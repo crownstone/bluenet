@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <structs/cs_PacketsInternal.h>
 
-// Commands:
+// Commands
 
 struct cs_central_connect_t {
 	device_address_t address;
@@ -22,9 +22,9 @@ struct cs_central_write_t {
 	cs_data_t data;
 };
 
-// Events:
+// Events
 
 struct cs_central_write_result_t {
 	cs_ret_code_t retCode;
-	cs_data_t data;
+	cs_data_t data; // TODO: make this ResultPacketAccessor instead?
 };

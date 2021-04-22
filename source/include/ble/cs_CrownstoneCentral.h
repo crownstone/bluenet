@@ -10,36 +10,71 @@
 #include <ble/cs_UUID.h>
 #include <events/cs_EventListener.h>
 
+/**
+ * Class to connect to another crownstone, and write control commands.
+ */
 class CrownstoneCentral: EventListener {
 public:
 	cs_ret_code_t init();
 
 	/**
 	 * Connect, discover, and read session data.
+	 *
+	 * @param[in] stoneId              The stone ID of the crownstone you want to connect to.
+	 * @param[in] timeoutMs            How long (in milliseconds) to try connecting, before giving up.
+	 *
+	 * @return ERR_WRONG_STATE         When already connected.
+	 * @return ERR_BUSY                An operation is in progress (connect, write, disconnect).
+	 * @return ERR_WAIT_FOR_SUCCESS    When the connection will be attempted. Wait for EVT_CS_CENTRAL_CONNECT_RESULT.
 	 */
 	cs_ret_code_t connect(stone_id_t stoneId, uint16_t timeoutMs = 3000);
 
 	/**
 	 * Connect, discover, and read session data.
+	 *
+	 * @param[in] address              The MAC address of the crownstone you want to connect to.
+	 * @param[in] timeoutMs            How long (in milliseconds) to try connecting, before giving up.
+	 *
+	 * @return ERR_WRONG_STATE         When already connected.
+	 * @return ERR_BUSY                An operation is in progress (connect, write, disconnect).
+	 * @return ERR_WAIT_FOR_SUCCESS    When the connection will be attempted. Wait for EVT_CS_CENTRAL_CONNECT_RESULT.
 	 */
 	cs_ret_code_t connect(const device_address_t& address, uint16_t timeoutMs = 3000);
 
 	/**
-	 * Disconnect
+	 * Terminate current connection.
+	 *
+	 * @return ERR_SUCCESS             When already disconnected.
+	 * @return ERR_WAIT_FOR_SUCCESS    When disconnecting. Wait for EVT_BLE_CENTRAL_DISCONNECTED.
 	 */
 	cs_ret_code_t disconnect();
 
 	/**
-	 * Write a control command.
+	 * Write a control command, and get the result.
+	 *
+	 * When the result code in the result data is ERR_WAIT_FOR_SUCCESS, you will get another EVT_CS_CENTRAL_WRITE_RESULT event.
+	 *
+	 * TODO: add timeout.
+	 *
+	 * @param[in] commandType          What control command.
+	 * @param[in] data                 Pointer to the command payload data.
+	 * @param[in] size                 Size of the command payload data.
+	 *
+	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_CS_CENTRAL_WRITE_RESULT.
 	 */
 	cs_ret_code_t write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size);
 
 private:
+	enum ServiceIndex {
+		SERVICE_INDEX_CROWNSTONE = 0,
+		SERVICE_INDEX_SETUP = 1,
+		SERVICE_INDEX_DEVICE_INFO = 2,
+		SERVICE_INDEX_DFU = 3,
+	};
+
 	enum class Operation: uint8_t {
 		NONE,
 		CONNECT,
-//		DISCONNECT,
-//		READ,
 		WRITE
 	};
 
@@ -75,9 +110,26 @@ private:
 	uint8_t _notificationNextIndex = 0;
 	uint16_t _notificationMergedDataSize = 0;
 
+	/**
+	 * Reset connection variables.
+	 */
+	void reset();
+
+	/**
+	 * Reset notification merger variables.
+	 */
 	void resetNotifactionMergerState();
 
+	/**
+	 * Enable notification on the result characteristic.
+	 * Sets current step.
+	 */
 	void enableNotifications();
+
+	/**
+	 * Read session key or session data, depending on operation mode.
+	 * Sets current step.
+	 */
 	void readSessionData();
 
 	/**
@@ -92,6 +144,11 @@ private:
 	 */
 	cs_ret_code_t mergeNotification(const cs_const_data_t& notificationData, cs_data_t& resultData);
 
+	/**
+	 * Check whether an operation is in progress.
+	 */
+	bool isBusy();
+
 	void setStep(ConnectSteps step);
 	void setStep(WriteControlSteps step);
 
@@ -102,11 +159,19 @@ private:
 	bool finalizeStep(ConnectSteps step, cs_ret_code_t retCode);
 	bool finalizeStep(WriteControlSteps step, cs_ret_code_t retCode);
 
+	/**
+	 * Finalize an operation.
+	 * Will always lead to sending an event, and resetting current operation.
+	 */
 	void finalizeOperation(Operation operation, cs_ret_code_t retCode);
 	void finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize);
 	void sendOperationResult(event_t& event);
 
+	/**
+	 * Event handlers.
+	 */
 	void onConnect(cs_ret_code_t retCode);
+	void onDisconnect();
 	void onDiscovery(ble_central_discovery_t& result);
 	void onDiscoveryDone(cs_ret_code_t retCode);
 	void onRead(ble_central_read_result_t& result);

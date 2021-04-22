@@ -82,7 +82,7 @@ public:
 	 *
 	 * @return ERR_BUFFER_TOO_SMALL    The data size is too large.
 	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
-	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_BLE_CENTRAL_WRTIE_RESULT.
+	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_BLE_CENTRAL_WRITE_RESULT.
 	 */
 	cs_ret_code_t write(uint16_t handle, const uint8_t* data, uint16_t len);
 
@@ -168,6 +168,7 @@ private:
 
 	/**
 	 * Finalize an operation.
+	 * Will always lead to sending an event, and resetting current operation.
 	 */
 	void finalizeOperation(Operation operation, cs_ret_code_t retCode);
 	void finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize);

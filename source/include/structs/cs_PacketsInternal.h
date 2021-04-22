@@ -107,7 +107,7 @@ enum CS_ADDRESS_TYPE {
 
 struct __attribute__((packed)) device_address_t {
 	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t addressType; // See CS_ADDRESS_TYPE
+	uint8_t addressType = CS_ADDRESS_TYPE_RANDOM_STATIC;
 };
 
 /**

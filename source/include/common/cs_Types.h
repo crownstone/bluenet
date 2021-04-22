@@ -349,11 +349,11 @@ enum class CS_TYPE: uint16_t {
 	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
-	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.    See BleCentral::connect().
-	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device. See BleCentral::disconnect().
-	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.      See BleCentral::discoverServices().
-	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.  See BleCentral::read().
-	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic. See BleCentral::write().
+	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.       See BleCentral::connect().
+	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device.    See BleCentral::disconnect().
+	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.         See BleCentral::discoverServices().
+	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.     See BleCentral::read().
+	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic.    See BleCentral::write().
 
 	EVT_BLE_CENTRAL_CONNECT_START,                    // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
 	EVT_BLE_CENTRAL_CONNECT_RESULT,                   // Result of a connection attempt.
@@ -364,8 +364,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
 	EVT_BLE_CENTRAL_NOTIFICATION,                     // A notification has been received.
 
-	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device. See CrownstoneCentral::connect().
-	CMD_CS_CENTRAL_WRITE,                             // Write a control command.
+	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device.       See CrownstoneCentral::connect().
+	CMD_CS_CENTRAL_DISCONNECT,                        // Disconnect from device.    See CrownstoneCentral::disconnect().
+	CMD_CS_CENTRAL_WRITE,                             // Write a control command.   See CrownstoneCentral::write().
 
 	EVT_CS_CENTRAL_CONNECT_RESULT,
 	EVT_CS_CENTRAL_READ_RESULT,
@@ -524,6 +525,7 @@ typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
 typedef  ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
 typedef  cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
+typedef  void TYPIFY(CMD_CS_CENTRAL_DISCONNECT);
 typedef  cs_central_write_t TYPIFY(CMD_CS_CENTRAL_WRITE);
 typedef  cs_ret_code_t TYPIFY(EVT_CS_CENTRAL_CONNECT_RESULT);
 typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_READ_RESULT);
