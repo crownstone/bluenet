@@ -154,9 +154,10 @@ To calculate the MAC address used for iBeacon advertisements, simply subtract 1 
 
 
 ### iBeacon advertisement packet
+
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
 
-![iBeacon advertisement packet](../docs/diagrams/advertisement-ibeacon-packet.png)
+![iBeacon packet](../docs/diagrams/ibeacon-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -176,7 +177,7 @@ int8 | TX power | 1 | Received signal strength at 1 meter.
 ### Service data advertisement
 This packet contains the state of the Crownstone.
 
-![Service data advertisement](../docs/diagrams/advertisement-service-data-packet.png)
+![Service data packet](../docs/diagrams/service-data-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---

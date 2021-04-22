@@ -177,6 +177,7 @@ The family / market / type triplet is different from the notation at the top of 
     Dongle                05
     Built-in One          06
     Plug One              07
+    Hub                   08
 
 If values are not written they are still `FF`.
 
@@ -192,6 +193,7 @@ Why for example the `PRODUCT_HOUSING` is important to be known to the firmware, 
 | Crownstone Plugs - Ready to Go Kit                | CR102M01/01 | 7091048321175 |
 | Crownstone Guidestone - Kit (10 units)            | CR201M01/01 | 7091047327949 |
 | Crownstone Built-in One - Starter Kit (10 units)  | CR101M01/02 | 8719326566085 |
-| Crownstone Built-in One - Extension Kit (1 unit)  | CR101M01/02 | 8719326566085 |
+| Crownstone Built-in One - Extension Kit (1 unit)  | CR101M01/02 | 8719326566092 |
+| Crownstone Hub                                    | CR103M01/01 | 8719326566078 |
 
 For questions, contact [Crownstone](https://crownstone.rocks/team/).

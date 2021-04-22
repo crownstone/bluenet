@@ -5,6 +5,16 @@ This only documents the latest protocol, older versions can be found in the git 
 
 ## Message types
 
+![Crownstone mesh message](../docs/diagrams/crownstone-mesh-message.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | Message type | 1 | A type of mesh message (see table below)
+uint8_t | Payload | 7 | Payload for the mesh message
+
+This is in total 8 bytes (an unsegmented message). There's currently no versioning in use except for bumping the 
+identifier of a message.
+
 id | name | Payload | Result data
 ---|---|---|---
 0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
@@ -34,8 +44,8 @@ id | name | Payload | Result data
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Counter | 4 |
-uint8[3] | Dummy | 3 |
+uint32_t | Counter | 4 |
+uint8_t[3] | Dummy | 3 |
 
 
 #### cs_mesh_model_msg_time_t
@@ -46,7 +56,7 @@ to the given value. Behaviour is identical to the [set time command](PROTOCOL.md
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Timestamp | 4 | posix time stamp
+uint32_t | Timestamp | 4 | posix time stamp
 
 
 #### cs_mesh_model_msg_profile_location_t
@@ -55,8 +65,8 @@ uint32 | Timestamp | 4 | posix time stamp
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Profile | 1 |
-uint8 | Location | 1 |
+uint8_t | Profile | 1 |
+uint8_t | Location | 1 |
 
 
 #### cs_mesh_model_msg_state_0_t
@@ -65,11 +75,11 @@ uint8 | Location | 1 |
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Switch state | 1 |
-uint8 | Flags | 1 |
-int8 | Power factor | 1 |
-int16 | Power usage real | 2 |
-uint16 | Partial timestamp | 2 |
+uint8_t | Switch state | 1 |
+uint8_t | Flags | 1 |
+int8_t | Power factor | 1 |
+int16_t | Power usage real | 2 |
+uint16_t | Partial timestamp | 2 |
 
 
 #### cs_mesh_model_msg_state_1_t
@@ -87,11 +97,11 @@ uint16 | Partial timestamp | 2 |
 
 ![multi switch item](../docs/diagrams/mesh_multi_switch_item.png)
 
-Type | Name | Length | Description
---- | --- | --- | ---
-stone_id_t | Stone ID | 1 |
-uint8 | Switch value | 1 |
-uint16 | Delay | 2 |
+Type     | Name | Length | Description
+---      | --- | --- | ---
+uint8_t  | Stone ID | 1 |
+uint8_t  | Switch value | 1 |
+uint16_t | Delay | 2 |
 cmd_source_with_counter_t | Source | 3 |
 
 
@@ -101,7 +111,7 @@ cmd_source_with_counter_t | Source | 3 |
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Other bits must remain 0.
+uint32_t | Flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Other bits must remain 0.
 
 
 #### cs_mesh_model_msg_device_register_t
@@ -111,11 +121,11 @@ uint32 | Flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Oth
 Type | Name | Length | Description
 --- | --- | --- | ---
 device_id_t | Device ID | 2 |
-uint8 | Location ID | 1 |
-uint8 | Profile ID | 1 |
-int8 | RSSI offset | 1 |
-uint8 | Flags | 1 |
-uint8 | Access level | 1 |
+uint8_t | Location ID | 1 |
+uint8_t | Profile ID | 1 |
+int8_t | RSSI offset | 1 |
+uint8_t | Flags | 1 |
+uint8_t | Access level | 1 |
 
 
 #### cs_mesh_model_msg_device_token_t
@@ -125,8 +135,8 @@ uint8 | Access level | 1 |
 Type | Name | Length | Description
 --- | --- | --- | ---
 device_id_t | Device ID | 2 |
-uint8[3] | Device token | 3 |
-uint16 | TTL minutes | 2 |
+uint8_t[3] | Device token | 3 |
+uint16_t | TTL minutes | 2 |
 
 
 #### cs_mesh_model_msg_device_heartbeat_t
@@ -136,8 +146,8 @@ uint16 | TTL minutes | 2 |
 Type | Name | Length | Description
 --- | --- | --- | ---
 device_id_t | Device ID | 2 |
-uint8 | Location ID | 1 |
-uint8 | TTL minutes | 1 |
+uint8_t | Location ID | 1 |
+uint8_t | TTL minutes | 1 |
 
 
 
@@ -205,13 +215,13 @@ uint8_t | [Persistence mode](PROTOCOL.md#state-set-persistence-mode) | 2 | Type 
 #### rssi_ping_message_t
 ![Rssi ping message](../docs/diagrams/rssi_ping_msg.png)
 
-Type | Name | Length | Description
---- | --- | --- | ---
-stone_id_t | sender_id   | 1 |
-stone_id_t |recipient_id | 1 |
-uint8_t    | sample_id;  | 1 |
-int8_t     |rssi         | 1 |
-uint8_t    | channel     | 1 |
+Type       | Name         | Length | Description
+---        | ---          | ---    | ---
+uint8_t    | sender_id    | 1      | ID of node sending the message
+uint8_t    | recipient_id | 1      | ID of the receiving node
+uint8_t    | sample_id    | 1      | ID of the sample
+int8_t     | rssi         | 1      | RSSI at the receiver
+uint8_t    | channel      | 1      | channel over which the message was broadcasted
 
 
 #### high_resolution_time_stamp_t
@@ -230,7 +240,7 @@ uint16_t | posix_ms, version | 2 | bits 0-9: milliseconds passed since posix_s. 
 Type | Name | Length | Description
 --- | --- | --- | ---
 high_resolution_time_stamp_t  | stamp | 6 | current stamp of root clock
-stone_id_t | root_id | 1 | id of root clock (may differ from sender id)
+uint8_t | root_id | 1 | id of root clock (may differ from sender id)
 
 
 #### cs_mesh_model_msg_result
