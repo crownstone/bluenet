@@ -453,6 +453,8 @@ void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_f
 		retvalptr->summaries[i].flags   = _parsingFilters[i]->metadata.flags;
 		retvalptr->summaries[i].version = _parsingFilters[i]->metadata.version;
 	}
+
+	result.returnCode = ERR_SUCCESS;
 }
 
 // -------------------------------------------------------------
