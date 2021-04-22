@@ -94,6 +94,9 @@ void TestCrownstoneCentral::writeGetPowerSamples() {
 
 
 void TestCrownstoneCentral::disconnect() {
+	event_t cmdEvent(CS_TYPE::CMD_CS_CENTRAL_DISCONNECT);
+	cmdEvent.dispatch();
+	LOGi("disconnect: %u", cmdEvent.result.returnCode);
 }
 
 void TestCrownstoneCentral::handleEvent(event_t & event) {
