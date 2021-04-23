@@ -64,9 +64,9 @@ template<> struct CsStruct<CS_TYPE::CMD_GET_FILTER_SUMMARIES> : CsStructBase<tra
  * If protocol version is not known, nullptr is returned.
  */
 template<CS_TYPE CT>
-typename CsStruct<CT>::PacketType* unpackCmdWrapper(trackable_parser_cmd_wrapper_t& wrapper) {
-	if(wrapper.commandProtocolVersion == 0) {
-		return reinterpret_cast<typename CsStruct<CT>::PacketType*>(wrapper.payload);
+typename CsStruct<CT>::PacketType* unpackCmdWrapper(trackable_parser_cmd_wrapper_t* wrapper) {
+	if(wrapper->commandProtocolVersion == 0) {
+		return reinterpret_cast<typename CsStruct<CT>::PacketType*>(wrapper->payload);
 	}
 	return nullptr;
 }
@@ -97,7 +97,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			LOGTrackableParserDebug("CMD_UPLOAD_FILTER");
 
 			auto trackableCmdWrapper         = CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_UPLOAD_FILTER>(*trackableCmdWrapper);
+			auto payload = unpackCmdWrapper<CS_TYPE::CMD_UPLOAD_FILTER>(trackableCmdWrapper);
 			if(payload != nullptr) {
 				evt.result.returnCode = handleUploadFilterCommand(payload);
 			}
@@ -107,7 +107,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			LOGTrackableParserDebug("CMD_REMOVE_FILTER");
 
 			auto trackableCmdWrapper         = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_REMOVE_FILTER>(*trackableCmdWrapper);
+			auto payload = unpackCmdWrapper<CS_TYPE::CMD_REMOVE_FILTER>(trackableCmdWrapper);
 			if(payload != nullptr) {
 				evt.result.returnCode = handleRemoveFilterCommand(payload);
 			}
@@ -117,7 +117,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			LOGTrackableParserDebug("CMD_COMMIT_FILTER_CHANGES");
 
 			auto trackableCmdWrapper         = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_COMMIT_FILTER_CHANGES>(*trackableCmdWrapper);
+			auto payload = unpackCmdWrapper<CS_TYPE::CMD_COMMIT_FILTER_CHANGES>(trackableCmdWrapper);
 			if(payload != nullptr) {
 				evt.result.returnCode = handleCommitFilterChangesCommand(payload);
 			}
@@ -127,7 +127,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES");
 
 			auto trackableCmdWrapper = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_GET_FILTER_SUMMARIES>(*trackableCmdWrapper);
+			auto payload = unpackCmdWrapper<CS_TYPE::CMD_GET_FILTER_SUMMARIES>(trackableCmdWrapper);
 			if(payload != nullptr) {
 				handleGetFilterSummariesCommand(payload, evt.result);
 			}
