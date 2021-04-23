@@ -70,13 +70,16 @@ Type    | Name    | Length  | Description
 uint8   | Command | 1       | Command type
 uint8[] | Payload | 31      | Fields depending on command type
 
-Opcode | Command name | Description
----    | ---          | ---
-0x01   | `CS_MICROAPP_COMMAND_LOG`          | Print to serial (a log line in bluenet)
-0x02   | `CS_MICROAPP_COMMAND_DELAY`        | Delay microapp by calling bluenet and later on jumping back
-0x03   | `CS_MICROAPP_COMMAND_PIN`          | Write/read to/from a virtual pin
-0x04   | `CS_MICROAPP_COMMAND_SERVICE_DATA` | Write service data (over the air)
-0x05   | `CS_MICROAPP_COMMAND_TWI`          | Read/write from twi/i2c device
+There are a few command types defined.
+
+Command | Command name                       | Description
+---     | ---                                | ---
+0x00    |                                    | Reserved
+0x01    | `CS_MICROAPP_COMMAND_LOG`          | Print to serial (a log line in bluenet)
+0x02    | `CS_MICROAPP_COMMAND_DELAY`        | Delay microapp by calling bluenet and later on jumping back
+0x03    | `CS_MICROAPP_COMMAND_PIN`          | Write/read to/from a virtual pin
+0x04    | `CS_MICROAPP_COMMAND_SERVICE_DATA` | Write service data (over the air)
+0x05    | `CS_MICROAPP_COMMAND_TWI`          | Read/write from twi/i2c device
 
 For further details, see the next sections.
 
