@@ -10,7 +10,7 @@ DOCS_DIR_PREFIX = "../"
 DOCS_DIR = "../docs/"
 DIR = "diagrams/"
 GEN_DIR = DOCS_DIR + DIR
-FILENAMES = [DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "UART_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md", "MESH.md", "BLUETOOTH.md"]]
+FILENAMES = [DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "UART_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md", "MESH.md", "BLUETOOTH.md", "MICROAPP.md"]]
 
 fontPath = DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
