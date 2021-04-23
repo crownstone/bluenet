@@ -18,7 +18,7 @@
 #include <util/cs_CuckooFilter.h>
 #include <util/cs_Utils.h>
 
-#define LOGTrackableParserDebug LOGd
+#define LOGTrackableParserDebug LOGnone
 #define LOGTrackableParserWarn LOGw
 
 // ---------------------- local/temp utils ----------------------
@@ -60,7 +60,7 @@ template<> struct CsStruct<CS_TYPE::CMD_COMMIT_FILTER_CHANGES> : CsStructBase<tr
 template<> struct CsStruct<CS_TYPE::CMD_GET_FILTER_SUMMARIES> : CsStructBase<trackable_parser_cmd_get_filter_summaries_t> {};
 
 /**
- * Returns the correctly typed packet given the template parameter.
+ * Returns the correctly typed packet given the CS_TYPE template parameter.
  * If protocol version is not known, nullptr is returned.
  */
 template<CS_TYPE CT>
@@ -138,6 +138,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 	}
 }
 
+// TODO(#177858707): remove this when the linked task is implemented
 bool findUuid128(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceUuid16List;
@@ -205,7 +206,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 		}
 	}
 
-	// TODO: Add the AD Data loop for other filter inputTypes.
+	// TODO(#177858707): Add the AD Data loop for other filter inputTypes.
 	// loop over filters fields to check addata fields
 	//	// keeps fields as outer loop because that's more expensive to loop over.
 	// 	// See BLEutil:findAdvType how to loop the fields.
@@ -224,7 +225,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 }
 
 void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableAdv) {
-	// TODO: implement
+	// TODO: implement?
 }
 
 // -------------------------------------------------------------
@@ -516,7 +517,7 @@ uint16_t TrackableParser::masterCrc() {
 			break;
 		}
 
-		LOGd("filter crc: %x", trackingFilter->runtimedata.crc);
+		LOGTrackableParserDebug("filter crc: %x", trackingFilter->runtimedata.crc);
 
 		// appends/applies this filters' crc onto master crc
 		masterCrc =
@@ -527,9 +528,9 @@ uint16_t TrackableParser::masterCrc() {
 		prevCrc = &masterCrc;  // first iteration will have prevCrc == nullptr, all subsequent ones point to masterCrc.
 	}
 
-	LOGd("master crc: %x", masterCrc)
+	LOGTrackableParserDebug("master crc: %x", masterCrc);
 
-			return masterCrc;
+	return masterCrc;
 }
 
 bool TrackableParser::checkFilterSizeConsistency() {
@@ -556,8 +557,7 @@ bool TrackableParser::checkFilterSizeConsistency() {
 				// This check can't be performed earlier: as long as not all chuncks are
 				// received the filterdata may be in invalid state.
 
-				LOGTrackableParserWarn(
-						"Deallocating filter %u because of malformed cuckoofilter size: %u != %u",
+				LOGTrackableParserWarn("Deallocating filter %u because of malformed cuckoofilter size: %u != %u",
 						trackingFilter->runtimedata.filterId,
 						trackingFilterSize,
 						sizeof(tracking_filter_t) + cuckoo.bufferSize());

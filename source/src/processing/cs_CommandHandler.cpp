@@ -51,8 +51,8 @@ void reset(void* p_context) {
 
 
 CommandHandler::CommandHandler() :
-		_resetTimerId(NULL),
-		_boardConfig(NULL)
+		_resetTimerId(nullptr),
+		_boardConfig(nullptr)
 {
 		_resetTimerData = { {0} };
 		_resetTimerId = &_resetTimerData;
