@@ -90,7 +90,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
 			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES");
 
-			auto cmd_data         = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
+			auto cmd_data = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
 			handleGetFilterSummariesCommand(cmd_data, evt.result);
 			break;
 		}
@@ -130,7 +130,7 @@ bool findUuid128(scanned_device_t* scannedDevice) {
 // -------------------------------------------------------------
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	if (filterModificationInProgress) {
-		 return;
+		return;
 	}
 
 	// loop over filters to check mac address
@@ -141,8 +141,9 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 		// check mac address for this filter
 		if (trackingFilter->metadata.inputType == FilterInputType::MacAddress
 			&& cuckoo.contains(device->address, MAC_ADDRESS_LEN)) {
-			// TODO: get fingerprint from filter instead of literal mac address.
-			// TODO: we should just pass on the device, right than copying rssi?
+			// TODO(#177858707):
+			// - get fingerprint from filter instead of literal mac address.
+			// - we should just pass on the device, right than copying rssi?
 			LOGw("filter %d accepted adv from mac addres: %x %x %x %x %x %x %s",
 				 trackingFilter->runtimedata.filterId,
 				 device->address[0],
@@ -151,7 +152,8 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 				 device->address[3],
 				 device->address[4],
 				 device->address[5],
-				 findUuid128(device) ? "button pressed!" : ""); // TODO(#177858707) when in/out types is added, test with actual uuid
+				 findUuid128(device) ? "button pressed!"
+									 : "");  // TODO(#177858707) when in/out types is added, test with actual uuid
 
 			TrackableEvent trackableEventData;
 			trackableEventData.id   = TrackableId(device->address, MAC_ADDRESS_LEN);
@@ -190,8 +192,7 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableA
 // -------------------------------------------------------------
 
 tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t payloadSize) {
-	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d (endindex: %u)",
-			filterId, payloadSize, _parsingFiltersCount);
+	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d (endindex: %u)", filterId, payloadSize, _parsingFiltersCount);
 	size_t totalSize = sizeof(tracking_filter_runtime_data_t) + payloadSize;
 
 	if (_parsingFiltersCount >= MAX_FILTER_IDS) {
@@ -412,15 +413,16 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 		return ERR_MISMATCH;
 	}
 
-	// finish commit
-	// NOTE: if writing flash, this may need to be delayed until write success.
+	// finish commit by writing the _masterHash
 	_masterHash                  = masterHash;
 	filterModificationInProgress = false;
 
+	// NOTE: if writing flash, this may need to be delayed until write success.
 	return ERR_SUCCESS;
 }
 
-void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filter_summaries_t* cmd_data, cs_result_t& result) {
+void TrackableParser::handleGetFilterSummariesCommand(
+		trackable_parser_cmd_get_filter_summaries_t* cmd_data, cs_result_t& result) {
 	LOGTrackableParserDebug("handle get filter summaries:");
 	for (auto& trackingFilter : _parsingFilters) {
 		if (trackingFilter == nullptr) {
@@ -432,7 +434,7 @@ void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_f
 
 	// stack allocate a buffer summaries object fitting at most max summaries:
 	auto requiredBuffSize = sizeof(trackable_parser_cmd_get_filter_summaries_ret_t)
-							  + sizeof(tracking_filter_summary_t) * _parsingFiltersCount;
+							+ sizeof(tracking_filter_summary_t) * _parsingFiltersCount;
 
 	if (result.buf.len < requiredBuffSize) {
 		result.returnCode = ERR_BUFFER_TOO_SMALL;
@@ -440,7 +442,7 @@ void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_f
 	}
 
 	// placement new constructs the object in the buff and now has enough space for the summaries.
-	auto retvalptr = new (result.buf.data) trackable_parser_cmd_get_filter_summaries_ret_t;
+	auto retvalptr  = new (result.buf.data) trackable_parser_cmd_get_filter_summaries_ret_t;
 	result.dataSize = requiredBuffSize;
 
 	retvalptr->masterCrc     = _masterHash;
@@ -487,7 +489,7 @@ uint16_t TrackableParser::masterCrc() {
 
 	LOGd("master crc: %x", masterCrc)
 
-	return masterCrc;
+			return masterCrc;
 }
 
 bool TrackableParser::checkFilterSizeConsistency() {

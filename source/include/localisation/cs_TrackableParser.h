@@ -6,7 +6,6 @@
  */
 #pragma once
 
-#include <ble/cs_iBeacon.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_TrackableParserPackets.h>
 #include <structs/cs_TrackableParserStructs.h>
@@ -22,8 +21,7 @@
 class TrackableParser : public EventListener {
 public:
 	/**
-	 * TODO(Arend): load filters from memory.
-	 * - after loading, set filterModificationInProgress to false.
+	 * set filterModificationInProgress to false.
 	 */
 	void init();
 	void handleEvent(event_t& evt);
@@ -37,9 +35,9 @@ private:
 	// -------------------------------------------------------------
 
 	/**
-	 * List of pointers to the currently allocated filters in the _filterBuffer.
-	 * The filters in this array are always sorted by filterId, the list is
-	 * nullptr terminated.
+	 * List of pointers to the currently allocated filters.
+	 * The filters in this array are always sorted by filterId,
+	 * and the list is nullptr terminated.
 	 */
 	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS] = {};
 
@@ -49,8 +47,16 @@ private:
 	 */
 	uint8_t _parsingFiltersCount = 0;
 
+	/**
+	 * Hash of all the hashes of the allocated filters, sorted by filterId.
+	 * This is updated by the commit command if it matches.
+	 */
 	uint16_t _masterHash;
-	uint16_t _masterVersion;  // Lollipop @Persisted
+
+	/**
+	 * Keeps track of the version of the filters -- not in use yet.
+	 */
+	uint16_t _masterVersion;
 
 	/**
 	 * When this value is true:
@@ -65,13 +71,15 @@ private:
 	// ------------------ Advertisment processing ------------------
 	// -------------------------------------------------------------
 
-	void handleScannedDevice(scanned_device_t* device);
-
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
-	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
+	void handleScannedDevice(scanned_device_t* device);
 
+	/**
+	 * Not in use yet
+	 */
+	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
 
 	// -------------------------------------------------------------
 	// ------------------- Filter data management ------------------
@@ -93,12 +101,18 @@ private:
 	tracking_filter_t* allocateParsingFilter(uint8_t filterId, size_t payloadSize);
 
 	/**
-	 * Readjust the filterbuffer to create space at the back. Adjust the
-	 * _parsingFilter array too.
+	 * Same as deallocateParsingFilterByIndex, but looks up the filter by the filterId.
 	 *
 	 * Returns true when id is found and filter is deallocated, false else.
 	 */
 	bool deallocateParsingFilter(uint8_t filterId);
+
+	/**
+	 * Deallocates the filter at given index in the _parsingFilters array.
+	 *
+	 * If a gap is created in the array, this method moves all filters
+	 * with an index above the given one down one index to close this gap.
+	 */
 	void deallocateParsingFilterByIndex(uint8_t parsingFilterIndex);
 
 	/**
@@ -109,16 +123,26 @@ private:
 	 * for all j>=i.
 	 */
 	tracking_filter_t* findParsingFilter(uint8_t filterId);
+
+	/**
+	 * Returns the index of the parsing filter with given filterId,
+	 * or an empty optional if that wasn't available.
+	 */
 	std::optional<size_t> findParsingFilterIndex(uint8_t filterId);
 
+	/**
+	 * Returns the sums of all getTotalSize of the non-nullptrs in the _parsingFilters array.
+	 */
 	size_t getTotalHeapAllocatedSize();
 
+	/**
+	 * Computes and returns the totalSize allocated for the given filter.
+	 */
 	size_t getTotalSize(tracking_filter_t& trackingFilter);
 
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
 	// -------------------------------------------------------------
-
 
 	/**
 	 * Upon first reception of this command with the given filterId,
@@ -139,8 +163,7 @@ private:
 	 * This crownstones master version and crc are broadcasted over the mesh.
 	 * Sets 'filter modification in progress' flag of this crownstone back to off.
 	 */
-	cs_ret_code_t handleCommitFilterChangesCommand(
-			trackable_parser_cmd_commit_filter_changes_t* cmdData);
+	cs_ret_code_t handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmdData);
 
 	/**
 	 * Writes summaries of the filters into the result as a
@@ -149,8 +172,7 @@ private:
 	 * returnCode is ERR_BUFFER_TOO_SMALL if result data doesn't fit the result buffer.
 	 * Else, returnCode is ERR_SUCCESS.
 	 */
-	void handleGetFilterSummariesCommand(
-			trackable_parser_cmd_get_filter_summaries_t* cmdData, cs_result_t& result);
+	void handleGetFilterSummariesCommand(trackable_parser_cmd_get_filter_summaries_t* cmdData, cs_result_t& result);
 
 	// -------------------------------------------------------------
 	// ---------------------- Utility functions --------------------
@@ -190,6 +212,7 @@ private:
 	// ----------------------- OLD interface -----------------------
 	// -------------------------------------------------------------
 
+	// TODO(#177858707) remove this.
 	/**
 	 *  Checks service uuids of the scanned device and returns true
 	 *  if we can find an official 16 bit Tile service uuid.
