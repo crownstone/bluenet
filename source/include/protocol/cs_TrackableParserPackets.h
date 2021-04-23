@@ -9,6 +9,14 @@
 #include <cstdint>
 #include <protocol/cs_CuckooFilterStructs.h>
 
+
+// ------------------ command wrapper packet ------------------
+struct __attribute__((__packed__)) trackable_parser_cmd_wrapper_t {
+	uint8_t commandProtocolVersion;
+	uint8_t payload[];
+};
+
+
 // ------------------ Command values -----------------
 
 struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_t {
