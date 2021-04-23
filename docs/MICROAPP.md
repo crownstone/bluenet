@@ -82,7 +82,7 @@ For further details, see the next sections.
 
 ### Log
 
-The logging function accepts a type: char, int, string and then the payload: `[COMMAND TYPE PAYLOAD]`.
+The logging function accepts a type such as char, int, string, an option and then the data.
 
 ![Microapp log](../docs/diagrams/microapp_log.png)
 
