@@ -10,6 +10,8 @@
 #include <protocol/cs_CuckooFilterStructs.h>
 
 
+constexpr uint8_t TRACKABLE_PARSER_PROTOCOL_VERSION = 0;
+
 // ------------------ command wrapper packet ------------------
 struct __attribute__((__packed__)) trackable_parser_cmd_wrapper_t {
 	uint8_t commandProtocolVersion;

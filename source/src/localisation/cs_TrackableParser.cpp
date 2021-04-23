@@ -65,9 +65,10 @@ template<> struct CsStruct<CS_TYPE::CMD_GET_FILTER_SUMMARIES> : CsStructBase<tra
  */
 template<CS_TYPE CT>
 typename CsStruct<CT>::PacketType* unpackCmdWrapper(trackable_parser_cmd_wrapper_t* wrapper) {
-	if(wrapper->commandProtocolVersion == 0) {
+	if(wrapper->commandProtocolVersion == TRACKABLE_PARSER_PROTOCOL_VERSION) {
 		return reinterpret_cast<typename CsStruct<CT>::PacketType*>(wrapper->payload);
 	}
+	LOGTrackableParserWarn("protocol version mismatch");
 	return nullptr;
 }
 

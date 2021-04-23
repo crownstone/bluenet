@@ -30,7 +30,8 @@ void EventDispatcher::dispatch(event_t& event) {
 			break;
 		default:
 			if (event.size != TypeSize(event.type)) {
-				LOGEventdispatcherWarning("Can't dispatch: wrong payload length (%u) for type %u", event.size, event.type);
+				LOGEventdispatcherWarning("Can't dispatch: wrong payload length (%u should be %u) for type %u",
+						event.size, TypeSize(event.type), event.type);
 				event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 				return;
 			}
