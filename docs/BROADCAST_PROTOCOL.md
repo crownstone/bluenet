@@ -15,7 +15,7 @@ These are meant to be broadcasted by phones all the time.
 
 The packet that the phone should advertise to send a background broadcast.
 
-![Background broadcast advertisement](../docs/diagrams/background_broadcast_advertisement.png)
+![Background broadcast packet](../docs/diagrams/background_broadcast_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -94,7 +94,7 @@ These are meant to be broadcasted by phones for specific commands, like switchin
 
 The packet that the phone should advertise to send a command broadcast.
 
-![Command broadcast advertisement](../docs/diagrams/command_broadcast_advertisement.png)
+![Command broadcast packet](../docs/diagrams/command_broadcast_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---

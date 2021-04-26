@@ -23,6 +23,14 @@ enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_GPIO2         = 0x02, // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO3         = 0x03, // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO4         = 0x04, // GPIO pin on connector
+	CS_MICROAPP_COMMAND_PIN_BUTTON1       = 0x05, // BUTTON1
+	CS_MICROAPP_COMMAND_PIN_BUTTON2       = 0x06, // BUTTON2
+	CS_MICROAPP_COMMAND_PIN_BUTTON3       = 0x07, // BUTTON3
+	CS_MICROAPP_COMMAND_PIN_BUTTON4       = 0x08, // BUTTON4
+	CS_MICROAPP_COMMAND_PIN_LED1          = 0x09, // LED1
+	CS_MICROAPP_COMMAND_PIN_LED2          = 0x0a, // LED2
+	CS_MICROAPP_COMMAND_PIN_LED3          = 0x0b, // LED3
+	CS_MICROAPP_COMMAND_PIN_LED4          = 0x0c, // LED4
 };
 
 enum ErrorCodesMicroapp {
