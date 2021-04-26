@@ -129,3 +129,8 @@ const int8_t g_BUTTON2_INDEX = @BUTTON2_INDEX@;
 const int8_t g_BUTTON3_INDEX = @BUTTON3_INDEX@;
 const int8_t g_BUTTON4_INDEX = @BUTTON4_INDEX@;
 
+const int8_t g_LED1_INDEX = @LED1_INDEX@;
+const int8_t g_LED2_INDEX = @LED2_INDEX@;
+const int8_t g_LED3_INDEX = @LED3_INDEX@;
+const int8_t g_LED4_INDEX = @LED4_INDEX@;
+

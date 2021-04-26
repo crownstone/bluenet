@@ -120,6 +120,11 @@ extern const int8_t g_BUTTON2_INDEX;
 extern const int8_t g_BUTTON3_INDEX;
 extern const int8_t g_BUTTON4_INDEX;
 
+extern const int8_t g_LED1_INDEX;
+extern const int8_t g_LED2_INDEX;
+extern const int8_t g_LED3_INDEX;
+extern const int8_t g_LED4_INDEX;
+
 #ifdef __cplusplus
 }
 #endif
