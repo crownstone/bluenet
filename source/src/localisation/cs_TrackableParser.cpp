@@ -35,9 +35,7 @@ void logfilter(tracking_filter_t* filter) {
 		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.fingerprint);
 		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.bucketA);
 		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.bucketB);
-
-		auto cuckoo = CuckooFilter(filter->filterdata);
-		LOGTrackableParserDebug("cuckoo filter buffer size: %d", cuckoo.bufferSize());
+		LOGTrackableParserDebug("cuckoo filter buffer size: %d", CuckooFilter(filter->filterdata).bufferSize());
 	}
 	else {
 		LOGTrackableParserDebug("Trying to print tracking filter but pointer is null");
