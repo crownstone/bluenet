@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <structs/cs_PacketsInternal.h>
+#include <structs/cs_ResultPacketAccessor.h>
 
 // Commands
 
@@ -24,7 +25,15 @@ struct cs_central_write_t {
 
 // Events
 
+/**
+ * Result of writing a control command.
+ *
+ * writeRetCode    Whether the write was successful.
+ * result          The result packet that was received as reply, only set when write was successful.
+ *                 Check if ResultPacketAccessor is initialized before reading out fields.
+ *                 Check the result code to see if the command was actually executed.
+ */
 struct cs_central_write_result_t {
-	cs_ret_code_t retCode;
-	cs_data_t data; // TODO: make this ResultPacketAccessor instead?
+	cs_ret_code_t writeRetCode;
+	ResultPacketAccessor<> result;
 };

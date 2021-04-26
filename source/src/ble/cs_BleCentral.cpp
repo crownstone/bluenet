@@ -13,6 +13,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
+#include <structs/buffer/cs_EncryptionBuffer.h>
 
 #define LOGBleCentralInfo LOGi
 #define LOGBleCentralDebug LOGv
@@ -35,6 +36,9 @@ void BleCentral::init() {
 	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
 	APP_ERROR_CHECK(nrfCode);
+
+	// Use the encryption buffer, as that contains the encrypted data, which is what we usually write or read.
+	EncryptionBuffer::getInstance().getBuffer(_buf.data, _buf.len);
 
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &_scanInterval, sizeof(_scanInterval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &_scanWindow, sizeof(_scanWindow));
@@ -256,7 +260,7 @@ cs_data_t BleCentral::requestWriteBuffer() {
 	if (isBusy()) {
 		return cs_data_t();
 	}
-	return cs_data_t(_buf, sizeof(_buf));
+	return _buf;
 }
 
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {
@@ -280,10 +284,18 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 	}
 
 	// Copy the data to the buffer.
-	if (len > sizeof(_buf)) {
+	if (len > _buf.len) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
-	memcpy(_buf, data, len);
+
+	// Only copy data if it points to a different buffer.
+	if (_buf.data != data) {
+		// Use memmove, as it can handle overlapping buffers.
+		memmove(_buf.data, data, len);
+	}
+	else {
+		LOGBleCentralDebug("Skip copy");
+	}
 
 	if (len > _mtu - WRITE_OVERHEAD) {
 		// We need to break up the write into chunks.
@@ -307,7 +319,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 			.handle = handle,
 			.offset = 0,
 			.len = len,
-			.p_value = _buf
+			.p_value = _buf.data
 	};
 
 	uint32_t nrfCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
@@ -331,7 +343,7 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 		writeParams.handle = handle;
 		writeParams.offset = offset;
 		writeParams.len = std::min(chunkSize, _bufDataSize - offset);
-		writeParams.p_value = _buf + offset;
+		writeParams.p_value = _buf.data + offset;
 	}
 	else {
 		writeParams.write_op = BLE_GATT_OP_EXEC_WRITE_REQ;
@@ -573,7 +585,7 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	if (gattStatus == BLE_GATT_STATUS_ATTERR_INVALID_OFFSET) {
 		ble_central_read_result_t result = {
 				.retCode = ERR_SUCCESS,
-				.data = cs_data_t(_buf, event.offset)
+				.data = cs_data_t(_buf.data, event.offset)
 		};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
@@ -588,18 +600,18 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	if (event.len == 0) {
 		ble_central_read_result_t result = {
 				.retCode = ERR_SUCCESS,
-				.data = cs_data_t(_buf, event.offset)
+				.data = cs_data_t(_buf.data, event.offset)
 		};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
 
 	// Copy data that was read.
-	if (event.offset + event.len > sizeof(_buf)) {
+	if (event.offset + event.len > _buf.len) {
 		finalizeOperation(Operation::READ, ERR_BUFFER_TOO_SMALL);
 		return;
 	}
-	memcpy(_buf + event.offset, event.data, event.len);
+	memcpy(_buf.data + event.offset, event.data, event.len);
 
 	// Continue long read.
 	uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, event.handle, event.offset + event.len);

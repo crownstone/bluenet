@@ -82,6 +82,16 @@ public:
 	}
 
 	/**
+	 * Get the capacity of the payload.
+	 *
+	 * @return                    Max size of the payload in bytes.
+	 */
+	cs_buffer_size_t getMaxPayloadSize() {
+		checkInitialized();
+		return PAYLOAD_SIZE;
+	}
+
+	/**
 	 * Copy payload into the packet.
 	 *
 	 * @param[in] payload         Pointer to the payload.
@@ -99,8 +109,11 @@ public:
 			return ERR_BUFFER_UNASSIGNED;
 		}
 		_buffer->header.payloadSize = size;
-		if (size) {
-			memcpy(_buffer->payload, payload, size);
+		if (size && _buffer->payload != payload) {
+			memmove(_buffer->payload, payload, size);
+		}
+		else {
+			LOGd("Skip copy");
 		}
 		return ERR_SUCCESS;
 	}

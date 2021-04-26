@@ -119,7 +119,17 @@ void TestCrownstoneCentral::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_CS_CENTRAL_WRITE_RESULT: {
 			auto result = CS_TYPE_CAST(EVT_CS_CENTRAL_WRITE_RESULT, event.data);
-			LOGi("Write result: %u", result->retCode);
+			LOGi("Write result: %u", result->writeRetCode);
+			cs_ret_code_t replyRetCode = ERR_UNSPECIFIED;
+			if (result->result.isInitialized()) {
+				_log(SERIAL_INFO, false, "Reply: protocol=%u type=%u result=%u data=",
+						result->result.getProtocolVersion(),
+						result->result.getType(),
+						result->result.getResult());
+				_logArray(SERIAL_INFO, true, result->result.getPayload().data, result->result.getPayload().len);
+				replyRetCode = result->result.getResult();
+			}
+
 			switch (_writeStep) {
 				case 0: {
 					writeGetPowerSamples();
@@ -130,10 +140,13 @@ void TestCrownstoneCentral::handleEvent(event_t & event) {
 					break;
 				}
 				case 2: {
-					// Result should be WAIT_FOR_SUCCESS
+					// The setup command gives 2 results: first one tells us to wait for another result.
+					if (replyRetCode != ERR_WAIT_FOR_SUCCESS) {
+						disconnect();
+					}
 					break;
 				}
-				case 4: {
+				case 3: {
 					disconnect();
 				}
 			}

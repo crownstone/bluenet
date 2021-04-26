@@ -20,6 +20,8 @@
  * Generally, you first connect, then discover, then perform read and/or write operations, and finally disconnect.
  * Note that the disconnect event might happen at any time.
  *
+ * This class uses the EncryptionBuffer as write and read buffer.
+ *
  * TODO: introduce a timeout, so that a connection cannot remain open.
  */
 class BleCentral: EventListener {
@@ -130,9 +132,8 @@ private:
 
 	/**
 	 * Buffer used for reading and writing.
-	 * TODO: use CharacteristicWriteBuffer, CharacteristicReadBuffer, or EncryptionBuffer ?
 	 */
-	uint8_t _buf[200];
+	cs_data_t _buf;
 
 	/**
 	 * How much data is actually in the buffer.

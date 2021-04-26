@@ -90,8 +90,8 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 
 	cs_ret_code_t retCode;
 
-	cs_data_t encryptionBuffer;
-	if (!EncryptionBuffer::getInstance().getBuffer(encryptionBuffer.data, encryptionBuffer.len)) {
+	cs_data_t encryptedBuffer = BleCentral::getInstance().requestWriteBuffer();
+	if (encryptedBuffer.data == nullptr) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
 
@@ -112,13 +112,13 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 
 	uint16_t encryptedSize = ConnectionEncryption::getEncryptedBufferSize(controlPacket.len, ConnectionEncryptionType::CTR);
 	if (_opMode == OperationMode::OPERATION_MODE_SETUP) {
-		ConnectionEncryption::getInstance().encrypt(controlPacket, encryptionBuffer, SETUP, ConnectionEncryptionType::CTR);
+		ConnectionEncryption::getInstance().encrypt(controlPacket, encryptedBuffer, SETUP, ConnectionEncryptionType::CTR);
 	}
 	else {
-		ConnectionEncryption::getInstance().encrypt(controlPacket, encryptionBuffer, ADMIN, ConnectionEncryptionType::CTR);
+		ConnectionEncryption::getInstance().encrypt(controlPacket, encryptedBuffer, ADMIN, ConnectionEncryptionType::CTR);
 	}
 
-	retCode = BleCentral::getInstance().write(_controlHandle, encryptionBuffer.data, encryptedSize);
+	retCode = BleCentral::getInstance().write(_controlHandle, encryptedBuffer.data, encryptedSize);
 	if (retCode != ERR_WAIT_FOR_SUCCESS) {
 		return retCode;
 	}
@@ -126,6 +126,19 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 	_currentOperation = Operation::WRITE;
 	setStep(WriteControlSteps::WRITE);
 	return ERR_WAIT_FOR_SUCCESS;
+}
+
+cs_data_t CrownstoneCentral::requestWriteBuffer() {
+	if (isBusy()) {
+		return cs_data_t();
+	}
+	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
+	ControlPacketAccessor<> controlPacketAccessor;
+	cs_ret_code_t retCode = controlPacketAccessor.assign(writeBuf.data, writeBuf.len);
+	if (retCode != ERR_SUCCESS) {
+		return cs_data_t();
+	}
+	return cs_data_t(controlPacketAccessor.getPayload().data, controlPacketAccessor.getMaxPayloadSize());
 }
 
 //////////////////// Helpers ////////////////////
@@ -226,8 +239,8 @@ void CrownstoneCentral::finalizeOperation(Operation operation, cs_ret_code_t ret
 		}
 		case Operation::WRITE: {
 			cs_central_write_result_t result = {
-					.retCode = retCode,
-					.data = cs_data_t()
+					.writeRetCode = retCode,
+					.result = ResultPacketAccessor<>()
 			};
 			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 			break;
@@ -255,8 +268,8 @@ void CrownstoneCentral::finalizeOperation(Operation operation, uint8_t* data, ui
 			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_CS_CENTRAL_WRITE_RESULT) result = {
-						.retCode = ERR_WRONG_STATE,
-						.data = cs_data_t()
+						.writeRetCode = ERR_WRONG_STATE,
+						.result = ResultPacketAccessor<>()
 				};
 				event_t errEvent(CS_TYPE::EVT_CS_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
@@ -512,8 +525,8 @@ void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
 				_logArray(LogLevelCsCentralDebug, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
 
 				cs_central_write_result_t result = {
-						.retCode = ERR_SUCCESS,
-						.data = resultData
+						.writeRetCode = ERR_SUCCESS,
+						.result = resultPacketAccessor
 				};
 				if (resultPacketAccessor.getResult() == ERR_WAIT_FOR_SUCCESS) {
 					// Send event, but keep waiting for the next result.
@@ -555,25 +568,25 @@ cs_ret_code_t CrownstoneCentral::mergeNotification(const cs_const_data_t& data, 
 	}
 
 	// Get the encryption buffer.
-	cs_data_t encryptionBuffer;
-	if (!EncryptionBuffer::getInstance().getBuffer(encryptionBuffer.data, encryptionBuffer.len)) {
+	cs_data_t encryptedBuffer;
+	if (!EncryptionBuffer::getInstance().getBuffer(encryptedBuffer.data, encryptedBuffer.len)) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
 
-	if (encryptionBuffer.len < _notificationMergedDataSize + dataSize) {
+	if (encryptedBuffer.len < _notificationMergedDataSize + dataSize) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
 	// Copy data to encryption buffer.
-	memcpy(encryptionBuffer.data + _notificationMergedDataSize, data.data + headerSize, dataSize);
+	memcpy(encryptedBuffer.data + _notificationMergedDataSize, data.data + headerSize, dataSize);
 	_notificationNextIndex++;
 	_notificationMergedDataSize += dataSize;
 
 	if (index == 255) {
 		// Last index.
-		cs_data_t inputBuf(encryptionBuffer.data, _notificationMergedDataSize);
-		_log(SERIAL_INFO, false, "Merged notification data=");
-		_logArray(SERIAL_INFO, true, inputBuf.data, inputBuf.len);
+		cs_data_t inputBuf(encryptedBuffer.data, _notificationMergedDataSize);
+		_log(LogLevelCsCentralDebug, false, "Merged notification data=");
+		_logArray(LogLevelCsCentralDebug, true, inputBuf.data, inputBuf.len);
 
 		// Decrypt merged data to read buffer.
 		cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();

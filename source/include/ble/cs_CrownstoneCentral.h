@@ -12,6 +12,11 @@
 
 /**
  * Class to connect to another crownstone, and write control commands.
+ *
+ * This class uses:
+ * - The EncryptionBuffer to read notifications to.
+ * - The CharacteristicReadBuffer to decrypt read data to.
+ * - The CharacteristicWriteBuffer to construct control packets.
  */
 class CrownstoneCentral: EventListener {
 public:
@@ -63,6 +68,14 @@ public:
 	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_CS_CENTRAL_WRITE_RESULT.
 	 */
 	cs_ret_code_t write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size);
+
+	/**
+	 * Request the write buffer, to avoid having to copy data to the write buffer.
+	 *
+	 * @return     When busy:          A null pointer.
+	 * @return     On success:         A pointer to the write buffer, and the length of the buffer.
+	 */
+	cs_data_t requestWriteBuffer();
 
 private:
 	enum ServiceIndex {
