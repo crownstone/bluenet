@@ -26,7 +26,7 @@ Status: *Under active development. Protocol NOT FIXED YET*.
 
 ### Upload filter
 
-Upon receiving the first upload command for a given `filterId`, the firmware allocates a byte array of totalSize bytes. Then the chunk will be copied into the allocated space starting from the chunkStartIndex. Subsequent commands for the same id will use this same byte array until a commit command is received.
+Command to upload a filter. All chunks will be merged by the Crownstone.
 
 The `chunk` must be part of a [tracking filter data](#tracking-filter-data). 
 
@@ -188,6 +188,5 @@ uint8_t | filterId | 1
 uint8_t | flags | 1 
 uint16_t | filterVersion | 2
 uint16_t | filterCrc | 2
-
 
 
