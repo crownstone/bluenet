@@ -16,8 +16,8 @@
 #include <structs/buffer/cs_EncryptionBuffer.h>
 
 #define LOGBleCentralInfo LOGi
-#define LOGBleCentralDebug LOGv
-#define LogLevelBleCentralDebug SERIAL_VERBOSE
+#define LOGBleCentralDebug LOGvv
+#define LogLevelBleCentralDebug SERIAL_VERY_VERBOSE
 
 const uint16_t WRITE_OVERHEAD = 3;
 const uint16_t LONG_WRITE_OVERHEAD = 5;
@@ -43,7 +43,7 @@ void BleCentral::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &_scanInterval, sizeof(_scanInterval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &_scanWindow, sizeof(_scanWindow));
 
-	EventDispatcher::getInstance().addListener(this);
+	listen();
 }
 
 cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
@@ -114,8 +114,8 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 
 cs_ret_code_t BleCentral::disconnect() {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
-		return ERR_BUSY;
+		LOGBleCentralInfo("Cancel current operation");
+		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 
 	if (!isConnected()) {

@@ -5,31 +5,31 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_CrownstoneCentral.h>
 #include <ble/cs_BleCentral.h>
+#include <ble/cs_CrownstoneCentral.h>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_UuidConfig.h>
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
-
-#include <structs/cs_ControlPacketAccessor.h>
-#include <structs/cs_ResultPacketAccessor.h>
 #include <structs/buffer/cs_CharacteristicBuffer.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
+#include <structs/cs_ControlPacketAccessor.h>
+#include <structs/cs_ResultPacketAccessor.h>
+#include <util/cs_Utils.h>
 
 #define LOGCsCentralInfo LOGi
-#define LOGCsCentralDebug LOGv
-#define LogLevelCsCentralDebug SERIAL_VERBOSE
+#define LOGCsCentralDebug LOGvv
+#define LogLevelCsCentralDebug SERIAL_VERY_VERBOSE
 
 cs_ret_code_t CrownstoneCentral::init() {
 	// Make use of the fact ERR_SUCCESS = 0, to avoid many if statements.
 	cs_ret_code_t retCode = ERR_SUCCESS;
-	retCode |= _uuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE].fromFullUuid(CROWNSTONE_UUID);
-	retCode |= _uuids[ServiceIndex::SERVICE_INDEX_SETUP].fromFullUuid(SETUP_UUID);
-	retCode |= _uuids[ServiceIndex::SERVICE_INDEX_DEVICE_INFO].fromShortUuid(BLE_UUID_DEVICE_INFORMATION_SERVICE);
-	retCode |= _uuids[ServiceIndex::SERVICE_INDEX_DFU].fromShortUuid(0xFE59); // DFU service
+	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE].fromFullUuid(CROWNSTONE_UUID);
+	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP].fromFullUuid(SETUP_UUID);
+	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DEVICE_INFO].fromShortUuid(BLE_UUID_DEVICE_INFORMATION_SERVICE);
+	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DFU].fromShortUuid(0xFE59); // DFU service
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
@@ -73,8 +73,8 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 
 cs_ret_code_t CrownstoneCentral::disconnect() {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
-		return ERR_BUSY;
+		LOGCsCentralInfo("Cancel current operation");
+		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 	// No need to set current operation: BleCentral will block any other operations for us.
 	// Also, the user waits for the BleCentral event, and might get it before we get it.
@@ -143,15 +143,6 @@ cs_data_t CrownstoneCentral::requestWriteBuffer() {
 
 //////////////////// Helpers ////////////////////
 
-void CrownstoneCentral::enableNotifications() {
-	cs_ret_code_t retCode = BleCentral::getInstance().writeNotificationConfig(_resultCccdHandle, true);
-	if (retCode != ERR_WAIT_FOR_SUCCESS) {
-		finalizeOperation(Operation::CONNECT, retCode);
-		return;
-	}
-	setStep(ConnectSteps::ENABLE_NOTIFICATIONS);
-}
-
 void CrownstoneCentral::readSessionData() {
 	cs_ret_code_t retCode;
 	switch (_opMode) {
@@ -190,11 +181,18 @@ bool CrownstoneCentral::isBusy() {
 }
 
 void CrownstoneCentral::setStep(ConnectSteps step) {
-	_currentStep = static_cast<uint8_t>(step);
+	setStep(static_cast<uint8_t>(step));
 }
 
 void CrownstoneCentral::setStep(WriteControlSteps step) {
-	_currentStep = static_cast<uint8_t>(step);
+	setStep(static_cast<uint8_t>(step));
+}
+
+void CrownstoneCentral::setStep(uint8_t step) {
+	if (step != _currentStep + 1) {
+		LOGCsCentralDebug("Skipping steps: going from %u to %u", _currentStep, step);
+	}
+	_currentStep = step;
 }
 
 bool CrownstoneCentral::finalizeStep(ConnectSteps step, cs_ret_code_t retCode) {
@@ -315,7 +313,7 @@ void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 		return;
 	}
 
-	retCode = BleCentral::getInstance().discoverServices(_uuids, sizeof(_uuids) / sizeof(_uuids[0]));
+	retCode = BleCentral::getInstance().discoverServices(_serviceUuids, BLEutil::ArraySize(_serviceUuids));
 	if (retCode != ERR_WAIT_FOR_SUCCESS) {
 		finalizeOperation(Operation::CONNECT, retCode);
 		return;
@@ -345,21 +343,21 @@ void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
 	UUID uuid;
 
 	// Normal mode
-	if (result.uuid == _uuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE]) {
+	if (result.uuid == _serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE]) {
 		_opMode = OperationMode::OPERATION_MODE_NORMAL;
 		LOGCsCentralInfo("Crownstone service found");
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], SESSION_DATA_UNENCRYPTED_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], SESSION_DATA_UNENCRYPTED_UUID);
 	if (result.uuid == uuid) {
 		_sessionDataHandle = result.valueHandle;
 		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], CONTROL_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], CONTROL_UUID);
 	if (result.uuid == uuid) {
 		_controlHandle = result.valueHandle;
 		LOGCsCentralDebug("Found control handle: %u", _controlHandle);
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], RESULT_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], RESULT_UUID);
 	if (result.uuid == uuid) {
 		_resultHandle = result.valueHandle;
 		_resultCccdHandle = result.cccdHandle;
@@ -367,26 +365,26 @@ void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
 	}
 
 	// Setup mode
-	if (result.uuid == _uuids[ServiceIndex::SERVICE_INDEX_SETUP]) {
+	if (result.uuid == _serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP]) {
 		_opMode = OperationMode::OPERATION_MODE_SETUP;
 		LOGCsCentralInfo("Setup service found");
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_KEY_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_KEY_UUID);
 	if (result.uuid == uuid) {
 		_sessionKeyHandle = result.valueHandle;
 		LOGCsCentralDebug("Found session key handle: %u", _sessionKeyHandle);
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_SETUP], SESSION_DATA_UNENCRYPTED_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SESSION_DATA_UNENCRYPTED_UUID);
 	if (result.uuid == uuid) {
 		_sessionDataHandle = result.valueHandle;
 		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_CONTROL_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_CONTROL_UUID);
 	if (result.uuid == uuid) {
 		_controlHandle = result.valueHandle;
 		LOGCsCentralDebug("Found control handle: %u", _controlHandle);
 	}
-	uuid.fromBaseUuid(_uuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_RESULT_UUID);
+	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_RESULT_UUID);
 	if (result.uuid == uuid) {
 		_resultHandle = result.valueHandle;
 		_resultCccdHandle = result.cccdHandle;
@@ -399,7 +397,12 @@ void CrownstoneCentral::onDiscoveryDone(cs_ret_code_t retCode) {
 	if (!finalizeStep(ConnectSteps::DISCOVER, retCode)) {
 		return;
 	}
-	enableNotifications();
+	retCode = BleCentral::getInstance().writeNotificationConfig(_resultCccdHandle, true);
+	if (retCode != ERR_WAIT_FOR_SUCCESS) {
+		finalizeOperation(Operation::CONNECT, retCode);
+		return;
+	}
+	setStep(ConnectSteps::ENABLE_NOTIFICATIONS);
 }
 
 void CrownstoneCentral::onRead(ble_central_read_result_t& result) {
@@ -411,50 +414,7 @@ void CrownstoneCentral::onRead(ble_central_read_result_t& result) {
 
 	switch (_currentOperation) {
 		case Operation::CONNECT: {
-			ConnectSteps currentStep = static_cast<ConnectSteps>(_currentStep);
-			switch (currentStep) {
-				case ConnectSteps::SESSION_DATA: {
-					if (!finalizeStep(_currentStep, retCode)) {
-						return;
-					}
-					// Parse data that was read.
-					if (result.data.len != sizeof(session_data_t)) {
-						finalizeOperation(_currentOperation, ERR_WRONG_PAYLOAD_LENGTH);
-						return;
-					}
-					// Store the session data.
-					retCode = ConnectionEncryption::getInstance().setSessionData(*reinterpret_cast<session_data_t*>(result.data.data));
-					if (retCode != ERR_SUCCESS) {
-						finalizeOperation(_currentOperation, retCode);
-						return;
-					}
-					// Done.
-					finalizeOperation(_currentOperation, retCode);
-					break;
-				}
-				case ConnectSteps::SESSION_KEY: {
-					if (!finalizeStep(_currentStep, retCode)) {
-						return;
-					}
-					// Parse and store the session key.
-					retCode = KeysAndAccess::getInstance().setSetupKey(result.data);
-					if (retCode != ERR_SUCCESS) {
-						finalizeOperation(_currentOperation, retCode);
-						return;
-					}
-					// Read session data.
-					retCode = BleCentral::getInstance().read(_sessionDataHandle);
-					if (retCode != ERR_WAIT_FOR_SUCCESS) {
-						finalizeOperation(_currentOperation, retCode);
-						return;
-					}
-					setStep(ConnectSteps::SESSION_DATA);
-					return;
-				}
-				default:
-					finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
-					return;
-			}
+			onReadDuringConnect(result);
 			break;
 		}
 		default: {
@@ -462,7 +422,56 @@ void CrownstoneCentral::onRead(ble_central_read_result_t& result) {
 			return;
 		}
 	}
+}
 
+void CrownstoneCentral::onReadDuringConnect(ble_central_read_result_t& result) {
+	// The retCode has already been checked to be ERR_SUCCESS.
+	cs_ret_code_t retCode = result.retCode;
+
+	ConnectSteps currentStep = static_cast<ConnectSteps>(_currentStep);
+	switch (currentStep) {
+		case ConnectSteps::SESSION_DATA: {
+			if (!finalizeStep(_currentStep, retCode)) {
+				return;
+			}
+			// Parse data that was read.
+			if (result.data.len != sizeof(session_data_t)) {
+				finalizeOperation(_currentOperation, ERR_WRONG_PAYLOAD_LENGTH);
+				return;
+			}
+			// Store the session data.
+			retCode = ConnectionEncryption::getInstance().setSessionData(*reinterpret_cast<session_data_t*>(result.data.data));
+			if (retCode != ERR_SUCCESS) {
+				finalizeOperation(_currentOperation, retCode);
+				return;
+			}
+			// Done.
+			finalizeOperation(_currentOperation, retCode);
+			break;
+		}
+		case ConnectSteps::SESSION_KEY: {
+			if (!finalizeStep(_currentStep, retCode)) {
+				return;
+			}
+			// Parse and store the session key.
+			retCode = KeysAndAccess::getInstance().setSetupKey(result.data);
+			if (retCode != ERR_SUCCESS) {
+				finalizeOperation(_currentOperation, retCode);
+				return;
+			}
+			// Read session data.
+			retCode = BleCentral::getInstance().read(_sessionDataHandle);
+			if (retCode != ERR_WAIT_FOR_SUCCESS) {
+				finalizeOperation(_currentOperation, retCode);
+				return;
+			}
+			setStep(ConnectSteps::SESSION_DATA);
+			return;
+		}
+		default:
+			finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
+			return;
+	}
 }
 
 void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
@@ -501,52 +510,53 @@ void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
 
 	// In theory, we can receive notifications at any moment.
 	// So only handle them when we expect them, and ignore them otherwise.
-	if (_currentOperation == Operation::WRITE && static_cast<WriteControlSteps>(_currentStep) == WriteControlSteps::RECEIVE_RESULT) {
+	if (_currentOperation != Operation::WRITE || static_cast<WriteControlSteps>(_currentStep) != WriteControlSteps::RECEIVE_RESULT) {
+		return;
+	}
 
-		cs_data_t resultData;
-		cs_ret_code_t retCode = mergeNotification(result.data, resultData);
-		switch (retCode) {
-			case ERR_SUCCESS: {
-				if (resultData.data == nullptr) {
-					finalizeOperation(_currentOperation, ERR_BUFFER_UNASSIGNED);
-					return;
-				}
-				// Check the result data.
-				ResultPacketAccessor<> resultPacketAccessor;
-				retCode = resultPacketAccessor.assign(resultData.data, resultData.len);
-				if (retCode != ERR_SUCCESS) {
-					finalizeOperation(_currentOperation, retCode);
-					return;
-				}
-				_log(LogLevelCsCentralDebug, false, "Result: protocol=%u type=%u result=%u data=",
-						resultPacketAccessor.getProtocolVersion(),
-						resultPacketAccessor.getType(),
-						resultPacketAccessor.getResult());
-				_logArray(LogLevelCsCentralDebug, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
-
-				cs_central_write_result_t result = {
-						.writeRetCode = ERR_SUCCESS,
-						.result = resultPacketAccessor
-				};
-				if (resultPacketAccessor.getResult() == ERR_WAIT_FOR_SUCCESS) {
-					// Send event, but keep waiting for the next result.
-					// No need to check the current operation or step, that has been earlier in this function.
-					event_t resultEvent(CS_TYPE::EVT_CS_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
-					resultEvent.dispatch();
-					return;
-				}
-				// Done.
-				finalizeOperation(_currentOperation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
-				break;
+	cs_data_t resultData;
+	cs_ret_code_t retCode = mergeNotification(result.data, resultData);
+	switch (retCode) {
+		case ERR_SUCCESS: {
+			if (resultData.data == nullptr) {
+				finalizeOperation(_currentOperation, ERR_BUFFER_UNASSIGNED);
+				return;
 			}
-			case ERR_WAIT_FOR_SUCCESS: {
-				// Keep waiting for more notifications.
-				break;
-			}
-			default: {
+			// Check the result data.
+			ResultPacketAccessor<> resultPacketAccessor;
+			retCode = resultPacketAccessor.assign(resultData.data, resultData.len);
+			if (retCode != ERR_SUCCESS) {
 				finalizeOperation(_currentOperation, retCode);
-				break;
+				return;
 			}
+			_log(LogLevelCsCentralDebug, false, "Result: protocol=%u type=%u result=%u data=",
+					resultPacketAccessor.getProtocolVersion(),
+					resultPacketAccessor.getType(),
+					resultPacketAccessor.getResult());
+			_logArray(LogLevelCsCentralDebug, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
+
+			cs_central_write_result_t result = {
+					.writeRetCode = ERR_SUCCESS,
+					.result = resultPacketAccessor
+			};
+			if (resultPacketAccessor.getResult() == ERR_WAIT_FOR_SUCCESS) {
+				// Send event, but keep waiting for the next result.
+				// No need to check the current operation or step, that has been earlier in this function.
+				event_t resultEvent(CS_TYPE::EVT_CS_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				resultEvent.dispatch();
+				return;
+			}
+			// Done.
+			finalizeOperation(_currentOperation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+			break;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			// Keep waiting for more notifications.
+			break;
+		}
+		default: {
+			finalizeOperation(_currentOperation, retCode);
+			break;
 		}
 	}
 }
@@ -582,7 +592,7 @@ cs_ret_code_t CrownstoneCentral::mergeNotification(const cs_const_data_t& data, 
 	_notificationNextIndex++;
 	_notificationMergedDataSize += dataSize;
 
-	if (index == 255) {
+	if (index == CS_CHARACTERISTIC_NOTIFICATION_PART_LAST) {
 		// Last index.
 		cs_data_t inputBuf(encryptedBuffer.data, _notificationMergedDataSize);
 		_log(LogLevelCsCentralDebug, false, "Merged notification data=");

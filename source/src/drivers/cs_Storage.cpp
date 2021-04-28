@@ -17,8 +17,6 @@
 #include <util/cs_BleError.h>
 //#include <algorithm>
 
-#define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
-
 #define LOGStorageInfo LOGi
 #define LOGStorageDebug LOGd
 #define LOGStorageVerbose LOGnone

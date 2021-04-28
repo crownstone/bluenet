@@ -216,6 +216,7 @@ void CrownstoneService::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_SESSION_DATA_SET: {
 			// Check if this characteristic exists first. In case of setup mode it does not for instance.
 			if (_sessionDataCharacteristic != NULL) {
+				// This code assumes the session data that is pointed to, will remain valid!
 				// In setup mode, this requires the setup key to be generated.
 				_sessionDataCharacteristic->setValueLength(event.size);
 				_sessionDataCharacteristic->setValue((uint8_t*)event.data);

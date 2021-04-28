@@ -585,6 +585,8 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t *buf;
 };
 
+const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
+
 // ========================= functions =========================
 
 /**

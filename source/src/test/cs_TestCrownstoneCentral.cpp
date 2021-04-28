@@ -15,7 +15,7 @@
 TestCrownstoneCentral::TestCrownstoneCentral() {}
 
 void TestCrownstoneCentral::init() {
-	EventDispatcher::getInstance().addListener(this);
+	listen();
 }
 
 void TestCrownstoneCentral::connect() {

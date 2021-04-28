@@ -31,6 +31,12 @@ public:
 		return instance;
 	}
 
+	/**
+	 * Initializes the class:
+	 * - Assigns read/write buffer.
+	 * - Read config from State.
+	 * - Starts listening for events.
+	 */
 	void init();
 
 	/**
@@ -44,6 +50,8 @@ public:
 
 	/**
 	 * Terminate current connection.
+	 *
+	 * Can be called at any moment: will cancel the current operation if any.
 	 *
 	 * @return ERR_SUCCESS             When already disconnected.
 	 * @return ERR_WAIT_FOR_SUCCESS    When disconnecting. Wait for EVT_BLE_CENTRAL_DISCONNECTED.
@@ -80,6 +88,7 @@ public:
 	 *
 	 * @param[in] handle               The characteristic handle to write to. The handle was received during discovery.
 	 * @param[in] data                 Pointer to data, which will be copied.
+	 *                                 If the pointer equals the requested write buffer, no copying will take place.
 	 * @param[in] len                  Length of the data to write.
 	 *
 	 * @return ERR_BUFFER_TOO_SMALL    The data size is too large.
@@ -99,7 +108,7 @@ public:
 	cs_ret_code_t writeNotificationConfig(uint16_t cccdHandle, bool enableNotifications);
 
 	/**
-	 * Request the write buffer, to avoid having to copy data to the write buffer.
+	 * Request the write buffer. You can then put your data in this buffer and use it as data in the write() command, so no copy has to take place.
 	 *
 	 * @return     When busy:          A null pointer.
 	 * @return     On success:         A pointer to the write buffer, and the length of the buffer.

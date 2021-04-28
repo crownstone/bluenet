@@ -13,6 +13,11 @@
 /**
  * Class to connect to another crownstone, and write control commands.
  *
+ * The result of a control command will be received via notifications.
+ * These notifications are merged into a single result packet.
+ *
+ * Performs encryption and decryption of packets.
+ *
  * This class uses:
  * - The EncryptionBuffer to read notifications to.
  * - The CharacteristicReadBuffer to decrypt read data to.
@@ -20,6 +25,11 @@
  */
 class CrownstoneCentral: EventListener {
 public:
+	/**
+	 * Initializes the class:
+	 * - Constructs the service UUIDs.
+	 * - Starts listening for events.
+	 */
 	cs_ret_code_t init();
 
 	/**
@@ -49,6 +59,8 @@ public:
 	/**
 	 * Terminate current connection.
 	 *
+	 * Can be called at any moment: will cancel the current operation if any.
+	 *
 	 * @return ERR_SUCCESS             When already disconnected.
 	 * @return ERR_WAIT_FOR_SUCCESS    When disconnecting. Wait for EVT_BLE_CENTRAL_DISCONNECTED.
 	 */
@@ -62,7 +74,8 @@ public:
 	 * TODO: add timeout.
 	 *
 	 * @param[in] commandType          What control command.
-	 * @param[in] data                 Pointer to the command payload data.
+	 * @param[in] data                 Pointer to the command payload data, which will be copied.
+	 *                                 If the pointer equals the requested write buffer, no copying will take place.
 	 * @param[in] size                 Size of the command payload data.
 	 *
 	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_CS_CENTRAL_WRITE_RESULT.
@@ -70,7 +83,7 @@ public:
 	cs_ret_code_t write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size);
 
 	/**
-	 * Request the write buffer, to avoid having to copy data to the write buffer.
+	 * Request the write buffer. You can then put your data in this buffer and use it as data in the write() command, so no copy has to take place.
 	 *
 	 * @return     When busy:          A null pointer.
 	 * @return     On success:         A pointer to the write buffer, and the length of the buffer.
@@ -83,6 +96,7 @@ private:
 		SERVICE_INDEX_SETUP = 1,
 		SERVICE_INDEX_DEVICE_INFO = 2,
 		SERVICE_INDEX_DFU = 3,
+		SERVICE_INDEX_COUNT = 4
 	};
 
 	enum class Operation: uint8_t {
@@ -109,18 +123,43 @@ private:
 		DONE
 	};
 
-	UUID _uuids[4];
+	/**
+	 * Service UUIDs we need for discovery.
+	 */
+	UUID _serviceUuids[SERVICE_INDEX_COUNT];
 
+	/**
+	 * Handles that we need for reading and writing.
+	 */
 	uint16_t _sessionKeyHandle;
 	uint16_t _sessionDataHandle;
 	uint16_t _controlHandle;
 	uint16_t _resultHandle;
 	uint16_t _resultCccdHandle;
+
+	/**
+	 * Operation mode of the crownstone we are connected to.
+	 */
 	OperationMode _opMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
+
+	/**
+	 * The operation we're currently executing.
+	 */
 	Operation _currentOperation = Operation::NONE;
+
+	/**
+	 * Asynchronous step of an operation we are currently executing.
+	 */
 	uint8_t _currentStep;
 
+	/**
+	 * The notification index that we expect to get next.
+	 */
 	uint8_t _notificationNextIndex = 0;
+
+	/**
+	 * The current size of the merged notification data.
+	 */
 	uint16_t _notificationMergedDataSize = 0;
 
 	/**
@@ -132,12 +171,6 @@ private:
 	 * Reset notification merger variables.
 	 */
 	void resetNotifactionMergerState();
-
-	/**
-	 * Enable notification on the result characteristic.
-	 * Sets current step.
-	 */
-	void enableNotifications();
 
 	/**
 	 * Read session key or session data, depending on operation mode.
@@ -164,6 +197,7 @@ private:
 
 	void setStep(ConnectSteps step);
 	void setStep(WriteControlSteps step);
+	void setStep(uint8_t step);
 
 	/**
 	 * Returns true when you can continue.
@@ -188,6 +222,7 @@ private:
 	void onDiscovery(ble_central_discovery_t& result);
 	void onDiscoveryDone(cs_ret_code_t retCode);
 	void onRead(ble_central_read_result_t& result);
+	void onReadDuringConnect(ble_central_read_result_t& result);
 	void onWrite(cs_ret_code_t result);
 	void onNotification(ble_central_notification_t& result);
 

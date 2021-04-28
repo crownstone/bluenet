@@ -55,14 +55,15 @@ inline uint32_t convertEndian32(uint32_t val) {
  */
 #define CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(num, multiple) ((num + multiple - 1) & -multiple)
 
-
-/** Macro that returns the length of an array
+/**
+ * Get number of items in an array.
  *
- * @a the array whose length should be calculated
- *
- * @return the length of the array
+ * Usage: auto count = ArraySize(myArray);
  */
-#define SIZEOF_ARRAY( a ) (int)(sizeof( a ) / sizeof( a[ 0 ] ))
+template<class T, size_t N>
+constexpr auto ArraySize(T(&)[N]) {
+	return N;
+}
 
 template<typename T>
 void printInlineArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {

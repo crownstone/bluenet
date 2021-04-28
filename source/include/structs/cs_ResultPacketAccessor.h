@@ -26,7 +26,7 @@ public:
 	/**
 	 * Only set or get fields when this instance is initialized.
 	 */
-	bool isInitialized() {
+	bool isInitialized() const {
 		return _buffer != NULL;
 	}
 
@@ -186,7 +186,7 @@ protected:
 	result_packet_t<PAYLOAD_SIZE>* _buffer;
 
 	void checkInitialized() const {
-		assert(_buffer != NULL, "Buffer not initialized");
+		assert(isInitialized(), "Buffer not initialized");
 	}
 
 private:

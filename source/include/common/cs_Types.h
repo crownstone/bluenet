@@ -327,7 +327,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
-	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated.
+	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated. Data pointer has to point to memory that stays valid!
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
