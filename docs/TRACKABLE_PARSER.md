@@ -37,7 +37,7 @@ If a previously committed filter with the given filterId is already present on t
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8_t | filterId | 1 | Which filter to add the entry to.
-uint16_t | chunkStartIndex | 2 |  
+uint16_t | chunkStartIndex | 2 |  Offset in bytes of this chunk.
 uint16_t[] | totalSize | 2 |
 uint16_t | chunkSize | 2 |
 uint8_t[] | chunk | ... | 
@@ -188,4 +188,3 @@ uint8_t | filterId | 1
 uint8_t | flags | 1 
 uint16_t | filterVersion | 2
 uint16_t | filterCrc | 2
-
