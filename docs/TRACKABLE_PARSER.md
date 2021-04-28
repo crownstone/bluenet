@@ -30,7 +30,7 @@ Command to upload a filter. All chunks will be merged by the Crownstone.
 
 The `chunk` must be part of a [tracking filter data](#tracking-filter-data). 
 
-If a previously committed ilter with the given filterId is already present on the firmware, this will be deallocated prior to handling the chunk and a new filter of given total size will be allocated. 
+If a previously committed filter with the given filterId is already present on the Crownstone, it will be removed prior to handling the chunk.
 
 #### Upload filter packet
 
@@ -188,5 +188,4 @@ uint8_t | filterId | 1
 uint8_t | flags | 1 
 uint16_t | filterVersion | 2
 uint16_t | filterCrc | 2
-
 
