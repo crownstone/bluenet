@@ -66,8 +66,8 @@ public:
 	/**
 	 * Result of the event (optional).
 	 *
-	 * Sender of the event allocates the a buffer and assigns it to result.buf if it accepts response.
-	 * Handler of the event adjusts the result code, write to result.buf.data and sets result.dataSize accordingly.
+	 * Sender of the event allocates the a buffer and assigns it to result.buf if it accepts response data.
+	 * Handler of the event adjusts the result code, writes to result.buf.data and sets result.dataSize accordingly.
 	 */
 	cs_result_t result;
 
