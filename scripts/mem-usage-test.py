@@ -9,7 +9,9 @@ Then, run this script.
 This script depends on the crownstone python library: https://github.com/crownstone/crownstone-lib-python-uart
 """
 
+import argparse
 import logging
+import os
 import time
 
 from crownstone_core import Conversion
@@ -25,12 +27,48 @@ from crownstone_uart.core.uart.uartPackets.UartCrownstoneHelloPacket import Uart
 from crownstone_uart.core.uart.uartPackets.UartMessagePacket import UartMessagePacket
 from crownstone_uart.core.uart.uartPackets.UartWrapperPacket import UartWrapperPacket
 from crownstone_uart.topics.DevTopics import DevTopics
+from bluenet_logs import BluenetLogs
 
-#logging.basicConfig(format='%(levelname)-7s: %(message)s', level=logging.DEBUG)
-logging.basicConfig(format='%(levelname)-7s: %(message)s', level=logging.INFO)
+defaultSourceFilesDir = os.path.abspath(f"{os.path.dirname(os.path.abspath(__file__))}/../source")
 
-uart = CrownstoneUart()
+argParser = argparse.ArgumentParser(description="Client to show binary logs")
+argParser.add_argument('--sourceFilesDir',
+                       '-s',
+                       dest='sourceFilesDir',
+                       metavar='path',
+                       type=str,
+                       default=f"{defaultSourceFilesDir}",
+                       help='The path with the bluenet source code files on your system.')
+argParser.add_argument('--device',
+                       '-d',
+                       dest='device',
+                       metavar='path',
+                       type=str,
+                       default=None,
+                       help='The UART device to use, for example: /dev/ttyACM0')
+args = argParser.parse_args()
 
+sourceFilesDir = args.sourceFilesDir
+
+bluenetLogs = BluenetLogs()
+bluenetLogs.setSourceFilesDir(sourceFilesDir)
+
+logFile = sourceFilesDir + "/../mem-usage-test.log"
+logging.basicConfig(
+	format='%(asctime)s %(levelname)-7s: %(message)s',
+	level=logging.INFO,
+	handlers=[logging.FileHandler(logFile), logging.StreamHandler()]
+)
+
+print("")
+print("Make sure you compiled the firmware with:")
+print("    CS_SERIAL_ENABLED=SERIAL_ENABLE_RX_AND_TX")
+print("    SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY")
+print("    CS_UART_BINARY_PROTOCOL_ENABLED=1")
+print("    BUILD_MEM_USAGE_TEST=1")
+print("")
+print(f"Logging to file: {logFile}")
+print("")
 
 # Keep up the operation mode.
 stoneHasBeenSetUp = False
@@ -39,12 +77,13 @@ def handleHello(data):
 	logging.log(logging.DEBUG, f"flags={helloResult.status.flags}")
 	global stoneHasBeenSetUp
 	stoneHasBeenSetUp = helloResult.status.hasBeenSetUp
-	logging.log(logging.DEBUG, f"stoneHasBeenSetUp={stoneHasBeenSetUp}")
+	logging.log(logging.INFO, f"stoneHasBeenSetUp={stoneHasBeenSetUp}")
 UartEventBus.subscribe(UartTopics.hello, handleHello)
 
 
 # Start up the USB bridge.
-uart.initialize_usb_sync(writeChunkMaxSize=64)
+uart = CrownstoneUart()
+uart.initialize_usb_sync(port=args.device, writeChunkMaxSize=64)
 
 # Sphere specific settings:
 adminKey = "adminKeyForCrown"
@@ -62,6 +101,34 @@ crownstoneId = 200
 meshDeviceKey = "aStoneKeyForMesh"
 ibeaconMajor = 123
 ibeaconMinor = 456
+
+stats = {
+	"minStackEnd": [],
+	"maxHeapEnd": [],
+	"minFree": [],
+}
+
+def factoryReset() -> bool:
+	logging.log(logging.INFO, "Factory reset")
+	try:
+		controlPacket = ControlPacketsGenerator.getCommandFactoryResetPacket()
+		uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
+		uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
+		result = UartWriter(uartPacket).write_with_result_sync([ResultValue.SUCCESS, ResultValue.WAIT_FOR_SUCCESS])
+		if result.resultCode is ResultValue.SUCCESS:
+			# This always returns SUCCESS, while we should actually wait.
+			time.sleep(10.0)
+			return True
+		if result.resultCode is ResultValue.WAIT_FOR_SUCCESS:
+			# Actually we should wait for the next result code..
+			time.sleep(10.0)
+			return True
+		logging.log(logging.WARN, f"Factory reset failed, result={result}")
+		return False
+
+	except CrownstoneException as e:
+		logging.log(logging.WARN, f"Failed to factory reset: {e}")
+		return False
 
 def setup() -> bool:
 	logging.log(logging.INFO, "Perform setup")
@@ -113,26 +180,19 @@ def getRamStats():
 		logging.log(logging.WARN, f"Get ram stats failed: {e}")
 	return None
 
-# Main
-def stop():
-	logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
+def stop(errStr=None):
 	uart.stop()
-	exit(0)
+	if (errStr is None):
+		printStats()
+		logging.log(logging.INFO, "DONE!")
+		exit(0)
+	else:
+		logging.log(logging.WARN, f"Failed: {errStr}")
+		exit(1)
 
-try:
-	time.sleep(1)
-	if isSetupMode():
-		success = setup()
-		if not success:
-			exit(1)
-		logging.log(logging.INFO, "Setup completed")
-		time.sleep(2)
-
-#	uart._usbDev.resetCrownstone()
-#	time.sleep(3)
-
+def testRun():
 	minStackEnd = 0xFFFFFFFF
-	maxHeapEnd =  0x00000000
+	maxHeapEnd = 0x00000000
 	minFree = minStackEnd - maxHeapEnd
 	numSbrkFails = 0
 	similarStats = 0
@@ -149,7 +209,11 @@ try:
 				similarStats = 0
 			if similarStats > 60:
 				logging.log(logging.INFO, "No change in RAM statistics for some time.")
-				stop()
+				logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
+				stats["minStackEnd"].append(minStackEnd)
+				stats["maxHeapEnd"].append(maxHeapEnd)
+				stats["minFree"].append(minFree)
+				return
 
 			# Keep up the minima and maxima
 			minStackEnd = min(ramStats.minStackEnd, minStackEnd)
@@ -157,7 +221,37 @@ try:
 			minFree = min(ramStats.minFree, minFree)
 			numSbrkFails = max(ramStats.numSbrkFails, numSbrkFails)
 
+def printStats():
+	arr = stats["maxHeapEnd"]
+	logging.log(logging.INFO, f"Stats over {len(arr)} runs:")
+	logging.log(logging.INFO, f"maxHeapEnd:  min=0x{min(arr):08X} avg=0x{int(sum(arr) / len(arr)):08X} max=0x{max(arr):08X}")
+	arr = stats["minStackEnd"]
+	logging.log(logging.INFO, f"minStackEnd: min=0x{min(arr):08X} avg=0x{int(sum(arr)/len(arr)):08X} max=0x{max(arr):08X}")
+	arr = stats["minFree"]
+	logging.log(logging.INFO, f"minFree:     min={min(arr):10} avg={int(sum(arr) / len(arr)):10} max={max(arr):10}")
 
+def main():
+	for i in range(0, 5):
+		time.sleep(1)
+		if not isSetupMode():
+			stop("Not in setup mode")
+			return
+
+		success = setup()
+		if not success:
+			stop("Failed to setup")
+		logging.log(logging.INFO, "Setup completed")
+
+		testRun()
+
+		success = factoryReset()
+		if not success:
+			stop("Failed to factory reset")
+		logging.log(logging.INFO, "Factory reset completed")
+
+# Main
+try:
+	main()
 except KeyboardInterrupt:
 	pass
 
