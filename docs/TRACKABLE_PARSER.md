@@ -4,6 +4,11 @@ This page describes the commands and packets that affect Bluenets Trackable Pars
 
 Status: *Under active development. Protocol NOT FIXED YET*.
 
+
+<<Todo: add comments in typical workflow: get summaries, uploads/removes, commit>>
+<<Todo: add comment about start/end progress>>
+<<Todo: move _internal stuff into this file where necessary>>
+
 ## Table of contents
 
 [Commands](#commands)
@@ -40,10 +45,12 @@ uint8_t | filterId | 1 | Which filter to add the entry to.
 uint16_t | chunkStartIndex | 2 |  Offset in bytes of this chunk.
 uint16_t[] | totalSize | 2 |
 uint16_t | chunkSize | 2 |
-uint8_t[] | chunk | ... | 
+uint8_t[] | chunk | ... | <<Todo: explain >> 
 
 
 #### Upload filter result packet
+
+<<Todo: fix explanation about result packets>>
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. If result is not SUCCESS, 
 no change has been made to the filter or the mesh.
@@ -63,7 +70,7 @@ Removes the filter with given filter ID, and starts progress.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | filterId | 1 | Which filter to add the entry to.
+uint8_t | filterId | 1 | Id of the filter to remove.
 
 #### Remove filter result packet
 
@@ -84,7 +91,7 @@ Any malformed filters may immediately be deallocated to save resources and preve
 
 #### Commit filter packet
 
-Empty.
+<<Todo: add master crc and version in packet>>
 
 #### Commit filter result packet
 
@@ -108,9 +115,9 @@ Empty.
 #### Get filter summaries result packet
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint16_t | masterVersion | 2 | Synchronization version of the TrackableParser at time of constructing this result packet.  
+uint16_t | masterVersion | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. <<Todo: explain master version 0>>
 uint16_t | masterCrc | 2 | Master crc at time of constructing this result packet.
-[Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 6 | Summaries of all filters currently on the device.
+[Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 6 | Summaries of all filters currently on the Crownstone. <<Todo: MAX_FILTER_IDS should be explained somewhere>>
 
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
@@ -134,11 +141,11 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | protocol | 1 | Filter protocol of this filter. 
-[Filter version](#filter-version) | version | 1 | Synchronisation version of this filter.
-uint16_t | profileId | 2 | Entrys that pass this filter will be associated with this profile id.
+uint8_t | protocol | 1 | Filter protocol of this filter. <<Todo: set this value to 0>>
+[Filter version](#filter-version) | version | 1 | Synchronisation version of this filter. <<Todo: fix this according to new .md file>>
+uint16_t | profileId | 2 | Entries that pass this filter will be associated with this profile id.
 [Filter input type](#filter-input-type) | inputType | 1 | Determines how this filter interprets incoming entries.
-[Filter flags](#filter-flags) | flags | 1 | bitmask for future use. Must remain 0 for now.
+[Filter flags](#filter-flags) | flags | 1 | bitmask for future use. Must remain 0 for now. <<Todo: remove, can be added when protocol version is increased>>
 
 
 ### Cuckoo filter data
