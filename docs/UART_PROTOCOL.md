@@ -146,6 +146,8 @@ Type  | Type name                     | Encrypted | Data   | Description
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh-result-packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result-packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | To be defined.
+10108 | Asset Rssi Data               | Yes       | [Asset rssi data](#asset-rssi-data-packet) | Information about an asset a crownstone on the mesh has forwarded.
+10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The between an asset and its nearest Crownstone changed.
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -273,6 +275,25 @@ Value | Name | Description
 3 | Profile sphere exit    | The last user of given profile left the sphere. Ignore location value.
 4 | Profile location enter | The first user of given profile entered the given location.
 5 | Profile location exit  | The first user of given profile left the given location.
+
+
+### Asset rssi data packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | AssetMac | 6 | Mac address of the observed asset
+uint8 | StoneId | 1 | Id of the Crownstone that observed the asset
+uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
+uint8 | Channel | 1 | Channel of the observed advertisement
+
+### Nearest crownstone update
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | AssetId | 3 | ShortAssetId of the observed asset
+uint8 | ClosestStoneId | 1 | Id of the Crownstone that this Crownstone thinks is closest to the asset
+uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
+uint8 | Channel | 1 | Channel of the observed advertisement
 
 
 
