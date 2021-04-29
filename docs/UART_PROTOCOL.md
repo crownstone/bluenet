@@ -147,7 +147,8 @@ Type  | Type name                     | Encrypted | Data   | Description
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result-packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | To be defined.
 10108 | Asset Rssi Data               | Yes       | [Asset rssi data](#asset-rssi-data-packet) | Information about an asset a crownstone on the mesh has forwarded.
-10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The between an asset and its nearest Crownstone changed.
+10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The rssi between an asset and its nearest Crownstone changed.
+10110 | Nearest crownstone timed out  | Yes       | [Nearest crownstone timeout](#nearest-crownstone-timeout) | A previously tracked asset hasn't been observed in a
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -286,7 +287,7 @@ uint8 | StoneId | 1 | Id of the Crownstone that observed the asset
 uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
 uint8 | Channel | 1 | Channel of the observed advertisement
 
-### Nearest crownstone update
+### Nearest Crownstone update
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -295,6 +296,11 @@ uint8 | ClosestStoneId | 1 | Id of the Crownstone that this Crownstone thinks is
 uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
 uint8 | Channel | 1 | Channel of the observed advertisement
 
+### nearest Crownstone timeout
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | AssetId | 3 | ShortAssetId of the asset that timed out
 
 
 ### Binary log header
