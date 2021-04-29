@@ -57,7 +57,7 @@ no change has been made to the filter or the mesh.
 
 ### Remove filter
 
-Deallocates the given filter and starts progress.
+Removes the filter with given filter ID, and starts progress.
 
 #### Remove filter packet
 
