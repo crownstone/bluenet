@@ -106,12 +106,36 @@ no change has been made to the filter or the mesh.
 
 ## Packets
 
+
+### Cuckoo filter data
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | number of buckets log2 | 1 | Cuckoofilter will contain 2^(num buckets) buckets.
+uint8_t | Keys per bucket | 1 | Each bucket will contain at most this amount of fingerprints. 
+uint16_t | victim fingerprint | 2 | Fingerprint of last item that failed to be inserted, 0 if none.
+uint8_t | victim bucket index A | 1 | Bucket A of victim, 0 if none.
+uint8_t | victim bucket index B | 1 | Bucket V of victim, 0 if none.
+uint8_t[] | fingerprint array | 2^N*K | Fingerprint array. Here N = number of buckets log 2, K is number of fingerprints per bucket
+
+
 ### Cuckoo filter entry data
 Type | Name | Length | Description
 --- | --- | --- | ---
-EntryType | Type | 1 | Semantics of this data.
+EntryType | Type | 1 | Semantics of this data. <<Todo: this isn't used anywhere, can be removed>>
 uint8_t | Len | 1 | Length of the data array.
 uint8_t | Data | Len | Actual data of the entry 
+
+
+### Extended cuckoo filter entry data
+Extended fingerprints with bucket index A/B swapped identify the same entry in the cuckoo filter.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint16_t | Fingerprint   | 2 | Fingerprint of the data to add
+uint8_t | Bucket index A | 1 | Index of the bucket to that the fingerprint belongs to.
+uint8_t | Bucket index B | 1 | Alternative bucket that the fingerprint belongs to.
+
 
 ### Compressed cuckoo filter entry data
 Type | Name | Length | Description

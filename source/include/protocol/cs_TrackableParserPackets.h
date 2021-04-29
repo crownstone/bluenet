@@ -78,6 +78,7 @@ enum class FilterInputType : uint8_t {
  * Data associated to a parsing filter that is persisted to flash.
  */
 struct __attribute__((__packed__)) tracking_filter_meta_data_t {
+	todo updateThisToLatestProtocolDefinitions;
    public:
 	// sync info
 	uint8_t protocol;  // determines implementation type of filter

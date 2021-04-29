@@ -8,6 +8,7 @@ Status: *Under active development. Protocol NOT FIXED YET*.
 <<Todo: add comments in typical workflow: get summaries, uploads/removes, commit>>
 <<Todo: add comment about start/end progress>>
 <<Todo: move _internal stuff into this file where necessary>>
+<<Todo: define filter set to streamline text about synchronisation etc.>>
 
 ## Table of contents
 
@@ -134,57 +135,92 @@ A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Tracking filter meta data](#tracking-filter-meta-data) | metadata | | Metadata determining how the filter behaves
-[Cuckoo filter data](#cuckoo-filter-data) | filter | | Byte representation of the filter
+uint8[] | filterdata | | Byte representation of the filter, format depends on the `metadata`
 
 
 ### Tracking filter meta data
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | protocol | 1 | Filter protocol of this filter. <<Todo: set this value to 0>>
-[Filter version](#filter-version) | version | 1 | Synchronisation version of this filter. <<Todo: fix this according to new .md file>>
-uint16_t | profileId | 2 | Entries that pass this filter will be associated with this profile id.
-[Filter input type](#filter-input-type) | inputType | 1 | Determines how this filter interprets incoming entries.
-[Filter flags](#filter-flags) | flags | 1 | bitmask for future use. Must remain 0 for now. <<Todo: remove, can be added when protocol version is increased>>
+[Filter type](#filter-type) | filterType | 1 | Filter protocol of this filter. Describes a `filterdata` format.
+uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id.
+[Filter input type](#filter-input-type) | inputType |  | Determines how this filter interprets incoming entries.
+[Filter output type](#filter-output-type) | outputType |  | Determines how advertisements that pass this filter are handled by the system.
 
+### Filter type
 
-### Cuckoo filter data
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint8_t | number of buckets log2 | 1 | Cuckoofilter will contain 2^(num buckets) buckets.
-uint8_t | Keys per bucket | 1 | Each bucket will contain at most this amount of fingerprints. 
-uint16_t | victim fingerprint | 2 | Fingerprint of last item that failed to be inserted, 0 if none.
-uint8_t | victim bucket index A | 1 | Bucket A of victim, 0 if none.
-uint8_t | victim bucket index B | 1 | Bucket V of victim, 0 if none.
-uint8_t[] | fingerprint array | 2^N*K | Fingerprint array. Here N = number of buckets log 2, K is number of fingerprints per bucket
+Value | Name | Description 
+--- | --- | ---
+0 | CuckooFilter | Filter data is interpreted as [Cuckoo filter data](./CUCKOO_FILTER.md#cuckoo-filter-data)
 
 
 ### Filter input type
-A `uint8_t` value to determine which part of an advertisment is fed to the filter and how it is interpreted. 
+The input type metadata field of a filter defines what data is put into the filter when an advertisement is received
+in order to determine wether or not the advertisement 'passed' the filter or is 'rejected'.
 
-Value | Name | Description
+Type | Name | Description
 --- | --- | ---
-0 | MAC filter | Mac address is fed into the filter and determines the trackable id.
-1 | AD data identity filter | AD data is fed into the filter and determines the trackable id.
-2 | AD data category filter | AD data is fed into the filter but MAC address determines the trackable id.
+advertisement_subdata_t | format | What part of the advertisment is used to filter on.
 
-### Filter version
-A `uint16_t` "lollipop" value used for determining if a filter is up-to-date. 
+### Filter output type
+When a filter accepts an advertisement, 'output data' needs to be constructed. Depending on the use case this construction 
+may or may not need to use parts of the advertisement data. The output_t metadata field of a filter defines which part
+of the advertisement is used to produce the output data, and how this output data is formatted.
 
-
-Value | Description
---- | --- 
-0 | Unknown or unset version. Always inferior to non-zero versions.
-other | For non zero versions `v` and all `1 <= n < 2^16`, `v` is inferior to `v+n` including lollipop roll over.
-
-### Filter flags
-A `uint8_t` bitmask.
-
-Bits | Name | Description
+Type | Name | Description 
 --- | --- | ---
-0 | isActive | Determines if the filter is currently active or not.
-1-7 | - | Reserved for future use. Must be 0.
+advertisement_subdata_t | in_format | What part of the advertisment is used to construct the output.
+output_format_t | out_format | Determines how the output is formatted
+
+
+
+### Advertisement subdata
+This defines a dataformat/selection of data an advertisement. Given an advertisement_subdata_t value
+there is a function that transforms a pair `(macaddres,AD data) -> uint8_t[]` into a byte array.
+Effectively that function 'selects' part of that pair which can be used for further processing.
+
+Type | Name | Description
+--- | --- | ---
+[Advertisement subdata type](#advertisement-subdata-type) | type | See table below
+uint8_t[] | auxData | depending on `type`, more descriptive information about the selection method.
+
+### Advertisement subdata type
+The advertisement subdata type field can have the following values. 
+
+The AD data is formatted as `(type0, data0[0], ... , data0[l0]), ..., (typeN, dataN[0], ... , dataN[lN])`. Each pair `(typeK, dataK[])` is called an entry. An advertisement consists of a mac address followed by a sequence of AD data entries.
+
+Value | Name  | auxData type | AuxTypeSize | Description
+--- | --- | --- | --- | ---
+0 | Mac              | - | 0 | The (full) mac address is selected, and nothing more.
+1 | AdDataType       | ad_data_type_selector_t  | 1 | The advertisement is truncated to the data part `dataI` of an `(typeI, dataI)` where `typeI` is equal to the given `AdDataType`. If multiple such entries exist, they are treated separately. If that no entry is found with the given type, the advertisement is ignored.
+2 | MaskedAdDataType | [masked_ad_data_t](#masked-ad-data-type-selector) | 5 | Same as `AdDataType`, but the data `dataI` is now masked by a byte wise mask.
+
+### Masked AD data type selector
+Defines which entries of an advertisement to select based on their type field and defines a mask to blank out irrelevant parts.
+
+The i-th bit of the mask, `AdDataMask & (1 << i)`, is multiplied with `dataI[i]` to obtain the output array.
+
+Type | Name | Description
+--- | --- | ---
+uint8_t | AdDataType | select an entry with `typeI` equal to `AdDataType`. If multiple such entries exist, they are treated separately.
+uint32_t | AdDataMask | bit-to-byte-wise mask for `dataI`.
+
+
+### Filter output format
+This output format is used to direct advertisements to the relevant firmware components (E.g. NearestCrownstoneAlgorithm,
+MeshTopology, ...) and it determines the format of the unique identifyer of the Asset in the Crownstone mesh.
+
+Type | Name | Description 
+--- | --- | ---
+uint8_t | format | Identifies one of several output types a filter may construct.
+<<Todo: we could add a firmware bus recipient identifier to determine exactly what happens next?>>
+
+
+Value | Name | Size |  Description
+--- | --- | --- | ---
+0 | Mac | 6 | Asset is identified by its mac address.
+1 | short asset id | 3 | *TODO: formal description* Basically fingerprint+bucket index, but should be allowed to depend on filter implementation type)
+
 
 ### Filter summary
 A short summary of a filters state.
@@ -192,6 +228,17 @@ A short summary of a filters state.
 Type | Name | Length
 --- | --- | --- 
 uint8_t | filterId | 1 
-uint8_t | flags | 1 
-uint16_t | filterVersion | 2
+uint16_t | filterType | 2
 uint16_t | filterCrc | 2
+
+
+### Filter version
+A `uint16_t` "lollipop" value used for determining if a filter set is up-to-date. 
+
+<<Todo: This still needs to be implemented>>
+
+Value | Description
+--- | --- 
+0 | Unknown or unset version. Always inferior to non-zero versions.
+other | For non zero versions `v` and all `1 <= n < 2^16`, `v` is inferior to `v+n` including lollipop roll over.
+
