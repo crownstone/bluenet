@@ -21,7 +21,6 @@ Status: *Under active development. Protocol NOT FIXED YET*.
 [Packets](#packets)
 - [Tracking filter data](#tracking-filter-data)
 - [Tracking filter meta data](#tracking-filter-meta-data)
-- [Cuckoo filter data](#cuckoo-filter-data)
 - [Filter input type](#filter-input-type)
 - [Filter version](#filter-version)
 - [Filter flags](#filter-flags)
@@ -92,7 +91,11 @@ Any malformed filters may immediately be deallocated to save resources and preve
 
 #### Commit filter packet
 
-<<Todo: add master crc and version in packet>>
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
+uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
+
 
 #### Commit filter result packet
 
@@ -116,8 +119,8 @@ Empty.
 #### Get filter summaries result packet
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint16_t | masterVersion | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. <<Todo: explain master version 0>>
-uint16_t | masterCrc | 2 | Master crc at time of constructing this result packet.
+uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
+uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
 [Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 6 | Summaries of all filters currently on the Crownstone. <<Todo: MAX_FILTER_IDS should be explained somewhere>>
 
 
@@ -169,8 +172,24 @@ of the advertisement is used to produce the output data, and how this output dat
 
 Type | Name | Description 
 --- | --- | ---
-advertisement_subdata_t | in_format | What part of the advertisment is used to construct the output.
-output_format_t | out_format | Determines how the output is formatted
+[output_format_t](#filter-output-format) | out_format | Determines how the output is formatted. 
+uint8[] | in_format | Aux data describing which part of the advertisment is used to construct the output. Type/length of this field depends on `out_format`.
+
+
+
+### Filter output format
+This output format is a `uint8` used to:
+- determines the format of the unique identifyer of the Asset in the Crownstone mesh.
+- direct advertisements to the relevant firmware components (E.g. NearestCrownstoneAlgorithm,
+MeshTopology, ...) and
+- determines `in_format` that describes which data was used to construct the output with.
+
+
+
+Value | Name | `in_format` type | `in_format` size |  Output description type
+--- | --- | --- | --- | ---
+0 | Mac | None | 0 | Mac address as `uint8_t[6]`
+1 | ShortAssetId | [Advertisement subdata](#advertisement-subdata) |  | *TODO: formal description* Basically fingerprint+bucket index, but should be allowed to depend on filter implementation type)
 
 
 
@@ -206,20 +225,6 @@ uint8_t | AdDataType | select an entry with `typeI` equal to `AdDataType`. If mu
 uint32_t | AdDataMask | bit-to-byte-wise mask for `dataI`.
 
 
-### Filter output format
-This output format is used to direct advertisements to the relevant firmware components (E.g. NearestCrownstoneAlgorithm,
-MeshTopology, ...) and it determines the format of the unique identifyer of the Asset in the Crownstone mesh.
-
-Type | Name | Description 
---- | --- | ---
-uint8_t | format | Identifies one of several output types a filter may construct.
-<<Todo: we could add a firmware bus recipient identifier to determine exactly what happens next?>>
-
-
-Value | Name | Size |  Description
---- | --- | --- | ---
-0 | Mac | 6 | Asset is identified by its mac address.
-1 | short asset id | 3 | *TODO: formal description* Basically fingerprint+bucket index, but should be allowed to depend on filter implementation type)
 
 
 ### Filter summary
@@ -231,8 +236,13 @@ uint8_t | filterId | 1
 uint16_t | filterType | 2
 uint16_t | filterCrc | 2
 
+### Master Crc
 
-### Filter version
+A uint16 that is computed as follows: <<Todo>>
+<<Todo: explain master version 0>>
+
+
+### Master version
 A `uint16_t` "lollipop" value used for determining if a filter set is up-to-date. 
 
 <<Todo: This still needs to be implemented>>
