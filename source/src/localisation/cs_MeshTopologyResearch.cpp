@@ -1,43 +1,43 @@
-#include <localisation/cs_MeshTopology.h>
-
-#include <common/cs_Types.h>
-#include <logging/cs_Logger.h>
-#include <drivers/cs_Timer.h>
-#include <events/cs_Event.h>
-#include <storage/cs_State.h>
-#include <time/cs_SystemTime.h>
-#include <test/cs_Test.h>
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: May 6, 2020
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
 
 #include <cmath>
+#include <common/cs_Types.h>
+#include <drivers/cs_Timer.h>
+#include <events/cs_Event.h>
+#include <localisation/cs_MeshTopologyResearchResearch.h>
+#include <logging/cs_Logger.h>
+#include <storage/cs_State.h>
+#include <test/cs_Test.h>
+#include <time/cs_SystemTime.h>
 
-#define LOGMeshTopologyDebug LOGd
-#define LOGMeshTopologyVerbose LOGnone
+#define LOGMeshTopologyResearchDebug LOGd
+#define LOGMeshTopologyResearchVerbose LOGnone
 
-// ------------ MeshTopology methods ------------
-
-MeshTopology::MeshTopology() :
+MeshTopologyResearch::MeshTopologyResearch() :
 		flushRoutine([this]() {
 			return flushAggregatedRssiData();
 		}) {
 }
 
-void MeshTopology::init() {
+void MeshTopologyResearch::init() {
 	TYPIFY(CONFIG_CROWNSTONE_ID) state_id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &state_id,
 			sizeof(state_id));
 
 	my_id = state_id;
 
-	LOGMeshTopologyDebug("MeshTopology: my_id %d", my_id);
+	LOGMeshTopologyResearchDebug("MeshTopology: my_id %d", my_id);
 
 	boot_sequence_finished = false;
 	last_stone_id_broadcasted_in_burst = 0;
 }
 
-// ------------ Recording ping stuff ------------
-
-
-void MeshTopology::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {
+void MeshTopologyResearch::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {
 	auto channel_index = channel - CHANNEL_START;
 
 	if (channel_index < 0 || CHANNEL_COUNT <= channel_index) {
@@ -49,9 +49,7 @@ void MeshTopology::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t ch
 	recorder.addValue(rssi);
 }
 
-// ------------ Sending Rssi Data ------------
-
-uint8_t MeshTopology::getVarianceRepresentation(float variance) {
+uint8_t MeshTopologyResearch::getVarianceRepresentation(float variance) {
 	variance = std::abs(variance);
 	if (variance <  2 *  2) return 0;
 	if (variance <  4 *  4) return 1;
@@ -63,7 +61,7 @@ uint8_t MeshTopology::getVarianceRepresentation(float variance) {
 	return 7;
 }
 
-uint8_t MeshTopology::getMeanRssiRepresentation(float mean) {
+uint8_t MeshTopologyResearch::getMeanRssiRepresentation(float mean) {
 	mean = std::abs(mean);
 	if (mean >= 1<<7 ) {
 		// mean rssi is worse than -128 dB, return 127.
@@ -72,7 +70,7 @@ uint8_t MeshTopology::getMeanRssiRepresentation(float mean) {
 	return static_cast<uint8_t>(mean);
 }
 
-uint8_t MeshTopology::getCountRepresentation(uint32_t count) {
+uint8_t MeshTopologyResearch::getCountRepresentation(uint32_t count) {
 	if (count >= 1<<6) {
 		return (1<< 6) - 1;
 	}
@@ -80,14 +78,14 @@ uint8_t MeshTopology::getCountRepresentation(uint32_t count) {
 }
 
 
-uint32_t MeshTopology::flushAggregatedRssiData() {
+uint32_t MeshTopologyResearch::flushAggregatedRssiData() {
 	if (!boot_sequence_finished) {
-		LOGMeshTopologyDebug("flushAggregatedRssiData boot delay");
+		LOGMeshTopologyResearchDebug("flushAggregatedRssiData boot delay");
 		boot_sequence_finished = true;
 		return Coroutine::delayMs(Settings.boot_sequence_period_ms);
 	}
 
-	LOGMeshTopologyDebug("flushAggregatedRssiData");
+	LOGMeshTopologyResearchDebug("flushAggregatedRssiData");
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
 	// ** begin burst loop **
@@ -96,7 +94,7 @@ uint32_t MeshTopology::flushAggregatedRssiData() {
 
 		stone_id_t id = main_iter->first;
 
-		LOGMeshTopologyDebug("Burst start for id=%u", id);
+		LOGMeshTopologyResearchDebug("Burst start for id=%u", id);
 
 		// the maps may not have the same key sets, this depends
 		// on possible loss differences between the channels.
@@ -150,7 +148,7 @@ uint32_t MeshTopology::flushAggregatedRssiData() {
 
 	} // ** end burst loop **
 
-	LOGMeshTopologyDebug("End of burst");
+	LOGMeshTopologyResearchDebug("End of burst");
 
 	last_stone_id_broadcasted_in_burst = 0;
 
@@ -159,7 +157,7 @@ uint32_t MeshTopology::flushAggregatedRssiData() {
 
 // --------------- generating rssi data --------------
 
-void MeshTopology::sendPingRequestOverMesh() {
+void MeshTopologyResearch::sendPingRequestOverMesh() {
 	rssi_ping_message_t ping_msg;
 
 	cs_mesh_msg_t msg_wrapper;
@@ -176,7 +174,7 @@ void MeshTopology::sendPingRequestOverMesh() {
 	msgevt.dispatch();
 }
 
-void MeshTopology::sendPingResponseOverMesh() {
+void MeshTopologyResearch::sendPingResponseOverMesh() {
 	cs_mesh_msg_t msg_wrapper;
 	msg_wrapper.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
 	msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -191,7 +189,7 @@ void MeshTopology::sendPingResponseOverMesh() {
 	msgevt.dispatch();
 }
 
-void MeshTopology::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
+void MeshTopologyResearch::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
 	if (meshMsgEvent.hops == 0) {
 		sendPingResponseOverMesh();
 	}
@@ -199,7 +197,7 @@ void MeshTopology::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
 
 // ------------- communicating rssi data -------------
 
-void MeshTopology::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) {
+void MeshTopologyResearch::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) {
 	cs_mesh_msg_t msg_wrapper;
 	msg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_DATA;
 	msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -214,11 +212,11 @@ void MeshTopology::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) 
 	msgevt.dispatch();
 }
 
-void MeshTopology::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
-	RssiDataMessage datamessage;
+void MeshTopologyResearch::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
+	mesh_topology_neighbour_rssi_t datamessage;
 
-	datamessage.receiver_id = my_id;
-	datamessage.sender_id = rssi_data_message->sender_id;
+	datamessage.receiverId = my_id;
+	datamessage.senderId = rssi_data_message->sender_id;
 
 	datamessage.count[0] = rssi_data_message->channel37.sampleCount;
 	datamessage.count[1] = rssi_data_message->channel38.sampleCount;
@@ -228,16 +226,16 @@ void MeshTopology::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) 
 	datamessage.rssi[1] = rssi_data_message->channel38.rssi;
 	datamessage.rssi[2] = rssi_data_message->channel39.rssi;
 
-	datamessage.standard_deviation[0] = rssi_data_message->channel37.variance;
-	datamessage.standard_deviation[1] = rssi_data_message->channel38.variance;
-	datamessage.standard_deviation[2] = rssi_data_message->channel39.variance;
+	datamessage.standardDeviation[0] = rssi_data_message->channel37.variance;
+	datamessage.standardDeviation[1] = rssi_data_message->channel38.variance;
+	datamessage.standardDeviation[2] = rssi_data_message->channel39.variance;
 
-	LOGMeshTopologyDebug("%d -> %d: ch37 #%d  -%d dB",
-			datamessage.sender_id,
-			datamessage.receiver_id,
+	LOGMeshTopologyResearchDebug("%d -> %d: ch37 #%d  -%d dB",
+			datamessage.senderId,
+			datamessage.receiverId,
 			datamessage.count[0],
 			datamessage.rssi[0],
-			datamessage.standard_deviation[0]
+			datamessage.standardDeviation[0]
 	);
 
 	UartHandler::getInstance().writeMsg(
@@ -246,7 +244,7 @@ void MeshTopology::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) 
 			sizeof(datamessage));
 }
 
-void MeshTopology::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
+void MeshTopologyResearch::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 	auto& rssi_data_message =
 			meshMsgEvent.getPacket<CS_MESH_MODEL_TYPE_RSSI_DATA>();
 	sendRssiDataOverUart(&rssi_data_message);
@@ -254,9 +252,9 @@ void MeshTopology::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 
 // ------------- recording mesh messages -------------
 
-void MeshTopology::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
+void MeshTopologyResearch::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?
-		LOGMeshTopologyVerbose("handle mesh msg event with 0 hops");
+		LOGMeshTopologyResearchVerbose("handle mesh msg event with 0 hops");
 		recordRssiValue(
 				mesh_msg_evt.srcAddress,
 				mesh_msg_evt.rssi,
@@ -267,7 +265,7 @@ void MeshTopology::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	// can't really interpret the rssi value if it was relayed.
 }
 
-void MeshTopology::handleEvent(event_t &evt) {
+void MeshTopologyResearch::handleEvent(event_t &evt) {
 	if (flushRoutine.handleEvent(evt)) {
 		return;
 	}
@@ -279,12 +277,12 @@ void MeshTopology::handleEvent(event_t &evt) {
 
 		switch (meshMsgEvent.type) {
 			case CS_MESH_MODEL_TYPE_RSSI_PING: {
-				LOGMeshTopologyDebug("received rssi ping message");
+				LOGMeshTopologyResearchDebug("received rssi ping message");
 				receivePingMessage(meshMsgEvent);
 				break;
 			}
 			case CS_MESH_MODEL_TYPE_RSSI_DATA: {
-				LOGMeshTopologyDebug("received rssi data message");
+				LOGMeshTopologyResearchDebug("received rssi data message");
 				receiveRssiDataMessage(meshMsgEvent);
 				break;
 			}

@@ -4,17 +4,16 @@
  * Date: May 6, 2020
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+
 #pragma once
 
 #include <cstdint>
 #include <events/cs_EventListener.h>
+#include <map>
+#include <protocol/cs_MeshTopologyPackets.h>
 #include <structs/cs_PacketsInternal.h>
-#include <localisation/cs_RssiDataMessage.h>
-
 #include <util/cs_Coroutine.h>
 #include <util/cs_Variance.h>
-
-#include <map>
 
 /**
  * This class/component keeps track of the rssi distance of a
@@ -25,9 +24,9 @@
  * over the mesh so that a hub, or other interested connected devices
  * can retrieve it.
  */
-class MeshTopology : public EventListener {
+class MeshTopologyResearch : public EventListener {
 public:
-	MeshTopology();
+	MeshTopologyResearch();
 
 	/**
 	 * Handles the following events:

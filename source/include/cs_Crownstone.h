@@ -19,7 +19,6 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
-#include <localisation/cs_MeshTopology.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <localisation/cs_TrackableParser.h>
 #include <presence/cs_PresenceHandler.h>
@@ -36,6 +35,7 @@
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
 #include <tracking/cs_TrackedDevices.h>
+#include <localisation/cs_MeshTopologyResearchResearch.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -345,7 +345,7 @@ private:
 	SystemTime _systemTime;
 
 #if BUILD_RSSI_DATA_TRACKER == 1
-	MeshTopology _meshTopology;
+	MeshTopologyResearch _meshTopology;
 #endif
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
