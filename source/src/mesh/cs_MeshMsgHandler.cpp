@@ -166,6 +166,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			result.returnCode = handleSetIbeaconConfigId(payload, payloadSize);
 			return;
 		}
+		case CS_MESH_MODEL_TYPE_STONE_MAC: {
+			// TODO: do we need to do anything?
+			return;
+		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
 			result.returnCode = ERR_INVALID_MESSAGE;
 			return;

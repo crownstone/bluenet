@@ -357,3 +357,8 @@ struct microapp_upload_internal_t {
 	microapp_upload_t header;
 	cs_data_t data;
 };
+
+struct mesh_topo_mac_result_t {
+	uint8_t macAddress[MAC_ADDRESS_LEN];
+	int8_t rssi;
+};

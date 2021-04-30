@@ -374,6 +374,9 @@ enum class CS_TYPE: uint16_t {
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
+	CMD_MESH_TOPO_GET_MAC,                            // Get the MAC address of a given stone ID.
+	EVT_MESH_TOPO_MAC_RESULT,                         // The resulting MAC address.
+
 	EVT_TWI_INIT,                                     // TWI initialisation.
 	EVT_TWI_WRITE,                                    // TWI write.
 	EVT_TWI_READ,                                     // TWI read (request).
@@ -661,6 +664,8 @@ typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
+typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_MAC);
+typedef mesh_topo_mac_result_t TYPIFY(EVT_MESH_TOPO_MAC_RESULT);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 // TWI / I2C module

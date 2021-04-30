@@ -33,6 +33,11 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT> {
 	using type = nearest_witness_report_t;
 };
 
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_STONE_MAC> {
+	using type = cs_mesh_model_msg_stone_mac_t;
+};
+
 
 class MeshMsgEvent{
 public:

@@ -35,6 +35,8 @@ void MeshTopologyResearch::init() {
 
 	boot_sequence_finished = false;
 	last_stone_id_broadcasted_in_burst = 0;
+
+	listen();
 }
 
 void MeshTopologyResearch::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {

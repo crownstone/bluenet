@@ -596,11 +596,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
 
-#if RSSI_DATA_TRACKER_ENABLED==1
-	_meshTopology.init();
-	_meshTopology.listen();
-#endif
-	
 #if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
 	_nearestCrownstoneTracker.init();
 	_nearestCrownstoneTracker.listen();
@@ -629,8 +624,10 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
+
+			_meshTopology.init();
 			break;
-		} 
+		}
 		case OperationMode::OPERATION_MODE_SETUP: {
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
