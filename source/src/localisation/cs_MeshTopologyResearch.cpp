@@ -9,7 +9,7 @@
 #include <common/cs_Types.h>
 #include <drivers/cs_Timer.h>
 #include <events/cs_Event.h>
-#include <localisation/cs_MeshTopologyResearchResearch.h>
+#include <localisation/cs_MeshTopologyResearch.h>
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 #include <test/cs_Test.h>
