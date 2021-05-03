@@ -46,16 +46,10 @@ struct __attribute__((__packed__)) trackable_parser_cmd_get_filter_summaries_t {
 
 struct __attribute__((__packed__)) tracking_filter_summary_t {
 	uint8_t id;
-	uint8_t flags;
-	uint16_t version;
+	uint8_t type;
 	uint16_t crc;
 };
 
-struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_ret_t {};
-
-struct __attribute__((__packed__)) trackable_parser_cmd_remove_filter_ret_t {};
-
-struct __attribute__((__packed__)) trackable_parser_cmd_commit_filter_changes_ret_t {};
 
 struct __attribute__((__packed__)) trackable_parser_cmd_get_filter_summaries_ret_t {
 	uint16_t masterVersion;
@@ -86,12 +80,4 @@ struct __attribute__((__packed__)) tracking_filter_meta_data_t {
 
 	uint8_t profileId;  // devices passing the filter are assigned this profile id
 	FilterInputType inputType;
-
-	// sync state
-	union {
-		uint8_t flags;
-		struct {
-			uint8_t isActive : 1;
-		} bits;
-	};
 };

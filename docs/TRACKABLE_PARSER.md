@@ -12,28 +12,54 @@ Status: *Under active development. Protocol NOT FIXED YET*.
 
 ## Table of contents
 
-[Commands](#commands)
+Version
+- [Trackable parser protocol version](#trackable-parser-protocol-version)
+
+Commands packets
 - [Upload filter](#upload-filter)
 - [Remove filter](#remove-filter)
 - [Commit filter changes](#commit-filter-changes)
 - [Get filter summaries](#get-filter-summaries)
 
-[Packets](#packets)
+Filter format packets
 - [Tracking filter data](#tracking-filter-data)
 - [Tracking filter meta data](#tracking-filter-meta-data)
+- [Filter type](#filter-type)
+
+Filter flowcontrol packets
 - [Filter input type](#filter-input-type)
-- [Filter version](#filter-version)
-- [Filter flags](#filter-flags)
+- [Filter output type](#filter-output-type)
+- [Filter output format](#filter-output-format)
+- [Advertisement subdata](#advertisement-subdata)
+- [Advertisement subdata type](#advertisement-subdata-type)
+- [Masked AD data type selector](#masked-ad-data-type-selector)
+
+Filter statistics packets
+- [Filter summary](#filter-summary)
+- [Filter master crc](#filter-master-crc)
+- [Filter version](#filter-master-version)
 
 *************************************************************************
+
+## Version
+
+### Trackable parser protocol version
+All commands that the trackable parser accepts contain a `uint8` command protocol version.
+This version will be incremented when making breaking changes to the protocol.
+
+Name | type | Description
+--- | --- | ---
+commandProtocolVersion | uint8 | Version identifier that describes the further format of the command.
+
+Value | Change Description
+--- | ---
+0 | **Current version**  Initial protocol definitions. 
 
 ## Commands
 
 ### Upload filter
 
-Command to upload a filter. All chunks will be merged by the Crownstone.
-
-The `chunk` must be part of a [tracking filter data](#tracking-filter-data). 
+Command to upload a filter in chunks. All chunks will be merged by the Crownstone. 
 
 If a previously committed filter with the given filterId is already present on the Crownstone, it will be removed prior to handling the chunk.
 
@@ -41,11 +67,12 @@ If a previously committed filter with the given filterId is already present on t
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
 uint8_t | filterId | 1 | Which filter to add the entry to.
 uint16_t | chunkStartIndex | 2 |  Offset in bytes of this chunk.
-uint16_t[] | totalSize | 2 |
+uint16_t | totalSize | 2 | Total size of the chunked data. Practical upper limit depends on command buffer size, prior allocated memory for filters in firmware etc. 
 uint16_t | chunkSize | 2 |
-uint8_t[] | chunk | ... | <<Todo: explain >> 
+uint8_t[] | chunk | `chunkSize` | Contiguous subspan of a [tracking filter data](#tracking-filter-data) packet starting from the byte at `chunkStartIndex` and `chunkSize` bytes in total.
 
 
 #### Upload filter result packet
@@ -70,6 +97,7 @@ Removes the filter with given filter ID, and starts progress.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
 uint8_t | filterId | 1 | Id of the filter to remove.
 
 #### Remove filter result packet
@@ -93,6 +121,7 @@ Any malformed filters may immediately be deallocated to save resources and preve
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
 uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
 uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
 
@@ -110,7 +139,7 @@ A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
 
 ### Get filter summaries
 
-Obtain a summary of the state of all filters currently on the device.
+Obtain a summary of the state of all filters currently on the device and selected metadata about synchronization, memory usage and protocol.
 
 #### Get filter summaries packet
 
@@ -118,9 +147,11 @@ Empty.
 
 #### Get filter summaries result packet
 Type | Name | Length | Description
---- | --- | --- | ---
+--- | --- | --- | --- 
+[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | Trackable parser protocol version implemented in the firmware
 uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
 uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
+uint16_ | <<TODO: free space>> 
 [Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 6 | Summaries of all filters currently on the Crownstone. <<Todo: MAX_FILTER_IDS should be explained somewhere>>
 
 
@@ -131,7 +162,9 @@ A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
 
 *************************************************************************
 
-## Packets
+# Packets
+
+## Filter upload packets
 
 ### Tracking filter data
 
@@ -152,10 +185,14 @@ uint8_t | profileId | 1 | Entries that pass this filter will be associated with 
 
 ### Filter type
 
+A `uint8` defining the format and implementation of the filter datastructure.
+
 Value | Name | Description 
 --- | --- | ---
 0 | CuckooFilter | Filter data is interpreted as [Cuckoo filter data](./CUCKOO_FILTER.md#cuckoo-filter-data)
 
+
+## Filter flowcontrol packets
 
 ### Filter input type
 The input type metadata field of a filter defines what data is put into the filter when an advertisement is received
@@ -225,7 +262,7 @@ uint8_t | AdDataType | select an entry with `typeI` equal to `AdDataType`. If mu
 uint32_t | AdDataMask | bit-to-byte-wise mask for `dataI`.
 
 
-
+## Filter statistics packets
 
 ### Filter summary
 A short summary of a filters state.
@@ -233,16 +270,16 @@ A short summary of a filters state.
 Type | Name | Length
 --- | --- | --- 
 uint8_t | filterId | 1 
-uint16_t | filterType | 2
+uint8_t | filterType | 2
 uint16_t | filterCrc | 2
 
-### Master Crc
+### Filter master crc
 
 A uint16 that is computed as follows: <<Todo>>
 <<Todo: explain master version 0>>
 
 
-### Master version
+### Filter master version
 A `uint16_t` "lollipop" value used for determining if a filter set is up-to-date. 
 
 <<Todo: This still needs to be implemented>>

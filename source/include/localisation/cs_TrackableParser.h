@@ -37,7 +37,10 @@ private:
 	/**
 	 * List of pointers to the currently allocated filters.
 	 * The filters in this array are always sorted by filterId,
-	 * and the list is nullptr terminated.
+	 * and nullptrs only occur at the back in the sense that:
+	 *   for any i <= j < MAX_FILTER_IDS:
+	 *   if   _parsingFilters[i] == nullptr
+	 *   then _parsingFilters[j] == nullptr
 	 */
 	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS] = {};
 
