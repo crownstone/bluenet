@@ -1,14 +1,18 @@
 # Trackable Parser
 
 This page describes the commands and packets that affect Bluenets Trackable Parser component public API.
+Typical workflow for updating the filters of the parser:
+1. send a command [get summaries](#get-filter-summaries) to find out what [protocol](#trackable-parser-protocol-version) the firmware uses and which filters are currently used
+2. send commands to [upload](#upload-filter) new filters and [remove](#remove-filter) outdated ones.
+3. send a [commit command](#commit-filter-changes) to complete the changes.
 
-Status: *Under active development. Protocol NOT FIXED YET*.
+When a crownstone reboots it loads any filters stored in its flash module into RAM. After a consistency check it will start parsing bluetooth advertisements.
+If an upload or remove command is received, it will change its run-time filters accordingly and set a flag `filterModificationInProgress` to true.
+During modifications the parser blocks all advertisements to prevent inconsistent behaviour. The progress flag stays active until a succesfully executed 
+commit command or a timeout occurs.
 
-
-<<Todo: add comments in typical workflow: get summaries, uploads/removes, commit>>
-<<Todo: add comment about start/end progress>>
-<<Todo: move _internal stuff into this file where necessary>>
-<<Todo: define filter set to streamline text about synchronisation etc.>>
+Filters are identified by a `uint8` called a filterId. These ids are free to be chosen by the device that uploads a filter. There is a maximum number of filters on the
+Crownstone, which is implementation defined. (`MAX_FILTER_IDS`)
 
 ## Table of contents
 
@@ -59,9 +63,10 @@ Value | Change Description
 
 ### Upload filter
 
-Command to upload a filter in chunks. All chunks will be merged by the Crownstone. 
+Command to upload a filter in chunks. All chunks will be merged by the Crownstone. If a previously committed filter with 
+the given filterId is already present on the Crownstone, it will be removed prior to handling the chunk.
 
-If a previously committed filter with the given filterId is already present on the Crownstone, it will be removed prior to handling the chunk.
+This command sets the `filterModificationInProgress` flag to true.
 
 #### Upload filter packet
 
@@ -75,12 +80,8 @@ uint16_t | chunkSize | 2 |
 uint8_t[] | chunk | `chunkSize` | Contiguous subspan of a [tracking filter data](#tracking-filter-data) packet starting from the byte at `chunkStartIndex` and `chunkSize` bytes in total.
 
 
-#### Upload filter result packet
+#### Upload filter result
 
-<<Todo: fix explanation about result packets>>
-
-A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. If result is not SUCCESS, 
-no change has been made to the filter or the mesh.
 - `SUCCESS`: Chunk has been copied into the desired filter.
 - `INVALID_MESSAGE`: Chunk would overflow total size of the filter. Message dropped.
 - `WRONG_STATE`: Total size changed between upload commands. Filter deallocated. 
@@ -91,7 +92,9 @@ no change has been made to the filter or the mesh.
 
 ### Remove filter
 
-Removes the filter with given filter ID, and starts progress.
+Removes the filter with given filter ID.
+
+This command sets the `filterModificationInProgress` flag to true.
 
 #### Remove filter packet
 
@@ -100,7 +103,7 @@ Type | Name | Length | Description
 [CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
 uint8_t | filterId | 1 | Id of the filter to remove.
 
-#### Remove filter result packet
+#### Remove filter result
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
 - `SUCCESS`: filter was found and deallocated. Progress was started.
@@ -122,17 +125,15 @@ Any malformed filters may immediately be deallocated to save resources and preve
 Type | Name | Length | Description
 --- | --- | --- | ---
 [CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
-uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
-uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
+uint16_t | [MasterVersion](#master-version) | 2 | Value of the synchronization version of the TrackableParser that should be set to if this command is succesfully handled. 
+uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result.
 
 
-#### Commit filter result packet
+#### Commit filter result
 
-A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. 
-
-- `SUCCESS`: all filters passed the consistency checks and the master crc matches.
-- `MISMATCH`:the master crc did not match but no consistency checks failed.
-- `WRONG_STATE`: some filters have been deleted due to failed consistency checks.
+- `SUCCESS`: all filters passed the consistency checks and the master crc matches. `MasterVersion` is updated to the value in the received command.
+- `MISMATCH`:the master crc did not match but no consistency checks failed. `MasterVersion` is not changed.
+- `WRONG_STATE`: some filters have been deleted due to failed consistency checks. `MasterVersion` is not changed.
 
 
 *************************************************************************
@@ -151,8 +152,8 @@ Type | Name | Length | Description
 [CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | Trackable parser protocol version implemented in the firmware
 uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
 uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
-uint16_ | <<TODO: free space>> 
-[Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 6 | Summaries of all filters currently on the Crownstone. <<Todo: MAX_FILTER_IDS should be explained somewhere>>
+uint16_ | freeSpace | 2 | The number of bytes that the TrackableParser is still allowed to allocate. (Does not take into account free heap space on the firmware.)
+[Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 4 | Summaries of all filters currently on the Crownstone. 
 
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
@@ -222,11 +223,10 @@ MeshTopology, ...) and
 - determines `in_format` that describes which data was used to construct the output with.
 
 
-
 Value | Name | `in_format` type | `in_format` size |  Output description type
 --- | --- | --- | --- | ---
 0 | Mac | None | 0 | Mac address as `uint8_t[6]`
-1 | ShortAssetId | [Advertisement subdata](#advertisement-subdata) |  | *TODO: formal description* Basically fingerprint+bucket index, but should be allowed to depend on filter implementation type)
+1 | [ShortAssetId](#short-asset-id) | [Advertisement subdata](#advertisement-subdata) |  | 
 
 
 
@@ -275,17 +275,33 @@ uint16_t | filterCrc | 2
 
 ### Filter master crc
 
-A uint16 that is computed as follows: <<Todo>>
-<<Todo: explain master version 0>>
+For a list of filters `f[0], ... , f[k]`, sorted by their `filterId`, in [tracking filter data](#tracking-filter-data) format,
+the master crc is computed by first computing the list of individual filter `crc16`s
+`c[0], ... , c[k]` and then computing the crc16 of that list. 
+
+The if the firmware needs to recompute its master crc, it uses the filters it has in RAM,
+not the filters that are stored on flash.
+
+
+### Short asset id
+
+A **3-byte** identifier that is used in Crownstone mesh communication to differentiate between advertisements (or the entities broadcasting them). 
+For example, a filter may be configured with [input type](#input-type) `MAC`, and filter type [CuckooFilter](#filter-type). The short asset id
+can then be a [compressed filter entry](CUCKOO_FILTER.md#compressed-cuckoo-filter-entry-data).
+
+Each [filter type](#filter-type) is allowed to implement their own algorithm to construct a short asset id based on their input data. They are 
+required to make a _reasonable effort_ to avoid collisions. Currently implemented:
+
+[Filter type](#filter-type) | Short asset id type | Depends on input type
+--- | --- | ---
+CuckooFilter | [compressed filter entry](CUCKOO_FILTER.md#compressed-cuckoo-filter-entry-data) | false
 
 
 ### Filter master version
-A `uint16_t` "lollipop" value used for determining if a filter set is up-to-date. 
-
-<<Todo: This still needs to be implemented>>
+A `uint16_t` "lollipop" value used for determining if a filter set is up-to-date.
 
 Value | Description
 --- | --- 
 0 | Unknown or unset version. Always inferior to non-zero versions.
-other | For non zero versions `v` and all `1 <= n < 2^16`, `v` is inferior to `v+n` including lollipop roll over.
+other | For non zero versions `v` and all `1 <= n < 2^(16-1)`, `v` is inferior to `v+n`, including lollipop roll over.
 
