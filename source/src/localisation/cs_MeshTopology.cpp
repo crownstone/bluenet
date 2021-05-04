@@ -69,8 +69,13 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	uint8_t compressedChannel = compressChannel(channel);
 	uint8_t index = find(id);
 	if (index == INDEX_NOT_FOUND) {
-		_neighbours[_neighbourCount] = neighbour_node_t(id, compressedRssi, compressedChannel);
-		_neighbourCount++;
+		if (_neighbourCount < MAX_NEIGHBOURS) {
+			_neighbours[_neighbourCount] = neighbour_node_t(id, compressedRssi, compressedChannel);
+			_neighbourCount++;
+		}
+		else {
+			LOGw("Can't add id=%u", id);
+		}
 	}
 	else {
 		_neighbours[index].rssi = compressedRssi;
