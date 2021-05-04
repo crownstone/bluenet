@@ -66,18 +66,18 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 
 void Mesh::initModels() {
 	LOGi("Initializing and adding models");
-	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
-		_msgHandler.handleMsg(msg, result);
+	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) -> void {
+		_msgHandler.handleMsg(msg, reply);
 	});
 	_modelMulticast.init(0);
 
-	_modelMulticastAcked.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
-		_msgHandler.handleMsg(msg, result);
+	_modelMulticastAcked.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) -> void {
+		_msgHandler.handleMsg(msg, reply);
 	});
 	_modelMulticastAcked.init(1);
 
-	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
-		_msgHandler.handleMsg(msg, result);
+	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) -> void {
+		_msgHandler.handleMsg(msg, reply);
 	});
 	_modelUnicast.init(2);
 }

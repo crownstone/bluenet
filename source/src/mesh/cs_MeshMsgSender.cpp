@@ -29,10 +29,12 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = meshMsg->type;
-	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
 	item.metaData.priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
-	item.reliable = false;
-	item.broadcast = true;
+	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
+	item.reliable = meshMsg->flags.flags.reliable;
+	item.broadcast = meshMsg->flags.flags.broadcast;
+	item.numIds = meshMsg->idCount;
+	item.stoneIdsPtr = meshMsg->targetIds;
 	item.msgPayload.len = meshMsg->size;
 	item.msgPayload.data = meshMsg->payload;
 

@@ -40,8 +40,13 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 
 	cs_mesh_msg_t meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_STONE_MAC;
-	meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+	meshMsg.flags.flags.broadcast = false;
+	meshMsg.flags.flags.reliable = true;
+	meshMsg.flags.flags.useKnownIds = false;
+	meshMsg.reliability = 3; // Low timeout, we expect a result quickly.
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	meshMsg.idCount = 1;
+	meshMsg.targetIds = &stoneId;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&request);
 	meshMsg.size = sizeof(request);
 
@@ -77,48 +82,46 @@ uint8_t MeshTopology::find(stone_id_t id) {
 	return INDEX_NOT_FOUND;
 }
 
-void MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet) {
+cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, mesh_reply_t* reply) {
 	switch (packet.type) {
 		case 0: {
 			LOGMeshTopologyInfo("Send mac address");
-			// Send MAC address
-			cs_mesh_model_msg_stone_mac_t reply;
-			reply.type = 1;
+
+			if (reply == nullptr) {
+				return ERR_BUFFER_UNASSIGNED;
+			}
+			if (reply->buf.len < sizeof(cs_mesh_model_msg_stone_mac_t)) {
+				return ERR_BUFFER_TOO_SMALL;
+			}
+			cs_mesh_model_msg_stone_mac_t* replyPacket = reinterpret_cast<cs_mesh_model_msg_stone_mac_t*>(reply->buf.data);
+			replyPacket->type = 1;
 
 			ble_gap_addr_t address;
 			if (sd_ble_gap_addr_get(&address) != NRF_SUCCESS) {
-				return;
+				return ERR_UNSPECIFIED;
 			}
-			memcpy(reply.mac, address.addr, MAC_ADDRESS_LEN);
-
-			cs_mesh_msg_t replyMsg;
-			replyMsg.type = CS_MESH_MODEL_TYPE_STONE_MAC;
-			replyMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-			replyMsg.urgency = CS_MESH_URGENCY_LOW;
-			replyMsg.payload = reinterpret_cast<uint8_t*>(&reply);
-			replyMsg.size = sizeof(reply);
-
-			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &replyMsg, sizeof(replyMsg));
-			event.dispatch();
+			memcpy(replyPacket->mac, address.addr, MAC_ADDRESS_LEN);
+			reply->dataSize = sizeof(cs_mesh_model_msg_stone_mac_t);
 			break;
 		}
-		case 1:{
+		case 1: {
 			LOGMeshTopologyInfo("Received mac address id=%u mac=%02X:%02X:%02X:%02X:%02X:%02X", id, packet.mac[5], packet.mac[4], packet.mac[3], packet.mac[2], packet.mac[1], packet.mac[0]);
 			break;
 		}
 	}
+	return ERR_SUCCESS;
 }
 
-void MeshTopology::onMeshMsg(MeshMsgEvent& packet) {
+void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
+	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
+		cs_mesh_model_msg_stone_mac_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
+		result.returnCode = onStoneMacMsg(packet.srcAddress, payload, packet.reply);
+	}
+
 	if (packet.hops != 0) {
 		return;
 	}
 	add(packet.srcAddress, packet.rssi, packet.channel);
-
-	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
-		cs_mesh_model_msg_stone_mac_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
-		onStoneMacMsg(packet.srcAddress, payload);
-	}
 }
 
 void MeshTopology::onTickSecond() {
@@ -174,7 +177,7 @@ void MeshTopology::handleEvent(event_t &evt) {
 	switch (evt.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
 			auto packet = CS_TYPE_CAST(EVT_RECV_MESH_MSG, evt.data);
-			onMeshMsg(*packet);
+			onMeshMsg(*packet, evt.result);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

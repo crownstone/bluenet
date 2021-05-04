@@ -34,8 +34,8 @@ private:
 	void add(stone_id_t id, int8_t rssi, uint8_t channel);
 	uint8_t find(stone_id_t id);
 
-	void onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet);
-	void onMeshMsg(MeshMsgEvent& packet);
+	cs_ret_code_t onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, mesh_reply_t* result);
+	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
 	void onTickSecond();
 
 	uint8_t compressRssi(int8_t rssi);

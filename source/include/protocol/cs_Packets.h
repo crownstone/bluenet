@@ -188,7 +188,7 @@ union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 		bool reliable: 1;
 		bool useKnownIds: 1;
 	} flags;
-	uint8_t asInt;
+	uint8_t asInt = 1; // Broadcast to all by default.
 };
 
 /**

@@ -188,17 +188,23 @@ enum cs_mesh_msg_urgency {
 /**
  * Struct to communicate a mesh message.
  * type            Type of message.
- * payload         The payload.
- * size            Size of the payload.
- * reliability     How reliable the message should be.
+ * flags           How to send the message.
+ * reliability     Timeout for acked messages, number of transmission for unacked messages. Use 0 for the default value.
  * urgency         How quick the message should be sent.
+ * idCount         Number of IDs, for targeted messages.
+ * targetIds       Pointer to array with targeted stone IDs.
+ * size            Size of the payload.
+ * payload         The payload.
  */
 struct cs_mesh_msg_t {
 	cs_mesh_model_msg_type_t type;
-	uint8_t* payload;
-	size16_t size = 0;
-	cs_mesh_msg_reliability reliability = CS_MESH_RELIABILITY_LOW;
+	mesh_control_command_packet_flags_t flags;
+	uint8_t reliability = 0;
 	cs_mesh_msg_urgency urgency = CS_MESH_URGENCY_LOW;
+	uint8_t idCount = 0;
+	stone_id_t* targetIds = nullptr;
+	size16_t size = 0;
+	uint8_t* payload = nullptr;
 };
 
 /**

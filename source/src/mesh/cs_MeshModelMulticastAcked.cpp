@@ -116,44 +116,24 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			return;
 		}
 		case CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG: {
-//			if (ownMsg && _handledSelf) {
-//				return;
-//			}
-
-			// Prepare a reply message, to send the result back.
+			// Prepare a reply message.
 			uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 			replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
 
-			cs_mesh_model_msg_result_header_t* resultHeader = (cs_mesh_model_msg_result_header_t*) (replyMsg + MESH_HEADER_SIZE);
+			mesh_reply_t reply = {
+					.type = CS_MESH_MODEL_TYPE_UNKNOWN,
+					.buf = cs_data_t(replyMsg + MESH_HEADER_SIZE, sizeof(replyMsg) - MESH_HEADER_SIZE),
+					.dataSize = 0
+			};
 
-			uint8_t headerSize = MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_result_header_t);
-			cs_data_t resultData(replyMsg + headerSize, sizeof(replyMsg) - headerSize);
-			cs_result_t result(resultData);
+			// Handle the message, get the reply msg.
+			_msgCallback(msg, &reply);
 
-			// Handle the message, get the result.
-			_msgCallback(msg, result);
-
-			// Set the result header.
-			resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
-			resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
-
-//			if (ownMsg) {
-//				// Handle the reply msg immediately.
-//				_handledSelf = true;
-//				MeshUtil::cs_mesh_received_msg_t selfReplyMsg;
-//				selfReplyMsg.opCode = CS_MESH_MODEL_OPCODE_MULTICAST_REPLY;
-////				selfReplyMsg.srcAddress = _ownStoneId;
-//				selfReplyMsg.srcAddress = accessMsg->meta_data.src.value;
-//				selfReplyMsg.msg = replyMsg;
-//				selfReplyMsg.msgSize = sizeof(replyMsg);
-//				selfReplyMsg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
-//				selfReplyMsg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
-//				handleReply(selfReplyMsg);
-//			}
-//			else {
-				// Send the result as reply.
-				sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
-//			}
+			// Send the reply.
+			if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
+				reply.dataSize = sizeof(replyMsg) - MESH_HEADER_SIZE;
+			}
+			sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 			break;
 		}
 		default:
@@ -228,13 +208,7 @@ void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg
 	}
 
 	// Handle reply message.
-	cs_result_t result;
-	_msgCallback(msg, result);
-	if (result.returnCode != ERR_SUCCESS || MeshUtil::getType(msg.msg) != CS_MESH_MODEL_TYPE_RESULT) {
-		_log(SERIAL_WARN, false, "Invalid reply: ");
-		BLEutil::printArray(msg.msg, msg.msgSize, SERIAL_WARN);
-		return;
-	}
+	_msgCallback(msg, nullptr);
 
 	// Mark id as acked.
 	LOGMeshModelDebug("Set acked bit %u", stoneIndex);
@@ -248,10 +222,16 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 		return ERR_SUCCESS;
 	}
 #endif
+
 	size16_t msgSize = MeshUtil::getMeshMessageSize(item.msgPayload.len);
+	// Only unsegmented for now.
+	if (msgSize == 0 || msgSize > MAX_MESH_MSG_NON_SEGMENTED_SIZE) {
+		LOGw("Wrong payload length: %u", msgSize);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
-	assert(msgSize != 0, "Empty message");
-	assert(msgSize <= MAX_MESH_MSG_NON_SEGMENTED_SIZE, "Message too large"); // Only unsegmented for now.
 	assert(item.broadcast == true, "Multicast only");
 	assert(item.reliable == true, "Reliable only");
 

@@ -127,29 +127,29 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
 		// Handle the message, don't send a reply.
 		_replyReceived = true;
-		cs_result_t result;
-		_msgCallback(msg, result);
+		_msgCallback(msg, nullptr);
 		checkDone();
 		return;
 	}
 
-	// Prepare a reply message, to send the result back.
+	// Prepare a reply message.
 	uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 	replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
 
-	cs_mesh_model_msg_result_header_t* resultHeader = (cs_mesh_model_msg_result_header_t*) (replyMsg + MESH_HEADER_SIZE);
+	mesh_reply_t reply = {
+			.type = CS_MESH_MODEL_TYPE_UNKNOWN,
+			.buf = cs_data_t(replyMsg + MESH_HEADER_SIZE, sizeof(replyMsg) - MESH_HEADER_SIZE),
+			.dataSize = 0
+	};
 
-	uint8_t headerSize = MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_result_header_t);
-	cs_data_t resultData(replyMsg + headerSize, sizeof(replyMsg) - headerSize);
-	cs_result_t result(resultData);
+	// Handle the message, get the reply msg.
+	_msgCallback(msg, &reply);
 
-	// Handle the message, get the result.
-	_msgCallback(msg, result);
-
-	// Send the result as reply.
-	resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
-	resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
-	sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
+	// Send the reply.
+	if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
+		reply.dataSize = sizeof(replyMsg) - MESH_HEADER_SIZE;
+	}
+	sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 }
 
 cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
@@ -293,9 +293,13 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	}
 #endif
 	size16_t msgSize = MeshUtil::getMeshMessageSize(item.msgPayload.len);
+	if (msgSize == 0 || msgSize > MAX_MESH_MSG_SIZE) {
+		LOGw("Wrong payload length: %u", msgSize);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
-	assert(msgSize != 0, "Empty message");
-	assert(msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
 	assert(item.numIds == 1, "Single ID only");
 	assert(item.broadcast == false, "Unicast only");
 	assert(item.reliable == true, "Reliable only");
