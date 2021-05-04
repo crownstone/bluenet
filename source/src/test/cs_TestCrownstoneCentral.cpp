@@ -20,6 +20,7 @@ void TestCrownstoneCentral::init() {
 
 void TestCrownstoneCentral::connect() {
 	TYPIFY(CMD_CS_CENTRAL_CONNECT) cmdPacket = {
+			.stoneId = 36,
 			.address = {
 					.address = { 0xEC, 0x22, 0x35, 0xEF, 0x60, 0xF4 },
 					.addressType = CS_ADDRESS_TYPE_RANDOM_STATIC

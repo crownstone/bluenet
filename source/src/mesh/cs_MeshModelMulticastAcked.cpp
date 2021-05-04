@@ -105,8 +105,7 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 		return;
 	}
 
-	MeshUtil::cs_mesh_received_msg_t msg =
-				MeshUtil::fromAccessMessageRX(*accessMsg);
+	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 
 	switch (msg.opCode) {
 		case CS_MESH_MODEL_OPCODE_MULTICAST_REPLY: {
@@ -118,7 +117,6 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 		case CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG: {
 			// Prepare a reply message.
 			uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
-			replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
 
 			mesh_reply_t reply = {
 					.type = CS_MESH_MODEL_TYPE_UNKNOWN,
@@ -133,6 +131,7 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
 				reply.dataSize = sizeof(replyMsg) - MESH_HEADER_SIZE;
 			}
+			replyMsg[0] = reply.type;
 			sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 			break;
 		}

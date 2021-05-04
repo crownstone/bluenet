@@ -5,13 +5,16 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <localisation/cs_MeshTopology.h>
 #include <ble/cs_Nordic.h>
+#include <localisation/cs_MeshTopology.h>
+#include <storage/cs_State.h>
 
 #define LOGMeshTopologyInfo  LOGi
-#define LOGMeshTopologyDebug LOGd
+#define LOGMeshTopologyDebug LOGvv
 
 cs_ret_code_t MeshTopology::init() {
+
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 
 	_neighbours = new (std::nothrow) neighbour_node_t[MAX_NEIGHBOURS];
 	if (_neighbours == nullptr) {
@@ -59,6 +62,9 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 
 
 void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
+	if (id == 0 || id == _myId) {
+		return;
+	}
 	uint8_t compressedRssi = compressRssi(rssi);
 	uint8_t compressedChannel = compressChannel(channel);
 	uint8_t index = find(id);
@@ -101,11 +107,17 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone
 				return ERR_UNSPECIFIED;
 			}
 			memcpy(replyPacket->mac, address.addr, MAC_ADDRESS_LEN);
+			reply->type = CS_MESH_MODEL_TYPE_STONE_MAC;
 			reply->dataSize = sizeof(cs_mesh_model_msg_stone_mac_t);
 			break;
 		}
 		case 1: {
 			LOGMeshTopologyInfo("Received mac address id=%u mac=%02X:%02X:%02X:%02X:%02X:%02X", id, packet.mac[5], packet.mac[4], packet.mac[3], packet.mac[2], packet.mac[1], packet.mac[0]);
+			TYPIFY(EVT_MESH_TOPO_MAC_RESULT) result;
+			result.stoneId = id;
+			memcpy(result.macAddress, packet.mac, sizeof(result.macAddress));
+			event_t event(CS_TYPE::EVT_MESH_TOPO_MAC_RESULT, &result, sizeof(result));
+			event.dispatch();
 			break;
 		}
 	}

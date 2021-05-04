@@ -365,6 +365,6 @@ struct microapp_upload_internal_t {
 };
 
 struct mesh_topo_mac_result_t {
+	uint8_t stoneId;
 	uint8_t macAddress[MAC_ADDRESS_LEN];
-	int8_t rssi;
 };

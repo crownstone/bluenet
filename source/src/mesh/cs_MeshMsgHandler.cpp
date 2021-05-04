@@ -532,6 +532,7 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 		// Simply copy the data of the incoming message.
 		*stateHeader = meshStateHeader->header;
 
+		reply->type = CS_MESH_MODEL_TYPE_RESULT;
 		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t);
 	}
 
@@ -599,6 +600,7 @@ void MeshMsgHandler::replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code
 	cs_mesh_model_msg_result_header_t* packet = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
 	packet->msgType = type;
 	packet->retCode = retCode;
+	reply->type = CS_MESH_MODEL_TYPE_RESULT;
 	reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t);
 }
 

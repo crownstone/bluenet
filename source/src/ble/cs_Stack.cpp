@@ -517,6 +517,7 @@ void Stack::resetConnectionAliveTimer() {
 }
 
 void Stack::onMemoryRequest(uint16_t connectionHandle) {
+	// See: https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.1.1/group___b_l_e___g_a_t_t_s___q_u_e_u_e_d___w_r_i_t_e___b_u_f___n_o_a_u_t_h___m_s_c.html
 	// You can check which type is requested: p_ble_evt->evt.common_evt.params.user_mem_request.type
 	// Currently only option is: BLE_USER_MEM_TYPE_GATTS_QUEUED_WRITES
 	// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes

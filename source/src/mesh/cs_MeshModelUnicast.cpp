@@ -121,8 +121,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (ownMsg) {
 		return;
 	}
-	MeshUtil::cs_mesh_received_msg_t msg =
-			MeshUtil::fromAccessMessageRX(*accessMsg);
+	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
 		// Handle the message, don't send a reply.
@@ -134,7 +133,6 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 
 	// Prepare a reply message.
 	uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
-	replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
 
 	mesh_reply_t reply = {
 			.type = CS_MESH_MODEL_TYPE_UNKNOWN,
@@ -149,6 +147,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
 		reply.dataSize = sizeof(replyMsg) - MESH_HEADER_SIZE;
 	}
+	replyMsg[0] = reply.type;
 	sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 }
 
