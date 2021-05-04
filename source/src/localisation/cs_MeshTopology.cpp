@@ -54,9 +54,12 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	meshMsg.size = sizeof(request);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-
 	event.dispatch();
 	LOGMeshTopologyInfo("Sent mesh msg retCode=%u", event.result.returnCode);
+	if (event.result.returnCode != ERR_SUCCESS) {
+		return event.result.returnCode;
+	}
+
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
