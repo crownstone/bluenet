@@ -60,24 +60,52 @@ struct __attribute__((__packed__)) trackable_parser_cmd_get_filter_summaries_ret
 
 // ------------------ Filter format ------------------
 
-/**
- * Determines whether the filter has mac or advertisement data as input.
- */
-enum class FilterInputType : uint8_t {
-	MacAddress = 0,
-	AdData     = 1,
+enum class FilterType : uint8_t {
+	CuckooFilter = 0,
 };
+
+enum class AdvertisementSubdataType : uint8_t {
+	MacAddress       = 0,
+	AdDataType       = 1,
+	MaskedAdDataType = 2,
+};
+
+enum class FilterOutputFormat : uint8_t {
+	Mac          = 0,
+	ShortAssetId = 1,
+};
+
+struct __attribute__((__packed__)) ad_data_type_selector_t {
+	uint8_t adDataType;
+};
+
+struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
+	uint8_t adDataType;
+	uint32_t adDataMask;
+};
+
+struct __attribute__((__packed__)) advertisement_subdata_t {
+	AdvertisementSubdataType type;
+	uint8_t auxData[];
+};
+
+struct __attribute__((__packed__)) filter_input_type_t {
+	advertisement_subdata_t format;
+};
+
+
+struct __attribute__((__packed__)) filter_output_type_t {
+	FilterOutputFormat out_format;
+	uint8_t in_format[];
+};
+
 
 /**
  * Data associated to a parsing filter that is persisted to flash.
  */
 struct __attribute__((__packed__)) tracking_filter_meta_data_t {
-	todo updateThisToLatestProtocolDefinitions;
-   public:
-	// sync info
-	uint8_t protocol;  // determines implementation type of filter
-	uint16_t version;
-
-	uint8_t profileId;  // devices passing the filter are assigned this profile id
-	FilterInputType inputType;
+	FilterType type;
+	uint8_t profileId;
+	filter_input_type_t inputType;
+	filter_output_type_t outputType;
 };
