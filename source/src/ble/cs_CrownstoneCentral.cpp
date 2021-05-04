@@ -45,6 +45,8 @@ void CrownstoneCentral::reset() {
 	_resultHandle =      BLE_GATT_HANDLE_INVALID;
 	_resultCccdHandle =  BLE_GATT_HANDLE_INVALID;
 	_opMode =            OperationMode::OPERATION_MODE_UNINITIALIZED;
+	_stoneId =           0;
+	stopTimeoutTimer();
 	resetNotifactionMergerState();
 }
 
@@ -59,9 +61,6 @@ cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs)
 		return ERR_BUSY;
 	}
 
-	_stoneId = stoneId;
-	_timeoutMs = timeoutMs;
-
 	TYPIFY(CMD_MESH_TOPO_GET_MAC) eventData = stoneId;
 	event_t event(CS_TYPE::CMD_MESH_TOPO_GET_MAC, &eventData, sizeof(eventData));
 	event.dispatch();
@@ -73,8 +72,13 @@ cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs)
 			return ERR_NOT_IMPLEMENTED;
 		}
 		case ERR_WAIT_FOR_SUCCESS: {
+			// Start with a clean state.
+			reset();
+			_stoneId = stoneId;
+			_timeoutMs = timeoutMs;
 			_currentOperation = Operation::CONNECT;
 			setStep(ConnectSteps::GET_ADDRESS);
+
 			startTimeoutTimer(timeoutMs);
 			return ERR_WAIT_FOR_SUCCESS;
 		}
@@ -90,10 +94,11 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 		return ERR_BUSY;
 	}
 
-	_timeoutMs = timeoutMs;
-
 	cs_ret_code_t retCode = BleCentral::getInstance().connect(address, timeoutMs);
 	if (retCode == ERR_WAIT_FOR_SUCCESS) {
+		// Start with a clean state.
+		reset();
+		_timeoutMs = timeoutMs;
 		_currentOperation = Operation::CONNECT;
 		setStep(ConnectSteps::CONNECT);
 	}
@@ -346,6 +351,7 @@ void CrownstoneCentral::sendOperationResult(event_t& event) {
 //////////////////// Handlers ////////////////////
 
 void CrownstoneCentral::onTimeout() {
+	LOGCsCentralInfo("onTimeout");
 	finalizeOperation(_currentOperation, ERR_TIMEOUT);
 }
 
