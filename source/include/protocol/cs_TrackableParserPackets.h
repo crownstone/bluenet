@@ -84,28 +84,106 @@ struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
 	uint32_t adDataMask;
 };
 
-struct __attribute__((__packed__)) advertisement_subdata_t {
-	AdvertisementSubdataType type;
-	uint8_t auxData[];
-};
-
-struct __attribute__((__packed__)) filter_input_type_t {
-	advertisement_subdata_t format;
-};
-
-
 struct __attribute__((__packed__)) filter_output_type_t {
 	FilterOutputFormat out_format;
 	uint8_t in_format[];
 };
 
 
-/**
- * Data associated to a parsing filter that is persisted to flash.
- */
-struct __attribute__((__packed__)) tracking_filter_meta_data_t {
-	FilterType type;
-	uint8_t profileId;
-	filter_input_type_t inputType;
-	filter_output_type_t outputType;
+//struct __attribute__((__packed__)) advertisement_subdata_t {
+//	AdvertisementSubdataType type;
+//	uint8_t auxData[];
+//};
+
+
+// @Bart: this is a solution direction for those variable length headers
+// that we need to be able to access the data in.
+
+#include <optional>
+
+class AdvertisementSubdata {
+private:
+	uint8_t (&_data)[];  // reference to an array containing the data
+public:
+	AdvertisementSubdata(uint8_t (&data)[]) : _data(data){}
+
+	AdvertisementSubdataType&                      type();
+	std::optional<ad_data_type_selector_t&>        AdTypeField();
+	std::optional<masked_ad_data_type_selector_t&> AdTypeMasked();
+
+	size_t length();
 };
+
+/**
+ * This is an accessor class that defines the packet structure.
+ * and can deal with variable length packets 'in the middle'.
+ */
+class TrackingFilterMetaData {
+private:
+	uint8_t (&_data)[];  // reference to an array containing the data
+public:
+	TrackingFilterMetaData(uint8_t (&data)[]) : _data(data) {}
+
+	FilterType&           type();
+	uint8_t&              profileId();
+	AdvertisementSubdata  inputType();
+	filter_output_type_t& outputType();
+
+	size_t length(); // TODO.
+};
+
+
+// -----------------------------------
+// AdvertisementSubdata implementation
+// -----------------------------------
+
+AdvertisementSubdataType& AdvertisementSubdata::type() {
+	return *reinterpret_cast<AdvertisementSubdataType*>(_data + 0);
+}
+
+std::optional<ad_data_type_selector_t&> AdvertisementSubdata::AdTypeField() {
+	if (type() == AdvertisementSubdataType::AdDataType) {
+		// cast first byte to correct type and return
+		return *reinterpret_cast<ad_data_type_selector_t*>(_data + 1);
+	}
+	return {};
+}
+
+std::optional<masked_ad_data_type_selector_t&> AdvertisementSubdata::AdTypeMasked() {
+	if (type() == AdvertisementSubdataType::MaskedAdDataType) {
+		// cast first byte to correct type and return
+		return *reinterpret_cast<masked_ad_data_type_selector_t*>(_data + 1);
+	}
+	return {};
+}
+
+size_t AdvertisementSubdata::length() {
+	switch(type()) {
+		case AdvertisementSubdataType::MacAddress: return 1;
+		case AdvertisementSubdataType::AdDataType: return 2;
+		case AdvertisementSubdataType::MaskedAdDataType: return 6;
+	}
+}
+
+
+// -------------------------------------
+// TrackingFilterMetaData implementation
+// -------------------------------------
+
+FilterType& TrackingFilterMetaData::type() {
+	return *reinterpret_cast<FilterType*>(_data + 0);
+}
+
+uint8_t& TrackingFilterMetaData::profileId() {
+	return _data[1];
+}
+
+AdvertisementSubdata  TrackingFilterMetaData::inputType() {
+	return AdvertisementSubdata(_data + 2);
+}
+
+filter_output_type_t& TrackingFilterMetaData::outputType() {
+	return *reinterpret_cast<filter_output_type_t*>(_data + 2 + inputType().length());
+}
+
+
