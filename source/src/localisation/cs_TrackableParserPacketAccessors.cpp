@@ -44,22 +44,64 @@ size_t AdvertisementSubdata::length() {
 	return 0;
 }
 
+// -------------------------------
+// FilterOutputType implementation
+// -------------------------------
+
+FilterOutputFormat* FilterOutputType::outFormat() {
+	return reinterpret_cast<FilterOutputFormat*>(_data + 0);
+}
+
+AdvertisementSubdata FilterOutputType::outFormat() {
+	return AdvertisementSubdata(_data + sizeof(FilterOutputFormat));
+}
+
+size_t FilterOutputType::length() {
+	switch(*outFormat()){
+		case FilterOutputFormat::Mac: return sizeof(FilterOutputFormat);
+		case FilterOutputFormat::ShortAssetId: sizeof(FilterOutputFormat) + inFormat().length();
+	}
+	return 0;
+}
+
+
 // -------------------------------------
 // TrackingFilterMetaData implementation
 // -------------------------------------
 
-FilterType& TrackingFilterMetaData::type() {
-	return *reinterpret_cast<FilterType*>(_data + 0);
+FilterType* TrackingFilterMetadata::type() {
+	return reinterpret_cast<FilterType*>(_data + 0);
 }
 
-uint8_t& TrackingFilterMetaData::profileId() {
-	return _data[1];
+uint8_t* TrackingFilterMetadata::profileId() {
+	return _data + sizeof(FilterType);
 }
 
-AdvertisementSubdata  TrackingFilterMetaData::inputType() {
-	return AdvertisementSubdata(_data + 2);
+AdvertisementSubdata TrackingFilterMetadata::inputType() {
+	return AdvertisementSubdata(_data + sizeof(FilterType) + sizeof(uint8_t));
 }
 
-filter_output_type_t& TrackingFilterMetaData::outputType() {
-	return *reinterpret_cast<filter_output_type_t*>(_data + 2 + inputType().length());
+filter_output_type_t* TrackingFilterMetadata::outputType() {
+	return reinterpret_cast<filter_output_type_t*>(
+			_data + sizeof(FilterType) + sizeof(uint8_t) + inputType().length());
+}
+
+size_t TrackingFilterMetadata::length() {
+	return sizeof(FilterType)
+			+ sizeof(uint8_t)
+			+ inputType().length()
+			+ outputType().length();
+}
+
+
+// --------------------------------
+// TrackinFilterData implementation
+// --------------------------------
+
+TrackingFilterMetadata TrackingFilterData::metadata() {
+	return TrackingFilterMetadata(_data + 0);
+}
+CuckooFilter TrackingFilterData::filterdata() {
+	return CuckooFilter(*reinterpret_cast<cuckoo_filter_data_t*>(
+			_data + metadata().length()));
 }

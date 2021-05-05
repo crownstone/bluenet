@@ -7,6 +7,14 @@
 #pragma once
 
 #include <protocol/cs_TrackableParserPackets.h>
+#include <protocol/cs_CuckooFilterStructs.h>
+
+/**
+ * This file defines several accessor classes for structures that
+ * relate to the trackable parser. They are constructed using a buffer pointer
+ * and provide read/write access to the buffer according to the protocol.
+ */
+
 
 class AdvertisementSubdata {
 private:
@@ -16,8 +24,8 @@ public:
 	AdvertisementSubdata(uint8_t* data) : _data(data){}
 
 	AdvertisementSubdataType*       type();
-	ad_data_type_selector_t*        AdTypeField();  // returns nullptr unless type() == AdDataType
-	masked_ad_data_type_selector_t* AdTypeMasked(); // returns nullptr unless type() == MaskedAdDataType
+	ad_data_type_selector_t*        AdTypeField();  // returns nullptr unless *type() == AdDataType
+	masked_ad_data_type_selector_t* AdTypeMasked(); // returns nullptr unless *type() == MaskedAdDataType
 
 	/**
 	 * Total length of the AdvertisementSubdata. Depends on type().
@@ -25,21 +33,42 @@ public:
 	size_t length();
 };
 
-/**
- * This is an accessor class that defines the packet structure.
- * and can deal with variable length packets 'in the middle'.
- */
-class TrackingFilterMetaData {
+class FilterOutputType {
+private:
+	uint8_t* _data;
+
+public:
+	FilterOutputType(uint8_t* data) : _data(data) {}
+
+	FilterOutputFormat* outFormat();
+	AdvertisementSubdata inFormat(); // invalid unless *outFormat() == ShortAssetId
+
+	size_t length();
+};
+
+
+class TrackingFilterMetadata {
 private:
 	uint8_t* _data;  // byte representation of this object.
 
 public:
-	TrackingFilterMetaData(uint8_t* data) : _data(data) {}
+	TrackingFilterMetadata(uint8_t* data) : _data(data) {}
 
 	FilterType*           type();
 	uint8_t*              profileId();
 	AdvertisementSubdata  inputType();
-	filter_output_type_t* outputType();
+	FilterOutputType outputType();
 
-	size_t length(); // TODO.
+	size_t length();
+};
+
+class TrackingFilterData {
+private:
+	uint8_t* _data;  // byte representation of this object.
+
+public:
+	TrackingFilterData(uint8_t* data) : _data(data) {}
+
+	TrackingFilterMetadata metadata();
+	CuckooFilter filterdata(); // invalid unless *metadata().type() == FilterType::CukooFilter
 };
