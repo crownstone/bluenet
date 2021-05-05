@@ -18,6 +18,8 @@
 #include <util/cs_CuckooFilter.h>
 #include <util/cs_Utils.h>
 
+#include <localisation/cs_TrackableParserPacketAccessors.h>
+
 #define LOGTrackableParserDebug LOGnone
 #define LOGTrackableParserWarn LOGw
 
@@ -55,7 +57,6 @@ struct CsStruct : public CsStructBase<void>{};
 template<> struct CsStruct<CS_TYPE::CMD_UPLOAD_FILTER> : CsStructBase<trackable_parser_cmd_upload_filter_t> {};
 template<> struct CsStruct<CS_TYPE::CMD_REMOVE_FILTER> : CsStructBase<trackable_parser_cmd_remove_filter_t> {};
 template<> struct CsStruct<CS_TYPE::CMD_COMMIT_FILTER_CHANGES> : CsStructBase<trackable_parser_cmd_commit_filter_changes_t> {};
-template<> struct CsStruct<CS_TYPE::CMD_GET_FILTER_SUMMARIES> : CsStructBase<trackable_parser_cmd_get_filter_summaries_t> {};
 
 /**
  * Returns the correctly typed packet given the CS_TYPE template parameter.
@@ -125,10 +126,8 @@ void TrackableParser::handleEvent(event_t& evt) {
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
 			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES");
 
-			auto trackableCmdWrapper = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_GET_FILTER_SUMMARIES>(trackableCmdWrapper);
 			if(payload != nullptr) {
-				handleGetFilterSummariesCommand(payload, evt.result);
+				handleGetFilterSummariesCommand(evt.result);
 			}
 			break;
 		}
@@ -174,11 +173,11 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 
 	// loop over filters to check mac address
 	for (size_t i = 0; i < _parsingFiltersCount; ++i) {
-		tracking_filter_t* trackingFilter = _parsingFilters[i];
-		CuckooFilter cuckoo(trackingFilter->filterdata);
+		TrackingFilter trackingFilter(_parsingFilters[i]);
+		CuckooFilter cuckoo = trackingFilter.filterdata().filterdata();
 
 		// check mac address for this filter
-		if (trackingFilter->metadata.inputType == FilterInputType::MacAddress
+		if (*trackingFilter.metadata().inputType().type() == FilterInputType::MacAddress
 			&& cuckoo.contains(device->address, MAC_ADDRESS_LEN)) {
 			// TODO(#177858707):
 			// - get fingerprint from filter instead of literal mac address.
@@ -245,9 +244,9 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 	}
 
 	// try heap allocation
-	uint8_t* newArray = new (std::nothrow) uint8_t[totalSize];
+	uint8_t* newFilterBuffer = new (std::nothrow) uint8_t[totalSize];
 
-	if (newArray == nullptr) {
+	if (newFilterBuffer == nullptr) {
 		LOGTrackableParserWarn("Filter couldn't be allocated, heap is too full");
 		return nullptr;
 	}
@@ -260,7 +259,7 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 		// i is always a valid position: because of previous check it is strictly less than MAX_FILTER_IDS
 		// (i-1) won't roll over because i > 0.
 
-		if (_parsingFilters[i - 1]->runtimedata.filterId > filterId) {
+		if (TrackingFilterData(_parsingFilters[i - 1]).runtimedata()->filterId > filterId) {
 			// move this entry up one position in the list.
 			_parsingFilters[i] = _parsingFilters[i - 1];
 		}
@@ -270,21 +269,20 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 		}
 	}
 
-	// just a shorthand
-	auto& newFilterLocation = _parsingFilters[index_for_new_entry];
+	_parsingFilters[index_for_new_entry] = newFilterBuffer;
 
-	newFilterLocation = reinterpret_cast<tracking_filter_t*>(newArray);
+	TrackingFilterData newFilterAccessor(newFilterBuffer);
 
 	LOGTrackableParserDebug("before assignments");
 	// initialize runtime data.
-	newFilterLocation->runtimedata.totalSize = payloadSize;
-	newFilterLocation->runtimedata.filterId  = filterId;
-	newFilterLocation->runtimedata.crc       = 0;
+	newFilterAccessor.runtimedata()->filterId  = filterId;
+	newFilterAccessor.runtimedata()->totalSize = payloadSize;
+	newFilterAccessor.runtimedata()->crc       = 0;
 
 	// don't forget to increment the Count for the filter list.
 	_parsingFiltersCount++;
 
-	return newFilterLocation;
+	return newFilterBuffer;
 }
 
 void TrackableParser::deallocateParsingFilterByIndex(uint8_t parsingFilterIndex) {
@@ -460,8 +458,7 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 	return ERR_SUCCESS;
 }
 
-void TrackableParser::handleGetFilterSummariesCommand(
-		trackable_parser_cmd_get_filter_summaries_t* cmd_data, cs_result_t& result) {
+void TrackableParser::handleGetFilterSummariesCommand(cs_result_t& result) {
 	LOGTrackableParserDebug("handle get filter summaries:");
 	for (auto& trackingFilter : _parsingFilters) {
 		if (trackingFilter == nullptr) {

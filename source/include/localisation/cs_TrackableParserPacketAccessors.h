@@ -7,6 +7,7 @@
 #pragma once
 
 #include <protocol/cs_TrackableParserPackets.h>
+#include <structs/cs_TrackableParserStructs.h>
 #include <protocol/cs_CuckooFilterStructs.h>
 
 /**
@@ -71,4 +72,16 @@ public:
 
 	TrackingFilterMetadata metadata();
 	CuckooFilter filterdata(); // invalid unless *metadata().type() == FilterType::CukooFilter
+};
+
+
+class TrackingFilter {
+private:
+	uint8_t* _data;  // byte representation of this object.
+
+public:
+	TrackingFilter(uint8_t* data) : _data(data) {}
+
+	tracking_filter_runtime_data_t* runtimedata();
+	TrackingFilterData filterdata();
 };

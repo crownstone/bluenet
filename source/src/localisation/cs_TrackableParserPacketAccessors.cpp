@@ -64,7 +64,6 @@ size_t FilterOutputType::length() {
 	return 0;
 }
 
-
 // -------------------------------------
 // TrackingFilterMetaData implementation
 // -------------------------------------
@@ -93,7 +92,6 @@ size_t TrackingFilterMetadata::length() {
 			+ outputType().length();
 }
 
-
 // --------------------------------
 // TrackinFilterData implementation
 // --------------------------------
@@ -105,3 +103,17 @@ CuckooFilter TrackingFilterData::filterdata() {
 	return CuckooFilter(*reinterpret_cast<cuckoo_filter_data_t*>(
 			_data + metadata().length()));
 }
+
+// --------------------------------
+// TrackinFilterData implementation
+// --------------------------------
+
+
+tracking_filter_runtime_data_t* TrackingFilter::metadata() {
+	return reinterpret_cast<tracking_filter_runtime_data_t*>(_data + 0);
+}
+
+TrackingFilterData TrackingFilter::filterdata() {
+	return TrackingFilterData(_data + sizeof(tracking_filter_runtime_data_t));
+}
+

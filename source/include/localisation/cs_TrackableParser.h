@@ -35,14 +35,17 @@ private:
 	// -------------------------------------------------------------
 
 	/**
-	 * List of pointers to the currently allocated filters.
+	 * List of pointers to the currently allocated buffers for the filters.
 	 * The filters in this array are always sorted by filterId,
 	 * and nullptrs only occur at the back in the sense that:
 	 *   for any i <= j < MAX_FILTER_IDS:
 	 *   if   _parsingFilters[i] == nullptr
 	 *   then _parsingFilters[j] == nullptr
+	 *
+	 *  To access a filter, construct an accessor object of type TrackingFilter
+	 *  for the given buffer.
 	 */
-	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS] = {};
+	uint8_t* _parsingFilters[MAX_FILTER_IDS] = {};
 
 	/**
 	 * Number of allocated filters in the parsingFilters array.
@@ -101,7 +104,7 @@ private:
 	 *
 	 * Internally adjusts _filterBufferEnd to point to one byte after this array.
 	 */
-	tracking_filter_t* allocateParsingFilter(uint8_t filterId, size_t payloadSize);
+	uint8_t* allocateParsingFilter(uint8_t filterId, size_t payloadSize);
 
 	/**
 	 * Same as deallocateParsingFilterByIndex, but looks up the filter by the filterId.
@@ -125,7 +128,7 @@ private:
 	 * if _parsingFilters[i] == nullptr then _parsingFilters[j] == nullptr
 	 * for all j>=i.
 	 */
-	tracking_filter_t* findParsingFilter(uint8_t filterId);
+	uint8_t* findParsingFilter(uint8_t filterId);
 
 	/**
 	 * Returns the index of the parsing filter with given filterId,
@@ -140,8 +143,9 @@ private:
 
 	/**
 	 * Computes and returns the totalSize allocated for the given filter.
+	 * Returns 0 for nullptr.
 	 */
-	size_t getTotalSize(tracking_filter_t& trackingFilter);
+	size_t getTotalSize(uint8_t* trackingFilter);
 
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
@@ -175,7 +179,7 @@ private:
 	 * returnCode is ERR_BUFFER_TOO_SMALL if result data doesn't fit the result buffer.
 	 * Else, returnCode is ERR_SUCCESS.
 	 */
-	void handleGetFilterSummariesCommand(trackable_parser_cmd_get_filter_summaries_t* cmdData, cs_result_t& result);
+	void handleGetFilterSummariesCommand(cs_result_t& result);
 
 	// -------------------------------------------------------------
 	// ---------------------- Utility functions --------------------
