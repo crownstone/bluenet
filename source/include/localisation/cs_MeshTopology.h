@@ -42,6 +42,7 @@ public:
 	 * @param[in] stoneId    The stone ID of the crownstone.
 	 *
 	 * @return ERR_WAIT_FOR_SUCCESS    When the MAC address is requested. Wait for EVT_MESH_TOPO_MAC_RESULT.
+	 *                                 However, there will be no event if it times out.
 	 * @return ERR_NOT_FOUND           When the stone is not a known neighbour.
 	 */
 	cs_ret_code_t getMacAddress(stone_id_t stoneId);
