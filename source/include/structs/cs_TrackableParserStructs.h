@@ -15,10 +15,10 @@
  */
 struct __attribute__((__packed__)) tracking_filter_runtime_data_t {
 	/**
+	 * Id of a filter.
 	 *
-	 *
-	 * can be runtime only since it's saved as part of record metadata on flash.
-	 * */
+	 * Can be runtime only since it's saved as part of record metadata on flash. (State Id equals filter Id)
+	 */
 	uint8_t filterId;
 
 	/**
@@ -41,16 +41,3 @@ struct __attribute__((__packed__)) tracking_filter_runtime_data_t {
 	 */
 	uint16_t crc;
 };
-//
-///**
-// * The filters and their associated metadata.
-// * Datatype is used in the filter object pool
-// *
-// * Warning: keep this structure and order as-is, that makes chunking
-// * the whole thing a stupid load simpler.
-// */
-//struct __attribute__((__packed__)) tracking_filter_t {
-//	tracking_filter_runtime_data_t runtimedata;
-//	tracking_filter_meta_data_t metadata;
-//	cuckoo_filter_data_t filterdata;
-//};

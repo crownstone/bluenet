@@ -160,6 +160,7 @@ private:
 	/**
 	 * Removes given filter immediately.
 	 * Flags this crownstone as 'filter modification in progress'.
+	 * Returns ERR_SUCCESS_NO_CHANGE if filter not found, else ERR_SUCCESS.
 	 */
 	cs_ret_code_t handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmdData);
 
@@ -200,6 +201,8 @@ private:
 	/**
 	 * The master crc is the crc16 of the filters in the buffer.
 	 * This method assumes the filter crcs are up to date.
+	 * Returns the mastercrc computed from the filter crcs.
+	 * _masterHash is not changed by this method.
 	 */
 	uint16_t masterCrc();
 

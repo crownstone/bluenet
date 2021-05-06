@@ -52,8 +52,8 @@ struct cs_result_t {
 	 */
 	cs_buffer_size_t dataSize = 0;
 
-	cs_result_t() : buf() {}
-	cs_result_t(cs_data_t buf) : buf(buf) {}
+	cs_result_t() :                         buf() {}
+	cs_result_t(cs_data_t buf) :            buf(buf) {}
 	cs_result_t(cs_ret_code_t returnCode) : returnCode(returnCode), buf() {}
 };
 
@@ -69,7 +69,7 @@ enum CS_ADDRESS_TYPE {
 	CS_ADDRESS_TYPE_RANDOM_STATIC                 = 1,    // Random static address (can only change at boot).
 	CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE     = 2,    // Random resolvable address (can change at any moment).
 	CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE = 3,    // Random address (can change at any moment).
-	CS_ADDRESS_TYPE_ANONYMOUS                     = 0x7F  // No address is advertised.
+	CS_ADDRESS_TYPE_ANONYMOUS                     = 0x7F,  // No address is advertised.
 };
 
 struct __attribute__((packed)) device_address_t {
@@ -139,7 +139,7 @@ enum cs_mesh_msg_reliability {
 	CS_MESH_RELIABILITY_LOWEST  = 1,
 	CS_MESH_RELIABILITY_LOW     = 3,
 	CS_MESH_RELIABILITY_MEDIUM  = 5,
-	CS_MESH_RELIABILITY_HIGH    = 10
+	CS_MESH_RELIABILITY_HIGH    = 10,
 };
 
 /**
@@ -147,7 +147,10 @@ enum cs_mesh_msg_reliability {
  *
  * Lower urgency means that it's okay if the message is not sent immediately.
  */
-enum cs_mesh_msg_urgency { CS_MESH_URGENCY_LOW, CS_MESH_URGENCY_HIGH };
+enum cs_mesh_msg_urgency {
+	CS_MESH_URGENCY_LOW,
+	CS_MESH_URGENCY_HIGH,
+};
 
 /**
  * Struct to communicate a mesh message.

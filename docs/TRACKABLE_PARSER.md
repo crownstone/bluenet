@@ -106,7 +106,7 @@ uint8_t | filterId | 1 | Id of the filter to remove.
 #### Remove filter result
 
 - `SUCCESS`: filter was found and deallocated. Progress was started.
-- `NOT_FOUND`: filter wasn't found. Progress was started.
+- `SUCCESS_NO_CHANGE`: filter wasn't found. Progress was started.
 
 *************************************************************************
 

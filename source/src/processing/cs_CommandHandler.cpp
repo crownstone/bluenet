@@ -86,6 +86,13 @@ void CommandHandler::handleCommand(
 		return;
 	}
 
+	// Prints incoming command types.
+	// Some cases are avoided because the occur often (currently only SET_SUN_TIME).
+	switch (type) {
+		case CTRL_CMD_SET_SUN_TIME: break;
+		default: LOGd("cmd=%u lvl=%u", type, accessLevel); break;
+	}
+
 	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		LOGCommandHandlerDebug("command message skipped, access not allowed");
 		result.returnCode = ERR_NO_ACCESS;
