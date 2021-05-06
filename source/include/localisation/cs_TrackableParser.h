@@ -21,7 +21,7 @@
 class TrackableParser : public EventListener {
 public:
 	/**
-	 * set filterModificationInProgress to false.
+	 * set _filterModificationInProgress to false.
 	 */
 	void init();
 	void handleEvent(event_t& evt);
@@ -71,7 +71,7 @@ private:
 	 *
 	 * Defaults to true, so that the system has time to load data from flash.
 	 */
-	bool filterModificationInProgress = true;
+	bool _filterModificationInProgress = true;
 
 	// -------------------------------------------------------------
 	// ------------------ Advertisment processing ------------------
@@ -185,12 +185,17 @@ private:
 	// -------------------------------------------------------------
 
 	/**
-	 * sets _masterVersion to 0 and filterModificationInProgress to true.
+	 * sets _masterVersion to 0 and _filterModificationInProgress to true.
 	 *
 	 * This will result in the TrackableParser not handling incoming advertisements
 	 * and ensure that it is safe to adjust the filters.
 	 */
 	void startProgress();
+	/**
+	 * Sets the _masterVersion and _masterHash, and _filterModificationInProgress to false.
+	 */
+	void endProgress(uint16_t newMasterHash, uint16_t newMasterVersion);
+	bool isInProgress();
 
 	/**
 	 * The master crc is the crc16 of the filters in the buffer.

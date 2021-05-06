@@ -27,7 +27,7 @@
 
 void TrackableParser::init() {
 	LOGTrackableParserDebug("trackable parser initialised");
-	filterModificationInProgress = false;
+	endProgress(_masterHash, _masterVersion);
 }
 
 void TrackableParser::handleEvent(event_t& evt) {
@@ -113,7 +113,7 @@ bool findUuid128(scanned_device_t* scannedDevice) {
 // ------------------ Advertisment processing ------------------
 // -------------------------------------------------------------
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
-	if (filterModificationInProgress) {
+	if (isInProgress()) {
 		return;
 	}
 
@@ -387,15 +387,14 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 
 	uint16_t masterHash = masterCrc();
 	if (cmd_data->masterCrc != masterHash) {
-		LOGTrackableParserWarn("Master Crc did not match (%x != %x, filterModificationInProgress stays true.",
+		LOGTrackableParserWarn("Master Crc did not match (%x != %x, _filterModificationInProgress stays true.",
 				cmd_data->masterCrc,
 				masterHash);
 		return ERR_MISMATCH;
 	}
 
 	// finish commit by writing the _masterHash
-	_masterHash                  = masterHash;
-	filterModificationInProgress = false;
+	endProgress(cmd_data->masterCrc, cmd_data->masterVersion);
 
 	// NOTE: if writing flash, this may need to be delayed until write success.
 	return ERR_SUCCESS;
@@ -442,9 +441,20 @@ void TrackableParser::handleGetFilterSummariesCommand(cs_result_t& result) {
 // ---------------------- Utility functions --------------------
 // -------------------------------------------------------------
 void TrackableParser::startProgress() {
-	filterModificationInProgress = true;
-	_masterVersion               = 0;
+	_filterModificationInProgress = true;
+	_masterVersion                = 0;
 }
+
+void TrackableParser::endProgress(uint16_t newMasterHash, uint16_t newMasterVersion) {
+	_masterHash                   = newMasterHash;
+	_masterVersion                = newMasterVersion;
+	_filterModificationInProgress = false;
+}
+
+bool TrackableParser::isInProgress() {
+	return _filterModificationInProgress;
+}
+
 
 uint16_t TrackableParser::masterCrc() {
 	uint16_t masterCrc = 0;
