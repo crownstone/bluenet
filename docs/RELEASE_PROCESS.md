@@ -1,5 +1,9 @@
 # Release process
 
+## Memory usage test
+
+Perform a [memory usage test](MEMORY_USAGE_TEST.md), and commit the result.
+
 ## Bluenet
 
 The release process starts with updating version information. The application version has to be bumped. This is an integer that is checked by the bootloader to make sure that the
