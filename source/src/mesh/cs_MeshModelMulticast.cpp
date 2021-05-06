@@ -108,16 +108,23 @@ cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
 	accessMsg.length = len;
 	accessMsg.force_segmented = false;
 	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-	uint32_t status = NRF_SUCCESS;
-//	for (int i=0; i<transmissionsOrTimeout; ++i) {
-		accessMsg.access_token = nrf_mesh_unique_token_get();
-		status = access_model_publish(_accessModelHandle, &accessMsg);
-		if (status != NRF_SUCCESS) {
-			LOGw("sendMsg failed: %u", status);
-//			break;
+
+	uint32_t nrfCode = NRF_SUCCESS;
+	accessMsg.access_token = nrf_mesh_unique_token_get();
+	nrfCode = access_model_publish(_accessModelHandle, &accessMsg);
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			return ERR_SUCCESS;
 		}
-//	}
-	return status;
+		case NRF_ERROR_FORBIDDEN: {
+			LOGMeshModelInfo("sendMsg failed: no seq nr yet");
+			return ERR_BUSY;
+		}
+		default: {
+			LOGw("sendMsg failed: %u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
 }
 
 cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
@@ -211,8 +218,12 @@ bool MeshModelMulticast::sendMsgFromQueue() {
 //			}
 //		}
 //	}
-	sendMsg(item->msg, item->msgSize);
-	// TOOD: check return code, maybe retry again later.
+	cs_ret_code_t retCode = sendMsg(item->msg, item->msgSize);
+	if (retCode == ERR_BUSY) {
+		// Try again later.
+		return false;
+	}
+
 	--(item->metaData.transmissionsOrTimeout);
 	LOGMeshModelInfo("sent ind=%u transmissions_left=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
 
