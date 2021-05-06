@@ -100,9 +100,8 @@ private:
 	 * Initializes the .runtimedata of the newly allocated tracking_filter_t
 	 * with the given size, filterid and crc == 0.
 	 *
-	 * Returns nullptr on failure.
-	 *
-	 * Internally adjusts _filterBufferEnd to point to one byte after this array.
+	 * Returns nullptr on failure, pointer to the buffer on success.
+	 * On success the buffer pointer is also appended to the _parsingFilters.
 	 */
 	uint8_t* allocateParsingFilter(uint8_t filterId, size_t payloadSize);
 

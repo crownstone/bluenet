@@ -25,7 +25,7 @@ ad_data_type_selector_t* AdvertisementSubdata::AdTypeField() {
 }
 
 masked_ad_data_type_selector_t* AdvertisementSubdata::AdTypeMasked() {
-	if (type() == AdvertisementSubdataType::MaskedAdDataType) {
+	if (*type() == AdvertisementSubdataType::MaskedAdDataType) {
 		return reinterpret_cast<masked_ad_data_type_selector_t*>(
 				_data + sizeof(AdvertisementSubdataType));
 	}
@@ -33,7 +33,7 @@ masked_ad_data_type_selector_t* AdvertisementSubdata::AdTypeMasked() {
 }
 
 size_t AdvertisementSubdata::length() {
-	switch (type()) {
+	switch (*type()) {
 		case AdvertisementSubdataType::MacAddress:
 			return sizeof(AdvertisementSubdataType) + 0;
 		case AdvertisementSubdataType::AdDataType:
@@ -52,14 +52,14 @@ FilterOutputFormat* FilterOutputType::outFormat() {
 	return reinterpret_cast<FilterOutputFormat*>(_data + 0);
 }
 
-AdvertisementSubdata FilterOutputType::outFormat() {
+AdvertisementSubdata FilterOutputType::inFormat() {
 	return AdvertisementSubdata(_data + sizeof(FilterOutputFormat));
 }
 
 size_t FilterOutputType::length() {
 	switch(*outFormat()){
 		case FilterOutputFormat::Mac: return sizeof(FilterOutputFormat);
-		case FilterOutputFormat::ShortAssetId: sizeof(FilterOutputFormat) + inFormat().length();
+		case FilterOutputFormat::ShortAssetId: return sizeof(FilterOutputFormat) + inFormat().length();
 	}
 	return 0;
 }
@@ -80,8 +80,8 @@ AdvertisementSubdata TrackingFilterMetadata::inputType() {
 	return AdvertisementSubdata(_data + sizeof(FilterType) + sizeof(uint8_t));
 }
 
-filter_output_type_t* TrackingFilterMetadata::outputType() {
-	return reinterpret_cast<filter_output_type_t*>(
+FilterOutputType TrackingFilterMetadata::outputType() {
+	return FilterOutputType(
 			_data + sizeof(FilterType) + sizeof(uint8_t) + inputType().length());
 }
 
@@ -104,12 +104,15 @@ CuckooFilter TrackingFilterData::filterdata() {
 			_data + metadata().length()));
 }
 
+size_t TrackingFilterData::length() {
+	return metadata().length() + filterdata().size();
+}
+
 // --------------------------------
-// TrackinFilterData implementation
+// TrackinFilter implementation
 // --------------------------------
 
-
-tracking_filter_runtime_data_t* TrackingFilter::metadata() {
+tracking_filter_runtime_data_t* TrackingFilter::runtimedata() {
 	return reinterpret_cast<tracking_filter_runtime_data_t*>(_data + 0);
 }
 
@@ -117,3 +120,6 @@ TrackingFilterData TrackingFilter::filterdata() {
 	return TrackingFilterData(_data + sizeof(tracking_filter_runtime_data_t));
 }
 
+size_t TrackingFilter::length() {
+	return sizeof(tracking_filter_runtime_data_t) + filterdata().length();
+}

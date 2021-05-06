@@ -23,26 +23,6 @@
 #define LOGTrackableParserDebug LOGnone
 #define LOGTrackableParserWarn LOGw
 
-// ---------------------- local/temp utils ----------------------
-
-void logfilter(tracking_filter_t* filter) {
-	if (filter != nullptr) {
-		LOGTrackableParserDebug("medatadata.inputType: %d", filter->metadata.inputType);
-		LOGTrackableParserDebug("medatadata.profileId: %x", filter->metadata.profileId);
-		LOGTrackableParserDebug("medatadata.protocol: %d", filter->metadata.protocol);
-		LOGTrackableParserDebug("medatadata.version: %d", filter->metadata.version);
-		LOGTrackableParserDebug("medatadata.flags: %x", filter->metadata.flags);
-		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.bucketCountLog2);
-		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.nestsPerBucket);
-		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.fingerprint);
-		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.bucketA);
-		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.bucketB);
-		LOGTrackableParserDebug("cuckoo filter buffer size: %d", CuckooFilter(filter->filterdata).bufferSize());
-	}
-	else {
-		LOGTrackableParserDebug("Trying to print tracking filter but pointer is null");
-	}
-}
 
 // (this is just boilerplate reduction)
 template<class S> struct CsStructBase {
@@ -125,10 +105,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
 			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES");
-
-			if(payload != nullptr) {
-				handleGetFilterSummariesCommand(evt.result);
-			}
+			handleGetFilterSummariesCommand(evt.result);
 			break;
 		}
 		default: break;
@@ -177,13 +154,13 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 		CuckooFilter cuckoo = trackingFilter.filterdata().filterdata();
 
 		// check mac address for this filter
-		if (*trackingFilter.metadata().inputType().type() == FilterInputType::MacAddress
+		if (*trackingFilter.filterdata().metadata().inputType().type() == AdvertisementSubdataType::MacAddress
 			&& cuckoo.contains(device->address, MAC_ADDRESS_LEN)) {
 			// TODO(#177858707):
 			// - get fingerprint from filter instead of literal mac address.
 			// - we should just pass on the device, right than copying rssi?
 			LOGw("filter %d accepted adv from mac addres: %x %x %x %x %x %x %s",
-				 trackingFilter->runtimedata.filterId,
+				 trackingFilter.runtimedata()->filterId,
 				 device->address[0],
 				 device->address[1],
 				 device->address[2],
@@ -229,7 +206,7 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableA
 // ------------------- Filter data management ------------------
 // -------------------------------------------------------------
 
-tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t payloadSize) {
+uint8_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t payloadSize) {
 	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d (endindex: %u)", filterId, payloadSize, _parsingFiltersCount);
 	size_t totalSize = sizeof(tracking_filter_runtime_data_t) + payloadSize;
 
@@ -259,7 +236,7 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 		// i is always a valid position: because of previous check it is strictly less than MAX_FILTER_IDS
 		// (i-1) won't roll over because i > 0.
 
-		if (TrackingFilterData(_parsingFilters[i - 1]).runtimedata()->filterId > filterId) {
+		if (TrackingFilter(_parsingFilters[i - 1]).runtimedata()->filterId > filterId) {
 			// move this entry up one position in the list.
 			_parsingFilters[i] = _parsingFilters[i - 1];
 		}
@@ -271,7 +248,7 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 
 	_parsingFilters[index_for_new_entry] = newFilterBuffer;
 
-	TrackingFilterData newFilterAccessor(newFilterBuffer);
+	TrackingFilter newFilterAccessor(newFilterBuffer);
 
 	LOGTrackableParserDebug("before assignments");
 	// initialize runtime data.
@@ -286,11 +263,12 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 }
 
 void TrackableParser::deallocateParsingFilterByIndex(uint8_t parsingFilterIndex) {
+	if (parsingFilterIndex >= MAX_FILTER_IDS) {
+		return;
+	}
 
-	tracking_filter_t* candidateFilterToDelete = _parsingFilters[parsingFilterIndex];
-
-	auto candidateAsByteArray = reinterpret_cast<uint8_t*>(candidateFilterToDelete);
-	delete[] candidateAsByteArray;  // (delete can handle nullptr according to c++ standard)
+	// (delete can handle nullptr according to c++ standard)
+	delete[] _parsingFilters[parsingFilterIndex];
 
 	LOGTrackableParserDebug("post-delete.");
 
@@ -318,7 +296,7 @@ bool TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 	return false;
 }
 
-tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
+uint8_t* TrackableParser::findParsingFilter(uint8_t filterId) {
 	auto filterIndexOpt = findParsingFilterIndex(filterId);
 
 	return filterIndexOpt ? _parsingFilters[filterIndexOpt.value()] : nullptr;
@@ -327,7 +305,7 @@ tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
 std::optional<size_t> TrackableParser::findParsingFilterIndex(uint8_t filterId) {
 	LOGTrackableParserDebug("Looking up filter %d, end index: %d", filterId, _parsingFiltersCount);
 
-	tracking_filter_t* trackingFilter;
+	uint8_t* trackingFilter;
 	for (size_t index = 0; index < _parsingFiltersCount; ++index) {
 		trackingFilter = _parsingFilters[index];
 
@@ -337,7 +315,7 @@ std::optional<size_t> TrackableParser::findParsingFilterIndex(uint8_t filterId) 
 			return {};
 		}
 
-		if (trackingFilter->runtimedata.filterId == filterId) {
+		if (TrackingFilter(trackingFilter).runtimedata()->filterId == filterId) {
 			LOGTrackableParserDebug("Filter found at index %d", index);
 			return index;
 		}
@@ -346,20 +324,16 @@ std::optional<size_t> TrackableParser::findParsingFilterIndex(uint8_t filterId) 
 	return {};
 }
 
-size_t TrackableParser::getTotalSize(tracking_filter_t& trackingFilter) {
-	return sizeof(tracking_filter_runtime_data_t) + trackingFilter.runtimedata.totalSize;
-}
-
 size_t TrackableParser::getTotalHeapAllocatedSize() {
 	LOGTrackableParserDebug("computing allocated size");
 
 	size_t total = 0;
-	for (tracking_filter_t* trackingFilter : _parsingFilters) {
+	for (uint8_t* trackingFilter : _parsingFilters) {
 		if (trackingFilter == nullptr) {
 			// reached back of the list (nullptr).
 			break;
 		}
-		total += getTotalSize(*trackingFilter);
+		total += TrackingFilter(trackingFilter).length();
 	}
 
 	return total;
@@ -383,32 +357,32 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 	}
 
 	// find or allocate a parsing filter
-	tracking_filter_t* parsingFilter = findParsingFilter(cmd_data->filterId);
+	TrackingFilter parsingFilter(findParsingFilter(cmd_data->filterId));
 
 	// check if we need to clean up an old filter.
-	if (parsingFilter != nullptr && parsingFilter->runtimedata.crc != 0) {
+	if (parsingFilter._data != nullptr && parsingFilter.runtimedata()->crc != 0) {
 		LOGTrackableParserDebug("removing pre-existing filter with same id (%d)", cmd_data->filterId);
-		deallocateParsingFilter(parsingFilter->runtimedata.filterId);
+		deallocateParsingFilter(parsingFilter.runtimedata()->filterId);
 
 		// after deallocation, the filter is clearly gone.
-		parsingFilter = nullptr;
+		parsingFilter._data = nullptr;
 	}
 
 	// check if the total size hasn't changed in the mean time
-	if (parsingFilter != nullptr && parsingFilter->runtimedata.totalSize != cmd_data->totalSize) {
+	if (parsingFilter._data != nullptr && parsingFilter.runtimedata()->totalSize != cmd_data->totalSize) {
 		// If total size to allocate changes something is really off on the host side
 		LOGe("Corrupt chunk of upload data received. Deallocating partially constructed filter.");
-		deallocateParsingFilter(parsingFilter->runtimedata.filterId);
+		deallocateParsingFilter(parsingFilter.runtimedata()->filterId);
 		return ERR_WRONG_STATE;
 	}
 
 	// check if we need to create a new filter
-	if (parsingFilter == nullptr) {
+	if (parsingFilter._data == nullptr) {
 		LOGTrackableParserDebug("parsing filter %d not found", cmd_data->filterId);
 		// command totalSize only includes the size of the cuckoo filter and its metadata, not the runtime data yet.
 		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
 
-		if (parsingFilter == nullptr) {
+		if (parsingFilter._data == nullptr) {
 			// failed to handle command, no space.
 			LOGTrackableParserWarn("parsing filter allocation failed");
 			return ERR_NO_SPACE;
@@ -418,7 +392,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 	// by now, the filter exists, is clean, and the incoming chunk is verified for totalSize consistency.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
-	uint8_t* parsingFilterBase_ptr  = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
+	uint8_t* parsingFilterBase_ptr = parsingFilter.filterdata()._data;
 	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
 
 	// apply filter chunk, counting chunk index from metadata onwards:
@@ -486,10 +460,10 @@ void TrackableParser::handleGetFilterSummariesCommand(cs_result_t& result) {
 	retvalptr->freeSpace     = getTotalHeapAllocatedSize();
 
 	for (size_t i = 0; i < _parsingFiltersCount; i++) {
-		retvalptr->summaries[i].id      = _parsingFilters[i]->runtimedata.filterId;
-		retvalptr->summaries[i].crc     = _parsingFilters[i]->runtimedata.crc;
-		retvalptr->summaries[i].flags   = _parsingFilters[i]->metadata.flags;
-		retvalptr->summaries[i].version = _parsingFilters[i]->metadata.version;
+		TrackingFilter filter(_parsingFilters[i]);
+		retvalptr->summaries[i].id   = filter.runtimedata()->filterId;
+		retvalptr->summaries[i].type = static_cast<uint8_t>(*filter.filterdata().metadata().type());
+		retvalptr->summaries[i].crc  = filter.runtimedata()->crc;
 	}
 
 	result.returnCode = ERR_SUCCESS;
@@ -507,17 +481,19 @@ uint16_t TrackableParser::masterCrc() {
 	uint16_t masterCrc = 0;
 	uint16_t* prevCrc  = nullptr;
 
-	for (auto trackingFilter : _parsingFilters) {
-		if (trackingFilter == nullptr) {
+	for (auto trackingFilterBuffer : _parsingFilters) {
+		if (trackingFilterBuffer == nullptr) {
 			break;
 		}
+
+		TrackingFilter trackingFilter(trackingFilterBuffer);
 
 		LOGTrackableParserDebug("filter crc: %x", trackingFilter->runtimedata.crc);
 
 		// appends/applies this filters' crc onto master crc
 		masterCrc =
-				crc16(reinterpret_cast<const uint8_t*>(&trackingFilter->runtimedata.crc),
-					  sizeof(trackingFilter->runtimedata.crc),
+				crc16(reinterpret_cast<const uint8_t*>(trackingFilter.runtimedata()->crc),
+					  sizeof(trackingFilter.runtimedata()->crc),
 					  prevCrc);
 
 		prevCrc = &masterCrc;  // first iteration will have prevCrc == nullptr, all subsequent ones point to masterCrc.
@@ -533,31 +509,31 @@ bool TrackableParser::checkFilterSizeConsistency() {
 
 	size_t index = 0;
 	while (index < _parsingFiltersCount) {
-		auto trackingFilter = _parsingFilters[index];
+		auto trackingFilter = TrackingFilter(_parsingFilters[index]);
 
-		if (trackingFilter == nullptr) {
+		if (trackingFilter._data == nullptr) {
 			// early return: last filter has been handled.
 			break;
 		}
 
-		if (trackingFilter->runtimedata.crc == 0) {
+		if (trackingFilter.runtimedata()->crc == 0) {
 			// filter changed since commit.
 
-			size_t trackingFilterSize = getTotalSize(*trackingFilter);
-			auto cuckoo               = CuckooFilter(trackingFilter->filterdata);
+			size_t trackingFilterAllocatedSize = trackingFilter.runtimedata()->totalSize;
+			size_t trackingFilterSize = trackingFilter.length();
 
-			if (trackingFilterSize != sizeof(tracking_filter_t) + cuckoo.bufferSize()) {
+			if (trackingFilterSize != trackingFilterAllocatedSize) {
 				// the cuckoo filter size parameters do not match the allocated space.
 				// likely cause by malformed data on the host side.
 				// This check can't be performed earlier: as long as not all chuncks are
 				// received the filterdata may be in invalid state.
 
 				LOGTrackableParserWarn("Deallocating filter %u because of malformed cuckoofilter size: %u != %u",
-						trackingFilter->runtimedata.filterId,
+						trackingFilter.runtimedata()->filterId,
 						trackingFilterSize,
-						sizeof(tracking_filter_t) + cuckoo.bufferSize());
+						trackingFilterAllocatedSize);
 
-				deallocateParsingFilter(trackingFilter->runtimedata.filterId);
+				deallocateParsingFilterByIndex(index);
 				consistencyChecksFailed = true;
 
 				// intentionally skipping index++, deallocate shrinks the array we're looping over.
@@ -572,16 +548,18 @@ bool TrackableParser::checkFilterSizeConsistency() {
 }
 
 void TrackableParser::computeCrcs() {
-	for (auto trackingFilter : _parsingFilters) {
-		if (trackingFilter == nullptr) {
+	for (uint8_t* trackingFilterBuffer : _parsingFilters) {
+		if (trackingFilterBuffer == nullptr) {
 			break;
 		}
 
-		if (trackingFilter->runtimedata.crc == 0) {
+		TrackingFilter trackingFilter(trackingFilterBuffer);
+
+		if (trackingFilter.runtimedata()->crc == 0) {
 			// filter changed since commit.
-			trackingFilter->runtimedata.crc =
-					crc16(reinterpret_cast<const uint8_t*>(&trackingFilter->metadata),
-						  trackingFilter->runtimedata.totalSize,
+			trackingFilter.runtimedata()->crc =
+					crc16(trackingFilter.filterdata().metadata()._data,
+						  trackingFilter.runtimedata()->totalSize,
 						  nullptr);
 		}
 	}

@@ -8,7 +8,7 @@
 
 #include <protocol/cs_TrackableParserPackets.h>
 #include <structs/cs_TrackableParserStructs.h>
-#include <protocol/cs_CuckooFilterStructs.h>
+#include <util/cs_CuckooFilter.h>
 
 /**
  * This file defines several accessor classes for structures that
@@ -18,10 +18,9 @@
 
 
 class AdvertisementSubdata {
-private:
+public:
 	uint8_t* _data;  // byte representation of this object.
 
-public:
 	AdvertisementSubdata(uint8_t* data) : _data(data){}
 
 	AdvertisementSubdataType*       type();
@@ -35,10 +34,9 @@ public:
 };
 
 class FilterOutputType {
-private:
+public:
 	uint8_t* _data;
 
-public:
 	FilterOutputType(uint8_t* data) : _data(data) {}
 
 	FilterOutputFormat* outFormat();
@@ -47,41 +45,40 @@ public:
 	size_t length();
 };
 
-
 class TrackingFilterMetadata {
-private:
+public:
 	uint8_t* _data;  // byte representation of this object.
 
-public:
 	TrackingFilterMetadata(uint8_t* data) : _data(data) {}
 
 	FilterType*           type();
 	uint8_t*              profileId();
 	AdvertisementSubdata  inputType();
-	FilterOutputType outputType();
+	FilterOutputType      outputType();
 
 	size_t length();
 };
 
 class TrackingFilterData {
-private:
+public:
 	uint8_t* _data;  // byte representation of this object.
 
-public:
 	TrackingFilterData(uint8_t* data) : _data(data) {}
 
 	TrackingFilterMetadata metadata();
 	CuckooFilter filterdata(); // invalid unless *metadata().type() == FilterType::CukooFilter
+
+	size_t length();
 };
 
-
 class TrackingFilter {
-private:
+public:
 	uint8_t* _data;  // byte representation of this object.
 
-public:
 	TrackingFilter(uint8_t* data) : _data(data) {}
 
 	tracking_filter_runtime_data_t* runtimedata();
 	TrackingFilterData filterdata();
+
+	size_t length();
 };
