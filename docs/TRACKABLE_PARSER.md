@@ -105,7 +105,6 @@ uint8_t | filterId | 1 | Id of the filter to remove.
 
 #### Remove filter result
 
-A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
 - `SUCCESS`: filter was found and deallocated. Progress was started.
 - `NOT_FOUND`: filter wasn't found. Progress was started.
 
@@ -147,16 +146,16 @@ Obtain a summary of the state of all filters currently on the device and selecte
 Empty.
 
 #### Get filter summaries result packet
+
 Type | Name | Length | Description
 --- | --- | --- | --- 
 [CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | Trackable parser protocol version implemented in the firmware
 uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
 uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
-uint16_ | freeSpace | 2 | The number of bytes that the TrackableParser is still allowed to allocate. (Does not take into account free heap space on the firmware.)
+uint16_t | freeSpace | 2 | The number of bytes that the TrackableParser is still allowed to allocate. (Does not take into account free heap space on the firmware.)
 [Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 4 | Summaries of all filters currently on the Crownstone. 
 
-
-A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
+Result:
 - `SUCCESS`: No filter modifications in progress.
 - `BUSY`: There was a filter modification in progress while handling this command.
 

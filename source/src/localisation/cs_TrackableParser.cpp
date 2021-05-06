@@ -23,34 +23,6 @@
 #define LOGTrackableParserDebug LOGnone
 #define LOGTrackableParserWarn LOGw
 
-
-// (this is just boilerplate reduction)
-template<class S> struct CsStructBase {
-	typedef S PacketType;
-};
-
-// full specializations of this type define the correspondence between CS_TYPEs and the type used to (de)serialize.
-template<CS_TYPE CT>
-struct CsStruct : public CsStructBase<void>{};
-
-// define which cs type maps to which struct type
-template<> struct CsStruct<CS_TYPE::CMD_UPLOAD_FILTER> : CsStructBase<trackable_parser_cmd_upload_filter_t> {};
-template<> struct CsStruct<CS_TYPE::CMD_REMOVE_FILTER> : CsStructBase<trackable_parser_cmd_remove_filter_t> {};
-template<> struct CsStruct<CS_TYPE::CMD_COMMIT_FILTER_CHANGES> : CsStructBase<trackable_parser_cmd_commit_filter_changes_t> {};
-
-/**
- * Returns the correctly typed packet given the CS_TYPE template parameter.
- * If protocol version is not known, nullptr is returned.
- */
-template<CS_TYPE CT>
-typename CsStruct<CT>::PacketType* unpackCmdWrapper(trackable_parser_cmd_wrapper_t* wrapper) {
-	if(wrapper->commandProtocolVersion == TRACKABLE_PARSER_PROTOCOL_VERSION) {
-		return reinterpret_cast<typename CsStruct<CT>::PacketType*>(wrapper->payload);
-	}
-	LOGTrackableParserWarn("protocol version mismatch");
-	return nullptr;
-}
-
 // ---------------------- Trackable Parser ----------------------
 
 void TrackableParser::init() {
@@ -76,30 +48,27 @@ void TrackableParser::handleEvent(event_t& evt) {
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
 			LOGTrackableParserDebug("CMD_UPLOAD_FILTER");
 
-			auto trackableCmdWrapper         = CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_UPLOAD_FILTER>(trackableCmdWrapper);
-			if(payload != nullptr) {
-				evt.result.returnCode = handleUploadFilterCommand(payload);
+			auto commandPacket         = CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
+			if(commandPacket != nullptr) {
+				evt.result.returnCode = handleUploadFilterCommand(commandPacket);
 			}
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
 			LOGTrackableParserDebug("CMD_REMOVE_FILTER");
 
-			auto trackableCmdWrapper         = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_REMOVE_FILTER>(trackableCmdWrapper);
-			if(payload != nullptr) {
-				evt.result.returnCode = handleRemoveFilterCommand(payload);
+			auto commandPacket         = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
+			if(commandPacket != nullptr) {
+				evt.result.returnCode = handleRemoveFilterCommand(commandPacket);
 			}
 			break;
 		}
 		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
 			LOGTrackableParserDebug("CMD_COMMIT_FILTER_CHANGES");
 
-			auto trackableCmdWrapper         = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
-			auto payload = unpackCmdWrapper<CS_TYPE::CMD_COMMIT_FILTER_CHANGES>(trackableCmdWrapper);
-			if(payload != nullptr) {
-				evt.result.returnCode = handleCommitFilterChangesCommand(payload);
+			auto commandPacket         = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
+			if(commandPacket != nullptr) {
+				evt.result.returnCode = handleCommitFilterChangesCommand(commandPacket);
 			}
 			break;
 		}

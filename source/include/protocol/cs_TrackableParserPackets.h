@@ -10,18 +10,15 @@
 #include <protocol/cs_CuckooFilterStructs.h>
 
 
-constexpr uint8_t TRACKABLE_PARSER_PROTOCOL_VERSION = 0;
-
-// ------------------ command wrapper packet ------------------
-struct __attribute__((__packed__)) trackable_parser_cmd_wrapper_t {
-	uint8_t commandProtocolVersion;
-	uint8_t payload[];
-};
+// ------------------ Command protocol version ------------------
+typedef uint8_t trackable_parser_cmd_protocol_t;
+constexpr trackable_parser_cmd_protocol_t TRACKABLE_PARSER_PROTOCOL_VERSION = 0;
 
 
 // ------------------ Command values -----------------
 
 struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint8_t filterId;
 	uint16_t chunkStartIndex;
 	uint16_t totalSize;
@@ -30,10 +27,12 @@ struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_t {
 };
 
 struct __attribute__((__packed__)) trackable_parser_cmd_remove_filter_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint8_t filterId;
 };
 
 struct __attribute__((__packed__)) trackable_parser_cmd_commit_filter_changes_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint16_t masterVersion;
 	uint16_t masterCrc;
 };
@@ -48,6 +47,7 @@ struct __attribute__((__packed__)) tracking_filter_summary_t {
 
 
 struct __attribute__((__packed__)) trackable_parser_cmd_get_filter_summaries_ret_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint16_t masterVersion;
 	uint16_t masterCrc;
 	uint16_t freeSpace;

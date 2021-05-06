@@ -602,10 +602,10 @@ typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 
-typedef trackable_parser_cmd_wrapper_t TYPIFY(CMD_UPLOAD_FILTER);          // payload: trackable_parser_cmd_upload_filter_t
-typedef trackable_parser_cmd_wrapper_t TYPIFY(CMD_REMOVE_FILTER);          // payload: trackable_parser_cmd_remove_filter_t
-typedef trackable_parser_cmd_wrapper_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);  // payload: trackable_parser_cmd_commit_filter_changes_t
-typedef trackable_parser_cmd_wrapper_t TYPIFY(CMD_GET_FILTER_SUMMARIES);   // payload: trackable_parser_cmd_get_filter_summaries_t
+typedef trackable_parser_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
+typedef trackable_parser_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
+typedef trackable_parser_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
+typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
