@@ -354,7 +354,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		if (valueLength - offset > MAX_NOTIFICATION_LEN) {
 			notification.partNr = offset / MAX_NOTIFICATION_LEN;
 		} else {
-			notification.partNr = 0xFF;
+			notification.partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
 		}
 
 //		LOGi("dataLen: %d ", dataLen);

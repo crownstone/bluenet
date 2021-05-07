@@ -11,6 +11,9 @@ from crownstone_uart import CrownstoneUart
 
 from bluenet_logs import BluenetLogs
 
+import logging
+#logging.basicConfig(format='%(asctime)s %(levelname)-7s: %(message)s', level=logging.DEBUG)
+
 defaultSourceFilesDir = os.path.abspath(f"{os.path.dirname(os.path.abspath(__file__))}/../source")
 
 argParser = argparse.ArgumentParser(description="Client to show binary logs")

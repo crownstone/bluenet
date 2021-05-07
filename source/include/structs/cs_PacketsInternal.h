@@ -32,6 +32,23 @@ struct cs_data_t {
 	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size) : data(buf), len(size) {}
 };
 
+/**
+ * Variable length data encapsulation in terms of length and pointer to data.
+ */
+struct cs_const_data_t {
+	const uint8_t* data = nullptr;      /** < Pointer to data. */
+	cs_buffer_size_t len = 0;      /** < Length of data. */
+
+	cs_const_data_t():
+		data(nullptr),
+		len(0)
+	{}
+	cs_const_data_t(const uint8_t* buf, cs_buffer_size_t size):
+		data(buf),
+		len(size)
+	{}
+};
+
 struct cs_result_t {
 	/**
 	 * Return code.
@@ -74,7 +91,7 @@ enum CS_ADDRESS_TYPE {
 
 struct __attribute__((packed)) device_address_t {
 	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t addressType;  // See CS_ADDRESS_TYPE
+	uint8_t addressType = CS_ADDRESS_TYPE_RANDOM_STATIC;
 };
 
 /**

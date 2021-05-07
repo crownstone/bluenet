@@ -34,15 +34,21 @@ struct ble_central_write_t {
 
 // Events:
 
-struct ble_central_read_result_t {
-	cs_ret_code_t retCode;
-	cs_data_t data;
-};
-
 struct ble_central_discovery_t {
 	UUID uuid;
 	uint16_t valueHandle;    // Set to BLE_GATT_HANDLE_INVALID when not existing.
 	uint16_t cccdHandle;     // Set to BLE_GATT_HANDLE_INVALID when not existing.
 };
+
+struct ble_central_read_result_t {
+	cs_ret_code_t retCode;
+	cs_data_t data;
+};
+
+struct ble_central_notification_t {
+	uint16_t handle;
+	cs_const_data_t data;
+};
+
 
 
