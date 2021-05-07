@@ -8,6 +8,8 @@
 #include <localisation/cs_AssetFiltering.h>
 #include <util/cs_Utils.h>
 
+#define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE
+
 cs_ret_code_t AssetFiltering::init() {
 	_filterStore = new AssetFilterStore();
 	if (_filterStore == nullptr) {
@@ -97,7 +99,7 @@ void AssetFiltering::logServiceData(scanned_device_t* scannedDevice) {
 		return;
 	}
 
-	_log(SERIAL_DEBUG, false, "servicedata: ");
-	_logArray(SERIAL_DEBUG, true, serviceData.data, serviceData.len);
+	_log(LogLevelAssetFilteringDebug, false, "servicedata: ");
+	_logArray(LogLevelAssetFilteringDebug, true, serviceData.data, serviceData.len);
 }
 

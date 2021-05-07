@@ -23,6 +23,7 @@ cs_ret_code_t AssetFilterStore::init() {
 	// TODO: Load from flash.
 	LOGAssetFilterInfo("init");
 	endProgress(_masterHash, _masterVersion);
+	listen();
 	return ERR_SUCCESS;
 }
 
@@ -37,25 +38,21 @@ AssetFilter AssetFilterStore::getFilter(uint8_t index) {
 void AssetFilterStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
-			LOGAssetFilterDebug("CMD_UPLOAD_FILTER");
 			auto commandPacket = CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
 			evt.result.returnCode = handleUploadFilterCommand(*commandPacket);
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
-			LOGAssetFilterDebug("CMD_REMOVE_FILTER");
 			auto commandPacket = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
 			evt.result.returnCode = handleRemoveFilterCommand(*commandPacket);
 			break;
 		}
 		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
-			LOGAssetFilterDebug("CMD_COMMIT_FILTER_CHANGES");
 			auto commandPacket = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
 			evt.result.returnCode = handleCommitFilterChangesCommand(*commandPacket);
 			break;
 		}
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
-			LOGAssetFilterDebug("CMD_GET_FILTER_SUMMARIES");
 			handleGetFilterSummariesCommand(evt.result);
 			break;
 		}
@@ -203,7 +200,7 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd_upload_filter_t& cmdData) {
 	startProgress();
 
-	LOGAssetFilterDebug("upload command received chunkStartIndex %u, chunkSize %u, totalSize %u",
+	LOGAssetFilterDebug("handleUploadFilterCommand chunkStartIndex=%u, chunkSize=%u, totalSize=%u",
 			cmdData.chunkStartIndex,
 			cmdData.chunkSize,
 			cmdData.totalSize);
@@ -259,6 +256,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 }
 
 cs_ret_code_t AssetFilterStore::handleRemoveFilterCommand(const asset_filter_cmd_remove_filter_t& cmdData) {
+	LOGAssetFilterDebug("handleRemoveFilterCommand id=%u", cmdData.filterId)
 	if (deallocateFilter(cmdData.filterId)) {
 		startProgress();
 		return ERR_SUCCESS;
@@ -268,7 +266,7 @@ cs_ret_code_t AssetFilterStore::handleRemoveFilterCommand(const asset_filter_cmd
 }
 
 cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_filter_cmd_commit_filter_changes_t& cmdData) {
-
+	LOGAssetFilterDebug("handleCommitFilterChangesCommand version=%u crc=%u", cmdData.masterVersion, cmdData.masterCrc);
 	if (checkFilterSizeConsistency()) {
 		return ERR_WRONG_STATE;
 	}
