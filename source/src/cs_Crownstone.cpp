@@ -596,15 +596,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
 
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER==1
-	_nearestCrownstoneTracker.init();
-	_nearestCrownstoneTracker.listen();
-
-	_trackableParser.init();
-	_trackableParser.listen();
-#endif
-
-
 	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
@@ -626,6 +617,13 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_multiSwitchHandler->init();
 
 			_meshTopology.init();
+
+			_assetFiltering.init();
+
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+			_nearestCrownstoneTracker.init();
+			_nearestCrownstoneTracker.listen();
+#endif
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {

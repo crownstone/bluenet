@@ -14,8 +14,6 @@
 
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
-#include "protocol/cs_TrackableParserPackets.h"
-
 #include "structs/cs_PacketsInternal.h"
 #include <structs/cs_BleCentralPackets.h>
 #include <structs/cs_CrownstoneCentralPackets.h>
@@ -29,6 +27,7 @@
 
 #include <time/cs_TimeSyncMessage.h>
 #include <mesh/cs_MeshMsgEvent.h>
+#include <protocol/cs_AssetFilterPackets.h>
 
 // #include <presence/cs_PresenceHandler.h>
 
@@ -622,9 +621,9 @@ typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 
-typedef trackable_parser_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
-typedef trackable_parser_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
-typedef trackable_parser_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
+typedef asset_filter_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
+typedef asset_filter_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
+typedef asset_filter_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
 typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
