@@ -35,6 +35,7 @@ args = argParser.parse_args()
 
 sourceFilesDir = args.sourceFilesDir
 
+print("Listen to device on port" + args.device)
 
 # Init bluenet logs, it will listen to events from the Crownstone lib.
 bluenetLogs = BluenetLogs()
