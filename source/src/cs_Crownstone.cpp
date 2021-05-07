@@ -780,7 +780,28 @@ void Crownstone::tick() {
 	event.dispatch();
 	++_tickCount;
 
+	// TODO: might be useful to create separate test/ folder and allow them to be compiled or not
+	test();
+
 	scheduleNextTick();
+}
+
+void Crownstone::test() {
+	if (_operationMode != OperationMode::OPERATION_MODE_NORMAL) {
+		return;
+	}
+	TrackableEvent trackable;
+	// trackable.id;
+	static uint8_t rssi = 24;
+	rssi = (rssi + 89) % 100;
+	// just sent some different values
+	trackable.rssi = rssi;
+	event_t event(
+			CS_TYPE::EVT_TRACKABLE,
+			&trackable,
+			sizeof(trackable));
+
+	event.dispatch();
 }
 
 void Crownstone::scheduleNextTick() {

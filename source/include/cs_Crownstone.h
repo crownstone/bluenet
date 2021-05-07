@@ -297,6 +297,10 @@ private:
 	 */
 	void tick();
 
+	/** test function
+	 */
+	void test();
+
 	/** schedule next execution of tick function
 	 */
 	void scheduleNextTick();

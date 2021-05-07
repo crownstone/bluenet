@@ -668,6 +668,33 @@ void UartHandler::handleEvent(event_t & event) {
 			writeMsg(UART_OPCODE_TX_PRESENCE_CHANGE, reinterpret_cast<uint8_t*>(state), sizeof(*state));
 			break;
 		}
+		// probably something like EVT_TRACKABLE should come in
+		case CS_TYPE::EVT_TRACKABLE: {
+			TYPIFY(EVT_TRACKABLE)* trackable = (TYPIFY(EVT_TRACKABLE)*)event.data;
+//			cs_nearest_stone_update_t update = ...
+//			writeMsg(UART_OPCODE_TX_NEAREST_CROWNSTONE_UPDATE, reinterpret_cast<uint8_t*>(update), sizeof(*update));
+//			break;
+//		}
+//		case CS_TYPE::
+//			cs_nearest_stone_timeout_t timeout = ...
+//			writeMsg(UART_OPCODE_TX_NEAREST_CROWNSTONE_TIMEOUT, reinterpret_cast<uint8_t*>(timeout), sizeof(*timeout));
+//			break;
+//		case CS_TYPE::
+			cs_asset_rssi_data_t rssi_data;
+			// trackable->id 
+			// set mac address to 0x3333b01dface
+			rssi_data.address[0] = 0x33;
+			rssi_data.address[1] = 0x33;
+			rssi_data.address[2] = 0xb0;
+			rssi_data.address[3] = 0x1d;
+			rssi_data.address[4] = 0xfa;
+			rssi_data.address[5] = 0xce;
+			rssi_data.stone_id = 38;
+			rssi_data.rssi = trackable->rssi;
+			rssi_data.channel = 37;
+			writeMsg(UART_OPCODE_TX_ASSET_RSSI_DATA, reinterpret_cast<uint8_t*>(&rssi_data), sizeof(rssi_data));
+			break;
+		}
 		default:
 			break;
 	}

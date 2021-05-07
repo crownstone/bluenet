@@ -567,6 +567,36 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t *buf;
 };
 
+/**
+ * A packet that represents RSSI data about an asset received by a particular Crownstone. There is no timestamp in it.
+ * Timestamps can be added on the hub.
+ */
+struct __attribute__((packed)) cs_asset_rssi_data_t {
+	uint8_t address[6];
+	uint8_t stone_id;
+	uint8_t rssi;
+	uint8_t channel;
+};
+
+/**
+ * A packet that informs about the nearest Crownstone with respect to an asset. The asset is represented by an
+ * identifier of three bytes. This allows this message to be sent as unsegmented message through the mesh.
+ */
+struct __attribute__((packed)) cs_nearest_stone_update_t {
+	uint8_t asset_id[3];
+	uint8_t stone_id;
+	uint8_t rssi;
+	uint8_t channel;
+};
+
+/**
+ * The communication about a timeout being expired with respect to a given asset_id. It hasn't been seen by any node
+ * in the given mesh for a particular time period.
+ */
+struct __attribute__((packed)) cs_nearest_stone_timeout_t {
+	uint8_t asset_id[3];
+};
+
 // ========================= functions =========================
 
 /**

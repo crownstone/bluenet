@@ -7,7 +7,11 @@
 
 #pragma once
 
-
+/**
+ * Messages received over UART. Note that the documentation on github is from the perspective of the user.
+ *   https://github.com/crownstone/bluenet/blob/master/docs/UART_PROTOCOL.md
+ * Hence, what is called RX here is called TX there.
+ */
 enum UartOpcodeRx {
 	UART_OPCODE_RX_HELLO =                            0,
 	UART_OPCODE_RX_SESSION_NONCE =                    1,
@@ -42,6 +46,11 @@ enum UartOpcodeRx {
 	UART_OPCODE_RX_INJECT_EVENT =                     60000, // Dispatch any event. Payload: CS_TYPE + event data structure.
 };
 
+/**
+ * Send messages over the UART to someone listening.
+ *
+ * RX on https://github.com/crownstone/bluenet/blob/master/docs/UART_PROTOCOL.md.
+ */
 enum UartOpcodeTx {
 	UART_OPCODE_TX_HELLO =                            0,
 	UART_OPCODE_TX_SESSION_NONCE =                    1,
@@ -74,7 +83,9 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_MESH_RESULT =                      10105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
 	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              10106, // Whether all stone IDs were acked, payload: result_packet_header_t.
 	UART_OPCODE_TX_RSSI_DATA_MESSAGE =                10107, // When MeshTopology receives an rssi_data_message, it is sent to host. Payload: RssiDataMessage.
-
+	UART_OPCODE_TX_ASSET_RSSI_DATA =                  10108, // Info about an asset a Crownstone on the mesh has forwarded.
+	UART_OPCODE_TX_NEAREST_CROWNSTONE_UPDATE =        10109, // The rssi between an asset and its nearest Crownstone changed.
+	UART_OPCODE_TX_NEAREST_CROWNSTONE_TIMEOUT =       10110, // A previously tracked asset hasn't been observed in a while.
 	UART_OPCODE_TX_LOG =                              10200, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
 	UART_OPCODE_TX_LOG_ARRAY =                        10201, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
 
