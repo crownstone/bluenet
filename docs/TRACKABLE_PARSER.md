@@ -179,7 +179,7 @@ uint8[] | filterdata | | Byte representation of the filter, format depends on th
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Filter type](#filter-type) | filterType | 1 | Filter protocol of this filter. Describes a `filterdata` format.
-uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id.
+uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id. Use 255 for no profile.
 [Filter input type](#filter-input-type) | inputType |  | Determines how this filter interprets incoming entries.
 [Filter output type](#filter-output-type) | outputType |  | Determines how advertisements that pass this filter are handled by the system.
 
