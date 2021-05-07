@@ -100,6 +100,8 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 		}
 		case NRF_EVT_RADIO_BLOCKED:
 		case NRF_EVT_RADIO_CANCELED:
+		case NRF_EVT_RADIO_SESSION_IDLE:
+		case NRF_EVT_RADIO_SESSION_CLOSED:
 			break;
 		default: {
 			LOGd("Unhandled event: %i", evt_id);

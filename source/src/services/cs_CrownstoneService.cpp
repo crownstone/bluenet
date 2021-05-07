@@ -136,6 +136,22 @@ void CrownstoneService::addSessionDataCharacteristic(buffer_ptr_t buffer, cs_buf
 	_sessionDataCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_sessionDataCharacteristic->setMaxGattValueLength(size);
 	_sessionDataCharacteristic->setValueLength(0);
+
+	if (_sessionDataUnencryptedCharacteristic != NULL) {
+		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SESSION_DATA);
+		return;
+	}
+	_sessionDataUnencryptedCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_sessionDataUnencryptedCharacteristic);
+	_sessionDataUnencryptedCharacteristic->setUUID(UUID(getUUID(), SESSION_DATA_UNENCRYPTED_UUID));
+	_sessionDataUnencryptedCharacteristic->setName(BLE_CHAR_SESSION_DATA);
+	_sessionDataUnencryptedCharacteristic->setWritable(false);
+//	_sessionDataUnencryptedCharacteristic->setNotifies(false);
+	_sessionDataUnencryptedCharacteristic->setValue(_keySessionDataBuffer);
+//	_sessionDataUnencryptedCharacteristic->setSharedEncryptionBuffer(true);
+	_sessionDataUnencryptedCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+	_sessionDataUnencryptedCharacteristic->setMaxGattValueLength(sizeof(_keySessionDataBuffer));
+	_sessionDataUnencryptedCharacteristic->setValueLength(0);
 }
 
 void CrownstoneService::addFactoryResetCharacteristic() {
@@ -200,10 +216,15 @@ void CrownstoneService::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_SESSION_DATA_SET: {
 			// Check if this characteristic exists first. In case of setup mode it does not for instance.
 			if (_sessionDataCharacteristic != NULL) {
+				// This code assumes the session data that is pointed to, will remain valid!
 				// In setup mode, this requires the setup key to be generated.
 				_sessionDataCharacteristic->setValueLength(event.size);
 				_sessionDataCharacteristic->setValue((uint8_t*)event.data);
 				_sessionDataCharacteristic->updateValue(ConnectionEncryptionType::ECB);
+
+				_sessionDataUnencryptedCharacteristic->setValueLength(event.size);
+				_sessionDataUnencryptedCharacteristic->setValue(reinterpret_cast<uint8_t*>(event.data));
+				_sessionDataUnencryptedCharacteristic->updateValue();
 			}
 			break;
 		}

@@ -18,6 +18,7 @@
 
 #include "structs/cs_PacketsInternal.h"
 #include <structs/cs_BleCentralPackets.h>
+#include <structs/cs_CrownstoneCentralPackets.h>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
@@ -326,7 +327,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
-	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated.
+	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated. Data pointer has to point to memory that stays valid!
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
@@ -348,11 +349,11 @@ enum class CS_TYPE: uint16_t {
 	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
-	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.    See BleCentral::connect().
-	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device. See BleCentral::disconnect().
-	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.      See BleCentral::discoverServices().
-	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.  See BleCentral::read().
-	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic. See BleCentral::write().
+	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.       See BleCentral::connect().
+	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device.    See BleCentral::disconnect().
+	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.         See BleCentral::discoverServices().
+	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.     See BleCentral::read().
+	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic.    See BleCentral::write().
 
 	EVT_BLE_CENTRAL_CONNECT_START,                    // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
 	EVT_BLE_CENTRAL_CONNECT_RESULT,                   // Result of a connection attempt.
@@ -361,6 +362,15 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                 // Result of service discovery.
 	EVT_BLE_CENTRAL_READ_RESULT,                      // Result of a read.
 	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
+	EVT_BLE_CENTRAL_NOTIFICATION,                     // A notification has been received.
+
+	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device.       See CrownstoneCentral::connect().
+	CMD_CS_CENTRAL_DISCONNECT,                        // Disconnect from device.    See CrownstoneCentral::disconnect().
+	CMD_CS_CENTRAL_WRITE,                             // Write a control command.   See CrownstoneCentral::write().
+
+	EVT_CS_CENTRAL_CONNECT_RESULT,
+	EVT_CS_CENTRAL_READ_RESULT,
+	EVT_CS_CENTRAL_WRITE_RESULT,
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
@@ -511,8 +521,15 @@ typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
 typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
-typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
 typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef  ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
+typedef  cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
+typedef  void TYPIFY(CMD_CS_CENTRAL_DISCONNECT);
+typedef  cs_central_write_t TYPIFY(CMD_CS_CENTRAL_WRITE);
+typedef  cs_ret_code_t TYPIFY(EVT_CS_CENTRAL_CONNECT_RESULT);
+typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_READ_RESULT);
+typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_WRITE_RESULT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);

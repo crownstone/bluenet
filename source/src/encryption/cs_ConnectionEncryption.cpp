@@ -12,9 +12,11 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_Event.h>
+#include <logging/cs_Logger.h>
 #include <util/cs_Utils.h>
 
-#define LOGConnectionEncryption LOGnone
+#define LOGConnectionEncryption LOGvv
+#define LogLevelConnectionEncryption SERIAL_VERY_VERBOSE
 
 ConnectionEncryption::ConnectionEncryption() {
 	_sessionData.protocol = CS_CONNECTION_PROTOCOL_VERSION;
@@ -144,6 +146,21 @@ void ConnectionEncryption::generateSessionData() {
 	RNG::fillBuffer(_sessionData.sessionNonce, sizeof(_sessionData.sessionNonce));
 	RNG::fillBuffer(_sessionData.validationKey, sizeof(_sessionData.validationKey));
 	memcpy(_nonce.sessionNonce, _sessionData.sessionNonce, sizeof(_sessionData.sessionNonce));
+	_log(LogLevelConnectionEncryption, false, "Set session data:");
+	_logArray(LogLevelConnectionEncryption, true, reinterpret_cast<uint8_t*>(&_sessionData), sizeof(_sessionData));
+}
+
+cs_ret_code_t ConnectionEncryption::setSessionData(session_data_t& sessionData) {
+	if (sessionData.protocol != _sessionData.protocol) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+//	memcpy(_sessionData.sessionNonce, sessionData.sessionNonce, sizeof(sessionData.sessionNonce));
+//	memcpy(_sessionData.validationKey, sessionData.validationKey, sizeof(sessionData.validationKey));
+	_sessionData = sessionData;
+	memcpy(_nonce.sessionNonce, sessionData.sessionNonce, sizeof(sessionData.sessionNonce));
+	_log(LogLevelConnectionEncryption, false, "Set session data:");
+	_logArray(LogLevelConnectionEncryption, true, reinterpret_cast<uint8_t*>(&_sessionData), sizeof(_sessionData));
+	return ERR_SUCCESS;
 }
 
 
@@ -198,6 +215,7 @@ void ConnectionEncryption::handleEvent(event_t& event) {
 
 			break;
 		}
+		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED:
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
 			// End of connection session.
 			KeysAndAccess::getInstance().invalidateSetupKey();

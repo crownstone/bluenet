@@ -284,8 +284,8 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 				case CS_MICROAPP_COMMAND_LOG_FLOAT: {
 					// TODO: We get into trouble when printing using %f
 					__attribute__((unused)) int value = *(int*)&payload[3];
-					int before = value / 10000;
-					int after = value - (before * 10000);
+					__attribute__((unused)) int before = value / 10000;
+					__attribute__((unused)) int after = value - (before * 10000);
 					_log(SERIAL_INFO, newLine, "%i.%04i", before, after);
 					break;
 				}
@@ -296,8 +296,8 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_STR: {
-					int str_length = length - 3; // Check if length <= max_length - 1, for null terminator.
-					char *data = reinterpret_cast<char*>(&(payload[3]));
+					__attribute__((unused)) int str_length = length - 3; // Check if length <= max_length - 1, for null terminator.
+					__attribute__((unused)) char *data = reinterpret_cast<char*>(&(payload[3]));
 					data[str_length] = 0;
 					_log(SERIAL_INFO, newLine, "%s", data);
 					break;

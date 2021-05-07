@@ -353,7 +353,7 @@ void Stack::setAesEncrypted(bool encrypted) {
 
 void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED && p_ble_evt->header.evt_id != BLE_GAP_EVT_ADV_REPORT) {
-		LOGi("BLE event $nordicEventTypeName(%u) (0x%X)", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
+		LOGStackDebug("BLE event $nordicEventTypeName(%u) (0x%X)", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
 	}
 
 	switch (p_ble_evt->header.evt_id) {

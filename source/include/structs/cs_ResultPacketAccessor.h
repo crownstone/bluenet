@@ -24,6 +24,13 @@ template <cs_buffer_size_t PAYLOAD_SIZE = CS_RESULT_PACKET_DEFAULT_PAYLOAD_SIZE>
 class ResultPacketAccessor: BufferAccessor {
 public:
 	/**
+	 * Only set or get fields when this instance is initialized.
+	 */
+	bool isInitialized() const {
+		return _buffer != NULL;
+	}
+
+	/**
 	 * Get the protocol version.
 	 */
 	uint8_t getProtocolVersion() const {
@@ -53,6 +60,14 @@ public:
 	void setType(cs_control_cmd_t type) {
 		checkInitialized();
 		_buffer->header.commandType = type;
+	}
+
+	/**
+	 * Get the result code.
+	 */
+	cs_ret_code_t getResult() const {
+		checkInitialized();
+		return _buffer->header.returnCode;
 	}
 
 	/**
@@ -171,7 +186,7 @@ protected:
 	result_packet_t<PAYLOAD_SIZE>* _buffer;
 
 	void checkInitialized() const {
-		assert(_buffer != NULL, "Butter not initialized");
+		assert(isInitialized(), "Buffer not initialized");
 	}
 
 private:

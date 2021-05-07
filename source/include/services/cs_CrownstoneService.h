@@ -73,11 +73,11 @@ protected:
 	void removeBuffer();
 
 protected:
-	Characteristic<buffer_ptr_t>* _controlCharacteristic = NULL;
-	Characteristic<buffer_ptr_t>* _resultCharacteristic = NULL;
+	Characteristic<buffer_ptr_t>* _controlCharacteristic = nullptr;
+	Characteristic<buffer_ptr_t>* _resultCharacteristic = nullptr;
 
-	ControlPacketAccessor<>* _controlPacketAccessor = NULL;
-	ResultPacketAccessor<>* _resultPacketAccessor = NULL;
+	ControlPacketAccessor<>* _controlPacketAccessor = nullptr;
+	ResultPacketAccessor<>* _resultPacketAccessor = nullptr;
 
 	/** Write a result to the result characteristic.
 	 *
@@ -98,6 +98,9 @@ protected:
 
 
 private:
-	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic = NULL;
-	Characteristic<uint32_t>*     _factoryResetCharacteristic = NULL;
+	uint8_t _keySessionDataBuffer[sizeof(session_data_t)];
+
+	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic = nullptr;
+	Characteristic<buffer_ptr_t>* _sessionDataUnencryptedCharacteristic = nullptr;
+	Characteristic<uint32_t>*     _factoryResetCharacteristic = nullptr;
 };
