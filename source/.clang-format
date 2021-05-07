@@ -30,7 +30,6 @@ BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeTernaryOperators: true
 AlignConsecutiveAssignments: true
 
-
 ###### Wrapping and general whitespace ######
 
 ColumnLimit: 120
