@@ -32,12 +32,6 @@
  * If the definition becomes large, move it to its own file and include it in this file.
  */
 
-/**
- * Length of a MAC address
- * TODO: check if this length is similar to BLE_GAP_ADDR_LEN
- */
-static constexpr uint8_t MAC_ADDRESS_LEN = 6;
-
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
 	MEMBER              = 1,
@@ -194,7 +188,7 @@ union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 		bool reliable: 1;
 		bool useKnownIds: 1;
 	} flags;
-	uint8_t asInt;
+	uint8_t asInt = 1; // Broadcast to all by default.
 };
 
 /**

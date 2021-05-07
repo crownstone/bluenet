@@ -45,6 +45,8 @@ void CrownstoneCentral::reset() {
 	_resultHandle =      BLE_GATT_HANDLE_INVALID;
 	_resultCccdHandle =  BLE_GATT_HANDLE_INVALID;
 	_opMode =            OperationMode::OPERATION_MODE_UNINITIALIZED;
+	_stoneId =           0;
+	stopTimeoutTimer();
 	resetNotifactionMergerState();
 }
 
@@ -54,7 +56,36 @@ void CrownstoneCentral::resetNotifactionMergerState() {
 }
 
 cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs) {
-	return ERR_NOT_IMPLEMENTED;
+	if (isBusy()) {
+		LOGCsCentralInfo("Busy");
+		return ERR_BUSY;
+	}
+
+	TYPIFY(CMD_MESH_TOPO_GET_MAC) eventData = stoneId;
+	event_t event(CS_TYPE::CMD_MESH_TOPO_GET_MAC, &eventData, sizeof(eventData));
+	event.dispatch();
+	cs_ret_code_t retCode = event.result.returnCode;
+	switch (retCode) {
+		case ERR_SUCCESS: {
+			// If address would be available immediately, we don't have to wait for it and can connect instead.
+			LOGw("Not implemented");
+			return ERR_NOT_IMPLEMENTED;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			// Start with a clean state.
+			reset();
+			_stoneId = stoneId;
+			_timeoutMs = timeoutMs;
+			_currentOperation = Operation::CONNECT;
+			setStep(ConnectSteps::GET_ADDRESS);
+
+			startTimeoutTimer(timeoutMs);
+			return ERR_WAIT_FOR_SUCCESS;
+		}
+		default: {
+			return retCode;
+		}
+	}
 }
 
 cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
@@ -65,6 +96,9 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 
 	cs_ret_code_t retCode = BleCentral::getInstance().connect(address, timeoutMs);
 	if (retCode == ERR_WAIT_FOR_SUCCESS) {
+		// Start with a clean state.
+		reset();
+		_timeoutMs = timeoutMs;
 		_currentOperation = Operation::CONNECT;
 		setStep(ConnectSteps::CONNECT);
 	}
@@ -178,6 +212,14 @@ void CrownstoneCentral::readSessionData() {
 
 bool CrownstoneCentral::isBusy() {
 	return _currentOperation != Operation::NONE;
+}
+
+void CrownstoneCentral::startTimeoutTimer(uint16_t timeoutMs) {
+	_timeoutCountDown = timeoutMs / TICK_INTERVAL_MS;
+}
+
+void CrownstoneCentral::stopTimeoutTimer() {
+	_timeoutCountDown = 0;
 }
 
 void CrownstoneCentral::setStep(ConnectSteps step) {
@@ -307,6 +349,33 @@ void CrownstoneCentral::sendOperationResult(event_t& event) {
 }
 
 //////////////////// Handlers ////////////////////
+
+void CrownstoneCentral::onTimeout() {
+	LOGCsCentralInfo("onTimeout");
+	finalizeOperation(_currentOperation, ERR_TIMEOUT);
+}
+
+void CrownstoneCentral::onMacAddress(mesh_topo_mac_result_t& result) {
+	if (!finalizeStep(ConnectSteps::GET_ADDRESS, ERR_SUCCESS)) {
+		return;
+	}
+	if (result.stoneId != _stoneId) {
+		LOGw("Wrong stone ID: received=%u expected=%u", result.stoneId, _stoneId);
+		return;
+	}
+	stopTimeoutTimer();
+
+	device_address_t address;
+	memcpy(address.address, result.macAddress, sizeof(address.address));
+
+	cs_ret_code_t retCode = BleCentral::getInstance().connect(address, _timeoutMs);
+	if (retCode != ERR_WAIT_FOR_SUCCESS) {
+		finalizeOperation(Operation::CONNECT, retCode);
+		return;
+	}
+	_currentOperation = Operation::CONNECT;
+	setStep(ConnectSteps::CONNECT);
+}
 
 void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 	if (!finalizeStep(ConnectSteps::CONNECT, retCode)) {
@@ -617,7 +686,12 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 		// Commands
 		case CS_TYPE::CMD_CS_CENTRAL_CONNECT: {
 			auto packet = CS_TYPE_CAST(CMD_CS_CENTRAL_CONNECT, event.data);
-			event.result.returnCode = connect(packet->address, packet->timeoutMs);
+			if (packet->stoneId != 0) {
+				event.result.returnCode = connect(packet->stoneId, packet->timeoutMs);
+			}
+			else {
+				event.result.returnCode = connect(packet->address, packet->timeoutMs);
+			}
 			break;
 		}
 		case CS_TYPE::CMD_CS_CENTRAL_DISCONNECT: {
@@ -663,6 +737,19 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION: {
 			auto result = CS_TYPE_CAST(EVT_BLE_CENTRAL_NOTIFICATION, event.data);
 			onNotification(*result);
+			break;
+		}
+		case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT: {
+			auto result = CS_TYPE_CAST(EVT_MESH_TOPO_MAC_RESULT, event.data);
+			onMacAddress(*result);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			if (_timeoutCountDown != 0) {
+				if (--_timeoutCountDown == 0) {
+					onTimeout();
+				}
+			}
 			break;
 		}
 		default: {

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <mesh/cs_MeshCommon.h>
+#include <mesh/cs_MeshMsgEvent.h>
 #include <third/std/function.h>
 #include <util/cs_BitmaskVarSize.h>
 
@@ -24,7 +25,7 @@ extern "C" {
 class MeshModelMulticastAcked {
 public:
 	/** Callback function definition. */
-	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result)> callback_msg_t;
+	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply)> callback_msg_t;
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.

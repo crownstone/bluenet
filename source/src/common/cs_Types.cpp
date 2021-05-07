@@ -235,6 +235,8 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -630,11 +632,11 @@ size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TRACKABLE:
 		return sizeof(TYPIFY(EVT_TRACKABLE));
 	case CS_TYPE::CMD_UPLOAD_FILTER:
-		return sizeof(trackable_parser_cmd_upload_filter_t);
+		return sizeof(asset_filter_cmd_upload_filter_t);
 	case CS_TYPE::CMD_REMOVE_FILTER:
-		return sizeof(trackable_parser_cmd_remove_filter_t);
+		return sizeof(asset_filter_cmd_remove_filter_t);
 	case CS_TYPE::CMD_COMMIT_FILTER_CHANGES:
-		return sizeof(trackable_parser_cmd_commit_filter_changes_t);
+		return sizeof(asset_filter_cmd_commit_filter_changes_t);
 	case CS_TYPE::CMD_GET_FILTER_SUMMARIES:
 		return 0;
 	case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING:
@@ -705,6 +707,10 @@ size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(CMD_MICROAPP_ADVERTISE));
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return sizeof(TYPIFY(EVT_HUB_DATA_REPLY));
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
+		return sizeof(TYPIFY(CMD_MESH_TOPO_GET_MAC));
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
+		return sizeof(TYPIFY(EVT_MESH_TOPO_MAC_RESULT));
 	case CS_TYPE::EVT_TWI_INIT:
 		return sizeof(TYPIFY(EVT_TWI_INIT));
 	case CS_TYPE::EVT_TWI_WRITE:
@@ -953,6 +959,8 @@ static const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT: return "EVT_MICROAPP_ERASE_RESULT";
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE: return "CMD_MICROAPP_ADVERTISE";
 	case CS_TYPE::EVT_HUB_DATA_REPLY: return "EVT_HUB_DATA_REPLY";
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC: return "CMD_MESH_TOPO_GET_MAC";
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT: return "EVT_MESH_TOPO_MAC_RESULT";
 	case CS_TYPE::EVT_TWI_INIT: return "EVT_TWI_INIT";
 	case CS_TYPE::EVT_TWI_WRITE: return "EVT_TWI_WRITE";
 	case CS_TYPE::EVT_TWI_READ: return "EVT_TWI_READ";
@@ -1181,6 +1189,8 @@ bool hasMultipleIds(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -1432,6 +1442,8 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -1672,6 +1684,8 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -1912,6 +1926,8 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
+	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:

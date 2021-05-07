@@ -163,6 +163,22 @@ private:
 	uint16_t _notificationMergedDataSize = 0;
 
 	/**
+	 * Keep up to which stone ID we're connected.
+	 * Not always set though.
+	 */
+	stone_id_t _stoneId = 0;
+
+	/**
+	 * Keep up which timeout we use.
+	 */
+	uint16_t _timeoutMs;
+
+	/**
+	 * A countdown until timeout.
+	 */
+	uint16_t _timeoutCountDown = 0;
+
+	/**
 	 * Reset connection variables.
 	 */
 	void reset();
@@ -195,6 +211,9 @@ private:
 	 */
 	bool isBusy();
 
+	void startTimeoutTimer(uint16_t timeoutMs);
+	void stopTimeoutTimer();
+
 	void setStep(ConnectSteps step);
 	void setStep(WriteControlSteps step);
 	void setStep(uint8_t step);
@@ -217,6 +236,8 @@ private:
 	/**
 	 * Event handlers.
 	 */
+	void onTimeout();
+	void onMacAddress(mesh_topo_mac_result_t& result);
 	void onConnect(cs_ret_code_t retCode);
 	void onDisconnect();
 	void onDiscovery(ble_central_discovery_t& result);

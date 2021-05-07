@@ -29,10 +29,12 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = meshMsg->type;
-	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
 	item.metaData.priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
-	item.reliable = false;
-	item.broadcast = true;
+	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
+	item.reliable = meshMsg->flags.flags.reliable;
+	item.broadcast = meshMsg->flags.flags.broadcast;
+	item.numIds = meshMsg->idCount;
+	item.stoneIdsPtr = meshMsg->targetIds;
 	item.msgPayload.len = meshMsg->size;
 	item.msgPayload.data = meshMsg->payload;
 
@@ -450,53 +452,53 @@ void MeshMsgSender::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_SEND_MESH_MSG: {
 			TYPIFY(CMD_SEND_MESH_MSG)* msg = (TYPIFY(CMD_SEND_MESH_MSG)*)event.data;
-			sendMsg(msg);
+			event.result.returnCode = sendMsg(msg);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME: {
 			TYPIFY(CMD_SEND_MESH_MSG_SET_TIME)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_TIME)*)event.data;
 			cs_mesh_model_msg_time_t item;
 			item.timestamp = *packet;
-			sendSetTime(&item);
+			event.result.returnCode = sendSetTime(&item);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: {
-			sendNoop();
+			event.result.returnCode = sendNoop();
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
 			TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
-			sendMultiSwitchItem(packet, event.source);
+			event.result.returnCode = sendMultiSwitchItem(packet, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS: {
 			TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)*)event.data;
-			sendBehaviourSettings(packet);
+			event.result.returnCode = sendBehaviourSettings(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION: {
 			TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)* packet = (TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)*)event.data;
-			sendProfileLocation(packet);
+			event.result.returnCode = sendProfileLocation(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)*)event.data;
-			sendTrackedDeviceRegister(packet);
+			event.result.returnCode = sendTrackedDeviceRegister(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)*)event.data;
-			sendTrackedDeviceToken(packet);
+			event.result.returnCode = sendTrackedDeviceToken(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)*)event.data;
-			sendTrackedDeviceHeartbeat(packet);
+			event.result.returnCode = sendTrackedDeviceHeartbeat(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)*)event.data;
-			sendTrackedDeviceListSize(packet);
+			event.result.returnCode = sendTrackedDeviceListSize(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND: {

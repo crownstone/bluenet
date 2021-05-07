@@ -14,6 +14,7 @@
 // Commands
 
 struct cs_central_connect_t {
+	stone_id_t stoneId = 0;  // If you set stoneId, that will be used instead of address.
 	device_address_t address;
 	uint16_t timeoutMs = 3000;
 };

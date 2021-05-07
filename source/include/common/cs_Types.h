@@ -14,8 +14,6 @@
 
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
-#include "protocol/cs_TrackableParserPackets.h"
-
 #include "structs/cs_PacketsInternal.h"
 #include <structs/cs_BleCentralPackets.h>
 #include <structs/cs_CrownstoneCentralPackets.h>
@@ -29,6 +27,7 @@
 
 #include <time/cs_TimeSyncMessage.h>
 #include <mesh/cs_MeshMsgEvent.h>
+#include <protocol/cs_AssetFilterPackets.h>
 
 // #include <presence/cs_PresenceHandler.h>
 
@@ -374,6 +373,9 @@ enum class CS_TYPE: uint16_t {
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
+	CMD_MESH_TOPO_GET_MAC,                            // Get the MAC address of a given stone ID.
+	EVT_MESH_TOPO_MAC_RESULT,                         // The resulting MAC address.
+
 	EVT_TWI_INIT,                                     // TWI initialisation.
 	EVT_TWI_WRITE,                                    // TWI write.
 	EVT_TWI_READ,                                     // TWI read (request).
@@ -619,9 +621,9 @@ typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 
-typedef trackable_parser_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
-typedef trackable_parser_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
-typedef trackable_parser_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
+typedef asset_filter_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
+typedef asset_filter_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
+typedef asset_filter_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
 typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
@@ -661,6 +663,8 @@ typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
+typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_MAC);
+typedef mesh_topo_mac_result_t TYPIFY(EVT_MESH_TOPO_MAC_RESULT);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 // TWI / I2C module
