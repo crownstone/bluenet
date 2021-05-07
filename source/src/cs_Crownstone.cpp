@@ -596,7 +596,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
 
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER==1
 	_nearestCrownstoneTracker.init();
 	_nearestCrownstoneTracker.listen();
 

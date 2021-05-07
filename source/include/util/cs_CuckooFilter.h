@@ -125,14 +125,14 @@ public:
 	// Sizing helpers
 	// -------------------------------------------------------------
 
-	static constexpr size_t fingerprintCount(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+	static constexpr size_t fingerprintCount(size_t bucketCount, cuckoo_index_t nestsPerBucket) {
 		return bucketCount * nestsPerBucket;
 	}
 
 	/**
 	 * Size of the byte buffer in bytes.
 	 */
-	static constexpr size_t bufferSize(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+	static constexpr size_t bufferSize(size_t bucketCount, cuckoo_index_t nestsPerBucket) {
 		return fingerprintCount(bucketCount, nestsPerBucket) * sizeof(cuckoo_fingerprint_t);
 	}
 
@@ -150,7 +150,7 @@ public:
 	/**
 	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
 	 */
-	constexpr auto bucketCount() { return 1 << data.bucketCountLog2; }
+	constexpr size_t bucketCount() { return 1 << data.bucketCountLog2; }
 
 	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nestsPerBucket); }
 

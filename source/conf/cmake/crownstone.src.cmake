@@ -106,6 +106,7 @@ ENDIF()
 
 IF (BUILD_CLOSEST_CROWNSTONE_TRACKER)
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_TrackableParser.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_TrackableParserPacketAccessors.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_NearestCrownstoneTracker.cpp")
 ENDIF()
 

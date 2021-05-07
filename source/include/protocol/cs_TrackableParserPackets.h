@@ -9,9 +9,16 @@
 #include <cstdint>
 #include <protocol/cs_CuckooFilterStructs.h>
 
+
+// ------------------ Command protocol version ------------------
+typedef uint8_t trackable_parser_cmd_protocol_t;
+constexpr trackable_parser_cmd_protocol_t TRACKABLE_PARSER_PROTOCOL_VERSION = 0;
+
+
 // ------------------ Command values -----------------
 
 struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint8_t filterId;
 	uint16_t chunkStartIndex;
 	uint16_t totalSize;
@@ -20,55 +27,74 @@ struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_t {
 };
 
 struct __attribute__((__packed__)) trackable_parser_cmd_remove_filter_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint8_t filterId;
 };
 
 struct __attribute__((__packed__)) trackable_parser_cmd_commit_filter_changes_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
 	uint16_t masterVersion;
 	uint16_t masterCrc;
 };
 
-struct __attribute__((__packed__)) trackable_parser_cmd_get_filer_summaries_t {
-	// empty
-};
-
 // ------------------ Return values ------------------
 
-struct __attribute__((__packed__)) trackable_parser_cmd_upload_filter_ret_t {};
+struct __attribute__((__packed__)) tracking_filter_summary_t {
+	uint8_t id;
+	uint8_t type;
+	uint16_t crc;
+};
 
-struct __attribute__((__packed__)) trackable_parser_cmd_remove_filter_ret_t {};
 
-struct __attribute__((__packed__)) trackable_parser_cmd_commit_filter_changes_ret_t {};
-
-struct __attribute__((__packed__)) trackable_parser_cmd_get_filer_summaries_ret_t {};
+struct __attribute__((__packed__)) trackable_parser_cmd_get_filter_summaries_ret_t {
+	trackable_parser_cmd_protocol_t protocolVersion;
+	uint16_t masterVersion;
+	uint16_t masterCrc;
+	uint16_t freeSpace;
+	tracking_filter_summary_t summaries[];
+};
 
 // ------------------ Filter format ------------------
 
-/**
- * Determines whether the filter has mac or advertisement data as input.
- */
-enum class FilterInputType : uint8_t {
-	MacAddress = 0,
-	AdData     = 1,
+enum class FilterType : uint8_t {
+	CuckooFilter = 0,
 };
 
-/**
- * Data associated to a parsing filter that is persisted to flash.
- */
-struct __attribute__((__packed__)) tracking_filter_meta_data_t {
-   public:
-	// sync info
-	uint8_t protocol;  // determines implementation type of filter
-	uint16_t version;
-
-	uint8_t profileId;  // devices passing the filter are assigned this profile id
-	FilterInputType inputType;
-
-	// sync state
-	union {
-		uint8_t flags;
-		struct {
-			uint8_t isActive : 1;
-		} bits;
-	};
+enum class AdvertisementSubdataType : uint8_t {
+	MacAddress       = 0,
+	AdDataType       = 1,
+	MaskedAdDataType = 2,
 };
+
+enum class FilterOutputFormat : uint8_t {
+	Mac          = 0,
+	ShortAssetId = 1,
+};
+
+struct __attribute__((__packed__)) ad_data_type_selector_t {
+	uint8_t adDataType;
+};
+
+struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
+	uint8_t adDataType;
+	uint32_t adDataMask;
+};
+
+struct __attribute__((__packed__)) advertisement_subdata_t {
+	AdvertisementSubdataType type;
+	uint8_t auxData[];
+};
+
+struct __attribute__((__packed__)) filter_output_type_t {
+	FilterOutputFormat out_format;
+	uint8_t in_format[];
+};
+
+struct __attribute__((__packed__)) filter_input_type_t {
+	advertisement_subdata_t format;
+};
+
+
+
+
+

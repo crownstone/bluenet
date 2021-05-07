@@ -312,10 +312,10 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_PRESENCE,                                 // Get the current presence.
 	EVT_TRACKABLE,                                    // TrackableParser emits updates of this type.
 
-	CMD_UPLOAD_FILTER,                                // Update data chunk for a filter.                 See protocol or cs_TrackableParser.h for more information.
-	CMD_REMOVE_FILTER,                                // Remove a filter by id.                          See protocol or cs_TrackableParser.h for more information.
-	CMD_COMMIT_FILTER_CHANGES,                        // Confirm all recent changes to filters.          See protocol or cs_TrackableParser.h for more information.
-	CMD_GET_FILTER_SUMMARIES,                         // Obtain status summary for each filter in RAM.   See protocol or cs_TrackableParser.h for more information.
+	CMD_UPLOAD_FILTER,                                // Update data chunk for a filter.                 See PROTOCOL.md CTRL_CMD_FILTER_UPLOAD
+	CMD_REMOVE_FILTER,                                // Remove a filter by id.                          See PROTOCOL.md CTRL_CMD_FILTER_REMOVE
+	CMD_COMMIT_FILTER_CHANGES,                        // Confirm all recent changes to filters.          See PROTOCOL.md CTRL_CMD_FILTER_COMMIT
+	CMD_GET_FILTER_SUMMARIES,                         // Obtain status summary for each filter in RAM.   See PROTOCOL.md CTRL_CMD_FILTER_GET_SUMMARIES
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -625,7 +625,7 @@ typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 typedef trackable_parser_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
 typedef trackable_parser_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
 typedef trackable_parser_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
-typedef trackable_parser_cmd_get_filer_summaries_t TYPIFY(CMD_GET_FILTER_SUMMARIES);
+typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

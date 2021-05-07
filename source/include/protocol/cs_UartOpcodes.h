@@ -39,7 +39,7 @@ enum UartOpcodeRx {
 //	UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE =       50203, // Enable writing filtered voltage samples (payload: bool enable)
 	UART_OPCODE_RX_POWER_LOG_POWER =                  50204, // Enable writing calculated power (payload: bool enable)
 
-	UART_OPCODE_RX_INJECT_EVENT =                     60000, // Dispatch any event. Payload: CS_TYPE + data.
+	UART_OPCODE_RX_INJECT_EVENT =                     60000, // Dispatch any event. Payload: CS_TYPE + event data structure.
 };
 
 enum UartOpcodeTx {

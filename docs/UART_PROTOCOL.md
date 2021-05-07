@@ -22,9 +22,13 @@ uint8   | Start          | 1 | Start of a message (0x7E).
 uint16  | Size           | 2 | Size of all data after this field, including CRC. Size 0 is always invalid.
 uint8   | Protocol major | 1 | Major protocol version, increased for breaking changes.
 uint8   | Protocol minor | 1 | Minor protocol version, increased when new types are added.
-uint8   | Message type   | 1 | Type of UART message, see below.
+[Uart message type](#uart-message-type)   | Message type   | 1 | Type of UART message, see below.
 uint8[] | Payload        | N | Depends on message type.
 uint16  | CRC            | 2 | The CRC16 (CRC-16-CCITT) of everything after the size field.
+
+
+## UART message type
+A uint8 to differentiate between several uart message formats.
 
 Type | Payload | Description
 ---- | ------- | -----------
@@ -101,7 +105,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 50201 | Log voltage                   | Never     | uint8  | Enable sending voltage samples.
 50202 | Log filtered current          | Never     | uint8  | Enable sending filtered current samples.
 50204 | Log power                     | Never     | uint8  | Enable sending calculated power samples.
-60000 | Inject event                  | Never     | ?      | Inject an internal event.
+60000 | Inject event                  | Never     | uint8[]      | Inject an internal event. Payload consists of the CS_TYPE and its associated event data structure.
 
 
 ## RX data types (events and replies)
@@ -142,6 +146,9 @@ Type  | Type name                     | Encrypted | Data   | Description
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh-result-packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result-packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | To be defined.
+10108 | Asset Rssi Data               | Yes       | [Asset rssi data](#asset-rssi-data-packet) | Information about an asset a crownstone on the mesh has forwarded.
+10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The rssi between an asset and its nearest Crownstone changed.
+10110 | Nearest crownstone timed out  | Yes       | [Nearest crownstone timeout](#nearest-crownstone-timeout) | A previously tracked asset hasn't been observed in a
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -270,6 +277,30 @@ Value | Name | Description
 4 | Profile location enter | The first user of given profile entered the given location.
 5 | Profile location exit  | The first user of given profile left the given location.
 
+
+### Asset rssi data packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | AssetMac | 6 | Mac address of the observed asset
+uint8 | StoneId | 1 | Id of the Crownstone that observed the asset
+uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
+uint8 | Channel | 1 | Channel of the observed advertisement
+
+### Nearest Crownstone update
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | AssetId | 3 | ShortAssetId of the observed asset
+uint8 | ClosestStoneId | 1 | Id of the Crownstone that this Crownstone thinks is closest to the asset
+uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
+uint8 | Channel | 1 | Channel of the observed advertisement
+
+### nearest Crownstone timeout
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | AssetId | 3 | ShortAssetId of the asset that timed out
 
 
 ### Binary log header
