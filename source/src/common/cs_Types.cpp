@@ -630,13 +630,13 @@ size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TRACKABLE:
 		return sizeof(TYPIFY(EVT_TRACKABLE));
 	case CS_TYPE::CMD_UPLOAD_FILTER:
-		return sizeof(TYPIFY(CMD_UPLOAD_FILTER));
+		return sizeof(trackable_parser_cmd_upload_filter_t);
 	case CS_TYPE::CMD_REMOVE_FILTER:
-		return sizeof(TYPIFY(CMD_REMOVE_FILTER));
+		return sizeof(trackable_parser_cmd_remove_filter_t);
 	case CS_TYPE::CMD_COMMIT_FILTER_CHANGES:
-		return sizeof(TYPIFY(CMD_COMMIT_FILTER_CHANGES));
+		return sizeof(trackable_parser_cmd_commit_filter_changes_t);
 	case CS_TYPE::CMD_GET_FILTER_SUMMARIES:
-		return sizeof(TYPIFY(CMD_GET_FILTER_SUMMARIES));
+		return 0;
 	case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING:
 		return sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING));
 	case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING:

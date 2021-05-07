@@ -347,6 +347,11 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
 95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
+110 | Upload filter | [Upload filter packet](./TRACKABLE_PARSER.md#upload-filter) | - | **Under development.** Uploads a part of a filter for the TrackableParser component. | x
+111 | Remove filter | [Remove filter packet](./TRACKABLE_PARSER.md#remove-filter) | - | **Under development.** Deletes a part of a filter for the TrackableParser component. | x
+112 | Commit filter changes |  [Commit filter changes packet](./TRACKABLE_PARSER.md#commit-filter-changes) | - | **Under development.** Commit changes made to the filters of the TrackableParser component. | x
+113 | Get filter summaries | [Get filter summaries packet](./TRACKABLE_PARSER.md#get-filter-summaries) | - | **Under development.** Obtain summaries of the filters for the TrackableParser component.  | x
+
 
 #### Setup packet
 

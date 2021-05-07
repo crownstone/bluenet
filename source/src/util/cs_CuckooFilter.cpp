@@ -118,6 +118,8 @@ bool CuckooFilter::removeFingerprintFromBucket(
 
 				if (lastFingerprintOfBucket != 0) {
 					candidateFingerprintForRemovalInArray = lastFingerprintOfBucket;
+					lastFingerprintOfBucket = 0;
+					break;
 				}
 			}
 
