@@ -269,7 +269,7 @@ A short summary of a filters state.
 Type | Name | Length
 --- | --- | --- 
 uint8_t | filterId | 1 
-uint8_t | filterType | 2
+uint8_t | filterType | 1
 uint16_t | filterCrc | 2
 
 ### Filter master crc
