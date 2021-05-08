@@ -1,8 +1,8 @@
-# Trackable Parser
+# Asset Filter Store
 
-This page describes the commands and packets that affect Bluenets Trackable Parser component public API.
+This page describes the commands and packets that affect Bluenets Asset Filter Store component public API.
 Typical workflow for updating the filters of the parser:
-1. send a command [get summaries](#get-filter-summaries) to find out what [protocol](#trackable-parser-protocol-version) the firmware uses and which filters are currently used
+1. send a command [get summaries](#get-filter-summaries) to find out what [protocol](#asset-filter-store-protocol-version) the firmware uses and which filters are currently used
 2. send commands to [upload](#upload-filter) new filters and [remove](#remove-filter) outdated ones.
 3. send a [commit command](#commit-filter-changes) to complete the changes.
 
@@ -17,7 +17,7 @@ Crownstone, which is implementation defined. (`MAX_FILTER_IDS`)
 ## Table of contents
 
 Version
-- [Trackable parser protocol version](#trackable-parser-protocol-version)
+- [Asset Filter Store protocol version](#asset-filter-store-protocol-version)
 
 Commands packets
 - [Upload filter](#upload-filter)
@@ -30,7 +30,7 @@ Filter format packets
 - [Tracking filter meta data](#tracking-filter-meta-data)
 - [Filter type](#filter-type)
 
-Filter flowcontrol packets
+Filter IO packets
 - [Filter input type](#filter-input-type)
 - [Filter output type](#filter-output-type)
 - [Filter output format](#filter-output-format)
@@ -38,7 +38,7 @@ Filter flowcontrol packets
 - [Advertisement subdata type](#advertisement-subdata-type)
 - [Masked AD data type selector](#masked-ad-data-type-selector)
 
-Filter statistics packets
+Filter description packets
 - [Filter summary](#filter-summary)
 - [Filter master crc](#filter-master-crc)
 - [Filter version](#filter-master-version)
@@ -47,8 +47,8 @@ Filter statistics packets
 
 ## Version
 
-### Trackable parser protocol version
-All commands that the trackable parser accepts contain a `uint8` command protocol version.
+### Asset Filter Store protocol version
+All commands that the Asset Filter Store accepts contain a `uint8` command protocol version.
 This version will be incremented when making breaking changes to the protocol.
 
 Name | type | Description
@@ -72,7 +72,7 @@ This command sets the `filterModificationInProgress` flag to true.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
+[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | 
 uint8_t | filterId | 1 | Which filter to add the entry to.
 uint16_t | chunkStartIndex | 2 |  Offset in bytes of this chunk.
 uint16_t | totalSize | 2 | Total size of the chunked data. Practical upper limit depends on command buffer size, prior allocated memory for filters in firmware etc. 
@@ -100,7 +100,7 @@ This command sets the `filterModificationInProgress` flag to true.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
+[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | 
 uint8_t | filterId | 1 | Id of the filter to remove.
 
 #### Remove filter result
@@ -123,8 +123,8 @@ Any malformed filters may immediately be deallocated to save resources and preve
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | 
-uint16_t | [MasterVersion](#master-version) | 2 | Value of the synchronization version of the TrackableParser that should be set to if this command is succesfully handled. 
+[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | 
+uint16_t | [MasterVersion](#master-version) | 2 | Value of the synchronization version of the Asset Filter Store that should be set to if this command is succesfully handled. 
 uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result.
 
 
@@ -149,10 +149,10 @@ Empty.
 
 Type | Name | Length | Description
 --- | --- | --- | --- 
-[CommandProtocolVersion](#trackable-parser-protocol-version) | protocol | 1 | Trackable parser protocol version implemented in the firmware
-uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the TrackableParser at time of constructing this result packet. 
+[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | Asset Filter Store protocol version implemented in the firmware
+uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the Asset Filter Store at time of constructing this result packet. 
 uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
-uint16_t | freeSpace | 2 | The number of bytes that the TrackableParser is still allowed to allocate. (Does not take into account free heap space on the firmware.)
+uint16_t | freeSpace | 2 | The number of bytes that the Asset Filter Store is still allowed to allocate. (Does not take into account free heap space on the firmware.)
 [Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 4 | Summaries of all filters currently on the Crownstone. 
 
 Result:
@@ -179,7 +179,7 @@ uint8[] | filterdata | | Byte representation of the filter, format depends on th
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Filter type](#filter-type) | filterType | 1 | Filter protocol of this filter. Describes a `filterdata` format.
-uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id. Use 255 for no profile.
+uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id.
 [Filter input type](#filter-input-type) | inputType |  | Determines how this filter interprets incoming entries.
 [Filter output type](#filter-output-type) | outputType |  | Determines how advertisements that pass this filter are handled by the system.
 
@@ -192,7 +192,7 @@ Value | Name | Description
 0 | CuckooFilter | Filter data is interpreted as [Cuckoo filter data](./CUCKOO_FILTER.md#cuckoo-filter-data)
 
 
-## Filter flowcontrol packets
+## Filter IO packets
 
 ### Filter input type
 The input type metadata field of a filter defines what data is put into the filter when an advertisement is received
@@ -261,7 +261,7 @@ uint8_t | AdDataType | select an entry with `typeI` equal to `AdDataType`. If mu
 uint32_t | AdDataMask | bit-to-byte-wise mask for `dataI`.
 
 
-## Filter statistics packets
+## Filter description packets
 
 ### Filter summary
 A short summary of a filters state.
