@@ -34,6 +34,7 @@ extern "C" {
 #define SERIAL_INFO                 6
 #define SERIAL_DEBUG                7
 #define SERIAL_VERBOSE              8
+#define SERIAL_VERY_VERBOSE         9
 
 #define SERIAL_CRLF "\r\n"
 

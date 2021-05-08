@@ -6,8 +6,8 @@
  */
 #pragma once
 
-#include <protocol/cs_TrackableParserPackets.h>
-#include <structs/cs_TrackableParserStructs.h>
+#include <protocol/cs_AssetFilterPackets.h>
+#include <structs/cs_AssetFilterStructs.h>
 #include <util/cs_CuckooFilter.h>
 
 /**
@@ -17,13 +17,13 @@
  */
 
 
-class AdvertisementSubdata {
+class AssetFilterInput {
 public:
 	uint8_t* _data;  // byte representation of this object.
 
-	AdvertisementSubdata(uint8_t* data) : _data(data){}
+	AssetFilterInput(uint8_t* data) : _data(data){}
 
-	AdvertisementSubdataType*       type();
+	AssetFilterInputType*           type();
 	ad_data_type_selector_t*        AdTypeField();  // returns nullptr unless *type() == AdDataType
 	masked_ad_data_type_selector_t* AdTypeMasked(); // returns nullptr unless *type() == MaskedAdDataType
 
@@ -33,52 +33,52 @@ public:
 	size_t length();
 };
 
-class FilterOutputType {
+class AssetFilterOutput {
 public:
 	uint8_t* _data;
 
-	FilterOutputType(uint8_t* data) : _data(data) {}
+	AssetFilterOutput(uint8_t* data) : _data(data) {}
 
-	FilterOutputFormat* outFormat();
-	AdvertisementSubdata inFormat(); // invalid unless *outFormat() == ShortAssetId
-
-	size_t length();
-};
-
-class TrackingFilterMetadata {
-public:
-	uint8_t* _data;  // byte representation of this object.
-
-	TrackingFilterMetadata(uint8_t* data) : _data(data) {}
-
-	FilterType*           type();
-	uint8_t*              profileId();
-	AdvertisementSubdata  inputType();
-	FilterOutputType      outputType();
+	AssetFilterOutputFormat* outFormat();
+	AssetFilterInput         inFormat(); // invalid unless *outFormat() == ShortAssetId
 
 	size_t length();
 };
 
-class TrackingFilterData {
+class AssetFilterMetadata {
 public:
 	uint8_t* _data;  // byte representation of this object.
 
-	TrackingFilterData(uint8_t* data) : _data(data) {}
+	AssetFilterMetadata(uint8_t* data) : _data(data) {}
 
-	TrackingFilterMetadata metadata();
+	AssetFilterType*  filterType();
+	uint8_t*          profileId();
+	AssetFilterInput  inputType();
+	AssetFilterOutput outputType();
+
+	size_t length();
+};
+
+class AssetFilterData {
+public:
+	uint8_t* _data;  // byte representation of this object.
+
+	AssetFilterData(uint8_t* data) : _data(data) {}
+
+	AssetFilterMetadata metadata();
 	CuckooFilter filterdata(); // invalid unless *metadata().type() == FilterType::CukooFilter
 
 	size_t length();
 };
 
-class TrackingFilter {
+class AssetFilter {
 public:
 	uint8_t* _data;  // byte representation of this object.
 
-	TrackingFilter(uint8_t* data) : _data(data) {}
+	AssetFilter(uint8_t* data) : _data(data) {}
 
-	tracking_filter_runtime_data_t* runtimedata();
-	TrackingFilterData filterdata();
+	asset_filter_runtime_data_t* runtimedata();
+	AssetFilterData filterdata();
 
 	size_t length();
 };

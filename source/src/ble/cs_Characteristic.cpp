@@ -8,7 +8,8 @@
 #include <ble/cs_Characteristic.h>
 #include <storage/cs_State.h>
 
-// #define PRINT_CHARACTERISTIC_VERBOSE
+#define LOGCharacteristicDebug LOGvv
+#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
 	_name(NULL),
@@ -188,10 +189,8 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 		// GATT is public facing, getValue is internal
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
-#ifdef PRINT_CHARACTERISTIC_VERBOSE
-		_log(SERIAL_DEBUG, false, "data: ");
-		BLEutil::printArray(getValuePtr(), valueLength);
-#endif
+		_log(LogLevelCharacteristicDebug, false, "data: ");
+		BLEutil::printArray(getValuePtr(), valueLength, LogLevelCharacteristicDebug);
 
 		// we calculate what size buffer we need
 		cs_ret_code_t retVal = ERR_SUCCESS;
@@ -206,10 +205,8 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 					_minAccessLevel,
 					encryptionType
 			);
-#ifdef PRINT_CHARACTERISTIC_VERBOSE
-			_log(SERIAL_DEBUG, false, "encrypted: ");
-			BLEutil::printArray(valueGattAddress, encryptionBufferLength);
-#endif
+			_log(LogLevelCharacteristicDebug, false, "encrypted: ");
+			BLEutil::printArray(valueGattAddress, encryptionBufferLength, LogLevelCharacteristicDebug);
 		}
 		if (!SUCCESS(retVal)) {
 			// clear the partially encrypted buffer.
@@ -233,9 +230,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 
 
 	uint16_t gattValueLength = getGattValueLength();
-#ifdef PRINT_CHARACTERISTIC_VERBOSE
-	LOGd("gattValueLength=%u gattValueAddress=%p, gattValueMaxSize=%u", gattValueLength, valueGattAddress, getGattValueMaxLength());
-#endif
+	LOGCharacteristicDebug("gattValueLength=%u gattValueAddress=%p, gattValueMaxSize=%u", gattValueLength, valueGattAddress, getGattValueMaxLength());
 
 	ble_gatts_value_t gatts_value;
 	gatts_value.len = gattValueLength;
@@ -354,7 +349,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		if (valueLength - offset > MAX_NOTIFICATION_LEN) {
 			notification.partNr = offset / MAX_NOTIFICATION_LEN;
 		} else {
-			notification.partNr = 0xFF;
+			notification.partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
 		}
 
 //		LOGi("dataLen: %d ", dataLen);

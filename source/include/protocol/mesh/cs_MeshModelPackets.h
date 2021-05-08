@@ -66,6 +66,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t
 	CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT    = 23, // Payload: nearest_witness_report_t
 	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t
+	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -233,4 +234,10 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 	rssi_data_t channel38;
 	rssi_data_t channel39;
 };
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_stone_mac_t {
+	uint8_t type; // 0 = request, 1 = reply.
+	uint8_t mac[MAC_ADDRESS_LEN];
+};
+
 

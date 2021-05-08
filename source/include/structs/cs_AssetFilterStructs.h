@@ -6,14 +6,14 @@
  */
 #pragma once
 
-#include <protocol/cs_CuckooFilterStructs.h>
-#include <protocol/cs_TrackableParserPackets.h>
 #include <cstdint>
+#include <protocol/cs_AssetFilterPackets.h>
+#include <protocol/cs_CuckooFilterStructs.h>
 
 /**
- * Runtime meta data associated to a tracking_filter_t that is not persisted to flash.
+ * Runtime meta data associated to an asset filter that is not persisted to flash.
  */
-struct __attribute__((__packed__)) tracking_filter_runtime_data_t {
+struct __attribute__((__packed__)) asset_filter_runtime_data_t {
 	/**
 	 * Id of a filter.
 	 *

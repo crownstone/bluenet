@@ -67,8 +67,8 @@ void asACR01B1D(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
 
-	p_config->scanIntervalUs                     = 200 * 1000;
-	p_config->scanWindowUs                       = 150 * 1000;
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 105 * 1000; // This board cannot provide enough power for 100% scanning.
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -138,8 +138,8 @@ void asACR01B10D(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 //	p_config->currentRange                       = 3000; // 0-3V
 
-	p_config->scanIntervalUs                     = 2000 * 1000;
-	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 140 * 1000;
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -233,8 +233,8 @@ void asACR01B13B(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 2000 * 1000;
-	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 140 * 1000;
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -281,8 +281,8 @@ void asACR01B2C(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 200 * 1000;
-	p_config->scanWindowUs                       = 150 * 1000;
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 105 * 1000; // This board cannot provide enough power for 100% scanning.
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -331,8 +331,8 @@ void asACR01B2G(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 200 * 1000;
-	p_config->scanWindowUs                       = 150 * 1000; // This board cannot provide enough power for 100% scanning.
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 105 * 1000; // This board cannot provide enough power for 100% scanning.
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -423,8 +423,8 @@ void asACR01B11A(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20;          // unknown
 
-	p_config->scanIntervalUs                     = 2000 * 1000;
-	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 140 * 1000;
 	p_config->tapToToggleDefaultRssiThreshold    = -35;          // unknown
 }
 
@@ -510,8 +510,8 @@ void asPca10040(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -40;
 
-	p_config->scanIntervalUs                     = 2000 * 1000;
-	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 140 * 1000;
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -548,8 +548,8 @@ void asGuidestone(boards_config_t* p_config) {
 
 	p_config->minTxPower          = -20;
 
-	p_config->scanIntervalUs      = 2000 * 1000;
-	p_config->scanWindowUs        = 2000 * 1000;
+	p_config->scanIntervalUs      = 140 * 1000;
+	p_config->scanWindowUs        = 140 * 1000;
 }
 
 uint32_t configure_board(boards_config_t* p_config) {

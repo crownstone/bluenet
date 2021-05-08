@@ -101,8 +101,8 @@ BUILD_TWI=0
 # Enable nrfx gpiote driver (for GPIO pins)
 BUILD_GPIOTE=0
 
-# Add support for RSSI data tracker
-BUILD_RSSI_DATA_TRACKER=0
+# Add support for mesh topology research
+BUILD_MESH_TOPOLOGY_RESEARCH=0
 
 # Add support for tracking functionality w.r.t which crownstone is closest to a trackable device
 BUILD_CLOSEST_CROWNSTONE_TRACKER=0

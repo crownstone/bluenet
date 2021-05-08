@@ -16,16 +16,6 @@
 namespace MeshUtil {
 
 bool isValidMeshMessage(cs_mesh_msg_t* meshMsg) {
-	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID) {
-		LOGMeshModelPacketHelperWarn("Invalid reliability");
-		return false;
-	}
-	if (meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
-		LOGMeshModelPacketHelperWarn("message size too big %u > %u",
-				meshMsg->size,
-				MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE);
-		return false;
-	}
 	return isValidMeshPayload(meshMsg->type, meshMsg->payload, meshMsg->size);
 }
 
@@ -84,6 +74,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t);
 		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT:
 			return payloadSize == sizeof(nearest_witness_report_t);
+		case CS_MESH_MODEL_TYPE_STONE_MAC:
+			return payloadSize == sizeof(cs_mesh_model_msg_stone_mac_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}

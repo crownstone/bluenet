@@ -14,10 +14,9 @@
 
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
-#include "protocol/cs_TrackableParserPackets.h"
-
 #include "structs/cs_PacketsInternal.h"
 #include <structs/cs_BleCentralPackets.h>
+#include <structs/cs_CrownstoneCentralPackets.h>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
@@ -28,6 +27,7 @@
 
 #include <time/cs_TimeSyncMessage.h>
 #include <mesh/cs_MeshMsgEvent.h>
+#include <protocol/cs_AssetFilterPackets.h>
 
 // #include <presence/cs_PresenceHandler.h>
 
@@ -326,7 +326,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
-	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated.
+	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated. Data pointer has to point to memory that stays valid!
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
@@ -348,11 +348,11 @@ enum class CS_TYPE: uint16_t {
 	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
-	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.    See BleCentral::connect().
-	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device. See BleCentral::disconnect().
-	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.      See BleCentral::discoverServices().
-	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.  See BleCentral::read().
-	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic. See BleCentral::write().
+	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.       See BleCentral::connect().
+	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device.    See BleCentral::disconnect().
+	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.         See BleCentral::discoverServices().
+	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.     See BleCentral::read().
+	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic.    See BleCentral::write().
 
 	EVT_BLE_CENTRAL_CONNECT_START,                    // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
 	EVT_BLE_CENTRAL_CONNECT_RESULT,                   // Result of a connection attempt.
@@ -361,9 +361,21 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                 // Result of service discovery.
 	EVT_BLE_CENTRAL_READ_RESULT,                      // Result of a read.
 	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
+	EVT_BLE_CENTRAL_NOTIFICATION,                     // A notification has been received.
+
+	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device.       See CrownstoneCentral::connect().
+	CMD_CS_CENTRAL_DISCONNECT,                        // Disconnect from device.    See CrownstoneCentral::disconnect().
+	CMD_CS_CENTRAL_WRITE,                             // Write a control command.   See CrownstoneCentral::write().
+
+	EVT_CS_CENTRAL_CONNECT_RESULT,
+	EVT_CS_CENTRAL_READ_RESULT,
+	EVT_CS_CENTRAL_WRITE_RESULT,
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
+	CMD_MESH_TOPO_GET_MAC,                            // Get the MAC address of a given stone ID.
+	EVT_MESH_TOPO_MAC_RESULT,                         // The resulting MAC address.
+
 	EVT_TWI_INIT,                                     // TWI initialisation.
 	EVT_TWI_WRITE,                                    // TWI write.
 	EVT_TWI_READ,                                     // TWI read (request).
@@ -511,8 +523,15 @@ typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
 typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
-typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
 typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef  ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
+typedef  cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
+typedef  void TYPIFY(CMD_CS_CENTRAL_DISCONNECT);
+typedef  cs_central_write_t TYPIFY(CMD_CS_CENTRAL_WRITE);
+typedef  cs_ret_code_t TYPIFY(EVT_CS_CENTRAL_CONNECT_RESULT);
+typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_READ_RESULT);
+typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_WRITE_RESULT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
@@ -602,9 +621,9 @@ typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 
-typedef trackable_parser_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
-typedef trackable_parser_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
-typedef trackable_parser_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
+typedef asset_filter_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
+typedef asset_filter_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
+typedef asset_filter_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
 typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
@@ -644,6 +663,8 @@ typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
+typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_MAC);
+typedef mesh_topo_mac_result_t TYPIFY(EVT_MESH_TOPO_MAC_RESULT);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 // TWI / I2C module

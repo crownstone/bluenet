@@ -9,7 +9,7 @@
 #include <encryption/cs_KeysAndAccess.h>
 #include <storage/cs_State.h>
 
-#define KeysAndAccessDebug LOGnone
+#define LOGKeysAndAccessDebug LOGnone
 
 KeysAndAccess::KeysAndAccess() {
 
@@ -58,7 +58,7 @@ bool KeysAndAccess::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessL
 }
 
 bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBuf, cs_buffer_size_t outBufSize) {
-	KeysAndAccessDebug("getKey accessLevel=%u", accessLevel);
+	LOGKeysAndAccessDebug("getKey accessLevel=%u", accessLevel);
 	if (outBufSize < ENCRYPTION_KEY_LENGTH) {
 		LOGe("Buf size too small");
 		return false;
@@ -82,7 +82,9 @@ bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBu
 			keyConfigType = CS_TYPE::CONFIG_KEY_LOCALIZATION;
 			break;
 		case SETUP: {
-			if (_operationMode == OperationMode::OPERATION_MODE_SETUP && _setupKeyValid) {
+			// Don't check if in setup mode: we want to use this for outgoing connections too.
+			// The check _setupKeyValid == true should be enough.
+			if (_setupKeyValid) {
 				memcpy(outBuf, _setupKey, ENCRYPTION_KEY_LENGTH);
 				return true;
 			}
@@ -100,7 +102,7 @@ bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBu
 }
 
 cs_data_t KeysAndAccess::getSetupKey() {
-	KeysAndAccessDebug("getSetupKey valid=%u", _setupKeyValid);
+	LOGKeysAndAccessDebug("getSetupKey valid=%u", _setupKeyValid);
 	if (!_setupKeyValid) {
 		return cs_data_t();
 	}
@@ -108,11 +110,22 @@ cs_data_t KeysAndAccess::getSetupKey() {
 }
 
 void KeysAndAccess::generateSetupKey() {
-	KeysAndAccessDebug("generateSetupKey opMode=%u", _operationMode);
+	LOGKeysAndAccessDebug("generateSetupKey opMode=%u", _operationMode);
 	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		RNG::fillBuffer(_setupKey, SOC_ECB_KEY_LENGTH);
 		_setupKeyValid = true;
 	}
+}
+
+cs_ret_code_t KeysAndAccess::setSetupKey(cs_data_t data) {
+	LOGKeysAndAccessDebug("Set setup key");
+	if (data.len != sizeof(_setupKey)) {
+		LOGw("Wrong key length: %u", data.len);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	memcpy(_setupKey, data.data, sizeof(_setupKey));
+	_setupKeyValid = true;
+	return ERR_SUCCESS;
 }
 
 void KeysAndAccess::invalidateSetupKey() {

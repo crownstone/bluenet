@@ -32,6 +32,23 @@ struct cs_data_t {
 	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size) : data(buf), len(size) {}
 };
 
+/**
+ * Variable length data encapsulation in terms of length and pointer to data.
+ */
+struct cs_const_data_t {
+	const uint8_t* data = nullptr;      /** < Pointer to data. */
+	cs_buffer_size_t len = 0;      /** < Length of data. */
+
+	cs_const_data_t():
+		data(nullptr),
+		len(0)
+	{}
+	cs_const_data_t(const uint8_t* buf, cs_buffer_size_t size):
+		data(buf),
+		len(size)
+	{}
+};
+
 struct cs_result_t {
 	/**
 	 * Return code.
@@ -74,7 +91,7 @@ enum CS_ADDRESS_TYPE {
 
 struct __attribute__((packed)) device_address_t {
 	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t addressType;  // See CS_ADDRESS_TYPE
+	uint8_t addressType = CS_ADDRESS_TYPE_RANDOM_STATIC;
 };
 
 /**
@@ -155,17 +172,23 @@ enum cs_mesh_msg_urgency {
 /**
  * Struct to communicate a mesh message.
  * type            Type of message.
- * payload         The payload.
- * size            Size of the payload.
- * reliability     How reliable the message should be.
+ * flags           How to send the message.
+ * reliability     Timeout for acked messages, number of transmission for unacked messages. Use 0 for the default value.
  * urgency         How quick the message should be sent.
+ * idCount         Number of IDs, for targeted messages.
+ * targetIds       Pointer to array with targeted stone IDs.
+ * size            Size of the payload.
+ * payload         The payload.
  */
 struct cs_mesh_msg_t {
 	cs_mesh_model_msg_type_t type;
-	uint8_t* payload;
-	size16_t size                       = 0;
-	cs_mesh_msg_reliability reliability = CS_MESH_RELIABILITY_LOW;
-	cs_mesh_msg_urgency urgency         = CS_MESH_URGENCY_LOW;
+	mesh_control_command_packet_flags_t flags;
+	uint8_t reliability         = 0;
+	cs_mesh_msg_urgency urgency = CS_MESH_URGENCY_LOW;
+	uint8_t idCount             = 0;
+	stone_id_t* targetIds       = nullptr;
+	size16_t size               = 0;
+	uint8_t* payload            = nullptr;
 };
 
 /**
@@ -322,4 +345,9 @@ struct microapp_advertise_request_t {
 struct microapp_upload_internal_t {
 	microapp_upload_t header;
 	cs_data_t data;
+};
+
+struct mesh_topo_mac_result_t {
+	uint8_t stoneId;
+	uint8_t macAddress[MAC_ADDRESS_LEN];
 };

@@ -9,6 +9,7 @@
 
 #include <common/cs_Types.h>
 #include <mesh/cs_MeshDefines.h>
+#include <mesh/cs_MeshMsgEvent.h>
 
 /**
  * Mesh utils without dependencies on mesh SDK.

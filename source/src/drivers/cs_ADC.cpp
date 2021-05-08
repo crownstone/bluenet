@@ -660,7 +660,7 @@ void ADC::_handleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (dataCallbackRegistered()) {
 		if (_firstBuffer) {
-			LOGw("ADC restarted");
+			LOGw("ADC restarted (ignore first warning on boot)");
 			event_t event(CS_TYPE::EVT_ADC_RESTARTED, NULL, 0);
 			event.dispatch();
 		}

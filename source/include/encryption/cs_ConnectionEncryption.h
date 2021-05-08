@@ -72,6 +72,16 @@ public:
 	static cs_buffer_size_t getPlaintextBufferSize(cs_buffer_size_t encryptedBufferSize, ConnectionEncryptionType encryptionType);
 
 	/**
+	 * Set session data. To be used when connecting to another crownstone.
+	 *
+	 * @param[in]  sessionData              The session data that has been read.
+	 *
+	 * @return ERR_PROTOCOL_UNSUPPORTED     When the protocol is not supported.
+	 * @return ERR_SUCCESS                  When the session data is set.
+	 */
+	cs_ret_code_t setSessionData(session_data_t& sessionData);
+
+	/**
 	 * Whether a it's allowed to write to a characteristic.
 	 *
 	 * TODO: remove and let stack handle this.

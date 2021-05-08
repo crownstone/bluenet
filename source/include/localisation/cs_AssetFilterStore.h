@@ -7,10 +7,10 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
-#include <protocol/cs_TrackableParserPackets.h>
-#include <structs/cs_TrackableParserStructs.h>
-
+#include <localisation/cs_AssetFilterPacketAccessors.h>
 #include <optional>
+#include <protocol/cs_AssetFilterPackets.h>
+#include <structs/cs_AssetFilterStructs.h>
 
 /**
  * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
@@ -18,13 +18,20 @@
  *
  * Responsible for throttling input to the localisation module using filter parsers.
  */
-class TrackableParser : public EventListener {
+class AssetFilterStore : public EventListener {
 public:
 	/**
 	 * set _filterModificationInProgress to false.
 	 */
-	void init();
-	void handleEvent(event_t& evt);
+	cs_ret_code_t init();
+
+	/**
+	 * Whether changes are in progress.
+	 */
+	bool isInProgress();
+
+	uint8_t getFilterCount();
+	AssetFilter getFilter(uint8_t index);
 
 	constexpr static size_t MAX_FILTER_IDS     = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
@@ -45,13 +52,13 @@ private:
 	 *  To access a filter, construct an accessor object of type TrackingFilter
 	 *  for the given buffer.
 	 */
-	uint8_t* _parsingFilters[MAX_FILTER_IDS] = {};
+	uint8_t* _filters[MAX_FILTER_IDS] = {};
 
 	/**
 	 * Number of allocated filters in the parsingFilters array.
 	 * Shall suffice: 0 <=  _parsingFiltersCount < MAX_FILTER_IDS
 	 */
-	uint8_t _parsingFiltersCount = 0;
+	uint8_t _filtersCount = 0;
 
 	/**
 	 * Hash of all the hashes of the allocated filters, sorted by filterId.
@@ -62,7 +69,7 @@ private:
 	/**
 	 * Keeps track of the version of the filters -- not in use yet.
 	 */
-	uint16_t _masterVersion;
+	uint16_t _masterVersion = 0;
 
 	/**
 	 * When this value is true:
@@ -77,15 +84,15 @@ private:
 	// ------------------ Advertisment processing ------------------
 	// -------------------------------------------------------------
 
-	/**
-	 * Dispatches a TrackedEvent for the given advertisement.
-	 */
-	void handleScannedDevice(scanned_device_t* device);
+//	/**
+//	 * Dispatches a TrackedEvent for the given advertisement.
+//	 */
+//	void handleScannedDevice(scanned_device_t* device);
 
-	/**
-	 * Not in use yet
-	 */
-	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
+//	/**
+//	 * Not in use yet
+//	 */
+//	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
 
 	// -------------------------------------------------------------
 	// ------------------- Filter data management ------------------
@@ -103,14 +110,14 @@ private:
 	 * Returns nullptr on failure, pointer to the buffer on success.
 	 * On success the buffer pointer is also appended to the _parsingFilters.
 	 */
-	uint8_t* allocateParsingFilter(uint8_t filterId, size_t payloadSize);
+	uint8_t* allocateFilter(uint8_t filterId, size_t payloadSize);
 
 	/**
 	 * Same as deallocateParsingFilterByIndex, but looks up the filter by the filterId.
 	 *
 	 * Returns true when id is found and filter is deallocated, false else.
 	 */
-	bool deallocateParsingFilter(uint8_t filterId);
+	bool deallocateFilter(uint8_t filterId);
 
 	/**
 	 * Deallocates the filter at given index in the _parsingFilters array.
@@ -118,7 +125,7 @@ private:
 	 * If a gap is created in the array, this method moves all filters
 	 * with an index above the given one down one index to close this gap.
 	 */
-	void deallocateParsingFilterByIndex(uint8_t parsingFilterIndex);
+	void deallocateFilterByIndex(uint8_t parsingFilterIndex);
 
 	/**
 	 * Looks up given filter id in the list of filters. Returns nullptr if not found.
@@ -127,13 +134,13 @@ private:
 	 * if _parsingFilters[i] == nullptr then _parsingFilters[j] == nullptr
 	 * for all j>=i.
 	 */
-	uint8_t* findParsingFilter(uint8_t filterId);
+	uint8_t* findFilter(uint8_t filterId);
 
 	/**
 	 * Returns the index of the parsing filter with given filterId,
 	 * or an empty optional if that wasn't available.
 	 */
-	std::optional<size_t> findParsingFilterIndex(uint8_t filterId);
+	std::optional<size_t> findFilterIndex(uint8_t filterId);
 
 	/**
 	 * Returns the sums of all getTotalSize of the non-nullptrs in the _parsingFilters array.
@@ -155,14 +162,14 @@ private:
 	 * allocate space in the buffer. If this fails, abort. Else set the filterId to
 	 * 'upload in progress'.
 	 */
-	cs_ret_code_t handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmdData);
+	cs_ret_code_t handleUploadFilterCommand(const asset_filter_cmd_upload_filter_t& cmdData);
 
 	/**
 	 * Removes given filter immediately.
 	 * Flags this crownstone as 'filter modification in progress'.
 	 * Returns ERR_SUCCESS_NO_CHANGE if filter not found, else ERR_SUCCESS.
 	 */
-	cs_ret_code_t handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmdData);
+	cs_ret_code_t handleRemoveFilterCommand(const asset_filter_cmd_remove_filter_t& cmdData);
 
 	/**
 	 * Inactive filters are activated.
@@ -170,7 +177,7 @@ private:
 	 * This crownstones master version and crc are broadcasted over the mesh.
 	 * Sets 'filter modification in progress' flag of this crownstone back to off.
 	 */
-	cs_ret_code_t handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmdData);
+	cs_ret_code_t handleCommitFilterChangesCommand(const asset_filter_cmd_commit_filter_changes_t& cmdData);
 
 	/**
 	 * Writes summaries of the filters into the result as a
@@ -196,7 +203,6 @@ private:
 	 * Sets the _masterVersion and _masterHash, and _filterModificationInProgress to false.
 	 */
 	void endProgress(uint16_t newMasterHash, uint16_t newMasterVersion);
-	bool isInProgress();
 
 	/**
 	 * The master crc is the crc16 of the filters in the buffer.
@@ -222,21 +228,9 @@ private:
 	 */
 	void computeCrcs();
 
-	// -------------------------------------------------------------
-	// ----------------------- OLD interface -----------------------
-	// -------------------------------------------------------------
-
-	// TODO(#177858707) remove this.
+public:
 	/**
-	 *  Checks service uuids of the scanned device and returns true
-	 *  if we can find an official 16 bit Tile service uuid.
-	 *
-	 *  Caveats:
-	 *  - Tiles are not iBeacons.
-	 *  - expects the services to be listed in the type
-	 *    BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE.
+	 * Internal usage.
 	 */
-	bool isTileDevice(scanned_device_t* scannedDevice);
-
-	void logServiceData(scanned_device_t* scannedDevice);
+	void handleEvent(event_t& evt);
 };
