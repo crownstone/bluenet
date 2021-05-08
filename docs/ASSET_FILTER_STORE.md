@@ -31,8 +31,8 @@ Filter format packets
 - [Filter type](#filter-type)
 
 Filter IO packets
-- [Filter input type](#filter-input-type)
-- [Filter output type](#filter-output-type)
+- [Filter input type](#filter-input-description)
+- [Filter output type](#filter-output-description)
 - [Filter output format](#filter-output-format)
 - [Advertisement subdata](#advertisement-subdata)
 - [Advertisement subdata type](#advertisement-subdata-type)
@@ -180,8 +180,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 [Filter type](#filter-type) | filterType | 1 | Filter protocol of this filter. Describes a `filterdata` format.
 uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id.
-[Filter input type](#filter-input-type) | inputType |  | Determines how this filter interprets incoming entries.
-[Filter output type](#filter-output-type) | outputType |  | Determines how advertisements that pass this filter are handled by the system.
+[Filter input type](#filter-input-description) | inputDescription |  | Determines how this filter interprets incoming entries.
+[Filter output type](#filter-output-description) | outputDescription |  | Determines how advertisements that pass this filter are handled by the system.
 
 ### Filter type
 
@@ -194,22 +194,22 @@ Value | Name | Description
 
 ## Filter IO packets
 
-### Filter input type
+### Filter input description
 The input type metadata field of a filter defines what data is put into the filter when an advertisement is received
 in order to determine wether or not the advertisement 'passed' the filter or is 'rejected'.
 
 Type | Name | Description
 --- | --- | ---
-advertisement_subdata_t | format | What part of the advertisment is used to filter on.
+[Advertisement subdata description](#advertisement-subdata) | format | What part of the advertisment is used to filter on.
 
-### Filter output type
+### Filter output description
 When a filter accepts an advertisement, 'output data' needs to be constructed. Depending on the use case this construction 
 may or may not need to use parts of the advertisement data. The output_t metadata field of a filter defines which part
 of the advertisement is used to produce the output data, and how this output data is formatted.
 
 Type | Name | Description 
 --- | --- | ---
-[output_format_t](#filter-output-format) | out_format | Determines how the output is formatted. 
+[Filter output format](#filter-output-format) | out_format | Determines how the output is formatted. 
 uint8[] | in_format | Aux data describing which part of the advertisment is used to construct the output. Type/length of this field depends on `out_format`.
 
 
@@ -229,7 +229,7 @@ Value | Name | `in_format` type | `in_format` size |  Output description type
 
 
 
-### Advertisement subdata
+### Advertisement subdata description
 This defines a dataformat/selection of data an advertisement. Given an advertisement_subdata_t value
 there is a function that transforms a pair `(macaddres,AD data) -> uint8_t[]` into a byte array.
 Effectively that function 'selects' part of that pair which can be used for further processing.
