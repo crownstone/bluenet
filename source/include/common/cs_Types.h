@@ -283,8 +283,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT,       // Send a tracked device heartbeat mesh message.
 	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
-	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
-	EVT_MESH_RSSI_DATA,                               // A message containing rssi data between sender and one of its neighbors was received.
+	EVT_MESH_RSSI_PING,                               // TODO: remove this type, it's not used.
+	EVT_MESH_RSSI_DATA,                               // TODO: remove this type, it's not used.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
 	EVT_RECV_MESH_MSG,                                // A mesh message was received.
 	EVT_MESH_NEAREST_WITNESS_REPORT,                  // CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT was received on the mesh and parsed by MeshMsgHandler. Payload: MeshMsgEvent

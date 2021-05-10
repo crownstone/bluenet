@@ -193,7 +193,7 @@ void Mesh::onTick(uint32_t tickCount) {
 				_synced = !requestSync(false);
 
 				if (!_synced) {
-					LOGw("Sync failed");
+					LOGi("Sync failed");
 					event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
 					syncFailEvent.dispatch();
 
