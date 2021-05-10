@@ -80,20 +80,10 @@ struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
 	uint32_t adDataMask;
 };
 
-//struct __attribute__((__packed__)) asset_filter_input_data_t {
-//	AssetFilterInputType type;
-//	uint8_t auxData[];
-//};
 
-//struct __attribute__((__packed__)) filter_output_type_t {
-//	AssetFilterOutputFormat out_format;
-//	uint8_t in_format[];
-//};
-
-//struct __attribute__((__packed__)) filter_input_type_t {
-//	asset_filter_input_data_t format;
-//};
-
+struct __attribute__((__packed__)) short_asset_id_t {
+	uint8_t data[3];
+}
 
 
 

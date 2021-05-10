@@ -77,6 +77,15 @@ cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 			.bucketB     = static_cast<cuckoo_index_t>((hashedFinger ^ finger) % bucketCount())};
 }
 
+cuckoo_compressed_fingerprint_t CuckooFilter::getCompressedFingerprint(cuckoo_key_t key, size_t keyLengthInBytes) {
+	cuckoo_fingerprint_t finger       = hash(key, keyLengthInBytes);
+	cuckoo_fingerprint_t hashedFinger = hash(&finger, sizeof(finger));
+
+	return cuckoo_extended_fingerprint_t{
+			.fingerprint = finger,
+			.bucket      = static_cast<cuckoo_index_t>(hashedFinger % bucketCount())};
+}
+
 /* ------------------------------------------------------------------------- */
 
 cuckoo_fingerprint_t CuckooFilter::filterhash() {

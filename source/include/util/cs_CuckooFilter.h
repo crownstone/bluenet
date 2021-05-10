@@ -96,6 +96,12 @@ public:
 		return contains(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
+	/**
+	 * Reduces a key (element) to a compressed fingerprint, consisting of
+	 * the fingerprint of the key and its associated primary position in the fingerprint array.
+	 */
+	cuckoo_compressed_fingerprint_t getCompressedFingerprint(cuckoo_key_t key, size_t keyLengthInBytes);
+
 	// -------------------------------------------------------------
 	// Init/deinit like stuff.
 	// -------------------------------------------------------------
