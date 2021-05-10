@@ -296,7 +296,7 @@ void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
 			// expecting all subsequent iterations of this loop to get nullptrs
 			continue;
 		}
-		LOGAssetFilterDebug("filter: %u", filter->runtimedata.filterId);
+		LOGAssetFilterDebug("filter: %u", AssetFilter(filter).runtimedata()->filterId);
 	}
 
 	// stack allocate a buffer summaries object fitting at most max summaries:
@@ -354,11 +354,9 @@ uint16_t AssetFilterStore::masterCrc() {
 
 		AssetFilter filter(filterBuffer);
 
-		LOGAssetFilterDebug("filter crc: 0x%x", filter->runtimedata.crc);
-
 		// appends/applies this filters' crc onto master crc
 		masterCrc = crc16(
-				reinterpret_cast<const uint8_t*>(filter.runtimedata()->crc),
+				reinterpret_cast<const uint8_t*>(&filter.runtimedata()->crc),
 				sizeof(filter.runtimedata()->crc),
 				&masterCrc);
 	}
@@ -382,7 +380,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 		if (filter.runtimedata()->crc == 0) {
 			// filter changed since commit.
 
-			size_t filterAllocatedSize = filter.runtimedata()->totalSize;
+			size_t filterAllocatedSize = filter.runtimedata()->totalSize + sizeof(asset_filter_runtime_data_t);
 			size_t filterSize          = filter.length();
 
 			if (filterSize != filterAllocatedSize) {
@@ -391,8 +389,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 				// This check can't be performed earlier: as long as not all chuncks are
 				// received the filterdata may be in invalid state.
 
-				LOGAssetFilterWarn(
-						"Deallocating filter %u because of malformed cuckoofilter size: %u != %u",
+				LOGAssetFilterWarn("Deallocating filter %u because of malformed cuckoofilter size: %u != %u",
 						filter.runtimedata()->filterId,
 						filterSize,
 						filterAllocatedSize);
@@ -422,6 +419,7 @@ void AssetFilterStore::computeCrcs() {
 		if (filter.runtimedata()->crc == 0) {
 			// filter changed since commit.
 			filter.runtimedata()->crc = crc16(filter.filterdata().metadata()._data, filter.runtimedata()->totalSize, nullptr);
+			LOGAssetFilterDebug("crc recomputed for filter %u: value 0x%x", filter.runtimedata()->filterId, filter.runtimedata()->crc);
 		}
 	}
 }
