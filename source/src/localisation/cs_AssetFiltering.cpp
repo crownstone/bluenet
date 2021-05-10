@@ -82,23 +82,28 @@ void AssetFiltering::processFilter(AssetFilter filter, const scanned_device_t& d
 	}
 }
 
-//
-//template<class ReturnType, class ExpressionType>
-//ReturnType getFilterResult(AssetFilter f, const scanned_device_t& device) {
-//
-//}
 
-bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_t& device) {
+/**
+ * Extracted logic to parse the input type into a template that accepts a delegate expression
+ * `ExpressionType returnExpression` in order to re-use the stuff.
+ *
+ * This method extracts the filters 'input type', prepares the inputtype
+ * and calls the delegate with the prepared data.
+ *
+ * Todo: factor out 'input type' so that it can also use 'output type.input type'.
+ */
+template<class ReturnType, class ExpressionType>
+ReturnType filterResultTemplate(AssetFilter filter, const scanned_device_t& device, ExpressionType delegateExpression, ReturnType defaultValue) {
 	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
 		LogAssetFilteringWarn("Filtertype not implemented");
-		return false;
+		return defaultValue;
 	}
 
 	CuckooFilter cuckoo = filter.filterdata().filterdata();
 
 	switch (*filter.filterdata().metadata().inputType().type()) {
 		case AssetFilterInputType::MacAddress: {
-			return cuckoo.contains(device.address, sizeof(device.address));
+			return delegateExpression(cuckoo, device.address, sizeof(device.address));
 		}
 		case AssetFilterInputType::AdDataType: {
 			// selects the first found field of configured type and checks if that field's
@@ -107,7 +112,7 @@ bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_
 			ad_data_type_selector_t* selector = filter.filterdata().metadata().inputType().AdTypeField();
 			assert(selector != nullptr, "Filter metadata type check failed");
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
-				return cuckoo.contains(result.data, result.len);
+				return delegateExpression(cuckoo, result.data, result.len);
 			}
 			return false;
 		}
@@ -130,14 +135,36 @@ bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_
 					}
 				}
 
-				return cuckoo.contains(buff, result.len);
+				return delegateExpression(cuckoo, buff, result.len);
 			}
-			return false;
+			return defaultValue;
 		}
 	}
-	return false;
+	return defaultValue;
 }
 
+bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_t& asset) {
+	// The input result is nothing more than a call to .contains with the correctly prepared input.
+	// It is 'correctly preparing the input' that is fumbly.
+	return filterResultTemplate(
+			filter,
+			asset,
+			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) { return cuckoo.contains(data, len); },
+			false);
+}
+
+short_asset_id_t filterOutputResult(AssetFilter filter, const scanned_device_t& asset) {
+	// The input result is nothing more than a call to .contains with the correctly prepared input.
+	// It is 'correctly preparing the input' that is fumbly.
+	return filterResultTemplate(
+			filter,
+			asset,
+			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
+				// this will need some casting...
+				return cuckoo.getCompressedFingerprint(data, len);
+			},
+			short_asset_id_t{});
+}
 
 void AssetFiltering::processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId) {
 	// TODO
