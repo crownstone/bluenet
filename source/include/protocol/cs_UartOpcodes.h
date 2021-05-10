@@ -7,7 +7,11 @@
 
 #pragma once
 
-
+/**
+ * Messages received over UART. Note that the documentation on github is from the perspective of the user.
+ *   https://github.com/crownstone/bluenet/blob/master/docs/UART_PROTOCOL.md
+ * Hence, what is called RX here is called TX there.
+ */
 enum UartOpcodeRx {
 	UART_OPCODE_RX_HELLO =                            0,
 	UART_OPCODE_RX_SESSION_NONCE =                    1,
@@ -42,6 +46,11 @@ enum UartOpcodeRx {
 	UART_OPCODE_RX_INJECT_EVENT =                     60000, // Dispatch any event. Payload: CS_TYPE + event data structure.
 };
 
+/**
+ * Send messages over the UART to someone listening.
+ *
+ * RX on https://github.com/crownstone/bluenet/blob/master/docs/UART_PROTOCOL.md.
+ */
 enum UartOpcodeTx {
 	UART_OPCODE_TX_HELLO =                            0,
 	UART_OPCODE_TX_SESSION_NONCE =                    1,
