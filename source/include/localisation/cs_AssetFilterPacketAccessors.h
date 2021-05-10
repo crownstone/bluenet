@@ -80,5 +80,8 @@ public:
 	asset_filter_runtime_data_t* runtimedata();
 	AssetFilterData filterdata();
 
+	/**
+	 * Total size ot the _data, including runtimedata() and the filterdata()
+	 */
 	size_t length();
 };

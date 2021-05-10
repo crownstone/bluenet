@@ -225,7 +225,7 @@ MeshTopology, ...) and
 Value | Name | `in_format` type | `in_format` size |  Output description type
 --- | --- | --- | --- | ---
 0 | Mac | None | 0 | Mac address as `uint8_t[6]`
-1 | [ShortAssetId](#short-asset-id) | [Advertisement subdata](#advertisement-subdata) |  | 
+1 | ShortAssetId | [Advertisement subdata](#advertisement-subdata) |  |  [Short asset id](#short-asset-id)
 
 
 
