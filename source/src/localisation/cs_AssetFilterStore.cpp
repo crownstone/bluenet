@@ -283,6 +283,7 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 
 	// finish commit by writing the _masterHash
 	endProgress(cmdData.masterCrc, cmdData.masterVersion);
+	LOGAssetFilterDebug("Accepted commit command, ended filterModificationInProgress");
 
 	return ERR_SUCCESS;
 }
