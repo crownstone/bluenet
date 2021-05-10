@@ -9,6 +9,8 @@
 #include <util/cs_Utils.h>
 
 #define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE
+#define LogAssetFilteringDebug LOGd
+#define LogAssetFilteringWarn LOGw
 
 cs_ret_code_t AssetFiltering::init() {
 	_filterStore = new AssetFilterStore();
@@ -28,52 +30,111 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	// loop over filters to check mac address
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
-		AssetFilter filter = _filterStore->getFilter(i);
-		CuckooFilter cuckoo = filter.filterdata().filterdata();
-
-		// check mac address for this filter
-		if (*filter.filterdata().metadata().inputType().type() == AssetFilterInputType::MacAddress
-			&& cuckoo.contains(device.address, MAC_ADDRESS_LEN)) {
-			// TODO(#177858707):
-			// - get fingerprint from filter instead of literal mac address.
-			// - we should just pass on the device, right than copying rssi?
-			LOGw("filter %u accepted adv from mac addres: %x:%x:%x:%x:%x:%x",
-				 filter.runtimedata()->filterId,
-				 device.address[0],
-				 device.address[1],
-				 device.address[2],
-				 device.address[3],
-				 device.address[4],
-				 device.address[5]);  // TODO(#177858707) when in/out types is added, test with actual uuid
-
-			TrackableEvent trackableEventData;
-			trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
-			trackableEventData.rssi = device.rssi;
-
-			event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
-			trackableEvent.dispatch();
-			return;
+		auto filter = AssetFilter(_filterStore[i]);
+		if (filterInputResult(filter, device)) {
+			processAcceptedAsset(filter,device);
 		}
 	}
+}
 
-	// TODO(#177858707): Add the AD Data loop for other filter inputTypes.
-	// loop over filters fields to check addata fields
-	//	// keeps fields as outer loop because that's more expensive to loop over.
-	// 	// See BLEutil:findAdvType how to loop the fields.
-	//	for (auto field: devicefields) {
-	//		for(size_t i = 0; i < _parsingFiltersCount; ++i) {
-	//			tracking_filter_t* filter = _parsingFilters[i];
-	//			if(filter->metadata.inputType == FilterInputType::AdData) {
-	//				// check each AD Data field for this filter
-	//				// TODO: query filter for fingerprint
-	//				TrackableEvent trackEvent;
-	//				trackEvent.dispatch();
-	//				return;
-	//			}
-	//		}
-	//	}
+void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
+	switch (filter.filterdata().metadata().outputType().outFormat()) {
+		case AssetFilterOutputFormat::Mac: {
+			mac_address_t mac;
+			mac.data = asset.address;
+			processAcceptedAsset(filter, asset, mac);
+			break;
+		}
+
+		case AssetFilterOutputFormat::ShortAssetId: {
+			filter.filterdata().filterdata().getCompressedFingerprint();
+			break;
+		}
+	}
+}
+
+void AssetFiltering::processFilter(AssetFilter f, const scanned_device_t& device) {
+
+	CuckooFilter cuckoo = filter.filterdata().filterdata();
+
+	// check mac address for this filter
+	if (*filter.filterdata().metadata().inputType().type() == AssetFilterInputType::MacAddress
+		&& cuckoo.contains(device.address, MAC_ADDRESS_LEN)) {
+		// TODO(#177858707):
+		// - get fingerprint from filter instead of literal mac address.
+		// - we should just pass on the device, right than copying rssi?
+		LOGw("filter %u accepted adv from mac addres: %x:%x:%x:%x:%x:%x",
+			 filter.runtimedata()->filterId,
+			 device.address[0],
+			 device.address[1],
+			 device.address[2],
+			 device.address[3],
+			 device.address[4],
+			 device.address[5]);  // TODO(#177858707) when in/out types is added, test with actual uuid
+
+		TrackableEvent trackableEventData;
+		trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
+		trackableEventData.rssi = device.rssi;
+
+		event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
+		trackableEvent.dispatch();
+	}
+}
+
+//
+//template<class ReturnType, class ExpressionType>
+//ReturnType getFilterResult(AssetFilter f, const scanned_device_t& device) {
+//
+//}
+
+bool filterInputResult(AssetFilter f, const scanned_device_t& device) {
+	if (*f.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
+		LogAssetFilteringWarn("Filtertype not implemented");
+		return false;
+	}
+
+	CuckooFilter cuckoo = f.filterdata().filterdata();
+
+	switch (f.filterdata().metadata().inputType().type()) {
+		case AssetFilterInputType::MacAddress: {
+			return cuckoo.contains(device.address, sizeof(device.address));
+		}
+		case AssetFilterInputType::AdDataType: {
+			// selects the first found field of configured type and checks if that field's
+			// data is contained in the filter. returns false if it can't be found.
+			cs_data_t result                  = {};
+			ad_data_type_selector_t* selector = f.filterdata().metadata().inputType().AdTypeField();
+			assert(selector != nullptr, "Filter metadata type check failed");
+			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
+				return cuckoo.contains(result.data, result.len);
+			}
+			return false;
+		}
+		case AssetFilterInputType::MaskedAdDataType: {
+			// selects the first found field of configured type and checks if that field's
+			// data is contained in the filter. returns false if it can't be found.
+			cs_data_t result                  = {};
+			masked_ad_data_type_selector_t* selector = f.filterdata().metadata().inputType().AdTypeMasked();
+			assert(selector != nullptr, "Filter metadata type check failed");
+			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
+				uint8_t buff[31] = {0};
+				assert(result.len <=31, "advertisement length too big");
+
+				// blank out bytes that aren't set in the mask
+				for (size_t i = 0; i < result.len; i++){
+					if(BLEutil::isBitSet(selector->adDataMask, i)) {
+						buff[i] = result.data[i];
+					} else {
+						buff[i] = 0x00;
+					}
+				}
+
+				return cuckoo.contains(buff, result.len);
+			}
+			return false;
+		}
+	}
 }
 
 void AssetFiltering::handleEvent(event_t& evt) {

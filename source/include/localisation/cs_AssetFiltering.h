@@ -20,7 +20,44 @@ private:
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
-	void handleScannedDevice(const scanned_device_t& device);
+	void handleScannedDevice(const scanned_device_t& asset);
+
+	/**
+	 * Handles a specific filter.
+	 */
+	void processFilter(AssetFilter f, const scanned_device_t& asset);
+
+	/**
+	 * Returns true if the device passes the filter according to its
+	 * metadata settings.
+	 */
+	bool filterInputResult(AssetFilter filter, const scanned_device_t& asset);
+
+	// --------- Processing of accepted Assest ---------------
+
+	/**
+	 * Constructs the output of the filter for an accepted asset
+	 * and dispatches it to specific handler.
+	 *
+	 * filter: the filter that accepted this device.
+	 * device: the device that was accepted
+	 */
+	void processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
+
+	/**
+	 * Handles further processing of accepted asset when
+	 * filter.metadata.outputType.outputFormat is ShortAssetId
+	 */
+	void processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId);
+
+	/**
+	 * Handles further processing of accepted asset when
+	 * filter.metadata.outputType.outputFormat is MAC
+	 */
+	void processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, const mac_address_t& assetMac);
+
+
+	// ---------- Util ---------------
 
 	void logServiceData(scanned_device_t* scannedDevice);
 public:
