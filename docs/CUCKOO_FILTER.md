@@ -2,7 +2,7 @@
 
 This page describes the commands and packets that can manipulate the filters in the Trackable Parser component at a more granular level. These commands that are considered private API. As such, Crownstone might change this protocol to better suit any desired requirement, possibly without backward compatibility.
 
-Status: Currently unimplemented
+Status: Commands currently unimplemented, packets used in [Trackable Parser](#TRACKABLE_PARSER.md)
 
 # Index
 [Commands](#commands)
@@ -12,8 +12,10 @@ Status: Currently unimplemented
 - [Remove compressed filter entry](#remove-compressed-filter-entry)
 
 [Packets](#packets) 
+- [Cuckoo filter data](#cuckoo-filter-data)
 - [Filter entry data](#cuckoo-filter-entry-data)
-- [Compressed filter entry data](#compressed-cuckoo-filter-entry-data)
+- [Extended filter entry data](#extended-cuckoo-filter-entry-data)
+- [Compressed cuckoo filter entry data](#compressed-cuckoo-filter-entry-data)
 
 *************************************************************************
 
@@ -113,16 +115,13 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8_t | number of buckets log2 | 1 | Cuckoofilter will contain 2^(num buckets) buckets.
 uint8_t | Keys per bucket | 1 | Each bucket will contain at most this amount of fingerprints. 
-uint16_t | victim fingerprint | 2 | Fingerprint of last item that failed to be inserted, 0 if none.
-uint8_t | victim bucket index A | 1 | Bucket A of victim, 0 if none.
-uint8_t | victim bucket index B | 1 | Bucket V of victim, 0 if none.
+[extended fingerprint](#extended-cuckoo-filter-entry-data) | victim fingerprint | 4 | Fingerprint of last item that failed to be inserted, 0 if none.
 uint8_t[] | fingerprint array | 2^N*K | Fingerprint array. Here N = number of buckets log 2, K is number of fingerprints per bucket
 
 
 ### Cuckoo filter entry data
 Type | Name | Length | Description
 --- | --- | --- | ---
-EntryType | Type | 1 | Semantics of this data. <<Todo: this isn't used anywhere, can be removed>>
 uint8_t | Len | 1 | Length of the data array.
 uint8_t | Data | Len | Actual data of the entry 
 
