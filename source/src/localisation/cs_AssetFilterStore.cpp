@@ -35,6 +35,14 @@ AssetFilter AssetFilterStore::getFilter(uint8_t index) {
 	return AssetFilter(_filters[index]);
 }
 
+uint16_t AssetFilterStore::getMasterVersion() {
+	return _masterVersion;
+}
+
+uint16_t AssetFilterStore::getMasterCrc() {
+	return _masterHash;
+}
+
 void AssetFilterStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
