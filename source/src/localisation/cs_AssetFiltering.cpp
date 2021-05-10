@@ -31,7 +31,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	}
 
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
-		auto filter = AssetFilter(_filterStore[i]);
+		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
 			processAcceptedAsset(filter,device);
 		}
@@ -39,22 +39,22 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 }
 
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
-	switch (filter.filterdata().metadata().outputType().outFormat()) {
+	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
 			mac_address_t mac;
-			mac.data = asset.address;
+//			mac.data = asset.address; // TODO: copy data.
 			processAcceptedAsset(filter, asset, mac);
 			break;
 		}
 
 		case AssetFilterOutputFormat::ShortAssetId: {
-			filter.filterdata().filterdata().getCompressedFingerprint();
+//			filter.filterdata().filterdata().getCompressedFingerprint(); // TODO: use this
 			break;
 		}
 	}
 }
 
-void AssetFiltering::processFilter(AssetFilter f, const scanned_device_t& device) {
+void AssetFiltering::processFilter(AssetFilter filter, const scanned_device_t& device) {
 
 	CuckooFilter cuckoo = filter.filterdata().filterdata();
 
@@ -88,15 +88,15 @@ void AssetFiltering::processFilter(AssetFilter f, const scanned_device_t& device
 //
 //}
 
-bool filterInputResult(AssetFilter f, const scanned_device_t& device) {
-	if (*f.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
+bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_t& device) {
+	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
 		LogAssetFilteringWarn("Filtertype not implemented");
 		return false;
 	}
 
-	CuckooFilter cuckoo = f.filterdata().filterdata();
+	CuckooFilter cuckoo = filter.filterdata().filterdata();
 
-	switch (f.filterdata().metadata().inputType().type()) {
+	switch (*filter.filterdata().metadata().inputType().type()) {
 		case AssetFilterInputType::MacAddress: {
 			return cuckoo.contains(device.address, sizeof(device.address));
 		}
@@ -104,7 +104,7 @@ bool filterInputResult(AssetFilter f, const scanned_device_t& device) {
 			// selects the first found field of configured type and checks if that field's
 			// data is contained in the filter. returns false if it can't be found.
 			cs_data_t result                  = {};
-			ad_data_type_selector_t* selector = f.filterdata().metadata().inputType().AdTypeField();
+			ad_data_type_selector_t* selector = filter.filterdata().metadata().inputType().AdTypeField();
 			assert(selector != nullptr, "Filter metadata type check failed");
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				return cuckoo.contains(result.data, result.len);
@@ -115,7 +115,7 @@ bool filterInputResult(AssetFilter f, const scanned_device_t& device) {
 			// selects the first found field of configured type and checks if that field's
 			// data is contained in the filter. returns false if it can't be found.
 			cs_data_t result                  = {};
-			masked_ad_data_type_selector_t* selector = f.filterdata().metadata().inputType().AdTypeMasked();
+			masked_ad_data_type_selector_t* selector = filter.filterdata().metadata().inputType().AdTypeMasked();
 			assert(selector != nullptr, "Filter metadata type check failed");
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				uint8_t buff[31] = {0};
@@ -135,7 +135,18 @@ bool filterInputResult(AssetFilter f, const scanned_device_t& device) {
 			return false;
 		}
 	}
+	return false;
 }
+
+
+void AssetFiltering::processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId) {
+	// TODO
+}
+
+void AssetFiltering::processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, const mac_address_t& assetId) {
+	// TODO
+}
+
 
 void AssetFiltering::handleEvent(event_t& evt) {
 	switch (evt.type) {

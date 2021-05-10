@@ -83,7 +83,7 @@ struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
 
 struct __attribute__((__packed__)) short_asset_id_t {
 	uint8_t data[3];
-}
+};
 
 
 
