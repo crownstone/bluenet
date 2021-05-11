@@ -101,7 +101,9 @@ ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_d
 
 	CuckooFilter cuckoo = filter.filterdata().filterdata();
 
-	switch (*filter.filterdata().metadata().inputType().type()) {
+	AssetFilterInput filterInputDescription = filter.filterdata().metadata().inputType();
+
+	switch (*filterInputDescription.type()) {
 		case AssetFilterInputType::MacAddress: {
 			return delegateExpression(cuckoo, device.address, sizeof(device.address));
 		}
@@ -109,24 +111,29 @@ ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_d
 			// selects the first found field of configured type and checks if that field's
 			// data is contained in the filter. returns false if it can't be found.
 			cs_data_t result                  = {};
-			ad_data_type_selector_t* selector = filter.filterdata().metadata().inputType().AdTypeField();
+			ad_data_type_selector_t* selector = filterInputDescription.AdTypeField();
+
 			assert(selector != nullptr, "Filter metadata type check failed");
+
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				return delegateExpression(cuckoo, result.data, result.len);
 			}
-			return false;
+
+			return defaultValue;
 		}
 		case AssetFilterInputType::MaskedAdDataType: {
 			// selects the first found field of configured type and checks if that field's
 			// data is contained in the filter. returns false if it can't be found.
 			cs_data_t result                  = {};
-			masked_ad_data_type_selector_t* selector = filter.filterdata().metadata().inputType().AdTypeMasked();
+			masked_ad_data_type_selector_t* selector = filterInputDescription.AdTypeMasked();
+
 			assert(selector != nullptr, "Filter metadata type check failed");
+
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				uint8_t buff[31] = {0};
 				assert(result.len <=31, "advertisement length too big");
 
-				// blank out bytes that aren't set in the mask
+				// apply the mask
 				for (size_t i = 0; i < result.len; i++){
 					if(BLEutil::isBitSet(selector->adDataMask, i)) {
 						buff[i] = result.data[i];
@@ -137,6 +144,7 @@ ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_d
 
 				return delegateExpression(cuckoo, buff, result.len);
 			}
+
 			return defaultValue;
 		}
 	}
@@ -163,7 +171,8 @@ short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanne
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
 				assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
 					   "can't cast compressed fingerprint to asset id");
-				return reinterpret_cast<short_asset_id_t>(cuckoo.getCompressedFingerprint(data, len));
+				cuckoo_compressed_fingerprint_t ccf = cuckoo.getCompressedFingerprint(data, len);
+				return *reinterpret_cast<short_asset_id_t*>(&ccf);
 			},
 			short_asset_id_t{});
 }
