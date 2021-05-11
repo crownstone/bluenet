@@ -334,9 +334,10 @@ void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
 	auto retvalptr  = new (result.buf.data) asset_filter_cmd_get_filter_summaries_ret_t;
 	result.dataSize = requiredBuffSize;
 
-	retvalptr->masterCrc     = _masterHash;
-	retvalptr->masterVersion = _masterVersion;
-	retvalptr->freeSpace     = getTotalHeapAllocatedSize();
+	retvalptr->protocolVersion = ASSET_FILTER_CMD_PROTOCOL_VERSION;
+	retvalptr->masterVersion   = _masterVersion;
+	retvalptr->masterCrc       = _masterHash;
+	retvalptr->freeSpace       = getTotalHeapAllocatedSize();
 
 	for (size_t i = 0; i < _filtersCount; i++) {
 		AssetFilter filter(_filters[i]);
