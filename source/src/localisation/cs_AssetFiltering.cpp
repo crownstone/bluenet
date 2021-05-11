@@ -21,6 +21,16 @@ cs_ret_code_t AssetFiltering::init() {
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
+
+	_filterSyncer = new AssetFilterSyncer();
+	if (_filterSyncer == nullptr) {
+		return ERR_NO_SPACE;
+	}
+	retCode = _filterSyncer->init(*_filterStore);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
 	listen();
 	return ERR_SUCCESS;
 }

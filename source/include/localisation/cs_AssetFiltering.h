@@ -9,6 +9,7 @@
 
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFilterStore.h>
+#include <localisation/cs_AssetFilterSyncer.h>
 
 class AssetFiltering : EventListener {
 public:
@@ -19,6 +20,8 @@ public:
 
 private:
 	AssetFilterStore* _filterStore            = nullptr;
+
+	AssetFilterSyncer* _filterSyncer          = nullptr;
 
 	/**
 	 * This handleAcceptedAsset callback will be called for each filter

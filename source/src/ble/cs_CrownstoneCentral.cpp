@@ -703,6 +703,10 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 			event.result.returnCode = write(packet->commandType, packet->data.data, packet->data.len);
 			break;
 		}
+		case CS_TYPE::CMD_CS_CENTRAL_GET_WRITE_BUF: {
+			event.result.buf = requestWriteBuffer();
+			break;
+		}
 
 		// Events
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {

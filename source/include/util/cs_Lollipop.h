@@ -24,11 +24,11 @@
  */
 class Lollipop {
 private:
-	uint8_t val;
-	uint8_t max;
+	uint16_t val;
+	uint16_t max;
 public:
-	Lollipop(uint8_t m) : val(0), max(m) {}
-	Lollipop(uint8_t v, uint8_t m) : val(v), max(m) {}
+	Lollipop(uint16_t m) : val(0), max(m) {}
+	Lollipop(uint16_t v, uint16_t m) : val(v), max(m) {}
 	Lollipop(const Lollipop& l) = default;
 
 	// strict comparison: this < other
@@ -57,7 +57,7 @@ public:
 	 *
 	 * Rolls over at maxValue and skips 0.
 	 */
-	static uint8_t next(uint8_t currentValue, uint8_t maxValue) {
+	static uint16_t next(uint16_t currentValue, uint16_t maxValue) {
 		return ++currentValue >= maxValue ? 1 : currentValue;
 	}
 
@@ -67,7 +67,7 @@ public:
 	 * This is always false when currentValue is 0.
 	 * This is true when previousValue is 0.
 	 */
-	static bool isNewer(uint8_t previousValue, uint8_t currentValue, uint8_t maxValue){
+	static bool isNewer(uint16_t previousValue, uint16_t currentValue, uint16_t maxValue){
 		return Lollipop(previousValue, maxValue) < Lollipop(currentValue, maxValue);
 	}
 

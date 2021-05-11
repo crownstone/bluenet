@@ -10,6 +10,7 @@
 #include <mesh/cs_MeshDefines.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/cs_CmdSource.h>
+#include <protocol/cs_AssetFilterPackets.h>
 
 /**
  * Message opcodes.
@@ -67,6 +68,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT    = 23, // Payload: nearest_witness_report_t                        Only used in NearestCrownstone
 	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t
 	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
+	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -240,4 +242,10 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_stone_mac_t {
 	uint8_t mac[MAC_ADDRESS_LEN];
 };
 
-
+struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
+	asset_filter_cmd_protocol_t protocol;
+	uint16_t masterVersion;
+	uint16_t masterCrc;
+	uint8_t maxFilterCount: 5;
+	uint16_t maxSpace: 11;
+};
