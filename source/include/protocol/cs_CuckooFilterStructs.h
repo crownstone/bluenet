@@ -26,6 +26,13 @@ struct __attribute__((__packed__)) cuckoo_extended_fingerprint_t {
 	cuckoo_index_t bucketB;  // and the alternative bucket.
 };
 
+struct __attribute__((__packed__)) cuckoo_compressed_fingerprint_t {
+	cuckoo_fingerprint_t fingerprint;
+	cuckoo_index_t bucket;  // the bucket this fingerprint should be put in
+};
+
+
+
 /**
  * Data content of the cuckoo filter.
  */

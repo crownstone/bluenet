@@ -38,5 +38,9 @@ typedef uint8_t  adc_buffer_seq_nr_t;
 static constexpr uint8_t MAC_ADDRESS_LEN = 6;
 
 typedef struct {
+	uint8_t data[MAC_ADDRESS_LEN];
+} mac_address_t;
+
+typedef struct {
   uint8_t uuid128[16];
 } cs_uuid128_t;

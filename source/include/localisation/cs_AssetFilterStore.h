@@ -7,7 +7,10 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
+
 #include <localisation/cs_AssetFilterPacketAccessors.h>
+#include <localisation/cs_AssetHandler.h>
+
 #include <optional>
 #include <protocol/cs_AssetFilterPackets.h>
 #include <structs/cs_AssetFilterStructs.h>
