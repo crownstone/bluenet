@@ -69,33 +69,21 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 	}
 }
 
-//void AssetFiltering::processFilter(AssetFilter filter, const scanned_device_t& device) {
-//
-//	CuckooFilter cuckoo = filter.filterdata().filterdata();
-//
-//	// check mac address for this filter
-//	if (*filter.filterdata().metadata().inputType().type() == AssetFilterInputType::MacAddress
-//		&& cuckoo.contains(device.address, MAC_ADDRESS_LEN)) {
-//		// TODO(#177858707):
-//		// - get fingerprint from filter instead of literal mac address.
-//		// - we should just pass on the device, right than copying rssi?
-//		LOGw("filter %u accepted adv from mac addres: %x:%x:%x:%x:%x:%x",
-//			 filter.runtimedata()->filterId,
-//			 device.address[0],
-//			 device.address[1],
-//			 device.address[2],
-//			 device.address[3],
-//			 device.address[4],
-//			 device.address[5]);  // TODO(#177858707) when in/out types is added, test with actual uuid
-//
-//		TrackableEvent trackableEventData;
-//		trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
-//		trackableEventData.rssi = device.rssi;
-//
-//		event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
-//		trackableEvent.dispatch();
-//	}
-//}
+
+void AssetFiltering::dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset) {
+	// TODO
+	//		TrackableEvent trackableEventData;
+	//		trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
+	//		trackableEventData.rssi = device.rssi;
+	//
+	//		event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
+	//		trackableEvent.dispatch();
+}
+
+void AssetFiltering::dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId) {
+	// TODO
+}
+
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 
