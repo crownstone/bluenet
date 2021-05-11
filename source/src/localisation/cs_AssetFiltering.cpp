@@ -160,8 +160,10 @@ short_asset_id_t filterOutputResult(AssetFilter filter, const scanned_device_t& 
 			filter,
 			asset,
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
-				// this will need some casting...
-				return cuckoo.getCompressedFingerprint(data, len);
+				assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
+					   "can't cast compressed fingerprint to asset id");
+				return reinterpret_cast<short_asset_id_t>(cuckoo.getCompressedFingerprint(data, len));
+				;
 			},
 			short_asset_id_t{});
 }
