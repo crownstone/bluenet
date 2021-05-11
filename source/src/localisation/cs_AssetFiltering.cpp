@@ -25,7 +25,13 @@ cs_ret_code_t AssetFiltering::init() {
 	return ERR_SUCCESS;
 }
 
+void AssetFiltering::setAssetHandlerMac(AssetHandlerMac* assetHandlerMac) {
+	_assetHandlerMac = assetHandlerMac;
+}
 
+void AssetFiltering::setAssetHandlerShortId(AssetHandlerShortId* assetHandlerShortId) {
+	_assetHandlerShortId = assetHandlerShortId;
+}
 
 // ---------------------------- Handling events ----------------------------
 
@@ -57,33 +63,21 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
-			dispatchAcceptedAsset(filter, asset);
+			if( _assetHandlerMac != nullptr) {
+				_assetHandlerMac->handleAcceptedAsset(filter, asset);
+			}
 			break;
 		}
 
 		case AssetFilterOutputFormat::ShortAssetId: {
-			short_asset_id_t shortId = filterOutputResultShortAssetId(filter, asset);
-			dispatchAcceptedAsset(filter, asset, shortId);
+			if (_assetHandlerShortId != nullptr) {
+				short_asset_id_t shortId = filterOutputResultShortAssetId(filter, asset);
+				_assetHandlerShortId->handleAcceptedAsset(filter, asset, shortId);
+			}
 			break;
 		}
 	}
 }
-
-
-void AssetFiltering::dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset) {
-	// TODO
-	//		TrackableEvent trackableEventData;
-	//		trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
-	//		trackableEventData.rssi = device.rssi;
-	//
-	//		event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
-	//		trackableEvent.dispatch();
-}
-
-void AssetFiltering::dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId) {
-	// TODO
-}
-
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 
@@ -192,10 +186,11 @@ short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter filt
 
 // ======================== Utils ========================
 
-void AssetFiltering::logServiceData(scanned_device_t* scannedDevice) {
+void logServiceData(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceData;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA, scannedDevice->data, scannedDevice->dataSize, &serviceData);
+	errCode = BLEutil::findAdvType(
+			BLE_GAP_AD_TYPE_SERVICE_DATA, scannedDevice->data, scannedDevice->dataSize, &serviceData);
 
 	if (errCode != ERR_SUCCESS) {
 		return;
@@ -204,4 +199,3 @@ void AssetFiltering::logServiceData(scanned_device_t* scannedDevice) {
 	_log(LogLevelAssetFilteringDebug, false, "servicedata: ");
 	_logArray(LogLevelAssetFilteringDebug, true, serviceData.data, serviceData.len);
 }
-

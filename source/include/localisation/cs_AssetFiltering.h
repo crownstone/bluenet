@@ -14,8 +14,23 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
+	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
+	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
+
 private:
-	AssetFilterStore* _filterStore;
+	AssetFilterStore* _filterStore            = nullptr;
+
+	/**
+	 * This handleAcceptedAsset callback will be called for each filter
+	 * that has output type mac and have accepted the incoming asset.
+	 */
+	AssetHandlerMac* _assetHandlerMac         = nullptr;
+
+	/**
+	 * This handleAcceptedAsset callback will be called for each filter
+	 * that has output type ShortAssetId and have accepted the incoming asset.
+	 */
+	AssetHandlerShortId* _assetHandlerShortId = nullptr;
 
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
@@ -52,22 +67,7 @@ private:
 	 */
 	void processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
 
-	/**
-	 * Handles further processing of accepted asset when
-	 * filter.metadata.outputType.outputFormat is ShortAssetId
-	 */
-	void dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId);
 
-	/**
-	 * Handles further processing of accepted asset when
-	 * filter.metadata.outputType.outputFormat is MAC
-	 */
-	void dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset);
-
-
-	// ---------- Util ---------------
-
-	void logServiceData(scanned_device_t* scannedDevice);
 public:
 	/**
 	 * Internal usage.
