@@ -32,7 +32,8 @@ private:
 	 * metadata settings.
 	 */
 	bool filterInputResult(AssetFilter filter, const scanned_device_t& asset);
-
+	bool filterInputResult(AssetFilter filter, const scanned_device_t& asset);
+	filterOutputResultShortAssetId
 	// --------- Processing of accepted Assest ---------------
 
 	/**

@@ -93,7 +93,7 @@ void AssetFiltering::processFilter(AssetFilter filter, const scanned_device_t& d
  * Todo: factor out 'input type' so that it can also use 'output type.input type'.
  */
 template<class ReturnType, class ExpressionType>
-ReturnType filterResultTemplate(AssetFilter filter, const scanned_device_t& device, ExpressionType delegateExpression, ReturnType defaultValue) {
+ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_device_t& device, ExpressionType delegateExpression, ReturnType defaultValue) {
 	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
 		LogAssetFilteringWarn("Filtertype not implemented");
 		return defaultValue;
@@ -146,24 +146,24 @@ ReturnType filterResultTemplate(AssetFilter filter, const scanned_device_t& devi
 bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_t& asset) {
 	// The input result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly.
-	return filterResultTemplate(
+	return prepareFilterInputAndCallDelegate(
 			filter,
 			asset,
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) { return cuckoo.contains(data, len); },
 			false);
 }
 
-short_asset_id_t filterOutputResult(AssetFilter filter, const scanned_device_t& asset) {
-	// The input result is nothing more than a call to .contains with the correctly prepared input.
-	// It is 'correctly preparing the input' that is fumbly.
-	return filterResultTemplate(
+short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset) {
+	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
+	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
+	// preallocate the buffer that the MaskedAdData needs.)
+	return prepareFilterInputAndCallDelegate(
 			filter,
 			asset,
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
 				assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
 					   "can't cast compressed fingerprint to asset id");
 				return reinterpret_cast<short_asset_id_t>(cuckoo.getCompressedFingerprint(data, len));
-				;
 			},
 			short_asset_id_t{});
 }
