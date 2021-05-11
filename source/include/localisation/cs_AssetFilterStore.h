@@ -33,10 +33,16 @@ public:
 	uint8_t getFilterCount();
 	AssetFilter getFilter(uint8_t index);
 
+	/**
+	 * Returns the index of the parsing filter with given filterId,
+	 * or an empty optional if that wasn't available.
+	 */
+	std::optional<uint8_t> findFilterIndex(uint8_t filterId);
+
 	uint16_t getMasterVersion();
 	uint16_t getMasterCrc();
 
-	constexpr static size_t MAX_FILTER_IDS     = 8;
+	constexpr static uint8_t MAX_FILTER_IDS    = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
 
 private:
@@ -138,12 +144,6 @@ private:
 	 * for all j>=i.
 	 */
 	uint8_t* findFilter(uint8_t filterId);
-
-	/**
-	 * Returns the index of the parsing filter with given filterId,
-	 * or an empty optional if that wasn't available.
-	 */
-	std::optional<size_t> findFilterIndex(uint8_t filterId);
 
 	/**
 	 * Returns the sums of all getTotalSize of the non-nullptrs in the _parsingFilters array.

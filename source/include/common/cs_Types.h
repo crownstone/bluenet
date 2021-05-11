@@ -366,6 +366,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device.       See CrownstoneCentral::connect().
 	CMD_CS_CENTRAL_DISCONNECT,                        // Disconnect from device.    See CrownstoneCentral::disconnect().
 	CMD_CS_CENTRAL_WRITE,                             // Write a control command.   See CrownstoneCentral::write().
+	CMD_CS_CENTRAL_GET_WRITE_BUF,                     // Request the write buffer.  See CrownstoneCentral::requestWriteBuffer(). The result.buf will be set to the write buffer.
 
 	EVT_CS_CENTRAL_CONNECT_RESULT,
 	EVT_CS_CENTRAL_READ_RESULT,
@@ -529,6 +530,7 @@ typedef  ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
 typedef  cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
 typedef  void TYPIFY(CMD_CS_CENTRAL_DISCONNECT);
 typedef  cs_central_write_t TYPIFY(CMD_CS_CENTRAL_WRITE);
+typedef  void TYPIFY(CMD_CS_CENTRAL_GET_WRITE_BUF);
 typedef  cs_ret_code_t TYPIFY(EVT_CS_CENTRAL_CONNECT_RESULT);
 typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_READ_RESULT);
 typedef  cs_central_write_result_t TYPIFY(EVT_CS_CENTRAL_WRITE_RESULT);

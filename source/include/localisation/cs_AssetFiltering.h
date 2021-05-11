@@ -9,6 +9,7 @@
 
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFilterStore.h>
+#include <localisation/cs_AssetFilterSyncer.h>
 
 class AssetFiltering : EventListener {
 public:
@@ -16,6 +17,7 @@ public:
 
 private:
 	AssetFilterStore* _filterStore;
+	AssetFilterSyncer* _filterSyncer;
 
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.

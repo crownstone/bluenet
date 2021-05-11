@@ -164,16 +164,15 @@ uint8_t* AssetFilterStore::findFilter(uint8_t filterId) {
 	return filterIndexOpt ? _filters[filterIndexOpt.value()] : nullptr;
 }
 
-std::optional<size_t> AssetFilterStore::findFilterIndex(uint8_t filterId) {
+std::optional<uint8_t> AssetFilterStore::findFilterIndex(uint8_t filterId) {
 	LOGAssetFilterDebug("Looking up filter %u, end index: %u", filterId, _filtersCount);
 
 	uint8_t* trackingFilter;
-	for (size_t index = 0; index < _filtersCount; ++index) {
+	for (uint8_t index = 0; index < _filtersCount; ++index) {
 		trackingFilter = _filters[index];
 
 		if (trackingFilter == nullptr) {
-			LOGw("_parsingFiltersCount incorrect: found nullptr before reaching end of filter "
-				 "list.");
+			LOGw("_parsingFiltersCount incorrect: found nullptr before reaching end of filter list.");
 			return {};
 		}
 
@@ -206,17 +205,21 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 // -------------------------------------------------------------
 
 cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd_upload_filter_t& cmdData) {
-	startProgress();
-
 	LOGAssetFilterDebug("handleUploadFilterCommand chunkStartIndex=%u, chunkSize=%u, totalSize=%u",
 			cmdData.chunkStartIndex,
 			cmdData.chunkSize,
 			cmdData.totalSize);
 
+	if (cmdData.protocolVersion != ASSET_FILTER_CMD_PROTOCOL_VERSION) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
 	if (cmdData.chunkStartIndex + cmdData.chunkSize > cmdData.totalSize) {
 		LOGAssetFilterWarn("Chunk overflows total size.");
 		return ERR_INVALID_MESSAGE;
 	}
+
+	startProgress();
 
 	// Find or allocate a filter.
 	AssetFilter filter(findFilter(cmdData.filterId));
@@ -264,7 +267,12 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 }
 
 cs_ret_code_t AssetFilterStore::handleRemoveFilterCommand(const asset_filter_cmd_remove_filter_t& cmdData) {
-	LOGAssetFilterDebug("handleRemoveFilterCommand id=%u", cmdData.filterId)
+	LOGAssetFilterDebug("handleRemoveFilterCommand id=%u", cmdData.filterId);
+
+	if (cmdData.protocolVersion != ASSET_FILTER_CMD_PROTOCOL_VERSION) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
 	if (deallocateFilter(cmdData.filterId)) {
 		startProgress();
 		return ERR_SUCCESS;
@@ -275,6 +283,11 @@ cs_ret_code_t AssetFilterStore::handleRemoveFilterCommand(const asset_filter_cmd
 
 cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_filter_cmd_commit_filter_changes_t& cmdData) {
 	LOGAssetFilterDebug("handleCommitFilterChangesCommand version=%u crc=%u", cmdData.masterVersion, cmdData.masterCrc);
+
+	if (cmdData.protocolVersion != ASSET_FILTER_CMD_PROTOCOL_VERSION) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
 	if (checkFilterSizeConsistency()) {
 		return ERR_WRONG_STATE;
 	}
