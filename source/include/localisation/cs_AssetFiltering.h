@@ -10,6 +10,7 @@
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFilterStore.h>
 #include <localisation/cs_AssetFilterSyncer.h>
+#include <localisation/cs_AssetHandler.h>
 
 class AssetFiltering : EventListener {
 public:
