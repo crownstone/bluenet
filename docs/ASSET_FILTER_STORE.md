@@ -274,9 +274,12 @@ uint16_t | filterCrc | 2
 
 ### Filter master crc
 
-For a list of filters `f[0], ... , f[k]`, sorted by their `filterId`, in [tracking filter data](#tracking-filter-data) format,
-the master crc is computed by first computing the list of individual filter `crc16`s
-`c[0], ... , c[k]` and then computing the crc16 of that list. 
+Given a list of filters `f[0], ... , f[k]`, in [tracking filter data](#tracking-filter-data) format, the `masterCrc` is computed as follows:
+- Sort the filters according to ascending `filterId` to obtain a new list: `f'[0], ... , f'[k]`
+- compute the crcs16 values of this list: `c[0], ... , c[k]`.
+- create a new list by zipping the filterIds with these crcs: `id(f'[0]), c[0], ... , id(f'[k]), c[k]`.
+  Here `id(f'[i])` is the `filterId` of `f'[i]`. Note that these id's are `uint8`, while the crcs are `uint16`.
+- the `masterCrc` the crc16 of this zipped list.
 
 The if the firmware needs to recompute its master crc, it uses the filters it has in RAM,
 not the filters that are stored on flash.
