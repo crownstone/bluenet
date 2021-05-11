@@ -363,7 +363,13 @@ uint16_t AssetFilterStore::masterCrc() {
 
 		AssetFilter filter(filterBuffer);
 
-		// appends/applies this filters' crc onto master crc
+		// apply filterId onto master crc
+		masterCrc = crc16(
+				reinterpret_cast<const uint8_t*>(&filter.runtimedata()->filterId),
+				sizeof(filter.runtimedata()->filterId),
+				&masterCrc);
+
+		// apply fitlerCrc onto master crc
 		masterCrc = crc16(
 				reinterpret_cast<const uint8_t*>(&filter.runtimedata()->crc),
 				sizeof(filter.runtimedata()->crc),
