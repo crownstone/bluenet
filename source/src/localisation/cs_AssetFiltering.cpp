@@ -25,6 +25,22 @@ cs_ret_code_t AssetFiltering::init() {
 	return ERR_SUCCESS;
 }
 
+
+
+// ---------------------------- Handling events ----------------------------
+
+void AssetFiltering::handleEvent(event_t& evt) {
+	switch (evt.type) {
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			auto scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
+			handleScannedDevice(*scannedDevice);
+			break;
+		}
+		default:
+			break;
+	}
+}
+
 void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	if (_filterStore->isInProgress()) {
 		return;
@@ -41,59 +57,65 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
-			mac_address_t mac;
-//			mac.data = asset.address; // TODO: copy data.
-			processAcceptedAsset(filter, asset, mac);
+			dispatchAcceptedAsset(filter, asset);
 			break;
 		}
 
 		case AssetFilterOutputFormat::ShortAssetId: {
-//			filter.filterdata().filterdata().getCompressedFingerprint(); // TODO: use this
+			short_asset_id_t shortId = filterOutputResultShortAssetId(filter, asset);
+			dispatchAcceptedAsset(filter, asset, shortId);
 			break;
 		}
 	}
 }
 
-void AssetFiltering::processFilter(AssetFilter filter, const scanned_device_t& device) {
+//void AssetFiltering::processFilter(AssetFilter filter, const scanned_device_t& device) {
+//
+//	CuckooFilter cuckoo = filter.filterdata().filterdata();
+//
+//	// check mac address for this filter
+//	if (*filter.filterdata().metadata().inputType().type() == AssetFilterInputType::MacAddress
+//		&& cuckoo.contains(device.address, MAC_ADDRESS_LEN)) {
+//		// TODO(#177858707):
+//		// - get fingerprint from filter instead of literal mac address.
+//		// - we should just pass on the device, right than copying rssi?
+//		LOGw("filter %u accepted adv from mac addres: %x:%x:%x:%x:%x:%x",
+//			 filter.runtimedata()->filterId,
+//			 device.address[0],
+//			 device.address[1],
+//			 device.address[2],
+//			 device.address[3],
+//			 device.address[4],
+//			 device.address[5]);  // TODO(#177858707) when in/out types is added, test with actual uuid
+//
+//		TrackableEvent trackableEventData;
+//		trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
+//		trackableEventData.rssi = device.rssi;
+//
+//		event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
+//		trackableEvent.dispatch();
+//	}
+//}
 
-	CuckooFilter cuckoo = filter.filterdata().filterdata();
-
-	// check mac address for this filter
-	if (*filter.filterdata().metadata().inputType().type() == AssetFilterInputType::MacAddress
-		&& cuckoo.contains(device.address, MAC_ADDRESS_LEN)) {
-		// TODO(#177858707):
-		// - get fingerprint from filter instead of literal mac address.
-		// - we should just pass on the device, right than copying rssi?
-		LOGw("filter %u accepted adv from mac addres: %x:%x:%x:%x:%x:%x",
-			 filter.runtimedata()->filterId,
-			 device.address[0],
-			 device.address[1],
-			 device.address[2],
-			 device.address[3],
-			 device.address[4],
-			 device.address[5]);  // TODO(#177858707) when in/out types is added, test with actual uuid
-
-		TrackableEvent trackableEventData;
-		trackableEventData.id   = TrackableId(device.address, MAC_ADDRESS_LEN);
-		trackableEventData.rssi = device.rssi;
-
-		event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
-		trackableEvent.dispatch();
-	}
-}
-
+// ---------------------------- Extracting data from the filter  ----------------------------
 
 /**
  * Extracted logic to parse the input type into a template that accepts a delegate expression
  * `ExpressionType returnExpression` in order to re-use the stuff.
  *
- * This method extracts the filters 'input type', prepares the inputtype
- * and calls the delegate with the prepared data.
+ * This method extracts the filters 'input description', prepares the input according to that
+ * description and calls the delegate with the prepared data.
  *
- * Todo: factor out 'input type' so that it can also use 'output type.input type'.
+ * delegateExpression should be of the form (CuckooFilter, uint8_t*, size_t) -> ReturnType.
  */
-template<class ReturnType, class ExpressionType>
-ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_device_t& device, ExpressionType delegateExpression, ReturnType defaultValue) {
+template <class ReturnType, class ExpressionType>
+ReturnType prepareFilterInputAndCallDelegate(
+		AssetFilter filter,
+		const scanned_device_t& device,
+		AssetFilterInput filterInputDescription,
+		ExpressionType delegateExpression,
+		ReturnType defaultValue) {
+
 	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
 		LogAssetFilteringWarn("Filtertype not implemented");
 		return defaultValue;
@@ -101,15 +123,13 @@ ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_d
 
 	CuckooFilter cuckoo = filter.filterdata().filterdata();
 
-	AssetFilterInput filterInputDescription = filter.filterdata().metadata().inputType();
-
 	switch (*filterInputDescription.type()) {
 		case AssetFilterInputType::MacAddress: {
 			return delegateExpression(cuckoo, device.address, sizeof(device.address));
 		}
 		case AssetFilterInputType::AdDataType: {
 			// selects the first found field of configured type and checks if that field's
-			// data is contained in the filter. returns false if it can't be found.
+			// data is contained in the filter. returns defaultValue if it can't be found.
 			cs_data_t result                  = {};
 			ad_data_type_selector_t* selector = filterInputDescription.AdTypeField();
 
@@ -124,20 +144,21 @@ ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_d
 		case AssetFilterInputType::MaskedAdDataType: {
 			// selects the first found field of configured type and checks if that field's
 			// data is contained in the filter. returns false if it can't be found.
-			cs_data_t result                  = {};
+			cs_data_t result                         = {};
 			masked_ad_data_type_selector_t* selector = filterInputDescription.AdTypeMasked();
 
 			assert(selector != nullptr, "Filter metadata type check failed");
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				uint8_t buff[31] = {0};
-				assert(result.len <=31, "advertisement length too big");
+				assert(result.len <= 31, "advertisement length too big");
 
 				// apply the mask
-				for (size_t i = 0; i < result.len; i++){
-					if(BLEutil::isBitSet(selector->adDataMask, i)) {
+				for (size_t i = 0; i < result.len; i++) {
+					if (BLEutil::isBitSet(selector->adDataMask, i)) {
 						buff[i] = result.data[i];
-					} else {
+					}
+					else {
 						buff[i] = 0x00;
 					}
 				}
@@ -148,6 +169,7 @@ ReturnType prepareFilterInputAndCallDelegate(AssetFilter filter, const scanned_d
 			return defaultValue;
 		}
 	}
+
 	return defaultValue;
 }
 
@@ -157,17 +179,19 @@ bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_
 	return prepareFilterInputAndCallDelegate(
 			filter,
 			asset,
+			filter.filterdata().metadata().inputType(),
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) { return cuckoo.contains(data, len); },
 			false);
 }
 
-short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset) {
+short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset) {
 	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
 	// preallocate the buffer that the MaskedAdData needs.)
 	return prepareFilterInputAndCallDelegate(
 			filter,
 			asset,
+			filter.filterdata().metadata().outputType().inFormat(),
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
 				assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
 					   "can't cast compressed fingerprint to asset id");
@@ -177,26 +201,6 @@ short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanne
 			short_asset_id_t{});
 }
 
-void AssetFiltering::processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId) {
-	// TODO
-}
-
-void AssetFiltering::processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, const mac_address_t& assetId) {
-	// TODO
-}
-
-
-void AssetFiltering::handleEvent(event_t& evt) {
-	switch (evt.type) {
-		case CS_TYPE::EVT_DEVICE_SCANNED: {
-			auto scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
-			handleScannedDevice(*scannedDevice);
-			break;
-		}
-		default:
-			break;
-	}
-}
 
 // ======================== Utils ========================
 

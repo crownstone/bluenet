@@ -29,12 +29,15 @@ private:
 
 	/**
 	 * Returns true if the device passes the filter according to its
-	 * metadata settings.
+	 * metadata settings. Returns false otherwise.
 	 */
 	bool filterInputResult(AssetFilter filter, const scanned_device_t& asset);
 
 	/**
-	 *
+	 * Returns a short_asset_id_t based on the configured selection of data
+	 * in metadata.outputType.inFormat. If the data is not sufficient, a default
+	 * constructed object is returned. (Data not sufficient can be detected:
+	 * filterInputResult will return false in that case.)
 	 */
 	short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
 
@@ -53,13 +56,13 @@ private:
 	 * Handles further processing of accepted asset when
 	 * filter.metadata.outputType.outputFormat is ShortAssetId
 	 */
-	void processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId);
+	void dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId);
 
 	/**
 	 * Handles further processing of accepted asset when
 	 * filter.metadata.outputType.outputFormat is MAC
 	 */
-	void processAcceptedAsset(AssetFilter f, const scanned_device_t& asset, const mac_address_t& assetMac);
+	void dispatchAcceptedAsset(AssetFilter f, const scanned_device_t& asset);
 
 
 	// ---------- Util ---------------
