@@ -88,7 +88,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 1     | Session nonce                 | Never     | [Session nonce](#refresh-session-nonce-packet) | Refresh the session nonce.
 2     | Heartbeat                     | Optional  | [Heartbeat](#heartbeat-packet) | Used to know whether the UART connection is alive. You can mix encrypted and unencrypted heartbeat commands. With current implementation though, each time you send an unencrypted heartbeat, the hub service data flag `UART alive encrypted` will be false until an encrypted heartbeat is sent.
 3     | Status                        | Optional  | [Status](#user-status-packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
-4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
+4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone (in reverse byte order compared to string representation).
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control-packet) | Send a control command.
 11    | Hub data reply                | Optional  | [Hub data reply](#hub-data-reply) | Only after receiving `Hub data`, reply with this command. This data will be relayed to the device (phone) connected via BLE.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
@@ -282,10 +282,10 @@ Value | Name | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | AssetMac | 6 | Mac address of the observed asset
-uint8 | StoneId | 1 | Id of the Crownstone that observed the asset
-uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
-uint8 | Channel | 1 | Channel of the observed advertisement
+uint8[] | AssetMac | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
+uint8 | StoneId | 1 | Id of the Crownstone that observed the asset.
+uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone.
+uint8 | Channel | 1 | Channel of the observed advertisement.
 
 ### Nearest Crownstone update
 

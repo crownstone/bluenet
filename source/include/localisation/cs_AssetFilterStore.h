@@ -33,6 +33,9 @@ public:
 	uint8_t getFilterCount();
 	AssetFilter getFilter(uint8_t index);
 
+	uint16_t getMasterVersion();
+	uint16_t getMasterCrc();
+
 	constexpr static size_t MAX_FILTER_IDS     = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
 

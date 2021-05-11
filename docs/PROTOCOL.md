@@ -303,7 +303,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr-data-packet) | Get the UICR data. | x | x | x | x
 6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon-config-id-packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x | | | 
-7 | Get MAC address | - | uint8[6] | Get the MAC address of this stone. | x | x | x | x
+7 | Get MAC address | - | uint8[6] | Get the MAC address of this stone (in reverse byte order compared to string representation). | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
