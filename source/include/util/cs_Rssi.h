@@ -6,10 +6,7 @@
  */
 #pragma once
 
-struct __attribute__((__packed__)) compressed_rssi_data_t {
-	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssi_halved : 6; // half of the absolute value of the original rssi.
-};
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 inline compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
 	compressed_rssi_data_t compressed;
@@ -29,12 +26,3 @@ inline compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
 	return compressed;
 
 }
-//
-//compressed_rssi_t compressRssi(int8_t rssi) {
-//
-//}
-//
-//compressed_rssi_t compressChannel(uint8_t channel) {
-//
-//}
-//

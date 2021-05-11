@@ -42,6 +42,7 @@ protected:
 	cs_ret_code_t handleResult(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
 	cs_ret_code_t handleSetIbeaconConfigId(      uint8_t* payload, size16_t payloadSize);
 
+	cs_ret_code_t dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEvent& meshMshEvent);
 private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
 

@@ -64,12 +64,17 @@ private:
 
 	/**
 	 * Constructs the output of the filter for an accepted asset
-	 * and dispatches it to specific handler.
+	 * and dispatches it to one of the specific handlers, among which:
+	 * - processAcceptedAssetMac,
+	 * - _assetHandlerMac
+	 * - _assetHandlerShortId
 	 *
 	 * filter: the filter that accepted this device.
 	 * device: the device that was accepted
 	 */
 	void processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
+
+	void dispatchAcceptedAssetMacToMesh(AssetFilter filter, const scanned_device_t& asset);
 
 
 public:

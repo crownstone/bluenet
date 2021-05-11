@@ -67,6 +67,7 @@ private:
 	void onDisconnect();
 	void onWriteResult(cs_central_write_result_t& result);
 	void onFilterSummaries(cs_data_t& payload);
+
 public:
 	/**
 	 * Internal usage.
