@@ -33,6 +33,11 @@ cs_ret_code_t AssetFiltering::init() {
 		return retCode;
 	}
 
+	_assetForwarder = new AssetForwarder();
+	if (_assetForwarder == nullptr) {
+		return ERR_NO_SPACE;
+	}
+
 	listen();
 	return ERR_SUCCESS;
 }
@@ -86,7 +91,9 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 				_assetHandlerMac->handleAcceptedAsset(filter, asset);
 			}
 
-			dispatchAcceptedAssetMacToMesh(filter, asset);
+			if(_assetForwarder != nullptr) {
+				_assetForwarder->handleAcceptedAsset(filter, asset);
+			}
 
 			break;
 		}
@@ -101,24 +108,7 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 	}
 }
 
-void AssetFiltering::dispatchAcceptedAssetMacToMesh(AssetFilter filter, const scanned_device_t& asset) {
-	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
-	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
-	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));
-	LOGAssetFilteringDebug("AssetFiltering::dispatchAcceptedAssetMacToMesh: ch%u @ -%u dB",
-			asset_msg.rssiData.channel + 36, asset_msg.rssiData.rssi_halved * 2);
 
-	cs_mesh_msg_t msgWrapper;
-	msgWrapper.type =  CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC;
-	msgWrapper.payload = reinterpret_cast<uint8_t*>(&asset_msg);
-	msgWrapper.size = sizeof(asset_msg);
-	msgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
-	msgWrapper.urgency = CS_MESH_URGENCY_LOW;
-
-	event_t meshMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &msgWrapper, sizeof(msgWrapper));
-
-	meshMsgEvt.dispatch();
-}
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 
