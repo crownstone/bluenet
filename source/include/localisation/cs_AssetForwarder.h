@@ -20,4 +20,5 @@ public:
 
 private:
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg);
+	cs_asset_rssi_data_t expandMeshMsg(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg);
 };

@@ -17,12 +17,19 @@ inline compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
 		default: compressed.channel = 0;
 	}
 
-	if(rssi < 0) {
+	if (rssi < 0) {
 		rssi = -rssi;
 	}
 
-	compressed.rssi_halved = rssi/2;
+	compressed.rssi_halved = rssi / 2;
 
 	return compressed;
+}
 
+inline uint8_t getChannel(const compressed_rssi_data_t& compressed) {
+	return compressed.channel == 0 ? 0 : compressed.channel + 36;
+}
+
+inline int8 getRssi(const compressed_rssi_data_t& compressed) {
+	return -2 * compressed.rssi_halved;
 }
