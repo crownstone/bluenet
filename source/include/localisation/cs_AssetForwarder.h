@@ -8,10 +8,13 @@
 #pragma once
 
 #include <localisation/cs_AssetHandler.h>
+#include <events/cs_EventListener.h>
 
-class AssetForwarder : public AssetHandlerMac {
+class AssetForwarder : public EventListener, AssetHandlerMac {
 public:
 	cs_ret_code_t init();
 
 	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset);
+
+	virtual void handleEvent(event_t & event);
 };

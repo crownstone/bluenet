@@ -7,7 +7,7 @@
 
 
 #include <localisation/cs_AssetForwarder.h>
-#include <events/cs_EventListener.h>
+
 #include <util/cs_Rssi.h>
 #include <logging/cs_Logger.h>
 
@@ -15,6 +15,7 @@
 
 
 cs_ret_code_t AssetForwarder::init() {
+	listen();
 	return ERR_SUCCESS;
 }
 
@@ -36,4 +37,8 @@ void AssetForwarder::handleAcceptedAsset(AssetFilter f, const scanned_device_t& 
 	event_t meshMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &msgWrapper, sizeof(msgWrapper));
 
 	meshMsgEvt.dispatch();
+}
+
+void AssetForwarder::handleEvent(event_t & event) {
+
 }
