@@ -20,6 +20,8 @@
  * into EVT_TRACKING_UPDATE events.
  *
  * Responsible for throttling input to the localisation module using filter parsers.
+ *
+ * TODO: timeout filterModificationInProgress.
  */
 class AssetFilterStore : public EventListener {
 public:

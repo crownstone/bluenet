@@ -225,6 +225,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 	AssetFilter filter(findFilter(cmdData.filterId));
 
 	// check if we need to clean up an old filter.
+	// TODO: a CRC of 0 is a valid case.
 	if (filter._data != nullptr && filter.runtimedata()->crc != 0) {
 		LOGAssetFilterDebug("removing pre-existing filter with same id (%u)", cmdData.filterId);
 		deallocateFilter(filter.runtimedata()->filterId);
@@ -417,6 +418,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 			break;
 		}
 
+		// TODO: a CRC of 0 is a valid case.
 		if (filter.runtimedata()->crc == 0) {
 			// filter changed since commit.
 
@@ -456,6 +458,7 @@ void AssetFilterStore::computeCrcs() {
 
 		AssetFilter filter(filterBuffer);
 
+		// TODO: a CRC of 0 is a valid case.
 		if (filter.runtimedata()->crc == 0) {
 			// filter changed since commit.
 			filter.runtimedata()->crc = crc16(filter.filterdata().metadata()._data, filter.runtimedata()->totalSize, nullptr);
