@@ -17,4 +17,7 @@ public:
 	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset);
 
 	virtual void handleEvent(event_t & event);
+
+private:
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg);
 };

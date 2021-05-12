@@ -7,12 +7,18 @@
 
 
 #include <localisation/cs_AssetForwarder.h>
+#include <mesh/cs_MeshMsgEvent.h>
 
 #include <util/cs_Rssi.h>
 #include <logging/cs_Logger.h>
 
 #define LOGAssetForwarderDebug LOGd
 
+void printAsset(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
+	LOGAssetForwarderDebug("AssetFiltering::dispatchAcceptedAssetMacToMesh: ch%u @ -%u dB",
+			assetMsg.rssiData.channel + 36,
+			assetMsg.rssiData.rssi_halved * 2);
+}
 
 cs_ret_code_t AssetForwarder::init() {
 	listen();
@@ -23,9 +29,8 @@ void AssetForwarder::handleAcceptedAsset(AssetFilter f, const scanned_device_t& 
 	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
 	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));
-	LOGAssetForwarderDebug("AssetFiltering::dispatchAcceptedAssetMacToMesh: ch%u @ -%u dB",
-			asset_msg.rssiData.channel + 36,
-			asset_msg.rssiData.rssi_halved * 2);
+	LOGAssetForwarderDebug("handledAcceptedAsset");
+	printAsset(asset_msg);
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC;
@@ -40,5 +45,22 @@ void AssetForwarder::handleAcceptedAsset(AssetFilter f, const scanned_device_t& 
 }
 
 void AssetForwarder::handleEvent(event_t & event) {
+	switch (event.type) {
+		case CS_TYPE::EVT_RECV_MESH_MSG: {
+			auto meshMsg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
+			if (meshMsg->type == CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC) {
+				forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC>());
+				event.result.returnCode = ERR_SUCCESS;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+}
 
+void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
+	LOGAssetForwarderDebug("forwardAssetToUart");
+	printAsset(assetMsg);
+	// TODO implement
 }
