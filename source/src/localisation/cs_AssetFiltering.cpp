@@ -6,7 +6,6 @@
  */
 
 #include <localisation/cs_AssetFiltering.h>
-#include <util/cs_Rssi.h>
 #include <util/cs_Utils.h>
 
 #define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE

@@ -11,5 +11,7 @@
 
 class AssetForwarder : public AssetHandlerMac {
 public:
+	cs_ret_code_t init();
+
 	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset);
 };
