@@ -315,6 +315,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_REMOVE_FILTER,                                // Remove a filter by id.                          See PROTOCOL.md CTRL_CMD_FILTER_REMOVE
 	CMD_COMMIT_FILTER_CHANGES,                        // Confirm all recent changes to filters.          See PROTOCOL.md CTRL_CMD_FILTER_COMMIT
 	CMD_GET_FILTER_SUMMARIES,                         // Obtain status summary for each filter in RAM.   See PROTOCOL.md CTRL_CMD_FILTER_GET_SUMMARIES
+	EVT_FILTERS_UPDATED,                              // Sent when the asset filter master version was updated (after a commit command was accepted).
+	EVT_FILTER_MODIFICATION,                          // Sent when filter modification has started (payload is true) or stopped (payload is false).
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -627,6 +629,8 @@ typedef asset_filter_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
 typedef asset_filter_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
 typedef asset_filter_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
 typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
+typedef void TYPIFY(EVT_FILTERS_UPDATED);
+typedef bool TYPIFY(EVT_FILTER_MODIFICATION);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

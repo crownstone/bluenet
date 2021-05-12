@@ -306,6 +306,9 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 	endProgress(cmdData.masterCrc, cmdData.masterVersion);
 	LOGAssetFilterDebug("Accepted commit command, ended filterModificationInProgress");
 
+	event_t event(CS_TYPE::EVT_FILTERS_UPDATED);
+	event.dispatch();
+
 	return ERR_SUCCESS;
 }
 
@@ -355,12 +358,20 @@ void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
 void AssetFilterStore::startProgress() {
 	_filterModificationInProgress = true;
 	_masterVersion                = 0;
+
+	TYPIFY(EVT_FILTER_MODIFICATION) modification = _filterModificationInProgress;
+	event_t event(CS_TYPE::EVT_FILTER_MODIFICATION, &modification, sizeof(modification));
+	event.dispatch();
 }
 
 void AssetFilterStore::endProgress(uint16_t newMasterHash, uint16_t newMasterVersion) {
 	_masterHash                   = newMasterHash;
 	_masterVersion                = newMasterVersion;
 	_filterModificationInProgress = false;
+
+	TYPIFY(EVT_FILTER_MODIFICATION) modification = _filterModificationInProgress;
+	event_t event(CS_TYPE::EVT_FILTER_MODIFICATION, &modification, sizeof(modification));
+	event.dispatch();
 }
 
 bool AssetFilterStore::isInProgress() {
