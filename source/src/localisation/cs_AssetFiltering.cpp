@@ -10,10 +10,11 @@
 #include <util/cs_Utils.h>
 
 #define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE
-#define LogAssetFilteringDebug LOGd
-#define LogAssetFilteringWarn LOGw
+#define LOGAssetFilteringDebug LOGd
+#define LOGAssetFilteringWarn LOGw
 
 cs_ret_code_t AssetFiltering::init() {
+	LOGAssetFilteringDebug("AssetFitlering::init");
 	_filterStore = new AssetFilterStore();
 	if (_filterStore == nullptr) {
 		return ERR_NO_SPACE;
@@ -66,7 +67,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
-			processAcceptedAsset(filter,device);
+			LOGAssetFilteringDebug("handleScannedDevice accepted device with mac: %x:%x:%x:%x:%x:%x",
+					device.address[0],
+					device.address[1],
+					device.address[2],
+					device.address[3],
+					device.address[4],
+					device.address[5]);
+			processAcceptedAsset(filter, device);
 		}
 	}
 }
@@ -97,6 +105,8 @@ void AssetFiltering::dispatchAcceptedAssetMacToMesh(AssetFilter filter, const sc
 	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
 	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));
+	LOGAssetFilteringDebug("AssetFiltering::dispatchAcceptedAssetMacToMesh: ch%u @ -%u dB",
+			asset_msg.rssiData.channel + 36, asset_msg.rssiData.rssi_halved * 2);
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type =  CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC;
@@ -130,7 +140,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 		ReturnType defaultValue) {
 
 	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
-		LogAssetFilteringWarn("Filtertype not implemented");
+		LOGAssetFilteringWarn("Filtertype not implemented");
 		return defaultValue;
 	}
 
