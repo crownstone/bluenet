@@ -787,6 +787,12 @@ void Crownstone::test() {
 	if (_operationMode != OperationMode::OPERATION_MODE_NORMAL) {
 		return;
 	}
+	// every so many ticks
+	static int count = 0;
+	if (count++ < 30) {
+		return;
+	}
+	count = 0;
 	TrackableEvent trackable;
 	// trackable.id;
 	static uint8_t rssi = 24;

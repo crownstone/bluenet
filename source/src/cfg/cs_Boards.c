@@ -495,7 +495,7 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->flags.hasAdcZeroRef                = false;
 	p_config->flags.pwmTempInverted              = false;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
+	p_config->deviceType                         = DEVICE_CROWNSTONE_HUB;
 
 	p_config->voltageMultiplier                  = 0.0; // set to 0 to disable sampling checks
 	p_config->currentMultiplier                  = 0.0; // set to 0 to disable sampling checks
