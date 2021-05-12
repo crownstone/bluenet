@@ -10,14 +10,15 @@
 #include <mesh/cs_MeshMsgEvent.h>
 
 #include <util/cs_Rssi.h>
+#include <protocol/cs_Packets.h>
 #include <logging/cs_Logger.h>
 
 #define LOGAssetForwarderDebug LOGd
 
 void printAsset(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
 	LOGAssetForwarderDebug("AssetFiltering::dispatchAcceptedAssetMacToMesh: ch%u @ -%u dB",
-			assetMsg.rssiData.channel + 36,
-			assetMsg.rssiData.rssi_halved * 2);
+			getChannel(assetMsg),
+			getRssi(assetMsg));
 }
 
 cs_ret_code_t AssetForwarder::init() {
@@ -63,4 +64,19 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t
 	LOGAssetForwarderDebug("forwardAssetToUart");
 	printAsset(assetMsg);
 	// TODO implement
+}
+
+struct __attribute__((packed)) cs_asset_rssi_data_t {
+	uint8_t address[6];
+	uint8_t stoneId;
+	uint8_t rssi;
+	uint8_t channel;
+};
+cs_asset_rssi_data_t AssetForwarder::constructUartMsg(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, const stone_id_t& sender) {
+	return cs_asset_rssi_data_t {
+		.address = ,
+				.stoneId = ,
+				. rssi = getRssi(assetMsg),
+				,channel = getChannel(assetMsg)
+	};
 }
