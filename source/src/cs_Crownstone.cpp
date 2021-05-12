@@ -654,7 +654,7 @@ void Crownstone::startUp() {
 
 	//! start advertising
 	LOGi("Start advertising");
-	_advertiser->startAdvertising();
+	//_advertiser->startAdvertising();
 
 	// Set the stored tx power, must be done after advertising has started.
 	TYPIFY(CONFIG_TX_POWER) txPower = 0;

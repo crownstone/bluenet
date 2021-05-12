@@ -43,6 +43,10 @@ void MeshAdvertiser::init() {
 	}
 
 	listen();
+
+	for (int i = 0; i < 6; ++i) {
+		_deterministicAddress[i] = 0x00;
+	}
 }
 
 void MeshAdvertiser::setMacAddress(uint8_t* macAddress) {
@@ -51,6 +55,7 @@ void MeshAdvertiser::setMacAddress(uint8_t* macAddress) {
 	address.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
 	address.addr_id_peer = 0;
 	memcpy(address.addr, macAddress, BLE_GAP_ADDR_LEN);
+	LOGi("Address: %u:%u:%u:%u:%u:%u", macAddress[0], macAddress[1], macAddress[2], macAddress[3], macAddress[4], macAddress[5]);
 	advertiser_address_set(_advertiser, &address);
 }
 
@@ -82,9 +87,13 @@ void MeshAdvertiser::stop() {
 void MeshAdvertiser::advertiseIbeacon(uint8_t ibeaconIndex) {
 	_ibeaconConfigId = ibeaconIndex;
 	updateIbeacon();
+	LOGi("Advertise manufacturer data");
 }
 
 void MeshAdvertiser::updateIbeacon() {
+	advertise();
+	return;
+
 	TYPIFY(CONFIG_IBEACON_MAJOR) major;
 	TYPIFY(CONFIG_IBEACON_MINOR) minor;
 	TYPIFY(CONFIG_IBEACON_UUID) uuid;
@@ -149,6 +158,44 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	memcpy(&(_advPacket->packet.payload[7]), ibeacon->getArray(), ibeacon->size());
 
 	_advPacket->config.repeats = ADVERTISER_REPEAT_INFINITE;
+	advertiser_packet_send(_advertiser, _advPacket);
+}
+
+void MeshAdvertiser::advertise() {
+	if (_advPacket != NULL) {
+		advertiser_flush(_advertiser);
+		stop();
+		for (int i = 0; i < 6; ++i) {
+			if (_deterministicAddress[i] != 0xFF) {
+				_deterministicAddress[i]++;
+				break;
+			} else {
+				_deterministicAddress[i] = 0;
+			}
+		}
+		_advPacket = NULL;
+		setMacAddress(_deterministicAddress);
+		start();
+		return;
+	}
+
+	setMacAddress(_deterministicAddress);
+	
+	_advPacket = advertiser_packet_alloc(_advertiser, 7 + 1);
+	_advPacket->packet.payload[0] = 0x02; // Length of next AD
+	_advPacket->packet.payload[1] = 0x01; // Type: flags
+	_advPacket->packet.payload[2] = 0x06; // Flags
+	_advPacket->packet.payload[3] = 0x04; // Length of next AD
+	_advPacket->packet.payload[4] = 0xFF; // Type: manufacturer data
+	_advPacket->packet.payload[5] = 0xCD; // Company id low byte
+	_advPacket->packet.payload[6] = 0x09; // Company id high byte
+	
+	static uint8_t counter = 0x00;
+	_advPacket->packet.payload[7] = counter++;
+
+	// only one packet
+	_advPacket->config.repeats = 1;
+	LOGi("Send");
 	advertiser_packet_send(_advertiser, _advPacket);
 }
 
@@ -239,6 +286,15 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 			// It's ok if it's not a valid posix time.
 			auto timestamp = SystemTime::getSynchronizedStamp();
 			handleTime(timestamp.posix_s);
+
+			// every time!
+//			updateIbeacon();
+			static int steps = 0;
+			steps++;
+			if (steps == 10) {
+				steps = 0;
+				advertiseIbeacon(0);
+			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {

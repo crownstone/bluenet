@@ -67,6 +67,8 @@ private:
 	adv_packet_t* _advPacket = NULL;
 	uint8_t _ibeaconConfigId = 0;
 
+	uint8_t _deterministicAddress[6];
+
 	// Cache of what's in flash.
 	ibeacon_config_id_packet_t _ibeaconInterval[num_ibeacon_config_ids];
 
@@ -81,6 +83,11 @@ private:
 	 * Updates previous advertisement.
 	 */
 	void advertise(IBeacon* ibeacon);
+
+	/**
+	 * Advertise manufacturing data
+	 */
+	void advertise();
 
 	cs_ret_code_t handleSetIbeaconConfig(set_ibeacon_config_id_packet_t* packet);
 
