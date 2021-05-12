@@ -19,6 +19,8 @@
  */
 class AssetFilterSyncer: EventListener {
 public:
+	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_SECONDS = 5 * 60;
+
 	cs_ret_code_t init(AssetFilterStore& store);
 
 	/**
@@ -67,6 +69,7 @@ private:
 	void onDisconnect();
 	void onWriteResult(cs_central_write_result_t& result);
 	void onFilterSummaries(cs_data_t& payload);
+	void onTick(uint32_t tickCount);
 public:
 	/**
 	 * Internal usage.

@@ -16,6 +16,7 @@
 #define LOGAssetFilterSyncerVerbose LOGd
 
 cs_ret_code_t AssetFilterSyncer::init(AssetFilterStore& store) {
+	LOGAssetFilterSyncerInfo("Init");
 	_store = &store;
 
 	listen();
@@ -27,6 +28,7 @@ void AssetFilterSyncer::sendVersion() {
 		LOGe("Store is nullptr");
 		return;
 	}
+	LOGAssetFilterSyncerDebug("sendVersion");
 	uint16_t masterVersion = _store->getMasterVersion();
 	uint16_t masterCrc = _store->getMasterCrc();
 
@@ -424,6 +426,12 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 	removeNextFilter();
 }
 
+void AssetFilterSyncer::onTick(uint32_t tickCount) {
+	if (tickCount % (1000 * VERSION_BROADCAST_INTERVAL_SECONDS / TICK_INTERVAL_MS) == 0) {
+		sendVersion();
+	}
+}
+
 void AssetFilterSyncer::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
@@ -447,6 +455,11 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
 			onDisconnect();
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			auto tickCount = CS_TYPE_CAST(EVT_TICK, event.data);
+			onTick(*tickCount);
 			break;
 		}
 		default:
