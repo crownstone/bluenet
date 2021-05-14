@@ -161,12 +161,23 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			// TODO: do we need to do anything?
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC: {
+//			dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_ASSET_RSSI_MAC, meshMsgEvent);
+			// TODO
+		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
 			retCode = ERR_INVALID_MESSAGE;
 			break;
 		}
 	}
 	replyWithRetCode(msgType, retCode, reply);
+}
+
+cs_ret_code_t MeshMsgHandler::dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEvent& meshMshEvent) {
+	event_t event(evtType, &meshMshEvent, sizeof(meshMshEvent));
+	event.dispatch();
+
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshMsgHandler::handleTest(uint8_t* payload, size16_t payloadSize) {
@@ -246,37 +257,16 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 }
 
 cs_ret_code_t MeshMsgHandler::handleRssiPing(MeshMsgEvent& mesh_msg_event) {
-	event_t event(
-			CS_TYPE::EVT_MESH_RSSI_PING,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event)
-			);
-	event.dispatch();
-
-	return ERR_SUCCESS;
+	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_RSSI_PING, mesh_msg_event);
 }
 
 cs_ret_code_t MeshMsgHandler::handleRssiData(MeshMsgEvent& mesh_msg_event) {
-	event_t event(
-			CS_TYPE::EVT_MESH_RSSI_DATA,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event)
-			);
-	event.dispatch();
-
-	return ERR_SUCCESS;
+	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_RSSI_DATA, mesh_msg_event);
 }
 
 cs_ret_code_t MeshMsgHandler::handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
+	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, mesh_msg_event);
 
-	event_t event(
-			CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event)
-			);
-	event.dispatch();
-
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t payloadSize) {

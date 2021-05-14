@@ -10,6 +10,8 @@
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFilterStore.h>
 #include <localisation/cs_AssetFilterSyncer.h>
+#include <localisation/cs_AssetHandler.h>
+#include <localisation/cs_AssetForwarder.h>
 
 class AssetFiltering : EventListener {
 public:
@@ -21,15 +23,15 @@ public:
 	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 
 private:
-	AssetFilterStore* _filterStore            = nullptr;
-
-	AssetFilterSyncer* _filterSyncer          = nullptr;
+	AssetFilterStore* _filterStore   = nullptr;
+	AssetFilterSyncer* _filterSyncer = nullptr;
+	AssetForwarder* _assetForwarder   = nullptr;
 
 	/**
 	 * This handleAcceptedAsset callback will be called for each filter
 	 * that has output type mac and have accepted the incoming asset.
 	 */
-	AssetHandlerMac* _assetHandlerMac         = nullptr;
+	AssetHandlerMac* _assetHandlerMac = nullptr;
 
 	/**
 	 * This handleAcceptedAsset callback will be called for each filter
@@ -65,12 +67,17 @@ private:
 
 	/**
 	 * Constructs the output of the filter for an accepted asset
-	 * and dispatches it to specific handler.
+	 * and dispatches it to one of the specific handlers, among which:
+	 * - processAcceptedAssetMac,
+	 * - _assetHandlerMac
+	 * - _assetHandlerShortId
 	 *
 	 * filter: the filter that accepted this device.
 	 * device: the device that was accepted
 	 */
 	void processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
+
+	void dispatchAcceptedAssetMacToMesh(AssetFilter filter, const scanned_device_t& asset);
 
 
 public:

@@ -8,6 +8,7 @@
 #include <ble/cs_Nordic.h>
 #include <localisation/cs_MeshTopology.h>
 #include <storage/cs_State.h>
+#include <util/cs_Rssi.h>
 
 #define LOGMeshTopologyInfo  LOGi
 #define LOGMeshTopologyDebug LOGvv
@@ -68,12 +69,12 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	if (id == 0 || id == _myId) {
 		return;
 	}
-	uint8_t compressedRssi = compressRssi(rssi);
-	uint8_t compressedChannel = compressChannel(channel);
+	auto compressedRssiData = compressRssi(rssi,channel);
+
 	uint8_t index = find(id);
 	if (index == INDEX_NOT_FOUND) {
 		if (_neighbourCount < MAX_NEIGHBOURS) {
-			_neighbours[_neighbourCount] = neighbour_node_t(id, compressedRssi, compressedChannel);
+			_neighbours[_neighbourCount] = neighbour_node_t(id, compressedRssiData);
 			_neighbourCount++;
 		}
 		else {
@@ -81,8 +82,7 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 		}
 	}
 	else {
-		_neighbours[index].rssi = compressedRssi;
-		_neighbours[index].channel = compressedChannel;
+		_neighbours[index].compressedRssi = compressedRssiData;
 		_neighbours[index].lastSeenSeconds = 0;
 	}
 }
@@ -168,28 +168,9 @@ void MeshTopology::onTickSecond() {
 	}
 }
 
-uint8_t MeshTopology::compressRssi(int8_t rssi) {
-	if (rssi > -37) {
-		return 63;
-	}
-	if (rssi < -100) {
-		return 0;
-	}
-	return 100 + rssi;
-}
-
-uint8_t MeshTopology::compressChannel(uint8_t channel) {
-	switch (channel) {
-		case 37: return 1;
-		case 38: return 2;
-		case 39: return 3;
-		default: return 0;
-	}
-}
-
 void MeshTopology::print() {
 	for (uint8_t i = 0; i < _neighbourCount; ++i) {
-		LOGMeshTopologyDebug("id=%u rssi=%i channel=%u lastSeen=%u", _neighbours[i].id, _neighbours[i].rssi, _neighbours[i].channel, _neighbours[i].lastSeenSeconds);
+		LOGMeshTopologyDebug("id=%u rssi=%i channel=%u lastSeen=%u", _neighbours[i].id, _neighbours[i].compressedRssi.rssi_halved, _neighbours[i].compressedRssi.channel, _neighbours[i].lastSeenSeconds);
 	}
 }
 

@@ -48,6 +48,11 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION> {
 	using type = cs_mesh_model_msg_asset_filter_version_t;
 };
 
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC> {
+	using type = cs_mesh_model_msg_asset_rssi_mac_t;
+};
+
 class MeshMsgEvent {
 public:
 	cs_mesh_model_msg_type_t type;     // Type of message
