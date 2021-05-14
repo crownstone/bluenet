@@ -11,12 +11,13 @@
 
 #include <util/cs_Rssi.h>
 #include <protocol/cs_Packets.h>
+#include <uart/cs_UartHandler.h>
 #include <logging/cs_Logger.h>
 
-#define LOGAssetForwarderDebug LOGd
+#define LOGAssetForwarderDebug LOGnone
 
 void printAsset(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
-	LOGAssetForwarderDebug("AssetFiltering::dispatchAcceptedAssetMacToMesh: ch%u @ -%u dB",
+	LOGAssetForwarderDebug("mesh_model_msg_asset: ch%u @ -%u dB",
 			getChannel(assetMsg.rssiData),
 			getRssiUnsigned(assetMsg.rssiData));
 }
@@ -51,7 +52,8 @@ void AssetForwarder::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
 			auto meshMsg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
 			if (meshMsg->type == CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC) {
-				forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC>());
+				forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC>(),
+						meshMsg->srcAddress);
 				event.result.returnCode = ERR_SUCCESS;
 			}
 			break;
@@ -61,14 +63,19 @@ void AssetForwarder::handleEvent(event_t & event) {
 	}
 }
 
-void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
-	LOGAssetForwarderDebug("forwardAssetToUart");
+void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender) {
 	printAsset(assetMsg);
-	// TODO implement
+
+	cs_asset_rssi_data_t uartAssetMsg = constructUartMsg(assetMsg, sender);
+
+	UartHandler::getInstance().writeMsg(
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_DATA,
+			reinterpret_cast<uint8_t*>(&uartAssetMsg),
+			sizeof(uartAssetMsg));
 }
 
 cs_asset_rssi_data_t AssetForwarder::constructUartMsg(
-		const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, const stone_id_t& sender) {
+		const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender) {
 	auto assetData = cs_asset_rssi_data_t{
 			.address = {},
 			.stoneId = sender,
