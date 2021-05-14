@@ -40,7 +40,6 @@ cs_ret_code_t AssetFiltering::init() {
 		return retCode;
 	}
 
-
 	listen();
 	return ERR_SUCCESS;
 }

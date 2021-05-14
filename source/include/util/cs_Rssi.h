@@ -11,10 +11,10 @@
 inline compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
 	compressed_rssi_data_t compressed;
 	switch (channel) {
-		case 37: compressed.channel = 1;
-		case 38: compressed.channel = 2;
-		case 39: compressed.channel = 3;
-		default: compressed.channel = 0;
+		case 37: compressed.channel = 1; break;
+		case 38: compressed.channel = 2; break;
+		case 39: compressed.channel = 3; break;
+		default: compressed.channel = 0; break;
 	}
 
 	if (rssi < 0) {
@@ -30,6 +30,10 @@ inline uint8_t getChannel(const compressed_rssi_data_t& compressed) {
 	return compressed.channel == 0 ? 0 : compressed.channel + 36;
 }
 
-inline int8 getRssi(const compressed_rssi_data_t& compressed) {
+inline int8_t getRssi(const compressed_rssi_data_t& compressed) {
 	return -2 * compressed.rssi_halved;
+}
+
+inline uint8_t getRssiUnsigned(const compressed_rssi_data_t& compressed) {
+	return 2 * compressed.rssi_halved;
 }
