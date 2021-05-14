@@ -22,7 +22,7 @@
 cs_ret_code_t AssetFilterStore::init() {
 	// TODO: Load from flash.
 	LOGAssetFilterInfo("init");
-	endProgress(_masterHash, _masterVersion);
+	endInProgress(_masterHash, _masterVersion);
 	listen();
 	return ERR_SUCCESS;
 }
@@ -62,6 +62,10 @@ void AssetFilterStore::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
 			handleGetFilterSummariesCommand(evt.result);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			onTick();
 			break;
 		}
 		default: break;
@@ -219,7 +223,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 		return ERR_INVALID_MESSAGE;
 	}
 
-	startProgress();
+	startInProgress();
 
 	// Find or allocate a filter.
 	AssetFilter filter(findFilter(cmdData.filterId));
@@ -275,7 +279,7 @@ cs_ret_code_t AssetFilterStore::handleRemoveFilterCommand(const asset_filter_cmd
 	}
 
 	if (deallocateFilter(cmdData.filterId)) {
-		startProgress();
+		startInProgress();
 		return ERR_SUCCESS;
 	}
 
@@ -297,14 +301,12 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 
 	uint16_t masterHash = masterCrc();
 	if (cmdData.masterCrc != masterHash) {
-		LOGAssetFilterWarn("Master Crc did not match (0x%x != 0x%x, _filterModificationInProgress stays true.",
-				cmdData.masterCrc,
-				masterHash);
+		LOGAssetFilterWarn("Master Crc did not match: 0x%x != 0x%x, inProgress stays true.", cmdData.masterCrc, masterHash);
 		return ERR_MISMATCH;
 	}
 
 	// finish commit by writing the _masterHash
-	endProgress(cmdData.masterCrc, cmdData.masterVersion);
+	endInProgress(cmdData.masterCrc, cmdData.masterVersion);
 	LOGAssetFilterDebug("Accepted commit command, ended filterModificationInProgress");
 
 	event_t event(CS_TYPE::EVT_FILTERS_UPDATED);
@@ -353,30 +355,42 @@ void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
 	result.returnCode = ERR_SUCCESS;
 }
 
+void AssetFilterStore::onTick() {
+	if (_modificationInProgressCountdown) {
+		_modificationInProgressCountdown--;
+		if (_modificationInProgressCountdown == 0) {
+			LOGAssetFilterInfo("Modification in progress timeout.");
+			sendInProgressStatus();
+		}
+	}
+}
+
 // -------------------------------------------------------------
 // ---------------------- Utility functions --------------------
 // -------------------------------------------------------------
-void AssetFilterStore::startProgress() {
-	_filterModificationInProgress = true;
-	_masterVersion                = 0;
-
-	TYPIFY(EVT_FILTER_MODIFICATION) modification = _filterModificationInProgress;
-	event_t event(CS_TYPE::EVT_FILTER_MODIFICATION, &modification, sizeof(modification));
-	event.dispatch();
+void AssetFilterStore::startInProgress() {
+	LOGAssetFilterDebug("startInProgress");
+	_modificationInProgressCountdown = 1000 * MODIFICATION_IN_PROGRESS_TIMEOUT_SECONDS / TICK_INTERVAL_MS;
+	_masterVersion                   = 0;
+	sendInProgressStatus();
 }
 
-void AssetFilterStore::endProgress(uint16_t newMasterHash, uint16_t newMasterVersion) {
-	_masterHash                   = newMasterHash;
-	_masterVersion                = newMasterVersion;
-	_filterModificationInProgress = false;
-
-	TYPIFY(EVT_FILTER_MODIFICATION) modification = _filterModificationInProgress;
-	event_t event(CS_TYPE::EVT_FILTER_MODIFICATION, &modification, sizeof(modification));
-	event.dispatch();
+void AssetFilterStore::endInProgress(uint16_t newMasterHash, uint16_t newMasterVersion) {
+	LOGAssetFilterDebug("endInProgress version=%u crc=%u", newMasterVersion, newMasterHash);
+	_masterHash                      = newMasterHash;
+	_masterVersion                   = newMasterVersion;
+	_modificationInProgressCountdown = 0;
+	sendInProgressStatus();
 }
 
 bool AssetFilterStore::isInProgress() {
-	return _filterModificationInProgress;
+	return _modificationInProgressCountdown != 0;
+}
+
+void AssetFilterStore::sendInProgressStatus() {
+	TYPIFY(EVT_FILTER_MODIFICATION) modification = isInProgress();
+	event_t event(CS_TYPE::EVT_FILTER_MODIFICATION, &modification, sizeof(modification));
+	event.dispatch();
 }
 
 uint16_t AssetFilterStore::masterCrc() {
