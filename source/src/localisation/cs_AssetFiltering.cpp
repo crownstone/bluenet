@@ -36,6 +36,7 @@ cs_ret_code_t AssetFiltering::init() {
 	if (_assetForwarder == nullptr) {
 		return ERR_NO_SPACE;
 	}
+	retCode = _assetForwarder->init();
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
