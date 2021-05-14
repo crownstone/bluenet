@@ -16,17 +16,23 @@
 #define LOGAssetFilterSyncerVerbose LOGd
 
 cs_ret_code_t AssetFilterSyncer::init(AssetFilterStore& store) {
+	LOGAssetFilterSyncerInfo("Init");
 	_store = &store;
 
 	listen();
 	return ERR_SUCCESS;
 }
 
-void AssetFilterSyncer::sendVersion() {
+void AssetFilterSyncer::sendVersion(bool reliable) {
 	if (_store == nullptr) {
 		LOGe("Store is nullptr");
 		return;
 	}
+	if (_store->isInProgress()) {
+		LOGAssetFilterSyncerDebug("Store is in progress: don't send version");
+		return;
+	}
+	LOGAssetFilterSyncerDebug("sendVersion reliable=%u", reliable);
 	uint16_t masterVersion = _store->getMasterVersion();
 	uint16_t masterCrc = _store->getMasterCrc();
 
@@ -40,7 +46,7 @@ void AssetFilterSyncer::sendVersion() {
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION;
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.reliability = reliable ? CS_MESH_RELIABILITY_MEDIUM : CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&versionPacket);
 	meshMsg.size = sizeof(versionPacket);
@@ -56,36 +62,66 @@ cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg
 			packet.masterVersion,
 			packet.masterCrc,
 			packet.maxFilterCount,
-			packet.maxSpace)
-	if (shouldSync(packet.protocol, packet.masterVersion, packet.masterCrc)) {
-		syncFilters(stoneId);
+			packet.maxSpace);
+	VersionCompare compare = compareToMyVersion(packet.protocol, packet.masterVersion, packet.masterCrc);
+	switch (compare) {
+		case VersionCompare::OLDER: {
+			// The stone has an older version: sync it.
+			syncFilters(stoneId);
+			break;
+		}
+		case VersionCompare::NEWER: {
+			// The stone has a newer version: inform it that we should be synced.
+			// Should not be reliable, as we currently get a call to onVersion each for each repeat.
+			sendVersion(false);
+			break;
+		}
+		default: {
+			break;
+		}
 	}
-
 	return ERR_SUCCESS;
 }
 
-bool AssetFilterSyncer::shouldSync(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint16_t masterCrc) {
+AssetFilterSyncer::VersionCompare AssetFilterSyncer::compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint16_t masterCrc) {
 	if (protocol != ASSET_FILTER_CMD_PROTOCOL_VERSION) {
 		LOGAssetFilterSyncerInfo("Unknown protocol: %u", protocol);
-		return false;
+		return VersionCompare::UNKOWN;
 	}
 
 	uint16_t myMasterVersion = _store->getMasterVersion();
 	uint16_t myMasterCrc = _store->getMasterCrc();
+
 	if (myMasterVersion == 0) {
+		if (masterVersion == 0) {
+			// CRC can be ignored.
+			LOGAssetFilterSyncerDebug("Both have no valid filters");
+			return VersionCompare::EQUAL;
+		}
 		LOGAssetFilterSyncerDebug("We have no valid filters");
-		return false;
+		return VersionCompare::NEWER;
 	}
 
 	if (masterVersion == myMasterVersion) {
 		if (masterCrc == myMasterCrc) {
 			LOGAssetFilterSyncerDebug("Version and CRC match");
-			return false;
+			return VersionCompare::EQUAL;
 		}
-		return (myMasterCrc > masterCrc);
+		LOGAssetFilterSyncerInfo("Equal version, but different CRC");
+		if (masterCrc > myMasterCrc) {
+			return VersionCompare::NEWER;
+		}
+		else {
+			return VersionCompare::OLDER;
+		}
 	}
 
-	return (Lollipop::isNewer(masterVersion, myMasterVersion, 0xFFFF));
+	if (Lollipop::isNewer(myMasterVersion, masterVersion, 0xFFFF)) {
+		return VersionCompare::NEWER;
+	}
+	else {
+		return VersionCompare::OLDER;
+	}
 }
 
 void AssetFilterSyncer::setStep(SyncStep step) {
@@ -104,6 +140,10 @@ void AssetFilterSyncer::reset() {
 void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
 	LOGAssetFilterSyncerInfo("syncFilters to stoneId=%u", stoneId);
 	if (_step != SyncStep::NONE) {
+		return;
+	}
+	if (_store->isInProgress()) {
+		LOGAssetFilterSyncerInfo("Store is in progress");
 		return;
 	}
 	connect(stoneId);
@@ -256,6 +296,7 @@ void AssetFilterSyncer::disconnect() {
 		case ERR_SUCCESS: {
 			// Already disconnected.
 			setStep(SyncStep::NONE);
+			done();
 			return;
 		}
 		case ERR_WAIT_FOR_SUCCESS: {
@@ -268,6 +309,12 @@ void AssetFilterSyncer::disconnect() {
 			return;
 		}
 	}
+}
+
+void AssetFilterSyncer::done() {
+	LOGAssetFilterSyncerDebug("Done!");
+	// Send out version again, so the next crownstone with an old version can send their version, which makes us connect to that crownstone.
+	sendVersion(true);
 }
 
 
@@ -294,6 +341,9 @@ void AssetFilterSyncer::onConnectResult(cs_ret_code_t retCode) {
 }
 
 void AssetFilterSyncer::onDisconnect() {
+	if (_step == SyncStep::DISCONNECT) {
+		done();
+	}
 	if (_step != SyncStep::NONE) {
 		reset();
 	}
@@ -370,7 +420,7 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 	auto header = reinterpret_cast<asset_filter_cmd_get_filter_summaries_ret_t*>(payload.data);
 
 	// Double check master version etc.
-	if (!shouldSync(header->protocolVersion, header->masterVersion, header->masterCrc)) {
+	if (compareToMyVersion(header->protocolVersion, header->masterVersion, header->masterCrc) != VersionCompare::OLDER) {
 		reset();
 		return;
 	}
@@ -424,6 +474,20 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 	removeNextFilter();
 }
 
+void AssetFilterSyncer::onModificationInProgress(bool inProgress) {
+	LOGAssetFilterSyncerDebug("onModificationInProgress %u", inProgress);
+	if (inProgress) {
+		// Abort the current upload.
+		reset();
+	}
+}
+
+void AssetFilterSyncer::onTick(uint32_t tickCount) {
+	if (tickCount % (1000 * VERSION_BROADCAST_INTERVAL_SECONDS / TICK_INTERVAL_MS) == 0) {
+		sendVersion(false);
+	}
+}
+
 void AssetFilterSyncer::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
@@ -433,6 +497,15 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 				auto packet = meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION>();
 				event.result.returnCode = onVersion(meshMsg->srcAddress, packet);
 			}
+			break;
+		}
+		case CS_TYPE::EVT_FILTERS_UPDATED: {
+			sendVersion(true);
+			break;
+		}
+		case CS_TYPE::EVT_FILTER_MODIFICATION: {
+			auto packet = CS_TYPE_CAST(EVT_FILTER_MODIFICATION, event.data);
+			onModificationInProgress(*packet);
 			break;
 		}
 		case CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT: {
@@ -447,6 +520,11 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
 			onDisconnect();
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			auto tickCount = CS_TYPE_CAST(EVT_TICK, event.data);
+			onTick(*tickCount);
 			break;
 		}
 		default:

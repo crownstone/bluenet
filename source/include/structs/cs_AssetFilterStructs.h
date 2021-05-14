@@ -38,6 +38,7 @@ struct __attribute__((__packed__)) asset_filter_runtime_data_t {
 	 * - tracking_filter_t::filterdata
 	 *
 	 * The value 0 wil be interpreted as 'not valid'.
+	 * TODO: a CRC of 0 is a valid case.
 	 */
 	uint16_t crc;
 };

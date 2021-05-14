@@ -19,12 +19,14 @@
  */
 class AssetFilterSyncer: EventListener {
 public:
+	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_SECONDS = 5 * 60;
+
 	cs_ret_code_t init(AssetFilterStore& store);
 
 	/**
 	 * Sends the master version and CRC over the mesh and UART.
 	 */
-	void sendVersion();
+	void sendVersion(bool reliable);
 
 
 private:
@@ -36,6 +38,13 @@ private:
 		UPLOAD_FILTERS,
 		COMMIT,
 		DISCONNECT
+	};
+
+	enum class VersionCompare {
+		UNKOWN,
+		OLDER,
+		EQUAL,
+		NEWER
 	};
 
 	AssetFilterStore* _store = nullptr;
@@ -51,7 +60,7 @@ private:
 
 	void setStep(SyncStep step);
 	void reset();
-	bool shouldSync(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint16_t masterCrc);
+	VersionCompare compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint16_t masterCrc);
 
 	void syncFilters(stone_id_t stoneId);
 	void connect(stone_id_t stoneId);
@@ -59,15 +68,19 @@ private:
 	void uploadNextFilter();
 	void commit();
 	void disconnect();
+	/**
+	 * When the whole sync process to a stone was successful, call done().
+	 */
+	void done();
 
 
 	cs_ret_code_t onVersion(stone_id_t stoneId, cs_mesh_model_msg_asset_filter_version_t& packet);
-
+	void onModificationInProgress(bool inProgress);
 	void onConnectResult(cs_ret_code_t retCode);
 	void onDisconnect();
 	void onWriteResult(cs_central_write_result_t& result);
 	void onFilterSummaries(cs_data_t& payload);
-
+	void onTick(uint32_t tickCount);
 public:
 	/**
 	 * Internal usage.

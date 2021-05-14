@@ -46,6 +46,7 @@ public:
 
 	constexpr static uint8_t MAX_FILTER_IDS    = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
+	constexpr static int MODIFICATION_IN_PROGRESS_TIMEOUT_SECONDS = 20;
 
 private:
 	// -------------------------------------------------------------
@@ -83,13 +84,11 @@ private:
 	uint16_t _masterVersion = 0;
 
 	/**
-	 * When this value is true:
-	 * - no incoming advertisements are parsed.
-	 * - filters may be in inconsistent state.
+	 * When this value is not 0, the filters are being modified.
 	 *
-	 * Defaults to true, so that the system has time to load data from flash.
+	 * Reduced by 1 every tick.
 	 */
-	bool _filterModificationInProgress = true;
+	uint16_t _modificationInProgressCountdown = 0;
 
 	// -------------------------------------------------------------
 	// ------------------ Advertisment processing ------------------
@@ -193,21 +192,27 @@ private:
 	 */
 	void handleGetFilterSummariesCommand(cs_result_t& result);
 
+	void onTick();
+
 	// -------------------------------------------------------------
 	// ---------------------- Utility functions --------------------
 	// -------------------------------------------------------------
 
 	/**
-	 * sets _masterVersion to 0 and _filterModificationInProgress to true.
-	 *
-	 * This will result in the TrackableParser not handling incoming advertisements
-	 * and ensure that it is safe to adjust the filters.
+	 * To be called when about to modify filters.
+	 * - Sets master version to 0.
 	 */
-	void startProgress();
+	void startInProgress();
+
 	/**
-	 * Sets the _masterVersion and _masterHash, and _filterModificationInProgress to false.
+	 * To be called when filters are no longer being modified.
 	 */
-	void endProgress(uint16_t newMasterHash, uint16_t newMasterVersion);
+	void endInProgress(uint16_t newMasterHash, uint16_t newMasterVersion);
+
+	/**
+	 * Send an internal event when isInProgress() may have changed.
+	 */
+	void sendInProgressStatus();
 
 	/**
 	 * The master crc is the crc16 of the filters in the buffer.

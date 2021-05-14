@@ -17,6 +17,8 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
+	// TODO: check if master version != 0 before using filters.
+
 	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
 	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 
