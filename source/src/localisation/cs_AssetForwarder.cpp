@@ -79,7 +79,7 @@ cs_asset_rssi_data_t AssetForwarder::constructUartMsg(
 	auto assetData = cs_asset_rssi_data_t{
 			.address = {},
 			.stoneId = sender,
-			.rssi    = getRssiUnsigned(assetMsg.rssiData),
+			.rssi    = getRssi(assetMsg.rssiData),
 			.channel = getChannel(assetMsg.rssiData),
 	};
 	memcpy (assetData.address, assetMsg.mac, sizeof(assetMsg.mac));

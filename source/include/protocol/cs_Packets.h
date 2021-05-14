@@ -588,7 +588,7 @@ const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
 struct __attribute__((packed)) cs_asset_rssi_data_t {
 	uint8_t address[6];
 	uint8_t stoneId;
-	uint8_t rssi;
+	int8_t rssi;
 	uint8_t channel;
 };
 
@@ -599,7 +599,7 @@ struct __attribute__((packed)) cs_asset_rssi_data_t {
 struct __attribute__((packed)) cs_nearest_stone_update_t {
 	uint8_t assetId[3];
 	uint8_t stoneId;
-	uint8_t rssi;
+	int8_t rssi;
 	uint8_t channel;
 };
 

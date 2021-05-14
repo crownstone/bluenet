@@ -284,7 +284,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8[] | AssetMac | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
 uint8 | StoneId | 1 | Id of the Crownstone that observed the asset.
-uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone.
+int8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone.
 uint8 | Channel | 1 | Channel of the observed advertisement.
 
 ### Nearest Crownstone update
@@ -293,7 +293,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8[] | AssetId | 3 | ShortAssetId of the observed asset
 uint8 | ClosestStoneId | 1 | Id of the Crownstone that this Crownstone thinks is closest to the asset
-uint8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
+int8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
 uint8 | Channel | 1 | Channel of the observed advertisement
 
 ### nearest Crownstone timeout
