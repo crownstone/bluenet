@@ -87,7 +87,6 @@ void MeshAdvertiser::stop() {
 void MeshAdvertiser::advertiseIbeacon(uint8_t ibeaconIndex) {
 	_ibeaconConfigId = ibeaconIndex;
 	updateIbeacon();
-	LOGi("Advertise manufacturer data");
 }
 
 void MeshAdvertiser::updateIbeacon() {
@@ -161,26 +160,19 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	advertiser_packet_send(_advertiser, _advPacket);
 }
 
+/**
+ * This implementation is a hack. If we use advertiser_packet_discard we run into issues. Also, we have to wait after
+ * an enable command through a call to start(). Here we choose to just set _advPacket to null and return. Hence, there
+ * is a considerable memory leak. Surprisingly, this does not seem to run into too much issues (you will see mainly
+ * error messages w.r.t. FDS coming by).
+ */
 void MeshAdvertiser::advertise() {
 	if (_advPacket != NULL) {
-		advertiser_flush(_advertiser);
-		stop();
-		for (int i = 0; i < 6; ++i) {
-			if (_deterministicAddress[i] != 0xFF) {
-				_deterministicAddress[i]++;
-				break;
-			} else {
-				_deterministicAddress[i] = 0;
-			}
-		}
-		_advPacket = NULL;
-		setMacAddress(_deterministicAddress);
-		start();
-		return;
+		// just continue and allocate again!
 	}
 
 	setMacAddress(_deterministicAddress);
-	
+
 	_advPacket = advertiser_packet_alloc(_advertiser, 7 + 1);
 	_advPacket->packet.payload[0] = 0x02; // Length of next AD
 	_advPacket->packet.payload[1] = 0x01; // Type: flags
@@ -189,14 +181,26 @@ void MeshAdvertiser::advertise() {
 	_advPacket->packet.payload[4] = 0xFF; // Type: manufacturer data
 	_advPacket->packet.payload[5] = 0xCD; // Company id low byte
 	_advPacket->packet.payload[6] = 0x09; // Company id high byte
-	
+
+	// just also have something in the payload itself that increments (mod 256)
 	static uint8_t counter = 0x00;
 	_advPacket->packet.payload[7] = counter++;
 
-	// only one packet
+	// send only one packet (repeats is one means a packet over all 3 BLE adv channels)
 	_advPacket->config.repeats = 1;
-	LOGi("Send");
+	LOGi("Advertise manufacturer data");
 	advertiser_packet_send(_advertiser, _advPacket);
+	
+	// increment MAC address for next call
+	for (int i = 0; i < 6; ++i) {
+		if (_deterministicAddress[i] != 0xFF) {
+			_deterministicAddress[i]++;
+			break;
+		} else {
+			_deterministicAddress[i] = 0;
+		}
+	}
+	
 }
 
 cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(set_ibeacon_config_id_packet_t* packet) {
