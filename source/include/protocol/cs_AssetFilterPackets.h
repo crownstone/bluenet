@@ -34,22 +34,21 @@ struct __attribute__((__packed__)) asset_filter_cmd_remove_filter_t {
 struct __attribute__((__packed__)) asset_filter_cmd_commit_filter_changes_t {
 	asset_filter_cmd_protocol_t protocolVersion;
 	uint16_t masterVersion;
-	uint16_t masterCrc;
+	uint32_t masterCrc;
 };
 
 // ------------------ Return values ------------------
 
 struct __attribute__((__packed__)) asset_filter_summary_t {
 	uint8_t id;
-	uint8_t type;
-	uint16_t crc;
+	uint32_t crc;
 };
 
 
 struct __attribute__((__packed__)) asset_filter_cmd_get_filter_summaries_ret_t {
 	asset_filter_cmd_protocol_t protocolVersion;
 	uint16_t masterVersion;
-	uint16_t masterCrc;
+	uint32_t masterCrc;
 	uint16_t freeSpace;
 	asset_filter_summary_t summaries[];
 };

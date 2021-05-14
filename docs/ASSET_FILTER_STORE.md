@@ -40,7 +40,7 @@ Filter IO packets
 
 Filter description packets
 - [Filter summary](#filter-summary)
-- [Filter master crc](#filter-master-crc)
+- [Filter master CRC](#filter-master-crc)
 - [Filter version](#filter-master-version)
 
 *************************************************************************
@@ -114,7 +114,7 @@ uint8_t | filterId | 1 | Id of the filter to remove.
 
 A commit filter changes command signifies the end of a sequence of changes. When this is received the firmware
 will perform several consistency checks:
-- Crc values are recomputed where necessary
+- CRC values are recomputed where necessary
 - Filters are checked for size consistency (e.g. allocated space for a tracking filter must match the cuckoo filter size definition)
 
 Any malformed filters may immediately be deallocated to save resources and prevent firmware crashes. When return value is not `SUCCESS`, query the status with a [get filter summaries](#get-filter-summaries) command for more information.
@@ -123,15 +123,15 @@ Any malformed filters may immediately be deallocated to save resources and preve
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | 
-uint16_t | [MasterVersion](#master-version) | 2 | Value of the synchronization version of the Asset Filter Store that should be set to if this command is succesfully handled. 
-uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result.
+[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 |
+uint16_t | [MasterVersion](#master-version) | 2 | Value of the synchronization version of the Asset Filter Store that should be set to if this command is succesfully handled.
+uint32_t | [MasterCrc](#master-crc) | 4 | Master CRC at time of constructing this result.
 
 
 #### Commit filter result
 
-- `SUCCESS`: all filters passed the consistency checks and the master crc matches. `MasterVersion` is updated to the value in the received command.
-- `MISMATCH`:the master crc did not match but no consistency checks failed. `MasterVersion` is not changed.
+- `SUCCESS`: all filters passed the consistency checks and the master CRC matches. `MasterVersion` is updated to the value in the received command.
+- `MISMATCH`:the master CRC did not match but no consistency checks failed. `MasterVersion` is not changed.
 - `WRONG_STATE`: some filters have been deleted due to failed consistency checks. `MasterVersion` is not changed.
 
 
@@ -148,10 +148,10 @@ Empty.
 #### Get filter summaries result packet
 
 Type | Name | Length | Description
---- | --- | --- | --- 
+--- | --- | --- | ---
 [CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | Asset Filter Store protocol version implemented in the firmware
-uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the Asset Filter Store at time of constructing this result packet. 
-uint16_t | [MasterCrc](#master-crc) | 2 | Master crc at time of constructing this result packet.
+uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the Asset Filter Store at time of constructing this result packet.
+uint32_t | [MasterCrc](#master-crc) | 4 | Master CRC at time of constructing this result packet.
 uint16_t | freeSpace | 2 | The number of bytes that the Asset Filter Store is still allowed to allocate. (Does not take into account free heap space on the firmware.)
 [Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 4 | Summaries of all filters currently on the Crownstone. 
 
@@ -267,21 +267,20 @@ uint32_t | AdDataMask | bit-to-byte-wise mask for `dataI`.
 A short summary of a filters state.
 
 Type | Name | Length
---- | --- | --- 
-uint8_t | filterId | 1 
-uint8_t | filterType | 1
-uint16_t | filterCrc | 2
+--- | --- | ---
+uint8_t | filterId | 1
+uint32_t | filterCrc | 4
 
-### Filter master crc
+### Filter master CRC
 
 Given a list of filters `f[0], ... , f[k]`, in [tracking filter data](#tracking-filter-data) format, the `masterCrc` is computed as follows:
 - Sort the filters according to ascending `filterId` to obtain a new list: `f'[0], ... , f'[k]`
-- compute the crcs16 values of this list: `c[0], ... , c[k]`.
+- compute the CRC-32 values of this list: `c[0], ... , c[k]`.
 - create a new list by zipping the filterIds with these crcs: `id(f'[0]), c[0], ... , id(f'[k]), c[k]`.
-  Here `id(f'[i])` is the `filterId` of `f'[i]`. Note that these id's are `uint8`, while the crcs are `uint16`.
-- the `masterCrc` the crc16 of this zipped list.
+  Here `id(f'[i])` is the `filterId` of `f'[i]`. Note that these id's are `uint8`, while the CRCs are `uint32`.
+- the `masterCrc` the CRC-32 of this zipped list.
 
-The if the firmware needs to recompute its master crc, it uses the filters it has in RAM,
+The if the firmware needs to recompute its master CRC, it uses the filters it has in RAM,
 not the filters that are stored on flash.
 
 

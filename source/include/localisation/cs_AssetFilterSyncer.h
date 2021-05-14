@@ -60,7 +60,7 @@ private:
 
 	void setStep(SyncStep step);
 	void reset();
-	VersionCompare compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint16_t masterCrc);
+	VersionCompare compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint32_t masterCrc);
 
 	void syncFilters(stone_id_t stoneId);
 	void connect(stone_id_t stoneId);

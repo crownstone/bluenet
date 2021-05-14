@@ -162,6 +162,7 @@
 
 // Required for FDS
 #define CRC16_ENABLED 1
+#define CRC32_ENABLED 1
 
 // Used by cs_Comp
 #define COMP_ENABLED 1

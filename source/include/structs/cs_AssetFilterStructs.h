@@ -21,6 +21,14 @@ struct __attribute__((__packed__)) asset_filter_runtime_data_t {
 	 */
 	uint8_t filterId;
 
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			bool crcCalculated : 1;  // Whether the CRC of this filter has been calculated.
+			bool committed : 1;      // Whether this filter has been committed.
+		} flags;
+		uint8_t asInt = 0;
+	} flags;
+
 	/**
 	 * The size of the tracking_filter_t, including the buffer, excluding sizeof(runtimedata).
 	 * i.e.:
@@ -33,12 +41,9 @@ struct __attribute__((__packed__)) asset_filter_runtime_data_t {
 	uint16_t totalSize;
 
 	/**
-	 * crc16 of the fields:
+	 * crc32 of the fields:
 	 * - tracking_filter_t::metadata
 	 * - tracking_filter_t::filterdata
-	 *
-	 * The value 0 wil be interpreted as 'not valid'.
-	 * TODO: a CRC of 0 is a valid case.
 	 */
-	uint16_t crc;
+	uint32_t crc;
 };

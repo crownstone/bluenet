@@ -12,7 +12,7 @@
 #include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_PacketsInternal.h>
-#include <util/cs_Crc16.h>
+#include <util/cs_Crc32.h>
 #include <util/cs_CuckooFilter.h>
 
 #define LOGAssetFilterWarn LOGw
@@ -22,7 +22,8 @@
 cs_ret_code_t AssetFilterStore::init() {
 	// TODO: Load from flash.
 	LOGAssetFilterInfo("init");
-	endInProgress(_masterHash, _masterVersion);
+
+//	endInProgress(_masterVersion, _masterCrc);
 	listen();
 	return ERR_SUCCESS;
 }
@@ -39,8 +40,8 @@ uint16_t AssetFilterStore::getMasterVersion() {
 	return _masterVersion;
 }
 
-uint16_t AssetFilterStore::getMasterCrc() {
-	return _masterHash;
+uint32_t AssetFilterStore::getMasterCrc() {
+	return _masterCrc;
 }
 
 void AssetFilterStore::handleEvent(event_t& evt) {
@@ -118,9 +119,10 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t payloadSize) 
 
 	LOGAssetFilterDebug("before assignments");
 	// initialize runtime data.
-	newFilterAccessor.runtimedata()->filterId  = filterId;
-	newFilterAccessor.runtimedata()->totalSize = payloadSize;
-	newFilterAccessor.runtimedata()->crc       = 0;
+	newFilterAccessor.runtimedata()->filterId    = filterId;
+	newFilterAccessor.runtimedata()->totalSize   = payloadSize;
+	newFilterAccessor.runtimedata()->crc         = 0;
+	newFilterAccessor.runtimedata()->flags.asInt = 0;
 
 	// don't forget to increment the Count for the filter list.
 	_filtersCount++;
@@ -228,9 +230,9 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 	// Find or allocate a filter.
 	AssetFilter filter(findFilter(cmdData.filterId));
 
-	// check if we need to clean up an old filter.
-	// TODO: a CRC of 0 is a valid case.
-	if (filter._data != nullptr && filter.runtimedata()->crc != 0) {
+	// Check if we need to remove an old filter.
+	// Note that we can't just remove if there's data, because it might be the previous chunk.
+	if (filter._data != nullptr && filter.runtimedata()->flags.flags.committed == false) {
 		LOGAssetFilterDebug("removing pre-existing filter with same id (%u)", cmdData.filterId);
 		deallocateFilter(filter.runtimedata()->filterId);
 
@@ -297,15 +299,16 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 		return ERR_WRONG_STATE;
 	}
 
-	computeCrcs();
+	computeFilterCrcs();
 
-	uint16_t masterHash = masterCrc();
+	uint32_t masterHash = computeMasterCrc();
 	if (cmdData.masterCrc != masterHash) {
 		LOGAssetFilterWarn("Master Crc did not match: 0x%x != 0x%x, inProgress stays true.", cmdData.masterCrc, masterHash);
 		return ERR_MISMATCH;
 	}
 
 	// finish commit by writing the _masterHash
+
 	endInProgress(cmdData.masterCrc, cmdData.masterVersion);
 	LOGAssetFilterDebug("Accepted commit command, ended filterModificationInProgress");
 
@@ -342,13 +345,12 @@ void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
 
 	retvalptr->protocolVersion = ASSET_FILTER_CMD_PROTOCOL_VERSION;
 	retvalptr->masterVersion   = _masterVersion;
-	retvalptr->masterCrc       = _masterHash;
-	retvalptr->freeSpace       = getTotalHeapAllocatedSize();
+	retvalptr->masterCrc       = _masterCrc;
+	retvalptr->freeSpace       = FILTER_BUFFER_SIZE - getTotalHeapAllocatedSize();
 
 	for (size_t i = 0; i < _filtersCount; i++) {
 		AssetFilter filter(_filters[i]);
 		retvalptr->summaries[i].id   = filter.runtimedata()->filterId;
-		retvalptr->summaries[i].type = static_cast<uint8_t>(*filter.filterdata().metadata().filterType());
 		retvalptr->summaries[i].crc  = filter.runtimedata()->crc;
 	}
 
@@ -375,9 +377,9 @@ void AssetFilterStore::startInProgress() {
 	sendInProgressStatus();
 }
 
-void AssetFilterStore::endInProgress(uint16_t newMasterHash, uint16_t newMasterVersion) {
-	LOGAssetFilterDebug("endInProgress version=%u crc=%u", newMasterVersion, newMasterHash);
-	_masterHash                      = newMasterHash;
+void AssetFilterStore::endInProgress(uint16_t newMasterVersion, uint32_t newMasterCrc) {
+	LOGAssetFilterDebug("endInProgress version=%u crc=%u", newMasterVersion, newMasterCrc);
+	_masterCrc                       = newMasterCrc;
 	_masterVersion                   = newMasterVersion;
 	_modificationInProgressCountdown = 0;
 	sendInProgressStatus();
@@ -393,8 +395,8 @@ void AssetFilterStore::sendInProgressStatus() {
 	event.dispatch();
 }
 
-uint16_t AssetFilterStore::masterCrc() {
-	uint16_t masterCrc = crc16(nullptr, 0);
+uint32_t AssetFilterStore::computeMasterCrc() {
+	uint32_t masterCrc = crc32(nullptr, 0);
 
 	for (auto filterBuffer : _filters) {
 		if (filterBuffer == nullptr) {
@@ -404,13 +406,13 @@ uint16_t AssetFilterStore::masterCrc() {
 		AssetFilter filter(filterBuffer);
 
 		// apply filterId onto master crc
-		masterCrc = crc16(
+		masterCrc = crc32(
 				reinterpret_cast<const uint8_t*>(&filter.runtimedata()->filterId),
 				sizeof(filter.runtimedata()->filterId),
 				&masterCrc);
 
 		// apply fitlerCrc onto master crc
-		masterCrc = crc16(
+		masterCrc = crc32(
 				reinterpret_cast<const uint8_t*>(&filter.runtimedata()->crc),
 				sizeof(filter.runtimedata()->crc),
 				&masterCrc);
@@ -432,8 +434,8 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 			break;
 		}
 
-		// TODO: a CRC of 0 is a valid case.
-		if (filter.runtimedata()->crc == 0) {
+		if (filter.runtimedata()->flags.flags.committed == false) {
+			filter.runtimedata()->flags.flags.committed = true;
 			// filter changed since commit.
 
 			size_t filterAllocatedSize = filter.runtimedata()->totalSize + sizeof(asset_filter_runtime_data_t);
@@ -445,10 +447,10 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 				// This check can't be performed earlier: as long as not all chuncks are
 				// received the filterdata may be in invalid state.
 
-				LOGAssetFilterWarn("Deallocating filter %u because of malformed cuckoofilter size: %u != %u",
+				LOGAssetFilterWarn("Deallocating filter ID=%u because of invalid filter size: allocated=%u calculated=%u",
 						filter.runtimedata()->filterId,
-						filterSize,
-						filterAllocatedSize);
+						filterAllocatedSize,
+						filterSize);
 
 				deallocateFilterByIndex(index);
 				consistencyChecksFailed = true;
@@ -464,19 +466,20 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 	return consistencyChecksFailed;
 }
 
-void AssetFilterStore::computeCrcs() {
+void AssetFilterStore::computeFilterCrcs() {
 	for (uint8_t* filterBuffer : _filters) {
 		if (filterBuffer == nullptr) {
 			break;
 		}
 
 		AssetFilter filter(filterBuffer);
-
-		// TODO: a CRC of 0 is a valid case.
-		if (filter.runtimedata()->crc == 0) {
-			// filter changed since commit.
-			filter.runtimedata()->crc = crc16(filter.filterdata().metadata()._data, filter.runtimedata()->totalSize, nullptr);
-			LOGAssetFilterDebug("crc recomputed for filter %u: value 0x%x", filter.runtimedata()->filterId, filter.runtimedata()->crc);
+		if (filter.runtimedata()->flags.flags.crcCalculated == false) {
+			filter.runtimedata()->crc = crc32(filter.filterdata().metadata()._data, filter.runtimedata()->totalSize, nullptr);
+			filter.runtimedata()->flags.flags.crcCalculated = true;
+			LOGAssetFilterDebug("Calculate CRC for filter filterId=%u, CRC=0x%x", filter.runtimedata()->filterId, filter.runtimedata()->crc);
+		}
+		else {
+			LOGAssetFilterDebug("Skip filter CRC calculation for filterId=%u, CRC=0x%x", filter.runtimedata()->filterId, filter.runtimedata()->crc)
 		}
 	}
 }

@@ -43,7 +43,7 @@ public:
 	std::optional<uint8_t> findFilterIndex(uint8_t filterId);
 
 	uint16_t getMasterVersion();
-	uint16_t getMasterCrc();
+	uint32_t getMasterCrc();
 
 	constexpr static uint8_t MAX_FILTER_IDS    = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
@@ -77,7 +77,7 @@ private:
 	 * Hash of all the hashes of the allocated filters, sorted by filterId.
 	 * This is updated by the commit command if it matches.
 	 */
-	uint16_t _masterHash;
+	uint32_t _masterCrc;
 
 	/**
 	 * Keeps track of the version of the filters -- not in use yet.
@@ -208,7 +208,7 @@ private:
 	/**
 	 * To be called when filters are no longer being modified.
 	 */
-	void endInProgress(uint16_t newMasterHash, uint16_t newMasterVersion);
+	void endInProgress(uint16_t newMasterVersion, uint32_t newMasterCrc);
 
 	/**
 	 * Send an internal event when isInProgress() may have changed.
@@ -221,7 +221,7 @@ private:
 	 * Returns the mastercrc computed from the filter crcs.
 	 * _masterHash is not changed by this method.
 	 */
-	uint16_t masterCrc();
+	uint32_t computeMasterCrc();
 
 	/**
 	 * Checks if the cuckoo filter buffer size plus the constant overhead
@@ -230,14 +230,16 @@ private:
 	 *
 	 * Deallocates any filters failing the check.
 	 *
-	 * Check is only performed on filters that are currently in progress (.crc == 0)
+	 * Check is only performed on filters that are currently in progress (flags.committed == false)
+	 * Sets flags.committed to true.
 	 */
 	bool checkFilterSizeConsistency();
 
 	/**
-	 * Computes the crcs of filters that currently have their crc set to 0.
+	 * Computes the CRC of filters that have not been calculated yet (flags.crcCalculated == false)
+	 * Sets flags.crcCalculated to true.
 	 */
-	void computeCrcs();
+	void computeFilterCrcs();
 
 public:
 	/**

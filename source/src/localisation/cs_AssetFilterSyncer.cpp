@@ -34,14 +34,12 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 	}
 	LOGAssetFilterSyncerDebug("sendVersion reliable=%u", reliable);
 	uint16_t masterVersion = _store->getMasterVersion();
-	uint16_t masterCrc = _store->getMasterCrc();
+	uint32_t masterCrc = _store->getMasterCrc();
 
 	cs_mesh_model_msg_asset_filter_version_t versionPacket = {
 			.protocol = ASSET_FILTER_CMD_PROTOCOL_VERSION,
 			.masterVersion = masterVersion,
-			.masterCrc = masterCrc,
-			.maxFilterCount = AssetFilterStore::MAX_FILTER_IDS,
-			.maxSpace = AssetFilterStore::FILTER_BUFFER_SIZE
+			.masterCrc = masterCrc
 	};
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
@@ -56,13 +54,11 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 }
 
 cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg_asset_filter_version_t& packet) {
-	LOGAssetFilterSyncerDebug("onVersion stoneId=%u protocol=%u version=%u crc=%u maxFilterCount=%u maxSpace=%u",
+	LOGAssetFilterSyncerDebug("onVersion stoneId=%u protocol=%u version=%u crc=%u",
 			stoneId,
 			packet.protocol,
 			packet.masterVersion,
-			packet.masterCrc,
-			packet.maxFilterCount,
-			packet.maxSpace);
+			packet.masterCrc);
 	VersionCompare compare = compareToMyVersion(packet.protocol, packet.masterVersion, packet.masterCrc);
 	switch (compare) {
 		case VersionCompare::OLDER: {
@@ -83,14 +79,14 @@ cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg
 	return ERR_SUCCESS;
 }
 
-AssetFilterSyncer::VersionCompare AssetFilterSyncer::compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint16_t masterCrc) {
+AssetFilterSyncer::VersionCompare AssetFilterSyncer::compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint32_t masterCrc) {
 	if (protocol != ASSET_FILTER_CMD_PROTOCOL_VERSION) {
 		LOGAssetFilterSyncerInfo("Unknown protocol: %u", protocol);
 		return VersionCompare::UNKOWN;
 	}
 
 	uint16_t myMasterVersion = _store->getMasterVersion();
-	uint16_t myMasterCrc = _store->getMasterCrc();
+	uint32_t myMasterCrc = _store->getMasterCrc();
 
 	if (myMasterVersion == 0) {
 		if (masterVersion == 0) {

@@ -245,7 +245,5 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_stone_mac_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 	asset_filter_cmd_protocol_t protocol;
 	uint16_t masterVersion;
-	uint16_t masterCrc;
-	uint8_t maxFilterCount: 5;
-	uint16_t maxSpace: 11;
+	uint32_t masterCrc;
 };
