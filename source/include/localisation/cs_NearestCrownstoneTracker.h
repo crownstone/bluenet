@@ -13,6 +13,8 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+#include <localisation/cs_AssetHandler.h>
+
 /**
  * This class implements the in-mesh computation of which crownstone
  * is nearest to a 'trackable' device.

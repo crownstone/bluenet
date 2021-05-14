@@ -81,16 +81,6 @@ private:
 	void onTickSecond();
 
 	/**
-	 * Get a 6 bit representation of RSSI.
-	 */
-	uint8_t compressRssi(int8_t rssi);
-
-	/**
-	 * Get a 2 bit representation of the channel.
-	 */
-	uint8_t compressChannel(uint8_t channel);
-
-	/**
 	 * Print all neighbours.
 	 */
 	void print();

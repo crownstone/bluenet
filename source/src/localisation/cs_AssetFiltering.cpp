@@ -9,10 +9,11 @@
 #include <util/cs_Utils.h>
 
 #define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE
-#define LogAssetFilteringDebug LOGd
-#define LogAssetFilteringWarn LOGw
+#define LOGAssetFilteringDebug LOGd
+#define LOGAssetFilteringWarn LOGw
 
 cs_ret_code_t AssetFiltering::init() {
+	LOGAssetFilteringDebug("AssetFitlering::init");
 	_filterStore = new AssetFilterStore();
 	if (_filterStore == nullptr) {
 		return ERR_NO_SPACE;
@@ -27,6 +28,15 @@ cs_ret_code_t AssetFiltering::init() {
 		return ERR_NO_SPACE;
 	}
 	retCode = _filterSyncer->init(*_filterStore);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	_assetForwarder = new AssetForwarder();
+	if (_assetForwarder == nullptr) {
+		return ERR_NO_SPACE;
+	}
+	retCode = _assetForwarder->init();
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
@@ -65,7 +75,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
-			processAcceptedAsset(filter,device);
+			LOGAssetFilteringDebug("handleScannedDevice accepted device with mac: %x:%x:%x:%x:%x:%x",
+					device.address[0],
+					device.address[1],
+					device.address[2],
+					device.address[3],
+					device.address[4],
+					device.address[5]);
+			processAcceptedAsset(filter, device);
 		}
 	}
 }
@@ -76,6 +93,11 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 			if( _assetHandlerMac != nullptr) {
 				_assetHandlerMac->handleAcceptedAsset(filter, asset);
 			}
+
+			if(_assetForwarder != nullptr) {
+				_assetForwarder->handleAcceptedAsset(filter, asset);
+			}
+
 			break;
 		}
 
@@ -88,6 +110,8 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 		}
 	}
 }
+
+
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 
@@ -109,7 +133,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 		ReturnType defaultValue) {
 
 	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
-		LogAssetFilteringWarn("Filtertype not implemented");
+		LOGAssetFilteringWarn("Filtertype not implemented");
 		return defaultValue;
 	}
 

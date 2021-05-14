@@ -9,20 +9,19 @@
 
 #include <cstdint>
 #include <protocol/cs_Typedefs.h>
+#include <util/cs_Rssi.h>
 
 static constexpr uint8_t MESH_TOPOLOGY_CHANNEL_COUNT = 3;
 
 struct __attribute__((packed)) neighbour_node_t {
 	stone_id_t id;
-	uint8_t rssi : 6;        // 100 + RSSI. If RSSI < -100: 0. If RSSI > -37: 63.
-	uint8_t channel: 2;      // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
+	compressed_rssi_data_t compressedRssi;
 	uint8_t lastSeenSeconds; // Last seen N seconds ago.
 
 	neighbour_node_t() {};
-	neighbour_node_t(stone_id_t id, uint8_t rssi, uint8_t channel):
+	neighbour_node_t(stone_id_t id, compressed_rssi_data_t rssiData):
 		id(id),
-		rssi(rssi),
-		channel(channel),
+		compressedRssi(rssiData),
 		lastSeenSeconds(0)
 	{}
 };
