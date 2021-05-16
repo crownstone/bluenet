@@ -121,7 +121,6 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t payloadSize) 
 	// initialize runtime data.
 	newFilterAccessor.runtimedata()->filterId    = filterId;
 	newFilterAccessor.runtimedata()->totalSize   = payloadSize;
-	newFilterAccessor.runtimedata()->crc         = 0;
 	newFilterAccessor.runtimedata()->flags.asInt = 0;
 
 	// don't forget to increment the Count for the filter list.
