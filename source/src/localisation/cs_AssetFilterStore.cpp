@@ -202,6 +202,7 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 		total += AssetFilter(filter).length();
 	}
 
+	LOGAssetFilterDebug("computing allocated size finished");
 	return total;
 }
 
@@ -231,7 +232,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 
 	// Check if we need to remove an old filter.
 	// Note that we can't just remove if there's data, because it might be the previous chunk.
-	if (filter._data != nullptr && filter.runtimedata()->flags.flags.committed == false) {
+	if (filter._data != nullptr && filter.runtimedata()->flags.flags.committed == true) {
 		LOGAssetFilterDebug("removing pre-existing filter with same id (%u)", cmdData.filterId);
 		deallocateFilter(filter.runtimedata()->filterId);
 
@@ -308,7 +309,7 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 
 	// finish commit by writing the _masterHash
 
-	endInProgress(cmdData.masterCrc, cmdData.masterVersion);
+	endInProgress(cmdData.masterVersion, cmdData.masterCrc);
 	LOGAssetFilterDebug("Accepted commit command, ended filterModificationInProgress");
 
 	event_t event(CS_TYPE::EVT_FILTERS_UPDATED);
@@ -378,8 +379,8 @@ void AssetFilterStore::startInProgress() {
 
 void AssetFilterStore::endInProgress(uint16_t newMasterVersion, uint32_t newMasterCrc) {
 	LOGAssetFilterDebug("endInProgress version=%u crc=%u", newMasterVersion, newMasterCrc);
-	_masterCrc                       = newMasterCrc;
 	_masterVersion                   = newMasterVersion;
+	_masterCrc                       = newMasterCrc;
 	_modificationInProgressCountdown = 0;
 	sendInProgressStatus();
 }

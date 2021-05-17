@@ -109,7 +109,7 @@ public:
 	/**
 	 * Wraps a data struct into a CuckooFilter object
 	 */
-	CuckooFilter(cuckoo_filter_data_t& data) : data(data) {}
+	CuckooFilter(cuckoo_filter_data_t& data) : _data(data) {}
 
 	/**
 	 * Memsets the bucket_array to 0x00 and sets victim to 0.
@@ -156,15 +156,15 @@ public:
 	/**
 	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
 	 */
-	constexpr size_t bucketCount() { return 1 << data.bucketCountLog2; }
+	constexpr size_t bucketCount() { return 1 << _data.bucketCountLog2; }
 
-	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nestsPerBucket); }
+	constexpr size_t bufferSize() { return bufferSize(bucketCount(), _data.nestsPerBucket); }
 
 	/**
 	 * Total number of bytes this instance occypies.
 	 * Use this function instead of sizeof for this class to take the buffer into account.
 	 */
-	constexpr size_t size() { return size(bucketCount(), data.nestsPerBucket); }
+	constexpr size_t size() { return size(bucketCount(), _data.nestsPerBucket); }
 
 private:
 	// -------------------------------------------------------------
@@ -177,7 +177,7 @@ private:
 	// Run time variables
 	// -------------------------------------------------------------
 
-	cuckoo_filter_data_t& data;
+	cuckoo_filter_data_t& _data;
 
 	// -------------------------------------------------------------
 	// ----- Private methods -----
@@ -200,20 +200,25 @@ private:
 	cuckoo_extended_fingerprint_t getExtendedFingerprint(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
 
 	/**
-	 * A hash of this filters current contents (data).
+	 * A crc16 hash of this filters current contents (_data).
 	 */
-	cuckoo_fingerprint_t filterhash();
+	cuckoo_fingerprint_t filterHash();
 
 	/**
-	 * Hashes the given key (data) into a fingerprint.
+	 * Hashes the given key into a fingerprint.
 	 */
-	cuckoo_fingerprint_t hash(cuckoo_key_t key, size_t keyLengthInBytes);
+	cuckoo_fingerprint_t hashToFingerprint(cuckoo_key_t key, size_t keyLengthInBytes);
+
+	/**
+	 * Hashes the given key to obtain an (untruncated) bucket index.
+	 */
+	cuckoo_fingerprint_t hashToBucket(cuckoo_key_t key, size_t keyLengthInBytes);
 
 	/**
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
 	cuckoo_fingerprint_t& lookupFingerprint(cuckoo_index_t bucketIndex, cuckoo_index_t fingerIndex) {
-		return data.bucketArray[(bucketIndex * data.nestsPerBucket) + fingerIndex];
+		return _data.bucketArray[(bucketIndex * _data.nestsPerBucket) + fingerIndex];
 	}
 
 	/**
