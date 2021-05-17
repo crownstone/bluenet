@@ -64,7 +64,6 @@ void AssetFiltering::setAssetHandlerShortId(AssetHandlerShortId* assetHandlerSho
 // ---------------------------- Handling events ----------------------------
 
 bool AssetFiltering::isInitialized() {
-	// TODO: check if master version != 0 before using filters.
 	return _assetForwarder != nullptr || _filterSyncer != nullptr || _filterStore != nullptr;
 }
 

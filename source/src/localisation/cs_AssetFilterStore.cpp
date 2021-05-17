@@ -370,6 +370,12 @@ void AssetFilterStore::onTick() {
 // -------------------------------------------------------------
 // ---------------------- Utility functions --------------------
 // -------------------------------------------------------------
+
+void AssetFilterStore::isReady() {
+	// _masterVersion must be non-zero. Before that the filters
+	return _masterVersion != 0 && !isInProgress();
+}
+
 void AssetFilterStore::startInProgress() {
 	LOGAssetFilterDebug("startInProgress");
 	_modificationInProgressCountdown = 1000 * MODIFICATION_IN_PROGRESS_TIMEOUT_SECONDS / TICK_INTERVAL_MS;
