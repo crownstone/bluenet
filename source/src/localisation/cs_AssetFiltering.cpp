@@ -14,27 +14,35 @@
 
 cs_ret_code_t AssetFiltering::init() {
 	LOGAssetFilteringDebug("AssetFitlering::init");
-	_filterStore = new AssetFilterStore();
+	cs_ret_code_t retCode = ERR_UNSPECIFIED;
+
 	if (_filterStore == nullptr) {
-		return ERR_NO_SPACE;
+		_filterStore = new AssetFilterStore();
+		if (_filterStore == nullptr) {
+			return ERR_NO_SPACE;
+		}
 	}
-	cs_ret_code_t retCode = _filterStore->init();
+	retCode = _filterStore->init();
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 
-	_filterSyncer = new AssetFilterSyncer();
 	if (_filterSyncer == nullptr) {
-		return ERR_NO_SPACE;
+		_filterSyncer = new AssetFilterSyncer();
+		if (_filterSyncer == nullptr) {
+			return ERR_NO_SPACE;
+		}
 	}
 	retCode = _filterSyncer->init(*_filterStore);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 
-	_assetForwarder = new AssetForwarder();
 	if (_assetForwarder == nullptr) {
-		return ERR_NO_SPACE;
+		_assetForwarder = new AssetForwarder();
+		if (_assetForwarder == nullptr) {
+			return ERR_NO_SPACE;
+		}
 	}
 	retCode = _assetForwarder->init();
 	if (retCode != ERR_SUCCESS) {
@@ -55,7 +63,16 @@ void AssetFiltering::setAssetHandlerShortId(AssetHandlerShortId* assetHandlerSho
 
 // ---------------------------- Handling events ----------------------------
 
+bool AssetFiltering::isInitialized() {
+	// TODO: check if master version != 0 before using filters.
+	return _assetForwarder != nullptr || _filterSyncer != nullptr || _filterStore != nullptr;
+}
+
 void AssetFiltering::handleEvent(event_t& evt) {
+	if (!isInitialized()) {
+		return;
+	}
+
 	switch (evt.type) {
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
 			auto scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
@@ -68,7 +85,7 @@ void AssetFiltering::handleEvent(event_t& evt) {
 }
 
 void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
-	if (_filterStore->isInProgress()) {
+	if (_filterStore->isReady()) {
 		return;
 	}
 
@@ -210,9 +227,12 @@ short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter filt
 			asset,
 			filter.filterdata().metadata().outputType().inFormat(),
 			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
+
 				assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
 					   "can't cast compressed fingerprint to asset id");
+
 				cuckoo_compressed_fingerprint_t ccf = cuckoo.getCompressedFingerprint(data, len);
+
 				return *reinterpret_cast<short_asset_id_t*>(&ccf);
 			},
 			short_asset_id_t{});
