@@ -75,7 +75,8 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
-			LOGAssetFilteringDebug("handleScannedDevice accepted device with mac: %x:%x:%x:%x:%x:%x",
+			LOGAssetFilteringDebug("handleScannedDevice, filter $%u accepted device with mac: %x:%x:%x:%x:%x:%x",
+					filter.runtimedata()->filterId,
 					device.address[0],
 					device.address[1],
 					device.address[2],
