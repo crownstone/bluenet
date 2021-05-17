@@ -31,6 +31,13 @@ public:
 	cs_ret_code_t init();
 
 	/**
+	 * Returns true if this object is ready to be used.
+	 * I.e. the store is not in progress of updates and
+	 * master version is non-zero.
+	 */
+	bool isReady();
+
+	/**
 	 * Whether changes are in progress.
 	 *
 	 * Meaning someone is actively modifying the filters, and a commit is expected to be done soon.
