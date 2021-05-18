@@ -373,7 +373,7 @@ void AssetFilterStore::onTick() {
 
 bool AssetFilterStore::isReady() {
 	// _masterVersion must be non-zero. Before that the filters
-	assert (_masterVersion != 0 && isInProgress(),"Master version should be set to 0 when in progress.");
+	assert (_masterVersion == 0 && !isInProgress(),"Master version should be set to 0 when in progress.");
 	return _masterVersion != 0;
 }
 
