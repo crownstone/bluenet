@@ -91,14 +91,15 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
-			LOGAssetFilteringDebug("handleScannedDevice, filter $%u accepted device with mac: %x:%x:%x:%x:%x:%x",
+			_logArray(SERIAL_DEBUG, true, device.data, device.dataSize);
+			LOGAssetFilteringDebug("handleScannedDevice, filter index=%u accepted device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
 					filter.runtimedata()->filterId,
-					device.address[0],
-					device.address[1],
-					device.address[2],
-					device.address[3],
+					device.address[5],
 					device.address[4],
-					device.address[5]);
+					device.address[3],
+					device.address[2],
+					device.address[1],
+					device.address[0]);
 			processAcceptedAsset(filter, device);
 		}
 	}
