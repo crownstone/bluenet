@@ -47,6 +47,7 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	meshMsg.flags.flags.broadcast = false;
 	meshMsg.flags.flags.reliable = true;
 	meshMsg.flags.flags.useKnownIds = false;
+	meshMsg.flags.flags.noHops = false; // No reliable msgs without hops yet.
 	meshMsg.reliability = 3; // Low timeout, we expect a result quickly.
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.idCount = 1;

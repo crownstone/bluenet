@@ -557,6 +557,7 @@ void BleCentral::onDisconnect(const ble_gap_evt_disconnected_t& event) {
 		// Ignore disconnect event as peripheral.
 		return;
 	}
+	// TODO: reconnect on certain errors (for example BLE_HCI_CONN_FAILED_TO_BE_ESTABLISHED).
 	LOGBleCentralInfo("Disconnected reason=%u", event.reason);
 
 	// Disconnected, reset state.

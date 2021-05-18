@@ -33,6 +33,7 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
 	item.reliable = meshMsg->flags.flags.reliable;
 	item.broadcast = meshMsg->flags.flags.broadcast;
+	item.noHop = meshMsg->flags.flags.noHops;
 	item.numIds = meshMsg->idCount;
 	item.stoneIdsPtr = meshMsg->targetIds;
 	item.msgPayload.len = meshMsg->size;

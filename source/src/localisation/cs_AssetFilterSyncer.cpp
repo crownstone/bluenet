@@ -46,6 +46,7 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 	meshMsg.type = CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION;
 	meshMsg.reliability = reliable ? CS_MESH_RELIABILITY_MEDIUM : CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.noHops = true;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&versionPacket);
 	meshMsg.size = sizeof(versionPacket);
 
@@ -69,7 +70,7 @@ cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg
 		case VersionCompare::NEWER: {
 			// The stone has a newer version: inform it that we should be synced.
 			// Should not be reliable, as we currently get a call to onVersion each for each repeat.
-			sendVersion(false);
+			sendVersion(true);
 			break;
 		}
 		default: {
@@ -131,6 +132,7 @@ void AssetFilterSyncer::reset() {
 		disconnect();
 	}
 	setStep(SyncStep::NONE);
+	sendVersion(true);
 }
 
 void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
@@ -310,7 +312,7 @@ void AssetFilterSyncer::disconnect() {
 void AssetFilterSyncer::done() {
 	LOGAssetFilterSyncerDebug("Done!");
 	// Send out version again, so the next crownstone with an old version can send their version, which makes us connect to that crownstone.
-	sendVersion(true);
+//	sendVersion(true);
 }
 
 

@@ -14,6 +14,7 @@
 #include <mesh/cs_MeshCore.h>
 #include <mesh/cs_MeshModelMulticast.h>
 #include <mesh/cs_MeshModelMulticastAcked.h>
+#include <mesh/cs_MeshModelMulticastNeighbours.h>
 #include <mesh/cs_MeshModelUnicast.h>
 #include <mesh/cs_MeshModelSelector.h>
 #include <mesh/cs_MeshMsgHandler.h>
@@ -104,15 +105,16 @@ private:
 	//! Assignment operator, singleton, thus made private
 	Mesh& operator=(Mesh const &) = delete;
 
-	MeshCore*                _core;
-	MeshModelMulticast       _modelMulticast;
-	MeshModelMulticastAcked  _modelMulticastAcked;
-	MeshModelUnicast         _modelUnicast;
-	MeshModelSelector        _modelSelector;
-	MeshMsgHandler           _msgHandler;
-	MeshMsgSender            _msgSender;
-	MeshAdvertiser           _advertiser;
-	MeshScanner              _scanner;
+	MeshCore*                     _core;
+	MeshModelMulticast            _modelMulticast;
+	MeshModelMulticastNeighbours  _modelMulticastNeighbours;
+	MeshModelMulticastAcked       _modelMulticastAcked;
+	MeshModelUnicast              _modelUnicast;
+	MeshModelSelector             _modelSelector;
+	MeshMsgHandler                _msgHandler;
+	MeshMsgSender                 _msgSender;
+	MeshAdvertiser                _advertiser;
+	MeshScanner                   _scanner;
 
 	BOOL _enabled = true;
 
