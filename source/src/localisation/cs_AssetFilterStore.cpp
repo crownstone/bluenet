@@ -175,20 +175,32 @@ bool AssetFilterStore::deallocateFilter(uint8_t filterId) {
 }
 
 CS_TYPE AssetFilterStore::getStateType(uint16_t filterDataSize) {
-	if (filterDataSize <= 32) {
+	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_32)) {
 		return CS_TYPE::STATE_ASSET_FILTER_32;
 	}
-	if (filterDataSize <= 64) {
+	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_64)) {
 		return CS_TYPE::STATE_ASSET_FILTER_64;
 	}
-
+	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_128)) {
+		return CS_TYPE::STATE_ASSET_FILTER_128;
+	}
+	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_256)) {
+		return CS_TYPE::STATE_ASSET_FILTER_256;
+	}
+	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_512)) {
+		return CS_TYPE::STATE_ASSET_FILTER_512;
+	}
 
 	LOGw("Invalid size: %u", filterDataSize);
 	return CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
 uint16_t AssetFilterStore::getStateSize(uint16_t filterDataSize) {
-	return TypeSize(getStateType(filterDataSize));
+	CS_TYPE type = getStateType(filterDataSize);
+	if (type == CS_TYPE::CONFIG_DO_NOT_USE) {
+		return FILTER_BUFFER_SIZE;
+	}
+	return TypeSize(type);
 }
 
 uint8_t* AssetFilterStore::findFilter(uint8_t filterId) {

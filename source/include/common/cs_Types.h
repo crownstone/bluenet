@@ -189,9 +189,9 @@ enum class CS_TYPE: uint16_t {
 	STATE_ASSET_FILTERS_VERSION             = 159,
 	STATE_ASSET_FILTER_32                   = 160,
 	STATE_ASSET_FILTER_64                   = 161,
-//	STATE_ASSET_FILTER_128                  = 162,
-//	STATE_ASSET_FILTER_256                  = 163,
-//	STATE_ASSET_FILTER_512                  = 164,
+	STATE_ASSET_FILTER_128                  = 162,
+	STATE_ASSET_FILTER_256                  = 163,
+	STATE_ASSET_FILTER_512                  = 164,
 
 	/*
 	 * Internal commands and events.

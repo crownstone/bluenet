@@ -237,6 +237,12 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::STATE_ASSET_FILTER_64:
 		return ERR_NOT_AVAILABLE;
+	case CS_TYPE::STATE_ASSET_FILTER_128:
+		return ERR_NOT_AVAILABLE;
+	case CS_TYPE::STATE_ASSET_FILTER_256:
+		return ERR_NOT_AVAILABLE;
+	case CS_TYPE::STATE_ASSET_FILTER_512:
+		return ERR_NOT_AVAILABLE;
 
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
@@ -476,6 +482,9 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_ASSET_FILTERS_VERSION:
 	case CS_TYPE::STATE_ASSET_FILTER_32:
 	case CS_TYPE::STATE_ASSET_FILTER_64:
+	case CS_TYPE::STATE_ASSET_FILTER_128:
+	case CS_TYPE::STATE_ASSET_FILTER_256:
+	case CS_TYPE::STATE_ASSET_FILTER_512:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
