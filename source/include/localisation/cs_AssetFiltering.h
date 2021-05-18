@@ -17,8 +17,6 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
-	// TODO: check if master version != 0 before using filters.
-
 	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
 	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 
@@ -38,6 +36,12 @@ private:
 	 * that has output type ShortAssetId and have accepted the incoming asset.
 	 */
 	AssetHandlerShortId* _assetHandlerShortId = nullptr;
+
+	/**
+	 * Returns true if init has been called successfully and
+	 * _filterStore, _filterSyncer and _assetForwarder are non-nullptr.
+	 */
+	bool isInitialized();
 
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.

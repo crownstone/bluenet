@@ -17,7 +17,7 @@
  * - Regularly informs other crownstones of the master version and CRC.
  * - Will connect and update the asset filters of a crownstone with an older master version.
  */
-class AssetFilterSyncer: EventListener {
+class AssetFilterSyncer : EventListener {
 public:
 	/**
 	 * Interval at which the master version is broadcasted.
