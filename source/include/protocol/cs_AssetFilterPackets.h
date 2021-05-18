@@ -84,6 +84,10 @@ struct __attribute__((__packed__)) short_asset_id_t {
 	uint8_t data[3];
 };
 
+struct __attribute__((__packed__)) asset_filters_version_t {
+	uint16_t masterVersion = 0;
+	uint32_t masterCrc;
+};
 
 
 

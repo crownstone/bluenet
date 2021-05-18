@@ -186,6 +186,13 @@ enum class CS_TYPE: uint16_t {
 	STATE_HUB_MODE                          = 157,
 	STATE_UART_KEY                          = 158,
 
+	STATE_ASSET_FILTERS_VERSION             = 159,
+	STATE_ASSET_FILTER_32                   = 160,
+	STATE_ASSET_FILTER_64                   = 161,
+//	STATE_ASSET_FILTER_128                  = 162,
+//	STATE_ASSET_FILTER_256                  = 163,
+//	STATE_ASSET_FILTER_512                  = 164,
+
 	/*
 	 * Internal commands and events.
 	 * Start at Internal_Base.
@@ -507,7 +514,7 @@ typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef microapp_state_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
 typedef uint8_t TYPIFY(STATE_HUB_MODE);
-
+typedef asset_filters_version_t TYPIFY(STATE_ASSET_FILTERS_VERSION);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
