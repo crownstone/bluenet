@@ -494,22 +494,21 @@ void AssetFilterSyncer::setSendVersionSpeedHigh() {
 
 void AssetFilterSyncer::onTick(uint32_t tickCount) {
 	// decrement timers
-	if(_sendVersionSpeedHighCounterTicks != 0 ) {
+	if (_sendVersionSpeedHighCounterTicks != 0 ) {
 		_sendVersionSpeedHighCounterTicks--;
 	}
-	if(_sendVersionCounterTicks != 0) {
+	if (_sendVersionCounterTicks != 0) {
 		_sendVersionCounterTicks--;
 	}
 
-	if(_sendVersionCounterTicks == 0) {
+	if (_sendVersionCounterTicks == 0) {
 		// version countdown finished
 		bool isInLowSpeedMode = _sendVersionSpeedHighCounterTicks == 0;
 
 		// bump send version counter back up to desired time
 		_sendVersionCounterTicks = isInLowSpeedMode
-				? RTC::msToTicks(1000*VERSION_BROADCAST_INTERVAL_SLOW_SECONDS)
-				: RTC::msToTicks(1000*VERSION_BROADCAST_INTERVAL_FAST_SECONDS);
-
+				? VERSION_BROADCAST_INTERVAL_SLOW_SECONDS * 1000 / TICK_INTERVAL_MS
+				: VERSION_BROADCAST_INTERVAL_FAST_SECONDS * 1000 / TICK_INTERVAL_MS;
 		sendVersion(false);
 	}
 }
