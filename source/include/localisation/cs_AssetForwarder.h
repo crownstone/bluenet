@@ -19,6 +19,8 @@ public:
 	virtual void handleEvent(event_t & event);
 
 private:
+	stone_id_t _myId;
+
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender);
 	cs_asset_rssi_data_t constructUartMsg(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg,
 			 stone_id_t sender);

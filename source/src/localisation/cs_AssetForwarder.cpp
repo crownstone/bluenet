@@ -13,6 +13,7 @@
 #include <protocol/cs_Packets.h>
 #include <uart/cs_UartHandler.h>
 #include <logging/cs_Logger.h>
+#include <storage/cs_State.h>
 
 #define LOGAssetForwarderDebug LOGnone
 
@@ -24,6 +25,7 @@ void printAsset(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
 
 
 cs_ret_code_t AssetForwarder::init() {
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 	listen();
 	return ERR_SUCCESS;
 }
@@ -45,6 +47,10 @@ void AssetForwarder::handleAcceptedAsset(AssetFilter f, const scanned_device_t& 
 	event_t meshMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &msgWrapper, sizeof(msgWrapper));
 
 	meshMsgEvt.dispatch();
+
+
+	// forward message over uart (i.e. it's also interesting if the hub receives asset advertisement)
+	forwardAssetToUart(asset_msg, _myId);
 }
 
 void AssetForwarder::handleEvent(event_t & event) {
