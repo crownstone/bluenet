@@ -22,19 +22,15 @@ public:
 	/**
 	 * Interval at which the master version is broadcasted.
 	 */
-	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_SECONDS = 5 * 60;
+	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_SLOW_SECONDS = 5 * 60;
+	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_FAST_SECONDS = 1;
+	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_RESET_SECONDS = 60;
 
 	/**
 	 * Init the class:
 	 * - Starts listening for events.
 	 */
 	cs_ret_code_t init(AssetFilterStore& store);
-
-	/**
-	 * Sends the master version and CRC over the mesh.
-	 */
-	void sendVersion(bool reliable);
-
 
 private:
 	/**
@@ -91,6 +87,34 @@ private:
 	 */
 	uint8_t _filterIdsToRemove[AssetFilterStore::MAX_FILTER_IDS];
 	uint8_t _filterRemoveCount;
+
+	/**
+	 * While this counter is non-zero, onTick will call sendVersion
+	 * with higher frequency than usual.
+	 * The counter will be decreased in onTick so that this period
+	 * lasts at most VERSION_BROADCAST_INTERVAL_RESET_SECONDS.
+	 *
+	 * Unit of this variable: ticks 'til end of period.
+	 */
+	uint16_t _sendVersionSpeedHighCounterTicks = 0;
+
+	/**
+	 * Count down counter that keeps track when onTick has to call
+	 * sendVersion again.
+	 */
+	uint16_t _sendVersionCounterTicks = 0;
+
+	/**
+	 * Sends the master version and CRC over the mesh.
+	 */
+	void sendVersion(bool reliable);
+
+	/**
+	 * Calling this will increase the frequency with wich onTick will
+	 * call sendVersion for a short period of time.
+	 */
+	void setSendVersionSpeedHigh();
+
 
 
 	/**
