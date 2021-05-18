@@ -11,6 +11,7 @@
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <storage/cs_State.h>
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Crc32.h>
 #include <util/cs_CuckooFilter.h>
@@ -73,9 +74,11 @@ void AssetFilterStore::handleEvent(event_t& evt) {
 	}
 }
 
-uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t payloadSize) {
-	LOGAssetFilterDebug("Allocating filter #%u, of size %u (endindex: %u)", filterId, payloadSize, _filtersCount);
-	size_t totalSize = sizeof(asset_filter_runtime_data_t) + payloadSize;
+uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t filterDataSize) {
+	// TODO: is payloadsize equal to filterData size?
+	size_t stateSize = getStateSize(filterDataSize);
+	size_t totalSize = sizeof(asset_filter_runtime_data_t) + stateSize;
+	LOGAssetFilterDebug("Allocating filter id=%u filterDataSize=%u stateSize=%u totalSize=%u", filterId, filterDataSize, stateSize, totalSize);
 
 	if (_filtersCount >= MAX_FILTER_IDS) {
 		// not enough space for more filter ids.
@@ -120,7 +123,7 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t payloadSize) 
 	LOGAssetFilterDebug("before assignments");
 	// initialize runtime data.
 	newFilterAccessor.runtimedata()->filterId    = filterId;
-	newFilterAccessor.runtimedata()->totalSize   = payloadSize;
+	newFilterAccessor.runtimedata()->totalSize   = filterDataSize;
 	newFilterAccessor.runtimedata()->flags.asInt = 0;
 
 	// don't forget to increment the Count for the filter list.
@@ -132,6 +135,14 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t payloadSize) 
 void AssetFilterStore::deallocateFilterByIndex(uint8_t filterIndex) {
 	if (filterIndex >= MAX_FILTER_IDS) {
 		return;
+	}
+
+	// Remove from flash.
+	auto filter = getFilter(filterIndex);
+	uint16_t size = filter.filterdata().length();
+	cs_ret_code_t retCode = State::getInstance().remove(getStateType(size), filter.runtimedata()->filterId);
+	if (retCode != ERR_SUCCESS) {
+		LOGAssetFilterWarn("Remove from state failed retCode=%u", retCode);
 	}
 
 	// (delete can handle nullptr according to c++ standard)
@@ -154,13 +165,30 @@ bool AssetFilterStore::deallocateFilter(uint8_t filterId) {
 	LOGAssetFilterDebug("deallocating %u", filterId);
 
 	auto filterIndexOpt = findFilterIndex(filterId);
-	if (filterIndexOpt) {
-		deallocateFilterByIndex(filterIndexOpt.value());
-		return true;
+	if (filterIndexOpt.has_value() == false) {
+		LOGAssetFilterDebug("filter not found");
+		return false;
 	}
 
-	LOGAssetFilterDebug("tried to deallocate but filter id wasn't found.");
-	return false;
+	deallocateFilterByIndex(filterIndexOpt.value());
+	return true;
+}
+
+CS_TYPE AssetFilterStore::getStateType(uint16_t filterDataSize) {
+	if (filterDataSize <= 32) {
+		return CS_TYPE::STATE_ASSET_FILTER_32;
+	}
+	if (filterDataSize <= 64) {
+		return CS_TYPE::STATE_ASSET_FILTER_64;
+	}
+
+
+	LOGw("Invalid size: %u", filterDataSize);
+	return CS_TYPE::CONFIG_DO_NOT_USE;
+}
+
+uint16_t AssetFilterStore::getStateSize(uint16_t filterDataSize) {
+	return TypeSize(getStateType(filterDataSize));
 }
 
 uint8_t* AssetFilterStore::findFilter(uint8_t filterId) {
@@ -390,6 +418,12 @@ void AssetFilterStore::endInProgress(uint16_t newMasterVersion, uint32_t newMast
 	_masterCrc                       = newMasterCrc;
 	_modificationInProgressCountdown = 0;
 	sendInProgressStatus();
+
+	TYPIFY(STATE_ASSET_FILTERS_VERSION) stateVal = {
+			.masterVersion = _masterVersion,
+			.masterCrc     = _masterCrc
+	};
+	State::getInstance().set(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &stateVal, sizeof(stateVal));
 }
 
 bool AssetFilterStore::isInProgress() {

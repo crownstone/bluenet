@@ -38,7 +38,7 @@ struct __attribute__((__packed__)) asset_filter_runtime_data_t {
 	 *
 	 * can be runtime only since it's saved as part of record metadata on flash.
 	 */
-	uint16_t totalSize;
+	uint16_t totalSize; // TODO: rename to filterDataSize.
 
 	/**
 	 * crc32 of the fields:

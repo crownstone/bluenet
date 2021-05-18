@@ -230,6 +230,14 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_UART_KEY:
 		memset(data.value, 0, TypeSize(CS_TYPE::STATE_UART_KEY));
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_ASSET_FILTERS_VERSION:
+		*(TYPIFY(STATE_ASSET_FILTERS_VERSION)*)data.value = asset_filters_version_t();
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_ASSET_FILTER_32:
+		return ERR_NOT_AVAILABLE;
+	case CS_TYPE::STATE_ASSET_FILTER_64:
+		return ERR_NOT_AVAILABLE;
+
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -465,6 +473,9 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SOFT_ON_SPEED:
 	case CS_TYPE::STATE_HUB_MODE:
 	case CS_TYPE::STATE_UART_KEY:
+	case CS_TYPE::STATE_ASSET_FILTERS_VERSION:
+	case CS_TYPE::STATE_ASSET_FILTER_32:
+	case CS_TYPE::STATE_ASSET_FILTER_64:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:

@@ -174,7 +174,8 @@ uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
 uint 8 | [Switch state](#switch-state-packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 uint 16 | Behaviour master hash | 2 | Part of behaviour master hash: divide hash by 65536.
-uint 8[] | Reserved | 6 | Reserved for future use, 0 for now.
+uint 16 | Asset filters version | 2 | Master version of the asset filters.
+uint 32 | Asset filters CRC | 4 | Master CRC of the asset filters.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.

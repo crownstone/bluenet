@@ -145,6 +145,9 @@ private:
 	 */
 	void deallocateFilterByIndex(uint8_t parsingFilterIndex);
 
+	CS_TYPE getStateType(uint16_t filterDataSize);
+	uint16_t getStateSize(uint16_t filterDataSize);
+
 	/**
 	 * Returns a pointer to the filter with given filterId, or nullptr if not found.
 	 */
