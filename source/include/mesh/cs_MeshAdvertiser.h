@@ -74,6 +74,7 @@ private:
 
 	// Cache of previous time update.
 	uint32_t _lastTimestamp = 0;
+	bool _started = false;
 
 	void updateIbeacon();
 

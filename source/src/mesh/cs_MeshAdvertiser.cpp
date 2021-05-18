@@ -44,9 +44,8 @@ void MeshAdvertiser::init() {
 
 	listen();
 
-	for (int i = 0; i < 6; ++i) {
-		_deterministicAddress[i] = 0x00;
-	}
+	memset(_deterministicAddress, 0, sizeof(_deterministicAddress));
+	_deterministicAddress[5] = 0xFF;
 }
 
 void MeshAdvertiser::setMacAddress(uint8_t* macAddress) {
@@ -55,7 +54,7 @@ void MeshAdvertiser::setMacAddress(uint8_t* macAddress) {
 	address.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
 	address.addr_id_peer = 0;
 	memcpy(address.addr, macAddress, BLE_GAP_ADDR_LEN);
-	LOGi("Address: %u:%u:%u:%u:%u:%u", macAddress[0], macAddress[1], macAddress[2], macAddress[3], macAddress[4], macAddress[5]);
+	LOGi("Address: %02x:%02x:%02x:%02x:%02x:%02x", macAddress[5], macAddress[4], macAddress[3], macAddress[2], macAddress[1], macAddress[0]);
 	advertiser_address_set(_advertiser, &address);
 }
 
@@ -77,10 +76,12 @@ void MeshAdvertiser::setTxPower(int8_t power) {
 }
 
 void MeshAdvertiser::start() {
+	_started = true;
 	advertiser_enable(_advertiser);
 }
 
 void MeshAdvertiser::stop() {
+	_started = false;
 	advertiser_disable(_advertiser);
 }
 
@@ -167,13 +168,19 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
  * error messages w.r.t. FDS coming by).
  */
 void MeshAdvertiser::advertise() {
+	if (!_started) {
+		return;
+	}
 	if (_advPacket != NULL) {
 		// just continue and allocate again!
 	}
 
-	setMacAddress(_deterministicAddress);
 
 	_advPacket = advertiser_packet_alloc(_advertiser, 7 + 1);
+	if (_advPacket == NULL) {
+		LOGi("no mem");
+		return;
+	}
 	_advPacket->packet.payload[0] = 0x02; // Length of next AD
 	_advPacket->packet.payload[1] = 0x01; // Type: flags
 	_advPacket->packet.payload[2] = 0x06; // Flags
@@ -186,9 +193,11 @@ void MeshAdvertiser::advertise() {
 	static uint8_t counter = 0x00;
 	_advPacket->packet.payload[7] = counter++;
 
+	setMacAddress(_deterministicAddress);
+
 	// send only one packet (repeats is one means a packet over all 3 BLE adv channels)
 	_advPacket->config.repeats = 1;
-	LOGi("Advertise manufacturer data");
+//	LOGi("Advertise manufacturer data");
 	advertiser_packet_send(_advertiser, _advPacket);
 	
 	// increment MAC address for next call
@@ -288,17 +297,17 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_TICK: {
 			// Use the synchronized time stamp.
 			// It's ok if it's not a valid posix time.
-			auto timestamp = SystemTime::getSynchronizedStamp();
-			handleTime(timestamp.posix_s);
+//			auto timestamp = SystemTime::getSynchronizedStamp();
+//			handleTime(timestamp.posix_s);
 
 			// every time!
-//			updateIbeacon();
-			static int steps = 0;
-			steps++;
-			if (steps == 10) {
-				steps = 0;
-				advertiseIbeacon(0);
-			}
+			updateIbeacon();
+//			static int steps = 0;
+//			steps++;
+//			if (steps == 10) {
+//				steps = 0;
+//				advertiseIbeacon(0);
+//			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {
