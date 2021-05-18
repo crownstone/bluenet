@@ -305,7 +305,12 @@ void ServiceData::fillWithAlternativeState(uint32_t timestamp) {
 	_serviceData.params.encrypted.altState.switchState = _switchState;
 	_serviceData.params.encrypted.altState.flags = _flags;
 	_serviceData.params.encrypted.altState.behaviourMasterHash = getPartialBehaviourHash(behaviourHash);
-	memset(_serviceData.params.encrypted.altState.reserved, 0, sizeof(_serviceData.params.encrypted.altState.reserved));
+
+	TYPIFY(STATE_ASSET_FILTERS_VERSION) filtersVersion;
+	State::getInstance().get(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &filtersVersion, sizeof(filtersVersion));
+	_serviceData.params.encrypted.altState.assetFiltersVersion = filtersVersion.masterVersion;
+	_serviceData.params.encrypted.altState.assetFiltersCrc = filtersVersion.masterCrc;
+
 //	_serviceData.params.encrypted.altState.reserved = {0};
 	_serviceData.params.encrypted.altState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 	_serviceData.params.encrypted.altState.reserved2 = 0;

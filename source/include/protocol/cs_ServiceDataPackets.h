@@ -130,7 +130,8 @@ struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 	uint8_t  switchState;
 	service_data_state_flags_t flags;
 	uint16_t behaviourMasterHash;
-	uint8_t  reserved[6];
+	uint16_t assetFiltersVersion;
+	uint32_t assetFiltersCrc;
 	uint16_t partialTimestamp;    // Current timestamp.
 	uint8_t  reserved2;
 	uint8_t  validation;          // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
