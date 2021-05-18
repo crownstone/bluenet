@@ -11,6 +11,9 @@
 #include <localisation/cs_AssetFilterStore.h>
 #include <util/cs_Lollipop.h>
 
+#include <drivers/cs_RTC.h>
+#include <util/cs_Math.h>
+
 #define LOGAssetFilterSyncerInfo LOGi
 #define LOGAssetFilterSyncerDebug LOGd
 #define LOGAssetFilterSyncerVerbose LOGd
@@ -70,7 +73,7 @@ cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg
 		case VersionCompare::NEWER: {
 			// The stone has a newer version: inform it that we should be synced.
 			// Should not be reliable, as we currently get a call to onVersion each for each repeat.
-			sendVersion(true);
+			sendVersion(false);
 			break;
 		}
 		default: {
@@ -132,7 +135,7 @@ void AssetFilterSyncer::reset() {
 		disconnect();
 	}
 	setStep(SyncStep::NONE);
-	sendVersion(true);
+	setSendVersionSpeedHigh();
 }
 
 void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
@@ -480,8 +483,33 @@ void AssetFilterSyncer::onModificationInProgress(bool inProgress) {
 	}
 }
 
+void AssetFilterSyncer::setSendVersionSpeedHigh() {
+	_sendVersionSpeedHighCounterTicks = RTC::msToTicks(1000 * VERSION_BROADCAST_INTERVAL_RESET_SECONDS);
+
+	// clamp current counter
+	_sendVersionCounterTicks = CsMath::min(
+			_sendVersionCounterTicks,
+			RTC::msToTicks(1000 * VERSION_BROADCAST_INTERVAL_FAST_SECONDS));
+}
+
 void AssetFilterSyncer::onTick(uint32_t tickCount) {
-	if (tickCount % (1000 * VERSION_BROADCAST_INTERVAL_SECONDS / TICK_INTERVAL_MS) == 0) {
+	// decrement timers
+	if(_sendVersionSpeedHighCounterTicks != 0 ) {
+		_sendVersionSpeedHighCounterTicks--;
+	}
+	if(_sendVersionCounterTicks != 0) {
+		_sendVersionCounterTicks--;
+	}
+
+	if(_sendVersionCounterTicks == 0) {
+		// version countdown finished
+		bool isInLowSpeedMode = _sendVersionSpeedHighCounterTicks == 0;
+
+		// bump send version counter back up to desired time
+		_sendVersionCounterTicks = isInLowSpeedMode
+				? RTC::msToTicks(1000*VERSION_BROADCAST_INTERVAL_SLOW_SECONDS)
+				: RTC::msToTicks(1000*VERSION_BROADCAST_INTERVAL_FAST_SECONDS);
+
 		sendVersion(false);
 	}
 }
@@ -498,7 +526,7 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
-			sendVersion(true);
+			setSendVersionSpeedHigh();
 			break;
 		}
 		case CS_TYPE::EVT_FILTER_MODIFICATION: {
