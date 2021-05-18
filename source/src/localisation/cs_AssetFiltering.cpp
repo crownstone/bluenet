@@ -84,7 +84,7 @@ void AssetFiltering::handleEvent(event_t& evt) {
 }
 
 void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
-	if (_filterStore->isReady()) {
+	if (!_filterStore->isReady()) {
 		return;
 	}
 
