@@ -20,6 +20,7 @@ cs_ret_code_t AssetFilterSyncer::init(AssetFilterStore& store) {
 	LOGAssetFilterSyncerInfo("Init");
 	_store = &store;
 
+	sendVersionAtLowInterval();
 	listen();
 	return ERR_SUCCESS;
 }
@@ -488,6 +489,7 @@ void AssetFilterSyncer::sendVersionAtLowInterval() {
 	_sendVersionCountdown = CsMath::min(
 			_sendVersionCountdown,
 			VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS);
+	LOGAssetFilterSyncerDebug("sendVersionAtLowInterval sendVersionCountdown=%u", _sendVersionCountdown);
 }
 
 void AssetFilterSyncer::onTick(uint32_t tickCount) {
@@ -495,18 +497,18 @@ void AssetFilterSyncer::onTick(uint32_t tickCount) {
 	if (_sendVersionAtLowIntervalCountdown != 0 ) {
 		_sendVersionAtLowIntervalCountdown--;
 	}
-
 	if (_sendVersionCountdown != 0) {
 		_sendVersionCountdown--;
-		if (_sendVersionCountdown == 0) {
-			// Send our version.
-			bool isInLowIntervalMode = _sendVersionAtLowIntervalCountdown == 0;
+	}
 
-			_sendVersionCountdown = isInLowIntervalMode
-					? VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS
-					: VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS;
-			sendVersion(false);
-		}
+	if (_sendVersionCountdown == 0) {
+		// Send our version.
+		bool isInLowIntervalMode = _sendVersionAtLowIntervalCountdown == 0;
+
+		_sendVersionCountdown = isInLowIntervalMode
+				? VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS
+				: VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS;
+		sendVersion(false);
 	}
 }
 
