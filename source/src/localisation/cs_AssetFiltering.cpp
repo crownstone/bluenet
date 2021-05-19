@@ -13,7 +13,7 @@
 #define LOGAssetFilteringWarn LOGw
 
 cs_ret_code_t AssetFiltering::init() {
-	LOGAssetFilteringDebug("AssetFitlering::init");
+	LOGAssetFilteringDebug("AssetFiltering::init");
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
 
 	if (_filterStore == nullptr) {
@@ -64,7 +64,7 @@ void AssetFiltering::setAssetHandlerShortId(AssetHandlerShortId* assetHandlerSho
 // ---------------------------- Handling events ----------------------------
 
 bool AssetFiltering::isInitialized() {
-	return _assetForwarder != nullptr || _filterSyncer != nullptr || _filterStore != nullptr;
+	return _assetForwarder != nullptr && _filterSyncer != nullptr && _filterStore != nullptr;
 }
 
 void AssetFiltering::handleEvent(event_t& evt) {
