@@ -188,16 +188,15 @@ ReturnType prepareFilterInputAndCallDelegate(
 				assert(result.len <= 31, "advertisement length too big");
 
 				// apply the mask
-				for (size_t i = 0; i < result.len; i++) {
-					if (BLEutil::isBitSet(selector->adDataMask, i)) {
-						buff[i] = result.data[i];
-					}
-					else {
-						buff[i] = 0x00;
+				size_t buffIndex = 0;
+				for (size_t bitIndex = 0; bitIndex < result.len; bitIndex++) {
+					if (BLEutil::isBitSet(selector->adDataMask, bitIndex)) {
+						buff[buffIndex] = result.data[bitIndex];
+						buffIndex++;
 					}
 				}
 
-				return delegateExpression(cuckoo, buff, result.len);
+				return delegateExpression(cuckoo, buff, buffIndex);
 			}
 
 			return defaultValue;
