@@ -126,9 +126,12 @@ private:
 	 * - Checks max filters (MAX_FILTER_IDS).
 	 * - Checks max ram size (FILTER_BUFFER_SIZE).
 	 *
+	 * @param[in] filterId        ID of the filter.
+	 * @param[in] stateDataSize   Size of the filter data used in State, result of getStateSize(filter data size).
+	 *
 	 * Returns nullptr on failure, pointer to the buffer on success.
 	 */
-	uint8_t* allocateFilter(uint8_t filterId, size_t payloadSize);
+	uint8_t* allocateFilter(uint8_t filterId, size_t stateDataSize);
 
 	/**
 	 * Same as deallocateFilterByIndex, but looks up the filter by the filterId.
@@ -145,8 +148,24 @@ private:
 	 */
 	void deallocateFilterByIndex(uint8_t parsingFilterIndex);
 
+	/**
+	 * Get the State type, given the filter data size.
+	 *
+	 * Returns CONFIG_DO_NOT_USE for invalid size.
+	 */
 	CS_TYPE getStateType(uint16_t filterDataSize);
+
+	/**
+	 * Get the size required for State, given the filter data size.
+	 */
 	uint16_t getStateSize(uint16_t filterDataSize);
+
+	/**
+	 * Used to loop over all asset filter state types.
+	 *
+	 * Returns CONFIG_DO_NOT_USE for invalid index.
+	 */
+	CS_TYPE getNthStateType(uint8_t index);
 
 	/**
 	 * Returns a pointer to the filter with given filterId, or nullptr if not found.
@@ -191,8 +210,8 @@ private:
 	 * Commit the filters.
 	 * - Computes CRCs and checks it against the given CRC.
 	 * - Checks the filter data validity.
-	 * - Unsets "modification in progress".
-	 * - Sets master version when it passed all checks.
+	 * - Unsets "modification in progress" when all checks are passed.
+	 * - Sets master version when all checks are passed.
 	 *
 	 * @return ERR_PROTOCOL_UNSUPPORTED   For an invalid protocol version.
 	 * @return ERR_WRONG_STATE            When a filter is invalid.
@@ -224,9 +243,27 @@ private:
 	void endInProgress(uint16_t newMasterVersion, uint32_t newMasterCrc);
 
 	/**
+	 * Called when the modification in progress is timed out.
+	 */
+	void inProgressTimeout();
+
+	/**
 	 * Send an internal event when isInProgress() may have changed.
 	 */
 	void sendInProgressStatus();
+
+	/**
+	 * Commit current filters.
+	 * - Checks the filter data validity.
+	 * - Computes CRCs and checks it against the given CRC.
+	 *
+	 * When all checks pass:
+	 * - Stores the filters, if store == true.
+	 * - Marks filters as committed.
+	 * - Unsets "modification in progress".
+	 * - Sets master version.
+	 */
+	cs_ret_code_t commit(uint16_t masterVersion, uint32_t masterCrc, bool store);
 
 	/**
 	 * Calculate the master CRC and return it (not stored).
@@ -238,9 +275,8 @@ private:
 	/**
 	 * Checks for all filters if the allocated filter data size is equal to the computed size based on its contents.
 	 *
-	 * - Skips filters that have passed this check before (flags.committed == true).
+	 * - Skips filters that have already been committed.
 	 * - Deallocates any filters failing the check.
-	 * - Sets flags.committed to true.
 	 *
 	 * @return true          When all filters passed the check.
 	 */
@@ -253,6 +289,28 @@ private:
 	 * - Sets flags.crcCalculated to true.
 	 */
 	void computeFilterCrcs();
+
+	/**
+	 * Store filters to flash.
+	 *
+	 * - Skips filters that have already been committed.
+	 */
+	void storeFilters();
+
+	/**
+	 * Load filters and version from flash.
+	 */
+	void loadFromFlash();
+
+	/**
+	 * Load filters of a specific type (size) from flash.
+	 */
+	void loadFromFlash(CS_TYPE type);
+
+	/**
+	 * Sets flags.committed to true.
+	 */
+	void markFiltersCommitted();
 
 public:
 	/**

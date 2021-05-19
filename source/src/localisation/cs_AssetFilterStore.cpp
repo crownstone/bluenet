@@ -21,10 +21,10 @@
 #define LOGAssetFilterDebug LOGd
 
 cs_ret_code_t AssetFilterStore::init() {
-	// TODO: Load from flash.
 	LOGAssetFilterInfo("init");
 
-//	endInProgress(_masterVersion, _masterCrc);
+	loadFromFlash();
+
 	listen();
 	return ERR_SUCCESS;
 }
@@ -74,11 +74,9 @@ void AssetFilterStore::handleEvent(event_t& evt) {
 	}
 }
 
-uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t filterDataSize) {
-	// TODO: is payloadsize equal to filterData size?
-	size_t stateSize = getStateSize(filterDataSize);
-	size_t totalSize = sizeof(asset_filter_runtime_data_t) + stateSize;
-	LOGAssetFilterDebug("Allocating filter id=%u filterDataSize=%u stateSize=%u totalSize=%u", filterId, filterDataSize, stateSize, totalSize);
+uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t stateDataSize) {
+	size_t totalSize = sizeof(asset_filter_runtime_data_t) + stateDataSize;
+	LOGAssetFilterDebug("Allocating filter id=%u stateDataSize=%u totalSize=%u", filterId, stateDataSize, totalSize);
 
 	if (_filtersCount >= MAX_FILTER_IDS) {
 		// not enough space for more filter ids.
@@ -118,21 +116,13 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t filterDataSiz
 
 	_filters[indexForNewEntry] = newFilterBuffer;
 
-	AssetFilter newFilterAccessor(newFilterBuffer);
-
-	LOGAssetFilterDebug("before assignments");
-	// initialize runtime data.
-	newFilterAccessor.runtimedata()->filterId    = filterId;
-	newFilterAccessor.runtimedata()->totalSize   = filterDataSize;
-	newFilterAccessor.runtimedata()->flags.asInt = 0;
-
-	// don't forget to increment the Count for the filter list.
 	_filtersCount++;
 
 	return newFilterBuffer;
 }
 
 void AssetFilterStore::deallocateFilterByIndex(uint8_t filterIndex) {
+	LOGAssetFilterDebug("Deallocate index=%u", filterIndex);
 	if (filterIndex >= MAX_FILTER_IDS) {
 		return;
 	}
@@ -148,8 +138,6 @@ void AssetFilterStore::deallocateFilterByIndex(uint8_t filterIndex) {
 	// (delete can handle nullptr according to c++ standard)
 	delete[] _filters[filterIndex];
 
-	LOGAssetFilterDebug("post-delete.");
-
 	// shift entries after the deleted one an index downward (overwriting the deleted pointer).
 	for (size_t i = filterIndex + 1; i < _filtersCount; i++) {
 		_filters[i - 1] = _filters[i];
@@ -162,11 +150,11 @@ void AssetFilterStore::deallocateFilterByIndex(uint8_t filterIndex) {
 }
 
 bool AssetFilterStore::deallocateFilter(uint8_t filterId) {
-	LOGAssetFilterDebug("deallocating %u", filterId);
+	LOGAssetFilterDebug("Deallocate filterId=%u", filterId);
 
 	auto filterIndexOpt = findFilterIndex(filterId);
 	if (filterIndexOpt.has_value() == false) {
-		LOGAssetFilterDebug("filter not found");
+		LOGAssetFilterDebug("Filter not found");
 		return false;
 	}
 
@@ -175,23 +163,17 @@ bool AssetFilterStore::deallocateFilter(uint8_t filterId) {
 }
 
 CS_TYPE AssetFilterStore::getStateType(uint16_t filterDataSize) {
-	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_32)) {
-		return CS_TYPE::STATE_ASSET_FILTER_32;
+	for (uint8_t i = 0; i < 255; ++i) {
+		CS_TYPE type = getNthStateType(i);
+		if (type == CS_TYPE::CONFIG_DO_NOT_USE) {
+			LOGw("Invalid size: %u", filterDataSize);
+			return CS_TYPE::CONFIG_DO_NOT_USE;
+		}
+		if (filterDataSize <= TypeSize(type)) {
+			return type;
+		}
 	}
-	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_64)) {
-		return CS_TYPE::STATE_ASSET_FILTER_64;
-	}
-	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_128)) {
-		return CS_TYPE::STATE_ASSET_FILTER_128;
-	}
-	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_256)) {
-		return CS_TYPE::STATE_ASSET_FILTER_256;
-	}
-	if (filterDataSize <= TypeSize(CS_TYPE::STATE_ASSET_FILTER_512)) {
-		return CS_TYPE::STATE_ASSET_FILTER_512;
-	}
-
-	LOGw("Invalid size: %u", filterDataSize);
+	// Should no be reached.
 	return CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
@@ -201,6 +183,17 @@ uint16_t AssetFilterStore::getStateSize(uint16_t filterDataSize) {
 		return FILTER_BUFFER_SIZE;
 	}
 	return TypeSize(type);
+}
+
+CS_TYPE AssetFilterStore::getNthStateType(uint8_t index) {
+	switch (index) {
+		case 0:  return CS_TYPE::STATE_ASSET_FILTER_32;
+		case 1:  return CS_TYPE::STATE_ASSET_FILTER_64;
+		case 2:  return CS_TYPE::STATE_ASSET_FILTER_128;
+		case 3:  return CS_TYPE::STATE_ASSET_FILTER_256;
+		case 4:  return CS_TYPE::STATE_ASSET_FILTER_512;
+		default: return CS_TYPE::CONFIG_DO_NOT_USE;
+	}
 }
 
 uint8_t* AssetFilterStore::findFilter(uint8_t filterId) {
@@ -251,7 +244,8 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 // -------------------------------------------------------------
 
 cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd_upload_filter_t& cmdData) {
-	LOGAssetFilterDebug("handleUploadFilterCommand chunkStartIndex=%u, chunkSize=%u, totalSize=%u",
+	LOGAssetFilterDebug("handleUploadFilterCommand filterId=%u chunkStartIndex=%u, chunkSize=%u, totalSize=%u",
+			cmdData.filterId,
 			cmdData.chunkStartIndex,
 			cmdData.chunkSize,
 			cmdData.totalSize);
@@ -273,35 +267,39 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 	// Check if we need to remove an old filter.
 	// Note that we can't just remove if there's data, because it might be the previous chunk.
 	if (filter._data != nullptr && filter.runtimedata()->flags.flags.committed == true) {
-		LOGAssetFilterDebug("removing pre-existing filter with same id (%u)", cmdData.filterId);
+		LOGAssetFilterDebug("Remove previous filter");
 		deallocateFilter(filter.runtimedata()->filterId);
 
-		// after deallocation, the filter is clearly gone.
+		// After deallocation, the filter is clearly gone.
 		filter._data = nullptr;
 	}
 
-	// check if the total size hasn't changed in the mean time
+	// Check if the total size hasn't changed.
 	if (filter._data != nullptr && filter.runtimedata()->totalSize != cmdData.totalSize) {
-		// If total size to allocate changes something is really off on the host side
-		LOGe("Corrupt chunk of upload data received. Deallocating partially constructed filter.");
+		// If total size to allocate changes something is really off on the host side.
+		LOGw("Receive different totalSize than previously uncommitted filter");
 		deallocateFilter(filter.runtimedata()->filterId);
 		return ERR_WRONG_STATE;
 	}
 
-	// check if we need to create a new filter
+	// Check if we need to allocate a new filter.
 	if (filter._data == nullptr) {
-		LOGAssetFilterDebug("Filter %u not found", cmdData.filterId);
-		// command totalSize only includes the size of the cuckoo filter and its metadata, not the runtime data yet.
-		filter = allocateFilter(cmdData.filterId, cmdData.totalSize);
+		// Command totalSize only includes the size of the cuckoo filter and its metadata, not the runtime data yet.
+		uint8_t* newBuf = allocateFilter(cmdData.filterId, getStateSize(cmdData.totalSize));
+		filter = AssetFilter(newBuf);
 
 		if (filter._data == nullptr) {
-			// failed to handle command, no space.
 			LOGAssetFilterWarn("Filter allocation failed");
 			return ERR_NO_SPACE;
 		}
+
+		// initialize runtime data.
+		filter.runtimedata()->filterId    = cmdData.filterId;
+		filter.runtimedata()->totalSize   = cmdData.totalSize;
+		filter.runtimedata()->flags.asInt = 0;
 	}
 
-	// by now, the filter exists, is clean, and the incoming chunk is verified for totalSize consistency.
+	// By now, the filter exists, is clean, and the incoming chunk is verified for totalSize consistency.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
 	uint8_t* filterBasePtr = filter.filterdata()._data;
@@ -335,22 +333,7 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 
-	if (checkFilterSizeConsistency()) {
-		return ERR_WRONG_STATE;
-	}
-
-	computeFilterCrcs();
-
-	uint32_t masterHash = computeMasterCrc();
-	if (cmdData.masterCrc != masterHash) {
-		LOGAssetFilterWarn("Master Crc did not match: 0x%x != 0x%x, inProgress stays true.", cmdData.masterCrc, masterHash);
-		return ERR_MISMATCH;
-	}
-
-	// finish commit by writing the _masterHash
-
-	endInProgress(cmdData.masterVersion, cmdData.masterCrc);
-	LOGAssetFilterDebug("Accepted commit command, ended filterModificationInProgress");
+	commit(cmdData.masterVersion, cmdData.masterCrc, true);
 
 	event_t event(CS_TYPE::EVT_FILTERS_UPDATED);
 	event.dispatch();
@@ -401,8 +384,7 @@ void AssetFilterStore::onTick() {
 	if (_modificationInProgressCountdown) {
 		_modificationInProgressCountdown--;
 		if (_modificationInProgressCountdown == 0) {
-			LOGAssetFilterInfo("Modification in progress timeout.");
-			sendInProgressStatus();
+			inProgressTimeout();
 		}
 	}
 }
@@ -429,23 +411,73 @@ void AssetFilterStore::endInProgress(uint16_t newMasterVersion, uint32_t newMast
 	_masterVersion                   = newMasterVersion;
 	_masterCrc                       = newMasterCrc;
 	_modificationInProgressCountdown = 0;
-	sendInProgressStatus();
 
 	TYPIFY(STATE_ASSET_FILTERS_VERSION) stateVal = {
 			.masterVersion = _masterVersion,
 			.masterCrc     = _masterCrc
 	};
 	State::getInstance().set(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &stateVal, sizeof(stateVal));
+
+	sendInProgressStatus();
 }
 
 bool AssetFilterStore::isInProgress() {
 	return _modificationInProgressCountdown != 0;
 }
 
+void AssetFilterStore::inProgressTimeout() {
+	LOGAssetFilterInfo("Modification in progress timeout.");
+
+	// Clean up filters that have not been committed.
+	for (uint8_t index = 0; index < _filtersCount; /* intentionally no index++ here */) {
+		auto filter = AssetFilter(_filters[index]);
+
+		if (filter._data == nullptr) {
+			// Early return: last filter has been handled.
+			break;
+		}
+
+		if (filter.runtimedata()->flags.flags.committed == false) {
+			deallocateFilterByIndex(index);
+
+			// Intentionally skipping index++, deallocate shrinks the array we're looping over.
+			continue;
+		}
+		index++;
+	}
+
+	sendInProgressStatus();
+}
+
 void AssetFilterStore::sendInProgressStatus() {
 	TYPIFY(EVT_FILTER_MODIFICATION) modification = isInProgress();
 	event_t event(CS_TYPE::EVT_FILTER_MODIFICATION, &modification, sizeof(modification));
 	event.dispatch();
+}
+
+
+cs_ret_code_t AssetFilterStore::commit(uint16_t masterVersion, uint32_t masterCrc, bool store) {
+	LOGAssetFilterDebug("Commit version=%u CRC=%u store=%u", masterVersion, masterCrc, store);
+	if (checkFilterSizeConsistency()) {
+		return ERR_WRONG_STATE;
+	}
+
+	computeFilterCrcs();
+
+	uint32_t computedMasterCrc = computeMasterCrc();
+	if (masterCrc != computedMasterCrc) {
+		LOGAssetFilterWarn("Master CRC does not match: 0x%x != 0x%x", masterCrc, computedMasterCrc);
+		return ERR_MISMATCH;
+	}
+
+	if (store) {
+		storeFilters();
+	}
+
+	markFiltersCommitted();
+
+	endInProgress(masterVersion, masterCrc);
+	return ERR_SUCCESS;
 }
 
 uint32_t AssetFilterStore::computeMasterCrc() {
@@ -488,7 +520,6 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 		}
 
 		if (filter.runtimedata()->flags.flags.committed == false) {
-			filter.runtimedata()->flags.flags.committed = true;
 			// filter changed since commit.
 
 			size_t filterAllocatedSize = filter.runtimedata()->totalSize + sizeof(asset_filter_runtime_data_t);
@@ -534,5 +565,106 @@ void AssetFilterStore::computeFilterCrcs() {
 		else {
 			LOGAssetFilterDebug("Skip filter CRC calculation for filterId=%u, CRC=0x%x", filter.runtimedata()->filterId, filter.runtimedata()->crc)
 		}
+	}
+}
+
+void AssetFilterStore::storeFilters() {
+	LOGAssetFilterDebug("storeFilters");
+	for (uint8_t* filterBuffer : _filters) {
+		if (filterBuffer == nullptr) {
+			break;
+		}
+
+		AssetFilter filter(filterBuffer);
+		if (filter.runtimedata()->flags.flags.committed == true) {
+			continue;
+		}
+
+		cs_state_data_t stateData(
+				getStateType(filter.filterdata().length()),
+				filter.runtimedata()->filterId,
+				filter.filterdata()._data,
+				getStateSize(filter.filterdata().length()));
+		LOGAssetFilterDebug("store stateType=%u stateId=%u size=%u", stateData.type, stateData.id, stateData.size);
+		State::getInstance().set(stateData);
+	}
+}
+
+void AssetFilterStore::loadFromFlash() {
+	// Load all filters.
+	for (uint8_t i = 0; i < 255; ++i) {
+		CS_TYPE type = getNthStateType(i);
+		if (type == CS_TYPE::CONFIG_DO_NOT_USE) {
+			break;
+		}
+
+		loadFromFlash(type);
+	}
+
+	// Load master version and CRC.
+	TYPIFY(STATE_ASSET_FILTERS_VERSION) stateVal;
+	State::getInstance().get(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &stateVal, sizeof(stateVal));
+
+	// Commit filters.
+	cs_ret_code_t retCode = ERR_UNSPECIFIED;
+	if (stateVal.masterVersion != 0) {
+		retCode = commit(stateVal.masterVersion, stateVal.masterCrc, false);
+	}
+
+	// In case of error: remove all filters.
+	if (retCode != ERR_SUCCESS) {
+		// TODO: do we want to remove all filters?
+		// Remove all filters: reverse iterate.
+		for (uint8_t index = _filtersCount; index > 0; --index) {
+			deallocateFilterByIndex(index - 1);
+		}
+		endInProgress(0, 0);
+	}
+}
+
+void AssetFilterStore::loadFromFlash(CS_TYPE type) {
+	LOGAssetFilterDebug("loadFromFlash type=%u", type);
+	cs_ret_code_t retCode;
+
+	std::vector<cs_state_id_t>* ids = nullptr;
+	retCode = State::getInstance().getIds(type, ids);
+	if (retCode != ERR_SUCCESS) {
+		return;
+	}
+
+	for (auto id: *ids) {
+		if (id >= MAX_FILTER_IDS) {
+			LOGw("Invalid id: %u", id);
+			continue;
+		}
+
+		deallocateFilter(id);
+		uint16_t stateSize = TypeSize(type);
+		uint8_t* filterBuf = allocateFilter(id, stateSize);
+		AssetFilter filter(filterBuf);
+
+		cs_state_data_t stateData (type, id, filter.filterdata()._data, stateSize);
+		retCode = State::getInstance().get(stateData);
+		if (retCode != ERR_SUCCESS) {
+			deallocateFilter(id);
+			continue;
+		}
+
+		filter.runtimedata()->filterId = id;
+		filter.runtimedata()->flags.asInt = 0;
+		filter.runtimedata()->totalSize = filter.filterdata().length();
+	}
+}
+
+void AssetFilterStore::markFiltersCommitted() {
+	LOGAssetFilterDebug("markFiltersCommitted");
+	for (size_t index = 0; index < _filtersCount; ++index) {
+		auto filter = AssetFilter(_filters[index]);
+
+		if (filter._data == nullptr) {
+			// early return: last filter has been handled.
+			break;
+		}
+		filter.runtimedata()->flags.flags.committed = true;
 	}
 }
