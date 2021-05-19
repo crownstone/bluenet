@@ -77,21 +77,21 @@ void AssetFilterStore::handleEvent(event_t& evt) {
 uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t filterDataSize) {
 	// TODO: is payloadsize equal to filterData size?
 	size_t stateSize = getStateSize(filterDataSize);
-	size_t totalSize = sizeof(asset_filter_runtime_data_t) + stateSize;
-	LOGAssetFilterDebug("Allocating filter id=%u filterDataSize=%u stateSize=%u totalSize=%u", filterId, filterDataSize, stateSize, totalSize);
+	size_t allocatedSize = sizeof(asset_filter_runtime_data_t) + stateSize;
+	LOGAssetFilterDebug("Allocating filter id=%u filterDataSize=%u stateSize=%u allocatedSize=%u", filterId, filterDataSize, stateSize, allocatedSize);
 
 	if (_filtersCount >= MAX_FILTER_IDS) {
 		// not enough space for more filter ids.
 		return nullptr;
 	}
 
-	if (getTotalHeapAllocatedSize() + totalSize > FILTER_BUFFER_SIZE) {
+	if (getTotalHeapAllocatedSize() + allocatedSize > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
 	}
 
 	// try heap allocation
-	uint8_t* newFilterBuffer = new (std::nothrow) uint8_t[totalSize];
+	uint8_t* newFilterBuffer = new (std::nothrow) uint8_t[allocatedSize]; // TODO memset(0)
 
 	if (newFilterBuffer == nullptr) {
 		LOGAssetFilterWarn("Filter couldn't be allocated, heap is too full");
@@ -123,8 +123,9 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t filterDataSiz
 	LOGAssetFilterDebug("before assignments");
 	// initialize runtime data.
 	newFilterAccessor.runtimedata()->filterId    = filterId;
-	newFilterAccessor.runtimedata()->totalSize   = filterDataSize;
+	newFilterAccessor.runtimedata()->filterDataSize   = filterDataSize;
 	newFilterAccessor.runtimedata()->flags.asInt = 0;
+	newFilterAccessor.runtimedata()->crc         = 0;
 
 	// don't forget to increment the Count for the filter list.
 	_filtersCount++;
@@ -251,7 +252,7 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 // -------------------------------------------------------------
 
 cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd_upload_filter_t& cmdData) {
-	LOGAssetFilterDebug("handleUploadFilterCommand chunkStartIndex=%u, chunkSize=%u, totalSize=%u",
+	LOGAssetFilterDebug("handleUploadFilterCommand command[chunkStartIndex=%u, chunkSize=%u, totalSize=%u]",
 			cmdData.chunkStartIndex,
 			cmdData.chunkSize,
 			cmdData.totalSize);
@@ -281,7 +282,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 	}
 
 	// check if the total size hasn't changed in the mean time
-	if (filter._data != nullptr && filter.runtimedata()->totalSize != cmdData.totalSize) {
+	if (filter._data != nullptr && filter.runtimedata()->filterDataSize != cmdData.totalSize) {
 		// If total size to allocate changes something is really off on the host side
 		LOGe("Corrupt chunk of upload data received. Deallocating partially constructed filter.");
 		deallocateFilter(filter.runtimedata()->filterId);
@@ -301,7 +302,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 		}
 	}
 
-	// by now, the filter exists, is clean, and the incoming chunk is verified for totalSize consistency.
+	// by now, the filter exists, is clean, and the incoming chunk is verified for filterDataSize consistency.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
 	uint8_t* filterBasePtr = filter.filterdata()._data;
@@ -343,7 +344,7 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 
 	uint32_t masterHash = computeMasterCrc();
 	if (cmdData.masterCrc != masterHash) {
-		LOGAssetFilterWarn("Master Crc did not match: 0x%x != 0x%x, inProgress stays true.", cmdData.masterCrc, masterHash);
+		LOGAssetFilterWarn("Master Crc did not match: 0x%x (command) != 0x%x (local), inProgress stays true.", cmdData.masterCrc, masterHash);
 		return ERR_MISMATCH;
 	}
 
@@ -367,7 +368,9 @@ void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
 			// expecting all subsequent iterations of this loop to get nullptrs
 			continue;
 		}
-		LOGAssetFilterDebug("filter: %u", AssetFilter(filter).runtimedata()->filterId);
+		LOGAssetFilterDebug("filter: #%u, crc: %x",
+				AssetFilter(filter).runtimedata()->filterId,
+				AssetFilter(filter).runtimedata()->crc);
 	}
 
 	// stack allocate a buffer summaries object fitting at most max summaries:
@@ -491,7 +494,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 			filter.runtimedata()->flags.flags.committed = true;
 			// filter changed since commit.
 
-			size_t filterAllocatedSize = filter.runtimedata()->totalSize + sizeof(asset_filter_runtime_data_t);
+			size_t filterAllocatedSize = filter.runtimedata()->filterDataSize + sizeof(asset_filter_runtime_data_t);
 			size_t filterSize          = filter.length();
 
 			if (filterSize != filterAllocatedSize) {
@@ -527,7 +530,7 @@ void AssetFilterStore::computeFilterCrcs() {
 
 		AssetFilter filter(filterBuffer);
 		if (filter.runtimedata()->flags.flags.crcCalculated == false) {
-			filter.runtimedata()->crc = crc32(filter.filterdata().metadata()._data, filter.runtimedata()->totalSize, nullptr);
+			filter.runtimedata()->crc = crc32(filter.filterdata().metadata()._data, filter.runtimedata()->filterDataSize, nullptr);
 			filter.runtimedata()->flags.flags.crcCalculated = true;
 			LOGAssetFilterDebug("Calculate CRC for filter filterId=%u, CRC=0x%x", filter.runtimedata()->filterId, filter.runtimedata()->crc);
 		}
