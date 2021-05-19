@@ -64,7 +64,7 @@ void AssetFiltering::setAssetHandlerShortId(AssetHandlerShortId* assetHandlerSho
 // ---------------------------- Handling events ----------------------------
 
 bool AssetFiltering::isInitialized() {
-	return _assetForwarder != nullptr || _filterSyncer != nullptr || _filterStore != nullptr;
+	return _assetForwarder != nullptr && _filterSyncer != nullptr && _filterStore != nullptr;
 }
 
 void AssetFiltering::handleEvent(event_t& evt) {
