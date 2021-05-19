@@ -10,8 +10,6 @@
 #include <events/cs_Event.h>
 #include <localisation/cs_AssetFilterStore.h>
 #include <util/cs_Lollipop.h>
-
-#include <drivers/cs_RTC.h>
 #include <util/cs_Math.h>
 
 #define LOGAssetFilterSyncerInfo LOGi
@@ -135,7 +133,7 @@ void AssetFilterSyncer::reset() {
 		disconnect();
 	}
 	setStep(SyncStep::NONE);
-	setSendVersionSpeedHigh();
+	sendVersionAtLowInterval();
 }
 
 void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
@@ -315,7 +313,7 @@ void AssetFilterSyncer::disconnect() {
 void AssetFilterSyncer::done() {
 	LOGAssetFilterSyncerDebug("Done!");
 	// Send out version again, so the next crownstone with an old version can send their version, which makes us connect to that crownstone.
-//	sendVersion(true);
+	sendVersionAtLowInterval();
 }
 
 
@@ -483,33 +481,32 @@ void AssetFilterSyncer::onModificationInProgress(bool inProgress) {
 	}
 }
 
-void AssetFilterSyncer::setSendVersionSpeedHigh() {
-	_sendVersionSpeedHighCounterTicks = RTC::msToTicks(1000 * VERSION_BROADCAST_INTERVAL_RESET_SECONDS);
+void AssetFilterSyncer::sendVersionAtLowInterval() {
+	_sendVersionAtLowIntervalCountdown = VERSION_BROADCAST_INTERVAL_RESET_SECONDS * 1000 / TICK_INTERVAL_MS;
 
-	// clamp current counter
-	_sendVersionCounterTicks = CsMath::min(
-			_sendVersionCounterTicks,
-			RTC::msToTicks(1000 * VERSION_BROADCAST_INTERVAL_FAST_SECONDS));
+	// Clamp the countdown: leave current countdown as it is, but it should be at most the low interval.
+	_sendVersionCountdown = CsMath::min(
+			_sendVersionCountdown,
+			VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS);
 }
 
 void AssetFilterSyncer::onTick(uint32_t tickCount) {
-	// decrement timers
-	if (_sendVersionSpeedHighCounterTicks != 0 ) {
-		_sendVersionSpeedHighCounterTicks--;
-	}
-	if (_sendVersionCounterTicks != 0) {
-		_sendVersionCounterTicks--;
+	// Decrement timers.
+	if (_sendVersionAtLowIntervalCountdown != 0 ) {
+		_sendVersionAtLowIntervalCountdown--;
 	}
 
-	if (_sendVersionCounterTicks == 0) {
-		// version countdown finished
-		bool isInLowSpeedMode = _sendVersionSpeedHighCounterTicks == 0;
+	if (_sendVersionCountdown != 0) {
+		_sendVersionCountdown--;
+		if (_sendVersionCountdown == 0) {
+			// Send our version.
+			bool isInLowIntervalMode = _sendVersionAtLowIntervalCountdown == 0;
 
-		// bump send version counter back up to desired time
-		_sendVersionCounterTicks = isInLowSpeedMode
-				? VERSION_BROADCAST_INTERVAL_SLOW_SECONDS * 1000 / TICK_INTERVAL_MS
-				: VERSION_BROADCAST_INTERVAL_FAST_SECONDS * 1000 / TICK_INTERVAL_MS;
-		sendVersion(false);
+			_sendVersionCountdown = isInLowIntervalMode
+					? VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS
+					: VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS;
+			sendVersion(false);
+		}
 	}
 }
 
@@ -525,7 +522,7 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
-			setSendVersionSpeedHigh();
+			sendVersionAtLowInterval();
 			break;
 		}
 		case CS_TYPE::EVT_FILTER_MODIFICATION: {
