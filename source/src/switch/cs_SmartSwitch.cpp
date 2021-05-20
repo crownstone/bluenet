@@ -13,7 +13,7 @@
 #define LOGSmartSwitchDebug LOGnone
 
 void SmartSwitch::init(const boards_config_t& board) {
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
+	State::getInstance().get(CS_TYPE::CONFIG_DIMMING_ALLOWED, &allowDimming, sizeof(allowDimming));
 
 	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked;
 	State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
@@ -239,7 +239,7 @@ cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	LOGi("setAllowDimming %u", allowed);
 	allowDimming = allowed;
-	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
+	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &allowDimming, sizeof(allowDimming));
 
 	// This will trigger event CONFIG_PWM_ALLOWED, which will call handleAllowDimmingSet().
 //	handleAllowDimmingSet();
@@ -302,8 +302,8 @@ void SmartSwitch::handleEvent(event_t& evt) {
 			// Fade to intended intensity?
 			break;
 		}
-		case CS_TYPE::CONFIG_PWM_ALLOWED: {
-			allowDimming = *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(evt.data);
+		case CS_TYPE::CONFIG_DIMMING_ALLOWED: {
+			allowDimming = *reinterpret_cast<TYPIFY(CONFIG_DIMMING_ALLOWED)*>(evt.data);
 			handleAllowDimmingSet();
 			break;
 		}

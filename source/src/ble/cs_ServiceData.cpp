@@ -40,7 +40,7 @@ void ServiceData::init(uint8_t deviceType) {
 
 	// Init flags
 	_flags.asInt = 0;
-	_flags.flags.markedDimmable = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
+	_flags.flags.markedDimmable = State::getInstance().isTrue(CS_TYPE::CONFIG_DIMMING_ALLOWED);
 	_flags.flags.switchLocked = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED);
 	_flags.flags.switchcraft = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 	_flags.flags.tapToToggle = State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED);
@@ -433,8 +433,8 @@ void ServiceData::handleEvent(event_t & event) {
 			_flags.flags.dimmingReady = *reinterpret_cast<TYPIFY(EVT_DIMMER_POWERED)*>(event.data);
 			break;
 		}
-		case CS_TYPE::CONFIG_PWM_ALLOWED: {
-			_flags.flags.markedDimmable = *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(event.data);
+		case CS_TYPE::CONFIG_DIMMING_ALLOWED: {
+			_flags.flags.markedDimmable = *reinterpret_cast<TYPIFY(CONFIG_DIMMING_ALLOWED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_SWITCH_LOCKED: {

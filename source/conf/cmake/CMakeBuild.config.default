@@ -136,8 +136,8 @@ INTERVAL_SCANNER_ENABLED=0
 SCAN_DURATION=2000
 SCAN_BREAK_DURATION=7000
 
-# Enables the dimmer.
-PWM_ENABLE=1
+# Default setting of dimming allowed.
+DIMMING_ALLOWED=0
 
 # The iBeacon advertisement packet parameters contains the proximity UUID, MAJOR, MINOR, AND RSSI value.
 BEACON_UUID="a643423e-e175-4af0-a2e4-31e32f729a8a"

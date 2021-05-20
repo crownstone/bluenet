@@ -824,7 +824,7 @@ void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const Encrypti
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CONFIG_PWM_ALLOWED) allow = payload->enable;
+	TYPIFY(CONFIG_DIMMING_ALLOWED) allow = payload->enable;
 
 	event_t evt(CS_TYPE::CMD_DIMMING_ALLOWED, &allow, sizeof(allow));
 	EventDispatcher::getInstance().dispatch(evt);

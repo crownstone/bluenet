@@ -248,8 +248,8 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	sendUnexpectedStateUpdate();
 
 	// Disable dimming, as it's likely that dimming shouldn't be allowed for this device.
-	TYPIFY(CONFIG_PWM_ALLOWED) dimmingEnabled = 0;
-	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &dimmingEnabled, sizeof(dimmingEnabled));
+	TYPIFY(CONFIG_DIMMING_ALLOWED) dimmingEnabled = 0;
+	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &dimmingEnabled, sizeof(dimmingEnabled));
 
 	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON);
 	EventDispatcher::getInstance().dispatch(eventRelay);
