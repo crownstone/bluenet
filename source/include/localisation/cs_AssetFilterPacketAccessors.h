@@ -81,7 +81,9 @@ public:
 	AssetFilterData filterdata();
 
 	/**
-	 * Total size ot the _data, including runtimedata() and the filterdata()
+	 * Total size ot the _data, including runtimedata() and the filterdata().
+	 *
+	 * I.e. computed from the runtimedata() length and filterdata().length().
 	 */
 	size_t length();
 };
