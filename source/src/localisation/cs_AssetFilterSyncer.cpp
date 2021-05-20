@@ -34,9 +34,9 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 		LOGAssetFilterSyncerDebug("Store is in progress: don't send version");
 		return;
 	}
-	LOGAssetFilterSyncerDebug("sendVersion reliable=%u", reliable);
 	uint16_t masterVersion = _store->getMasterVersion();
 	uint32_t masterCrc = _store->getMasterCrc();
+	LOGAssetFilterSyncerDebug("sendVersion reliable=%u version=%u crc=%u", reliable, masterVersion, masterCrc);
 
 	cs_mesh_model_msg_asset_filter_version_t versionPacket = {
 			.protocol = ASSET_FILTER_CMD_PROTOCOL_VERSION,
