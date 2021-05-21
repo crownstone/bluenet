@@ -149,6 +149,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10108 | Asset Rssi Data               | Yes       | [Asset rssi data](#asset-rssi-data-packet) | Information about an asset a crownstone on the mesh has forwarded.
 10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The rssi between an asset and its nearest Crownstone changed.
 10110 | Nearest crownstone timed out  | Yes       | [Nearest crownstone timeout](#nearest-crownstone-timeout) | A previously tracked asset hasn't been observed in a
+10111 | RSSI between stones           | Yes       | [RSSI between stones](#rssi-between-stones) | The RSSI between 2 Crownstones.
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -301,6 +302,29 @@ uint8 | Channel | 1 | Channel of the observed advertisement
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8[] | AssetId | 3 | ShortAssetId of the asset that timed out
+
+
+### RSSI between stones
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Receiver ID | 1 | Stone ID of the stone that received a message.
+uint8 | Sender ID | 1 | Stone ID of the stone that sent a message.
+int8  | RSSI | 1 | RSSI between the two stones, according to the receiver.
+uint8 | Channel | 1 | Channel of the message.
+uint8 | Last seen | 1 | How many seconds ago the sender was last seen by the receiver.
+
+We might also consider:
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Receiver ID | 1 | Stone ID of the stone that received a message.
+uint8 | Sender ID | 1 | Stone ID of the stone that sent a message.
+int8  | RSSI channel 37 | 1 | RSSI between the two stones on channel 37, according to the receiver.
+int8  | RSSI channel 38 | 1 | RSSI between the two stones on channel 38, according to the receiver.
+int8  | RSSI channel 39 | 1 | RSSI between the two stones on channel 39, according to the receiver.
+uint8 | Last seen | 1 | How many seconds ago the sender was last seen by the receiver.
+
 
 
 ### Binary log header
