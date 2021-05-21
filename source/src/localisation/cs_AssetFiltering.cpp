@@ -91,7 +91,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
-			_logArray(SERIAL_DEBUG, true, device.data, device.dataSize);
+			_logArray(LogLevelAssetFilteringDebug, true, device.data, device.dataSize);
 			LOGAssetFilteringDebug("handleScannedDevice, filter index=%u accepted device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
 					filter.runtimedata()->filterId,
 					device.address[5],
