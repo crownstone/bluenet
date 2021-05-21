@@ -215,7 +215,7 @@ void MeshTopologyResearch::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_m
 }
 
 void MeshTopologyResearch::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
-	mesh_topology_neighbour_rssi_t datamessage;
+	mesh_topology_neighbour_research_rssi_t datamessage;
 
 	datamessage.receiverId = my_id;
 	datamessage.senderId = rssi_data_message->sender_id;

@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_MeshTopologyPackets.h>
-#include <structs/buffer/cs_CircularBuffer.h>
 
 #if BUILD_MESH_TOPOLOGY_RESEARCH == 1
 #include <localisation/cs_MeshTopologyResearch.h>
@@ -27,6 +26,12 @@ public:
 	 * Time after last seen, before a neighbour is removed from the list.
 	 */
 	static constexpr uint8_t TIMEOUT_SECONDS = 50;
+
+	/**
+	 * Interval at which to a send mesh messages for each neighbour.
+	 * So on average <neighbour count> mesh messages will sent per interval.
+	 */
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR = 1*60;
 
 	/**
 	 * Initializes the class:
@@ -58,7 +63,7 @@ private:
 	/**
 	 * A list of all known neighbours, allocated on init.
 	 */
-	neighbour_node_t* _neighbours = nullptr;
+	cs_mesh_model_msg_neighbour_rssi_t* _neighbours = nullptr;
 
 	/**
 	 * Number of neighbours in the list.
@@ -66,7 +71,17 @@ private:
 	uint8_t _neighbourCount = 0;
 
 	/**
-	 * Add a neighbour.
+	 * Next index of the neighbours list to send via the mesh.
+	 */
+	uint8_t _nextSendIndex = 0;
+
+	/**
+	 * Countdown in seconds until sending the next mesh message.
+	 */
+	uint16_t _sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR;
+
+	/**
+	 * Add a neighbour to the list.
 	 */
 	void add(stone_id_t id, int8_t rssi, uint8_t channel);
 
@@ -75,7 +90,13 @@ private:
 	 */
 	uint8_t find(stone_id_t id);
 
+	/**
+	 * Sends the RSSI of 1 neighbour over the mesh.
+	 */
+	void sendNextMeshMessage();
+
 	// Event handlers
+	void onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet);
 	cs_ret_code_t onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, mesh_reply_t* result);
 	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
 	void onTickSecond();

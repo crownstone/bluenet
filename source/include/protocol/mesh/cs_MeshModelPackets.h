@@ -65,12 +65,13 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID     = 19, // Payload: set_ibeacon_config_id_packet_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT  = 20, // Payload: cs_mesh_model_msg_device_heartbeat_t
 	CS_MESH_MODEL_TYPE_RSSI_PING                 = 21, // Payload: rssi_ping_message_t                             Only used in MeshTopologyResearch
-	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t                   Only used in MeshTopologyResearch
+	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t
 	CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT    = 23, // Payload: nearest_witness_report_t                        Only used in NearestCrownstone
-	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t
+	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
 	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
 	CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
+	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -239,6 +240,35 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 	rssi_data_t channel39;
 };
 
+struct __attribute__((__packed__)) compressed_rssi_data_t {
+	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
+	uint8_t rssi_halved : 6; // half of the absolute value of the original rssi.
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_neighbour_rssi_t {
+	stone_id_t neighbourId;
+	uint8_t type = 0; // Type of report, always 0 for now.
+	compressed_rssi_data_t compressedRssi;
+	uint8_t lastSeenSecondsAgo;
+
+	// Possible option to reduce the number of mesh messages:
+	//   uint8_t type = 1;
+	//   int8_t rssiChannel37;
+	//   int8_t rssiChannel38;
+	//   int8_t rssiChannel39;
+	//   uint8_t lastSeenSecondsAgo;
+
+	// Possible future type:
+	//   uint8_t type : 4;
+	//   uint8_t rssiChannel37 : 6;
+	//   uint8_t rssiChannel38 : 6;
+	//   uint8_t rssiChannel39 : 6;
+	//   uint8_t avgRssiChannel37 : 6;
+	//   uint8_t avgRssiChannel38 : 6;
+	//   uint8_t avgRssiChannel39 : 6;
+	//   uint8_t lastSeenSecondsAgo;
+};
+
 struct __attribute__((__packed__)) cs_mesh_model_msg_stone_mac_t {
 	uint8_t type; // 0 = request, 1 = reply.
 	uint8_t mac[MAC_ADDRESS_LEN];
@@ -248,12 +278,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 	asset_filter_cmd_protocol_t protocol;
 	uint16_t masterVersion;
 	uint32_t masterCrc;
-};
-
-
-struct __attribute__((__packed__)) compressed_rssi_data_t {
-	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssi_halved : 6; // half of the absolute value of the original rssi.
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_mac_t {

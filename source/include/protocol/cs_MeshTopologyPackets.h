@@ -13,18 +13,18 @@
 
 static constexpr uint8_t MESH_TOPOLOGY_CHANNEL_COUNT = 3;
 
-struct __attribute__((packed)) neighbour_node_t {
-	stone_id_t id;
-	compressed_rssi_data_t compressedRssi;
-	uint8_t lastSeenSeconds; // Last seen N seconds ago.
 
-	neighbour_node_t() {};
-	neighbour_node_t(stone_id_t id, compressed_rssi_data_t rssiData):
-		id(id),
-		compressedRssi(rssiData),
-		lastSeenSeconds(0)
-	{}
+struct __attribute__((packed)) mesh_topology_neighbour_rssi_t {
+	// TODO: change this to include RSSI of all channels?
+	stone_id_t receiverId;
+	stone_id_t senderId;
+	uint8_t type = 0;
+	int8_t rssi;
+	uint8_t channel;
+//	int8_t rssi[MESH_TOPOLOGY_CHANNEL_COUNT];
+	uint8_t lastSeenSecondsAgo; // How many seconds ago the sender was last seen by the receiver.
 };
+
 
 /**
  * Message format to be sent over uart.
@@ -32,7 +32,7 @@ struct __attribute__((packed)) neighbour_node_t {
  *
  * (Necessary since we have to fold in our own id anyway.)
  */
-struct __attribute__((packed)) mesh_topology_neighbour_rssi_t {
+struct __attribute__((packed)) mesh_topology_neighbour_research_rssi_t {
 	stone_id_t receiverId;
 	stone_id_t senderId;
 	uint8_t count[MESH_TOPOLOGY_CHANNEL_COUNT];
