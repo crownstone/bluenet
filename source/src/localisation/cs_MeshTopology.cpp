@@ -11,8 +11,9 @@
 #include <util/cs_Rssi.h>
 #include <uart/cs_UartHandler.h>
 
-#define LOGMeshTopologyInfo  LOGi
-#define LOGMeshTopologyDebug LOGvv
+#define LOGMeshTopologyInfo    LOGi
+#define LOGMeshTopologyDebug   LOGd
+#define LOGMeshTopologyVerbose LOGvv
 
 cs_ret_code_t MeshTopology::init() {
 
@@ -100,7 +101,7 @@ uint8_t MeshTopology::find(stone_id_t id) {
 	return INDEX_NOT_FOUND;
 }
 
-void MeshTopology::sendNextMeshMessage() {
+void MeshTopology::sendNext() {
 	if (_neighbourCount == 0) {
 		// Nothing to send.
 		return;
@@ -111,28 +112,31 @@ void MeshTopology::sendNextMeshMessage() {
 		_nextSendIndex = 0;
 	}
 
-	cs_mesh_model_msg_neighbour_rssi_t& msgPayload = _neighbours[_nextSendIndex];
-	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u secondsAgo=%u", _nextSendIndex, msgPayload.neighbourId, msgPayload.lastSeenSecondsAgo);
+	cs_mesh_model_msg_neighbour_rssi_t& neighbourRssi = _neighbours[_nextSendIndex];
+	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u", _nextSendIndex, neighbourRssi.neighbourId, neighbourRssi.lastSeenSecondsAgo);
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
 	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.flags.flags.noHops = false;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&msgPayload);
-	meshMsg.size = sizeof(msgPayload);
+	meshMsg.payload = reinterpret_cast<uint8_t*>(&neighbourRssi);
+	meshMsg.size = sizeof(neighbourRssi);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
+
+	// Also send over UART.
+	sendRssiToUart(_myId, neighbourRssi);
 
 	// Send next item in the list next time.
 	_nextSendIndex++;
 }
 
-void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet) {
-	// Send to UART.
+void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
+	LOGMeshTopologyDebug("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
 	mesh_topology_neighbour_rssi_t uartMsg = {
-			.receiverId = id,
+			.receiverId = receiverId,
 			.senderId = packet.neighbourId,
 			.type = 0,
 			.rssi = getRssi(packet.compressedRssi),
@@ -140,6 +144,11 @@ void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rs
 			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo
 	};
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
+}
+
+void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet) {
+	// Send to UART.
+	sendRssiToUart(id, packet);
 }
 
 cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, mesh_reply_t* reply) {
@@ -195,7 +204,7 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 }
 
 void MeshTopology::onTickSecond() {
-	LOGMeshTopologyDebug("onTickSecond nextSendIndex=%u", _nextSendIndex);
+	LOGMeshTopologyVerbose("onTickSecond nextSendIndex=%u", _nextSendIndex);
 	print();
 	[[maybe_unused]] bool change = false;
 	for (uint8_t i = 0; i < _neighbourCount; /**/ ) {
@@ -217,7 +226,7 @@ void MeshTopology::onTickSecond() {
 		}
 	}
 	if (change) {
-		LOGMeshTopologyDebug("Result: nextSendIndex=%u", _nextSendIndex);
+		LOGMeshTopologyVerbose("Result: nextSendIndex=%u", _nextSendIndex);
 		print();
 	}
 
@@ -225,15 +234,15 @@ void MeshTopology::onTickSecond() {
 		_sendCountdown--;
 	}
 	if (_sendCountdown == 0) {
-		sendNextMeshMessage();
+		sendNext();
 		_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR / _neighbourCount;
-		LOGMeshTopologyDebug("sendCountdown=%u", _sendCountdown);
+		LOGMeshTopologyVerbose("sendCountdown=%u", _sendCountdown);
 	}
 }
 
 void MeshTopology::print() {
 	for (uint8_t i = 0; i < _neighbourCount; ++i) {
-		LOGMeshTopologyDebug("index=%u id=%u rssi=%i channel=%u secondsAgo=%u", i, _neighbours[i].neighbourId, getRssi(_neighbours[i].compressedRssi), getChannel(_neighbours[i].compressedRssi), _neighbours[i].lastSeenSecondsAgo);
+		LOGMeshTopologyVerbose("index=%u id=%u rssi=%i channel=%u secondsAgo=%u", i, _neighbours[i].neighbourId, getRssi(_neighbours[i].compressedRssi), getChannel(_neighbours[i].compressedRssi), _neighbours[i].lastSeenSecondsAgo);
 	}
 }
 

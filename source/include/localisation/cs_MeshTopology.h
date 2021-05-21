@@ -28,8 +28,7 @@ public:
 	static constexpr uint8_t TIMEOUT_SECONDS = 50;
 
 	/**
-	 * Interval at which to a send mesh messages for each neighbour.
-	 * So on average <neighbour count> mesh messages will sent per interval.
+	 * Interval at which a mesh messages is sent for each neighbour.
 	 */
 	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR = 1*60;
 
@@ -91,9 +90,14 @@ private:
 	uint8_t find(stone_id_t id);
 
 	/**
-	 * Sends the RSSI of 1 neighbour over the mesh.
+	 * Sends the RSSI of 1 neighbour over the mesh and UART.
 	 */
-	void sendNextMeshMessage();
+	void sendNext();
+
+	/**
+	 * Sends the RSSI to a neighbour over UART.
+	 */
+	void sendRssiToUart(stone_id_t reveiverId, cs_mesh_model_msg_neighbour_rssi_t& packet);
 
 	// Event handlers
 	void onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet);
