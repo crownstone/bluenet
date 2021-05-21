@@ -300,14 +300,15 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 //			auto timestamp = SystemTime::getSynchronizedStamp();
 //			handleTime(timestamp.posix_s);
 
-			// every time!
-			updateIbeacon();
-//			static int steps = 0;
-//			steps++;
-//			if (steps == 10) {
-//				steps = 0;
-//				advertiseIbeacon(0);
-//			}
+//			// every time!
+//			updateIbeacon();
+
+			static int steps = 0;
+			steps++;
+			if (steps == 10) {
+				steps = 0;
+				updateIbeacon();
+			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {
