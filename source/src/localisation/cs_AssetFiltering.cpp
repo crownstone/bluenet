@@ -8,7 +8,8 @@
 #include <localisation/cs_AssetFiltering.h>
 #include <util/cs_Utils.h>
 
-#define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE
+#define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
+#define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 #define LOGAssetFilteringDebug LOGd
 #define LOGAssetFilteringWarn LOGw
 
@@ -91,8 +92,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
-			_logArray(LogLevelAssetFilteringDebug, true, device.data, device.dataSize);
-			LOGAssetFilteringDebug("handleScannedDevice, filter index=%u accepted device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
+			LOGAssetFilteringDebug("FilterId=%u accepted device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
 					filter.runtimedata()->filterId,
 					device.address[5],
 					device.address[4],
@@ -100,6 +100,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 					device.address[2],
 					device.address[1],
 					device.address[0]);
+			_logArray(LogLevelAssetFilteringDebug, true, device.data, device.dataSize);
 			processAcceptedAsset(filter, device);
 		}
 	}
@@ -195,7 +196,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 						buffIndex++;
 					}
 				}
-
+				_logArray(LogLevelAssetFilteringVerbose, true, buff, buffIndex);
 				return delegateExpression(cuckoo, buff, buffIndex);
 			}
 
