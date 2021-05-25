@@ -318,6 +318,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 33 | Mesh command | [Command mesh packet](#command-mesh-packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun-time-packet) | - | Update the reference times for sunrise and sunset | x | x
 35 | Get time | - | uint32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
+36 | Reset RSSI between stones | - | - | Resets the cached RSSI between stones. Will also let the crownstones send the RSSI of their neighbours at a smaller interval. | x
 40 | Allow dimming | uint8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | - | Print the payload to UART. | x
