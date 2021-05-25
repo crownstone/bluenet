@@ -76,8 +76,10 @@ public:
 
 	/**
 	 * Max total size that the filters take up in RAM.
+	 *
+	 * Set to: TypeSize(CS_TYPE::STATE_ASSET_FILTER_512) + sizeof(asset_filter_runtime_data_t)
 	 */
-	constexpr static size_t FILTER_BUFFER_SIZE = 512;
+	constexpr static size_t FILTER_BUFFER_SIZE = 520;
 
 	/**
 	 * Time after last edit command (upload, remove), until "modification in progress" times out.
