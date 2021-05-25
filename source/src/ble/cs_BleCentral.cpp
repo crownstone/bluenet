@@ -260,7 +260,8 @@ cs_data_t BleCentral::requestWriteBuffer() {
 	if (isBusy()) {
 		return cs_data_t();
 	}
-	return _buf;
+	uint16_t maxWriteSize = 256;
+	return cs_data_t(_buf.data, std::min(_buf.len, maxWriteSize));
 }
 
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {

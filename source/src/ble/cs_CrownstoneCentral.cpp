@@ -172,6 +172,10 @@ cs_data_t CrownstoneCentral::requestWriteBuffer() {
 	if (retCode != ERR_SUCCESS) {
 		return cs_data_t();
 	}
+	uint16_t maxWriteSize = 224; // 256 - some bytes for encryption overhead..
+	if (writeBuf.len > maxWriteSize) {
+		return cs_data_t(controlPacketAccessor.getPayload().data, controlPacketAccessor.getMaxPayloadSize() - (writeBuf.len - maxWriteSize));
+	}
 	return cs_data_t(controlPacketAccessor.getPayload().data, controlPacketAccessor.getMaxPayloadSize());
 }
 
