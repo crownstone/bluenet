@@ -79,10 +79,12 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t stateDataSize
 	LOGAssetFilterDebug("Allocating filter id=%u stateDataSize=%u allocatedSize=%u", filterId, stateDataSize, allocatedSize);
 
 	if (_filtersCount >= MAX_FILTER_IDS) {
+		LOGAssetFilterInfo("Too many filters");
 		return nullptr;
 	}
 
 	if (getTotalHeapAllocatedSize() + allocatedSize > FILTER_BUFFER_SIZE) {
+		LOGAssetFilterInfo("Not enough free space for %u", allocatedSize);
 		return nullptr;
 	}
 
@@ -222,8 +224,6 @@ std::optional<uint8_t> AssetFilterStore::findFilterIndex(uint8_t filterId) {
 }
 
 size_t AssetFilterStore::getTotalHeapAllocatedSize() {
-	LOGAssetFilterDebug("computing allocated size");
-
 	size_t total = 0;
 	for (uint8_t* filter : _filters) {
 		if (filter == nullptr) {
@@ -233,7 +233,7 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 		total += AssetFilter(filter).length();
 	}
 
-	LOGAssetFilterDebug("computing allocated size finished");
+	LOGAssetFilterDebug("Total heap allocated = %u", total);
 	return total;
 }
 
