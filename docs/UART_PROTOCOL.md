@@ -311,9 +311,9 @@ Type | Name | Length | Description
 uint8 | Type | 1 | Defines the remainder of this message to allow for future changes. For now, always 0.
 uint8 | Receiver ID | 1 | Stone ID of the stone that received a message.
 uint8 | Sender ID | 1 | Stone ID of the stone that sent a message.
-int8  | RSSI channel 37 | 1 | RSSI between the two stones on channel 37, according to the receiver.
-int8  | RSSI channel 38 | 1 | RSSI between the two stones on channel 38, according to the receiver.
-int8  | RSSI channel 39 | 1 | RSSI between the two stones on channel 39, according to the receiver.
+int8  | RSSI channel 37 | 1 | RSSI between the two stones on channel 37, according to the receiver. A value of 0 means there is no data yet.
+int8  | RSSI channel 38 | 1 | RSSI between the two stones on channel 38, according to the receiver. A value of 0 means there is no data yet.
+int8  | RSSI channel 39 | 1 | RSSI between the two stones on channel 39, according to the receiver. A value of 0 means there is no data yet.
 uint8 | Last seen | 1 | How many seconds ago the sender was last seen by the receiver.
 
 

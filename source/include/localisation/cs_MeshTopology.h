@@ -25,7 +25,7 @@ public:
 	/**
 	 * Time after last seen, before a neighbour is removed from the list.
 	 */
-	static constexpr uint8_t TIMEOUT_SECONDS = 50;
+	static constexpr uint8_t TIMEOUT_SECONDS = 3*60;
 
 	/**
 	 * Interval at which a mesh messages is sent for each neighbour.
@@ -54,6 +54,16 @@ public:
 private:
 	static constexpr uint8_t INDEX_NOT_FOUND = 0xFF;
 
+	static constexpr int8_t RSSI_INIT = 0;
+
+	struct __attribute__((__packed__)) neighbour_node_t {
+		stone_id_t id;
+		int8_t rssiChannel37;
+		int8_t rssiChannel38;
+		int8_t rssiChannel39;
+		uint8_t lastSeenSecondsAgo;
+	};
+
 	/**
 	 * Stone ID of this crownstone, read on init.
 	 */
@@ -62,7 +72,7 @@ private:
 	/**
 	 * A list of all known neighbours, allocated on init.
 	 */
-	cs_mesh_model_msg_neighbour_rssi_t* _neighbours = nullptr;
+	neighbour_node_t* _neighbours = nullptr;
 
 	/**
 	 * Number of neighbours in the list.
@@ -83,6 +93,11 @@ private:
 	 * Add a neighbour to the list.
 	 */
 	void add(stone_id_t id, int8_t rssi, uint8_t channel);
+
+	/**
+	 * Update the data of a node in the list.
+	 */
+	void updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel);
 
 	/**
 	 * Find a neighbour in the list.

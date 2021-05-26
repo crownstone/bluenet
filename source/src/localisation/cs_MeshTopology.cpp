@@ -19,7 +19,7 @@ cs_ret_code_t MeshTopology::init() {
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 
-	_neighbours = new (std::nothrow) cs_mesh_model_msg_neighbour_rssi_t[MAX_NEIGHBOURS];
+	_neighbours = new (std::nothrow) neighbour_node_t[MAX_NEIGHBOURS];
 	if (_neighbours == nullptr) {
 		return ERR_NO_SPACE;
 	}
@@ -72,14 +72,16 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	if (id == 0 || id == _myId) {
 		return;
 	}
-	auto compressedRssiData = compressRssi(rssi,channel);
+//	auto compressedRssiData = compressRssi(rssi,channel);
 
 	uint8_t index = find(id);
 	if (index == INDEX_NOT_FOUND) {
 		if (_neighbourCount < MAX_NEIGHBOURS) {
-			_neighbours[_neighbourCount].neighbourId     = id;
-			_neighbours[_neighbourCount].compressedRssi  = compressedRssiData;
-			_neighbours[_neighbourCount].lastSeenSecondsAgo = 0;
+			// Init RSSI
+			_neighbours[_neighbourCount].rssiChannel37 = RSSI_INIT;
+			_neighbours[_neighbourCount].rssiChannel38 = RSSI_INIT;
+			_neighbours[_neighbourCount].rssiChannel39 = RSSI_INIT;
+			updateNeighbour(_neighbours[_neighbourCount], id, rssi, channel);
 			_neighbourCount++;
 		}
 		else {
@@ -87,14 +89,33 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 		}
 	}
 	else {
-		_neighbours[index].compressedRssi = compressedRssiData;
-		_neighbours[index].lastSeenSecondsAgo = 0;
+		updateNeighbour(_neighbours[index], id, rssi, channel);
 	}
+}
+
+void MeshTopology::updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel) {
+	// TODO: averaging.
+	node.id = id;
+	switch (channel) {
+		case 37: {
+			node.rssiChannel37  = rssi;
+			break;
+		}
+		case 38: {
+			node.rssiChannel38  = rssi;
+			break;
+		}
+		case 39: {
+			node.rssiChannel39  = rssi;
+			break;
+		}
+	}
+	node.lastSeenSecondsAgo = 0;
 }
 
 uint8_t MeshTopology::find(stone_id_t id) {
 	for (uint8_t index = 0; index < _neighbourCount; ++index) {
-		if (_neighbours[index].neighbourId == id) {
+		if (_neighbours[index].id == id) {
 			return index;
 		}
 	}
@@ -112,22 +133,31 @@ void MeshTopology::sendNext() {
 		_nextSendIndex = 0;
 	}
 
-	cs_mesh_model_msg_neighbour_rssi_t& neighbourRssi = _neighbours[_nextSendIndex];
-	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u", _nextSendIndex, neighbourRssi.neighbourId, neighbourRssi.lastSeenSecondsAgo);
+	auto& node = _neighbours[_nextSendIndex];
+	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u", _nextSendIndex, node.id, node.lastSeenSecondsAgo);
+
+	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
+			.type = 0,
+			.neighbourId = node.id,
+			.rssiChannel37 = node.rssiChannel37,
+			.rssiChannel38 = node.rssiChannel38,
+			.rssiChannel39 = node.rssiChannel39,
+			.lastSeenSecondsAgo = node.lastSeenSecondsAgo
+	};
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
 	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.flags.flags.noHops = false;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&neighbourRssi);
-	meshMsg.size = sizeof(neighbourRssi);
+	meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
+	meshMsg.size = sizeof(meshPayload);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
 
 	// Also send over UART.
-	sendRssiToUart(_myId, neighbourRssi);
+	sendRssiToUart(_myId, meshPayload);
 
 	// Send next item in the list next time.
 	_nextSendIndex++;
@@ -135,12 +165,13 @@ void MeshTopology::sendNext() {
 
 void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
 	LOGMeshTopologyDebug("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
-	mesh_topology_neighbour_rssi_t uartMsg = {
+	mesh_topology_neighbour_rssi_uart_t uartMsg = {
+			.type = 0,
 			.receiverId = receiverId,
 			.senderId = packet.neighbourId,
-			.type = 0,
-			.rssi = getRssi(packet.compressedRssi),
-			.channel = getChannel(packet.compressedRssi),
+			.rssiChannel37 = packet.rssiChannel37,
+			.rssiChannel38 = packet.rssiChannel38,
+			.rssiChannel39 = packet.rssiChannel39,
 			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo
 	};
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
@@ -235,6 +266,7 @@ void MeshTopology::onTickSecond() {
 	}
 	if (_sendCountdown == 0) {
 		sendNext();
+		// Even if we end up setting sendCountdown to 0, the next message will be sent next onTickSecond.
 		_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR / _neighbourCount;
 		LOGMeshTopologyVerbose("sendCountdown=%u", _sendCountdown);
 	}
@@ -242,7 +274,13 @@ void MeshTopology::onTickSecond() {
 
 void MeshTopology::print() {
 	for (uint8_t i = 0; i < _neighbourCount; ++i) {
-		LOGMeshTopologyVerbose("index=%u id=%u rssi=%i channel=%u secondsAgo=%u", i, _neighbours[i].neighbourId, getRssi(_neighbours[i].compressedRssi), getChannel(_neighbours[i].compressedRssi), _neighbours[i].lastSeenSecondsAgo);
+		LOGMeshTopologyVerbose("index=%u id=%u rssi=[%i, %i, %i] secondsAgo=%u",
+				i,
+				_neighbours[i].id,
+				_neighbours[i].rssiChannel37,
+				_neighbours[i].rssiChannel38,
+				_neighbours[i].rssiChannel39,
+				_neighbours[i].lastSeenSecondsAgo);
 	}
 }
 

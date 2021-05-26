@@ -246,17 +246,12 @@ struct __attribute__((__packed__)) compressed_rssi_data_t {
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_neighbour_rssi_t {
-	stone_id_t neighbourId;
 	uint8_t type = 0; // Type of report, always 0 for now.
-	compressed_rssi_data_t compressedRssi;
+	stone_id_t neighbourId;
+	int8_t rssiChannel37;
+	int8_t rssiChannel38;
+	int8_t rssiChannel39;
 	uint8_t lastSeenSecondsAgo;
-
-	// Possible option to reduce the number of mesh messages:
-	//   uint8_t type = 1;
-	//   int8_t rssiChannel37;
-	//   int8_t rssiChannel38;
-	//   int8_t rssiChannel39;
-	//   uint8_t lastSeenSecondsAgo;
 
 	// Possible future type:
 	//   uint8_t type : 4;
@@ -266,6 +261,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_neighbour_rssi_t {
 	//   uint8_t avgRssiChannel37 : 6;
 	//   uint8_t avgRssiChannel38 : 6;
 	//   uint8_t avgRssiChannel39 : 6;
+	//   stone_id_t neighbourId;
 	//   uint8_t lastSeenSecondsAgo;
 };
 
