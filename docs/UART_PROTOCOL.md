@@ -308,6 +308,7 @@ uint8[] | AssetId | 3 | ShortAssetId of the asset that timed out
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint8 | Type | 1 | Defines the remainder of this message to allow for future changes. For now, always 0.
 uint8 | Receiver ID | 1 | Stone ID of the stone that received a message.
 uint8 | Sender ID | 1 | Stone ID of the stone that sent a message.
 int8  | RSSI channel 37 | 1 | RSSI between the two stones on channel 37, according to the receiver.
