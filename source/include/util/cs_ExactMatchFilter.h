@@ -15,7 +15,12 @@ public:
 	// IFilter interface
 	// -------------------------------------------------------------
 
-	ExactMatchFilter(exact_match_filter_data_t& data);
+	ExactMatchFilter(exact_match_filter_data_t* data);
+
+	/**
+	 * Use this with care, _data is never checked in this class.
+	 */
+	ExactMatchFilter() : _data(nullptr){}
 
 	bool contains(const void* key, size_t keyLengthInBytes) override;
 
@@ -40,16 +45,16 @@ public:
 	}
 
 	constexpr size_t bufferSize() {
-		return bufferSize(_data.itemCount, _data.itemSize);
+		return bufferSize(_data->itemCount, _data->itemSize);
 	}
 
 	constexpr size_t size() {
-		return size(_data.itemCount, _data.itemSize);
+		return size(_data->itemCount, _data->itemSize);
 	}
 
 private:
 	uint8_t* getItem(size_t index);
 
-	exact_match_filter_data_t& _data;
+	exact_match_filter_data_t* _data;
 
 };

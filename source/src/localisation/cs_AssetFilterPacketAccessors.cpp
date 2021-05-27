@@ -97,11 +97,11 @@ AssetFilterMetadata AssetFilterData::metadata() {
 	return AssetFilterMetadata(_data + 0);
 }
 CuckooFilter AssetFilterData::cuckooFilter() {
-	return CuckooFilter(*reinterpret_cast<cuckoo_filter_data_t*>(_data + metadata().length()));
+	return CuckooFilter(reinterpret_cast<cuckoo_filter_data_t*>(_data + metadata().length()));
 }
 
 ExactMatchFilter AssetFilterData::exactMatchFilter() {
-	return ExactMatchFilter(*reinterpret_cast<exact_match_filter_data_t*>(_data + metadata().length()));
+	return ExactMatchFilter(reinterpret_cast<exact_match_filter_data_t*>(_data + metadata().length()));
 }
 
 size_t AssetFilterData::length() {

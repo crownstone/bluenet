@@ -82,7 +82,7 @@ public:
 	 * Total number of bytes this instance occypies.
 	 * Use this function instead of sizeof for this class to take the buffer into account.
 	 */
-	constexpr size_t size() { return size(bucketCount(), _data.nestsPerBucket); }
+	constexpr size_t size() { return size(bucketCount(), _data->nestsPerBucket); }
 
 	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
@@ -123,7 +123,12 @@ public:
 	/**
 	 * Wraps a data struct into a CuckooFilter object
 	 */
-	CuckooFilter(cuckoo_filter_data_t& data) : _data(data) {}
+	CuckooFilter(cuckoo_filter_data_t* data) : _data(data) {}
+
+	/**
+	 * Use this with loads of care, _data is never checked to be non-nullptr in this class.
+	 */
+	CuckooFilter() : _data(nullptr) {}
 
 	/**
 	 * Memsets the bucket_array to 0x00 and sets victim to 0.
@@ -170,9 +175,9 @@ public:
 	/**
 	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
 	 */
-	constexpr size_t bucketCount() { return 1 << _data.bucketCountLog2; }
+	constexpr size_t bucketCount() { return 1 << _data->bucketCountLog2; }
 
-	constexpr size_t bufferSize() { return bufferSize(bucketCount(), _data.nestsPerBucket); }
+	constexpr size_t bufferSize() { return bufferSize(bucketCount(), _data->nestsPerBucket); }
 
 
 private:
@@ -186,7 +191,7 @@ private:
 	// Run time variables
 	// -------------------------------------------------------------
 
-	cuckoo_filter_data_t& _data;
+	cuckoo_filter_data_t* _data;
 
 	// -------------------------------------------------------------
 	// ----- Private methods -----
@@ -227,7 +232,7 @@ private:
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
 	cuckoo_fingerprint_t& lookupFingerprint(cuckoo_index_t bucketIndex, cuckoo_index_t fingerIndex) {
-		return _data.bucketArray[(bucketIndex * _data.nestsPerBucket) + fingerIndex];
+		return _data->bucketArray[(bucketIndex * _data->nestsPerBucket) + fingerIndex];
 	}
 
 	/**

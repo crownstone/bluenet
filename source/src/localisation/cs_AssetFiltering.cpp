@@ -141,7 +141,7 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
  * This method extracts the filters 'input description', prepares the input according to that
  * description and calls the delegate with the prepared data.
  *
- * delegateExpression should be of the form (CuckooFilter, uint8_t*, size_t) -> ReturnType.
+ * delegateExpression should be of the form (IFilter&, void*, size_t) -> ReturnType.
  */
 template <class ReturnType, class ExpressionType>
 ReturnType prepareFilterInputAndCallDelegate(
@@ -156,11 +156,34 @@ ReturnType prepareFilterInputAndCallDelegate(
 		return defaultValue;
 	}
 
-	CuckooFilter cuckoo = filter.filterdata().cuckooFilter();
+	// getting a reference to an IFilter object of the correct filter type
+	// (can be made prettier...)
+	CuckooFilter cuckoo;
+	ExactMatchFilter exact;
+	IFilter* iFilterPtr = nullptr;
 
+	switch(*filter.filterdata().metadata().filterType()) {
+		case AssetFilterType::CuckooFilter: {
+			cuckoo = filter.filterdata().cuckooFilter();
+			iFilterPtr = &cuckoo;
+			break;
+		}
+		case AssetFilterType::ExactMatchFilter: {
+			exact = filter.filterdata().exactMatchFilter();
+			iFilterPtr = &exact;
+			break;
+		}
+		default: {
+			assert(false,"undefined filter type.");
+			return defaultValue;
+		}
+	}
+
+
+	// split out input type for the filter and prepare the input
 	switch (*filterInputDescription.type()) {
 		case AssetFilterInputType::MacAddress: {
-			return delegateExpression(cuckoo, device.address, sizeof(device.address));
+			return delegateExpression(iFilterPtr, device.address, sizeof(device.address));
 		}
 		case AssetFilterInputType::AdDataType: {
 			// selects the first found field of configured type and checks if that field's
@@ -171,7 +194,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 			assert(selector != nullptr, "Filter metadata type check failed");
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
-				return delegateExpression(cuckoo, result.data, result.len);
+				return delegateExpression(iFilterPtr, result.data, result.len);
 			}
 
 			return defaultValue;
@@ -197,7 +220,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 					}
 				}
 				_logArray(LogLevelAssetFilteringVerbose, true, buff, buffIndex);
-				return delegateExpression(cuckoo, buff, buffIndex);
+				return delegateExpression(iFilterPtr, buff, buffIndex);
 			}
 
 			return defaultValue;
@@ -214,8 +237,8 @@ bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_
 			filter,
 			asset,
 			filter.filterdata().metadata().inputType(),
-			[](IFilter& iFilter, const uint8_t* data, size_t len) {
-				return iFilter.contains(data, len);
+			[](IFilter* iFilter, const uint8_t* data, size_t len) {
+				return iFilter->contains(data, len);
 			},
 			false);
 }
@@ -228,8 +251,8 @@ short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter filt
 			filter,
 			asset,
 			filter.filterdata().metadata().outputType().inFormat(),
-			[](IFilter& iFilter, const uint8_t* data, size_t len) {
-				return iFilter.shortAssetId(data,len);
+			[](IFilter* iFilter, const uint8_t* data, size_t len) {
+				return iFilter->shortAssetId(data,len);
 			},
 			short_asset_id_t{});
 }
