@@ -30,7 +30,19 @@ public:
 	/**
 	 * Interval at which a mesh messages is sent for each neighbour.
 	 */
-	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR = 1*60;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR =      5 * 60;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST = 30;
+
+	/**
+	 * Interval at which a no-hop noop message is sent.
+	 */
+	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS =      5 * 60;
+	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS_FAST = 10;
+
+	/**
+	 * After a reset, the FAST intervals will be used instead, for this amount of seconds.
+	 */
+	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS = 1 * 60;
 
 	/**
 	 * Initializes the class:
@@ -87,7 +99,17 @@ private:
 	/**
 	 * Countdown in seconds until sending the next mesh message.
 	 */
-	uint16_t _sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR;
+	uint16_t _sendCountdown;
+
+	/**
+	 * Countdown in seconds until sending the next no hop ping mesh message.
+	 */
+	uint16_t _sendNoopCountdown;
+
+	/**
+	 * Countdown in seconds until sending at regular interval again.
+	 */
+	uint16_t _fastIntervalCountdown;
 
 	/**
 	 * Resets the stored topology.
@@ -113,6 +135,11 @@ private:
 	 * Get the RSSI of given stone ID and put it in the result buffer.
 	 */
 	void getRssi(stone_id_t stoneId, cs_result_t& result);
+
+	/**
+	 * Send a no-hop noop mesh message.
+	 */
+	void sendNoop();
 
 	/**
 	 * Sends the RSSI of 1 neighbour over the mesh and UART.
