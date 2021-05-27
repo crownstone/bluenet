@@ -401,6 +401,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
+	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -651,6 +653,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
+	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:

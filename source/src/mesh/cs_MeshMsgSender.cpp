@@ -364,18 +364,6 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			}
 			return sendSetTime(&packet, transmissions);
 		}
-		case CTRL_CMD_NOP: {
-			if (command->controlCommand.size != 0) {
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			if (command->header.idCount != 0
-					|| command->header.flags.flags.broadcast != true
-					|| command->header.flags.flags.reliable != false
-					|| command->header.flags.flags.useKnownIds != false) {
-				return ERR_NOT_IMPLEMENTED;
-			}
-			return sendNoop(command->header.timeoutOrTransmissions);
-		}
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID: {
 			if (command->controlCommand.size != sizeof(set_ibeacon_config_id_packet_t)) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
@@ -389,12 +377,10 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			// Size has already been checked in command handler.
 			state_packet_header_t* stateHeader = (state_packet_header_t*) command->controlCommand.data;
 			LOGd("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
-			if (command->header.idCount != 1
-					|| command->header.flags.flags.broadcast != false
-					|| command->header.flags.flags.reliable != true
-					|| command->header.flags.flags.useKnownIds != false) {
+			if (command->header.flags.flags.reliable != true || command->header.flags.flags.useKnownIds != false) {
 				return ERR_NOT_IMPLEMENTED;
 			}
+
 			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
 			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
 			uint8_t msg[sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize];

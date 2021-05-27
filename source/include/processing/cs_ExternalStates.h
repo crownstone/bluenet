@@ -62,4 +62,6 @@ private:
 	void addToList(int index, stone_id_t id, state_external_stone_t* state);
 
 	void fixState(state_external_stone_t* state);
+
+	int8_t getRssi(stone_id_t id);
 };

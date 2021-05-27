@@ -60,7 +60,15 @@ cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg
 	msg.msg = (uint8_t*)(accessMsg.p_data);
 	msg.msgSize = accessMsg.length;
 	msg.rssi = getRssi(accessMsg.meta_data.p_core_metadata);
-	msg.hops = ACCESS_DEFAULT_TTL - accessMsg.meta_data.ttl;
+
+	// When receiving a TTL:
+	// 0 = has not been relayed and will not be relayed
+	// 1 = may have been relayed, but will not be relayed
+	// 2 - 126 = may have been relayed and can be relayed
+	// 127 = has not been relayed and can be relayed
+//	msg.hops = ACCESS_DEFAULT_TTL - accessMsg.meta_data.ttl;
+	msg.hops = accessMsg.meta_data.ttl;
+
 	msg.channel = getChannel(accessMsg.meta_data.p_core_metadata);
 
 	return msg;

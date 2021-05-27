@@ -23,6 +23,7 @@ cs_ret_code_t MeshTopology::init() {
 	if (_neighbours == nullptr) {
 		return ERR_NO_SPACE;
 	}
+	reset();
 	listen();
 
 #if BUILD_MESH_TOPOLOGY_RESEARCH == 1
@@ -32,6 +33,17 @@ cs_ret_code_t MeshTopology::init() {
 	return ERR_SUCCESS;
 }
 
+void MeshTopology::reset() {
+	LOGMeshTopologyInfo("Reset");
+
+	// Remove stored neighbours.
+	_neighbourCount = 0;
+
+	// Let everyone first send a noop, and then the first result.
+	_sendNoopCountdown = 1;
+	_sendCountdown = 2;
+	_fastIntervalCountdown = FAST_INTERVAL_TIMEOUT_SECONDS;
+}
 
 cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	LOGMeshTopologyInfo("getMacAddress %u", stoneId);
@@ -120,6 +132,50 @@ uint8_t MeshTopology::find(stone_id_t id) {
 		}
 	}
 	return INDEX_NOT_FOUND;
+}
+
+void MeshTopology::getRssi(stone_id_t stoneId, cs_result_t& result) {
+	uint8_t index = find(stoneId);
+	if (index == INDEX_NOT_FOUND) {
+		result.returnCode = ERR_NOT_FOUND;
+		return;
+	}
+
+	// Simply use the first valid rssi.
+	int8_t rssi = _neighbours[index].rssiChannel37;
+	if (rssi == 0) {
+		rssi = _neighbours[index].rssiChannel38;
+	}
+	if (rssi == 0) {
+		rssi = _neighbours[index].rssiChannel39;
+	}
+	if (rssi == 0) {
+		result.returnCode = ERR_NOT_AVAILABLE;
+		return;
+	}
+
+	if (result.buf.len < sizeof(rssi)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+	// Copy to result buf.
+	result.buf.data[0] = *reinterpret_cast<uint8_t*>(&rssi);
+	result.dataSize = sizeof(rssi);
+	result.returnCode = ERR_SUCCESS;
+}
+
+void MeshTopology::sendNoop() {
+	LOGMeshTopologyDebug("sendNoop");
+	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
+	meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.noHops = true;
+	meshMsg.payload = nullptr;
+	meshMsg.size = 0;
+
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	event.dispatch();
 }
 
 void MeshTopology::sendNext() {
@@ -267,8 +323,26 @@ void MeshTopology::onTickSecond() {
 	if (_sendCountdown == 0) {
 		sendNext();
 		// Even if we end up setting sendCountdown to 0, the next message will be sent next onTickSecond.
-		_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR / _neighbourCount;
+		if (_fastIntervalCountdown) {
+			_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST / _neighbourCount;
+		}
+		else {
+			_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR / _neighbourCount;
+		}
 		LOGMeshTopologyVerbose("sendCountdown=%u", _sendCountdown);
+	}
+
+	if (_sendNoopCountdown != 0) {
+		_sendNoopCountdown--;
+	}
+	if (_sendNoopCountdown == 0) {
+		sendNoop();
+		_sendNoopCountdown = _fastIntervalCountdown ? SEND_NOOP_INTERVAL_SECONDS_FAST : SEND_NOOP_INTERVAL_SECONDS;
+		LOGMeshTopologyVerbose("sendNoopCountdown=%u", _sendNoopCountdown);
+	}
+
+	if (_fastIntervalCountdown != 0) {
+		_fastIntervalCountdown--;
 	}
 }
 
@@ -301,6 +375,16 @@ void MeshTopology::handleEvent(event_t &evt) {
 		case CS_TYPE::CMD_MESH_TOPO_GET_MAC: {
 			auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_MAC, evt.data);
 			evt.result.returnCode = getMacAddress(*packet);
+			break;
+		}
+		case CS_TYPE::CMD_MESH_TOPO_RESET: {
+			reset();
+			evt.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_MESH_TOPO_GET_RSSI: {
+			auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_RSSI, evt.data);
+			getRssi(*packet, evt.result);
 			break;
 		}
 		default:

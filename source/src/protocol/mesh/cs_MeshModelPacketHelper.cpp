@@ -159,8 +159,6 @@ CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType) {
 	switch (meshType) {
 		case CS_MESH_MODEL_TYPE_CMD_TIME:
 			return CTRL_CMD_SET_TIME;
-		case CS_MESH_MODEL_TYPE_CMD_NOOP:
-			return CTRL_CMD_NOP;
 		case CS_MESH_MODEL_TYPE_STATE_SET:
 			return CTRL_CMD_STATE_SET;
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
@@ -174,8 +172,6 @@ cs_mesh_model_msg_type_t getMeshType(CommandHandlerTypes ctrlCmdType) {
 	switch (ctrlCmdType) {
 		case CTRL_CMD_SET_TIME:
 			return CS_MESH_MODEL_TYPE_CMD_TIME;
-		case CTRL_CMD_NOP:
-			return CS_MESH_MODEL_TYPE_CMD_NOOP;
 		case CTRL_CMD_STATE_SET:
 			return CS_MESH_MODEL_TYPE_STATE_SET;
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:

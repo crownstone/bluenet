@@ -385,6 +385,8 @@ enum class CS_TYPE: uint16_t {
 	
 	CMD_MESH_TOPO_GET_MAC,                            // Get the MAC address of a given stone ID.
 	EVT_MESH_TOPO_MAC_RESULT,                         // The resulting MAC address.
+	CMD_MESH_TOPO_RESET,                              // Reset the stored mesh topology.
+	CMD_MESH_TOPO_GET_RSSI,                           // Get the RSSI to a stoneId. The RSSI is set in the result.
 
 	EVT_TWI_INIT,                                     // TWI initialisation.
 	EVT_TWI_WRITE,                                    // TWI write.
@@ -678,6 +680,8 @@ typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
 typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_MAC);
 typedef mesh_topo_mac_result_t TYPIFY(EVT_MESH_TOPO_MAC_RESULT);
+typedef void TYPIFY(CMD_MESH_TOPO_RESET);
+typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_RSSI);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 // TWI / I2C module

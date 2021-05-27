@@ -306,22 +306,13 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	// have non-connectable address one value higher than connectable one
 	macAddress.addr[0] -= 1;
 	macAddress.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
+	for (uint8_t i = 0; i < CORE_TX_ROLE_COUNT; ++i) {
+		mesh_opt_core_adv_addr_set((core_tx_role_t)i, &macAddress);
+	}
 
-	radio_tx_power_t radioTxPower = RADIO_POWER_NRF_0DBM;
 	TYPIFY(CONFIG_TX_POWER) txPower;
 	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	switch (txPower) {
-	case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
-		radioTxPower = (radio_tx_power_t)txPower;
-		break;
-	default:
-		radioTxPower = RADIO_POWER_NRF_POS4DBM;
-		break;
-	}
-	for (uint8_t i=0; i<CORE_TX_ROLE_COUNT; ++i) {
-		mesh_opt_core_adv_addr_set((core_tx_role_t)i, &macAddress);
-		mesh_opt_core_tx_power_set((core_tx_role_t)i, radioTxPower);
-	}
+	setTxPower(txPower);
 
 //	EventDispatcher::getInstance().addListener(this);
 	if (!_isProvisioned) {
@@ -475,6 +466,27 @@ void MeshCore::stop() {
 }
 
 
+cs_ret_code_t MeshCore::setTxPower(int8_t txPower) {
+	LOGi("setTxPower %i", txPower);
+	radio_tx_power_t radioTxPower = RADIO_POWER_NRF_POS4DBM;
+	switch (txPower) {
+		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
+			radioTxPower = (radio_tx_power_t)txPower;
+			break;
+	}
+	for (uint8_t i = 0; i < CORE_TX_ROLE_COUNT; ++i) {
+		// @retval NRF_SUCCESS The TX power was successfully set.
+		// @retval NRF_ERROR_INVALID_PARAMS Invalid options parameters
+		// @retval NRF_ERROR_NOT_FOUND Unknown role.
+		uint32_t nrfCode = mesh_opt_core_tx_power_set((core_tx_role_t)i, radioTxPower);
+		if (nrfCode != NRF_SUCCESS) {
+			LOGe("mesh_opt_core_tx_power_set nrfCode=%u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
+	return ERR_SUCCESS;
+}
+
 
 void MeshCore::factoryReset() {
 	LOGw("factoryReset");
@@ -557,6 +569,11 @@ void MeshCore::handleEvent(event_t & event) {
 				[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
 				LOGMeshDebug("Scanner stats: success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
 			}
+			break;
+		}
+		case CS_TYPE::CONFIG_TX_POWER: {
+			auto packet = CS_TYPE_CAST(CONFIG_TX_POWER, event.data);
+			setTxPower(*packet);
 			break;
 		}
 #if MESH_PERSISTENT_STORAGE == 2

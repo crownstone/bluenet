@@ -197,7 +197,6 @@ struct cs_mesh_msg_t {
  * serviceData     State of the stone.
  */
 struct state_external_stone_t {
-	int8_t rssi;
 	service_data_encrypted_t data;
 };
 

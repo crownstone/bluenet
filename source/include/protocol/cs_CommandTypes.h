@@ -37,6 +37,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_MESH_COMMAND                = 33,
 	CTRL_CMD_SET_SUN_TIME                = 34,
 	CTRL_CMD_GET_TIME                    = 35,
+	CTRL_CMD_RESET_MESH_TOPOLOGY         = 36,
 
 	CTRL_CMD_ALLOW_DIMMING               = 40,
 	CTRL_CMD_LOCK_SWITCH                 = 41,
