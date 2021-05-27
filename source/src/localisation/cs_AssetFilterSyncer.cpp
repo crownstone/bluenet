@@ -138,7 +138,6 @@ void AssetFilterSyncer::reset() {
 }
 
 void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
-	LOGAssetFilterSyncerInfo("syncFilters to stoneId=%u", stoneId);
 	if (_step != SyncStep::NONE) {
 		return;
 	}
@@ -146,6 +145,7 @@ void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
 		LOGAssetFilterSyncerInfo("Store is in progress");
 		return;
 	}
+	LOGAssetFilterSyncerInfo("syncFilters to stoneId=%u", stoneId);
 	connect(stoneId);
 }
 
