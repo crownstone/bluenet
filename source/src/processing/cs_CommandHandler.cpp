@@ -1048,7 +1048,6 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 	switch (type) {
 		case CTRL_CMD_FACTORY_RESET:
-		case CTRL_CMD_NOP:
 		case CTRL_CMD_RESET_ERRORS:
 		case CTRL_CMD_RESET:
 		case CTRL_CMD_SET_TIME:

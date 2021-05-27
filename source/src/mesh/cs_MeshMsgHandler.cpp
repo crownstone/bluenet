@@ -520,15 +520,14 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t);
 	}
 
-	cs_result_t result;
-	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source, result);
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 	event.dispatch();
 
 	if (resultHeader != nullptr) {
-		resultHeader->retCode = result.returnCode;
+		resultHeader->retCode = event.result.returnCode;
 	}
 
-	LOGi("retCode=%u", result.returnCode);
+	LOGi("retCode=%u", event.result.returnCode);
 }
 
 cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize, stone_id_t srcId) {
