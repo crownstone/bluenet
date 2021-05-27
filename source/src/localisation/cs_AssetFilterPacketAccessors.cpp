@@ -105,7 +105,18 @@ ExactMatchFilter AssetFilterData::exactMatchFilter() {
 }
 
 size_t AssetFilterData::length() {
-	return metadata().length() + cuckooFilter().size();
+	switch(*metadata().filterType()) {
+		case AssetFilterType::CuckooFilter: {
+			return metadata().length() + cuckooFilter().size();
+		}
+		case AssetFilterType::ExactMatchFilter: {
+			return metadata().length() + exactMatchFilter().size();
+		}
+		default: {
+			// bad bad
+			return 0;
+		}
+	}
 }
 
 // --------------------------------
