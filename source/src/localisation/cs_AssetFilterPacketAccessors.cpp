@@ -105,18 +105,21 @@ ExactMatchFilter AssetFilterData::exactMatchFilter() {
 }
 
 size_t AssetFilterData::length() {
-	switch(*metadata().filterType()) {
+	size_t len = metadata().length();
+	switch (*metadata().filterType()) {
 		case AssetFilterType::CuckooFilter: {
-			return metadata().length() + cuckooFilter().size();
+			len += cuckooFilter().size();
+			break;
 		}
 		case AssetFilterType::ExactMatchFilter: {
-			return metadata().length() + exactMatchFilter().size();
+			len += exactMatchFilter().size();
+			break;
 		}
 		default: {
-			// bad bad
-			return 0;
+			break;
 		}
 	}
+	return len;
 }
 
 // --------------------------------
