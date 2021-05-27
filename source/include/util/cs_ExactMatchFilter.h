@@ -11,14 +11,15 @@
 
 class ExactMatchFilter : public IFilter {
 public:
-	/**
-	 * Wraps a data struct into a Filter object
-	 */
+	// -------------------------------------------------------------
+	// IFilter interface
+	// -------------------------------------------------------------
+
 	ExactMatchFilter(exact_match_filter_data_t& data);
 
-	bool contains(filter_entry_t key, size_t keyLengthInBytes);
+	bool contains(const void* key, size_t keyLengthInBytes) override;
 
-
+	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
 
 	// -------------------------------------------------------------
 	// Sizing helpers

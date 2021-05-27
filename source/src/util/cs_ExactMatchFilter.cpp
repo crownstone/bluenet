@@ -25,7 +25,7 @@ ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t& data) : _data(data
 	}
 }
 
-bool ExactMatchFilter::contains(filter_entry_t key, size_t keyLengthInBytes) {
+bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 	if (keyLengthInBytes != _data.itemSize || _data.itemCount == 0) {
 		return false;
 	}

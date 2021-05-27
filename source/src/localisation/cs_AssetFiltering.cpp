@@ -214,7 +214,9 @@ bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_
 			filter,
 			asset,
 			filter.filterdata().metadata().inputType(),
-			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) { return cuckoo.contains(data, len); },
+			[](IFilter& iFilter, const uint8_t* data, size_t len) {
+				return iFilter.contains(data, len);
+			},
 			false);
 }
 
@@ -226,14 +228,8 @@ short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter filt
 			filter,
 			asset,
 			filter.filterdata().metadata().outputType().inFormat(),
-			[](CuckooFilter cuckoo, const uint8_t* data, size_t len) {
-
-				assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
-					   "can't cast compressed fingerprint to asset id");
-
-				cuckoo_compressed_fingerprint_t ccf = cuckoo.getCompressedFingerprint(data, len);
-
-				return *reinterpret_cast<short_asset_id_t*>(&ccf);
+			[](IFilter& iFilter, const uint8_t* data, size_t len) {
+				return iFilter.shortAssetId(data,len);
 			},
 			short_asset_id_t{});
 }

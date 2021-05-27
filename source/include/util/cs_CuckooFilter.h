@@ -69,6 +69,22 @@
 class CuckooFilter : public IFilter {
 public:
 	// -------------------------------------------------------------
+	// IFilter interface
+	// -------------------------------------------------------------
+
+	bool contains(const void* key, size_t keyLengthInBytes) override {
+		return contains(getExtendedFingerprint(key, keyLengthInBytes));
+	}
+
+	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
+
+	/**
+	 * Total number of bytes this instance occypies.
+	 * Use this function instead of sizeof for this class to take the buffer into account.
+	 */
+	constexpr size_t size() { return size(bucketCount(), _data.nestsPerBucket); }
+
+	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
 	// -------------------------------------------------------------
 	bool add(cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex) {
@@ -93,9 +109,6 @@ public:
 		return remove(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-	bool contains(const void* key, size_t keyLengthInBytes) override {
-		return contains(getExtendedFingerprint(key, keyLengthInBytes));
-	}
 
 	/**
 	 * Reduces a key (element) to a compressed fingerprint, consisting of
@@ -161,11 +174,6 @@ public:
 
 	constexpr size_t bufferSize() { return bufferSize(bucketCount(), _data.nestsPerBucket); }
 
-	/**
-	 * Total number of bytes this instance occypies.
-	 * Use this function instead of sizeof for this class to take the buffer into account.
-	 */
-	constexpr size_t size() { return size(bucketCount(), _data.nestsPerBucket); }
 
 private:
 	// -------------------------------------------------------------
