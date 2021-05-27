@@ -9,6 +9,7 @@
 #include <protocol/cs_AssetFilterPackets.h>
 #include <structs/cs_AssetFilterStructs.h>
 #include <util/cs_CuckooFilter.h>
+#include <util/cs_ExactMatchFilter.h>
 
 /**
  * This file defines several accessor classes for structures that
@@ -62,11 +63,11 @@ public:
 class AssetFilterData {
 public:
 	uint8_t* _data;  // byte representation of this object.
-
 	AssetFilterData(uint8_t* data) : _data(data) {}
 
 	AssetFilterMetadata metadata();
-	CuckooFilter filterdata(); // invalid unless *metadata().type() == FilterType::CukooFilter
+	CuckooFilter cuckooFilter(); // invalid unless *metadata().type() == FilterType::CukooFilter
+	ExactMatchFilter exactMatchFilter(); // invalid unless *metadata().type() == FilterType::ExactMatchFilter
 
 	size_t length();
 };
@@ -81,9 +82,9 @@ public:
 	AssetFilterData filterdata();
 
 	/**
-	 * Total size ot the _data, including runtimedata() and the filterdata().
+	 * Total size ot the _data, including runtimedata() and the cuckooFilter().
 	 *
-	 * I.e. computed from the runtimedata() length and filterdata().length().
+	 * I.e. computed from the runtimedata() length and cuckooFilter().length().
 	 */
 	size_t length();
 };

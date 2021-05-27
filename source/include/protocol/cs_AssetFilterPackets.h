@@ -57,6 +57,7 @@ struct __attribute__((__packed__)) asset_filter_cmd_get_filter_summaries_ret_t {
 
 enum class AssetFilterType : uint8_t {
 	CuckooFilter = 0,
+	ExactMatchFilter = 1,
 };
 
 enum class AssetFilterInputType : uint8_t {

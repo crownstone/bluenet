@@ -14,7 +14,6 @@
 #include <storage/cs_State.h>
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Crc32.h>
-#include <util/cs_CuckooFilter.h>
 
 #define LOGAssetFilterWarn LOGw
 #define LOGAssetFilterInfo LOGi

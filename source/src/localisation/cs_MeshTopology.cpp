@@ -12,7 +12,7 @@
 #include <uart/cs_UartHandler.h>
 
 #define LOGMeshTopologyInfo    LOGi
-#define LOGMeshTopologyDebug   LOGd
+#define LOGMeshTopologyDebug   LOGvv
 #define LOGMeshTopologyVerbose LOGvv
 
 cs_ret_code_t MeshTopology::init() {
