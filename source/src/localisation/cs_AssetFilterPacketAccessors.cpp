@@ -96,12 +96,16 @@ size_t AssetFilterMetadata::length() {
 AssetFilterMetadata AssetFilterData::metadata() {
 	return AssetFilterMetadata(_data + 0);
 }
-CuckooFilter AssetFilterData::filterdata() {
+CuckooFilter AssetFilterData::cuckooFilter() {
 	return CuckooFilter(*reinterpret_cast<cuckoo_filter_data_t*>(_data + metadata().length()));
 }
 
+ExactMatchFilter AssetFilterData::exactMatchFilter() {
+	return ExactMatchFilter(*reinterpret_cast<exact_match_filter_data_t*>(_data + metadata().length()));
+}
+
 size_t AssetFilterData::length() {
-	return metadata().length() + filterdata().size();
+	return metadata().length() + cuckooFilter().size();
 }
 
 // --------------------------------

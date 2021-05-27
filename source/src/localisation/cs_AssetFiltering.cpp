@@ -156,7 +156,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 		return defaultValue;
 	}
 
-	CuckooFilter cuckoo = filter.filterdata().filterdata();
+	CuckooFilter cuckoo = filter.filterdata().cuckooFilter();
 
 	switch (*filterInputDescription.type()) {
 		case AssetFilterInputType::MacAddress: {
