@@ -281,7 +281,7 @@ cs_ret_code_t AssetFilterStore::handleUploadFilterCommand(const asset_filter_cmd
 
 	// Check if we need to allocate a new filter.
 	if (filter._data == nullptr) {
-		// Command totalSize only includes the size of the cuckoo filter and its metadata, not the runtime data yet.
+		// Command totalSize only includes the size of the filter and its metadata, not the runtime data yet.
 		uint8_t* newBuf = allocateFilter(cmdData.filterId, getStateSize(cmdData.totalSize));
 		filter = AssetFilter(newBuf);
 
@@ -526,7 +526,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 			size_t filterSize          = filter.length();
 
 			if (filterSize != filterAllocatedSize) {
-				// the cuckoo filter size parameters do not match the allocated space.
+				// the filter size parameters do not match the allocated space.
 				// likely cause by malformed data on the host side.
 				// This check can't be performed earlier: as long as not all chuncks are
 				// received the filterdata may be in invalid state.
