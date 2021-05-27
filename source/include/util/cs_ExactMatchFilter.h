@@ -33,14 +33,14 @@ public:
 	/**
 	 * Size of the itemArray in bytes.
 	 */
-	static constexpr size_t bufferSize(uint16_t itemCount, uint16_t itemSize) {
+	static constexpr size_t bufferSize(uint8_t itemCount, uint8_t itemSize) {
 		return itemCount * itemSize;
 	}
 
 	/**
 	 * Total number of bytes that a filter with the given parameters would occupy.
 	 */
-	static constexpr size_t size(uint16_t itemCount, uint16_t itemSize) {
+	static constexpr size_t size(uint8_t itemCount, uint8_t itemSize) {
 		return sizeof(exact_match_filter_data_t) + bufferSize(itemCount, itemSize);
 	}
 

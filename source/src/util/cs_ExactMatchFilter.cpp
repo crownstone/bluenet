@@ -11,9 +11,9 @@
 #include <util/cs_ExactMatchFilter.h>
 
 ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {
-	assert (_data->itemSize != 0, "itemSize cannot be zero");
+	assert(_data->itemSize != 0, "itemSize cannot be zero");
 
-	if (_data->itemCount == 0){
+	if (_data->itemCount == 0) {
 		return;
 	}
 
@@ -58,7 +58,7 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 }
 
 uint8_t* ExactMatchFilter::getItem(size_t index){
-	return _data->itemArray +  index * _data->itemSize;
+	return _data->itemArray + index * _data->itemSize;
 }
 
 short_asset_id_t ExactMatchFilter::shortAssetId(const void* item, size_t itemSize) {
