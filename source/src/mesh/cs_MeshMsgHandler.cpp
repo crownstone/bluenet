@@ -355,18 +355,6 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 	if (_lastReceivedState.partsReceivedBitmask != 0x03) {
 		return;
 	}
-	if (hops == 0) {
-		// Maximum ttl, so we received it without hops: RSSI is valid.
-		_lastReceivedState.state.rssi = rssi;
-		_lastReceivedState.state.data.extState.rssi = 0;
-	}
-	else {
-		// We don't actually know the RSSI to the source of this message.
-		// We only get RSSI to a mac address, but we don't know what id a mac address has.
-		// So for now, just assume we don't have direct contact with the source stone.
-		_lastReceivedState.state.rssi = 0;
-		_lastReceivedState.state.data.extState.rssi = 0;
-	}
 	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
 	_lastReceivedState.state.data.type = SERVICE_DATA_DATA_TYPE_EXT_STATE;
 #if CS_SERIAL_NRF_LOG_ENABLED == 0

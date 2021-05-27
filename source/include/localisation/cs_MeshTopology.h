@@ -110,6 +110,11 @@ private:
 	uint8_t find(stone_id_t id);
 
 	/**
+	 * Get the RSSI of given stone ID and put it in the result buffer.
+	 */
+	void getRssi(stone_id_t stoneId, cs_result_t& result);
+
+	/**
 	 * Sends the RSSI of 1 neighbour over the mesh and UART.
 	 */
 	void sendNext();

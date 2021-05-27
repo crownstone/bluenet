@@ -126,6 +126,36 @@ uint8_t MeshTopology::find(stone_id_t id) {
 	return INDEX_NOT_FOUND;
 }
 
+void MeshTopology::getRssi(stone_id_t stoneId, cs_result_t& result) {
+	uint8_t index = find(stoneId);
+	if (index == INDEX_NOT_FOUND) {
+		result.returnCode = ERR_NOT_FOUND;
+		return;
+	}
+
+	// Simply use the first valid rssi.
+	int8_t rssi = _neighbours[index].rssiChannel37;
+	if (rssi == 0) {
+		rssi = _neighbours[index].rssiChannel38;
+	}
+	if (rssi == 0) {
+		rssi = _neighbours[index].rssiChannel39;
+	}
+	if (rssi == 0) {
+		result.returnCode = ERR_NOT_AVAILABLE;
+		return;
+	}
+
+	if (result.buf.len < sizeof(rssi)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+	// Copy to result buf.
+	result.buf.data[0] = *reinterpret_cast<uint8_t*>(&rssi);
+	result.dataSize = sizeof(rssi);
+	result.returnCode = ERR_SUCCESS;
+}
+
 void MeshTopology::sendNext() {
 	if (_neighbourCount == 0) {
 		// Nothing to send.
@@ -310,6 +340,11 @@ void MeshTopology::handleEvent(event_t &evt) {
 		case CS_TYPE::CMD_MESH_TOPO_RESET: {
 			reset();
 			evt.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_MESH_TOPO_GET_RSSI: {
+			auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_RSSI, evt.data);
+			getRssi(*packet, evt.result);
 			break;
 		}
 		default:

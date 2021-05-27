@@ -247,6 +247,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -741,6 +742,8 @@ size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_MESH_TOPO_MAC_RESULT));
 	case CS_TYPE::CMD_MESH_TOPO_RESET:
 		return 0;
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
+		return sizeof(TYPIFY(CMD_MESH_TOPO_GET_RSSI));
 	case CS_TYPE::EVT_TWI_INIT:
 		return sizeof(TYPIFY(EVT_TWI_INIT));
 	case CS_TYPE::EVT_TWI_WRITE:
@@ -984,6 +987,7 @@ bool hasMultipleIds(CS_TYPE const & type) {
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -1252,6 +1256,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -1504,6 +1509,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
@@ -1756,6 +1762,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_MESH_TOPO_GET_MAC:
 	case CS_TYPE::EVT_MESH_TOPO_MAC_RESULT:
 	case CS_TYPE::CMD_MESH_TOPO_RESET:
+	case CS_TYPE::CMD_MESH_TOPO_GET_RSSI:
 	case CS_TYPE::EVT_TWI_INIT:
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
