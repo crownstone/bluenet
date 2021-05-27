@@ -90,6 +90,11 @@ private:
 	uint16_t _sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR;
 
 	/**
+	 * Resets the stored topology.
+	 */
+	void reset();
+
+	/**
 	 * Add a neighbour to the list.
 	 */
 	void add(stone_id_t id, int8_t rssi, uint8_t channel);

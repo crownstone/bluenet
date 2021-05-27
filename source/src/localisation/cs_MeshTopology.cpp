@@ -32,6 +32,10 @@ cs_ret_code_t MeshTopology::init() {
 	return ERR_SUCCESS;
 }
 
+void MeshTopology::reset() {
+	LOGMeshTopologyInfo("Reset");
+	_neighbourCount = 0;
+}
 
 cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	LOGMeshTopologyInfo("getMacAddress %u", stoneId);
@@ -301,6 +305,11 @@ void MeshTopology::handleEvent(event_t &evt) {
 		case CS_TYPE::CMD_MESH_TOPO_GET_MAC: {
 			auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_MAC, evt.data);
 			evt.result.returnCode = getMacAddress(*packet);
+			break;
+		}
+		case CS_TYPE::CMD_MESH_TOPO_RESET: {
+			reset();
+			evt.result.returnCode = ERR_SUCCESS;
 			break;
 		}
 		default:

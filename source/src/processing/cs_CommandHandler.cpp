@@ -216,6 +216,9 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_COMMIT_FILTER_CHANGES, commandData, source, result);
 		case CTRL_CMD_FILTER_GET_SUMMARIES:
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_FILTER_SUMMARIES, commandData, source, result);
+		case CTRL_CMD_RESET_MESH_TOPOLOGY:
+			return dispatchEventForCommand(CS_TYPE::CMD_MESH_TOPO_RESET, commandData, source, result);
+
 		case CTRL_CMD_UNKNOWN:
 			result.returnCode = ERR_UNKNOWN_TYPE;
 			return;
@@ -1034,6 +1037,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_FILTER_REMOVE:
 		case CTRL_CMD_FILTER_COMMIT:
 		case CTRL_CMD_FILTER_GET_SUMMARIES:
+		case CTRL_CMD_RESET_MESH_TOPOLOGY:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;
