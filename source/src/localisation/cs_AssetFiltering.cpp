@@ -151,12 +151,8 @@ ReturnType prepareFilterInputAndCallDelegate(
 		ExpressionType delegateExpression,
 		ReturnType defaultValue) {
 
-	if (*filter.filterdata().metadata().filterType() != AssetFilterType::CuckooFilter) {
-		LOGAssetFilteringWarn("Filtertype not implemented");
-		return defaultValue;
-	}
 
-	// getting a reference to an IFilter object of the correct filter type
+	// obtain a pointer to an IFilter object of the correct filter type
 	// (can be made prettier...)
 	CuckooFilter cuckoo;
 	ExactMatchFilter exact;
@@ -175,6 +171,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 		}
 		default: {
 			assert(false,"undefined filter type.");
+			LOGAssetFilteringWarn("Filtertype not implemented");
 			return defaultValue;
 		}
 	}
