@@ -7,8 +7,9 @@
 #pragma once
 
 #include <protocol/cs_ExactMatchFilterStructs.h>
+#include <util/cs_IFilter.h>
 
-class ExactMatchFilter {
+class ExactMatchFilter : public IFilter {
 public:
 	/**
 	 * Wraps a data struct into a Filter object

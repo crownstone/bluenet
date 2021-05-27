@@ -43,6 +43,7 @@
 #pragma once
 
 #include <protocol/cs_CuckooFilterStructs.h>
+#include <util/cs_IFilter.h>
 
 /**
  * A CuckooFilter is a probabilistic datatype is made for approximate membership queries.
@@ -65,7 +66,7 @@
  * More details can be found in `https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf`.
  * "Cuckoo Filter: Better Than Bloom" by Bin Fan, Dave Andersen, and Michael Kaminsky
  */
-class CuckooFilter {
+class CuckooFilter : public IFilter {
 public:
 	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
@@ -92,7 +93,7 @@ public:
 		return remove(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-	bool contains(cuckoo_key_t key, size_t keyLengthInBytes) {
+	bool contains(const void* key, size_t keyLengthInBytes) override {
 		return contains(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
