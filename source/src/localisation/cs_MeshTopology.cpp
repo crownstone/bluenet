@@ -324,10 +324,10 @@ void MeshTopology::onTickSecond() {
 		sendNext();
 		// Even if we end up setting sendCountdown to 0, the next message will be sent next onTickSecond.
 		if (_fastIntervalCountdown) {
-			_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST / _neighbourCount;
+			_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST / std::min(_neighbourCount, (uint8_t)1);
 		}
 		else {
-			_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR / _neighbourCount;
+			_sendCountdown = SEND_INTERVAL_SECONDS_PER_NEIGHBOUR / std::min(_neighbourCount, (uint8_t)1);
 		}
 		LOGMeshTopologyVerbose("sendCountdown=%u", _sendCountdown);
 	}
