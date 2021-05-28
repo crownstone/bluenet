@@ -25,6 +25,17 @@ ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data
 	}
 }
 
+bool ExactMatchFilter::isValid() {
+	if (_data->itemCount == 0) {
+		return false;
+	}
+	if (_data->itemSize == 0) {
+		return false;
+	}
+	// TODO: more checks?
+	return true;
+}
+
 bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 	if (keyLengthInBytes != _data->itemSize || _data->itemCount == 0) {
 		return false;

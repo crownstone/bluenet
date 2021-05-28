@@ -17,6 +17,7 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
+	// TODO: what are these for?
 	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
 	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 

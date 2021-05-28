@@ -104,6 +104,20 @@ ExactMatchFilter AssetFilterData::exactMatchFilter() {
 	return ExactMatchFilter(reinterpret_cast<exact_match_filter_data_t*>(_data + metadata().length()));
 }
 
+bool AssetFilterData::isValid() {
+	switch (*metadata().filterType()) {
+		case AssetFilterType::CuckooFilter: {
+			return cuckooFilter().isValid();
+		}
+		case AssetFilterType::ExactMatchFilter: {
+			return exactMatchFilter().isValid();
+		}
+		default: {
+			return false;
+		}
+	}
+}
+
 size_t AssetFilterData::length() {
 	size_t len = metadata().length();
 	switch (*metadata().filterType()) {

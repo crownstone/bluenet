@@ -522,19 +522,21 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 		if (filter.runtimedata()->flags.flags.committed == false) {
 			// filter changed since commit.
 
-			size_t filterAllocatedSize = filter.runtimedata()->filterDataSize + sizeof(asset_filter_runtime_data_t);
-			size_t filterSize          = filter.length();
+			if (!filter.filterdata().isValid()) {
+				LOGAssetFilterWarn("Deallocating filter ID=%u because it is invalid", filter.runtimedata()->filterId);
+				deallocateFilterByIndex(index);
+				consistencyChecksFailed = true;
+				// intentionally skipping index++, deallocate shrinks the array we're looping over.
+				continue;
+			}
 
-			if (filterSize != filterAllocatedSize) {
-				// the filter size parameters do not match the allocated space.
-				// likely cause by malformed data on the host side.
-				// This check can't be performed earlier: as long as not all chuncks are
-				// received the filterdata may be in invalid state.
-
-				LOGAssetFilterWarn("Deallocating filter ID=%u because of invalid filter size: allocated=%u calculated=%u",
+			size_t filterDataSizeAllocated = filter.runtimedata()->filterDataSize;
+			size_t filterDataSizeCalculated = filter.filterdata().length();
+			if (filterDataSizeAllocated != filterDataSizeCalculated) {
+				LOGAssetFilterWarn("Deallocating filter ID=%u because filter size does not match: allocated=%u calculated=%u",
 						filter.runtimedata()->filterId,
-						filterAllocatedSize,
-						filterSize);
+						filterDataSizeAllocated,
+						filterDataSizeCalculated);
 
 				deallocateFilterByIndex(index);
 				consistencyChecksFailed = true;

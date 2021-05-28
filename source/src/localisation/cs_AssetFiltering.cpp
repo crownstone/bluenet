@@ -8,14 +8,21 @@
 #include <localisation/cs_AssetFiltering.h>
 #include <util/cs_Utils.h>
 
+#define LOGAssetFilteringWarn LOGw
+#define LOGAssetFilteringInfo LOGi
+#define LOGAssetFilteringDebug LOGd
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
-#define LOGAssetFilteringDebug LOGd
-#define LOGAssetFilteringWarn LOGw
 
 cs_ret_code_t AssetFiltering::init() {
-	LOGAssetFilteringDebug("AssetFiltering::init");
+	LOGAssetFilteringInfo("init");
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
+
+	// TODO: it seems there's a bunch of code to make multiple calls to init() possible,
+	// though listen() now can be called multiple times.
+	// Do we even want to support this?
+
+	// TODO: cleanup all if init fails?
 
 	if (_filterStore == nullptr) {
 		_filterStore = new AssetFilterStore();
@@ -109,11 +116,11 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
-			if( _assetHandlerMac != nullptr) {
+			if (_assetHandlerMac != nullptr) {
 				_assetHandlerMac->handleAcceptedAsset(filter, asset);
 			}
 
-			if(_assetForwarder != nullptr) {
+			if (_assetForwarder != nullptr) {
 				_assetForwarder->handleAcceptedAsset(filter, asset);
 			}
 
@@ -141,37 +148,39 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
  * This method extracts the filters 'input description', prepares the input according to that
  * description and calls the delegate with the prepared data.
  *
- * delegateExpression should be of the form (IFilter&, void*, size_t) -> ReturnType.
+ * delegateExpression should be of the form (FilterInterface&, void*, size_t) -> ReturnType.
+ *
+ * TODO: this looks like an overcomplicated way of doing this. And all the work is done 2x:
+ * first in filterInputResult() and again in processAcceptedAsset().
  */
 template <class ReturnType, class ExpressionType>
 ReturnType prepareFilterInputAndCallDelegate(
-		AssetFilter filter,
+		AssetFilter assetFilter,
 		const scanned_device_t& device,
 		AssetFilterInput filterInputDescription,
 		ExpressionType delegateExpression,
 		ReturnType defaultValue) {
 
 
-	// obtain a pointer to an IFilter object of the correct filter type
+	// obtain a pointer to an FilterInterface object of the correct filter type
 	// (can be made prettier...)
-	CuckooFilter cuckoo;
-	ExactMatchFilter exact;
-	IFilter* iFilterPtr = nullptr;
+	CuckooFilter cuckoo; // Dangerous to use, it has a nullptr as data.
+	ExactMatchFilter exact; // Dangerous to use, it has a nullptr as data.
+	FilterInterface* filter = nullptr;
 
-	switch(*filter.filterdata().metadata().filterType()) {
+	switch (*assetFilter.filterdata().metadata().filterType()) {
 		case AssetFilterType::CuckooFilter: {
-			cuckoo = filter.filterdata().cuckooFilter();
-			iFilterPtr = &cuckoo;
+			cuckoo = assetFilter.filterdata().cuckooFilter();
+			filter = &cuckoo;
 			break;
 		}
 		case AssetFilterType::ExactMatchFilter: {
-			exact = filter.filterdata().exactMatchFilter();
-			iFilterPtr = &exact;
+			exact = assetFilter.filterdata().exactMatchFilter();
+			filter = &exact;
 			break;
 		}
 		default: {
-			assert(false,"undefined filter type.");
-			LOGAssetFilteringWarn("Filtertype not implemented");
+			LOGAssetFilteringWarn("Filter type not implemented");
 			return defaultValue;
 		}
 	}
@@ -180,7 +189,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 	// split out input type for the filter and prepare the input
 	switch (*filterInputDescription.type()) {
 		case AssetFilterInputType::MacAddress: {
-			return delegateExpression(iFilterPtr, device.address, sizeof(device.address));
+			return delegateExpression(filter, device.address, sizeof(device.address));
 		}
 		case AssetFilterInputType::AdDataType: {
 			// selects the first found field of configured type and checks if that field's
@@ -191,7 +200,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 			assert(selector != nullptr, "Filter metadata type check failed");
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
-				return delegateExpression(iFilterPtr, result.data, result.len);
+				return delegateExpression(filter, result.data, result.len);
 			}
 
 			return defaultValue;
@@ -217,7 +226,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 					}
 				}
 				_logArray(LogLevelAssetFilteringVerbose, true, buff, buffIndex);
-				return delegateExpression(iFilterPtr, buff, buffIndex);
+				return delegateExpression(filter, buff, buffIndex);
 			}
 
 			return defaultValue;
@@ -227,46 +236,29 @@ ReturnType prepareFilterInputAndCallDelegate(
 	return defaultValue;
 }
 
-bool AssetFiltering::filterInputResult(AssetFilter filter, const scanned_device_t& asset) {
+bool AssetFiltering::filterInputResult(AssetFilter assetFilter, const scanned_device_t& asset) {
 	// The input result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly.
 	return prepareFilterInputAndCallDelegate(
-			filter,
+			assetFilter,
 			asset,
-			filter.filterdata().metadata().inputType(),
-			[](IFilter* iFilter, const uint8_t* data, size_t len) {
-				return iFilter->contains(data, len);
+			assetFilter.filterdata().metadata().inputType(),
+			[](FilterInterface* filter, const uint8_t* data, size_t len) {
+				return filter->contains(data, len);
 			},
 			false);
 }
 
-short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset) {
+short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
 	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
 	// preallocate the buffer that the MaskedAdData needs.)
 	return prepareFilterInputAndCallDelegate(
-			filter,
+			assetFilter,
 			asset,
-			filter.filterdata().metadata().outputType().inFormat(),
-			[](IFilter* iFilter, const uint8_t* data, size_t len) {
-				return iFilter->shortAssetId(data,len);
+			assetFilter.filterdata().metadata().outputType().inFormat(),
+			[](FilterInterface* filter, const uint8_t* data, size_t len) {
+				return filter->shortAssetId(data, len);
 			},
 			short_asset_id_t{});
-}
-
-
-// ======================== Utils ========================
-
-void logServiceData(scanned_device_t* scannedDevice) {
-	uint32_t errCode;
-	cs_data_t serviceData;
-	errCode = BLEutil::findAdvType(
-			BLE_GAP_AD_TYPE_SERVICE_DATA, scannedDevice->data, scannedDevice->dataSize, &serviceData);
-
-	if (errCode != ERR_SUCCESS) {
-		return;
-	}
-
-	_log(LogLevelAssetFilteringDebug, false, "servicedata: ");
-	_logArray(LogLevelAssetFilteringDebug, true, serviceData.data, serviceData.len);
 }

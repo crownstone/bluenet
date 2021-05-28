@@ -7,12 +7,12 @@
 #pragma once
 
 #include <protocol/cs_ExactMatchFilterStructs.h>
-#include <util/cs_IFilter.h>
+#include <util/cs_FilterInterface.h>
 
-class ExactMatchFilter : public IFilter {
+class ExactMatchFilter : public FilterInterface {
 public:
 	// -------------------------------------------------------------
-	// IFilter interface
+	// Interface methods.
 	// -------------------------------------------------------------
 
 	ExactMatchFilter(exact_match_filter_data_t* data);
@@ -25,6 +25,8 @@ public:
 	bool contains(const void* key, size_t keyLengthInBytes) override;
 
 	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
+
+	bool isValid() override;
 
 	// -------------------------------------------------------------
 	// Sizing helpers

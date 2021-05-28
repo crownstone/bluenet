@@ -219,6 +219,14 @@ void CuckooFilter::init(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucke
 	clear();
 }
 
+bool CuckooFilter::isValid() {
+	if (_data->nestsPerBucket == 0) {
+		return false;
+	}
+	// TODO: more checks?
+	return true;
+}
+
 /* ------------------------------------------------------------------------- */
 
 bool CuckooFilter::contains(cuckoo_extended_fingerprint_t efp) {

@@ -69,6 +69,7 @@ public:
 	CuckooFilter cuckooFilter(); // invalid unless *metadata().type() == FilterType::CukooFilter
 	ExactMatchFilter exactMatchFilter(); // invalid unless *metadata().type() == FilterType::ExactMatchFilter
 
+	bool isValid();
 	size_t length();
 };
 

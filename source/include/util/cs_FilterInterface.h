@@ -9,9 +9,9 @@
 
 #include <protocol/cs_AssetFilterPackets.h>
 
-class IFilter {
+class FilterInterface {
 public:
-	virtual ~IFilter() = default;
+	virtual ~FilterInterface() = default;
 
 	virtual bool contains(const void* key, size_t keyLengthInBytes) = 0;
 
@@ -20,5 +20,5 @@ public:
 	virtual size_t size() = 0;
 
 	// shortAssetId(key, len) = 0
-	// isValid() = 0
+	virtual bool isValid() = 0;
 };
