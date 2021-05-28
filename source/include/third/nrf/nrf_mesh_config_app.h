@@ -122,7 +122,7 @@
 /**
  * The default TTL value for the node.
  */
-#define ACCESS_DEFAULT_TTL (4)
+#define ACCESS_DEFAULT_TTL (10)
 
 /**
  * The number of models in the application.
