@@ -31,12 +31,14 @@ public:
 	 * Interval at which a mesh messages is sent for each neighbour.
 	 */
 	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR =      5 * 60;
-	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST = 30;
+	static constexpr uint16_t SEND_INTERVAL_SECONDS_PER_NEIGHBOUR_FAST = 10;
 
 	/**
 	 * Interval at which a no-hop noop message is sent.
+	 *
+	 * Should be lower than TIMEOUT_SECONDS, so that a message is sent before timeout.
 	 */
-	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS =      5 * 60;
+	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS =      1 * 60;
 	static constexpr uint16_t SEND_NOOP_INTERVAL_SECONDS_FAST = 10;
 
 	/**
