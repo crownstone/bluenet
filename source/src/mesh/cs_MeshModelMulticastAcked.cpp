@@ -406,7 +406,7 @@ void MeshModelMulticastAcked::checkDone() {
 			if (!_ackedStonesBitmask.isSet(i)) {
 				resultHeader.stoneId = item.stoneIdsPtr[i];
 				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
-				LOGMeshModelDebug("timeout id=%u", resultHeader.stoneId);
+				LOGi("timeout id=%u", resultHeader.stoneId);
 			}
 		}
 
