@@ -9,5 +9,8 @@ info files
 
 monitor reset
 
+#b app_error_fault_handler
+b app_error_handler
+
 continue
 
