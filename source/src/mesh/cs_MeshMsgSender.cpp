@@ -340,8 +340,6 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 	item.broadcast = command->header.flags.flags.broadcast;
 	item.numIds = command->header.idCount;
 	item.stoneIdsPtr = command->targetIds;
-	item.msgPayload.len = command->controlCommand.size;
-	item.msgPayload.data = command->controlCommand.data;
 
 	switch (command->controlCommand.type) {
 		case CTRL_CMD_SET_TIME: {
@@ -371,6 +369,8 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID;
 			item.metaData.priority = false;
+			item.msgPayload.len = command->controlCommand.size;
+			item.msgPayload.data = command->controlCommand.data;
 			break;
 		}
 		case CTRL_CMD_STATE_SET: {
@@ -417,19 +417,38 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_STATE_SET;
-			item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
 			item.metaData.priority = false;
-			item.reliable = command->header.flags.flags.reliable;
-			item.broadcast = command->header.flags.flags.broadcast;
-			item.numIds = command->header.idCount;
-			item.stoneIdsPtr = command->targetIds;
 			item.msgPayload.len = sizeof(msg);
 			item.msgPayload.data = msg;
-
-			return addToQueue(item);
+			break;
 		}
-		default:
-			return ERR_NOT_IMPLEMENTED;
+		default: {
+			// Size and cmd type have already been checked in command handler.
+			if (!MeshUtil::canShortenAccessLevel(command->controlCommand.accessLevel)) {
+				LOGw("Can't shorten accessLevel %u", command->controlCommand.accessLevel);
+				return ERR_WRONG_PARAMETER;
+			}
+			if (!MeshUtil::canShortenSource(source)) {
+				LOGw("Can't shorten source type=%u id=%u", source.source.type, source.source.id);
+				return ERR_WRONG_PARAMETER;
+			}
+
+			uint8_t cmdPayloadSize = command->controlCommand.size;
+			uint8_t meshMsg[sizeof(cs_mesh_model_msg_ctrl_cmd_header_t) + cmdPayloadSize];
+			cs_mesh_model_msg_ctrl_cmd_header_t* meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(meshMsg);
+			meshMsgHeader->cmdType = command->controlCommand.type;
+			meshMsgHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
+			meshMsgHeader->sourceId = MeshUtil::getShortenedSource(source);
+
+			memcpy(meshMsg + sizeof(cs_mesh_model_msg_ctrl_cmd_header_t), command->controlCommand.data, cmdPayloadSize);
+
+			item.metaData.id = 0;
+			item.metaData.type = CS_MESH_MODEL_TYPE_CTRL_CMD;
+			item.metaData.priority = false;
+			item.msgPayload.len = sizeof(meshMsg);
+			item.msgPayload.data = meshMsg;
+			break;
+		}
 	}
 
 	return addToQueue(item);

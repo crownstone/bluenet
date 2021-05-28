@@ -1054,6 +1054,9 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 		case CTRL_CMD_STATE_SET:
 		case CTRL_CMD_UART_MSG:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
+		case CTRL_CMD_RESET_MESH_TOPOLOGY:
+		case CTRL_CMD_LOCK_SWITCH:
+		case CTRL_CMD_ALLOW_DIMMING:
 			return true;
 		default:
 			return false;

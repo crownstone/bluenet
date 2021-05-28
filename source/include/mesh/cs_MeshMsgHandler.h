@@ -39,6 +39,7 @@ protected:
 	cs_ret_code_t handleTrackedDeviceListSize(   uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleSyncRequest(             uint8_t* payload, size16_t payloadSize);
 	void handleStateSet(                         uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply);
+	void handleControlCommand(                   uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply);
 	cs_ret_code_t handleResult(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
 	cs_ret_code_t handleSetIbeaconConfigId(      uint8_t* payload, size16_t payloadSize);
 

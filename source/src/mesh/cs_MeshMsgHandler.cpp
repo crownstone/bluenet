@@ -167,6 +167,11 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: {
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
+			handleControlCommand(payload, payloadSize, reply);
+			// Return instead of break, as this function already sends a reply.
+			return;
+		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
 			retCode = ERR_INVALID_MESSAGE;
 			break;
@@ -518,6 +523,55 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 
 		reply->type = CS_MESH_MODEL_TYPE_RESULT;
 		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t);
+	}
+
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
+	event.dispatch();
+
+	if (resultHeader != nullptr) {
+		resultHeader->retCode = event.result.returnCode;
+	}
+
+	LOGi("retCode=%u", event.result.returnCode);
+}
+
+void MeshMsgHandler::handleControlCommand(uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply) {
+	auto meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(payload);
+	uint8_t cmdPayloadSize = payloadSize - sizeof(*meshMsgHeader);
+	uint8_t* cmdPayloadData = payload + sizeof(*meshMsgHeader);
+
+	_log(SERIAL_INFO, false, "handleControlCommand: type=%u accessLevel=%u sourceId=%u data: ",
+			meshMsgHeader->cmdType,
+			meshMsgHeader->accessLevel,
+			meshMsgHeader->sourceId
+			);
+	BLEutil::printArray(cmdPayloadData, cmdPayloadSize, SERIAL_INFO);
+
+	TYPIFY(CMD_CONTROL_CMD) controlCmd;
+	controlCmd.protocolVersion =  CS_CONNECTION_PROTOCOL_VERSION;
+	controlCmd.type =             static_cast<CommandHandlerTypes>(meshMsgHeader->cmdType);
+	controlCmd.data =             cmdPayloadData;
+	controlCmd.size =             cmdPayloadSize;
+	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshMsgHeader->accessLevel);
+
+	// Inflate source.
+	cmd_source_with_counter_t source = MeshUtil::getInflatedSource(meshMsgHeader->sourceId);
+
+	// The reply is a result message, with the control command type as payload.
+	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
+	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(uint16_t)) {
+		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
+		resultHeader->msgType = CS_MESH_MODEL_TYPE_CTRL_CMD;
+
+		uint16_t* resultPayload = reinterpret_cast<uint16_t*>(
+				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
+		);
+
+		// Simply copy the data of the incoming message.
+		*resultPayload = meshMsgHeader->cmdType;
+
+		reply->type = CS_MESH_MODEL_TYPE_RESULT;
+		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(uint16_t);
 	}
 
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);

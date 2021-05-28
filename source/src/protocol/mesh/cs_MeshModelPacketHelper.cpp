@@ -82,6 +82,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize == sizeof(cs_mesh_model_msg_asset_rssi_mac_t);
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI:
 			return payloadSize == sizeof(cs_mesh_model_msg_neighbour_rssi_t);
+		case CS_MESH_MODEL_TYPE_CTRL_CMD:
+			return payloadSize >= sizeof(cs_mesh_model_msg_ctrl_cmd_header_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}

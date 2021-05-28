@@ -72,6 +72,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
 	CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
 	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
+	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_t + payload
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -166,6 +167,12 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_t {
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_ext_t {
 	cs_mesh_model_msg_state_header_t header;
+	uint8_t accessLevel : 3;      // Shortened version of access level.
+	uint8_t sourceId : 5;         // Shortened version of source.
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_ctrl_cmd_header_t {
+	uint16_t cmdType;             // CommandHandlerTypes
 	uint8_t accessLevel : 3;      // Shortened version of access level.
 	uint8_t sourceId : 5;         // Shortened version of source.
 };
