@@ -149,7 +149,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10108 | Asset Rssi Data               | Yes       | [Asset rssi data](#asset-rssi-data-packet) | Information about an asset a crownstone on the mesh has forwarded.
 10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The rssi between an asset and its nearest Crownstone changed.
 10110 | Nearest crownstone timed out  | Yes       | [Nearest crownstone timeout](#nearest-crownstone-timeout) | A previously tracked asset hasn't been observed in a
-10111 | RSSI between stones           | Yes       | [RSSI between stones](#rssi-between-stones) | The RSSI between 2 Crownstones.
+10111 | RSSI between stones report    | Yes       | [RSSI between stones report](#rssi-between-stones-report) | A report of the RSSI between 2 Crownstones.
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -304,7 +304,7 @@ Type | Name | Length | Description
 uint8[] | AssetId | 3 | ShortAssetId of the asset that timed out
 
 
-### RSSI between stones
+### RSSI between stones report
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -315,7 +315,7 @@ int8  | RSSI channel 37 | 1 | RSSI between the two stones on channel 37, accordi
 int8  | RSSI channel 38 | 1 | RSSI between the two stones on channel 38, according to the receiver. A value of 0 means there is no data yet.
 int8  | RSSI channel 39 | 1 | RSSI between the two stones on channel 39, according to the receiver. A value of 0 means there is no data yet.
 uint8 | Last seen | 1 | How many seconds ago the sender was last seen by the receiver.
-
+uint8 | Report number | 1 | Number that is increased by 1 each time the receiver sends this report. This can be used to identify how many messages from the receiver ID are lost.
 
 
 ### Binary log header
