@@ -10,6 +10,7 @@
 #include <common/cs_Types.h>
 #include <ble/cs_iBeacon.h>
 #include <events/cs_EventListener.h>
+#include <drivers/cs_Timer.h>
 
 extern "C" {
 #include <advertiser.h>
@@ -60,7 +61,19 @@ public:
 	/** Internal usage */
 	void handleEvent(event_t & event);
 
+	void tick();
+
+	/** tick function called by app timer
+	 */
+	static void staticTick(MeshAdvertiser *ptr) {
+		ptr->tick();
+	}
+
 private:
+	static constexpr uint32_t tickIntervalMs = 20;
+	app_timer_t              _mainTimerData;
+	app_timer_id_t           _mainTimerId;
+
 	static const uint8_t num_ibeacon_config_ids = 2;
 	advertiser_t* _advertiser = NULL;
 	uint8_t* _buffer = NULL;

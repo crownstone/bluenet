@@ -42,6 +42,10 @@ void MeshAdvertiser::init() {
 		}
 	}
 
+	_mainTimerData = { {0} };
+	_mainTimerId = &_mainTimerData;
+	Timer::getInstance().createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)MeshAdvertiser::staticTick);
+
 	listen();
 
 	memset(_deterministicAddress, 0, sizeof(_deterministicAddress));
@@ -59,7 +63,7 @@ void MeshAdvertiser::setMacAddress(uint8_t* macAddress) {
 }
 
 void MeshAdvertiser::setInterval(uint32_t intervalMs) {
-	advertiser_interval_set(_advertiser, intervalMs);
+	advertiser_interval_set(_advertiser, tickIntervalMs);
 }
 
 void MeshAdvertiser::setTxPower(int8_t power) {
@@ -78,6 +82,7 @@ void MeshAdvertiser::setTxPower(int8_t power) {
 void MeshAdvertiser::start() {
 	_started = true;
 	advertiser_enable(_advertiser);
+	Timer::getInstance().start(_mainTimerId, MS_TO_TICKS(tickIntervalMs), this);
 }
 
 void MeshAdvertiser::stop() {
@@ -91,7 +96,6 @@ void MeshAdvertiser::advertiseIbeacon(uint8_t ibeaconIndex) {
 }
 
 void MeshAdvertiser::updateIbeacon() {
-	advertise();
 	return;
 
 	TYPIFY(CONFIG_IBEACON_MAJOR) major;
@@ -272,6 +276,11 @@ void MeshAdvertiser::handleTime(uint32_t now) {
 	}
 }
 
+void MeshAdvertiser::tick() {
+	advertise();
+	Timer::getInstance().start(_mainTimerId, MS_TO_TICKS(tickIntervalMs), this);
+}
+
 void MeshAdvertiser::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::CONFIG_IBEACON_MAJOR: {
@@ -299,16 +308,6 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 			// It's ok if it's not a valid posix time.
 //			auto timestamp = SystemTime::getSynchronizedStamp();
 //			handleTime(timestamp.posix_s);
-
-//			// every time!
-//			updateIbeacon();
-
-			static int steps = 0;
-			steps++;
-			if (steps == 10) {
-				steps = 0;
-				updateIbeacon();
-			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {
