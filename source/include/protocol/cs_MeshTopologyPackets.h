@@ -22,6 +22,7 @@ struct __attribute__((packed)) mesh_topology_neighbour_rssi_uart_t {
 	int8_t rssiChannel38;
 	int8_t rssiChannel39;
 	uint8_t lastSeenSecondsAgo; // How many seconds ago the sender was last seen by the receiver.
+	uint8_t msgNumber; // Number that is increased by 1 for each message.
 };
 
 

@@ -44,7 +44,7 @@ public:
 	/**
 	 * After a reset, the FAST intervals will be used instead, for this amount of seconds.
 	 */
-	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS = 1 * 60;
+	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS = 5 * 60;
 
 	/**
 	 * Initializes the class:
@@ -112,6 +112,11 @@ private:
 	 * Countdown in seconds until sending at regular interval again.
 	 */
 	uint16_t _fastIntervalCountdown;
+
+	/**
+	 * Overflowing message counter.
+	 */
+	uint8_t _msgCount = 0;
 
 	/**
 	 * Resets the stored topology.

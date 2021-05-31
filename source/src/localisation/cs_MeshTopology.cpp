@@ -199,7 +199,8 @@ void MeshTopology::sendNext() {
 			.rssiChannel37 = node.rssiChannel37,
 			.rssiChannel38 = node.rssiChannel38,
 			.rssiChannel39 = node.rssiChannel39,
-			.lastSeenSecondsAgo = node.lastSeenSecondsAgo
+			.lastSeenSecondsAgo = node.lastSeenSecondsAgo,
+			.counter = _msgCount++
 	};
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
@@ -229,7 +230,8 @@ void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neigh
 			.rssiChannel37 = packet.rssiChannel37,
 			.rssiChannel38 = packet.rssiChannel38,
 			.rssiChannel39 = packet.rssiChannel39,
-			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo
+			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo,
+			.msgNumber = packet.counter
 	};
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
 }

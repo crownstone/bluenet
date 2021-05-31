@@ -263,6 +263,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_neighbour_rssi_t {
 	int8_t rssiChannel38;
 	int8_t rssiChannel39;
 	uint8_t lastSeenSecondsAgo;
+	uint8_t counter; // Message counter, to identify package loss at the receiving node.
 
 	// Possible future type:
 	//   uint8_t type : 4;
