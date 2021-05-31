@@ -484,12 +484,37 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 			);
 	BLEutil::printArray(stateData, stateDataSize, SERIAL_INFO);
 
+	// The reply is a result message, with a state header as payload.
+	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
+	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t)) {
+		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
+		resultHeader->msgType = CS_MESH_MODEL_TYPE_STATE_SET;
+
+		cs_mesh_model_msg_state_header_t* stateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_t*>(
+				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
+		);
+		// Simply copy the data of the incoming message.
+		*stateHeader = meshStateHeader->header;
+
+		reply->type = CS_MESH_MODEL_TYPE_RESULT;
+		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t);
+	}
+
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 
 	// The control command data starts with a state packet header,
 	// followed by state data.
 	uint8_t controlCmdDataSize = sizeof(state_packet_header_t) + stateDataSize;
-	uint8_t controlCmdData[controlCmdDataSize];
+
+	// We could also use the non ISO alloca().
+	uint8_t* controlCmdData = new (std::nothrow) uint8_t[controlCmdDataSize];
+	if (controlCmdData == nullptr) {
+		LOGw("Cannot allocate control command data.");
+		if (resultHeader != nullptr) {
+			resultHeader->retCode = ERR_NO_SPACE;
+		}
+		return;
+	}
 
 	state_packet_header_t* stateHeader = (state_packet_header_t*)controlCmdData;
 	memcpy(controlCmdData + sizeof(state_packet_header_t), stateData, stateDataSize);
@@ -509,24 +534,10 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 	controlCmd.size =             controlCmdDataSize;
 	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
 
-	// The reply is a result message, with a state header as payload.
-	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
-	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t)) {
-		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
-		resultHeader->msgType = CS_MESH_MODEL_TYPE_STATE_SET;
-
-		cs_mesh_model_msg_state_header_t* stateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_t*>(
-				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
-		);
-		// Simply copy the data of the incoming message.
-		*stateHeader = meshStateHeader->header;
-
-		reply->type = CS_MESH_MODEL_TYPE_RESULT;
-		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t);
-	}
-
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 	event.dispatch();
+
+	delete [] controlCmdData;
 
 	if (resultHeader != nullptr) {
 		resultHeader->retCode = event.result.returnCode;
@@ -536,43 +547,44 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 }
 
 void MeshMsgHandler::handleControlCommand(uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply) {
-	auto meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(payload);
+	_logArray(SERIAL_INFO, true, payload, payloadSize);
+	auto meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_ext_t*>(payload);
 	uint8_t cmdPayloadSize = payloadSize - sizeof(*meshMsgHeader);
 	uint8_t* cmdPayloadData = payload + sizeof(*meshMsgHeader);
 
 	_log(SERIAL_INFO, false, "handleControlCommand: type=%u accessLevel=%u sourceId=%u data: ",
-			meshMsgHeader->cmdType,
+			meshMsgHeader->header.cmdType,
 			meshMsgHeader->accessLevel,
 			meshMsgHeader->sourceId
 			);
-	BLEutil::printArray(cmdPayloadData, cmdPayloadSize, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, cmdPayloadData, cmdPayloadSize);
+
+	// The reply is a result message, with cs_mesh_model_msg_ctrl_cmd_header_t as payload.
+	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
+	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
+		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
+		resultHeader->msgType = CS_MESH_MODEL_TYPE_CTRL_CMD;
+
+		cs_mesh_model_msg_ctrl_cmd_header_t* resultPayload = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(
+				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
+		);
+
+		// Simply copy the data of the incoming message.
+		resultPayload->cmdType = meshMsgHeader->header.cmdType;
+
+		reply->type = CS_MESH_MODEL_TYPE_RESULT;
+		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(*resultPayload);
+	}
 
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 	controlCmd.protocolVersion =  CS_CONNECTION_PROTOCOL_VERSION;
-	controlCmd.type =             static_cast<CommandHandlerTypes>(meshMsgHeader->cmdType);
+	controlCmd.type =             static_cast<CommandHandlerTypes>(meshMsgHeader->header.cmdType);
 	controlCmd.data =             cmdPayloadData;
 	controlCmd.size =             cmdPayloadSize;
 	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshMsgHeader->accessLevel);
 
 	// Inflate source.
 	cmd_source_with_counter_t source = MeshUtil::getInflatedSource(meshMsgHeader->sourceId);
-
-	// The reply is a result message, with the control command type as payload.
-	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
-	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(uint16_t)) {
-		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
-		resultHeader->msgType = CS_MESH_MODEL_TYPE_CTRL_CMD;
-
-		uint16_t* resultPayload = reinterpret_cast<uint16_t*>(
-				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
-		);
-
-		// Simply copy the data of the incoming message.
-		*resultPayload = meshMsgHeader->cmdType;
-
-		reply->type = CS_MESH_MODEL_TYPE_RESULT;
-		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(uint16_t);
-	}
 
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 	event.dispatch();
@@ -587,21 +599,30 @@ void MeshMsgHandler::handleControlCommand(uint8_t* payload, size16_t payloadSize
 cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize, stone_id_t srcId) {
 	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(payload);
 	cs_data_t resultData(payload + sizeof(*header), payloadSize - sizeof(*header));
-//	uint8_t resultDataSize = payloadSize - sizeof(*header);
-//	uint8_t* resultData = payload + sizeof(*header);
 
 	// Convert to result packet header.
 	uart_msg_mesh_result_packet_header_t resultHeader;
 	resultHeader.stoneId = srcId;
-	resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
 	resultHeader.resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
 	resultHeader.resultHeader.payloadSize = resultData.len;
+
+	if (header->msgType == CS_MESH_MODEL_TYPE_CTRL_CMD && resultData.len == sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
+		auto ctrlMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(resultData.data);
+		resultHeader.resultHeader.commandType = static_cast<CommandHandlerTypes>(ctrlMsgHeader->cmdType);
+	}
+	else {
+		resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
+	}
 	if (resultHeader.resultHeader.commandType == CTRL_CMD_UNKNOWN) {
-		LOGw("Unknown command type %u, did you add it to getCtrlCmdType() and getMeshType()?", header->msgType);
+		LOGw("Unknown command type for msg type %u, did you add it to getCtrlCmdType()?", header->msgType);
 	}
 
-	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u retCode=%u data: ", srcId, header->msgType, header->retCode);
-	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
+	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u commandType=%u retCode=%u data: ",
+			srcId,
+			header->msgType,
+			resultHeader.resultHeader.commandType,
+			header->retCode);
+	_logArray(SERIAL_INFO, true, resultData.data, resultData.len);
 
 	// Convert result data if needed.
 	switch (header->msgType) {
@@ -620,9 +641,15 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 			resultData.len = 0;
 			break;
 		}
-		default:
+		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
+			// The control command type is in the resultData, but it was already used to set the command type in the resultHeader.
+			resultData.len = 0;
+			break;
+		}
+		default: {
 			sendResultToUart(resultHeader, resultData);
 			break;
+		}
 	}
 	return ERR_SUCCESS;
 }

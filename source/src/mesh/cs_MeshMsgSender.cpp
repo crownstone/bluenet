@@ -371,6 +371,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			item.metaData.priority = false;
 			item.msgPayload.len = command->controlCommand.size;
 			item.msgPayload.data = command->controlCommand.data;
+			return addToQueue(item);
 			break;
 		}
 		case CTRL_CMD_STATE_SET: {
@@ -380,12 +381,6 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			if (command->header.flags.flags.reliable != true || command->header.flags.flags.useKnownIds != false) {
 				return ERR_NOT_IMPLEMENTED;
 			}
-
-			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
-			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
-			uint8_t msg[sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize];
-			cs_mesh_model_msg_state_header_ext_t* meshStateHeader = (cs_mesh_model_msg_state_header_ext_t*) msg;
-
 			if (!MeshUtil::canShortenStateType(stateHeader->stateType)) {
 				LOGw("Can't shorten state type %u", stateHeader->stateType);
 				return ERR_WRONG_PARAMETER;
@@ -407,20 +402,32 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 				return ERR_WRONG_PARAMETER;
 			}
 
+			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
+			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
+
+			uint16_t meshMsgSize = sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize;
+			uint8_t* meshMsg = new (std::nothrow) uint8_t[meshMsgSize];
+			if (meshMsg == nullptr) {
+				return ERR_NO_SPACE;
+			}
+			cs_mesh_model_msg_state_header_ext_t* meshStateHeader = (cs_mesh_model_msg_state_header_ext_t*) meshMsg;
+
 			meshStateHeader->header.type = stateHeader->stateType;
 			meshStateHeader->header.id = stateHeader->stateId;
 			meshStateHeader->header.persistenceMode = stateHeader->persistenceMode;
 			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
 			meshStateHeader->sourceId = MeshUtil::getShortenedSource(source);
 
-			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
+			memcpy(meshMsg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
 
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_STATE_SET;
 			item.metaData.priority = false;
-			item.msgPayload.len = sizeof(msg);
-			item.msgPayload.data = msg;
-			break;
+			item.msgPayload.len = meshMsgSize;
+			item.msgPayload.data = meshMsg;
+			cs_ret_code_t retCode = addToQueue(item);
+			delete [] meshMsg;
+			return retCode;
 		}
 		default: {
 			// Size and cmd type have already been checked in command handler.
@@ -434,24 +441,31 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			}
 
 			uint8_t cmdPayloadSize = command->controlCommand.size;
-			uint8_t meshMsg[sizeof(cs_mesh_model_msg_ctrl_cmd_header_t) + cmdPayloadSize];
-			cs_mesh_model_msg_ctrl_cmd_header_t* meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(meshMsg);
-			meshMsgHeader->cmdType = command->controlCommand.type;
+			uint16_t meshMsgSize = sizeof(cs_mesh_model_msg_ctrl_cmd_header_ext_t) + cmdPayloadSize;
+			uint8_t* meshMsg = new (std::nothrow) uint8_t[meshMsgSize];
+			if (meshMsg == nullptr) {
+				return ERR_NO_SPACE;
+			}
+
+			cs_mesh_model_msg_ctrl_cmd_header_ext_t* meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_ext_t*>(meshMsg);
+			meshMsgHeader->header.cmdType = command->controlCommand.type;
 			meshMsgHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
 			meshMsgHeader->sourceId = MeshUtil::getShortenedSource(source);
 
-			memcpy(meshMsg + sizeof(cs_mesh_model_msg_ctrl_cmd_header_t), command->controlCommand.data, cmdPayloadSize);
+			memcpy(meshMsg + sizeof(*meshMsgHeader), command->controlCommand.data, cmdPayloadSize);
 
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_CTRL_CMD;
 			item.metaData.priority = false;
-			item.msgPayload.len = sizeof(meshMsg);
+			item.msgPayload.len = meshMsgSize;
 			item.msgPayload.data = meshMsg;
-			break;
+			cs_ret_code_t retCode = addToQueue(item);
+			delete [] meshMsg;
+			return retCode;
 		}
 	}
 
-	return addToQueue(item);
+	return ERR_NOT_IMPLEMENTED;
 }
 
 void MeshMsgSender::handleEvent(event_t & event) {

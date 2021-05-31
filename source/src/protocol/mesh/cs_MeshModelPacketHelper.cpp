@@ -170,19 +170,6 @@ CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType) {
 	}
 }
 
-cs_mesh_model_msg_type_t getMeshType(CommandHandlerTypes ctrlCmdType) {
-	switch (ctrlCmdType) {
-		case CTRL_CMD_SET_TIME:
-			return CS_MESH_MODEL_TYPE_CMD_TIME;
-		case CTRL_CMD_STATE_SET:
-			return CS_MESH_MODEL_TYPE_STATE_SET;
-		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
-			return CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID;
-		default:
-			return CS_MESH_MODEL_TYPE_UNKNOWN;
-	}
-}
-
 
 
 bool canShortenStateType(uint16_t type) {
