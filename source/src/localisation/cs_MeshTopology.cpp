@@ -107,6 +107,7 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 
 void MeshTopology::updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel) {
 	// TODO: averaging.
+	LOGMeshTopologyDebug("updateNeighbour id=%u rssi=%i channel=%u", id, rssi, channel);
 	node.id = id;
 	switch (channel) {
 		case 37: {
