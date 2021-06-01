@@ -24,15 +24,29 @@
 class AssetFilterInput {
 public:
 	uint8_t* _data;  // byte representation of this object.
-
-	AssetFilterInput(uint8_t* data) : _data(data){}
-
-	AssetFilterInputType*           type();
-	ad_data_type_selector_t*        AdTypeField();  // returns nullptr unless *type() == AdDataType
-	masked_ad_data_type_selector_t* AdTypeMasked(); // returns nullptr unless *type() == MaskedAdDataType
+	AssetFilterInput(uint8_t* data) : _data(data) {}
 
 	/**
-	 * Total length of the AdvertisementSubdata. Depends on type().
+	 * Get the type of input.
+	 */
+	AssetFilterInputType*           type();
+
+	/**
+	 * Get the payload for type AdDataType.
+	 *
+	 * @return nullptr if type is not AdDataType.
+	 */
+	ad_data_type_selector_t*        AdTypeField();
+
+	/**
+	 * Get the payload for type MaskedAdDataType.
+	 *
+	 * @return nullptr if type is not MaskedAdDataType.
+	 */
+	masked_ad_data_type_selector_t* AdTypeMasked();
+
+	/**
+	 * Get the expected length of this class, depends on type.
 	 */
 	size_t length();
 };
@@ -43,12 +57,23 @@ public:
 class AssetFilterOutput {
 public:
 	uint8_t* _data;
-
 	AssetFilterOutput(uint8_t* data) : _data(data) {}
 
+	/**
+	 * Get the type of output.
+	 */
 	AssetFilterOutputFormat* outFormat();
-	AssetFilterInput         inFormat(); // invalid unless *outFormat() == ShortAssetId
 
+	/**
+	 * Get the input format.
+	 *
+	 * Currently only valid if type is ShortAssetId.
+	 */
+	AssetFilterInput         inFormat();
+
+	/**
+	 * Get the expected length of this class, depends on type.
+	 */
 	size_t length();
 };
 
@@ -62,14 +87,31 @@ public:
 class AssetFilterMetadata {
 public:
 	uint8_t* _data;  // byte representation of this object.
-
 	AssetFilterMetadata(uint8_t* data) : _data(data) {}
 
+	/**
+	 * Get the type of filter.
+	 */
 	AssetFilterType*  filterType();
+
+	/**
+	 * Get the associated profile ID.
+	 */
 	uint8_t*          profileId();
+
+	/**
+	 * Get the input class.
+	 */
 	AssetFilterInput  inputType();
+
+	/**
+	 * Get the output class.
+	 */
 	AssetFilterOutput outputType();
 
+	/**
+	 * Get the expected length of this class.
+	 */
 	size_t length();
 };
 
@@ -83,11 +125,33 @@ public:
 	uint8_t* _data;  // byte representation of this object.
 	AssetFilterData(uint8_t* data) : _data(data) {}
 
+	/**
+	 * Get the metadata.
+	 */
 	AssetFilterMetadata metadata();
-	CuckooFilter cuckooFilter(); // invalid unless *metadata().type() == FilterType::CukooFilter
-	ExactMatchFilter exactMatchFilter(); // invalid unless *metadata().type() == FilterType::ExactMatchFilter
 
+	/**
+	 * Get the cuckoo filter.
+	 *
+	 * Only valid if filter type is FilterType::CukooFilter.
+	 */
+	CuckooFilter cuckooFilter();
+
+	/**
+	 * Get the cuckoo filter.
+	 *
+	 * Only valid if filter type is FilterType::ExactMatchFilter.
+	 */
+	ExactMatchFilter exactMatchFilter();
+
+	/**
+	 * Checks if the data has valid values.
+	 */
 	bool isValid();
+
+	/**
+	 * Get the expected length of this class.
+	 */
 	size_t length();
 };
 
@@ -99,16 +163,20 @@ public:
 class AssetFilter {
 public:
 	uint8_t* _data;  // byte representation of this object.
-
 	AssetFilter(uint8_t* data) : _data(data) {}
 
+	/**
+	 * Get the runtime data.
+	 */
 	asset_filter_runtime_data_t* runtimedata();
+
+	/**
+	 * Get the filter data.
+	 */
 	AssetFilterData filterdata();
 
 	/**
-	 * Total size ot the _data, including runtimedata() and the cuckooFilter().
-	 *
-	 * I.e. computed from the runtimedata() length and cuckooFilter().length().
+	 * Get the expected length of this class.
 	 */
 	size_t length();
 };
