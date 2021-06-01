@@ -644,6 +644,12 @@ void AssetFilterStore::loadFromFlash(CS_TYPE type) {
 		deallocateFilter(id);
 		uint16_t stateSize = TypeSize(type);
 		uint8_t* filterBuf = allocateFilter(id, stateSize);
+
+		if (filterBuf == nullptr) {
+			LOGw("failed to allocate filter buffer");
+			continue;
+		}
+
 		AssetFilter filter(filterBuf);
 
 		cs_state_data_t stateData (type, id, filter.filterdata()._data, stateSize);

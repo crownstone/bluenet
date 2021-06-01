@@ -5,23 +5,14 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
-#include <cstring>
+#include <logging/cs_Logger.h>
 #include <util/cs_Error.h>
 #include <util/cs_ExactMatchFilter.h>
+#include <cstring>
 
 ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {
-	assert(_data->itemSize != 0, "itemSize cannot be zero");
-
-	if (_data->itemCount == 0) {
-		return;
-	}
-
-	for (auto i = 0; i < _data->itemCount - 1; i++) {
-		auto cmp = memcmp(getItem(i), getItem(i + 1), _data->itemSize);
-		if (cmp > 0) {
-			assert(false, "Exact match filter requires sorted itemArray");
-		}
+	if (isValid() == false) {
+		assert(false, "Invalid ExactMatchFilter encountered");
 	}
 }
 
@@ -32,7 +23,15 @@ bool ExactMatchFilter::isValid() {
 	if (_data->itemSize == 0) {
 		return false;
 	}
-	// TODO: more checks?
+
+	for (auto i = 0; i < _data->itemCount - 1; i++) {
+		auto cmp = memcmp(getItem(i), getItem(i + 1), _data->itemSize);
+		if (cmp > 0) {
+			LOGe("Exact match filter requires sorted itemArray");
+			assert(false, "Exact match filter requires sorted itemArray");
+		}
+	}
+
 	return true;
 }
 
@@ -45,36 +44,28 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 	// the inclusive candidate interval for the key index.
 	size_t lowerIndex = 0;
 	size_t upperIndex = _data->itemCount - 1;
-	while (true) {
-		size_t midpointIndex  = (lowerIndex + upperIndex) / 2;
-		auto cmp              = memcmp(key, getItem(midpointIndex), keyLengthInBytes);
+	while (lowerIndex <= upperIndex) {
+		size_t midpointIndex = (lowerIndex + upperIndex) / 2;
+		auto cmp             = memcmp(key, getItem(midpointIndex), keyLengthInBytes);
 
 		if (cmp == 0) {  // early return when found
 			return true;
 		}
-
-		if (cmp > 0) {                          // key > data[i]
-			if (midpointIndex == upperIndex) {  // reached upperIndex limit of interval
-				return false;
-			}
+		if (cmp > 0) {  // key > data[i]
 			lowerIndex = midpointIndex + 1;
 		}
-		else {                                  // key < data[i]
-			if (midpointIndex == lowerIndex) {  // reached lowerIndex limit of interval
-				return false;
-			}
+		else {  // key < data[i]
 			upperIndex = midpointIndex - 1;
 		}
 	}
+	return false;
 }
 
-uint8_t* ExactMatchFilter::getItem(size_t index){
+uint8_t* ExactMatchFilter::getItem(size_t index) {
 	return _data->itemArray + index * _data->itemSize;
 }
 
 short_asset_id_t ExactMatchFilter::shortAssetId(const void* item, size_t itemSize) {
-// TODO what kind of short asset id are we going to use for this?
+	// TODO what kind of short asset id are we going to use for this?
 	return {};
 }
-
-
