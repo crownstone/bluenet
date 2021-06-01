@@ -30,16 +30,33 @@ masked_ad_data_type_selector_t* AssetFilterInput::AdTypeMasked() {
 	return nullptr;
 }
 
-size_t AssetFilterInput::length() {
+bool AssetFilterInput::isValid() {
 	switch (*type()) {
 		case AssetFilterInputType::MacAddress:
-			return sizeof(AssetFilterInputType) + 0;
 		case AssetFilterInputType::AdDataType:
-			return sizeof(AssetFilterInputType) + sizeof(ad_data_type_selector_t);
-		case AssetFilterInputType::MaskedAdDataType:
-			return sizeof(AssetFilterInputType) + sizeof(masked_ad_data_type_selector_t);
+		case AssetFilterInputType::MaskedAdDataType: {
+			return true;
+		}
 	}
-	return 0;
+	return false;
+}
+
+size_t AssetFilterInput::length() {
+	size_t len = sizeof(AssetFilterInputType);
+	switch (*type()) {
+		case AssetFilterInputType::MacAddress: {
+			break;
+		}
+		case AssetFilterInputType::AdDataType: {
+			len += sizeof(ad_data_type_selector_t);
+			break;
+		}
+		case AssetFilterInputType::MaskedAdDataType: {
+			len += sizeof(masked_ad_data_type_selector_t);
+			break;
+		}
+	}
+	return len;
 }
 
 /**
@@ -55,16 +72,32 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 	return AssetFilterInput(_data + sizeof(AssetFilterOutputFormat));
 }
 
-size_t AssetFilterOutput::length() {
+bool AssetFilterOutput::isValid() {
+	if (inFormat().isValid() == false) {
+		return false;
+	}
+
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac: {
-			return sizeof(AssetFilterOutputFormat);
-		}
+		case AssetFilterOutputFormat::Mac:
 		case AssetFilterOutputFormat::ShortAssetId: {
-			return sizeof(AssetFilterOutputFormat) + inFormat().length();
+			return true;
 		}
 	}
-	return 0;
+	return false;
+}
+
+size_t AssetFilterOutput::length() {
+	size_t len = sizeof(AssetFilterOutputFormat);
+	switch (*outFormat()) {
+		case AssetFilterOutputFormat::Mac: {
+			break;
+		}
+		case AssetFilterOutputFormat::ShortAssetId: {
+			len += inFormat().length();
+			break;
+		}
+	}
+	return len;
 }
 
 /**
@@ -96,6 +129,10 @@ AssetFilterOutput AssetFilterMetadata::outputType() {
 			_data + sizeof(AssetFilterType) + sizeof(asset_filter_flags_t) + sizeof(uint8_t) + inputType().length());
 }
 
+bool AssetFilterMetadata::isValid() {
+	return inputType().isValid() && outputType().isValid();
+}
+
 size_t AssetFilterMetadata::length() {
 	return sizeof(AssetFilterType)
 			+ sizeof(asset_filter_flags_t)
@@ -122,6 +159,9 @@ ExactMatchFilter AssetFilterData::exactMatchFilter() {
 }
 
 bool AssetFilterData::isValid() {
+	if (metadata().isValid() == false) {
+		return false;
+	}
 	switch (*metadata().filterType()) {
 		case AssetFilterType::CuckooFilter: {
 			return cuckooFilter().isValid();

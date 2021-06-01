@@ -46,6 +46,11 @@ public:
 	masked_ad_data_type_selector_t* AdTypeMasked();
 
 	/**
+	 * Checks if the data has valid values.
+	 */
+	bool isValid();
+
+	/**
 	 * Get the expected length of this class, depends on type.
 	 */
 	size_t length();
@@ -70,6 +75,11 @@ public:
 	 * Currently only valid if type is ShortAssetId.
 	 */
 	AssetFilterInput         inFormat();
+
+	/**
+	 * Checks if the data has valid values.
+	 */
+	bool isValid();
 
 	/**
 	 * Get the expected length of this class, depends on type.
@@ -114,6 +124,11 @@ public:
 	 * Get the output class.
 	 */
 	AssetFilterOutput outputType();
+
+	/**
+	 * Checks if the data has valid values.
+	 */
+	bool isValid();
 
 	/**
 	 * Get the expected length of this class.
