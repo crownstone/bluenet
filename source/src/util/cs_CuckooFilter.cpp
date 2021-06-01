@@ -220,6 +220,9 @@ void CuckooFilter::init(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucke
 }
 
 bool CuckooFilter::isValid() {
+	if (_data == nullptr) {
+		return false;
+	}
 	if (_data->nestsPerBucket == 0) {
 		return false;
 	}

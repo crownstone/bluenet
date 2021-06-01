@@ -11,12 +11,12 @@
 #include <cstring>
 
 ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {
-	if (isValid() == false) {
-		LOGe(false, "Invalid ExactMatchFilter encountered");
-	}
 }
 
 bool ExactMatchFilter::isValid() {
+	if (_data == nullptr) {
+		return false;
+	}
 	if (_data->itemCount == 0) {
 		return false;
 	}
