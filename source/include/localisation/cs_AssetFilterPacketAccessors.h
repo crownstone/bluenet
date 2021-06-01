@@ -93,22 +93,22 @@ public:
 	/**
 	 * Get the type of filter.
 	 */
-	AssetFilterType*  filterType();
+	AssetFilterType* filterType();
 
 	/**
 	 * Get the flags.
 	 */
-	asset_filter_flags_t flags();
+	asset_filter_flags_t* flags();
 
 	/**
 	 * Get the associated profile ID.
 	 */
-	uint8_t*          profileId();
+	uint8_t* profileId();
 
 	/**
 	 * Get the input class.
 	 */
-	AssetFilterInput  inputType();
+	AssetFilterInput inputType();
 
 	/**
 	 * Get the output class.
