@@ -179,9 +179,11 @@ uint8[] | filterdata | | Byte representation of the filter, format depends on th
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Filter type](#filter-type) | filterType | 1 | Filter protocol of this filter. Describes a `filterdata` format.
+[Filter flags](#filter-flags) | flags | 1 | Flags bitmask.
 uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id.
 [Filter input type](#filter-input-description) | inputDescription |  | Determines how this filter interprets incoming entries.
 [Filter output type](#filter-output-description) | outputDescription |  | Determines how advertisements that pass this filter are handled by the system.
+
 
 ### Filter type
 
@@ -190,6 +192,14 @@ A `uint8` defining the format and implementation of the filter datastructure.
 Value | Name | Description 
 --- | --- | ---
 0 | CuckooFilter | Filter data is interpreted as [Cuckoo filter data](./CUCKOO_FILTER.md#cuckoo-filter-data)
+
+
+### Filter flags
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Exclude | If set, the assets that pass this filter will be ignored. Note: this does not mean that assets that do not pass this filter are handled.
+1-7 | Reserved | Reserved for future usage, must be 0 for now.
 
 
 ## Filter IO packets

@@ -71,6 +71,14 @@ enum class AssetFilterOutputFormat : uint8_t {
 	ShortAssetId = 1,
 };
 
+union __attribute__((__packed__)) asset_filter_flags_t {
+	struct __attribute__((packed)) {
+		bool exclude: 1;
+	} flags;
+	uint8_t asInt = 0;
+};
+
+
 struct __attribute__((__packed__)) ad_data_type_selector_t {
 	uint8_t adDataType;
 };

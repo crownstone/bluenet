@@ -70,6 +70,7 @@ size_t AssetFilterOutput::length() {
 /**
  * AssetFilterMetadata struct:
  * - filterType
+ * - flags
  * - profileId
  * - input
  * - output
@@ -78,20 +79,25 @@ AssetFilterType* AssetFilterMetadata::filterType() {
 	return reinterpret_cast<AssetFilterType*>(_data + 0);
 }
 
+asset_filter_flags_t AssetFilterMetadata::flags() {
+	return reinterpret_cast<asset_filter_flags_t*>(_data + sizeof(AssetFilterType));
+}
+
 uint8_t* AssetFilterMetadata::profileId() {
-	return _data + sizeof(AssetFilterType);
+	return _data + sizeof(AssetFilterType) + sizeof(asset_filter_flags_t);
 }
 
 AssetFilterInput AssetFilterMetadata::inputType() {
-	return AssetFilterInput(_data + sizeof(AssetFilterType) + sizeof(uint8_t));
+	return AssetFilterInput(_data + sizeof(AssetFilterType) + sizeof(asset_filter_flags_t) + sizeof(uint8_t));
 }
 
 AssetFilterOutput AssetFilterMetadata::outputType() {
-	return AssetFilterOutput(_data + sizeof(AssetFilterType) + sizeof(uint8_t) + inputType().length());
+	return AssetFilterOutput(_data + sizeof(AssetFilterType) + sizeof(asset_filter_flags_t) + sizeof(uint8_t) + inputType().length());
 }
 
 size_t AssetFilterMetadata::length() {
 	return sizeof(AssetFilterType)
+			+ sizeof(asset_filter_flags_t)
 			+ sizeof(uint8_t)
 			+ inputType().length()
 			+ outputType().length();

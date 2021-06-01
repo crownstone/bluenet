@@ -80,6 +80,7 @@ public:
 /**
  * Class that contains all persisted metadata required for an asset filter:
  * - Type of filter.
+ * - Flags.
  * - What profile ID this filter is associated with.
  * - What data is used as input for the filter.
  * - What the output should be.
@@ -93,6 +94,11 @@ public:
 	 * Get the type of filter.
 	 */
 	AssetFilterType*  filterType();
+
+	/**
+	 * Get the flags.
+	 */
+	asset_filter_flags_t flags();
 
 	/**
 	 * Get the associated profile ID.
