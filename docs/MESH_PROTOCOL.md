@@ -17,13 +17,13 @@ identifier of a message.
 
 id | name | Payload | Result data
 ---|---|---|---
-0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
-1 | CS_MESH_MODEL_TYPE_ACK | none
-3 | CS_MESH_MODEL_TYPE_CMD_TIME | [cs_mesh_model_msg_time_t](#cs_mesh_model_msg_time_t)
-4 | CS_MESH_MODEL_TYPE_CMD_NOOP | none
-5 | CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH | [cs_mesh_model_msg_multi_switch_item_t](#cs_mesh_model_msg_multi_switch_item_t)
-8 | CS_MESH_MODEL_TYPE_STATE_0 | [cs_mesh_model_msg_state_0_t](#cs_mesh_model_msg_state_0_t)
-9 | CS_MESH_MODEL_TYPE_STATE_1 | [cs_mesh_model_msg_state_1_t](#cs_mesh_model_msg_state_1_t)
+0  | TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
+1  | CS_MESH_MODEL_TYPE_ACK | none
+3  | CS_MESH_MODEL_TYPE_CMD_TIME | [cs_mesh_model_msg_time_t](#cs_mesh_model_msg_time_t)
+4  | CS_MESH_MODEL_TYPE_CMD_NOOP | none
+5  | CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH | [cs_mesh_model_msg_multi_switch_item_t](#cs_mesh_model_msg_multi_switch_item_t)
+8  | CS_MESH_MODEL_TYPE_STATE_0 | [cs_mesh_model_msg_state_0_t](#cs_mesh_model_msg_state_0_t)
+9  | CS_MESH_MODEL_TYPE_STATE_1 | [cs_mesh_model_msg_state_1_t](#cs_mesh_model_msg_state_1_t)
 10 | CS_MESH_MODEL_TYPE_PROFILE_LOCATION | [cs_mesh_model_msg_profile_location_t](#cs_mesh_model_msg_profile_location_t)
 11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [behaviour_settings_t](#behaviour_settings_t)
 12 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER | [cs_mesh_model_msg_device_register_t](#cs_mesh_model_msg_device_register_t)
@@ -34,8 +34,12 @@ id | name | Payload | Result data
 18 | CS_MESH_MODEL_TYPE_RESULT | [cs_mesh_model_msg_result](#cs_mesh_model_msg_result)
 19 | CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID | [Ibeacon config ID packet](PROTOCOL.md#ibeacon-config-id-packet)
 20 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT | [Device heartbeat packet](#cs_mesh_model_msg_device_heartbeat_t)
-21 | CS_MESH_MODEL_TYPE_RSSI_PING | [rssi_ping_message_t](#rssi_ping_message_t)
-22 | CS_MESH_MODEL_TYPE_TIME_SYNC|  [time_sync_message_t](#time_sync_message_t)
+22 | CS_MESH_MODEL_TYPE_TIME_SYNC | [cs_mesh_model_msg_time_sync_message_t](#cs_mesh_model_msg_time_sync_message_t)
+25 | CS_MESH_MODEL_TYPE_STONE_MAC | [cs_mesh_model_msg_stone_mac_t](#cs_mesh_model_msg_stone_mac_t)
+26 | CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION | [cs_mesh_model_msg_asset_filter_version_t](#cs_mesh_model_msg_asset_filter_version_t)
+27 | CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC | [cs_mesh_model_msg_asset_rssi_mac_t](#cs_mesh_model_msg_asset_rssi_mac_t)
+28 | CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI | [cs_mesh_model_msg_neighbour_rssi_t](#cs_mesh_model_msg_neighbour_rssi_t)
+29 | CS_MESH_MODEL_TYPE_CTRL_CMD | [cs_mesh_model_msg_ctrl_cmd_t](#cs_mesh_model_msg_ctrl_cmd_t) | [cs_mesh_model_msg_ctrl_cmd_header_t](#cs_mesh_model_msg_ctrl_cmd_header_t)
 
 ## Packet descriptors
 
@@ -212,16 +216,28 @@ uint8_t | State ID | 6 | ID of state to get. Most state types will only have ID 
 uint8_t | [Persistence mode](PROTOCOL.md#state-set-persistence-mode) | 2 | Type of persistence mode.
 
 
-#### rssi_ping_message_t
-![Rssi ping message](../docs/diagrams/rssi_ping_msg.png)
+#### cs_mesh_model_msg_ctrl_cmd_t
 
-Type       | Name         | Length | Description
----        | ---          | ---    | ---
-uint8_t    | sender_id    | 1      | ID of node sending the message
-uint8_t    | recipient_id | 1      | ID of the receiving node
-uint8_t    | sample_id    | 1      | ID of the sample
-int8_t     | rssi         | 1      | RSSI at the receiver
-uint8_t    | channel      | 1      | channel over which the message was broadcasted
+Type | Name | Length | Description
+--- | --- | --- | ---
+[header](#cs_mesh_model_msg_ctrl_cmd_header_ext_t) | Header | 3 |
+uint8_t[] | Payload | N | Payload data, depends on command type.
+
+
+#### cs_mesh_model_msg_ctrl_cmd_header_ext_t
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+[header](#cs_mesh_model_msg_ctrl_cmd_header_t) | Header | 16 |
+uint8_t | Access level | 3 | Shortened version of access level: 0=ADMIN, 1=MEMBER, 2=BASIC, 6=SETUP, 7=NOT_SET.
+uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 2=INTERNAL, 3=UART, 4=CONNECTION, 5=SWITCHCRAFT, 30=BROADCAST
+
+
+#### cs_mesh_model_msg_ctrl_cmd_header_t
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint16_t | Command type | 2 | [Command type](PROTOCOL.md#Command-types).
 
 
 #### high_resolution_time_stamp_t
@@ -233,7 +249,7 @@ Type | Name | Length | Description
 uint32_t | posix_s  | 4 | seconds since epoch
 uint16_t | posix_ms, version | 2 | bits 0-9: milliseconds passed since posix_s. bits 10-15: synchronisation version
 
-#### time_sync_message_t
+#### cs_mesh_model_msg_time_sync_message_t
 
 ![Time sync message](../docs/diagrams/time_sync_message_t.png)
 
@@ -242,6 +258,47 @@ Type | Name | Length | Description
 high_resolution_time_stamp_t  | stamp | 6 | current stamp of root clock
 uint8_t | root_id | 1 | id of root clock (may differ from sender id)
 
+
+#### cs_mesh_model_msg_stone_mac_t
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | Type | 1 | Type: 0 = request, 1 = reply.
+uint8_t[] | MAC address | 6 | Mac address of the replier, ignored for request.
+
+#### cs_mesh_model_msg_asset_filter_version_t
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | Protocol | 1 | Supported protocol.
+uint16_t | Master version | 2 | Master version.
+uint32_t | Master CRC | 4 | Master CRC.
+
+#### cs_mesh_model_msg_asset_rssi_mac_t
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[compressed_rssi_data_t](#compressed_rssi_data_t) | Compressed RSSI data | 1 |
+uint8_t[] | MAC address | 6 | Mac address of the asset.
+
+#### compressed_rssi_data_t
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8_t | Channel | 2 | 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39.
+uint8_t | Rssi halved | 6 | Falf of the absolute value of the original RSSI.
+
+#### cs_mesh_model_msg_neighbour_rssi_t
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | Type | 1 | Always 0 for now.
+uint8_t | Neighbour ID | 1 | ID of the observed neighbour.
+int8_t | RSSI channel 37 | 1 | RSSI on channel 37.
+int8_t | RSSI channel 38 | 1 | RSSI on channel 38.
+int8_t | RSSI channel 39 | 1 | RSSI on channel 39.
+uint8_t | Last seen | 1 | How many seconds ago the neighbour was last seen.
+uint8_t | Message number | 1 | Message number that increases by 1 each time this message is sent. Used to identify package loss.
 
 #### cs_mesh_model_msg_result
 
