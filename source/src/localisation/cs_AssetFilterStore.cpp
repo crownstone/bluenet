@@ -17,7 +17,7 @@
 
 #define LOGAssetFilterWarn LOGw
 #define LOGAssetFilterInfo LOGi
-#define LOGAssetFilterDebug LOGd
+#define LOGAssetFilterDebug LOGnone
 
 cs_ret_code_t AssetFilterStore::init() {
 	LOGAssetFilterInfo("init");
@@ -511,7 +511,7 @@ uint32_t AssetFilterStore::computeMasterCrc() {
 }
 
 bool AssetFilterStore::checkFilterSizeConsistency() {
-	LOGd("checkFilterSizeConsistency");
+	LOGAssetFilterDebug("checkFilterSizeConsistency");
 	bool consistencyChecksFailed = false;
 
 	LOGAssetFilterDebug("Check size consistency");
@@ -561,7 +561,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 }
 
 void AssetFilterStore::computeFilterCrcs() {
-	LOGd("computeFilterCrcs");
+	LOGAssetFilterDebug("computeFilterCrcs");
 	for (uint8_t* filterBuffer : _filters) {
 		if (filterBuffer == nullptr) {
 			break;
@@ -615,6 +615,7 @@ void AssetFilterStore::loadFromFlash() {
 	// Load master version and CRC.
 	TYPIFY(STATE_ASSET_FILTERS_VERSION) stateVal;
 	State::getInstance().get(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &stateVal, sizeof(stateVal));
+	LOGAssetFilterDebug("masterVersion from flash: %u", stateVal.masterVersion);
 
 	// Commit filters.
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
@@ -629,7 +630,7 @@ void AssetFilterStore::loadFromFlash() {
 		if(retCode != ERR_UNSPECIFIED){
 			LOGw("Failed loading from flash, deallocating. Retcode: %u");
 		} else {
-			LOGd("Master version is 0 on flash");
+			LOGAssetFilterDebug("Master version is 0 on flash");
 		}
 		for (uint8_t index = _filtersCount; index > 0; --index) {
 			deallocateFilterByIndex(index - 1);

@@ -10,7 +10,7 @@
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGi
-#define LOGAssetFilteringDebug LOGd
+#define LOGAssetFilteringDebug LOGnone
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
@@ -25,7 +25,6 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 			device.address[2],
 			device.address[1],
 			device.address[0]);
-	_logArray(LogLevelAssetFilteringDebug, true, device.data, device.dataSize);
 }
 
 
@@ -133,6 +132,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 }
 
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
+	LOGAssetFilteringDebug("processAcceptedAsset");
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
 			if (_assetForwarder != nullptr) {
@@ -208,7 +208,9 @@ ReturnType prepareFilterInputAndCallDelegate(
 			cs_data_t result                  = {};
 			ad_data_type_selector_t* selector = filterInputDescription.AdTypeField();
 
-			assert(selector != nullptr, "Filter metadata type check failed");
+			if (selector != nullptr) {
+				LOGe(, "Filter metadata type check failed");
+			}
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				return delegateExpression(filter, result.data, result.len);
@@ -222,7 +224,9 @@ ReturnType prepareFilterInputAndCallDelegate(
 			cs_data_t result                         = {};
 			masked_ad_data_type_selector_t* selector = filterInputDescription.AdTypeMasked();
 
-			assert(selector != nullptr, "Filter metadata type check failed");
+			if (selector != nullptr) {
+				LOGe(, "Filter metadata type check failed");
+			}
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				// A normal advertisement payload size is 31B at most.
