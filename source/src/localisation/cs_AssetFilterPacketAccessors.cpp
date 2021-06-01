@@ -7,11 +7,11 @@
 
 #include <localisation/cs_AssetFilterPacketAccessors.h>
 
-
-// -----------------------------------
-// AdvertisementSubdata implementation
-// -----------------------------------
-
+/**
+ * AssetFilterInput struct:
+ * - type
+ * - payload (optional)
+ */
 AssetFilterInputType* AssetFilterInput::type() {
 	return reinterpret_cast<AssetFilterInputType*>(_data + 0);
 }
@@ -42,10 +42,11 @@ size_t AssetFilterInput::length() {
 	return 0;
 }
 
-// -------------------------------
-// FilterOutputType implementation
-// -------------------------------
-
+/**
+ * AssetFilterOutput struct:
+ * - type
+ * - payload (optional)
+ */
 AssetFilterOutputFormat* AssetFilterOutput::outFormat() {
 	return reinterpret_cast<AssetFilterOutputFormat*>(_data + 0);
 }
@@ -55,17 +56,24 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 }
 
 size_t AssetFilterOutput::length() {
-	switch(*outFormat()){
-		case AssetFilterOutputFormat::Mac: return sizeof(AssetFilterOutputFormat);
-		case AssetFilterOutputFormat::ShortAssetId: return sizeof(AssetFilterOutputFormat) + inFormat().length();
+	switch (*outFormat()) {
+		case AssetFilterOutputFormat::Mac: {
+			return sizeof(AssetFilterOutputFormat);
+		}
+		case AssetFilterOutputFormat::ShortAssetId: {
+			return sizeof(AssetFilterOutputFormat) + inFormat().length();
+		}
 	}
 	return 0;
 }
 
-// -------------------------------------
-// TrackingFilterMetaData implementation
-// -------------------------------------
-
+/**
+ * AssetFilterMetadata struct:
+ * - filterType
+ * - profileId
+ * - input
+ * - output
+ */
 AssetFilterType* AssetFilterMetadata::filterType() {
 	return reinterpret_cast<AssetFilterType*>(_data + 0);
 }
@@ -89,13 +97,15 @@ size_t AssetFilterMetadata::length() {
 			+ outputType().length();
 }
 
-// --------------------------------
-// TrackinFilterData implementation
-// --------------------------------
-
+/**
+ * AssetFilterData struct:
+ * - metadata
+ * - filter data
+ */
 AssetFilterMetadata AssetFilterData::metadata() {
 	return AssetFilterMetadata(_data + 0);
 }
+
 CuckooFilter AssetFilterData::cuckooFilter() {
 	return CuckooFilter(reinterpret_cast<cuckoo_filter_data_t*>(_data + metadata().length()));
 }
@@ -136,10 +146,11 @@ size_t AssetFilterData::length() {
 	return len;
 }
 
-// --------------------------------
-// TrackinFilter implementation
-// --------------------------------
-
+/**
+ * AssetFilter struct:
+ * - runtime data
+ * - asset filter data
+ */
 asset_filter_runtime_data_t* AssetFilter::runtimedata() {
 	return reinterpret_cast<asset_filter_runtime_data_t*>(_data + 0);
 }
