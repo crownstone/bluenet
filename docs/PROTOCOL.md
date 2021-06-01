@@ -873,6 +873,7 @@ Value | Name | Description
 43  | CANCELED | Operation was canceled.
 44  | PROTOCOL_UNSUPPORTED | The protocol is not supported.
 45  | MISMATCH | There is a mismatch, usually in CRC/checksum/hash.
+46  | WRONG_OPERATION | Another operation was expected.
 48  | NO_ACCESS | Invalid access for this command.
 49  | UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
@@ -880,11 +881,13 @@ Value | Name | Description
 67  | NOT_INITIALIZED | Something must first be initialized.
 68  | NOT_STARTED | Something must first be started.
 69  | NOT_POWERED | Something must first be powered.
+70  | WRONG_MODE | Something is in the wrong operation mode.
 80  | WRITE_DISABLED | Write is disabled for given type.
 81  | WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
 82  | READ_FAILED | Failed to read.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
 112 | EVENT_UNHANDLED | The event or command was not handled.
+128 | GATT_ERROR | An error occured during a BLE connection.
 65535 | UNSPECIFIED | Unspecified error.
 
 
