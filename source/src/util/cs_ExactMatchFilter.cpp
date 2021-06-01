@@ -27,8 +27,9 @@ bool ExactMatchFilter::isValid() {
 	for (auto i = 0; i < _data->itemCount - 1; i++) {
 		auto cmp = memcmp(getItem(i), getItem(i + 1), _data->itemSize);
 		if (cmp > 0) {
-			LOGe("Exact match filter requires sorted itemArray");
-			assert(false, "Exact match filter requires sorted itemArray");
+			LOGe("Exact match filter requires sorted itemArray (index %u)", i);
+			_logArray(SERIAL_DEBUG, true, getItem(i), _data->itemSize);
+			_logArray(SERIAL_DEBUG, true, getItem(i+1), _data->itemSize);
 		}
 	}
 

@@ -618,6 +618,11 @@ void AssetFilterStore::loadFromFlash() {
 	// In case of error: remove all filters. (saves memory and improves boot-up speed)
 	if (retCode != ERR_SUCCESS) {
 		// Remove all filters: reverse iterate.
+		if(retCode != ERR_UNSPECIFIED){
+			LOGw("Failed loading from flash, deallocating. Retcode: %u");
+		} else {
+			LOGd("Master version is 0 on flash");
+		}
 		for (uint8_t index = _filtersCount; index > 0; --index) {
 			deallocateFilterByIndex(index - 1);
 		}
