@@ -79,7 +79,7 @@ AssetFilterType* AssetFilterMetadata::filterType() {
 	return reinterpret_cast<AssetFilterType*>(_data + 0);
 }
 
-asset_filter_flags_t AssetFilterMetadata::flags() {
+asset_filter_flags_t* AssetFilterMetadata::flags() {
 	return reinterpret_cast<asset_filter_flags_t*>(_data + sizeof(AssetFilterType));
 }
 
@@ -92,7 +92,8 @@ AssetFilterInput AssetFilterMetadata::inputType() {
 }
 
 AssetFilterOutput AssetFilterMetadata::outputType() {
-	return AssetFilterOutput(_data + sizeof(AssetFilterType) + sizeof(asset_filter_flags_t) + sizeof(uint8_t) + inputType().length());
+	return AssetFilterOutput(
+			_data + sizeof(AssetFilterType) + sizeof(asset_filter_flags_t) + sizeof(uint8_t) + inputType().length());
 }
 
 size_t AssetFilterMetadata::length() {
