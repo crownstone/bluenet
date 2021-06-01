@@ -23,6 +23,7 @@ cs_ret_code_t AssetFilterStore::init() {
 	LOGAssetFilterInfo("init");
 
 	loadFromFlash();
+	LOGAssetFilterInfo("Successfully loaded %u filters", _filtersCount);
 
 	listen();
 	return ERR_SUCCESS;
@@ -459,7 +460,7 @@ void AssetFilterStore::sendInProgressStatus() {
 
 
 cs_ret_code_t AssetFilterStore::commit(uint16_t masterVersion, uint32_t masterCrc, bool store) {
-	LOGAssetFilterDebug("Commit version=%u CRC=%u store=%u", masterVersion, masterCrc, store);
+	LOGAssetFilterInfo("Commit version=%u CRC=%u store=%u", masterVersion, masterCrc, store);
 	if (validateFilters()) {
 		return ERR_WRONG_STATE;
 	}

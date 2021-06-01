@@ -475,7 +475,7 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 
 void AssetFilterSyncer::onModificationInProgress(bool inProgress) {
 	LOGAssetFilterSyncerDebug("onModificationInProgress %u", inProgress);
-	if (inProgress) {
+	if (inProgress && _step != SyncStep::NONE) {
 		// Abort the current upload.
 		reset();
 	}
