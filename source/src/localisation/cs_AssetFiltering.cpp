@@ -10,7 +10,7 @@
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGi
-#define LOGAssetFilteringDebug LOGnone
+#define LOGAssetFilteringDebug LOGd
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
@@ -208,8 +208,9 @@ ReturnType prepareFilterInputAndCallDelegate(
 			cs_data_t result                  = {};
 			ad_data_type_selector_t* selector = filterInputDescription.AdTypeField();
 
-			if (selector != nullptr) {
-				LOGe(, "Filter metadata type check failed");
+			if (selector == nullptr) {
+				LOGe("Filter metadata type check failed");
+				return defaultValue;
 			}
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
@@ -224,8 +225,9 @@ ReturnType prepareFilterInputAndCallDelegate(
 			cs_data_t result                         = {};
 			masked_ad_data_type_selector_t* selector = filterInputDescription.AdTypeMasked();
 
-			if (selector != nullptr) {
-				LOGe(, "Filter metadata type check failed");
+			if (selector == nullptr) {
+				LOGe("Filter metadata type check failed");
+				return defaultValue;
 			}
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {

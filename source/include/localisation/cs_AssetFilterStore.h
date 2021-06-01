@@ -282,7 +282,7 @@ private:
 	 *
 	 * @return true          When all filters passed the check.
 	 */
-	bool checkFilterSizeConsistency();
+	bool validateFilters();
 
 	/**
 	 * Computes the CRC of the filters, and sets it in the filter.

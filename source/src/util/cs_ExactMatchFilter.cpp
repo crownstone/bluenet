@@ -30,6 +30,7 @@ bool ExactMatchFilter::isValid() {
 			LOGe("Exact match filter requires sorted itemArray (index %u)", i);
 			_logArray(SERIAL_DEBUG, true, getItem(i), _data->itemSize);
 			_logArray(SERIAL_DEBUG, true, getItem(i+1), _data->itemSize);
+			return false;
 		}
 	}
 
