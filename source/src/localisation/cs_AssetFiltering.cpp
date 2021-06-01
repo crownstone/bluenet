@@ -14,6 +14,22 @@
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
+
+void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool excluded){
+	LOGAssetFilteringDebug("FilterId=%u %s device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
+			filter.runtimedata()->filterId,
+			excluded ? "excluded" : "accepted",
+			device.address[5],
+			device.address[4],
+			device.address[3],
+			device.address[2],
+			device.address[1],
+			device.address[0]);
+	_logArray(LogLevelAssetFilteringDebug, true, device.data, device.dataSize);
+}
+
+
+
 cs_ret_code_t AssetFiltering::init() {
 	LOGAssetFilteringInfo("init");
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
@@ -89,19 +105,29 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
+	// check if device is rejected by looping over exclusion filters.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
-		if (filterInputResult(filter, device)) {
-			LOGAssetFilteringDebug("FilterId=%u accepted device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
-					filter.runtimedata()->filterId,
-					device.address[5],
-					device.address[4],
-					device.address[3],
-					device.address[2],
-					device.address[1],
-					device.address[0]);
-			_logArray(LogLevelAssetFilteringDebug, true, device.data, device.dataSize);
-			processAcceptedAsset(filter, device);
+
+		if (filter.filterdata().metadata().flags()->flags.exclude == true) {
+			if (filterAcceptsScannedDevice(filter, device)) {
+				// reject by early return.
+				LogAcceptedDevice(filter, device, true);
+				return;
+			}
+		}
+	}
+
+	// device was not rejected: loop over inclusion filters afterwards.
+	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
+		auto filter = AssetFilter(_filterStore->getFilter(i));
+
+		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
+			if (filterAcceptsScannedDevice(filter, device)) {
+				// accept for each filter as they have different profile id's etc.
+				LogAcceptedDevice(filter, device, false);
+				processAcceptedAsset(filter, device);
+			}
 		}
 	}
 }
@@ -226,7 +252,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 	return defaultValue;
 }
 
-bool AssetFiltering::filterInputResult(AssetFilter assetFilter, const scanned_device_t& asset) {
+bool AssetFiltering::filterAcceptsScannedDevice(AssetFilter assetFilter, const scanned_device_t& asset) {
 	// The input result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly.
 	return prepareFilterInputAndCallDelegate(

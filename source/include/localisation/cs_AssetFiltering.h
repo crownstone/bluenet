@@ -43,7 +43,7 @@ private:
 	 * Returns true if the device passes the filter according to its
 	 * metadata settings. Returns false otherwise.
 	 */
-	bool filterInputResult(AssetFilter filter, const scanned_device_t& asset);
+	bool filterAcceptsScannedDevice(AssetFilter filter, const scanned_device_t& asset);
 
 	/**
 	 * Returns a short_asset_id_t based on the configured selection of data

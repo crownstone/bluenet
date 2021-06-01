@@ -505,7 +505,7 @@ uint32_t AssetFilterStore::computeMasterCrc() {
 				&masterCrc);
 	}
 
-	LOGAssetFilterDebug("master crc: 0x%x", masterCrc);
+	LOGAssetFilterDebug("computed master crc: 0x%x", masterCrc);
 
 	return masterCrc;
 }
@@ -513,6 +513,8 @@ uint32_t AssetFilterStore::computeMasterCrc() {
 bool AssetFilterStore::checkFilterSizeConsistency() {
 	LOGd("checkFilterSizeConsistency");
 	bool consistencyChecksFailed = false;
+
+	LOGAssetFilterDebug("Check size consistency");
 
 	for (size_t index = 0; index < _filtersCount; /* intentionally no index++ here */) {
 		auto filter = AssetFilter(_filters[index]);
@@ -523,6 +525,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 		}
 
 		if (filter.runtimedata()->flags.flags.committed == false) {
+			LOGAssetFilterDebug("Filter %u not yet commited", index);
 			// filter changed since commit.
 
 			if (!filter.filterdata().isValid()) {
@@ -535,6 +538,8 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 
 			size_t filterDataSizeAllocated = filter.runtimedata()->filterDataSize;
 			size_t filterDataSizeCalculated = filter.filterdata().length();
+			LOGAssetFilterDebug("filterDataSizeAllocated %u, filterDataSizeCalculated %u", filterDataSizeAllocated, filterDataSizeCalculated);
+			_logArray(SERIAL_DEBUG, true, filter.filterdata()._data, filterDataSizeAllocated);
 			if (filterDataSizeAllocated != filterDataSizeCalculated) {
 				LOGAssetFilterWarn("Deallocating filter ID=%u because filter size does not match: allocated=%u calculated=%u",
 						filter.runtimedata()->filterId,
@@ -614,6 +619,7 @@ void AssetFilterStore::loadFromFlash() {
 	// Commit filters.
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
 	if (stateVal.masterVersion != 0) {
+		LOGAssetFilterDebug("commit filters after loading from flash");
 		retCode = commit(stateVal.masterVersion, stateVal.masterCrc, false);
 	}
 
@@ -669,12 +675,16 @@ void AssetFilterStore::loadFromFlash(CS_TYPE type) {
 		filter.runtimedata()->filterId       = id;
 		filter.runtimedata()->flags.asInt    = 0;
 		filter.runtimedata()->filterDataSize = filter.filterdata().length();
-
+		
 		if (filter.runtimedata()->filterDataSize > stateSize) {
 			LOGw("Calculated filter data size is too large: filterDataSize=%u stateSize=%u", filter.runtimedata()->filterDataSize, stateSize);
 			deallocateFilter(id);
 			continue;
 		}
+		LOGAssetFilterDebug("filtertype %u, inputType %u, outputType %u",
+				*filter.filterdata().metadata().filterType(),
+				*filter.filterdata().metadata().inputType().type(),
+				*filter.filterdata().metadata().outputType().outFormat());
 	}
 }
 
