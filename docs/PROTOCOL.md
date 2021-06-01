@@ -166,7 +166,7 @@ uint8 | AD Type | 1 | 0x01: flags.
 uint8 | Flags | 1 |
 uint8 | AD Length | 1 | Length of the next AD structure.
 uint8 | AD Type | 1 | 0xFF: manufacturer specific data.
-uint8 | Company id | 2 | 0x004C: Apple.
+uint16 | Company id | 2 | 0x004C: Apple.
 uint8 | iBeacon type | 1 | 0x02: iBeacon.
 uint8 | iBeacon length | 1 | iBeacon struct length (0x15).
 uint8 | Proximity UUID | 16 | Configurable number.
