@@ -43,8 +43,10 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 
 	// binary search. [lowerIndex, upperIndex] is
 	// the inclusive candidate interval for the key index.
-	size_t lowerIndex = 0;
-	size_t upperIndex = _data->itemCount - 1;
+	// WARN: keep type equal to int, unsigned int will underflow when key
+	// is smaller than smallest element in filter.
+	int lowerIndex = 0;
+	int upperIndex = _data->itemCount - 1;
 	while (lowerIndex <= upperIndex) {
 		size_t midpointIndex = (lowerIndex + upperIndex) / 2;
 		auto cmp             = memcmp(key, getItem(midpointIndex), keyLengthInBytes);
