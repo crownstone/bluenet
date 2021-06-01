@@ -536,13 +536,12 @@ bool AssetFilterStore::validateFilters() {
 
 			size_t filterDataSizeAllocated = filter.runtimedata()->filterDataSize;
 			size_t filterDataSizeCalculated = filter.filterdata().length();
-			LOGAssetFilterDebug("filterDataSizeAllocated %u, filterDataSizeCalculated %u", filterDataSizeAllocated, filterDataSizeCalculated);
-			_logArray(SERIAL_DEBUG, true, filter.filterdata()._data, filterDataSizeAllocated);
 			if (filterDataSizeAllocated != filterDataSizeCalculated) {
 				LOGAssetFilterWarn("Deallocating filter ID=%u because filter size does not match: allocated=%u calculated=%u",
 						filter.runtimedata()->filterId,
 						filterDataSizeAllocated,
 						filterDataSizeCalculated);
+				_logArray(SERIAL_DEBUG, true, filter.filterdata()._data, filterDataSizeAllocated);
 
 				deallocateFilterByIndex(index);
 				consistencyChecksFailed = true;
