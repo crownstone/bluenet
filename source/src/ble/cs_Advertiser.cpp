@@ -514,7 +514,6 @@ void Advertiser::handleEvent(event_t & event) {
 			else {
 				stopAdvertising();
 			}
-			// TODO: should be done via event.
 			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
 			break;
 		}

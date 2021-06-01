@@ -67,7 +67,7 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	Mac          = 0,
+	Mac          = 0, // TODO: this isn't just "MAC" this also determines it is forwarded to the hub.
 	ShortAssetId = 1,
 };
 

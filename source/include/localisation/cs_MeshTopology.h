@@ -68,7 +68,7 @@ public:
 private:
 	static constexpr uint8_t INDEX_NOT_FOUND = 0xFF;
 
-	static constexpr int8_t RSSI_INIT = 0;
+	static constexpr int8_t RSSI_INIT = 0; // Should be in protocol
 
 	struct __attribute__((__packed__)) neighbour_node_t {
 		stone_id_t id;

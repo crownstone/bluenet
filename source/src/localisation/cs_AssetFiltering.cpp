@@ -116,6 +116,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
+			// TODO: what is this doing here?
 			if (_assetHandlerMac != nullptr) {
 				_assetHandlerMac->handleAcceptedAsset(filter, asset);
 			}
@@ -214,10 +215,16 @@ ReturnType prepareFilterInputAndCallDelegate(
 			assert(selector != nullptr, "Filter metadata type check failed");
 
 			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
-				uint8_t buff[31] = {0};
-				assert(result.len <= 31, "advertisement length too big");
+				// A normal advertisement payload size is 31B at most.
+				// We are also limited by the 32b bitmask.
+				if (result.len > 31) {
+					LOGw("Advertisement too large");
+					return defaultValue;
+				}
+				uint8_t buff[31];
 
 				// apply the mask
+				// TODO: why size_t? It is used on many places where a smaller uint can be used.
 				size_t buffIndex = 0;
 				for (size_t bitIndex = 0; bitIndex < result.len; bitIndex++) {
 					if (BLEutil::isBitSet(selector->adDataMask, bitIndex)) {
@@ -226,6 +233,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 					}
 				}
 				_logArray(LogLevelAssetFilteringVerbose, true, buff, buffIndex);
+				// TODO: pass the bitmask to the handler, so we don't have to make a copy?
 				return delegateExpression(filter, buff, buffIndex);
 			}
 

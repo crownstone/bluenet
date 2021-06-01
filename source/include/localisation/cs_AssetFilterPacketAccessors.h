@@ -18,6 +18,9 @@
  */
 
 
+/**
+ * Class that determines the input data for a filter or for the output.
+ */
 class AssetFilterInput {
 public:
 	uint8_t* _data;  // byte representation of this object.
@@ -34,6 +37,9 @@ public:
 	size_t length();
 };
 
+/**
+ * Class that determines the output method and data of an asset that passed the filter.
+ */
 class AssetFilterOutput {
 public:
 	uint8_t* _data;
@@ -46,6 +52,13 @@ public:
 	size_t length();
 };
 
+/**
+ * Class that contains all persisted metadata required for an asset filter:
+ * - Type of filter.
+ * - What profile ID this filter is associated with.
+ * - What data is used as input for the filter.
+ * - What the output should be.
+ */
 class AssetFilterMetadata {
 public:
 	uint8_t* _data;  // byte representation of this object.
@@ -60,6 +73,11 @@ public:
 	size_t length();
 };
 
+/**
+ * Class that contains all persisted data required for an asset filter:
+ * - Metadata.
+ * - Filter data.
+ */
 class AssetFilterData {
 public:
 	uint8_t* _data;  // byte representation of this object.
@@ -73,6 +91,11 @@ public:
 	size_t length();
 };
 
+/**
+ * Class that contains all data required for an asset filter:
+ * - Runtime data.
+ * - persisted data (filterdata).
+ */
 class AssetFilter {
 public:
 	uint8_t* _data;  // byte representation of this object.

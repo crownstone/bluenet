@@ -151,7 +151,6 @@ void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
 
 void AssetFilterSyncer::connect(stone_id_t stoneId) {
 	LOGAssetFilterSyncerDebug("connect");
-	// TODO: we need an event from the AssetFilterStore informing us if the store is in progress or not.
 	TYPIFY(CMD_CS_CENTRAL_CONNECT) packet;
 	packet.stoneId = stoneId;
 	event_t event(CS_TYPE::CMD_CS_CENTRAL_CONNECT, &packet, sizeof(packet));
