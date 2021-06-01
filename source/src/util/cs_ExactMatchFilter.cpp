@@ -27,7 +27,7 @@ bool ExactMatchFilter::isValid() {
 	for (auto i = 0; i < _data->itemCount - 1; i++) {
 		auto cmp = memcmp(getItem(i), getItem(i + 1), _data->itemSize);
 		if (cmp > 0) {
-			LOGe("Exact match filter requires sorted itemArray (index %u)", i);
+			LOGw("Exact match filter requires sorted itemArray (index %u)", i);
 			_logArray(SERIAL_DEBUG, true, getItem(i), _data->itemSize);
 			_logArray(SERIAL_DEBUG, true, getItem(i+1), _data->itemSize);
 			return false;
@@ -42,10 +42,8 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 		return false;
 	}
 
-	// binary search. [lowerIndex, upperIndex] is
-	// the inclusive candidate interval for the key index.
-	// WARN: keep type equal to int, unsigned int will underflow when key
-	// is smaller than smallest element in filter.
+	// Binary search. [lowerIndex, upperIndex] is the inclusive candidate interval for the key index.
+	// WARN: keep type equal to int, unsigned int will underflow when key is smaller than smallest element in filter.
 	int lowerIndex = 0;
 	int upperIndex = _data->itemCount - 1;
 	while (lowerIndex <= upperIndex) {

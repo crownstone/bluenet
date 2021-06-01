@@ -104,26 +104,26 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	// check if device is rejected by looping over exclusion filters.
+	// Check if device is rejected by looping over exclusion filters.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 
 		if (filter.filterdata().metadata().flags()->flags.exclude == true) {
 			if (filterAcceptsScannedDevice(filter, device)) {
-				// reject by early return.
+				// Reject by early return.
 				LogAcceptedDevice(filter, device, true);
 				return;
 			}
 		}
 	}
 
-	// device was not rejected: loop over inclusion filters afterwards.
+	// Device was not rejected: loop over inclusion filters afterwards.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 
 		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
 			if (filterAcceptsScannedDevice(filter, device)) {
-				// accept for each filter as they have different profile id's etc.
+				// Accept for each filter as they have different profile id's etc.
 				LogAcceptedDevice(filter, device, false);
 				processAcceptedAsset(filter, device);
 			}

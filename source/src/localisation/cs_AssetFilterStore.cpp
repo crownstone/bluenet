@@ -17,7 +17,7 @@
 
 #define LOGAssetFilterWarn LOGw
 #define LOGAssetFilterInfo LOGi
-#define LOGAssetFilterDebug LOGnone
+#define LOGAssetFilterDebug LOGvv
 
 cs_ret_code_t AssetFilterStore::init() {
 	LOGAssetFilterInfo("init");
@@ -505,32 +505,32 @@ uint32_t AssetFilterStore::computeMasterCrc() {
 				&masterCrc);
 	}
 
-	LOGAssetFilterDebug("computed master crc: 0x%x", masterCrc);
+	LOGAssetFilterDebug("Computed master crc: 0x%x", masterCrc);
 
 	return masterCrc;
 }
 
 bool AssetFilterStore::validateFilters() {
 	LOGAssetFilterDebug("validateFilters");
-	bool consistencyChecksFailed = false;
+	bool checksFailed = false;
 
 	for (size_t index = 0; index < _filtersCount; /* intentionally no index++ here */) {
 		auto filter = AssetFilter(_filters[index]);
 
 		if (filter._data == nullptr) {
-			// early return: last filter has been handled.
+			// Early return: last filter has been handled.
 			break;
 		}
 
 		if (filter.runtimedata()->flags.flags.committed == false) {
 			LOGAssetFilterDebug("Filter %u not yet commited", index);
-			// filter changed since commit.
+			// Filter changed since commit.
 
 			if (!filter.filterdata().isValid()) {
 				LOGAssetFilterWarn("Deallocating filter ID=%u because it is invalid", filter.runtimedata()->filterId);
 				deallocateFilterByIndex(index);
-				consistencyChecksFailed = true;
-				// intentionally skipping index++, deallocate shrinks the array we're looping over.
+				checksFailed = true;
+				// Intentionally skipping index++, deallocate shrinks the array we're looping over.
 				continue;
 			}
 
@@ -544,9 +544,9 @@ bool AssetFilterStore::validateFilters() {
 				_logArray(SERIAL_DEBUG, true, filter.filterdata()._data, filterDataSizeAllocated);
 
 				deallocateFilterByIndex(index);
-				consistencyChecksFailed = true;
+				checksFailed = true;
 
-				// intentionally skipping index++, deallocate shrinks the array we're looping over.
+				// Intentionally skipping index++, deallocate shrinks the array we're looping over.
 				continue;
 			}
 		}
@@ -554,7 +554,7 @@ bool AssetFilterStore::validateFilters() {
 		index++;
 	}
 
-	return consistencyChecksFailed;
+	return checksFailed;
 }
 
 void AssetFilterStore::computeFilterCrcs() {
@@ -605,30 +605,23 @@ void AssetFilterStore::loadFromFlash() {
 		if (type == CS_TYPE::CONFIG_DO_NOT_USE) {
 			break;
 		}
-
 		loadFromFlash(type);
 	}
 
 	// Load master version and CRC.
 	TYPIFY(STATE_ASSET_FILTERS_VERSION) stateVal;
 	State::getInstance().get(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &stateVal, sizeof(stateVal));
-	LOGAssetFilterDebug("masterVersion from flash: %u", stateVal.masterVersion);
+	LOGAssetFilterDebug("Loaded from flash: masterVersion=%u masterCrc=%u", stateVal.masterVersion, stateVal.masterCrc);
 
 	// Commit filters.
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
 	if (stateVal.masterVersion != 0) {
-		LOGAssetFilterDebug("commit filters after loading from flash");
 		retCode = commit(stateVal.masterVersion, stateVal.masterCrc, false);
 	}
 
 	// In case of error: remove all filters. (saves memory and improves boot-up speed)
 	if (retCode != ERR_SUCCESS) {
 		// Remove all filters: reverse iterate.
-		if(retCode != ERR_UNSPECIFIED){
-			LOGw("Failed loading from flash, deallocating. Retcode: %u");
-		} else {
-			LOGAssetFilterDebug("Master version is 0 on flash");
-		}
 		for (uint8_t index = _filtersCount; index > 0; --index) {
 			deallocateFilterByIndex(index - 1);
 		}
@@ -657,7 +650,7 @@ void AssetFilterStore::loadFromFlash(CS_TYPE type) {
 		uint8_t* filterBuf = allocateFilter(id, stateSize);
 
 		if (filterBuf == nullptr) {
-			LOGw("failed to allocate filter buffer");
+			LOGw("Failed to allocate filter buffer");
 			continue;
 		}
 
