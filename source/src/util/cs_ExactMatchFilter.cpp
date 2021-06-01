@@ -12,7 +12,7 @@
 
 ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {
 	if (isValid() == false) {
-		assert(false, "Invalid ExactMatchFilter encountered");
+		LOGe(false, "Invalid ExactMatchFilter encountered");
 	}
 }
 

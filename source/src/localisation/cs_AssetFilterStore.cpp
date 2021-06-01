@@ -511,6 +511,7 @@ uint32_t AssetFilterStore::computeMasterCrc() {
 }
 
 bool AssetFilterStore::checkFilterSizeConsistency() {
+	LOGd("checkFilterSizeConsistency");
 	bool consistencyChecksFailed = false;
 
 	for (size_t index = 0; index < _filtersCount; /* intentionally no index++ here */) {
@@ -555,6 +556,7 @@ bool AssetFilterStore::checkFilterSizeConsistency() {
 }
 
 void AssetFilterStore::computeFilterCrcs() {
+	LOGd("computeFilterCrcs");
 	for (uint8_t* filterBuffer : _filters) {
 		if (filterBuffer == nullptr) {
 			break;
