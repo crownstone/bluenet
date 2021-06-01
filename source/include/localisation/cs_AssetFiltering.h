@@ -17,26 +17,11 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
-	// TODO: what are these for?
-	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
-	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 
 private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;
 	AssetForwarder* _assetForwarder   = nullptr;
-
-	/**
-	 * This handleAcceptedAsset callback will be called for each filter
-	 * that has output type mac and have accepted the incoming asset.
-	 */
-	AssetHandlerMac* _assetHandlerMac = nullptr;
-
-	/**
-	 * This handleAcceptedAsset callback will be called for each filter
-	 * that has output type ShortAssetId and have accepted the incoming asset.
-	 */
-	AssetHandlerShortId* _assetHandlerShortId = nullptr;
 
 	/**
 	 * Returns true if init has been called successfully and

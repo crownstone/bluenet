@@ -89,7 +89,9 @@ uint8_t* AssetFilterStore::allocateFilter(uint8_t filterId, size_t stateDataSize
 
 	// Try heap allocation.
 	uint8_t* newFilterBuffer = new (std::nothrow) uint8_t[allocatedSize];
-	// TODO: memset to 0?
+
+	// memset to 0 to prevent undefined behaviour when 1st chunk is not uploaded.
+	memset(newFilterBuffer, 0, allocatedSize);
 
 	if (newFilterBuffer == nullptr) {
 		LOGAssetFilterWarn("Filter couldn't be allocated, heap is too full");
@@ -613,9 +615,8 @@ void AssetFilterStore::loadFromFlash() {
 		retCode = commit(stateVal.masterVersion, stateVal.masterCrc, false);
 	}
 
-	// In case of error: remove all filters.
+	// In case of error: remove all filters. (saves memory and improves boot-up speed)
 	if (retCode != ERR_SUCCESS) {
-		// TODO: do we want to remove all filters?
 		// Remove all filters: reverse iterate.
 		for (uint8_t index = _filtersCount; index > 0; --index) {
 			deallocateFilterByIndex(index - 1);

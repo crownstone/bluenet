@@ -47,9 +47,16 @@ bool EventDispatcher::addListener(EventListener* listener) {
 		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
 		return false;
 	}
-	if (listener == NULL) {
+	if (listener == nullptr) {
 		APP_ERROR_CHECK(NRF_ERROR_NULL);
 		return false;
+	}
+
+	// check for duplicate registration
+	for (uint8_t listenerIndex = 0; listenerIndex < _listenerCount; listenerIndex++) {
+		if(_listeners[listenerIndex] == listener) {
+			return true;
+		}
 	}
 
 	_listeners[_listenerCount++] = listener;
