@@ -17,36 +17,11 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
-	/**
-	 * Components can register as AssetHandlerMac in order to receive
-	 * a callback when a filter with AssetFilterOutputFormat::MacAdress
-	 * has accepted an advertisement.
-	 */
-	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
-
-	/**
-	 * Components can register as AssetHandlerShortId in order to receive
-	 * a callback when a filter with AssetFilterOutputFormat::ShortAssetId
-	 * has accepted an advertisement.
-	 */
-	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 
 private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;
 	AssetForwarder* _assetForwarder   = nullptr;
-
-	/**
-	 * This handleAcceptedAsset callback will be called for each filter
-	 * that has output type mac and have accepted the incoming asset.
-	 */
-	AssetHandlerMac* _assetHandlerMac = nullptr;
-
-	/**
-	 * This handleAcceptedAsset callback will be called for each filter
-	 * that has output type ShortAssetId and have accepted the incoming asset.
-	 */
-	AssetHandlerShortId* _assetHandlerShortId = nullptr;
 
 	/**
 	 * Returns true if init has been called successfully and

@@ -61,13 +61,6 @@ cs_ret_code_t AssetFiltering::init() {
 	return ERR_SUCCESS;
 }
 
-void AssetFiltering::setAssetHandlerMac(AssetHandlerMac* assetHandlerMac) {
-	_assetHandlerMac = assetHandlerMac;
-}
-
-void AssetFiltering::setAssetHandlerShortId(AssetHandlerShortId* assetHandlerShortId) {
-	_assetHandlerShortId = assetHandlerShortId;
-}
 
 // ---------------------------- Handling events ----------------------------
 
@@ -116,10 +109,6 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
-			if (_assetHandlerMac != nullptr) {
-				_assetHandlerMac->handleAcceptedAsset(filter, asset);
-			}
-
 			if (_assetForwarder != nullptr) {
 				_assetForwarder->handleAcceptedAsset(filter, asset);
 			}
@@ -128,10 +117,6 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 		}
 
 		case AssetFilterOutputFormat::ShortAssetId: {
-			if (_assetHandlerShortId != nullptr) {
-				short_asset_id_t shortId = filterOutputResultShortAssetId(filter, asset);
-				_assetHandlerShortId->handleAcceptedAsset(filter, asset, shortId);
-			}
 			break;
 		}
 	}
