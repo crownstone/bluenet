@@ -96,7 +96,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	for (size_t i = 0; i < _filterStore->getFilterCount(); ++i) {
+	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 		if (filterInputResult(filter, device)) {
 			LOGAssetFilteringDebug("FilterId=%u accepted device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
@@ -116,7 +116,6 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
-			// TODO: what is this doing here?
 			if (_assetHandlerMac != nullptr) {
 				_assetHandlerMac->handleAcceptedAsset(filter, asset);
 			}
@@ -143,16 +142,18 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 // ---------------------------- Extracting data from the filter  ----------------------------
 
 /**
- * Extracted logic to parse the input type into a template that accepts a delegate expression
- * `ExpressionType returnExpression` in order to re-use the stuff.
- *
  * This method extracts the filters 'input description', prepares the input according to that
  * description and calls the delegate with the prepared data.
  *
  * delegateExpression should be of the form (FilterInterface&, void*, size_t) -> ReturnType.
  *
- * TODO: this looks like an overcomplicated way of doing this. And all the work is done 2x:
- * first in filterInputResult() and again in processAcceptedAsset().
+ * The argument that is passed into `delegateExpression` is based on the AssetFilterInputType
+ * of the `assetFilter`.Buffers are only allocated when strictly necessary.
+ * (E.g. MacAddress is already available in the `device`, but for MaskedAdDataType a buffer
+ * of 31 bytes needs to be allocated on the stack.)
+ *
+ * The delegate return type is left as free template parameter so that this template can be
+ * used for both `contains` and `shortAssetId` return values.
  */
 template <class ReturnType, class ExpressionType>
 ReturnType prepareFilterInputAndCallDelegate(
@@ -162,11 +163,10 @@ ReturnType prepareFilterInputAndCallDelegate(
 		ExpressionType delegateExpression,
 		ReturnType defaultValue) {
 
-
 	// obtain a pointer to an FilterInterface object of the correct filter type
 	// (can be made prettier...)
-	CuckooFilter cuckoo; // Dangerous to use, it has a nullptr as data.
-	ExactMatchFilter exact; // Dangerous to use, it has a nullptr as data.
+	CuckooFilter cuckoo;     // Dangerous to use, it has a nullptr as data.
+	ExactMatchFilter exact;  // Dangerous to use, it has a nullptr as data.
 	FilterInterface* filter = nullptr;
 
 	switch (*assetFilter.filterdata().metadata().filterType()) {
@@ -176,7 +176,7 @@ ReturnType prepareFilterInputAndCallDelegate(
 			break;
 		}
 		case AssetFilterType::ExactMatchFilter: {
-			exact = assetFilter.filterdata().exactMatchFilter();
+			exact  = assetFilter.filterdata().exactMatchFilter();
 			filter = &exact;
 			break;
 		}
@@ -185,7 +185,6 @@ ReturnType prepareFilterInputAndCallDelegate(
 			return defaultValue;
 		}
 	}
-
 
 	// split out input type for the filter and prepare the input
 	switch (*filterInputDescription.type()) {
@@ -224,16 +223,14 @@ ReturnType prepareFilterInputAndCallDelegate(
 				uint8_t buff[31];
 
 				// apply the mask
-				// TODO: why size_t? It is used on many places where a smaller uint can be used.
-				size_t buffIndex = 0;
-				for (size_t bitIndex = 0; bitIndex < result.len; bitIndex++) {
+				uint8_t buffIndex = 0;
+				for (uint8_t bitIndex = 0; bitIndex < result.len; bitIndex++) {
 					if (BLEutil::isBitSet(selector->adDataMask, bitIndex)) {
 						buff[buffIndex] = result.data[bitIndex];
 						buffIndex++;
 					}
 				}
 				_logArray(LogLevelAssetFilteringVerbose, true, buff, buffIndex);
-				// TODO: pass the bitmask to the handler, so we don't have to make a copy?
 				return delegateExpression(filter, buff, buffIndex);
 			}
 

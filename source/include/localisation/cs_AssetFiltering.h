@@ -17,8 +17,18 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
-	// TODO: what are these for?
+	/**
+	 * Components can register as AssetHandlerMac in order to receive
+	 * a callback when a filter with AssetFilterOutputFormat::MacAdress
+	 * has accepted an advertisement.
+	 */
 	void setAssetHandlerMac(AssetHandlerMac* assetHandlerMac);
+
+	/**
+	 * Components can register as AssetHandlerShortId in order to receive
+	 * a callback when a filter with AssetFilterOutputFormat::ShortAssetId
+	 * has accepted an advertisement.
+	 */
 	void setAssetHandlerShortId(AssetHandlerShortId* assetHandlerMac);
 
 private:
