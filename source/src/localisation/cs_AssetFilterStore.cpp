@@ -667,6 +667,12 @@ void AssetFilterStore::loadFromFlash(CS_TYPE type) {
 		filter.runtimedata()->filterId       = id;
 		filter.runtimedata()->flags.asInt    = 0;
 		filter.runtimedata()->filterDataSize = filter.filterdata().length();
+
+		if (filter.runtimedata()->filterDataSize > stateSize) {
+			LOGw("Calculated filter data size is too large: filterDataSize=%u stateSize=%u", filter.runtimedata()->filterDataSize, stateSize);
+			deallocateFilter(id);
+			continue;
+		}
 	}
 }
 
