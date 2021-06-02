@@ -62,6 +62,7 @@ class MeshMsgEvent {
 public:
 	cs_mesh_model_msg_type_t type;     // Type of message
 	cs_data_t msg;                     // Message payload
+	const uint8_t* macAddress;               // Null pointer, or pointer to the MAC address of the relaying node, which is the src in case of 0 hops.
 	uint16_t srcAddress;               // Address of the original sender
 	uint8_t hops;                      // 0 hops means the msg was received directly from the original source.
 	int8_t rssi;                       // RSSI of the last hop

@@ -12,6 +12,7 @@
 #include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshModelMulticastNeighbours.h>
 #include <mesh/cs_MeshModelUnicast.h>
+#include <mesh/cs_MeshModelUnicastNeighbour.h>
 #include <protocol/cs_Typedefs.h>
 
 /**
@@ -27,7 +28,8 @@ public:
 			MeshModelMulticast& multicastModel,
 			MeshModelMulticastAcked& multicastAckedModel,
 			MeshModelMulticastNeighbours& multicastNeighboursModel,
-			MeshModelUnicast& unicastModel);
+			MeshModelUnicast& unicastModel,
+			MeshModelUnicastNeighbour& unicastNeighbourModel);
 
 	/**
 	 * Add item to the send queue of a suitable model.
@@ -40,8 +42,9 @@ public:
 	cs_ret_code_t remFromQueue(MeshUtil::cs_mesh_queue_item_t & item);
 
 private:
-	MeshModelMulticast* _multicastModel = nullptr;
-	MeshModelMulticastAcked* _multicastAckedModel = nullptr;
+	MeshModelMulticast* _multicastModel                     = nullptr;
+	MeshModelMulticastAcked* _multicastAckedModel           = nullptr;
 	MeshModelMulticastNeighbours* _multicastNeighboursModel = nullptr;
-	MeshModelUnicast* _unicastModel = nullptr;
+	MeshModelUnicast* _unicastModel                         = nullptr;
+	MeshModelUnicastNeighbour* _unicastNeighbourModel       = nullptr;
 };

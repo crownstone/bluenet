@@ -1,27 +1,28 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Apr 1, 2020
+ * Date: Mar 10, 2020
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #pragma once
 
 #include <mesh/cs_MeshCommon.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 #include <third/std/function.h>
-#include <util/cs_BitmaskVarSize.h>
 
 extern "C" {
-#include <access.h>
+#include <access_reliable.h>
 }
 
 /**
  * Class that:
- * - Sends and receives multicast acked messages.
+ * - Sends and receives targeted acked messages.
+ * - Uses reliable segmented messages for this.
  * - Queues messages to be sent.
  * - Handles queue 1 by 1.
  */
-class MeshModelMulticastAcked {
+class MeshModelUnicastNeighbour {
 public:
 	/** Callback function definition. */
 	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply)> callback_msg_t;
@@ -44,10 +45,7 @@ public:
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
-	 * Add a msg to an empty spot in the queue (transmissions == 0).
-	 * Start looking at SendIndex, then reverse iterate over the queue.
-	 * Then set the new SendIndex at the newly added item, so that it will be send first.
-	 * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
+	 * Add a msg the queue.
 	 */
 	cs_ret_code_t addToQueue(MeshUtil::cs_mesh_queue_item_t& item);
 
@@ -64,27 +62,36 @@ public:
 	/** Internal usage */
 	void handleMsg(const access_message_rx_t * accessMsg);
 
+	/** Internal usage */
+	void handleReliableStatus(access_reliable_status_t status);
+
 private:
 	const static uint8_t queue_size = 5;
 
 	const static uint8_t queue_index_none = 255;
 
-	struct __attribute__((__packed__)) cs_multicast_acked_queue_item_t {
+	struct __attribute__((__packed__)) cs_unicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
-		uint8_t numIds;
-		stone_id_t* stoneIdsPtr;
-
+		stone_id_t targetId;
 		uint8_t msgSize;
 		uint8_t* msgPtr = nullptr;
 	};
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
-	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _publishAddressHandle = DSM_HANDLE_INVALID;
 
 	callback_msg_t _msgCallback = nullptr;
 
-	cs_multicast_acked_queue_item_t _queue[queue_size];
+	access_reliable_t _accessReliableMsg;
+
+#if MESH_MODEL_TEST_MSG == 2
+	uint32_t _acked = 0;
+	uint32_t _timedout = 0;
+	uint32_t _canceled = 0;
+#endif
+
+	cs_unicast_queue_item_t _queue[queue_size];
 
 	/**
 	 * Queue index of message currently being sent.
@@ -97,25 +104,15 @@ private:
 	uint8_t _queueIndexNext = 0;
 
 	/**
-	 * Bitmask of acked stones.
-	 * If the Nth bit is set, the ack of Nth stone ID in the list has been received.
+	 * Status of the reliable msg.
+	 * 255 for no status.
 	 */
-	BitmaskVarSize _ackedStonesBitmask;
-
-//	/**
-//	 * Whether the current message has been handled by this stone yet.
-//	 */
-//	bool _handledSelf = false;
+	uint8_t _reliableStatus = 255;
 
 	/**
-	 *
+	 * Whether the reply message has been received.
 	 */
-	TYPIFY(CONFIG_CROWNSTONE_ID) _ownStoneId = 0;
-
-	/**
-	 * Number of processQueue() calls left until timeout.
-	 */
-	uint16_t _processCallsLeft;
+	bool _replyReceived = false;
 
 	/**
 	 * If item at index is in progress, cancel it.
@@ -147,33 +144,31 @@ private:
 	bool sendMsgFromQueue();
 
 	/**
-	 * Prepare for sending a new message.
-	 */
-	bool prepareForMsg(cs_multicast_acked_queue_item_t* item);
-
-	/**
-	 * Send a message over the mesh via publish, without reply.
-	 */
-	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len);
-
-	/**
-	 * Send an ack message.
-	 */
-	void sendReply(const access_message_rx_t* accessMsg, const uint8_t* data, uint16_t len);
-
-	/**
-	 * Handle an ack message.
-	 */
-	void handleReply(MeshUtil::cs_mesh_received_msg_t & msg);
-
-	/**
-	 * Check if ack from every stone ID in the list has been received.
-	 * Also check if timed out.
+	 * Check if a message is done (success or timed out).
 	 */
 	void checkDone();
 
 	/**
-	 * Retry sending (parts of) the message.
+	 * Send a unicast message over the mesh.
+	 *
+	 * This message will be have to acked or timed out,
+	 * before the next message can be sent.
+	 *
+	 * Message data has to stay in ram until acked or timedout!
 	 */
-	void retryMsg();
+	cs_ret_code_t sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs);
+
+	/**
+	 * Send a reply when receiving a reliable message.
+	 */
+	cs_ret_code_t sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize);
+
+	/**
+	 * Sets the publish address.
+	 *
+	 * Do this while no message is in progress.
+	 */
+	cs_ret_code_t setPublishAddress(stone_id_t id);
+
+	void sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode);
 };

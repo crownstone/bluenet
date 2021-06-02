@@ -53,10 +53,23 @@ uint8_t getChannel(const nrf_mesh_rx_metadata_t* metaData) {
 	return 0xff;
 }
 
-cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg) {
+const uint8_t* getMac(const nrf_mesh_rx_metadata_t* metaData) {
+	switch (metaData->source) {
+		case NRF_MESH_RX_SOURCE_SCANNER:
+			return metaData->params.scanner.adv_addr.addr;
+		case NRF_MESH_RX_SOURCE_INSTABURST:
+		case NRF_MESH_RX_SOURCE_GATT:
+		case NRF_MESH_RX_SOURCE_LOOPBACK:
+		default:
+			return nullptr;
+	}
+}
+
+cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t& accessMsg) {
 	cs_mesh_received_msg_t msg;
 	msg.opCode = accessMsg.opcode.opcode;
 	msg.srcAddress = accessMsg.meta_data.src.value;
+	msg.macAddress = getMac(accessMsg.meta_data.p_core_metadata);
 	msg.msg = (uint8_t*)(accessMsg.p_data);
 	msg.msgSize = accessMsg.length;
 	msg.rssi = getRssi(accessMsg.meta_data.p_core_metadata);

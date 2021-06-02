@@ -55,6 +55,8 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 
 	cs_mesh_model_msg_stone_mac_t request;
 	request.type = 0;
+	request.connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
+	memset(request.reserved, 0, sizeof(request.reserved));
 
 	cs_mesh_msg_t meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_STONE_MAC;
@@ -241,11 +243,10 @@ void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rs
 	sendRssiToUart(id, packet);
 }
 
-cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, mesh_reply_t* reply) {
+cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, const uint8_t* macAddress, mesh_reply_t* reply) {
 	switch (packet.type) {
 		case 0: {
-			LOGMeshTopologyInfo("Send mac address");
-
+			LOGMeshTopologyInfo("Reply to mac address request");
 			if (reply == nullptr) {
 				return ERR_BUFFER_UNASSIGNED;
 			}
@@ -254,21 +255,26 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone
 			}
 			cs_mesh_model_msg_stone_mac_t* replyPacket = reinterpret_cast<cs_mesh_model_msg_stone_mac_t*>(reply->buf.data);
 			replyPacket->type = 1;
+			replyPacket->connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
+			memset(replyPacket->reserved, 0, sizeof(replyPacket->reserved));
 
-			ble_gap_addr_t address;
-			if (sd_ble_gap_addr_get(&address) != NRF_SUCCESS) {
-				return ERR_UNSPECIFIED;
-			}
-			memcpy(replyPacket->mac, address.addr, MAC_ADDRESS_LEN);
 			reply->type = CS_MESH_MODEL_TYPE_STONE_MAC;
 			reply->dataSize = sizeof(cs_mesh_model_msg_stone_mac_t);
 			break;
 		}
 		case 1: {
-			LOGMeshTopologyInfo("Received mac address id=%u mac=%02X:%02X:%02X:%02X:%02X:%02X", id, packet.mac[5], packet.mac[4], packet.mac[3], packet.mac[2], packet.mac[1], packet.mac[0]);
+			LOGMeshTopologyInfo("Received mac address id=%u", id);
+			if (macAddress == nullptr) {
+				LOGw("Missing MAC address");
+				break;
+			}
+			if (packet.connectionProtocol != CS_CONNECTION_PROTOCOL_VERSION) {
+				LOGw("Unsupported protocol %u", packet.connectionProtocol);
+				break;
+			}
 			TYPIFY(EVT_MESH_TOPO_MAC_RESULT) result;
 			result.stoneId = id;
-			memcpy(result.macAddress, packet.mac, sizeof(result.macAddress));
+			memcpy(result.macAddress, macAddress, sizeof(result.macAddress));
 			event_t event(CS_TYPE::EVT_MESH_TOPO_MAC_RESULT, &result, sizeof(result));
 			event.dispatch();
 			break;
@@ -278,10 +284,6 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone
 }
 
 void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
-	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
-		cs_mesh_model_msg_stone_mac_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
-		result.returnCode = onStoneMacMsg(packet.srcAddress, payload, packet.reply);
-	}
 	if (packet.type == CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI) {
 		cs_mesh_model_msg_neighbour_rssi_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI>();
 		onNeighbourRssi(packet.srcAddress, payload);
@@ -289,6 +291,10 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 
 	if (packet.hops != 0) {
 		return;
+	}
+	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
+		cs_mesh_model_msg_stone_mac_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
+		result.returnCode = onStoneMacMsg(packet.srcAddress, payload, packet.macAddress, packet.reply);
 	}
 	add(packet.srcAddress, packet.rssi, packet.channel);
 }

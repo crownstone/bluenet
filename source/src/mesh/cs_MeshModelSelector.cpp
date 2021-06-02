@@ -13,11 +13,13 @@ void MeshModelSelector::init(
 		MeshModelMulticast& multicastModel,
 		MeshModelMulticastAcked& multicastAckedModel,
 		MeshModelMulticastNeighbours& multicastNeighboursModel,
-		MeshModelUnicast& unicastModel) {
-	_multicastModel = &multicastModel;
-	_multicastAckedModel = &multicastAckedModel;
+		MeshModelUnicast& unicastModel,
+		MeshModelUnicastNeighbour& unicastNeighbourModel) {
+	_multicastModel           = &multicastModel;
+	_multicastAckedModel      = &multicastAckedModel;
 	_multicastNeighboursModel = &multicastNeighboursModel;
-	_unicastModel = &unicastModel;
+	_unicastModel             = &unicastModel;
+	_unicastNeighbourModel    = &unicastNeighbourModel;
 }
 
 cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
@@ -41,12 +43,14 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 		}
 	}
 	else {
-		if (item.noHop) {
-			return ERR_NOT_IMPLEMENTED;
-		}
 		if (item.reliable) {
 			if (item.numIds == 1) {
-				return _unicastModel->addToQueue(item);
+				if (item.noHop) {
+					return _unicastNeighbourModel->addToQueue(item);
+				}
+				else {
+					return _unicastModel->addToQueue(item);
+				}
 			}
 			else {
 				return ERR_NOT_IMPLEMENTED;

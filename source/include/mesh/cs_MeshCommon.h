@@ -19,6 +19,7 @@ namespace MeshUtil {
 struct __attribute__((__packed__)) cs_mesh_received_msg_t {
 	uint16_t opCode;
 	uint16_t srcAddress; // of the original sender
+	const uint8_t* macAddress; // Null pointer, or pointer to the MAC address of the relaying node, which is the src in case of 0 hops.
 	uint8_t* msg;
 	uint8_t msgSize;
 	int8_t rssi;
