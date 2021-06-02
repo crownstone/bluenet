@@ -1,7 +1,7 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Mar 11, 2020
+ * Date: Jun 2, 2021
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -163,7 +163,7 @@ void MeshModelUnicastNeighbour::handleMsg(const access_message_rx_t * accessMsg)
 cs_ret_code_t MeshModelUnicastNeighbour::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
 	access_message_tx_t accessReplyMsg;
 	accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
+	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY;
 	accessReplyMsg.p_buffer = msg;
 	accessReplyMsg.length = msgSize;
 	accessReplyMsg.force_segmented = false;
@@ -182,7 +182,7 @@ cs_ret_code_t MeshModelUnicastNeighbour::sendMsg(const uint8_t* msg, uint16_t ms
 	}
 	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
 	accessMsg->opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG;
+	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_RELIABLE;
 	accessMsg->p_buffer = msg;
 	accessMsg->length = msgSize;
 	accessMsg->force_segmented = false;
@@ -191,7 +191,7 @@ cs_ret_code_t MeshModelUnicastNeighbour::sendMsg(const uint8_t* msg, uint16_t ms
 
 	_accessReliableMsg.model_handle = _accessModelHandle;
 	_accessReliableMsg.reply_opcode.company_id = CROWNSTONE_COMPANY_ID;
-	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
+	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY;
 	_accessReliableMsg.status_cb = staticReliableStatusHandler;
 	_accessReliableMsg.timeout = timeoutUs;
 
@@ -294,7 +294,7 @@ void MeshModelUnicastNeighbour::sendFailedResultToUart(stone_id_t id, cs_mesh_mo
 }
 
 cs_ret_code_t MeshModelUnicastNeighbour::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("Unicast addToQueue", item.metaData);
+	MeshUtil::printQueueItem("UnicastNeighbour addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
 	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
@@ -311,6 +311,7 @@ cs_ret_code_t MeshModelUnicastNeighbour::addToQueue(MeshUtil::cs_mesh_queue_item
 	assert(item.numIds == 1, "Single ID only");
 	assert(item.broadcast == false, "Unicast only");
 	assert(item.reliable == true, "Reliable only");
+	assert(item.noHop == true, "No hop only");
 
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then iterate over the queue.

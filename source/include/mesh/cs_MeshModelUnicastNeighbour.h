@@ -1,7 +1,7 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Mar 10, 2020
+ * Date: Jun 2, 2021
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -17,7 +17,7 @@ extern "C" {
 
 /**
  * Class that:
- * - Sends and receives targeted acked messages.
+ * - Sends and receives targeted acked messages to neighbours only (no relays).
  * - Uses reliable segmented messages for this.
  * - Queues messages to be sent.
  * - Handles queue 1 by 1.

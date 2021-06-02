@@ -9,6 +9,7 @@
 #include <localisation/cs_MeshTopology.h>
 #include <storage/cs_State.h>
 #include <util/cs_Rssi.h>
+#include <util/cs_Utils.h>
 #include <uart/cs_UartHandler.h>
 
 #define LOGMeshTopologyInfo    LOGi
@@ -63,7 +64,7 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	meshMsg.flags.flags.broadcast = false;
 	meshMsg.flags.flags.reliable = true;
 	meshMsg.flags.flags.useKnownIds = false;
-	meshMsg.flags.flags.noHops = false; // No reliable msgs without hops yet.
+	meshMsg.flags.flags.noHops = true;
 	meshMsg.reliability = 3; // Low timeout, we expect a result quickly.
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.idCount = 1;
@@ -243,39 +244,41 @@ void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rs
 	sendRssiToUart(id, packet);
 }
 
-cs_ret_code_t MeshTopology::onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, const uint8_t* macAddress, mesh_reply_t* reply) {
+cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
+	cs_mesh_model_msg_stone_mac_t packet = meshMsg.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
 	switch (packet.type) {
 		case 0: {
 			LOGMeshTopologyInfo("Reply to mac address request");
-			if (reply == nullptr) {
+			if (meshMsg.reply == nullptr) {
 				return ERR_BUFFER_UNASSIGNED;
 			}
-			if (reply->buf.len < sizeof(cs_mesh_model_msg_stone_mac_t)) {
+			if (meshMsg.reply->buf.len < sizeof(cs_mesh_model_msg_stone_mac_t)) {
 				return ERR_BUFFER_TOO_SMALL;
 			}
-			cs_mesh_model_msg_stone_mac_t* replyPacket = reinterpret_cast<cs_mesh_model_msg_stone_mac_t*>(reply->buf.data);
+			cs_mesh_model_msg_stone_mac_t* replyPacket = reinterpret_cast<cs_mesh_model_msg_stone_mac_t*>(meshMsg.reply->buf.data);
 			replyPacket->type = 1;
 			replyPacket->connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
 			memset(replyPacket->reserved, 0, sizeof(replyPacket->reserved));
 
-			reply->type = CS_MESH_MODEL_TYPE_STONE_MAC;
-			reply->dataSize = sizeof(cs_mesh_model_msg_stone_mac_t);
+			meshMsg.reply->type = CS_MESH_MODEL_TYPE_STONE_MAC;
+			meshMsg.reply->dataSize = sizeof(cs_mesh_model_msg_stone_mac_t);
 			break;
 		}
 		case 1: {
-			LOGMeshTopologyInfo("Received mac address id=%u", id);
-			if (macAddress == nullptr) {
+			LOGMeshTopologyInfo("Received mac address id=%u", meshMsg.srcAddress);
+			if (meshMsg.macAddressValid == false) {
 				LOGw("Missing MAC address");
 				break;
 			}
+			BLEutil::printAddress(meshMsg.macAddress, MAC_ADDRESS_LEN);
 			if (packet.connectionProtocol != CS_CONNECTION_PROTOCOL_VERSION) {
 				LOGw("Unsupported protocol %u", packet.connectionProtocol);
 				break;
 			}
 			TYPIFY(EVT_MESH_TOPO_MAC_RESULT) result;
-			result.stoneId = id;
-			memcpy(result.macAddress, macAddress, sizeof(result.macAddress));
-			event_t event(CS_TYPE::EVT_MESH_TOPO_MAC_RESULT, &result, sizeof(result));
+			result.stoneId = meshMsg.srcAddress;
+			memcpy(result.macAddress, meshMsg.macAddress, sizeof(result.macAddress));
+			event_t event(CS_TYPE::EVT_MESH_TOPO_MAC_RESULT, &result, sizeof(result)); // TODO: add result code and connection protocol to event.
 			event.dispatch();
 			break;
 		}
@@ -293,8 +296,7 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 		return;
 	}
 	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
-		cs_mesh_model_msg_stone_mac_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
-		result.returnCode = onStoneMacMsg(packet.srcAddress, payload, packet.macAddress, packet.reply);
+		result.returnCode = onStoneMacMsg(packet);
 	}
 	add(packet.srcAddress, packet.rssi, packet.channel);
 }

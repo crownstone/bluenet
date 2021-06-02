@@ -160,7 +160,7 @@ private:
 
 	// Event handlers
 	void onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet);
-	cs_ret_code_t onStoneMacMsg(stone_id_t id, cs_mesh_model_msg_stone_mac_t& packet, const uint8_t* macAddress, mesh_reply_t* result);
+	cs_ret_code_t onStoneMacMsg(MeshMsgEvent& meshMsg);
 	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
 	void onTickSecond();
 
