@@ -8,9 +8,10 @@
 #pragma once
 
 // Debug logs
+#define LOGMeshWarning LOGw
 #define LOGMeshInfo LOGvv
 #define LOGMeshDebug LOGvv
-#define LOGMeshWarning LOGw
+#define LOGMeshVerbose LOGvv
 
 // Debug logs
 #define LOGMeshModelInfo    LOGvv
