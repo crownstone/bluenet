@@ -462,7 +462,7 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 			}
 		}
 		if (!found) {
-			LOGAssetFilterSyncerVerbose("Missing, upload filterId=%u");
+			LOGAssetFilterSyncerVerbose("Missing, upload filterId=%u", filterId);
 			_filterIdsToUpload[_filterUploadCount++] = filterId;
 		}
 	}

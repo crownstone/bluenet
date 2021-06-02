@@ -251,6 +251,7 @@ void MeshModelUnicast::checkDone() {
 		}
 		case ACCESS_RELIABLE_TRANSFER_SUCCESS:
 			if (_replyReceived) {
+				// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 				CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type);
 				result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
 				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
@@ -270,6 +271,7 @@ void MeshModelUnicast::checkDone() {
 }
 
 void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode) {
+	// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 	CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(msgType);
 
 	uart_msg_mesh_result_packet_header_t resultHeader;
