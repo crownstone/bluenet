@@ -25,6 +25,8 @@ enum cs_mesh_model_opcode_t {
 	CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG = 0xC3,
 	CS_MESH_MODEL_OPCODE_MULTICAST_REPLY = 0xC4,
 	CS_MESH_MODEL_OPCODE_MULTICAST_NEIGHBOURS = 0xC5,
+	CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_RELIABLE = 0xC6,
+	CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY = 0xC7,
 };
 
 /**
@@ -279,7 +281,8 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_neighbour_rssi_t {
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_stone_mac_t {
 	uint8_t type; // 0 = request, 1 = reply.
-	uint8_t mac[MAC_ADDRESS_LEN];
+	uint8_t connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
+	uint8_t reserved[5]; // Allows for larger payloads for future types. Set to 0 for now.
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {

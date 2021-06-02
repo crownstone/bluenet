@@ -1,12 +1,12 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Mar 11, 2020
+ * Date: Jun 2, 2021
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #include <mesh/cs_MeshCommon.h>
-#include <mesh/cs_MeshModelUnicast.h>
+#include <mesh/cs_MeshModelUnicastNeighbour.h>
 #include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
@@ -23,25 +23,25 @@ extern "C" {
 }
 
 static void staticMsgHandler(access_model_handle_t handle, const access_message_rx_t * p_message, void * p_args) {
-	MeshModelUnicast* meshModel = (MeshModelUnicast*)p_args;
+	MeshModelUnicastNeighbour* meshModel = (MeshModelUnicastNeighbour*)p_args;
 	meshModel->handleMsg(p_message);
 }
 
 static void staticReliableStatusHandler(access_model_handle_t model_handle, void * p_args, access_reliable_status_t status) {
-	MeshModelUnicast* meshModel = (MeshModelUnicast*)p_args;
+	MeshModelUnicastNeighbour* meshModel = (MeshModelUnicastNeighbour*)p_args;
 	meshModel->handleReliableStatus(status);
 }
 
 static const access_opcode_handler_t opcodeHandlers[] = {
-		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG, CROWNSTONE_COMPANY_ID), staticMsgHandler},
-		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_REPLY, CROWNSTONE_COMPANY_ID), staticMsgHandler},
+		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_RELIABLE, CROWNSTONE_COMPANY_ID), staticMsgHandler},
+		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY, CROWNSTONE_COMPANY_ID), staticMsgHandler},
 };
 
-void MeshModelUnicast::registerMsgHandler(const callback_msg_t& closure) {
+void MeshModelUnicastNeighbour::registerMsgHandler(const callback_msg_t& closure) {
 	_msgCallback = closure;
 }
 
-void MeshModelUnicast::init(uint16_t modelId) {
+void MeshModelUnicastNeighbour::init(uint16_t modelId) {
 	assert(_msgCallback != nullptr, "Callback not set");
 	uint32_t retVal;
 	access_model_add_params_t accessParams;
@@ -56,9 +56,17 @@ void MeshModelUnicast::init(uint16_t modelId) {
 	APP_ERROR_CHECK(retVal);
 	retVal = access_model_subscription_list_alloc(_accessModelHandle);
 	APP_ERROR_CHECK(retVal);
+
+	// When receiving a TTL:
+	// 0 = has not been relayed and will not be relayed
+	// 1 = may have been relayed, but will not be relayed
+	// 2 - 126 = may have been relayed and can be relayed
+	// 127 = has not been relayed and can be relayed
+	retVal = access_model_publish_ttl_set(_accessModelHandle, 0);
+	APP_ERROR_CHECK(retVal);
 }
 
-void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
+void MeshModelUnicastNeighbour::configureSelf(dsm_handle_t appkeyHandle) {
 	uint32_t retCode;
 	// No need to call dsm_address_subscription_add_handle(), as we're only subscribed to unicast address.
 
@@ -70,7 +78,7 @@ void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
 	// No need to call access_model_subscription_add(), as we're only subscribed to unicast address.
 }
 
-cs_ret_code_t MeshModelUnicast::setPublishAddress(stone_id_t id) {
+cs_ret_code_t MeshModelUnicastNeighbour::setPublishAddress(stone_id_t id) {
 	uint32_t retCode;
 
 	// First clean up the previous one.
@@ -91,9 +99,9 @@ cs_ret_code_t MeshModelUnicast::setPublishAddress(stone_id_t id) {
 	return ERR_SUCCESS;
 }
 
-void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
+void MeshModelUnicastNeighbour::handleMsg(const access_message_rx_t * accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
-		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i",
+		LOGd("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i",
 				accessMsg->opcode.opcode,
 				accessMsg->meta_data.appkey_handle,
 				accessMsg->meta_data.subnet_handle,
@@ -122,8 +130,9 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 		return;
 	}
 	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
+	msg.hops = 0;
 
-	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
+	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY) {
 		// Handle the message, don't send a reply.
 		_replyReceived = true;
 		_msgCallback(msg, nullptr);
@@ -151,10 +160,10 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 }
 
-cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
+cs_ret_code_t MeshModelUnicastNeighbour::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
 	access_message_tx_t accessReplyMsg;
 	accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
+	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY;
 	accessReplyMsg.p_buffer = msg;
 	accessReplyMsg.length = msgSize;
 	accessReplyMsg.force_segmented = false;
@@ -166,14 +175,14 @@ cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, 
 	return retVal;
 }
 
-cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs) {
+cs_ret_code_t MeshModelUnicastNeighbour::sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs) {
 	if (!access_reliable_model_is_free(_accessModelHandle)) {
 		LOGMeshModelVerbose("Busy");
 		return ERR_BUSY;
 	}
 	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
 	accessMsg->opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG;
+	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_RELIABLE;
 	accessMsg->p_buffer = msg;
 	accessMsg->length = msgSize;
 	accessMsg->force_segmented = false;
@@ -182,7 +191,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, ui
 
 	_accessReliableMsg.model_handle = _accessModelHandle;
 	_accessReliableMsg.reply_opcode.company_id = CROWNSTONE_COMPANY_ID;
-	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
+	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY;
 	_accessReliableMsg.status_cb = staticReliableStatusHandler;
 	_accessReliableMsg.timeout = timeoutUs;
 
@@ -191,7 +200,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, ui
 	return retVal;
 }
 
-void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
+void MeshModelUnicastNeighbour::handleReliableStatus(access_reliable_status_t status) {
 	if (_queueIndexInProgress == queue_index_none) {
 		LOGe("No index in progress");
 		return;
@@ -229,7 +238,7 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 	checkDone();
 }
 
-void MeshModelUnicast::checkDone() {
+void MeshModelUnicastNeighbour::checkDone() {
 	bool done = false;
 	switch (_reliableStatus) {
 		case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
@@ -270,7 +279,7 @@ void MeshModelUnicast::checkDone() {
 	}
 }
 
-void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode) {
+void MeshModelUnicastNeighbour::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode) {
 	// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 	CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(msgType);
 
@@ -286,8 +295,8 @@ void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_t
 	LOGMeshModelDebug("all failed");
 }
 
-cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("Unicast addToQueue", item.metaData);
+cs_ret_code_t MeshModelUnicastNeighbour::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
+	MeshUtil::printQueueItem("UnicastNeighbour addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
 	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
@@ -304,6 +313,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	assert(item.numIds == 1, "Single ID only");
 	assert(item.broadcast == false, "Unicast only");
 	assert(item.reliable == true, "Reliable only");
+	assert(item.noHop == true, "No hop only");
 
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then iterate over the queue.
@@ -337,7 +347,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	return ERR_BUSY;
 }
 
-cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
+cs_ret_code_t MeshModelUnicastNeighbour::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
 	for (int i = 0; i < queue_size; ++i) {
 		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
@@ -349,21 +359,21 @@ cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint
 	return retCode;
 }
 
-void MeshModelUnicast::cancelQueueItem(uint8_t index) {
+void MeshModelUnicastNeighbour::cancelQueueItem(uint8_t index) {
 	if (_queueIndexInProgress == index) {
 		LOGe("TODO: Cancel progress");
 		_queueIndexInProgress = queue_index_none;
 	}
 }
 
-void MeshModelUnicast::remQueueItem(uint8_t index) {
+void MeshModelUnicastNeighbour::remQueueItem(uint8_t index) {
 	_queue[index].metaData.transmissionsOrTimeout = 0;
 	LOGMeshModelVerbose("free %p", _queue[index].msgPtr);
 	free(_queue[index].msgPtr);
 	LOGMeshModelVerbose("removed from queue: ind=%u", index);
 }
 
-int MeshModelUnicast::getNextItemInQueue(bool priority) {
+int MeshModelUnicastNeighbour::getNextItemInQueue(bool priority) {
 	int index;
 	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
 		index = i % queue_size;
@@ -374,7 +384,7 @@ int MeshModelUnicast::getNextItemInQueue(bool priority) {
 	return -1;
 }
 
-bool MeshModelUnicast::sendMsgFromQueue() {
+bool MeshModelUnicastNeighbour::sendMsgFromQueue() {
 	if (_queueIndexInProgress != queue_index_none) {
 		return false;
 	}
@@ -404,11 +414,11 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 	return true;
 }
 
-void MeshModelUnicast::processQueue() {
+void MeshModelUnicastNeighbour::processQueue() {
 	sendMsgFromQueue();
 }
 
-void MeshModelUnicast::tick(uint32_t tickCount) {
+void MeshModelUnicastNeighbour::tick(uint32_t tickCount) {
 	if (tickCount % (MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS / TICK_INTERVAL_MS) == 0) {
 		processQueue();
 	}

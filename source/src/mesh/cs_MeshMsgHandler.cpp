@@ -46,6 +46,8 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 	meshMsgEvent.msg.data = payload;
 	meshMsgEvent.msg.len = payloadSize;
 	meshMsgEvent.srcAddress = msg.srcAddress;
+	meshMsgEvent.macAddressValid = msg.macAddressValid;
+	memcpy(meshMsgEvent.macAddress, msg.macAddress, MAC_ADDRESS_LEN);
 	meshMsgEvent.hops = msg.hops;
 	meshMsgEvent.rssi = msg.rssi;
 	meshMsgEvent.channel = msg.channel;

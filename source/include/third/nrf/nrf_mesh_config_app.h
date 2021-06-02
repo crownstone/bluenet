@@ -135,7 +135,8 @@
                             + 1 /* Crownstone multicast model */  \
                             + 1 /* Crownstone multicast acked model */  \
                             + 1   /* Crownstone unicast model */ \
-                            + 1   /* Crownstone multicase neighbours model */)
+                            + 1   /* Crownstone multicast neighbours model */ \
+                            + 1   /* Crownstone unicast neighbour model */)
 
 /**
  * The number of elements in the application.
@@ -161,8 +162,8 @@
 /** Number of the allowed parallel transfers (size of the internal context pool). */
 #define ACCESS_RELIABLE_TRANSFER_COUNT (1 /* Configuration server */  \
                                         + 1 /* Health server */  \
-                                        + 1 /* Crownstone multicast acked model */  \
-                                        + 1   /* Crownstone unicast model */)
+                                        + 1 /* Crownstone unicast model */ \
+                                        + 1 /* Crownstone unicast neighbour model */)
 
 /** Define for acknowledging message transaction timeout, in micro seconds. */
 #define MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT  (SEC_TO_US(3))

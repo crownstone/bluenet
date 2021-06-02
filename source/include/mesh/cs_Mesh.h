@@ -16,6 +16,7 @@
 #include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshModelMulticastNeighbours.h>
 #include <mesh/cs_MeshModelUnicast.h>
+#include <mesh/cs_MeshModelUnicastNeighbour.h>
 #include <mesh/cs_MeshModelSelector.h>
 #include <mesh/cs_MeshMsgHandler.h>
 #include <mesh/cs_MeshMsgSender.h>
@@ -110,6 +111,7 @@ private:
 	MeshModelMulticastNeighbours  _modelMulticastNeighbours;
 	MeshModelMulticastAcked       _modelMulticastAcked;
 	MeshModelUnicast              _modelUnicast;
+	MeshModelUnicastNeighbour     _modelUnicastNeighbour;
 	MeshModelSelector             _modelSelector;
 	MeshMsgHandler                _msgHandler;
 	MeshMsgSender                 _msgSender;

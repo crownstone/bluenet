@@ -381,6 +381,7 @@ void MeshModelMulticastAcked::checkDone() {
 		LOGi("Received ack from all stones.");
 		MeshUtil::printQueueItem(" ", item.metaData);
 
+		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
 
 		result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
@@ -396,6 +397,7 @@ void MeshModelMulticastAcked::checkDone() {
 		LOGi("Timeout.");
 		MeshUtil::printQueueItem(" ", item.metaData);
 
+		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
 
 		// Timeout all remaining stones.
