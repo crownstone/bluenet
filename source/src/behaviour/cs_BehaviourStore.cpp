@@ -68,7 +68,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 		if (activeBehaviours[index] != nullptr &&
 				evt.size == activeBehaviours[index]->serializedSize() &&
 				memcmp(evt.getData(), activeBehaviours[index]->serialized().data(), evt.size) == 0) {
-			LOGi("Behaviour already exists at ind=%u", index);
+			LOGBehaviourStoreInfo("Behaviour already exists at ind=%u", index);
 			result_index = index;
 			evt.result.returnCode = ERR_SUCCESS;
 			break;
@@ -466,7 +466,7 @@ void BehaviourStore::init() {
 }
 
 void BehaviourStore::clearActiveBehavioursArray() {
-	LOGd("clearing all behaviours");
+	LOGBehaviourStoreInfo("clearing all behaviours");
 	for (size_t i = 0; i < MaxBehaviours; i++) {
 		removeBehaviour(i);
 	}

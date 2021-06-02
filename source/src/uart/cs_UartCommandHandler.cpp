@@ -270,13 +270,18 @@ void UartCommandHandler::handleCommandInjectEvent(cs_data_t commandData) {
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
+
 	uint16_t* type = reinterpret_cast<uint16_t*>(commandData.data);
 	CS_TYPE csType = toCsType(*type);
+
 	if (csType == CS_TYPE::CONFIG_DO_NOT_USE) {
 		LOGw("Invalid type: %u", type);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
+	} else {
+		LOGd("dispatching event for type: %u", csType);
 	}
+
 	uint8_t* eventData = commandData.data + sizeof(uint16_t);
 	uint16_t eventDataSize = commandData.len - sizeof(uint16_t);
 	event_t event(csType, eventData, eventDataSize);

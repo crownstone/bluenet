@@ -60,6 +60,7 @@ void SwitchAggregator::switchPowered() {
 // ================================== State updaters ==================================
 
 bool SwitchAggregator::updateBehaviourHandlers() {
+	LOGSwitchAggregatorDebug("updateBehaviourHandlers");
 
 	std::optional<uint8_t> prevBehaviourState = behaviourState;
 	behaviourHandler.update();
