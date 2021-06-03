@@ -66,16 +66,6 @@ constexpr auto ArraySize(T(&)[N]) {
 }
 
 template<typename T>
-void printInlineArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
-	_logArray(verbosity, false, arr, len);
-}
-
-template<typename T>
-void printArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
-	_logArray(verbosity, true, arr, len);
-}
-
-template<typename T>
 void printAddress(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
 	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
 	for (int i = len - 1; i > 0; i=i-1) {
