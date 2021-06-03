@@ -104,7 +104,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 	}
 }
 
-void PresenceHandler::handlePresenceEvent(uint8_t location, uint8_t profile, bool fromMesh) {
+void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, bool fromMesh) {
 	// Validate data.
 	if (profile > max_profile_id || location > max_location_id) {
 		LOGw("Invalid profile(%u) or location(%u)", profile, location);
