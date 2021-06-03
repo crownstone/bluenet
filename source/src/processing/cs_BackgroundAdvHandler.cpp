@@ -94,7 +94,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 
 #if BACKGROUND_ADV_VERBOSE == true
 	_log(SERIAL_DEBUG, false, "rssi=%i servicesMask: ", scannedDevice->rssi);
-	BLEutil::printArray(servicesMask, BACKGROUND_SERVICES_MASK_LEN);
+	_logArray(SERIAL_DEBUG, true, servicesMask, BACKGROUND_SERVICES_MASK_LEN);
 #endif
 
 	// Put the data into large integers, so we can perform shift operations.

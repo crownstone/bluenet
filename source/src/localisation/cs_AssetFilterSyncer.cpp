@@ -13,8 +13,8 @@
 #include <util/cs_Math.h>
 
 #define LOGAssetFilterSyncerInfo LOGi
-#define LOGAssetFilterSyncerDebug LOGd
-#define LOGAssetFilterSyncerVerbose LOGd
+#define LOGAssetFilterSyncerDebug LOGvv
+#define LOGAssetFilterSyncerVerbose LOGvv
 
 cs_ret_code_t AssetFilterSyncer::init(AssetFilterStore& store) {
 	LOGAssetFilterSyncerInfo("Init");
@@ -142,7 +142,7 @@ void AssetFilterSyncer::syncFilters(stone_id_t stoneId) {
 		return;
 	}
 	if (_store->isInProgress()) {
-		LOGAssetFilterSyncerInfo("Store is in progress");
+		LOGAssetFilterSyncerDebug("Store is in progress");
 		return;
 	}
 	LOGAssetFilterSyncerInfo("syncFilters to stoneId=%u", stoneId);
@@ -311,7 +311,7 @@ void AssetFilterSyncer::disconnect() {
 }
 
 void AssetFilterSyncer::done() {
-	LOGAssetFilterSyncerDebug("Done!");
+	LOGAssetFilterSyncerInfo("Done uploading master version %u", _store->getMasterVersion());
 	// Send out version again, so the next crownstone with an old version can send their version, which makes us connect to that crownstone.
 	sendVersionAtLowInterval();
 }
@@ -436,16 +436,16 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 		if (index.has_value()) {
 			AssetFilter myFilter = _store->getFilter(index.value());
 			if (myFilter.runtimedata()->crc != header->summaries[i].crc) {
-				LOGAssetFilterSyncerVerbose("CRC mismatch, upload filterId=%u");
+				LOGAssetFilterSyncerVerbose("CRC mismatch, upload filterId=%u", filterId);
 				_filterIdsToUpload[_filterUploadCount++] = filterId;
 			}
 			else {
-				LOGAssetFilterSyncerVerbose("CRC match, skip filterId=%u");
+				LOGAssetFilterSyncerVerbose("CRC match, skip filterId=%u", filterId);
 			}
 		}
 		else {
 			_filterIdsToRemove[_filterRemoveCount++] = filterId;
-			LOGAssetFilterSyncerVerbose("Not found, remove filterId=%u");
+			LOGAssetFilterSyncerVerbose("Not found, remove filterId=%u", filterId);
 		}
 	}
 

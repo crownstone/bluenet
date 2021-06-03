@@ -484,7 +484,7 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh
 			meshStateHeader->accessLevel,
 			meshStateHeader->sourceId
 			);
-	BLEutil::printArray(stateData, stateDataSize, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, stateData, stateDataSize);
 
 	// The reply is a result message, with a state header as payload.
 	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
@@ -674,7 +674,7 @@ void MeshMsgHandler::sendResultToUart(uart_msg_mesh_result_packet_header_t& resu
 	resultHeader.resultHeader.payloadSize = resultData.len;
 
 	_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, resultData.data, resultData.len);
 
 	// Send out result.
 	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);

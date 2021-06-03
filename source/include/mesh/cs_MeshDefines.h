@@ -17,6 +17,7 @@
 #define LOGMeshModelInfo    LOGvv
 #define LOGMeshModelDebug   LOGvv
 #define LOGMeshModelVerbose LOGvv
+#define LogLevelMeshModelVerbose SERIAL_VERY_VERBOSE
 
 /*
  * 0 to disable test.

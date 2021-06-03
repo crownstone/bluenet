@@ -370,7 +370,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 			it->msgSize = msgSize;
 			it->metaData.noHop = item.noHop;
 			LOGMeshModelVerbose("added to ind=%u", index);
-			BLEutil::printArray(it->msgPtr, it->msgSize);
+			_logArray(LogLevelMeshModelVerbose, true, it->msgPtr, it->msgSize);
 
 			// If queue was empty, we can start sending this item.
 			sendMsgFromQueue();

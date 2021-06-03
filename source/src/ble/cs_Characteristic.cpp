@@ -190,7 +190,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
 		_log(LogLevelCharacteristicDebug, false, "data: ");
-		BLEutil::printArray(getValuePtr(), valueLength, LogLevelCharacteristicDebug);
+		_logArray(LogLevelCharacteristicDebug, true, getValuePtr(), valueLength);
 
 		// we calculate what size buffer we need
 		cs_ret_code_t retVal = ERR_SUCCESS;
@@ -206,7 +206,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 					encryptionType
 			);
 			_log(LogLevelCharacteristicDebug, false, "encrypted: ");
-			BLEutil::printArray(valueGattAddress, encryptionBufferLength, LogLevelCharacteristicDebug);
+			_logArray(LogLevelCharacteristicDebug, true, valueGattAddress, encryptionBufferLength);
 		}
 		if (!SUCCESS(retVal)) {
 			// clear the partially encrypted buffer.
