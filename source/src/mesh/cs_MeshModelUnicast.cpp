@@ -100,12 +100,15 @@ cs_ret_code_t MeshModelUnicast::setPublishAddress(stone_id_t id) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MeshModelUnicast::setTtl(uint8_t ttl) {
+cs_ret_code_t MeshModelUnicast::setTtl(uint8_t ttl, bool temp) {
 	LOGMeshModelVerbose("setTtl %u", ttl);
 	uint32_t nrfCode = access_model_publish_ttl_set(_accessModelHandle, ttl);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGw("Failed to set TTL: nrfCode=%u", nrfCode);
 		return ERR_UNSPECIFIED;
+	}
+	if (!temp) {
+		_ttl = ttl;
 	}
 	return ERR_SUCCESS;
 }
@@ -181,9 +184,20 @@ cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, 
 	accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
 	accessReplyMsg.access_token = nrf_mesh_unique_token_get();
 
-	// Publish address and TTL are taken from the received accessMsg, jeey!
+	// Publish address is taken from the received accessMsg.
+	// TTL is only taken from the received accessMsg if it's 0, else it uses the current model TTL.
+	if (accessMsg->meta_data.ttl) {
+		setTtl(CS_MESH_DEFAULT_TTL, true);
+	}
+
 	uint32_t nrfCode = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
 	LOGMeshModelVerbose("send reply nrfCode=%u", nrfCode);
+
+	// Restore TTL
+	if (accessMsg->meta_data.ttl) {
+		setTtl(_ttl, true);
+	}
+
 	if (nrfCode != NRF_SUCCESS) {
 		LOGw("Failed to send reply: nrfCode=%u", nrfCode);
 		return ERR_UNSPECIFIED;

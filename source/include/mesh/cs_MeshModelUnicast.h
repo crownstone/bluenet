@@ -10,6 +10,7 @@
 #include <mesh/cs_MeshCommon.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <third/std/function.h>
+#include <cfg/cs_Config.h>
 
 extern "C" {
 #include <access_reliable.h>
@@ -114,6 +115,8 @@ private:
 	 */
 	bool _replyReceived = false;
 
+	uint8_t _ttl = CS_MESH_DEFAULT_TTL;
+
 	/**
 	 * If item at index is in progress, cancel it.
 	 */
@@ -175,7 +178,7 @@ private:
 	 *
 	 * Do this while no message is in progress.
 	 */
-	cs_ret_code_t setTtl(uint8_t ttl);
+	cs_ret_code_t setTtl(uint8_t ttl, bool temp = false);
 
 	void sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode);
 };
