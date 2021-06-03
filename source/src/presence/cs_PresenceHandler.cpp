@@ -34,32 +34,39 @@ void PresenceHandler::handleEvent(event_t& evt) {
 
 	switch (evt.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
-			if (BLEutil::isBitSet(parsed_adv_ptr->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
+			auto parsedAdvEventData = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
+
+			if (BLEutil::isBitSet(parsedAdvEventData->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
 				return;
 			}
 
-			uint8_t profile  = parsed_adv_ptr->profileId;
-			uint8_t location = parsed_adv_ptr->locationId;
-			bool fromMesh    = false;
+			uint8_t profile  = parsedAdvEventData->profileId;
+			uint8_t location = parsedAdvEventData->locationId;
+			bool forwardToMesh = !false;
 
-			handlePresenceEvent(profile, location, fromMesh);
+			handlePresenceEvent(profile, location, forwardToMesh);
 			return;
 		}
 		case CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION: {
-			TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)* profile_location = (TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*)evt.data;
+			auto profileLocationEventData = reinterpret_cast<TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*>(evt.data);
 
-			uint8_t profile  = profile_location->profileId;
-			uint8_t location = profile_location->locationId;
-			bool fromMesh    = profile_location->fromMesh;
+			uint8_t profile  = profileLocationEventData->profileId;
+			uint8_t location = profileLocationEventData->locationId;
+			bool forwardToMesh = !profileLocationEventData->fromMesh;
 
-			LOGPresenceHandler("Received: profile=%u location=%u mesh=%u", profile, location, fromMesh);
-
-			handlePresenceEvent(profile, location, fromMesh);
+			LOGPresenceHandler("Received: profile=%u location=%u mesh=%u", profile, location, forwardToMesh);
+			handlePresenceEvent(profile, location, forwardToMesh);
 			return;
 		}
 		case CS_TYPE::EVT_ASSET_ACCEPTED: {
-			LOGd("PresenceHandler received EVT_ASSET_ACCEPTED");
+			auto acceptedAssetEventData = reinterpret_cast<TYPIFY(EVT_ASSET_ACCEPTED)*>(evt.data);
+
+			uint8_t profileId = *acceptedAssetEventData->_filter.filterdata().metadata().profileId();
+			uint8_t location  = 0; // Location 0 signifies 'in sphere, no specific room'
+			bool forwardToMesh = true;
+
+			LOGd("PresenceHandler received EVT_ASSET_ACCEPTED (profileId %u, location 0)", profileId);
+			handlePresenceEvent(profileId, location, forwardToMesh);
 			break;
 		}
 		case CS_TYPE::CMD_GET_PRESENCE: {
@@ -125,7 +132,7 @@ void PresenceHandler::handlePresenceEvent(uint8_t location, uint8_t profile, boo
 	}
 }
 
-PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool fromMesh) {
+PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool forwardToMesh) {
 	auto prevdescription = getCurrentPresenceDescription();
 
 #ifdef PRESENCE_HANDLER_TESTING_CODE
@@ -142,16 +149,18 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 	}
 #endif
 
-	// purge whowhenwhere of old entries and add a new entry
+	// purge whowhenwhere of old entries
 	if (WhenWhoWhere.size() >= max_records) {
 		LOGw("Reached max number of records");
 		PresenceRecord record = WhenWhoWhere.back();
 		sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, record.who, record.where);
 		WhenWhoWhere.pop_back();
 	}
+
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
-	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
+
+	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ++iter) {
 		if (iter->timeoutCountdownSeconds == 0) {
 			// Should not happen, record should've been removed.
 			LOGw("timed out record");
@@ -163,15 +172,16 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 			newLocation = false;
 			break;
 		}
-		++iter;
 	}
 	// When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
 	if (meshCountdown == 0) {
-		if (!fromMesh) {
+		if (forwardToMesh) {
 			propagateMeshMessage(profile, location);
 		}
 		meshCountdown = presence_mesh_send_throttle_seconds + (RNG::getInstance().getRandom8() % presence_mesh_send_throttle_seconds_variation);
 	}
+
+	// Aadd the new entry
 	LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
 	WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));
 
