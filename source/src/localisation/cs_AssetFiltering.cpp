@@ -133,6 +133,8 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 
 void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
 	LOGAssetFilteringDebug("processAcceptedAsset");
+	dispatchAcceptedAssetEvent(filter,asset);
+
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
 			if (_assetForwarder != nullptr) {
@@ -146,6 +148,12 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 			break;
 		}
 	}
+}
+
+void AssetFiltering::dispatchAcceptedAssetEvent(AssetFilter filter, const scanned_device_t& asset) {
+	AssetAcceptedEvent evtData(filter, asset);
+	event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
+	assetEvent.dispatch();
 }
 
 

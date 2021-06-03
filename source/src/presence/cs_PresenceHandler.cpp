@@ -31,26 +31,35 @@ void PresenceHandler::init() {
 }
 
 void PresenceHandler::handleEvent(event_t& evt) {
-	uint8_t location;
-	uint8_t profile;
-	bool fromMesh = false;
+
 	switch (evt.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			// drop through
 			adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
 			if (BLEutil::isBitSet(parsed_adv_ptr->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
 				return;
 			}
-			profile = parsed_adv_ptr->profileId;
-			location = parsed_adv_ptr->locationId;
-			break;
+
+			uint8_t profile  = parsed_adv_ptr->profileId;
+			uint8_t location = parsed_adv_ptr->locationId;
+			bool fromMesh    = false;
+
+			handlePresenceEvent(profile, location, fromMesh);
+			return;
 		}
 		case CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION: {
-			TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*)evt.data;
-			profile = profile_location->profileId;
-			location = profile_location->locationId;
-			fromMesh = profile_location->fromMesh;
+			TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)* profile_location = (TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*)evt.data;
+
+			uint8_t profile  = profile_location->profileId;
+			uint8_t location = profile_location->locationId;
+			bool fromMesh    = profile_location->fromMesh;
+
 			LOGPresenceHandler("Received: profile=%u location=%u mesh=%u", profile, location, fromMesh);
+
+			handlePresenceEvent(profile, location, fromMesh);
+			return;
+		}
+		case CS_TYPE::EVT_ASSET_ACCEPTED: {
+			LOGd("PresenceHandler received EVT_ASSET_ACCEPTED");
 			break;
 		}
 		case CS_TYPE::CMD_GET_PRESENCE: {
@@ -73,8 +82,8 @@ void PresenceHandler::handleEvent(event_t& evt) {
 				resultData->presence[i] = 0;
 			}
 			resultData->presence[0] = presence ? presence.value().getBitmask() : 0;
-			evt.result.dataSize = sizeof(*resultData);
-			evt.result.returnCode = ERR_SUCCESS;
+			evt.result.dataSize     = sizeof(*resultData);
+			evt.result.returnCode   = ERR_SUCCESS;
 			return;
 		}
 		case CS_TYPE::EVT_TICK: {
@@ -84,15 +93,19 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			}
 			return;
 		}
-		default:
-			return;
+		default: return;
 	}
+}
+
+void PresenceHandler::handlePresenceEvent(uint8_t location, uint8_t profile, bool fromMesh) {
 	// Validate data.
 	if (profile > max_profile_id || location > max_location_id) {
 		LOGw("Invalid profile(%u) or location(%u)", profile, location);
 		return;
 	}
+
 	MutationType mutation = handleProfileLocationAdministration(profile, location, fromMesh);
+
 	if (mutation != MutationType::NothingChanged) {
 		triggerPresenceMutation(mutation);
 	}
@@ -108,8 +121,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			sendPresenceChange(PresenceChange::PROFILE_SPHERE_EXIT, profile);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }
 

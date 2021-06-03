@@ -92,6 +92,12 @@ private:
     void removeOldRecords();
 
     /**
+     * Calls handleProfileLocationAdministration, and dispatches events based
+     * on the returned mutation type.
+     */
+    void handlePresenceEvent(uint8_t location, uint8_t profile, bool fromMesh);
+
+    /**
      * Processes a new profile-location combination:
      * - a new entry is placed in the WhenWhoWhere list, 
      * - previous entries with the same p-l combo are deleted

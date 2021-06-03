@@ -325,6 +325,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_FILTERS_UPDATED,                              // Sent when the asset filter master version was updated (after a commit command was accepted).
 	EVT_FILTER_MODIFICATION,                          // Sent when filter modification has started (payload is true) or stopped (payload is false).
 
+	EVT_ASSET_ACCEPTED,                               // Sent by AssetFiltering an incoming scan is accepted by a filter.
+
+
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
 	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
@@ -640,6 +643,7 @@ typedef asset_filter_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGE
 typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 typedef void TYPIFY(EVT_FILTERS_UPDATED);
 typedef bool TYPIFY(EVT_FILTER_MODIFICATION);
+typedef AssetAcceptedEvent TYPIFY(EVT_ASSET_ACCEPTED);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

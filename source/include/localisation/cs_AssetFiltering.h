@@ -67,7 +67,7 @@ private:
 	 */
 	void processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
 
-	void dispatchAcceptedAssetMacToMesh(AssetFilter filter, const scanned_device_t& asset);
+	void dispatchAcceptedAssetEvent(AssetFilter filter, const scanned_device_t& asset);
 
 
 public:
