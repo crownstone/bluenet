@@ -51,7 +51,7 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
 		_scanner.onScan(scanData);
 	});
-	_modelSelector.init(_modelMulticast, _modelMulticastAcked, _modelMulticastNeighbours, _modelUnicast, _modelUnicastNeighbour);
+	_modelSelector.init(_modelMulticast, _modelMulticastAcked, _modelMulticastNeighbours, _modelUnicast);
 	_msgSender.init(&_modelSelector);
 
 	cs_ret_code_t retCode = _core->init(board);
@@ -85,11 +85,6 @@ void Mesh::initModels() {
 			_msgHandler.handleMsg(msg, nullptr);
 	});
 	_modelMulticastNeighbours.init(3);
-
-	_modelUnicastNeighbour.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) -> void {
-		_msgHandler.handleMsg(msg, reply);
-	});
-	_modelUnicastNeighbour.init(4);
 }
 
 void Mesh::configureModels(dsm_handle_t appkeyHandle) {
@@ -97,7 +92,6 @@ void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 	_modelMulticastAcked.configureSelf(appkeyHandle);
 	_modelUnicast.configureSelf(appkeyHandle);
 	_modelMulticastNeighbours.configureSelf(appkeyHandle);
-	_modelUnicastNeighbour.configureSelf(appkeyHandle);
 }
 
 void Mesh::start() {
@@ -229,7 +223,6 @@ void Mesh::onTick(uint32_t tickCount) {
 	_modelMulticastAcked.tick(tickCount);
 	_modelMulticastNeighbours.tick(tickCount);
 	_modelUnicast.tick(tickCount);
-	_modelUnicastNeighbour.tick(tickCount);
 }
 
 void Mesh::startSync() {

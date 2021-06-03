@@ -677,7 +677,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
 	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND, "mesh command: ");
-	BLEutil::printArray(buffer, size, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, buffer, size);
 
 	// Keep up the required size, and where in the buffer we are.
 	uint16_t bufIndex = 0;
@@ -769,7 +769,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		resultHeader.resultHeader.returnCode = result.returnCode;
 		resultHeader.resultHeader.payloadSize = result.dataSize;
 		_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-		BLEutil::printArray(result.buf.data, result.dataSize, SERIAL_INFO);
+		_logArray(SERIAL_INFO, true, result.buf.data, result.dataSize);
 
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));

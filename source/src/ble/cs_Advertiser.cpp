@@ -425,10 +425,10 @@ void Advertiser::printAdvertisement() {
 	LOGd("_adv_handle=%u", _advHandle);
 
 	_log(SERIAL_DEBUG, false, "adv_data len=%u data: ", _advData.adv_data.len);
-	BLEutil::printArray(_advData.adv_data.p_data, _advData.adv_data.len);
+	_logArray(SERIAL_DEBUG, true, _advData.adv_data.p_data, _advData.adv_data.len);
 
 	_log(SERIAL_DEBUG, false, "scan_rsp_data len=%u data: ", _advData.scan_rsp_data.len);
-	BLEutil::printArray(_advData.scan_rsp_data.p_data, _advData.scan_rsp_data.len);
+	_logArray(SERIAL_DEBUG, true, _advData.scan_rsp_data.p_data, _advData.scan_rsp_data.len);
 
 	LOGd("type=%u", _advParams.properties.type);
 	LOGd("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",

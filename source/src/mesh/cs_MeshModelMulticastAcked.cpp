@@ -273,7 +273,7 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 			it->msgSize = msgSize;
 
 			LOGMeshModelVerbose("added to ind=%u", index);
-			BLEutil::printArray(it->msgPtr, it->msgSize);
+			_logArray(LogLevelMeshModelVerbose, true, it->msgPtr, it->msgSize);
 
 			// If queue was empty, we can start sending this item.
 			sendMsgFromQueue();

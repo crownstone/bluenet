@@ -122,7 +122,7 @@
 /**
  * The default TTL value for the node.
  */
-#define ACCESS_DEFAULT_TTL (10)
+#define ACCESS_DEFAULT_TTL (CS_MESH_DEFAULT_TTL)
 
 /**
  * The number of models in the application.
@@ -135,8 +135,7 @@
                             + 1 /* Crownstone multicast model */  \
                             + 1 /* Crownstone multicast acked model */  \
                             + 1   /* Crownstone unicast model */ \
-                            + 1   /* Crownstone multicast neighbours model */ \
-                            + 1   /* Crownstone unicast neighbour model */)
+                            + 1   /* Crownstone multicast neighbours model */)
 
 /**
  * The number of elements in the application.
@@ -162,8 +161,7 @@
 /** Number of the allowed parallel transfers (size of the internal context pool). */
 #define ACCESS_RELIABLE_TRANSFER_COUNT (1 /* Configuration server */  \
                                         + 1 /* Health server */  \
-                                        + 1 /* Crownstone unicast model */ \
-                                        + 1 /* Crownstone unicast neighbour model */)
+                                        + 1 /* Crownstone unicast model */)
 
 /** Define for acknowledging message transaction timeout, in micro seconds. */
 #define MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT  (SEC_TO_US(3))
