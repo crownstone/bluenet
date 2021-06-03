@@ -71,21 +71,40 @@ void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
 }
 
 cs_ret_code_t MeshModelUnicast::setPublishAddress(stone_id_t id) {
-	uint32_t retCode;
-
+	LOGMeshModelVerbose("setPublishAddress %u", id);
 	// First clean up the previous one.
-	dsm_address_publish_remove(_publishAddressHandle);
+	uint32_t nrfCode = dsm_address_publish_remove(_publishAddressHandle);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+		case NRF_ERROR_NOT_FOUND: {
+			break;
+		}
+		default: {
+			LOGw("Failed to remove publish address: nrfCode=%u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
 
 	// All addresses with first 2 bits 0, are unicast addresses.
 	uint16_t address = id;
-	retCode = dsm_address_publish_add(address, &_publishAddressHandle);
-	assert(retCode == NRF_SUCCESS, "failed to add publish address");
-	if (retCode != NRF_SUCCESS) {
+	nrfCode = dsm_address_publish_add(address, &_publishAddressHandle);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to add publish address: nrfCode=%u", nrfCode);
 		return ERR_UNSPECIFIED;
 	}
-	retCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
-	assert(retCode == NRF_SUCCESS, "failed to set publish address");
-	if (retCode != NRF_SUCCESS) {
+	nrfCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to set publish address: nrfCode=%u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MeshModelUnicast::setTtl(uint8_t ttl) {
+	LOGMeshModelVerbose("setTtl %u", ttl);
+	uint32_t nrfCode = access_model_publish_ttl_set(_accessModelHandle, ttl);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to set TTL: nrfCode=%u", nrfCode);
 		return ERR_UNSPECIFIED;
 	}
 	return ERR_SUCCESS;
@@ -116,7 +135,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");
 #endif
 	}
-//	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type == NRF_MESH_ADDRESS_TYPE_UNICAST);
+
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
 	if (ownMsg) {
 		return;
@@ -145,6 +164,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 
 	// Send the reply.
 	if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
+		LOGw("Data size was set to %u", reply.dataSize);
 		reply.dataSize = sizeof(replyMsg) - MESH_HEADER_SIZE;
 	}
 	replyMsg[0] = reply.type;
@@ -161,14 +181,19 @@ cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, 
 	accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
 	accessReplyMsg.access_token = nrf_mesh_unique_token_get();
 
-	uint32_t retVal = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
-	LOGMeshModelVerbose("send reply %u", retVal);
-	return retVal;
+	// Publish address and TTL are taken from the received accessMsg, jeey!
+	uint32_t nrfCode = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
+	LOGMeshModelVerbose("send reply nrfCode=%u", nrfCode);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to send reply: nrfCode=%u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs) {
 	if (!access_reliable_model_is_free(_accessModelHandle)) {
-		LOGMeshModelVerbose("Busy");
+		LOGw("Busy");
 		return ERR_BUSY;
 	}
 	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
@@ -186,9 +211,13 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, ui
 	_accessReliableMsg.status_cb = staticReliableStatusHandler;
 	_accessReliableMsg.timeout = timeoutUs;
 
-	uint32_t retVal = access_model_reliable_publish(&_accessReliableMsg);
-	LOGd("reliable send ret=%u", retVal);
-	return retVal;
+	uint32_t nrfCode = access_model_reliable_publish(&_accessReliableMsg);
+	LOGd("reliable send nrfCode=%u", nrfCode);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to send msg: nrfCode=%u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
 }
 
 void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
@@ -325,6 +354,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
 			it->targetId = item.stoneIdsPtr[0];
 			it->msgSize = msgSize;
+			it->metaData.noHop = item.noHop;
 			LOGMeshModelVerbose("added to ind=%u", index);
 			BLEutil::printArray(it->msgPtr, it->msgSize);
 
@@ -390,8 +420,17 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 	_reliableStatus = 255;
 
 	cs_unicast_queue_item_t* item = &(_queue[index]);
-	setPublishAddress(item->targetId);
-	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->msgSize, item->metaData.transmissionsOrTimeout * 1000 * 1000);
+	cs_ret_code_t retCode = setPublishAddress(item->targetId);
+	if (retCode != ERR_SUCCESS) {
+		return false;
+	}
+
+	retCode = setTtl(item->metaData.noHop ? 0 : CS_MESH_DEFAULT_TTL);
+	if (retCode != ERR_SUCCESS) {
+		return false;
+	}
+
+	retCode = sendMsg(item->msgPtr, item->msgSize, item->metaData.transmissionsOrTimeout * 1000 * 1000);
 	if (retCode != ERR_SUCCESS) {
 		return false;
 	}

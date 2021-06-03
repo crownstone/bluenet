@@ -122,7 +122,7 @@
 /**
  * The default TTL value for the node.
  */
-#define ACCESS_DEFAULT_TTL (10)
+#define ACCESS_DEFAULT_TTL (CS_MESH_DEFAULT_TTL)
 
 /**
  * The number of models in the application.

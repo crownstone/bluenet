@@ -35,10 +35,12 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
 //	stone_id_t targetId = 0;   // 0 for broadcast
 	uint8_t transmissionsOrTimeout : 6; // Timeout in seconds when reliable, else number of transmissions.
 	bool priority : 1;
+	bool noHop : 1;
 
 	cs_mesh_queue_item_meta_data_t():
 		transmissionsOrTimeout(0),
-		priority(false)
+		priority(false),
+		noHop(false)
 	{}
 };
 

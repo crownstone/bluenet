@@ -45,12 +45,13 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 	else {
 		if (item.reliable) {
 			if (item.numIds == 1) {
-				if (item.noHop) {
-					return _unicastNeighbourModel->addToQueue(item);
-				}
-				else {
-					return _unicastModel->addToQueue(item);
-				}
+				return _unicastModel->addToQueue(item);
+//				if (item.noHop) {
+//					return _unicastNeighbourModel->addToQueue(item);
+//				}
+//				else {
+//					return _unicastModel->addToQueue(item);
+//				}
 			}
 			else {
 				return ERR_NOT_IMPLEMENTED;

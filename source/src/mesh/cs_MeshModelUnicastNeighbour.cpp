@@ -130,7 +130,6 @@ void MeshModelUnicastNeighbour::handleMsg(const access_message_rx_t * accessMsg)
 		return;
 	}
 	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
-	msg.hops = 0;
 
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_NEIGHBOURS_REPLY) {
 		// Handle the message, don't send a reply.

@@ -104,7 +104,6 @@ void MeshModelMulticastNeighbours::handleMsg(const access_message_rx_t * accessM
 		return;
 	}
 	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
-	msg.hops = 0;
 
 	_msgCallback(msg);
 }
