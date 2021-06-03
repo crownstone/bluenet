@@ -14,7 +14,7 @@
 #include <drivers/cs_RNG.h>
 #include <logging/cs_Logger.h>
 
-#define LOGPresenceHandler LOGnone
+#define LOGPresenceHandlerDebug LOGnone
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
@@ -42,7 +42,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 
 			uint8_t profile  = parsedAdvEventData->profileId;
 			uint8_t location = parsedAdvEventData->locationId;
-			bool forwardToMesh = !false;
+			bool forwardToMesh = true;
 
 			handlePresenceEvent(profile, location, forwardToMesh);
 			return;
@@ -54,7 +54,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			uint8_t location = profileLocationEventData->locationId;
 			bool forwardToMesh = !profileLocationEventData->fromMesh;
 
-			LOGPresenceHandler("Received: profile=%u location=%u mesh=%u", profile, location, forwardToMesh);
+			LOGPresenceHandlerDebug("Received: profile=%u location=%u mesh=%u", profile, location, forwardToMesh);
 			handlePresenceEvent(profile, location, forwardToMesh);
 			return;
 		}
@@ -65,20 +65,20 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			uint8_t location  = 0; // Location 0 signifies 'in sphere, no specific room'
 			bool forwardToMesh = true;
 
-			LOGd("PresenceHandler received EVT_ASSET_ACCEPTED (profileId %u, location 0)", profileId);
+			LOGPresenceHandlerDebug("PresenceHandler received EVT_ASSET_ACCEPTED (profileId %u, location 0)", profileId);
 			handlePresenceEvent(profileId, location, forwardToMesh);
 			break;
 		}
 		case CS_TYPE::CMD_GET_PRESENCE: {
-			LOGd("Get presence");
+			LOGPresenceHandlerDebug("Get presence");
 			if (evt.result.buf.data == nullptr) {
-				LOGd("ERR_BUFFER_UNASSIGNED");
+				LOGPresenceHandlerDebug("ERR_BUFFER_UNASSIGNED");
 				evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
 				return;
 			}
 			presence_t* resultData = reinterpret_cast<presence_t*>(evt.result.buf.data);
 			if (evt.result.buf.len < sizeof(*resultData)) {
-				LOGd("ERR_BUFFER_TOO_SMALL");
+				LOGPresenceHandlerDebug("ERR_BUFFER_TOO_SMALL");
 				evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
 				return;
 			}
@@ -166,7 +166,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 			LOGw("timed out record");
 		}
 		if (iter->who == profile && iter->where == location) {
-			LOGPresenceHandler("erasing old record profile(%u) location(%u)", profile, location);
+			LOGPresenceHandlerDebug("erasing old record profile(%u) location(%u)", profile, location);
 			meshCountdown = iter->meshSendCountdownSeconds;
 			WhenWhoWhere.erase(iter);
 			newLocation = false;
@@ -181,8 +181,8 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 		meshCountdown = presence_mesh_send_throttle_seconds + (RNG::getInstance().getRandom8() % presence_mesh_send_throttle_seconds_variation);
 	}
 
-	// Aadd the new entry
-	LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
+	// Add the new entry
+	LOGPresenceHandlerDebug("add record profile(%u) location(%u)", profile, location);
 	WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));
 
 	if (newLocation) {
@@ -230,7 +230,7 @@ void PresenceHandler::removeOldRecords() {
 	WhenWhoWhere.remove_if(
 			[&] (PresenceRecord www) {
 		if (www.timeoutCountdownSeconds == 0) {
-			LOGPresenceHandler("erasing timed out record profile=%u location=%u", www.who, www.where);
+			LOGPresenceHandlerDebug("erasing timed out record profile=%u location=%u", www.who, www.where);
 			return true;
 		}
 		return false;
@@ -263,7 +263,7 @@ void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location) {
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription() {
 	if (SystemTime::up() < presence_uncertain_due_reboot_time_out_s) {
-		LOGPresenceHandler("presence_uncertain_due_reboot_time_out_s hasn't expired");
+		LOGPresenceHandlerDebug("presence_uncertain_due_reboot_time_out_s hasn't expired");
 		return {};
 	}
 	PresenceStateDescription presence;
@@ -275,7 +275,7 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 		else {
 			// appearently iter is valid, so the .where field describes an occupied room.
 			presence.setRoom(iter->where);
-			// LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
+			// LOGPresenceHandlerDebug("adding room %d to currentPresenceDescription", iter->where);
 		}
 	}
 	return presence;
@@ -314,7 +314,7 @@ void PresenceHandler::tickSecond() {
 
 void PresenceHandler::print() {
 	// for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++) {
-	//     LOGd("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
+	//     LOGPresenceHandlerDebug("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
 	// }
 
 	std::optional<PresenceStateDescription> desc = getCurrentPresenceDescription();
@@ -322,6 +322,6 @@ void PresenceHandler::print() {
 		// desc->print();
 	}
 	else {
-		LOGPresenceHandler("presenchandler status: unavailable");
+		LOGPresenceHandlerDebug("presenchandler status: unavailable");
 	}
 }
