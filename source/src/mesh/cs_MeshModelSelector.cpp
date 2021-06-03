@@ -13,13 +13,11 @@ void MeshModelSelector::init(
 		MeshModelMulticast& multicastModel,
 		MeshModelMulticastAcked& multicastAckedModel,
 		MeshModelMulticastNeighbours& multicastNeighboursModel,
-		MeshModelUnicast& unicastModel,
-		MeshModelUnicastNeighbour& unicastNeighbourModel) {
+		MeshModelUnicast& unicastModel) {
 	_multicastModel           = &multicastModel;
 	_multicastAckedModel      = &multicastAckedModel;
 	_multicastNeighboursModel = &multicastNeighboursModel;
 	_unicastModel             = &unicastModel;
-	_unicastNeighbourModel    = &unicastNeighbourModel;
 }
 
 cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
@@ -45,13 +43,8 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 	else {
 		if (item.reliable) {
 			if (item.numIds == 1) {
+				// Unicast model can send with and without hops.
 				return _unicastModel->addToQueue(item);
-//				if (item.noHop) {
-//					return _unicastNeighbourModel->addToQueue(item);
-//				}
-//				else {
-//					return _unicastModel->addToQueue(item);
-//				}
 			}
 			else {
 				return ERR_NOT_IMPLEMENTED;
