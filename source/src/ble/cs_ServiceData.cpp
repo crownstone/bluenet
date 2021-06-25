@@ -380,13 +380,6 @@ void ServiceData::handleEvent(event_t & event) {
 			updateServiceData(false);
 			break;
 		}
-//		// TODO: do we need to keep up the error? Or we can simply retrieve it every service data update?
-//		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
-//		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-//		case CS_TYPE::EVT_RELAY_FORCED_ON:
-//			LOGd("Event: $typeName(%u)", event.type);
-//			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
-//			break;
 		case CS_TYPE::STATE_ERRORS: {
 			LOGd("Event: $typeName(%u)", event.type);
 			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
