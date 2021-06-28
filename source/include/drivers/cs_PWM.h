@@ -193,7 +193,6 @@ private:
 	int64_t _zeroCrossDeviationIntegral;
 
 	uint32_t _pinZeroCross = 32 + 9;
-//	uint32_t _pinZeroCross = 30;
 	uint32_t _gpioteZeroCross = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
 
 	//! Config gpiote
