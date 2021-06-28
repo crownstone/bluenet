@@ -185,6 +185,7 @@ void SafeSwitch::checkDimmerPower() {
 	}
 
 	checkedDimmerPowerUsage = true;
+	return;
 
 	TYPIFY(STATE_POWER_USAGE) powerUsage;
 	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
