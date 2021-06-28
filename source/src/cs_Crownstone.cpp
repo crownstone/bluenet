@@ -993,6 +993,7 @@ int main() {
 		// These boards use the NFC pins (p0.09 and p0.10).
 		// They have to be configured as GPIO before they can be used as GPIO.
 		case ACR01B10D:
+		case ACR01B13B:
 			enableNfcPins();
 			break;
 		default:

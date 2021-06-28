@@ -52,7 +52,7 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	config.threshold = threshold;
 	config.speed_mode = NRF_COMP_SP_MODE_Low; // Delay of 0.6us
 	config.hyst = NRF_COMP_HYST_NoHyst; // Not used in single ended mode
-	config.isource = NRF_COMP_ISOURCE_Off; // Should be off in our case and due to PAN 84
+//	config.isource = NRF_COMP_ISOURCE_Off; // Should be off in our case and due to PAN 84
 	config.interrupt_priority = APP_IRQ_PRIORITY_LOW;
 
 	if (ainPin > 7) {

@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "nrf52.h"
+#include "nrf.h"
 
 #ifdef __cplusplus
 }

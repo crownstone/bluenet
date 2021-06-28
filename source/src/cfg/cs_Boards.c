@@ -22,7 +22,7 @@
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_error.h"
-#include "nrf52.h"
+#include "nrf.h"
 #include "cfg/cs_AutoConfig.h"
 
 /* ********************************************************************************************************************
