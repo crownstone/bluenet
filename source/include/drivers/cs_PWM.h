@@ -86,6 +86,9 @@ public:
 	//! Interrupt handler: internal function, implementation specific.
 	void _handleInterrupt();
 
+	//! Helper function to get the gpiote event, given the index.
+	static nrf_gpiote_events_t getGpioteEvent(uint8_t index);
+
 private:
 	//! Private PWM constructor
 	PWM();
@@ -188,6 +191,10 @@ private:
 
 	//! Integral of the tick deviations.
 	int64_t _zeroCrossDeviationIntegral;
+
+	uint32_t _pinZeroCross = 32 + 9;
+//	uint32_t _pinZeroCross = 30;
+	uint32_t _gpioteZeroCross = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
 
 	//! Config gpiote
 	void gpioteConfig(uint8_t channel, bool initOn);

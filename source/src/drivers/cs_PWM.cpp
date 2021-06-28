@@ -64,7 +64,6 @@ PWM::PWM() :
 }
 
 uint32_t PWM::init(const pwm_config_t& config) {
-#if PWM_ENABLE==1
 	LOGi(FMT_INIT, "PWM");
 	_config = config;
 //	memcpy(&_config, &config, sizeof(pwm_config_t));
@@ -109,13 +108,32 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	_zeroCrossDeviationIntegral = 0;
 	_zeroCrossTicksDeviationAvg = 0;
 
+
+	nrf_gpio_cfg_input(_pinZeroCross, NRF_GPIO_PIN_NOPULL);
+
+	nrf_gpiote_event_configure(_gpioteZeroCross, _pinZeroCross, NRF_GPIOTE_POLARITY_TOGGLE);
+	nrf_gpiote_event_enable(_gpioteZeroCross);
+
+//	nrf_gpio_cfg_output(13);
+//	nrf_gpiote_task_configure(_gpioteZeroCross+1, 13, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
+//	nrf_gpiote_task_enable(_gpioteZeroCross+1);
+//
+//	auto ppiChannel = getPpiChannel(CS_PWM_PPI_CHANNEL_START + CS_PWM_PPI_CHANNEL_COUNT);
+//	nrf_ppi_channel_endpoint_setup(
+//			ppiChannel,
+//			nrf_gpiote_event_addr_get(getGpioteEvent(_gpioteZeroCross)),
+//			nrf_gpiote_task_addr_get(getGpioteTaskOut(_gpioteZeroCross + 1))
+//	);
+//	nrf_ppi_channel_enable(ppiChannel);
+
+	nrf_gpiote_event_clear(getGpioteEvent(_gpioteZeroCross));
+	nrf_gpiote_int_enable(1 << _gpioteZeroCross);
+//	nrf_gpiote_int_enable(0xFFFFFFFF);
+
 	PWM_TEST_PIN_INIT;
 
 	_initialized = true;
 	return ERR_SUCCESS;
-#endif
-
-	return ERR_PWM_NOT_ENABLED;
 }
 
 uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
@@ -192,6 +210,12 @@ void onTimerEnd(void* p_data, uint16_t len) {
 
 void PWM::onPeriodEnd() {
 	updateValues();
+	auto event = getGpioteEvent(_gpioteZeroCross);
+
+	bool set = nrf_gpiote_event_is_set(event);
+	nrf_gpiote_event_clear(event);
+	bool set2 = nrf_gpiote_event_is_set(event);
+	LOGd("event before=%u after=%u", set, set2);
 }
 
 
@@ -630,6 +654,22 @@ nrf_gpiote_tasks_t PWM::getGpioteTaskClear(uint8_t index) {
 	return NRF_GPIOTE_TASKS_CLR_0;
 }
 
+nrf_gpiote_events_t PWM::getGpioteEvent(uint8_t index) {
+	assert(index < 8, "invalid gpiote task index");
+	switch (index) {
+	case 0: return NRF_GPIOTE_EVENTS_IN_0;
+	case 1: return NRF_GPIOTE_EVENTS_IN_1;
+	case 2: return NRF_GPIOTE_EVENTS_IN_2;
+	case 3: return NRF_GPIOTE_EVENTS_IN_3;
+	case 4: return NRF_GPIOTE_EVENTS_IN_4;
+	case 5: return NRF_GPIOTE_EVENTS_IN_5;
+	case 6: return NRF_GPIOTE_EVENTS_IN_6;
+	case 7: return NRF_GPIOTE_EVENTS_IN_7;
+	}
+	APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
+	return NRF_GPIOTE_EVENTS_IN_0;
+}
+
 nrf_ppi_channel_t PWM::getPpiChannel(uint8_t index) {
 	assert(index < 16, "invalid ppi channel index");
 	switch (index) {
@@ -702,3 +742,38 @@ extern "C" void CS_PWM_TIMER_IRQ(void) {
 	PWM::getInstance()._handleInterrupt();
 //	}
 }
+
+// Interrupt handler
+extern "C" void GPIOTE_IRQHandler(void) {
+
+//	nrf_gpiote_events_t event = PWM::getGpioteEvent(CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT);
+//	if (nrf_gpiote_event_is_set(event)) {
+//		nrf_gpiote_event_clear(event);
+//		LOGw("gpio int");
+//	}
+
+
+	LOGw("gpio int");
+	uint32_t status            = 0;
+
+	/* collect status of all GPIOTE pin events. Processing is done once all are collected and cleared.*/
+	uint32_t            i;
+	nrf_gpiote_events_t event = NRF_GPIOTE_EVENTS_IN_0;
+	uint32_t            mask  = (uint32_t)NRF_GPIOTE_INT_IN0_MASK;
+
+	for (i = 0; i < GPIOTE_CH_NUM; i++)
+	{
+		if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
+		{
+			LOGw("gpio int %u", (uint32_t)event);
+			nrf_gpiote_event_clear(event);
+			status |= mask;
+		}
+		mask <<= 1;
+		/* Incrementing to next event, utilizing the fact that events are grouped together
+		 * in ascending order. */
+		event = (nrf_gpiote_events_t)((uint32_t)event + sizeof(uint32_t));
+	}
+}
+
+
