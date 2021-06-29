@@ -27,6 +27,7 @@ void NearestCrownstoneTracker::init() {
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	if (evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
+		// another crownstone has reported information.
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
 		MeshMsgEvent* meshMsgEvent = CS_TYPE_CAST(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
 		NearestWitnessReport report = createReport(meshMsgEvent);
@@ -35,8 +36,14 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	}
 
 	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
+		// a trackable asset is witnessed by this crownstone.
 		TrackableEvent* trackEvt = CS_TYPE_CAST(EVT_TRACKABLE, evt.data);
 		onReceive(trackEvt);
+	}
+
+	if (evt.type == CS_TYPE::EVT_ASSET_ACCEPTED) {
+		AssetAcceptedEvent* assetAcceptedEvent = CS_TYPE_CAST(EVT_ASSET_ACCEPTED, evt.data);
+		// TODO(Arend)
 	}
 }
 
@@ -145,8 +152,8 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMs
 			meshMsgEvent->srcAddress);
 }
 
-nearest_witness_report_t NearestCrownstoneTracker::reduceReport(const NearestWitnessReport& report) {
-	nearest_witness_report_t reducedReport;
+report_asset_mac_t NearestCrownstoneTracker::reduceReport(const NearestWitnessReport& report) {
+	report_asset_mac_t reducedReport;
 	std::memcpy(
 			reducedReport.trackableDeviceMac,
 			report.trackable.bytes,
@@ -192,7 +199,7 @@ void NearestCrownstoneTracker::resetReports() {
 // ------------------- Mesh related stuff ----------------------
 
 void NearestCrownstoneTracker::broadcastReport(NearestWitnessReport report) {
-	nearest_witness_report_t packedReport = reduceReport(report);
+	report_asset_mac_t packedReport = reduceReport(report);
 
 	cs_mesh_msg_t reportMsgWrapper;
 	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT;

@@ -89,15 +89,15 @@ private:
 	NearestWitnessReport createReport(TrackableEvent* trackedEvent);
 
 	/**
-	 * Expands the mesh representation of type nearest_witness_report_t to
+	 * Expands the mesh representation of type report_asset_mac_t to
 	 * the firmware representation of type NearestWitnessReport.
 	 */
 	NearestWitnessReport createReport(MeshMsgEvent* trackableAdvertisement);
 
 	/**
-	 * Returns a nearest_witness_report_t that can be sent over the mesh.
+	 * Returns a report_asset_mac_t that can be sent over the mesh.
 	 */
-	nearest_witness_report_t reduceReport(const NearestWitnessReport& report);
+	report_asset_mac_t reduceReport(const NearestWitnessReport& report);
 
 	/**
 	 * Only does an asignment to personal_report.

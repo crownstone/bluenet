@@ -66,7 +66,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT  = 20, // Payload: cs_mesh_model_msg_device_heartbeat_t
 	CS_MESH_MODEL_TYPE_RSSI_PING                 = 21, // Payload: rssi_ping_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t
-	CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT    = 23, // Payload: nearest_witness_report_t                        Only used in NearestCrownstone
+	CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT    = 23, // Payload: report_asset_mac_t                        Only used in NearestCrownstone
 	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
 	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
@@ -200,8 +200,14 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 /**
  * Packed version of NearestWitnessReport.
  */
-struct __attribute__((__packed__)) nearest_witness_report_t {
+struct __attribute__((__packed__)) report_asset_mac_t {
 	uint8_t trackableDeviceMac[6];
+	int8_t rssi;
+};
+
+struct __attribute__((__packed__)) report_asset_id_t {
+	uint8_t assetId[3];
+	uint8_t reserved[3];
 	int8_t rssi;
 };
 

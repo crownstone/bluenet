@@ -35,7 +35,7 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_TIME_SYNC> {
 
 template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT> {
-	using type = nearest_witness_report_t;
+	using type = report_asset_mac_t;
 };
 
 template<>

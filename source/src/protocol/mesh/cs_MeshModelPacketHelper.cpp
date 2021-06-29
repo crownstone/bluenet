@@ -73,7 +73,7 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_TIME_SYNC:
 			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t);
 		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT:
-			return payloadSize == sizeof(nearest_witness_report_t);
+			return payloadSize == sizeof(report_asset_mac_t);
 		case CS_MESH_MODEL_TYPE_STONE_MAC:
 			return payloadSize == sizeof(cs_mesh_model_msg_stone_mac_t);
 		case CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION:
