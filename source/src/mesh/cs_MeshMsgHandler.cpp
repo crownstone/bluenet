@@ -99,7 +99,13 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC: {
-			retCode = handleNearestWitnessReport(meshMsgEvent);
+			// TODO: this can actually be left out. An event is already sent for this message
+			// with type EVT_RECV_MESH_MSG.
+			retCode = dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, meshMsgEvent);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_REPORT_ASSET_ID: {
+			retCode = dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, meshMsgEvent);
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
@@ -190,7 +196,7 @@ cs_ret_code_t MeshMsgHandler::dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEv
 }
 
 cs_ret_code_t MeshMsgHandler::handleTest(uint8_t* payload, size16_t payloadSize) {
-	[[maybe_unused]] cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
+	[[maybe_unused]] cs_mesh_model_msg_test_t* test = reinterpret_cast<cs_mesh_model_msg_test_t*>(payload);
 	LOGi("received test counter=%u", test->counter);
 #if MESH_MODEL_TEST_MSG == 1
 	if (_lastReceivedCounter == 0) {

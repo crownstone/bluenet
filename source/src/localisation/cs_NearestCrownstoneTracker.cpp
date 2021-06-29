@@ -44,6 +44,7 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	if (evt.type == CS_TYPE::EVT_ASSET_ACCEPTED) {
 		AssetAcceptedEvent* assetAcceptedEvent = CS_TYPE_CAST(EVT_ASSET_ACCEPTED, evt.data);
 		// TODO(Arend)
+		(void)assetAcceptedEvent;
 	}
 }
 

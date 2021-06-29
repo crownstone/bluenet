@@ -39,6 +39,11 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC> {
 };
 
 template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_REPORT_ASSET_ID> {
+	using type = report_asset_id_t;
+};
+
+template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_STONE_MAC> {
 	using type = cs_mesh_model_msg_stone_mac_t;
 };
