@@ -110,7 +110,6 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
 
 	nrf_gpio_cfg_input(_pinZeroCross, NRF_GPIO_PIN_NOPULL);
-
 	nrf_gpiote_event_configure(_gpioteZeroCross, _pinZeroCross, NRF_GPIOTE_POLARITY_TOGGLE);
 	nrf_gpiote_event_enable(_gpioteZeroCross);
 
@@ -126,9 +125,16 @@ uint32_t PWM::init(const pwm_config_t& config) {
 //	);
 //	nrf_ppi_channel_enable(ppiChannel);
 
+	// Enable interrupt handling
+	err_code = sd_nvic_SetPriority(GPIOTE_IRQn, APP_IRQ_PRIORITY_MID);
+	APP_ERROR_CHECK(err_code);
+	err_code = sd_nvic_EnableIRQ(GPIOTE_IRQn);
+	APP_ERROR_CHECK(err_code);
+
+	// Turn on interrupts for zero crossing gpiote.
 	nrf_gpiote_event_clear(getGpioteEvent(_gpioteZeroCross));
 	nrf_gpiote_int_enable(1 << _gpioteZeroCross);
-//	nrf_gpiote_int_enable(0xFFFFFFFF);
+
 
 	PWM_TEST_PIN_INIT;
 
@@ -210,12 +216,11 @@ void onTimerEnd(void* p_data, uint16_t len) {
 
 void PWM::onPeriodEnd() {
 	updateValues();
-	auto event = getGpioteEvent(_gpioteZeroCross);
-
-	bool set = nrf_gpiote_event_is_set(event);
-	nrf_gpiote_event_clear(event);
-	bool set2 = nrf_gpiote_event_is_set(event);
-	LOGd("event before=%u after=%u", set, set2);
+//	auto event = getGpioteEvent(_gpioteZeroCross);
+//	bool set = nrf_gpiote_event_is_set(event);
+//	nrf_gpiote_event_clear(event);
+//	bool set2 = nrf_gpiote_event_is_set(event);
+//	LOGd("event before=%u after=%u", set, set2);
 }
 
 
@@ -745,35 +750,11 @@ extern "C" void CS_PWM_TIMER_IRQ(void) {
 
 // Interrupt handler
 extern "C" void GPIOTE_IRQHandler(void) {
-
-//	nrf_gpiote_events_t event = PWM::getGpioteEvent(CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT);
-//	if (nrf_gpiote_event_is_set(event)) {
-//		nrf_gpiote_event_clear(event);
-//		LOGw("gpio int");
-//	}
-
-
-	LOGw("gpio int");
-	uint32_t status            = 0;
-
-	/* collect status of all GPIOTE pin events. Processing is done once all are collected and cleared.*/
-	uint32_t            i;
-	nrf_gpiote_events_t event = NRF_GPIOTE_EVENTS_IN_0;
-	uint32_t            mask  = (uint32_t)NRF_GPIOTE_INT_IN0_MASK;
-
-	for (i = 0; i < GPIOTE_CH_NUM; i++)
-	{
-		if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask))
-		{
-			LOGw("gpio int %u", (uint32_t)event);
-			nrf_gpiote_event_clear(event);
-			status |= mask;
-		}
-		mask <<= 1;
-		/* Incrementing to next event, utilizing the fact that events are grouped together
-		 * in ascending order. */
-		event = (nrf_gpiote_events_t)((uint32_t)event + sizeof(uint32_t));
+	uint8_t channel = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
+	nrf_gpiote_events_t event = PWM::getGpioteEvent(channel);
+	uint32_t mask = 1 << channel;
+	if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask)) {
+		nrf_gpiote_event_clear(event);
+		LOGi("gpiote interrupt channel=%u", channel);
 	}
 }
-
-
