@@ -98,7 +98,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			retCode = handleRssiData(meshMsgEvent);
 			break;
 		}
-		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT: {
+		case CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC: {
 			retCode = handleNearestWitnessReport(meshMsgEvent);
 			break;
 		}

@@ -142,7 +142,7 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMs
 	// REVIEW: Lot of mesh implementation details: shouldn't this be done in the mesh msg handler?
 	// @Bart: We cannot. That would imply the component gets severely intertwined with other components
 	// and makes modularization a mess.
-	auto nearestWitnessReport = meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
+	auto nearestWitnessReport = meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC>();
 
 	return NearestWitnessReport(
 			TrackableId(
@@ -192,7 +192,7 @@ void NearestCrownstoneTracker::resetReports() {
 	_personalReport = NearestWitnessReport();
 
 	_personalReport.reporter = _myId;
-	_personalReport.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
+	_personalReport.rssi = -127; // std::numeric_limits<int8_t>::lowest();
 	_winningReport.rssi = -127;
 }
 
@@ -202,7 +202,7 @@ void NearestCrownstoneTracker::broadcastReport(NearestWitnessReport report) {
 	report_asset_mac_t packedReport = reduceReport(report);
 
 	cs_mesh_msg_t reportMsgWrapper;
-	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT;
+	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC;
 	reportMsgWrapper.payload = reinterpret_cast<uint8_t*>(&packedReport);
 	reportMsgWrapper.size = sizeof(packedReport);
 	reportMsgWrapper.reliability = CS_MESH_RELIABILITY_LOW;

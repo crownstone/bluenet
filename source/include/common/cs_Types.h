@@ -294,7 +294,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_RSSI_DATA,                               // TODO: remove this type, it's not used.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
 	EVT_RECV_MESH_MSG,                                // A mesh message was received.
-	EVT_MESH_NEAREST_WITNESS_REPORT,                  // CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT was received on the mesh and parsed by MeshMsgHandler. Payload: MeshMsgEvent
+	EVT_MESH_NEAREST_WITNESS_REPORT,                  // CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC was received on the mesh and parsed by MeshMsgHandler. Payload: MeshMsgEvent
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
