@@ -21,9 +21,19 @@
  * witnessing crownstone.
  *
  * NearestWitnessReport is the firmware internal representation of witness
- * reports. This contains auxiliary data compared to the mesh representation
- * (rssi_data_message_t).
+ * reports. This contains auxiliary data compared to the mesh representation.
  */
+struct __attribute__((__packed__)) internal_report_asset_id_t {
+	report_asset_id_t report;
+	stone_id_t reporter;
+};
+
+struct __attribute__((__packed__)) internal_report_asset_mac_t {
+	report_asset_mac_t report;
+	stone_id_t reporter;
+};
+
+
 class NearestWitnessReport {
 public:
 	TrackableId trackable;

@@ -99,8 +99,6 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC: {
-			// TODO: this can actually be left out. An event is already sent for this message
-			// with type EVT_RECV_MESH_MSG.
 			retCode = dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, meshMsgEvent);
 			break;
 		}

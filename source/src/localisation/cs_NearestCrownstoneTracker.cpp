@@ -27,23 +27,25 @@ void NearestCrownstoneTracker::init() {
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	if (evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
-		// another crownstone has reported information.
+
+		// another crownstone has reported information, this mesh message may be of type:
+		//  - CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC or
+		//  - CS_MESH_MODEL_TYPE_REPORT_ASSET_ID.
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
+
+		// transform to representation used in NearestCrownstoneTracker.
 		MeshMsgEvent* meshMsgEvent = CS_TYPE_CAST(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
 		NearestWitnessReport report = createReport(meshMsgEvent);
+
+		// handle the report.
 		onReceive(report);
 		return;
 	}
 
-	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
-		// a trackable asset is witnessed by this crownstone.
-		TrackableEvent* trackEvt = CS_TYPE_CAST(EVT_TRACKABLE, evt.data);
-		onReceive(trackEvt);
-	}
-
 	if (evt.type == CS_TYPE::EVT_ASSET_ACCEPTED) {
+		// an asset advertisement passed this crownstones filters.
 		AssetAcceptedEvent* assetAcceptedEvent = CS_TYPE_CAST(EVT_ASSET_ACCEPTED, evt.data);
-		// TODO(Arend)
+		onReceive(trackEvt);
 		(void)assetAcceptedEvent;
 	}
 }
@@ -135,14 +137,7 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* trac
 	return NearestWitnessReport(trackedEvent->id, trackedEvent->rssi, _myId);
 }
 
-// REVIEW: Return by ref?
-// @Bart: RVO (return value optimization) is guaranteed to take place
-// as the constructor call is part of the return statement.
-// (This means the return value is constructed on the stack frame below the current one.)
 NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMsgEvent) {
-	// REVIEW: Lot of mesh implementation details: shouldn't this be done in the mesh msg handler?
-	// @Bart: We cannot. That would imply the component gets severely intertwined with other components
-	// and makes modularization a mess.
 	auto nearestWitnessReport = meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC>();
 
 	return NearestWitnessReport(
