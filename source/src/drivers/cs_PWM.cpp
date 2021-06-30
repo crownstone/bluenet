@@ -406,10 +406,19 @@ uint8_t PWM::getValue(uint8_t channel) {
 	return _values[channel];
 }
 
+void onAdcInterrupt(void* p_data, uint16_t len) {
+	PWM::getInstance()._handleAdcInterrupt(*reinterpret_cast<uint32_t*>(p_data));
+}
+
+void PWM::_handleAdcInterrupt(uint32_t rtcTicks) {
+	LOGd("ADC interrupt dt: %u ticks or %u ms", RTC::difference(rtcTicks, _lastAdcZeroCrossInterruptRtcTicks), RTC::differenceMs(rtcTicks, _lastAdcZeroCrossInterruptRtcTicks));
+	_lastAdcZeroCrossInterruptRtcTicks = rtcTicks;
+}
+
 void PWM::onZeroCrossingInterrupt() {
-//	uint32_t rtcTicks = RTC::getCount();
-//	LOGd("onZeroCrossingInterrupt dt=%u or %u ms", RTC::difference(rtcTicks, _prevRtcTicks), RTC::differenceMs(rtcTicks, _prevRtcTicks));
-//	_prevRtcTicks = rtcTicks;
+	uint32_t rtcTicks = RTC::getCount();
+	uint32_t errorCode = app_sched_event_put(&rtcTicks, sizeof(rtcTicks), onAdcInterrupt);
+	APP_ERROR_CHECK(errorCode);
 
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
@@ -762,7 +771,7 @@ void onGpioteInterrupt(void* p_data, uint16_t len) {
 
 static uint32_t prevRtcTicks = 0;
 void PWM::_handleGpioteInterrupt(gpiote_int_data_t* data) {
-	LOGd("GPIOTE interrupt pin=%u dt: %u RTC ticks or %u ms", data->pinVal, RTC::difference(data->rtcTicks, prevRtcTicks), RTC::differenceMs(data->rtcTicks, prevRtcTicks));
+	LOGd("GPIOTE interrupt pin=%u dt: %u RTC ticks or %u ms. Time since ADC int: %u ticks", data->pinVal, RTC::difference(data->rtcTicks, prevRtcTicks), RTC::differenceMs(data->rtcTicks, prevRtcTicks), RTC::difference(data->rtcTicks, _lastAdcZeroCrossInterruptRtcTicks));
 	prevRtcTicks = data->rtcTicks;
 }
 

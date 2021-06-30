@@ -95,12 +95,15 @@ public:
 	static nrf_gpiote_events_t getGpioteEvent(uint8_t index);
 
 	uint32_t _prevRtcTicks = 0;
+	uint32_t _lastAdcZeroCrossInterruptRtcTicks = 0;
 
-	const static uint32_t _pinZeroCross = 32 + 9;
-//	const static uint32_t _pinZeroCross = 11;
+//	const static uint32_t _pinZeroCross = 32 + 9;
+	const static uint32_t _pinZeroCross = 11;
 	const static uint32_t _gpioteZeroCross = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
 
 	void _handleGpioteInterrupt(gpiote_int_data_t* data);
+
+	void _handleAdcInterrupt(uint32_t rtcTicks);
 
 private:
 	//! Private PWM constructor
