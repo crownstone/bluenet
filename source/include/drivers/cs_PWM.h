@@ -25,6 +25,11 @@ typedef struct {
 	pwm_channel_config_t channels[CS_PWM_MAX_CHANNELS];
 } pwm_config_t;
 
+struct gpiote_int_data_t {
+	uint32_t rtcTicks;
+	uint32_t pinVal;
+};
+
 /** Pulse Wide Modulation class
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
@@ -88,6 +93,14 @@ public:
 
 	//! Helper function to get the gpiote event, given the index.
 	static nrf_gpiote_events_t getGpioteEvent(uint8_t index);
+
+	uint32_t _prevRtcTicks = 0;
+
+	const static uint32_t _pinZeroCross = 32 + 9;
+//	const static uint32_t _pinZeroCross = 11;
+	const static uint32_t _gpioteZeroCross = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
+
+	void _handleGpioteInterrupt(gpiote_int_data_t* data);
 
 private:
 	//! Private PWM constructor
@@ -191,9 +204,6 @@ private:
 
 	//! Integral of the tick deviations.
 	int64_t _zeroCrossDeviationIntegral;
-
-	uint32_t _pinZeroCross = 32 + 9;
-	uint32_t _gpioteZeroCross = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
 
 	//! Config gpiote
 	void gpioteConfig(uint8_t channel, bool initOn);
