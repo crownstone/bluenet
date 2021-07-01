@@ -206,8 +206,10 @@ struct __attribute__((__packed__)) report_asset_mac_t {
 	int8_t rssi;
 };
 
+
+
 struct __attribute__((__packed__)) report_asset_id_t {
-	uint8_t assetId[3];
+	short_asset_id_t id;
 	uint8_t reserved[3];
 	int8_t rssi;
 };

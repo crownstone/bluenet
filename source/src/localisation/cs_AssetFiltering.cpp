@@ -151,7 +151,8 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 }
 
 void AssetFiltering::dispatchAcceptedAssetEvent(AssetFilter filter, const scanned_device_t& asset) {
-	AssetAcceptedEvent evtData(filter, asset);
+	AssetAcceptedEvent evtData(filter, asset, filterOutputResultShortAssetId(filter,asset));
+
 	event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
 	assetEvent.dispatch();
 }

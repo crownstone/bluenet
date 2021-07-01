@@ -10,18 +10,19 @@
 #include <localisation/cs_TrackableId.h>
 #include <localisation/cs_AssetFilterPacketAccessors.h>
 
+// TODO(Arend) remove this class
 class TrackableEvent {
 public:
 	TrackableId id;
 	int8_t rssi;
 };
 
-
 class AssetAcceptedEvent {
 public:
 	AssetFilter _filter;
 	const scanned_device_t& _asset;
+	short_asset_id_t _id;
 
-	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset) :
-		_filter(filter), _asset(asset) {}
+	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset, short_asset_id_t id)
+		: _filter(filter), _asset(asset), _id(id) {}
 };
