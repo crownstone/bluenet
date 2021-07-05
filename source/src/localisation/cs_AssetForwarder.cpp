@@ -30,7 +30,7 @@ cs_ret_code_t AssetForwarder::init() {
 	return ERR_SUCCESS;
 }
 
-void AssetForwarder::handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset) {
+void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
 	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));

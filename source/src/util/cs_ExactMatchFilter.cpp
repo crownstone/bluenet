@@ -36,10 +36,9 @@ bool ExactMatchFilter::isValid() {
 
 	return true;
 }
-
-bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
-	if (keyLengthInBytes != _data->itemSize || _data->itemCount == 0) {
-		return false;
+int ExactMatchFilter::find(const void* item, size_t itemSize) {
+	if (itemSize != _data->itemSize || _data->itemCount == 0) {
+		return -1;
 	}
 
 	// Binary search. [lowerIndex, upperIndex] is the inclusive candidate interval for the key index.
@@ -48,10 +47,10 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 	int upperIndex = _data->itemCount - 1;
 	while (lowerIndex <= upperIndex) {
 		size_t midpointIndex = (lowerIndex + upperIndex) / 2;
-		auto cmp             = memcmp(key, getItem(midpointIndex), keyLengthInBytes);
+		auto cmp             = memcmp(item, getItem(midpointIndex), itemSize);
 
 		if (cmp == 0) {  // early return when found
-			return true;
+			return midpointIndex;
 		}
 		if (cmp > 0) {  // key > data[i]
 			lowerIndex = midpointIndex + 1;
@@ -60,7 +59,12 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 			upperIndex = midpointIndex - 1;
 		}
 	}
-	return false;
+
+	return -1;
+}
+
+bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
+	return find(key,keyLengthInBytes) >= 0;
 }
 
 uint8_t* ExactMatchFilter::getItem(size_t index) {
@@ -68,6 +72,20 @@ uint8_t* ExactMatchFilter::getItem(size_t index) {
 }
 
 short_asset_id_t ExactMatchFilter::shortAssetId(const void* item, size_t itemSize) {
-	// TODO what kind of short asset id are we going to use for this?
-	return {};
+	int index = find(item,itemSize);
+	if (index < 0) {
+		short_asset_id_t id { .data = {0xff, 0xff, 0xff}};
+		return id;
+	}
+	uint16_t indexUnsigned = static_cast<uint16_t>(index);
+
+	short_asset_id_t id{
+		.data{
+			static_cast<uint8_t>((indexUnsigned >> 0) & 0xff),
+			static_cast<uint8_t>((indexUnsigned >> 8) & 0xff),
+			0xff
+		}
+	};
+
+	return id;
 }

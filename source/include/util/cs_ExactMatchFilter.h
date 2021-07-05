@@ -18,15 +18,26 @@ public:
 	ExactMatchFilter(exact_match_filter_data_t* data);
 
 	/**
-	 * Use this with care, _data is never checked in this class.
+	 * Use this default constructor with care, _data is never checked in this class.
 	 */
 	ExactMatchFilter() : _data(nullptr){}
 
 	bool contains(const void* key, size_t keyLengthInBytes) override;
 
+	/**
+	 * A short asset id for an exact match filter is formatted as
+	 * 	- { index_lsb, index_msb, 0xff} when item is present
+	 *  - { 0xff, 0xff, 0xff} when item is not present.
+	 */
 	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
 
 	bool isValid() override;
+
+	/**
+	 * if contains(key,itemSize): returns the index of the item
+	 * else: return -1
+	 */
+	int find(const void* item, size_t itemSize);
 
 	// -------------------------------------------------------------
 	// Sizing helpers

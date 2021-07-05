@@ -104,7 +104,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	// Check if device is rejected by looping over exclusion filters.
+	// Rejection check: looping over exclusion filters.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 
@@ -116,18 +116,37 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 			}
 		}
 	}
+	// Device was not rejected
 
-	// Device was not rejected: loop over inclusion filters afterwards.
+
+	// Accept check: loop over inclusion filters afterwards.
+	[[maybe_unused]] short_asset_id_t shortAssetId = {};
+	[[maybe_unused]] uint8_t acceptedIndexBitmask = 0;
+	[[maybe_unused]] uint8_t firstAcceptedIndex = 0;
+	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(acceptedIndexBitmask), "too many filters for bitmask");
+
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
-		auto filter = AssetFilter(_filterStore->getFilter(i));
+		auto filter = AssetFilter (_filterStore->getFilter(i));
 
 		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
 			if (filterAcceptsScannedDevice(filter, device)) {
+				if (acceptedIndexBitmask == 0) {
+					firstAcceptedIndex = i;
+					shortAssetId = filterOutputResultShortAssetId(filter, device);
+				}
+				acceptedIndexBitmask |= 1 << i;
+
 				// Accept for each filter as they have different profile id's etc.
 				LogAcceptedDevice(filter, device, false);
-				processAcceptedAsset(filter, device);
+				processAcceptedAsset(filter, device); // TODO: move out of loop
 			}
 		}
+	}
+
+	// send out relevant events in batch to prevent flooding the mesh and this devices' event bus.
+	if(acceptedIndexBitmask) {
+		// TODO: call _assetForwarder.
+		// TODO: dispatch event nearest.
 	}
 }
 
@@ -138,7 +157,7 @@ void AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_devi
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
 			if (_assetForwarder != nullptr) {
-				_assetForwarder->handleAcceptedAsset(filter, asset);
+				_assetForwarder->handleAcceptedAsset(asset);
 			}
 
 			break;

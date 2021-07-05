@@ -10,11 +10,11 @@
 #include <localisation/cs_AssetHandler.h>
 #include <events/cs_EventListener.h>
 
-class AssetForwarder : public EventListener, AssetHandlerMac {
+class AssetForwarder : public EventListener {
 public:
 	cs_ret_code_t init();
 
-	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset);
+	void handleAcceptedAsset(const scanned_device_t& asset);
 
 	virtual void handleEvent(event_t & event);
 
