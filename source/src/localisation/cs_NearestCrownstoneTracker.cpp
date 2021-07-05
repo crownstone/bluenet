@@ -71,9 +71,14 @@ void NearestCrownstoneTracker::handleAssetAcceptedEvent(event_t& evt){
 void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& incomingReport) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u)", _myId);
 
-	savePersonalReport(incomingReport);
+	auto recordPtr = getOrCreateRecord(incomingReport.id);
+	if (recordPtr == nullptr) {
+		// TODO: add error message. Too many local assets to track.
+		return;
+	}
+	auto& record = *recordPtr;
 
-	auto& _winningReport = getWinningReport(incomingReport.id);
+	savePersonalReport(record, incomingReport.rssi);
 
 	// REVIEW: Does it matter who reported it?
 	// @Bart: Yes. The crownstone always saves a 'personal report', but the rssi value between
@@ -83,16 +88,18 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	// - we are becoming the closest. Then 'winner' changes, and we start updating towards the mesh.
 	// - we are not the closest. Then we don't need to do anything beyond keeping track of our own distance to the trackable.
 	//   (Which was already done before the ifstatement.)
-	if (_winningReport.reporter == _myId) {
+	if (record.winningStoneId == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so it's time to send an update towards the mesh");
-		saveWinningReport(incomingReport, _myId);
+
+		saveWinningReport(record, incomingReport.rssi, _myId);
+
 		broadcastReport(incomingReport);
 	}
 	else {
 		LOGNearestCrownstoneTrackerVerbose("we didn't win before");
-		if (incomingReport.rssi > _winningReport.report.rssi)  {
+		if (incomingReport.rssi > record.winningRssi)  {
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
-			saveWinningReport(incomingReport, _myId);
+			saveWinningReport(record, incomingReport.rssi, _myId);
 			broadcastReport(incomingReport);
 			onWinnerChanged(true);
 		}
@@ -105,35 +112,38 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingReport, stone_id_t reporter) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i)", _myId, incomingReport.reporter, incomingReport.rssi);
 
-	auto& _winningReport = getWinningReport(incomingReport.id);
-	auto& _personalReport = getPersonalReport(incomingReport.id);
-
-
 	if (reporter == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
 		return;
 	}
 
-	if (reporter == _winningReport.reporter) {
+	auto recordPtr = getOrCreateRecord(incomingReport.id);
+	if (recordPtr == nullptr) {
+		// TODO: add error message. Too many local assets to track.
+		return;
+	}
+	auto& record = *recordPtr;
+
+	if (reporter == record.winningStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if (_personalReport.rssi > incomingReport.rssi) {
+		if (record.personalRssi > incomingReport.rssi) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
-			saveWinningReport(_personalReport, _myId);
+			saveWinningReport(record, record.personalRssi, _myId);
 
 			LOGNearestCrownstoneTrackerVerbose("Broadcast my personal report to update the mesh.");
-			broadcastReport(_personalReport);
+			broadcastPersonalReport(record);
 
 			onWinnerChanged(true);
 		} else {
 			LOGNearestCrownstoneTrackerVerbose("It still wins, so I'll just update the value of my winning report.");
-			saveWinningReport(incomingReport, reporter);
+			saveWinningReport(record, incomingReport.rssi, reporter);
 		}
 	}
 	else {
-		if (incomingReport.rssi > _winningReport.report.rssi) {
+		if (incomingReport.rssi > record.winningRssi) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
-			saveWinningReport(incomingReport, reporter);
+			saveWinningReport(record, incomingReport.rssi, reporter);
 			onWinnerChanged(false);
 		}
 	}
@@ -151,34 +161,39 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 	event.dispatch();
 }
 
-internal_report_asset_id_t& NearestCrownstoneTracker::getWinningReport(short_asset_id_t& id) {
-	return _winningReportAssetIds[0];  // TODO: find winning report for this id..
-}
-
-report_asset_id_t& NearestCrownstoneTracker::getPersonalReport(short_asset_id_t& id) {
-	return _personalReportAssetIds[0];  // TODO: find winning report for this id..
+NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
+	return &_assetRecords[0];// TODO: find winning report for this id..
+	// TODO: set rssi values to -127 if creating default so that anything will win
+	// against it.
 }
 
 // --------------------------- Report processing ------------------------
 
 
-void NearestCrownstoneTracker::savePersonalReport(report_asset_id_t& report) {
-	_personalReportAssetIds[0] = report;
+void NearestCrownstoneTracker::savePersonalReport(report_asset_record_t& rec, int8_t personalRssi) {
+	rec.personalRssi = personalRssi;
 }
 
-void NearestCrownstoneTracker::saveWinningReport(report_asset_id_t& report, stone_id_t reporter) {
-	_winningReportAssetIds[0] = {report, reporter};
+void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId) {
+	rec.winningStoneId = winningId;
+	rec.winningRssi = winningRssi;
 }
 
 void NearestCrownstoneTracker::resetReports() {
-	_winningReportAssetIds[0] = {};
-	_personalReportAssetIds[0] = {};
-
-	_personalReportAssetIds[0].rssi = -127; // std::numeric_limits<int8_t>::lowest();
-	_winningReportAssetIds[0].report.rssi = -127;
+	for (auto& rec : _assetRecords){
+		rec = {};
+	}
 }
 
 // ------------------- Mesh related stuff ----------------------
+
+void NearestCrownstoneTracker::broadcastPersonalReport(report_asset_record_t& record) {
+	report_asset_id_t report = {};
+	report.id = record.assetId;
+	report.rssi = record.personalRssi;
+
+	broadcastReport(report);
+}
 
 void NearestCrownstoneTracker::broadcastReport(report_asset_id_t& report) {
 
