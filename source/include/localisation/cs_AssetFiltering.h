@@ -64,8 +64,10 @@ private:
 	 *
 	 * filter: the filter that accepted this device.
 	 * device: the device that was accepted
+	 *
+	 * Returns the filters outputType.outputFormat.
 	 */
-	void processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
+	AssetFilterOutputFormat processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
 
 	void dispatchAcceptedAssetEvent(AssetFilter filter, const scanned_device_t& asset);
 
