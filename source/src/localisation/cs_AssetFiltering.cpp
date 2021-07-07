@@ -119,6 +119,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	// Device was not rejected
 
 
+
 	// Accept check: loop over inclusion filters and check which filters are accepting.
 
 	uint8_t acceptedFilterIdBitmaskMac = 0;
@@ -134,6 +135,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 
 		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
 			if (filterAcceptsScannedDevice(filter, device)) {
+				LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
 				// update the relevant acceptedFilterIdBitmask
 				switch (*filter.filterdata().metadata().outputType().outFormat()) {
 					case AssetFilterOutputFormat::Mac: {

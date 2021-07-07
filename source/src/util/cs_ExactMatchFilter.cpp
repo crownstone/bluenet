@@ -10,24 +10,29 @@
 #include <util/cs_ExactMatchFilter.h>
 #include <cstring>
 
+#define LogExactMatchFilterWarn LOGw
+
 ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {
 }
 
 bool ExactMatchFilter::isValid() {
 	if (_data == nullptr) {
+		LogExactMatchFilterWarn("data is nullptr");
 		return false;
 	}
 	if (_data->itemCount == 0) {
+		LogExactMatchFilterWarn("itemCount can't be 0");
 		return false;
 	}
 	if (_data->itemSize == 0) {
+		LogExactMatchFilterWarn("itemSize can't be 0")
 		return false;
 	}
 
 	for (auto i = 0; i < _data->itemCount - 1; i++) {
 		auto cmp = memcmp(getItem(i), getItem(i + 1), _data->itemSize);
 		if (cmp > 0) {
-			LOGw("Exact match filter requires sorted itemArray (index %u)", i);
+			LogExactMatchFilterWarn("Exact match filter requires sorted itemArray (index %u)", i);
 			_logArray(SERIAL_DEBUG, true, getItem(i), _data->itemSize);
 			_logArray(SERIAL_DEBUG, true, getItem(i+1), _data->itemSize);
 			return false;

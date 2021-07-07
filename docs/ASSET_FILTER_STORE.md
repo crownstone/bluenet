@@ -210,7 +210,7 @@ in order to determine wether or not the advertisement 'passed' the filter or is 
 
 Type | Name | Description
 --- | --- | ---
-[Advertisement subdata description](#advertisement-subdata) | format | What part of the advertisment is used to filter on.
+[Advertisement subdata description](#advertisement-subdata-description) | format | What part of the advertisment is used to filter on.
 
 ### Filter output description
 When a filter accepts an advertisement, 'output data' needs to be constructed. Depending on the use case this construction 
