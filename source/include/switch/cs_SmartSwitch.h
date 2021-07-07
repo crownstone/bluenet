@@ -83,7 +83,7 @@ private:
 	//! Cache of what is stored in State.
 	TYPIFY(STATE_SWITCH_STATE) storedState;
 
-	TYPIFY(CONFIG_PWM_ALLOWED) allowDimming = false;
+	TYPIFY(CONFIG_DIMMING_ALLOWED) allowDimming = false;
 
 	// returns _allowSwitching || allowSwitchingOverride.
 	bool allowSwitching();

@@ -14,7 +14,7 @@
 #include <drivers/cs_RNG.h>
 #include <logging/cs_Logger.h>
 
-#define LOGPresenceHandler LOGnone
+#define LOGPresenceHandlerDebug LOGnone
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
@@ -31,38 +31,54 @@ void PresenceHandler::init() {
 }
 
 void PresenceHandler::handleEvent(event_t& evt) {
-	uint8_t location;
-	uint8_t profile;
-	bool fromMesh = false;
+
 	switch (evt.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			// drop through
-			adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
-			if (BLEutil::isBitSet(parsed_adv_ptr->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
+			auto parsedAdvEventData = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
+
+			if (BLEutil::isBitSet(parsedAdvEventData->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
 				return;
 			}
-			profile = parsed_adv_ptr->profileId;
-			location = parsed_adv_ptr->locationId;
-			break;
+
+			uint8_t profile  = parsedAdvEventData->profileId;
+			uint8_t location = parsedAdvEventData->locationId;
+			bool forwardToMesh = true;
+
+			handlePresenceEvent(profile, location, forwardToMesh);
+			return;
 		}
 		case CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION: {
-			TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*)evt.data;
-			profile = profile_location->profileId;
-			location = profile_location->locationId;
-			fromMesh = profile_location->fromMesh;
-			LOGPresenceHandler("Received: profile=%u location=%u mesh=%u", profile, location, fromMesh);
+			auto profileLocationEventData = reinterpret_cast<TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*>(evt.data);
+
+			uint8_t profile  = profileLocationEventData->profileId;
+			uint8_t location = profileLocationEventData->locationId;
+			bool forwardToMesh = !profileLocationEventData->fromMesh;
+
+			LOGPresenceHandlerDebug("Received: profile=%u location=%u mesh=%u", profile, location, forwardToMesh);
+			handlePresenceEvent(profile, location, forwardToMesh);
+			return;
+		}
+		case CS_TYPE::EVT_ASSET_ACCEPTED: {
+			auto acceptedAssetEventData = reinterpret_cast<TYPIFY(EVT_ASSET_ACCEPTED)*>(evt.data);
+
+			uint8_t profileId = *acceptedAssetEventData->_filter.filterdata().metadata().profileId();
+			uint8_t location  = 0; // Location 0 signifies 'in sphere, no specific room'
+			bool forwardToMesh = true;
+
+			LOGPresenceHandlerDebug("PresenceHandler received EVT_ASSET_ACCEPTED (profileId %u, location 0)", profileId);
+			handlePresenceEvent(profileId, location, forwardToMesh);
 			break;
 		}
 		case CS_TYPE::CMD_GET_PRESENCE: {
-			LOGd("Get presence");
+			LOGPresenceHandlerDebug("Get presence");
 			if (evt.result.buf.data == nullptr) {
-				LOGd("ERR_BUFFER_UNASSIGNED");
+				LOGPresenceHandlerDebug("ERR_BUFFER_UNASSIGNED");
 				evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
 				return;
 			}
 			presence_t* resultData = reinterpret_cast<presence_t*>(evt.result.buf.data);
 			if (evt.result.buf.len < sizeof(*resultData)) {
-				LOGd("ERR_BUFFER_TOO_SMALL");
+				LOGPresenceHandlerDebug("ERR_BUFFER_TOO_SMALL");
 				evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
 				return;
 			}
@@ -73,8 +89,8 @@ void PresenceHandler::handleEvent(event_t& evt) {
 				resultData->presence[i] = 0;
 			}
 			resultData->presence[0] = presence ? presence.value().getBitmask() : 0;
-			evt.result.dataSize = sizeof(*resultData);
-			evt.result.returnCode = ERR_SUCCESS;
+			evt.result.dataSize     = sizeof(*resultData);
+			evt.result.returnCode   = ERR_SUCCESS;
 			return;
 		}
 		case CS_TYPE::EVT_TICK: {
@@ -84,15 +100,19 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			}
 			return;
 		}
-		default:
-			return;
+		default: return;
 	}
+}
+
+void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, bool fromMesh) {
 	// Validate data.
 	if (profile > max_profile_id || location > max_location_id) {
 		LOGw("Invalid profile(%u) or location(%u)", profile, location);
 		return;
 	}
+
 	MutationType mutation = handleProfileLocationAdministration(profile, location, fromMesh);
+
 	if (mutation != MutationType::NothingChanged) {
 		triggerPresenceMutation(mutation);
 	}
@@ -108,12 +128,11 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			sendPresenceChange(PresenceChange::PROFILE_SPHERE_EXIT, profile);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }
 
-PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool fromMesh) {
+PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool forwardToMesh) {
 	auto prevdescription = getCurrentPresenceDescription();
 
 #ifdef PRESENCE_HANDLER_TESTING_CODE
@@ -130,37 +149,40 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 	}
 #endif
 
-	// purge whowhenwhere of old entries and add a new entry
+	// purge whowhenwhere of old entries
 	if (WhenWhoWhere.size() >= max_records) {
 		LOGw("Reached max number of records");
 		PresenceRecord record = WhenWhoWhere.back();
 		sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, record.who, record.where);
 		WhenWhoWhere.pop_back();
 	}
+
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
-	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
+
+	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ++iter) {
 		if (iter->timeoutCountdownSeconds == 0) {
 			// Should not happen, record should've been removed.
 			LOGw("timed out record");
 		}
 		if (iter->who == profile && iter->where == location) {
-			LOGPresenceHandler("erasing old record profile(%u) location(%u)", profile, location);
+			LOGPresenceHandlerDebug("erasing old record profile(%u) location(%u)", profile, location);
 			meshCountdown = iter->meshSendCountdownSeconds;
 			WhenWhoWhere.erase(iter);
 			newLocation = false;
 			break;
 		}
-		++iter;
 	}
 	// When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
 	if (meshCountdown == 0) {
-		if (!fromMesh) {
+		if (forwardToMesh) {
 			propagateMeshMessage(profile, location);
 		}
 		meshCountdown = presence_mesh_send_throttle_seconds + (RNG::getInstance().getRandom8() % presence_mesh_send_throttle_seconds_variation);
 	}
-	LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
+
+	// Add the new entry
+	LOGPresenceHandlerDebug("add record profile(%u) location(%u)", profile, location);
 	WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));
 
 	if (newLocation) {
@@ -208,7 +230,7 @@ void PresenceHandler::removeOldRecords() {
 	WhenWhoWhere.remove_if(
 			[&] (PresenceRecord www) {
 		if (www.timeoutCountdownSeconds == 0) {
-			LOGPresenceHandler("erasing timed out record profile=%u location=%u", www.who, www.where);
+			LOGPresenceHandlerDebug("erasing timed out record profile=%u location=%u", www.who, www.where);
 			return true;
 		}
 		return false;
@@ -241,7 +263,7 @@ void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location) {
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription() {
 	if (SystemTime::up() < presence_uncertain_due_reboot_time_out_s) {
-		LOGPresenceHandler("presence_uncertain_due_reboot_time_out_s hasn't expired");
+		LOGPresenceHandlerDebug("presence_uncertain_due_reboot_time_out_s hasn't expired");
 		return {};
 	}
 	PresenceStateDescription presence;
@@ -253,7 +275,7 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 		else {
 			// appearently iter is valid, so the .where field describes an occupied room.
 			presence.setRoom(iter->where);
-			// LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
+			// LOGPresenceHandlerDebug("adding room %d to currentPresenceDescription", iter->where);
 		}
 	}
 	return presence;
@@ -292,7 +314,7 @@ void PresenceHandler::tickSecond() {
 
 void PresenceHandler::print() {
 	// for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++) {
-	//     LOGd("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
+	//     LOGPresenceHandlerDebug("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
 	// }
 
 	std::optional<PresenceStateDescription> desc = getCurrentPresenceDescription();
@@ -300,6 +322,6 @@ void PresenceHandler::print() {
 		// desc->print();
 	}
 	else {
-		LOGPresenceHandler("presenchandler status: unavailable");
+		LOGPresenceHandlerDebug("presenchandler status: unavailable");
 	}
 }

@@ -21,23 +21,10 @@ void MeshMsgHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 }
 
-void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) {
-//	BLEutil::printArray(msg.msg, msg.msgSize);
-//	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
-//		LOGe("sendReply");
-////		sendReply(accessMsg);
-//	}
-
-	// (checks payload size)
-	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
-		if (msg.msgSize > 0) {
-			LOGw("Invalid mesh message of type %u", MeshUtil::getType(msg.msg));
-		} else {
-			LOGw("Invalid mesh message of size 0");
-		}
-
-		BLEutil::printArray(msg.msg, msg.msgSize);
-		result.returnCode = ERR_INVALID_MESSAGE;
+void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) {
+	if (msg.msgSize < MESH_HEADER_SIZE) {
+		LOGw("Invalid mesh message of size 0");
+		replyWithRetCode(CS_MESH_MODEL_TYPE_UNKNOWN, ERR_INVALID_MESSAGE, reply);
 		return;
 	}
 
@@ -47,130 +34,159 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	size16_t payloadSize;
 	MeshUtil::getPayload(msg.msg, msg.msgSize, payload, payloadSize);
 
-	// ===========
-
-	// (at this point, the result.returnCode should be ERR_EVENT_UNHANDLED)
-	if (result.returnCode != ERR_EVENT_UNHANDLED) {
-		// some handler took care of business.
-		LOGw("MeshMshHandler result code not clean.");
+	if (!MeshUtil::isValidMeshPayload(msgType, payload, payloadSize)) {
+		LOGw("Invalid mesh message of type %u", msgType);
+		replyWithRetCode(msgType, ERR_INVALID_MESSAGE, reply);
 		return;
 	}
 
+	// TODO: either use MeshMsgEvent, or cs_mesh_received_msg_t. Now we need to copy data.
 	MeshMsgEvent meshMsgEvent;
+	meshMsgEvent.type = msgType;
 	meshMsgEvent.msg.data = payload;
 	meshMsgEvent.msg.len = payloadSize;
-	meshMsgEvent.type = msgType;
 	meshMsgEvent.srcAddress = msg.srcAddress;
-	meshMsgEvent.rssi = msg.rssi;
+	meshMsgEvent.macAddressValid = msg.macAddressValid;
+	memcpy(meshMsgEvent.macAddress, msg.macAddress, MAC_ADDRESS_LEN);
 	meshMsgEvent.hops = msg.hops;
+	meshMsgEvent.rssi = msg.rssi;
 	meshMsgEvent.channel = msg.channel;
+	meshMsgEvent.reply = reply;
 
-	event_t generic_mesh_msg_evt(
+	event_t event(
 			CS_TYPE::EVT_RECV_MESH_MSG,
 			&meshMsgEvent,
-			sizeof(meshMsgEvent),
-			result
+			sizeof(meshMsgEvent)
 			);
 
-	generic_mesh_msg_evt.dispatch();
+	event.dispatch();
 
-	if (generic_mesh_msg_evt.result.returnCode != ERR_EVENT_UNHANDLED) {
+	if (event.result.returnCode != ERR_EVENT_UNHANDLED) {
 		// some handler took care of business.
 		return;
 	}
 
 	// ===========
 
+	cs_ret_code_t retCode = ERR_UNSPECIFIED;
 	switch (msgType) {
 		case CS_MESH_MODEL_TYPE_TEST: {
-			result.returnCode = handleTest(payload, payloadSize);
-			return;
+			retCode = handleTest(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_ACK: {
-			result.returnCode = handleAck(payload, payloadSize);
-			return;
+			retCode = handleAck(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_TIME: {
-			result.returnCode = handleCmdTime(payload, payloadSize);
-			return;
+			retCode = handleCmdTime(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_TIME_SYNC: {
-			result.returnCode = handleTimeSync(payload, payloadSize, srcId, msg.hops);
-			return;
+			retCode = handleTimeSync(payload, payloadSize, srcId, msg.hops);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
-			result.returnCode = handleCmdNoop(payload, payloadSize);
-			return;
+			retCode = handleCmdNoop(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_RSSI_PING: {
-			result.returnCode = handleRssiPing(meshMsgEvent);
-			return;
+			retCode = handleRssiPing(meshMsgEvent);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_RSSI_DATA: {
-			result.returnCode = handleRssiData(meshMsgEvent);
-			return;
+			retCode = handleRssiData(meshMsgEvent);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT: {
-			result.returnCode = handleNearestWitnessReport(meshMsgEvent);
-			return;
+			retCode = handleNearestWitnessReport(meshMsgEvent);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
-			result.returnCode = handleCmdMultiSwitch(payload, payloadSize);
-			return;
+			retCode = handleCmdMultiSwitch(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_0: {
-			result.returnCode = handleState0(payload, payloadSize, srcId, msg.rssi, msg.hops);
-			return;
+			retCode = handleState0(payload, payloadSize, srcId, msg.rssi, msg.hops);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_1: {
-			result.returnCode = handleState1(payload, payloadSize, srcId, msg.rssi, msg.hops);
-			return;
+			retCode = handleState1(payload, payloadSize, srcId, msg.rssi, msg.hops);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
-			result.returnCode = handleProfileLocation(payload, payloadSize);
-			return;
+			retCode = handleProfileLocation(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS: {
-			result.returnCode = handleSetBehaviourSettings(payload, payloadSize);
-			return;
+			retCode = handleSetBehaviourSettings(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER: {
-			result.returnCode = handleTrackedDeviceRegister(payload, payloadSize);
-			return;
+			retCode = handleTrackedDeviceRegister(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN: {
-			result.returnCode = handleTrackedDeviceToken(payload, payloadSize);
-			return;
+			retCode = handleTrackedDeviceToken(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT: {
-			result.returnCode = handleTrackedDeviceHeartbeat(payload, payloadSize);
-			return;
+			retCode = handleTrackedDeviceHeartbeat(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE: {
-			result.returnCode = handleTrackedDeviceListSize(payload, payloadSize);
-			return;
+			retCode = handleTrackedDeviceListSize(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST: {
-			result.returnCode = handleSyncRequest(payload, payloadSize);
-			return;
+			retCode = handleSyncRequest(payload, payloadSize);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_SET: {
-			handleStateSet(payload, payloadSize, result);
+			handleStateSet(payload, payloadSize, reply);
+			// Return instead of break, as this function already sends a reply.
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_RESULT: {
-			result.returnCode = handleResult(payload, payloadSize, srcId);
-			return;
+			retCode = handleResult(payload, payloadSize, srcId);
+			break;
 		}
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID: {
-			result.returnCode = handleSetIbeaconConfigId(payload, payloadSize);
+			retCode = handleSetIbeaconConfigId(payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_STONE_MAC: {
+			// TODO: do we need to do anything?
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION: {
+			// TODO: do we need to do anything?
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC: {
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: {
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
+			handleControlCommand(payload, payloadSize, reply);
+			// Return instead of break, as this function already sends a reply.
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
-			result.returnCode = ERR_INVALID_MESSAGE;
-			return;
+			retCode = ERR_INVALID_MESSAGE;
+			break;
 		}
 	}
+	replyWithRetCode(msgType, retCode, reply);
+}
+
+cs_ret_code_t MeshMsgHandler::dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEvent& meshMshEvent) {
+	event_t event(evtType, &meshMshEvent, sizeof(meshMshEvent));
+	event.dispatch();
+
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshMsgHandler::handleTest(uint8_t* payload, size16_t payloadSize) {
@@ -250,37 +266,16 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 }
 
 cs_ret_code_t MeshMsgHandler::handleRssiPing(MeshMsgEvent& mesh_msg_event) {
-	event_t event(
-			CS_TYPE::EVT_MESH_RSSI_PING,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event)
-			);
-	event.dispatch();
-
-	return ERR_SUCCESS;
+	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_RSSI_PING, mesh_msg_event);
 }
 
 cs_ret_code_t MeshMsgHandler::handleRssiData(MeshMsgEvent& mesh_msg_event) {
-	event_t event(
-			CS_TYPE::EVT_MESH_RSSI_DATA,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event)
-			);
-	event.dispatch();
-
-	return ERR_SUCCESS;
+	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_RSSI_DATA, mesh_msg_event);
 }
 
 cs_ret_code_t MeshMsgHandler::handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
+	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, mesh_msg_event);
 
-	event_t event(
-			CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event)
-			);
-	event.dispatch();
-
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t payloadSize) {
@@ -366,18 +361,6 @@ bool MeshMsgHandler::isFromSameState(stone_id_t srcId, stone_id_t id, uint16_t p
 void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 	if (_lastReceivedState.partsReceivedBitmask != 0x03) {
 		return;
-	}
-	if (hops == 0) {
-		// Maximum ttl, so we received it without hops: RSSI is valid.
-		_lastReceivedState.state.rssi = rssi;
-		_lastReceivedState.state.data.extState.rssi = 0;
-	}
-	else {
-		// We don't actually know the RSSI to the source of this message.
-		// We only get RSSI to a mac address, but we don't know what id a mac address has.
-		// So for now, just assume we don't have direct contact with the source stone.
-		_lastReceivedState.state.rssi = 0;
-		_lastReceivedState.state.data.extState.rssi = 0;
 	}
 	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
 	_lastReceivedState.state.data.type = SERVICE_DATA_DATA_TYPE_EXT_STATE;
@@ -489,7 +472,7 @@ cs_ret_code_t MeshMsgHandler::handleSetIbeaconConfigId(uint8_t* payload, size16_
 	return event.result.returnCode;
 }
 
-void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_result_t& result) {
+void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply) {
 	auto meshStateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_ext_t*>(payload);
 	uint8_t stateDataSize = payloadSize - sizeof(*meshStateHeader);
 	uint8_t* stateData = payload + sizeof(*meshStateHeader);
@@ -501,14 +484,39 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 			meshStateHeader->accessLevel,
 			meshStateHeader->sourceId
 			);
-	BLEutil::printArray(stateData, stateDataSize, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, stateData, stateDataSize);
+
+	// The reply is a result message, with a state header as payload.
+	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
+	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t)) {
+		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
+		resultHeader->msgType = CS_MESH_MODEL_TYPE_STATE_SET;
+
+		cs_mesh_model_msg_state_header_t* stateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_t*>(
+				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
+		);
+		// Simply copy the data of the incoming message.
+		*stateHeader = meshStateHeader->header;
+
+		reply->type = CS_MESH_MODEL_TYPE_RESULT;
+		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_state_header_t);
+	}
 
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 
 	// The control command data starts with a state packet header,
 	// followed by state data.
 	uint8_t controlCmdDataSize = sizeof(state_packet_header_t) + stateDataSize;
-	uint8_t controlCmdData[controlCmdDataSize];
+
+	// We could also use the non ISO alloca().
+	uint8_t* controlCmdData = new (std::nothrow) uint8_t[controlCmdDataSize];
+	if (controlCmdData == nullptr) {
+		LOGw("Cannot allocate control command data.");
+		if (resultHeader != nullptr) {
+			resultHeader->retCode = ERR_NO_SPACE;
+		}
+		return;
+	}
 
 	state_packet_header_t* stateHeader = (state_packet_header_t*)controlCmdData;
 	memcpy(controlCmdData + sizeof(state_packet_header_t), stateData, stateDataSize);
@@ -528,38 +536,95 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	controlCmd.size =             controlCmdDataSize;
 	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
 
-	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source, cs_result_t(result.buf));
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 	event.dispatch();
 
-	// Since the result data buffer is not large enough for a state_packet_header_t,
-	// we use a cs_mesh_model_msg_state_header_t instead.
-	if (result.buf.len >= sizeof(meshStateHeader->header)) {
-		memcpy(result.buf.data, &(meshStateHeader->header), sizeof(meshStateHeader->header));
-		result.dataSize = sizeof(meshStateHeader->header);
+	delete [] controlCmdData;
+
+	if (resultHeader != nullptr) {
+		resultHeader->retCode = event.result.returnCode;
 	}
-//	result.dataSize = event.result.dataSize;
-	result.returnCode = event.result.returnCode;
-	LOGi("retCode=%u dataSize=%u", result.returnCode, result.dataSize);
+
+	LOGi("retCode=%u", event.result.returnCode);
+}
+
+void MeshMsgHandler::handleControlCommand(uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply) {
+	_logArray(SERIAL_INFO, true, payload, payloadSize);
+	auto meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_ext_t*>(payload);
+	uint8_t cmdPayloadSize = payloadSize - sizeof(*meshMsgHeader);
+	uint8_t* cmdPayloadData = payload + sizeof(*meshMsgHeader);
+
+	_log(SERIAL_INFO, false, "handleControlCommand: type=%u accessLevel=%u sourceId=%u data: ",
+			meshMsgHeader->header.cmdType,
+			meshMsgHeader->accessLevel,
+			meshMsgHeader->sourceId
+			);
+	_logArray(SERIAL_INFO, true, cmdPayloadData, cmdPayloadSize);
+
+	// The reply is a result message, with cs_mesh_model_msg_ctrl_cmd_header_t as payload.
+	cs_mesh_model_msg_result_header_t* resultHeader = nullptr;
+	if (reply != nullptr && reply->buf.len > sizeof(cs_mesh_model_msg_result_header_t) + sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
+		resultHeader = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
+		resultHeader->msgType = CS_MESH_MODEL_TYPE_CTRL_CMD;
+
+		cs_mesh_model_msg_ctrl_cmd_header_t* resultPayload = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(
+				reply->buf.data + sizeof(cs_mesh_model_msg_result_header_t)
+		);
+
+		// Simply copy the data of the incoming message.
+		resultPayload->cmdType = meshMsgHeader->header.cmdType;
+
+		reply->type = CS_MESH_MODEL_TYPE_RESULT;
+		reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t) + sizeof(*resultPayload);
+	}
+
+	TYPIFY(CMD_CONTROL_CMD) controlCmd;
+	controlCmd.protocolVersion =  CS_CONNECTION_PROTOCOL_VERSION;
+	controlCmd.type =             static_cast<CommandHandlerTypes>(meshMsgHeader->header.cmdType);
+	controlCmd.data =             cmdPayloadData;
+	controlCmd.size =             cmdPayloadSize;
+	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshMsgHeader->accessLevel);
+
+	// Inflate source.
+	cmd_source_with_counter_t source = MeshUtil::getInflatedSource(meshMsgHeader->sourceId);
+
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
+	event.dispatch();
+
+	if (resultHeader != nullptr) {
+		resultHeader->retCode = event.result.returnCode;
+	}
+
+	LOGi("retCode=%u", event.result.returnCode);
 }
 
 cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize, stone_id_t srcId) {
 	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(payload);
 	cs_data_t resultData(payload + sizeof(*header), payloadSize - sizeof(*header));
-//	uint8_t resultDataSize = payloadSize - sizeof(*header);
-//	uint8_t* resultData = payload + sizeof(*header);
 
 	// Convert to result packet header.
 	uart_msg_mesh_result_packet_header_t resultHeader;
 	resultHeader.stoneId = srcId;
-	resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
 	resultHeader.resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
 	resultHeader.resultHeader.payloadSize = resultData.len;
+
+	if (header->msgType == CS_MESH_MODEL_TYPE_CTRL_CMD && resultData.len == sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
+		auto ctrlMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(resultData.data);
+		resultHeader.resultHeader.commandType = static_cast<CommandHandlerTypes>(ctrlMsgHeader->cmdType);
+	}
+	else {
+		resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
+	}
 	if (resultHeader.resultHeader.commandType == CTRL_CMD_UNKNOWN) {
-		LOGw("Unknown command type %u, did you add it to getCtrlCmdType() and getMeshType()?", header->msgType);
+		LOGw("Unknown command type for msg type %u, did you add it to getCtrlCmdType()?", header->msgType);
 	}
 
-	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u retCode=%u data: ", srcId, header->msgType, header->retCode);
-	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
+	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u commandType=%u retCode=%u data: ",
+			srcId,
+			header->msgType,
+			resultHeader.resultHeader.commandType,
+			header->retCode);
+	_logArray(SERIAL_INFO, true, resultData.data, resultData.len);
 
 	// Convert result data if needed.
 	switch (header->msgType) {
@@ -571,25 +636,45 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 				stateHeader.stateType =           meshStateHeader->type;
 				stateHeader.stateId =             meshStateHeader->id;
 				stateHeader.persistenceMode =     meshStateHeader->persistenceMode;
-				sendResult(resultHeader, cs_data_t((uint8_t*)&stateHeader, sizeof(stateHeader)));
+				sendResultToUart(resultHeader, cs_data_t((uint8_t*)&stateHeader, sizeof(stateHeader)));
 				return ERR_SUCCESS;
 			}
 			LOGw("Wrong result data size: %u", resultData.len);
 			resultData.len = 0;
 			break;
 		}
-		default:
-			sendResult(resultHeader, resultData);
+		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
+			// The control command type is in the resultData, but it was already used to set the command type in the resultHeader.
+			resultData.len = 0;
 			break;
+		}
+		default: {
+			sendResultToUart(resultHeader, resultData);
+			break;
+		}
 	}
 	return ERR_SUCCESS;
 }
 
-void MeshMsgHandler::sendResult(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData) {
+void MeshMsgHandler::replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code_t retCode, mesh_reply_t* reply) {
+	if (reply == nullptr) {
+		return;
+	}
+	if (reply->buf.len < sizeof(cs_mesh_model_msg_result_header_t)) {
+		return;
+	}
+	cs_mesh_model_msg_result_header_t* packet = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
+	packet->msgType = type;
+	packet->retCode = retCode;
+	reply->type = CS_MESH_MODEL_TYPE_RESULT;
+	reply->dataSize = sizeof(cs_mesh_model_msg_result_header_t);
+}
+
+void MeshMsgHandler::sendResultToUart(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData) {
 	resultHeader.resultHeader.payloadSize = resultData.len;
 
 	_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, resultData.data, resultData.len);
 
 	// Send out result.
 	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);

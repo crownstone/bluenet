@@ -225,14 +225,23 @@ void SafeSwitch::setDimmerPowered(bool powered) {
 void SafeSwitch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
 	dimmer.set(0, false);
-	relay.set(false);
-
-	currentState.state.relay = 0;
 	currentState.state.dimmer = 0;
-	sendUnexpectedStateUpdate();
 
-	event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF);
-	EventDispatcher::getInstance().dispatch(event);
+	// A forced on relay has priority over turning it off.
+	if (isSafeToTurnRelayOff(getErrorState())) {
+		relay.set(false);
+		currentState.state.relay = 0;
+
+		sendUnexpectedStateUpdate();
+
+		event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF); // TODO: remove, as this event is not used.
+		EventDispatcher::getInstance().dispatch(event);
+	}
+	else {
+		// The dimmer should have already be turned off, so no need for event here.
+		event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF); // TODO: remove, as this event is not used.
+		EventDispatcher::getInstance().dispatch(eventDimmer);
+	}
 }
 
 void SafeSwitch::forceRelayOnAndDimmerOff() {
@@ -248,12 +257,12 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	sendUnexpectedStateUpdate();
 
 	// Disable dimming, as it's likely that dimming shouldn't be allowed for this device.
-	TYPIFY(CONFIG_PWM_ALLOWED) dimmingEnabled = 0;
-	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &dimmingEnabled, sizeof(dimmingEnabled));
+	TYPIFY(CONFIG_DIMMING_ALLOWED) dimmingEnabled = 0;
+	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &dimmingEnabled, sizeof(dimmingEnabled));
 
-	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON);
+	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON); // TODO: remove, as this event is not used.
 	EventDispatcher::getInstance().dispatch(eventRelay);
-	event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF);
+	event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF); // TODO: remove, as this event is not used.
 	EventDispatcher::getInstance().dispatch(eventDimmer);
 }
 

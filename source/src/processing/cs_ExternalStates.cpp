@@ -8,6 +8,8 @@
 #include "processing/cs_ExternalStates.h"
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"
+#include <events/cs_EventDispatcher.h>
+#include <events/cs_Event.h>
 //#include <cstring> // For calloc
 
 /**
@@ -107,18 +109,39 @@ service_data_encrypted_t* ExternalStates::getNextState() {
  * - Set correct rssi
  */
 void ExternalStates::fixState(state_external_stone_t* state) {
+	stone_id_t id = getStoneId(&(state->data));
+	int8_t rssi = getRssi(id);
 	switch (state->data.type) {
-	case SERVICE_DATA_DATA_TYPE_STATE:
-		convertToExternalState(&(state->data), state->rssi);
-		break;
-	case SERVICE_DATA_DATA_TYPE_ERROR:
-		convertToExternalError(&(state->data), state->rssi);
-		break;
-	case SERVICE_DATA_DATA_TYPE_EXT_STATE:
-		break;
-	case SERVICE_DATA_DATA_TYPE_EXT_ERROR:
-		break;
+		case SERVICE_DATA_DATA_TYPE_STATE: {
+			convertToExternalState(&(state->data), rssi);
+			break;
+		}
+		case SERVICE_DATA_DATA_TYPE_ERROR: {
+			convertToExternalError(&(state->data), rssi);
+			break;
+		}
+		case SERVICE_DATA_DATA_TYPE_EXT_STATE: {
+			state->data.extState.rssi = rssi;
+			break;
+		}
+		case SERVICE_DATA_DATA_TYPE_EXT_ERROR: {
+			state->data.extError.rssi = rssi;
+			break;
+		}
 	}
+}
+
+int8_t ExternalStates::getRssi(stone_id_t id) {
+	int8_t rssi = 0;
+	uint8_t resultBuf;
+	cs_result_t result(cs_data_t(&resultBuf, sizeof(resultBuf)));
+	TYPIFY(CMD_MESH_TOPO_GET_RSSI) stoneId = id;
+	event_t event(CS_TYPE::CMD_MESH_TOPO_GET_RSSI, &stoneId, sizeof(stoneId), result);
+	event.dispatch();
+	if (event.result.returnCode == ERR_SUCCESS && event.result.dataSize == sizeof(int8_t)) {
+		rssi = *reinterpret_cast<int8_t*>(event.result.buf.data);
+	}
+	return rssi;
 }
 
 void ExternalStates::tick(TYPIFY(EVT_TICK) tickCount) {

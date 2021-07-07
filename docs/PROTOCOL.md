@@ -166,7 +166,7 @@ uint8 | AD Type | 1 | 0x01: flags.
 uint8 | Flags | 1 |
 uint8 | AD Length | 1 | Length of the next AD structure.
 uint8 | AD Type | 1 | 0xFF: manufacturer specific data.
-uint8 | Company id | 2 | 0x004C: Apple.
+uint16 | Company id | 2 | 0x004C: Apple.
 uint8 | iBeacon type | 1 | 0x02: iBeacon.
 uint8 | iBeacon length | 1 | iBeacon struct length (0x15).
 uint8 | Proximity UUID | 16 | Configurable number.
@@ -303,7 +303,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr-data-packet) | Get the UICR data. | x | x | x | x
 6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon-config-id-packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x | | | 
-7 | Get MAC address | - | uint8[6] | Get the MAC address of this stone. | x | x | x | x
+7 | Get MAC address | - | uint8[6] | Get the MAC address of this stone (in reverse byte order compared to string representation). | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -315,9 +315,10 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 30 | Set time | uint32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state-error-bitmask) | - | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command-mesh-packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
+33 | Mesh command | [Mesh command packet](#mesh-command-packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun-time-packet) | - | Update the reference times for sunrise and sunset | x | x
 35 | Get time | - | uint32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
+36 | Reset RSSI between stones | - | - | Resets the cached RSSI between stones. Will also let the crownstones send the RSSI of their neighbours at a smaller interval. | x
 40 | Allow dimming | uint8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | - | Print the payload to UART. | x
@@ -347,6 +348,11 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
 95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
+110 | Upload filter | [Upload filter packet](./TRACKABLE_PARSER.md#upload-filter) | - | **Under development.** Uploads a part of a filter for the TrackableParser component. | x
+111 | Remove filter | [Remove filter packet](./TRACKABLE_PARSER.md#remove-filter) | - | **Under development.** Deletes a part of a filter for the TrackableParser component. | x
+112 | Commit filter changes |  [Commit filter changes packet](./TRACKABLE_PARSER.md#commit-filter-changes) | - | **Under development.** Commit changes made to the filters of the TrackableParser component. | x
+113 | Get filter summaries | [Get filter summaries packet](./TRACKABLE_PARSER.md#get-filter-summaries) | - | **Under development.** Obtain summaries of the filters for the TrackableParser component.  | x
+
 
 #### Setup packet
 
@@ -516,12 +522,18 @@ Bit | Name |  Description
 
 
 #### Mesh command packet
-For now, only a few of commands are implemented:
-
-- Set time, only broadcast, without acks.
-- Noop, only broadcast, without acks.
-- State set, only 1 target ID, with ack.
-- Set ibeacon config ID.
+This will not work for every command, because the payload size is limited, and the commands are white listed to be sent via mesh.
+Current white list:
+- Factory reset
+- Reset errors
+- Reset
+- Set time
+- Set state
+- Uart msg
+- Set iBeacon config ID
+- Reset RSSI between stones
+- Lock switch
+- Allow dimming
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -551,7 +563,7 @@ For now there are only a couple of combinations possible:
 Bit | Name |  Description
 --- | --- | ---
 0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
-1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout. **More than 1 IDs without broadcast is not implemented yet.**
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout. If you specify more than 1 IDs, only small command payloads will work for most command types.
 2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen. **Not implemented yet.**
 
 
@@ -861,6 +873,7 @@ Value | Name | Description
 43  | CANCELED | Operation was canceled.
 44  | PROTOCOL_UNSUPPORTED | The protocol is not supported.
 45  | MISMATCH | There is a mismatch, usually in CRC/checksum/hash.
+46  | WRONG_OPERATION | Another operation was expected.
 48  | NO_ACCESS | Invalid access for this command.
 49  | UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
@@ -868,11 +881,13 @@ Value | Name | Description
 67  | NOT_INITIALIZED | Something must first be initialized.
 68  | NOT_STARTED | Something must first be started.
 69  | NOT_POWERED | Something must first be powered.
+70  | WRONG_MODE | Something is in the wrong operation mode.
 80  | WRITE_DISABLED | Write is disabled for given type.
 81  | WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
 82  | READ_FAILED | Failed to read.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
 112 | EVENT_UNHANDLED | The event or command was not handled.
+128 | GATT_ERROR | An error occured during a BLE connection.
 65535 | UNSPECIFIED | Unspecified error.
 
 

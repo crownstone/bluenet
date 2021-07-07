@@ -47,7 +47,7 @@ public:
 		LOGd("Allocate buffer [%d]", size);
 		_size = size;
 		_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
-		//LOGd("buffer: %p", _buffer);
+//		LOGd("buffer: 0x%p", _buffer);
 	}
 
 	void clear() {

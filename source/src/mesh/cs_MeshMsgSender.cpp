@@ -29,10 +29,13 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = meshMsg->type;
-	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
 	item.metaData.priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
-	item.reliable = false;
-	item.broadcast = true;
+	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
+	item.reliable = meshMsg->flags.flags.reliable;
+	item.broadcast = meshMsg->flags.flags.broadcast;
+	item.noHop = meshMsg->flags.flags.noHops;
+	item.numIds = meshMsg->idCount;
+	item.stoneIdsPtr = meshMsg->targetIds;
 	item.msgPayload.len = meshMsg->size;
 	item.msgPayload.data = meshMsg->payload;
 
@@ -337,8 +340,6 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 	item.broadcast = command->header.flags.flags.broadcast;
 	item.numIds = command->header.idCount;
 	item.stoneIdsPtr = command->targetIds;
-	item.msgPayload.len = command->controlCommand.size;
-	item.msgPayload.data = command->controlCommand.data;
 
 	switch (command->controlCommand.type) {
 		case CTRL_CMD_SET_TIME: {
@@ -361,18 +362,6 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			}
 			return sendSetTime(&packet, transmissions);
 		}
-		case CTRL_CMD_NOP: {
-			if (command->controlCommand.size != 0) {
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			if (command->header.idCount != 0
-					|| command->header.flags.flags.broadcast != true
-					|| command->header.flags.flags.reliable != false
-					|| command->header.flags.flags.useKnownIds != false) {
-				return ERR_NOT_IMPLEMENTED;
-			}
-			return sendNoop(command->header.timeoutOrTransmissions);
-		}
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID: {
 			if (command->controlCommand.size != sizeof(set_ibeacon_config_id_packet_t)) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
@@ -380,23 +369,18 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID;
 			item.metaData.priority = false;
+			item.msgPayload.len = command->controlCommand.size;
+			item.msgPayload.data = command->controlCommand.data;
+			return addToQueue(item);
 			break;
 		}
 		case CTRL_CMD_STATE_SET: {
 			// Size has already been checked in command handler.
 			state_packet_header_t* stateHeader = (state_packet_header_t*) command->controlCommand.data;
 			LOGd("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
-			if (command->header.idCount != 1
-					|| command->header.flags.flags.broadcast != false
-					|| command->header.flags.flags.reliable != true
-					|| command->header.flags.flags.useKnownIds != false) {
+			if (command->header.flags.flags.reliable != true || command->header.flags.flags.useKnownIds != false) {
 				return ERR_NOT_IMPLEMENTED;
 			}
-			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
-			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
-			uint8_t msg[sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize];
-			cs_mesh_model_msg_state_header_ext_t* meshStateHeader = (cs_mesh_model_msg_state_header_ext_t*) msg;
-
 			if (!MeshUtil::canShortenStateType(stateHeader->stateType)) {
 				LOGw("Can't shorten state type %u", stateHeader->stateType);
 				return ERR_WRONG_PARAMETER;
@@ -418,85 +402,123 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 				return ERR_WRONG_PARAMETER;
 			}
 
+			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
+			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
+
+			uint16_t meshMsgSize = sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize;
+			uint8_t* meshMsg = new (std::nothrow) uint8_t[meshMsgSize];
+			if (meshMsg == nullptr) {
+				return ERR_NO_SPACE;
+			}
+			cs_mesh_model_msg_state_header_ext_t* meshStateHeader = (cs_mesh_model_msg_state_header_ext_t*) meshMsg;
+
 			meshStateHeader->header.type = stateHeader->stateType;
 			meshStateHeader->header.id = stateHeader->stateId;
 			meshStateHeader->header.persistenceMode = stateHeader->persistenceMode;
 			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
 			meshStateHeader->sourceId = MeshUtil::getShortenedSource(source);
 
-			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
+			memcpy(meshMsg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
 
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_STATE_SET;
-			item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
 			item.metaData.priority = false;
-			item.reliable = command->header.flags.flags.reliable;
-			item.broadcast = command->header.flags.flags.broadcast;
-			item.numIds = command->header.idCount;
-			item.stoneIdsPtr = command->targetIds;
-			item.msgPayload.len = sizeof(msg);
-			item.msgPayload.data = msg;
-
-			return addToQueue(item);
+			item.msgPayload.len = meshMsgSize;
+			item.msgPayload.data = meshMsg;
+			cs_ret_code_t retCode = addToQueue(item);
+			delete [] meshMsg;
+			return retCode;
 		}
-		default:
-			return ERR_NOT_IMPLEMENTED;
+		default: {
+			// Size and cmd type have already been checked in command handler.
+			if (!MeshUtil::canShortenAccessLevel(command->controlCommand.accessLevel)) {
+				LOGw("Can't shorten accessLevel %u", command->controlCommand.accessLevel);
+				return ERR_WRONG_PARAMETER;
+			}
+			if (!MeshUtil::canShortenSource(source)) {
+				LOGw("Can't shorten source type=%u id=%u", source.source.type, source.source.id);
+				return ERR_WRONG_PARAMETER;
+			}
+
+			uint8_t cmdPayloadSize = command->controlCommand.size;
+			uint16_t meshMsgSize = sizeof(cs_mesh_model_msg_ctrl_cmd_header_ext_t) + cmdPayloadSize;
+			uint8_t* meshMsg = new (std::nothrow) uint8_t[meshMsgSize];
+			if (meshMsg == nullptr) {
+				return ERR_NO_SPACE;
+			}
+
+			cs_mesh_model_msg_ctrl_cmd_header_ext_t* meshMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_ext_t*>(meshMsg);
+			meshMsgHeader->header.cmdType = command->controlCommand.type;
+			meshMsgHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
+			meshMsgHeader->sourceId = MeshUtil::getShortenedSource(source);
+
+			memcpy(meshMsg + sizeof(*meshMsgHeader), command->controlCommand.data, cmdPayloadSize);
+
+			item.metaData.id = 0;
+			item.metaData.type = CS_MESH_MODEL_TYPE_CTRL_CMD;
+			item.metaData.priority = false;
+			item.msgPayload.len = meshMsgSize;
+			item.msgPayload.data = meshMsg;
+			cs_ret_code_t retCode = addToQueue(item);
+			delete [] meshMsg;
+			return retCode;
+		}
 	}
 
-	return addToQueue(item);
+	return ERR_NOT_IMPLEMENTED;
 }
 
 void MeshMsgSender::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_SEND_MESH_MSG: {
 			TYPIFY(CMD_SEND_MESH_MSG)* msg = (TYPIFY(CMD_SEND_MESH_MSG)*)event.data;
-			sendMsg(msg);
+			event.result.returnCode = sendMsg(msg);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME: {
 			TYPIFY(CMD_SEND_MESH_MSG_SET_TIME)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_TIME)*)event.data;
 			cs_mesh_model_msg_time_t item;
 			item.timestamp = *packet;
-			sendSetTime(&item);
+			event.result.returnCode = sendSetTime(&item);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: {
-			sendNoop();
+			event.result.returnCode = sendNoop();
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
 			TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
-			sendMultiSwitchItem(packet, event.source);
+			event.result.returnCode = sendMultiSwitchItem(packet, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS: {
 			TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)*)event.data;
-			sendBehaviourSettings(packet);
+			event.result.returnCode = sendBehaviourSettings(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION: {
 			TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)* packet = (TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)*)event.data;
-			sendProfileLocation(packet);
+			event.result.returnCode = sendProfileLocation(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)*)event.data;
-			sendTrackedDeviceRegister(packet);
+			event.result.returnCode = sendTrackedDeviceRegister(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)*)event.data;
-			sendTrackedDeviceToken(packet);
+			event.result.returnCode = sendTrackedDeviceToken(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)*)event.data;
-			sendTrackedDeviceHeartbeat(packet);
+			event.result.returnCode = sendTrackedDeviceHeartbeat(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)*)event.data;
-			sendTrackedDeviceListSize(packet);
+			event.result.returnCode = sendTrackedDeviceListSize(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND: {

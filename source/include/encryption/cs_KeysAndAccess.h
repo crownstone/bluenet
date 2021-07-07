@@ -63,6 +63,16 @@ public:
 	void generateSetupKey();
 
 	/**
+	 * Set the setup key. To be used when connecting to another crownstone.
+	 *
+	 * @param[in] data                      The key that has been read.
+	 *
+	 * @return ERR_WRONG_PAYLOAD_LENGTH     When the data is of incorrect size.
+	 * @return ERR_SUCCESS                  When the setup key is set.
+	 */
+	cs_ret_code_t setSetupKey(cs_data_t data);
+
+	/**
 	 * Invalidate the setup key.
 	 */
 	void invalidateSetupKey();

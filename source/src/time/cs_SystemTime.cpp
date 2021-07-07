@@ -19,6 +19,7 @@
 #include <test/cs_Test.h>
 #include <util/cs_Lollipop.h>
 
+#define LOGSystemTimeInfo   LOGd
 #define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
 
@@ -187,7 +188,7 @@ void SystemTime::tick(void*) {
 // ======================== Setters ========================
 
 void SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh) {
-	LOGSystemTimeDebug("setTime posix=%u throttled=%d sendToMesh=%d", time, throttled, sendToMesh);
+	LOGSystemTimeInfo("setTime posix=%u throttled=%d sendToMesh=%d", time, throttled, sendToMesh);
 	if (time == 0) {
 		return;
 	}
@@ -269,20 +270,18 @@ void SystemTime::handleEvent(event_t & event) {
 
 	switch (event.type) {
 		case CS_TYPE::CMD_SET_TIME: {
-			LOGSystemTimeDebug("set time from command source: type=%u id=%u", event.source.source.type, event.source.source.id);
+			LOGSystemTimeInfo("set time from command source: type=%u id=%u", event.source.source.type, event.source.source.id);
 			uint32_t time = *((TYPIFY(CMD_SET_TIME)*)event.data);
 			bool sendToMesh = isOnlyReceiveByThisDevice(event.source);
 			setTime(time, true, sendToMesh);
 			break;
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
-			LOGd("set test time");
-			// Simply set root time, but don't let other crownstones know.
-			high_resolution_time_stamp_t stamp;
-			stamp.posix_s = *((TYPIFY(CMD_SET_TIME)*)event.data);
-			stamp.posix_ms = 0;
-			stamp.version = rootTime.version;
-			setRootTimeStamp(stamp, myId, RTC::getCount());
+			// brainwash this crownstone and don't let other crownstones know,
+			// this might be an intentional desync.
+			uint32_t posixtime = *((TYPIFY(CMD_SET_TIME)*)event.data);
+			LOGSystemTimeInfo("set test time %u", posixtime);
+			setTime(posixtime, false, false);
 			break;
 		}
 		case CS_TYPE::STATE_SUN_TIME: {

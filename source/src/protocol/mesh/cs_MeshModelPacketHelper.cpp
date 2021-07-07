@@ -16,16 +16,6 @@
 namespace MeshUtil {
 
 bool isValidMeshMessage(cs_mesh_msg_t* meshMsg) {
-	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID) {
-		LOGMeshModelPacketHelperWarn("Invalid reliability");
-		return false;
-	}
-	if (meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
-		LOGMeshModelPacketHelperWarn("message size too big %u > %u",
-				meshMsg->size,
-				MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE);
-		return false;
-	}
 	return isValidMeshPayload(meshMsg->type, meshMsg->payload, meshMsg->size);
 }
 
@@ -84,6 +74,16 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t);
 		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT:
 			return payloadSize == sizeof(nearest_witness_report_t);
+		case CS_MESH_MODEL_TYPE_STONE_MAC:
+			return payloadSize == sizeof(cs_mesh_model_msg_stone_mac_t);
+		case CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION:
+			return payloadSize == sizeof(cs_mesh_model_msg_asset_filter_version_t);
+		case CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC:
+			return payloadSize == sizeof(cs_mesh_model_msg_asset_rssi_mac_t);
+		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI:
+			return payloadSize == sizeof(cs_mesh_model_msg_neighbour_rssi_t);
+		case CS_MESH_MODEL_TYPE_CTRL_CMD:
+			return payloadSize >= sizeof(cs_mesh_model_msg_ctrl_cmd_header_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}
@@ -161,29 +161,12 @@ CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType) {
 	switch (meshType) {
 		case CS_MESH_MODEL_TYPE_CMD_TIME:
 			return CTRL_CMD_SET_TIME;
-		case CS_MESH_MODEL_TYPE_CMD_NOOP:
-			return CTRL_CMD_NOP;
 		case CS_MESH_MODEL_TYPE_STATE_SET:
 			return CTRL_CMD_STATE_SET;
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
 			return CTRL_CMD_SET_IBEACON_CONFIG_ID;
 		default:
 			return CTRL_CMD_UNKNOWN;
-	}
-}
-
-cs_mesh_model_msg_type_t getMeshType(CommandHandlerTypes ctrlCmdType) {
-	switch (ctrlCmdType) {
-		case CTRL_CMD_SET_TIME:
-			return CS_MESH_MODEL_TYPE_CMD_TIME;
-		case CTRL_CMD_NOP:
-			return CS_MESH_MODEL_TYPE_CMD_NOOP;
-		case CTRL_CMD_STATE_SET:
-			return CS_MESH_MODEL_TYPE_STATE_SET;
-		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
-			return CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID;
-		default:
-			return CS_MESH_MODEL_TYPE_UNKNOWN;
 	}
 }
 

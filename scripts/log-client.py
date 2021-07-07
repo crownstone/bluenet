@@ -11,6 +11,9 @@ from crownstone_uart import CrownstoneUart
 
 from bluenet_logs import BluenetLogs
 
+import logging
+#logging.basicConfig(format='%(asctime)s %(levelname)-7s: %(message)s', level=logging.DEBUG)
+
 defaultSourceFilesDir = os.path.abspath(f"{os.path.dirname(os.path.abspath(__file__))}/../source")
 
 argParser = argparse.ArgumentParser(description="Client to show binary logs")
@@ -32,6 +35,7 @@ args = argParser.parse_args()
 
 sourceFilesDir = args.sourceFilesDir
 
+print(f"Listening for logs on port {args.device}, and using files in \"{sourceFilesDir}\" to find the log formats.")
 
 # Init bluenet logs, it will listen to events from the Crownstone lib.
 bluenetLogs = BluenetLogs()
@@ -46,7 +50,6 @@ uart.initialize_usb_sync(port=args.device)
 # The try except part is just to catch a control+c to gracefully stop the UART lib.
 try:
 	# Simply keep the program running.
-	print(f"Listening for logs and using files in \"{sourceFilesDir}\" to find the log formats.")
 	while True:
 		time.sleep(1)
 except KeyboardInterrupt:

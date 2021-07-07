@@ -201,6 +201,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	this->listen();
 	_stack = &Stack::getInstance();
 	_bleCentral = &BleCentral::getInstance();
+	_crownstoneCentral = new CrownstoneCentral();
 	_advertiser = &Advertiser::getInstance();
 	_timer = &Timer::getInstance();
 	_storage = &Storage::getInstance();
@@ -278,6 +279,7 @@ void Crownstone::init1() {
 
 	LOGi(FMT_HEADER, "init central");
 	_bleCentral->init();
+	_crownstoneCentral->init();
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	LOGi(FMT_HEADER, "init microapp");
@@ -594,20 +596,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
 
-#if RSSI_DATA_TRACKER_ENABLED==1
-	_meshTopology.init();
-	_meshTopology.listen();
-#endif
-	
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
-	_nearestCrownstoneTracker.init();
-	_nearestCrownstoneTracker.listen();
-
-	_trackableParser.init();
-	_trackableParser.listen();
-#endif
-
-
 	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
@@ -627,8 +615,17 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
+
+			_meshTopology.init();
+
+			_assetFiltering.init();
+
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+			_nearestCrownstoneTracker.init();
+			_nearestCrownstoneTracker.listen();
+#endif
 			break;
-		} 
+		}
 		case OperationMode::OPERATION_MODE_SETUP: {
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {

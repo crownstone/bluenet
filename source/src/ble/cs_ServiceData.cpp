@@ -40,7 +40,7 @@ void ServiceData::init(uint8_t deviceType) {
 
 	// Init flags
 	_flags.asInt = 0;
-	_flags.flags.markedDimmable = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
+	_flags.flags.markedDimmable = State::getInstance().isTrue(CS_TYPE::CONFIG_DIMMING_ALLOWED);
 	_flags.flags.switchLocked = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED);
 	_flags.flags.switchcraft = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 	_flags.flags.tapToToggle = State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED);
@@ -158,7 +158,7 @@ void ServiceData::updateServiceData(bool initial) {
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
 	_log(SERIAL_DEBUG, false, "servideData: ");
-	BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
+	_logArray(SERIAL_DEBUG, true, _serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
 
@@ -305,7 +305,12 @@ void ServiceData::fillWithAlternativeState(uint32_t timestamp) {
 	_serviceData.params.encrypted.altState.switchState = _switchState;
 	_serviceData.params.encrypted.altState.flags = _flags;
 	_serviceData.params.encrypted.altState.behaviourMasterHash = getPartialBehaviourHash(behaviourHash);
-	memset(_serviceData.params.encrypted.altState.reserved, 0, sizeof(_serviceData.params.encrypted.altState.reserved));
+
+	TYPIFY(STATE_ASSET_FILTERS_VERSION) filtersVersion;
+	State::getInstance().get(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &filtersVersion, sizeof(filtersVersion));
+	_serviceData.params.encrypted.altState.assetFiltersVersion = filtersVersion.masterVersion;
+	_serviceData.params.encrypted.altState.assetFiltersCrc = filtersVersion.masterCrc;
+
 //	_serviceData.params.encrypted.altState.reserved = {0};
 	_serviceData.params.encrypted.altState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 	_serviceData.params.encrypted.altState.reserved2 = 0;
@@ -375,13 +380,6 @@ void ServiceData::handleEvent(event_t & event) {
 			updateServiceData(false);
 			break;
 		}
-//		// TODO: do we need to keep up the error? Or we can simply retrieve it every service data update?
-//		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
-//		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-//		case CS_TYPE::EVT_RELAY_FORCED_ON:
-//			LOGd("Event: $typeName(%u)", event.type);
-//			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
-//			break;
 		case CS_TYPE::STATE_ERRORS: {
 			LOGd("Event: $typeName(%u)", event.type);
 			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
@@ -428,8 +426,8 @@ void ServiceData::handleEvent(event_t & event) {
 			_flags.flags.dimmingReady = *reinterpret_cast<TYPIFY(EVT_DIMMER_POWERED)*>(event.data);
 			break;
 		}
-		case CS_TYPE::CONFIG_PWM_ALLOWED: {
-			_flags.flags.markedDimmable = *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(event.data);
+		case CS_TYPE::CONFIG_DIMMING_ALLOWED: {
+			_flags.flags.markedDimmable = *reinterpret_cast<TYPIFY(CONFIG_DIMMING_ALLOWED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_SWITCH_LOCKED: {

@@ -8,29 +8,25 @@
 
 #include <climits>
 #include <common/cs_Handlers.h>
-#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <float.h>
+#include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <util/cs_BleError.h>
 //#include <algorithm>
 
-#define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
-
+#define LOGStorageInit LOGi
 #define LOGStorageInfo LOGi
-#define LOGStorageDebug LOGd
-#define LOGStorageVerbose LOGnone
+#define LOGStorageWrite LOGd
+#define LOGStorageDebug LOGvv
+#define LOGStorageVerbose LOGvv
 
-Storage::Storage() : EventListener() {
-	LOGStorageDebug(FMT_CREATE, "storage");
-
-	EventDispatcher::getInstance().addListener(this);
-}
+Storage::Storage() {}
 
 cs_ret_code_t Storage::init() {
-	LOGStorageInfo(FMT_INIT, "storage");
+	LOGStorageInit("Init storage");
 	ret_code_t fds_ret_code;
 
 	uint8_t enabled = nrf_sdh_is_enabled();
@@ -39,7 +35,7 @@ cs_ret_code_t Storage::init() {
 	}
 
 	if (_initialized) {
-		LOGStorageInfo("Already initialized");
+		LOGStorageInit("Already initialized");
 		return ERR_SUCCESS;
 	}
 
@@ -60,7 +56,7 @@ cs_ret_code_t Storage::init() {
 		return getErrorCode(fds_ret_code);
 	}
 
-	LOGStorageInfo("Storage init success, wait for event.");
+	LOGStorageInit("Storage init success, wait for event.");
 	return getErrorCode(fds_ret_code);
 }
 
@@ -331,7 +327,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(stateData.size) >> 2;
-	LOGStorageDebug("Write key=%u file=%u", recordKey, fileId);
+	LOGStorageWrite("Write key=%u file=%u", recordKey, fileId);
 	LOGStorageVerbose("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool recordExists = false;
@@ -785,7 +781,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	eventData.id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
 	case NRF_SUCCESS: {
-		LOGStorageDebug("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
+		LOGStorageWrite("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
 		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -894,7 +890,7 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->id) {
 		case FDS_EVT_INIT: {
 			if (p_fds_evt->result == NRF_SUCCESS) {
-				LOGStorageDebug("Storage initialized");
+				LOGStorageInit("Storage initialized");
 				_initialized = true;
 				event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
 				EventDispatcher::getInstance().dispatch(event);

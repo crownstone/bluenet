@@ -32,12 +32,6 @@
  * If the definition becomes large, move it to its own file and include it in this file.
  */
 
-/**
- * Length of a MAC address
- * TODO: check if this length is similar to BLE_GAP_ADDR_LEN
- */
-static constexpr uint8_t MAC_ADDRESS_LEN = 6;
-
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
 	MEMBER              = 1,
@@ -135,6 +129,24 @@ struct __attribute__((__packed__)) result_packet_t {
 	uint8_t payload[N];
 };
 
+
+struct __attribute__((__packed__)) setup_data_t {
+	stone_id_t     stoneId;
+	uint8_t        sphereId;
+	uint8_t        adminKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        memberKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        basicKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        serviceDataKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        localizationKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        meshDeviceKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        meshAppKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        meshNetKey[ENCRYPTION_KEY_LENGTH];
+	cs_uuid128_t   ibeaconUuid;
+	uint16_t       ibeaconMajor;
+	uint16_t       ibeaconMinor;
+};
+
+
 enum class PersistenceModeGet {
 	CURRENT = 0,
 	STORED = 1,
@@ -175,8 +187,9 @@ union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 		bool broadcast: 1;
 		bool reliable: 1;
 		bool useKnownIds: 1;
+		bool noHops : 1;
 	} flags;
-	uint8_t asInt;
+	uint8_t asInt = 1; // Broadcast to all by default.
 };
 
 /**
@@ -565,6 +578,38 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t pin_index;
 	uint8_t length;
 	uint8_t *buf;
+};
+
+const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
+
+/**
+ * A packet that represents RSSI data about an asset received by a particular Crownstone. There is no timestamp in it.
+ * Timestamps can be added on the hub.
+ */
+struct __attribute__((packed)) cs_asset_rssi_data_t {
+	uint8_t address[6];
+	uint8_t stoneId;
+	int8_t rssi;
+	uint8_t channel;
+};
+
+/**
+ * A packet that informs about the nearest Crownstone with respect to an asset. The asset is represented by an
+ * identifier of three bytes. This allows this message to be sent as unsegmented message through the mesh.
+ */
+struct __attribute__((packed)) cs_nearest_stone_update_t {
+	uint8_t assetId[3];
+	uint8_t stoneId;
+	int8_t rssi;
+	uint8_t channel;
+};
+
+/**
+ * The communication about a timeout being expired with respect to a given asset_id. It hasn't been seen by any node
+ * in the given mesh for a particular time period.
+ */
+struct __attribute__((packed)) cs_nearest_stone_timeout_t {
+	uint8_t assetId[3];
 };
 
 // ========================= functions =========================

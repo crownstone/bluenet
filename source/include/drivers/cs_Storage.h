@@ -8,7 +8,6 @@
 
 #include <ble/cs_Nordic.h>
 #include <common/cs_Types.h>
-#include <events/cs_EventListener.h>
 #include <components/libraries/fds/fds.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_Utils.h>
@@ -56,7 +55,7 @@ typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, C
  * These events don't give any context of the operation, so it is not adviced to use FDS together with something else
  * that writes to flash (like Flash Manager).
  */
-class Storage : public EventListener {
+class Storage {
 public:
 
 	/** Returns the singleton instance of this class
@@ -271,11 +270,6 @@ public:
 	 * @return                    Pointer to allocated memory.
 	 */
 	uint8_t* allocate(size16_t& size);
-
-	/**
-	 * Handle Crownstone events.
-	 */
-	void handleEvent(event_t &) {};
 
 	/**
 	 * Handle FDS events.

@@ -31,6 +31,7 @@ extern "C" {
 
 #if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED == 2)
 	// Use NRF Logger instead.
+	#define CLOGvv NRF_LOG_DEBUG
 	#define CLOGv NRF_LOG_DEBUG
 	#define CLOGd NRF_LOG_DEBUG
 	#define CLOGi NRF_LOG_INFO
@@ -44,6 +45,7 @@ extern "C" {
 			cs_clog(addNewLine, fmt, ##__VA_ARGS__); \
 		}
 
+	#define CLOGvv(fmt, ...) _clog(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)
 	#define CLOGv(fmt, ...) _clog(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)
 	#define CLOGd(fmt, ...) _clog(SERIAL_DEBUG,   true, fmt, ##__VA_ARGS__)
 	#define CLOGi(fmt, ...) _clog(SERIAL_INFO,    true, fmt, ##__VA_ARGS__)
@@ -58,6 +60,11 @@ extern "C" {
 }
 #endif
 
+
+#if SERIAL_VERBOSITY < SERIAL_VERY_VERBOSE
+	#undef CLOGvv
+	#define CLOGvv(fmt, ...)
+#endif
 
 #if SERIAL_VERBOSITY < SERIAL_VERBOSE
 	#undef CLOGv

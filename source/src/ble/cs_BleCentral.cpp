@@ -13,10 +13,11 @@
 #include <events/cs_EventDispatcher.h>
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
+#include <structs/buffer/cs_EncryptionBuffer.h>
 
 #define LOGBleCentralInfo LOGi
-#define LOGBleCentralDebug LOGnone
-#define LogLevelBleCentralDebug SERIAL_VERBOSE
+#define LOGBleCentralDebug LOGvv
+#define LogLevelBleCentralDebug SERIAL_VERY_VERBOSE
 
 const uint16_t WRITE_OVERHEAD = 3;
 const uint16_t LONG_WRITE_OVERHEAD = 5;
@@ -36,10 +37,13 @@ void BleCentral::init() {
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
 	APP_ERROR_CHECK(nrfCode);
 
+	// Use the encryption buffer, as that contains the encrypted data, which is what we usually write or read.
+	EncryptionBuffer::getInstance().getBuffer(_buf.data, _buf.len);
+
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &_scanInterval, sizeof(_scanInterval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &_scanWindow, sizeof(_scanWindow));
 
-	EventDispatcher::getInstance().addListener(this);
+	listen();
 }
 
 cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
@@ -110,8 +114,8 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 
 cs_ret_code_t BleCentral::disconnect() {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
-		return ERR_BUSY;
+		LOGBleCentralInfo("Cancel current operation");
+		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 
 	if (!isConnected()) {
@@ -252,6 +256,14 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 	}
 }
 
+cs_data_t BleCentral::requestWriteBuffer() {
+	if (isBusy()) {
+		return cs_data_t();
+	}
+	uint16_t maxWriteSize = 256;
+	return cs_data_t(_buf.data, std::min(_buf.len, maxWriteSize));
+}
+
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {
 	if (isBusy()) {
 		LOGBleCentralInfo("Busy");
@@ -273,10 +285,18 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 	}
 
 	// Copy the data to the buffer.
-	if (len > sizeof(_buf)) {
+	if (len > _buf.len) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
-	memcpy(_buf, data, len);
+
+	// Only copy data if it points to a different buffer.
+	if (_buf.data != data) {
+		// Use memmove, as it can handle overlapping buffers.
+		memmove(_buf.data, data, len);
+	}
+	else {
+		LOGBleCentralDebug("Skip copy");
+	}
 
 	if (len > _mtu - WRITE_OVERHEAD) {
 		// We need to break up the write into chunks.
@@ -300,7 +320,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 			.handle = handle,
 			.offset = 0,
 			.len = len,
-			.p_value = _buf
+			.p_value = _buf.data
 	};
 
 	uint32_t nrfCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
@@ -324,7 +344,7 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 		writeParams.handle = handle;
 		writeParams.offset = offset;
 		writeParams.len = std::min(chunkSize, _bufDataSize - offset);
-		writeParams.p_value = _buf + offset;
+		writeParams.p_value = _buf.data + offset;
 	}
 	else {
 		writeParams.write_op = BLE_GATT_OP_EXEC_WRITE_REQ;
@@ -376,6 +396,11 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 
 	_currentOperation = Operation::READ;
 	return ERR_WAIT_FOR_SUCCESS;
+}
+
+cs_ret_code_t BleCentral::writeNotificationConfig(uint16_t cccdHandle, bool enable) {
+	uint16_t value = enable ? BLE_GATT_HVX_NOTIFICATION : 0;
+	return write(cccdHandle, reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
@@ -451,7 +476,7 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 	event.size = dataSize;
 	switch (_currentOperation) {
 		case Operation::NONE: {
-			LOGBleCentralDebug("No operation was in progress")
+			LOGBleCentralDebug("No operation was in progress");
 			break;
 		}
 		case Operation::CONNECT: {
@@ -533,6 +558,7 @@ void BleCentral::onDisconnect(const ble_gap_evt_disconnected_t& event) {
 		// Ignore disconnect event as peripheral.
 		return;
 	}
+	// TODO: reconnect on certain errors (for example BLE_HCI_CONN_FAILED_TO_BE_ESTABLISHED).
 	LOGBleCentralInfo("Disconnected reason=%u", event.reason);
 
 	// Disconnected, reset state.
@@ -561,7 +587,7 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	if (gattStatus == BLE_GATT_STATUS_ATTERR_INVALID_OFFSET) {
 		ble_central_read_result_t result = {
 				.retCode = ERR_SUCCESS,
-				.data = cs_data_t(_buf, event.offset)
+				.data = cs_data_t(_buf.data, event.offset)
 		};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
@@ -576,18 +602,18 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	if (event.len == 0) {
 		ble_central_read_result_t result = {
 				.retCode = ERR_SUCCESS,
-				.data = cs_data_t(_buf, event.offset)
+				.data = cs_data_t(_buf.data, event.offset)
 		};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
 
 	// Copy data that was read.
-	if (event.offset + event.len > sizeof(_buf)) {
+	if (event.offset + event.len > _buf.len) {
 		finalizeOperation(Operation::READ, ERR_BUFFER_TOO_SMALL);
 		return;
 	}
-	memcpy(_buf + event.offset, event.data, event.len);
+	memcpy(_buf.data + event.offset, event.data, event.len);
 
 	// Continue long read.
 	uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, event.handle, event.offset + event.len);
@@ -626,6 +652,31 @@ void BleCentral::onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& e
 	}
 }
 
+void BleCentral::onNotification(uint16_t gattStatus, const ble_gattc_evt_hvx_t& event) {
+	_log(LogLevelBleCentralDebug, false, "onNotification handle=%u len=%u data=", event.handle, event.len);
+	_logArray(LogLevelBleCentralDebug, true, event.data, event.len);
+
+	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
+		LOGw("gattStatus=%u", gattStatus);
+		return;
+	}
+
+	// BLE_GATT_HVX_NOTIFICATION are unacknowledged, while BLE_GATT_HVX_INDICATION have to be acknowledged.
+	if (event.type != BLE_GATT_HVX_NOTIFICATION) {
+		LOGw("unexpected type=%u", event.type);
+		return;
+	}
+
+	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION) packet = {
+			.handle = event.handle,
+			.data = cs_const_data_t(event.data, event.len)
+	};
+	event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &packet, sizeof(packet));
+	eventOut.dispatch();
+}
+
+
+
 
 void BleCentral::onGapEvent(uint16_t evtId, const ble_gap_evt_t& event) {
 	switch (evtId) {
@@ -662,6 +713,10 @@ void BleCentral::onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event
 		}
 		case BLE_GATTC_EVT_WRITE_RSP: {
 			onWrite(event.gatt_status, event.params.write_rsp);
+			break;
+		}
+		case BLE_GATTC_EVT_HVX: {
+			onNotification(event.gatt_status, event.params.hvx);
 			break;
 		}
 	}

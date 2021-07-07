@@ -163,7 +163,7 @@ protected:
 	uint8_t                                     _advHandle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
 
 	//! Advertised name
-	std::string                                 _device_name = "none";
+	std::string                                 _deviceName = "none";
 
 	//! Advertised appearance.
 	uint16_t                                    _appearance = BLE_APPEARANCE_GENERIC_TAG;

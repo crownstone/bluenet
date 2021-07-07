@@ -12,15 +12,16 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
-#include <ble/cs_BleCentral.h>
-#include <ble/cs_Stack.h>
 #include <ble/cs_Advertiser.h>
+#include <ble/cs_BleCentral.h>
+#include <ble/cs_CrownstoneCentral.h>
 #include <ble/cs_iBeacon.h>
+#include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
+#include <localisation/cs_AssetFiltering.h>
 #include <localisation/cs_MeshTopology.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
-#include <localisation/cs_TrackableParser.h>
 #include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
@@ -314,6 +315,7 @@ private:
 	// drivers
 	Stack* _stack;
 	BleCentral* _bleCentral;
+	CrownstoneCentral* _crownstoneCentral;
 	Advertiser* _advertiser;
 	Timer* _timer;
 	Storage* _storage;
@@ -342,14 +344,12 @@ private:
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
-#if BUILD_RSSI_DATA_TRACKER == 1
 	MeshTopology _meshTopology;
-#endif
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
-	TrackableParser _trackableParser;
 #endif
+	AssetFiltering _assetFiltering;
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;

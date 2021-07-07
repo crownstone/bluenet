@@ -21,19 +21,29 @@
  * If the definition becomes large, move it to its own file and include it in this file.
  */
 
-
 /**
  * Variable length data encapsulation in terms of length and pointer to data.
  */
 struct cs_data_t {
-	buffer_ptr_t data = nullptr;      /** < Pointer to data. */
+	buffer_ptr_t data    = nullptr; /** < Pointer to data. */
+	cs_buffer_size_t len = 0;       /** < Length of data. */
+
+	cs_data_t() : data(nullptr), len(0) {}
+	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size) : data(buf), len(size) {}
+};
+
+/**
+ * Variable length data encapsulation in terms of length and pointer to data.
+ */
+struct cs_const_data_t {
+	const uint8_t* data = nullptr;      /** < Pointer to data. */
 	cs_buffer_size_t len = 0;      /** < Length of data. */
 
-	cs_data_t():
+	cs_const_data_t():
 		data(nullptr),
 		len(0)
 	{}
-	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):
+	cs_const_data_t(const uint8_t* buf, cs_buffer_size_t size):
 		data(buf),
 		len(size)
 	{}
@@ -48,9 +58,7 @@ struct cs_result_t {
 	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
 
 	/**
-	 * Buffer to put the result data in.
-	 *
-	 * Cannot be NULL, buf.data can be NULL.
+	 * Buffer to put the result data in (can be nullptr).
 	 */
 	cs_data_t buf;
 
@@ -61,16 +69,9 @@ struct cs_result_t {
 	 */
 	cs_buffer_size_t dataSize = 0;
 
-	cs_result_t():
-		buf()
-	{}
-	cs_result_t(cs_data_t buf):
-		buf(buf)
-	{}
-	cs_result_t(cs_ret_code_t returnCode):
-		returnCode(returnCode),
-		buf()
-	{}
+	cs_result_t() :                         buf() {}
+	cs_result_t(cs_data_t buf) :            buf(buf) {}
+	cs_result_t(cs_ret_code_t returnCode) : returnCode(returnCode), buf() {}
 };
 
 /**
@@ -81,16 +82,16 @@ struct cs_result_t {
  * https://devzone.nordicsemi.com/f/nordic-q-a/2084/gap-address-types
  */
 enum CS_ADDRESS_TYPE {
-	CS_ADDRESS_TYPE_PUBLIC                          = 0, // Public (registered) static address.
-	CS_ADDRESS_TYPE_RANDOM_STATIC                   = 1, // Random static address (can only change at boot).
-	CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE       = 2, // Random resolvable address (can change at any moment).
-	CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE   = 3, // Random address (can change at any moment).
-	CS_ADDRESS_TYPE_ANONYMOUS                       = 0x7F // No address is advertised.
+	CS_ADDRESS_TYPE_PUBLIC                        = 0,    // Public (registered) static address.
+	CS_ADDRESS_TYPE_RANDOM_STATIC                 = 1,    // Random static address (can only change at boot).
+	CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE     = 2,    // Random resolvable address (can change at any moment).
+	CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE = 3,    // Random address (can change at any moment).
+	CS_ADDRESS_TYPE_ANONYMOUS                     = 0x7F,  // No address is advertised.
 };
 
 struct __attribute__((packed)) device_address_t {
 	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t addressType; // See CS_ADDRESS_TYPE
+	uint8_t addressType = CS_ADDRESS_TYPE_RANDOM_STATIC;
 };
 
 /**
@@ -100,11 +101,11 @@ struct __attribute__((packed)) scanned_device_t {
 	int8_t rssi;
 	uint8_t address[MAC_ADDRESS_LEN];
 	bool resolvedPrivateAddress;
-	uint8_t addressType; // See CS_ADDRESS_TYPE
+	uint8_t addressType;  // See CS_ADDRESS_TYPE
 	uint8_t channel;
 	uint8_t dataSize;
-	uint8_t *data; // What is the content of this field?
-	// See ble_gap_evt_adv_report_t
+	uint8_t* data;  // What is the content of this field?
+					// See ble_gap_evt_adv_report_t
 	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
 };
 
@@ -152,10 +153,10 @@ struct __attribute__((__packed__)) mesh_control_command_packet_t {
  */
 enum cs_mesh_msg_reliability {
 	CS_MESH_RELIABILITY_INVALID = 0,
-	CS_MESH_RELIABILITY_LOWEST = 1,
-	CS_MESH_RELIABILITY_LOW = 3,
-	CS_MESH_RELIABILITY_MEDIUM = 5,
-	CS_MESH_RELIABILITY_HIGH = 10
+	CS_MESH_RELIABILITY_LOWEST  = 1,
+	CS_MESH_RELIABILITY_LOW     = 3,
+	CS_MESH_RELIABILITY_MEDIUM  = 5,
+	CS_MESH_RELIABILITY_HIGH    = 10,
 };
 
 /**
@@ -165,23 +166,29 @@ enum cs_mesh_msg_reliability {
  */
 enum cs_mesh_msg_urgency {
 	CS_MESH_URGENCY_LOW,
-	CS_MESH_URGENCY_HIGH
+	CS_MESH_URGENCY_HIGH,
 };
 
 /**
  * Struct to communicate a mesh message.
  * type            Type of message.
- * payload         The payload.
- * size            Size of the payload.
- * reliability     How reliable the message should be.
+ * flags           How to send the message.
+ * reliability     Timeout for acked messages, number of transmission for unacked messages. Use 0 for the default value.
  * urgency         How quick the message should be sent.
+ * idCount         Number of IDs, for targeted messages.
+ * targetIds       Pointer to array with targeted stone IDs.
+ * size            Size of the payload.
+ * payload         The payload.
  */
 struct cs_mesh_msg_t {
 	cs_mesh_model_msg_type_t type;
-	uint8_t* payload;
-	size16_t size = 0;
-	cs_mesh_msg_reliability reliability = CS_MESH_RELIABILITY_LOW;
+	mesh_control_command_packet_flags_t flags;
+	uint8_t reliability         = 0;
 	cs_mesh_msg_urgency urgency = CS_MESH_URGENCY_LOW;
+	uint8_t idCount             = 0;
+	stone_id_t* targetIds       = nullptr;
+	size16_t size               = 0;
+	uint8_t* payload            = nullptr;
 };
 
 /**
@@ -190,7 +197,6 @@ struct cs_mesh_msg_t {
  * serviceData     State of the stone.
  */
 struct state_external_stone_t {
-	int8_t rssi;
 	service_data_encrypted_t data;
 };
 
@@ -211,7 +217,7 @@ struct __attribute__((__packed__)) adv_background_t {
  */
 struct __attribute__((__packed__)) adv_background_parsed_t {
 	uint8_t* macAddress;
-	int8_t  adjustedRssi;
+	int8_t adjustedRssi;
 	uint8_t locationId;
 	uint8_t profileId;
 	uint8_t flags;
@@ -226,7 +232,7 @@ struct __attribute__((__packed__)) adv_background_parsed_v1_t {
 struct profile_location_t {
 	uint8_t profileId;
 	uint8_t locationId;
-	bool fromMesh = false;
+	bool fromMesh  = false;
 	bool simulated = false;
 };
 
@@ -241,7 +247,6 @@ struct __attribute__((packed)) internal_tracked_device_heartbeat_packet_t {
 	tracked_device_heartbeat_packet_t data;
 	uint8_t accessLevel = NOT_SET;
 };
-
 
 #define CS_ADC_REF_PIN_NOT_AVAILABLE 255
 #define CS_ADC_PIN_VDD 100
@@ -330,7 +335,7 @@ struct hub_data_reply_t {
 };
 
 struct microapp_advertise_request_t {
-	uint8_t type; // 0 for encrypted service data.
+	uint8_t type;  // 0 for encrypted service data.
 	uint8_t version;
 	uint16_t appUuid;
 	cs_data_t data;
@@ -339,4 +344,9 @@ struct microapp_advertise_request_t {
 struct microapp_upload_internal_t {
 	microapp_upload_t header;
 	cs_data_t data;
+};
+
+struct mesh_topo_mac_result_t {
+	uint8_t stoneId;
+	uint8_t macAddress[MAC_ADDRESS_LEN];
 };

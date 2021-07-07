@@ -59,6 +59,7 @@ void MeshAdvertiser::setInterval(uint32_t intervalMs) {
 }
 
 void MeshAdvertiser::setTxPower(int8_t power) {
+	LOGi("setTxPower %i", power);
 	radio_tx_power_t txPower;
 	switch (power) {
 	case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
@@ -244,6 +245,11 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {
 			auto packet = (TYPIFY(CMD_SET_IBEACON_CONFIG_ID)*) event.data;
 			event.result.returnCode = handleSetIbeaconConfig(packet);
+			break;
+		}
+		case CS_TYPE::CONFIG_TX_POWER: {
+			auto packet = CS_TYPE_CAST(CONFIG_TX_POWER, event.data);
+			setTxPower(*packet);
 			break;
 		}
 		default:

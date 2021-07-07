@@ -10,6 +10,7 @@
 #include <mesh/cs_MeshCommon.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <third/std/function.h>
+#include <cfg/cs_Config.h>
 
 extern "C" {
 #include <access_reliable.h>
@@ -25,7 +26,7 @@ extern "C" {
 class MeshModelUnicast {
 public:
 	/** Callback function definition. */
-	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result)> callback_msg_t;
+	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply)> callback_msg_t;
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
@@ -114,6 +115,8 @@ private:
 	 */
 	bool _replyReceived = false;
 
+	uint8_t _ttl = CS_MESH_DEFAULT_TTL;
+
 	/**
 	 * If item at index is in progress, cancel it.
 	 */
@@ -169,6 +172,13 @@ private:
 	 * Do this while no message is in progress.
 	 */
 	cs_ret_code_t setPublishAddress(stone_id_t id);
+
+	/**
+	 * Sets the TTL.
+	 *
+	 * Do this while no message is in progress.
+	 */
+	cs_ret_code_t setTtl(uint8_t ttl, bool temp = false);
 
 	void sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode);
 };

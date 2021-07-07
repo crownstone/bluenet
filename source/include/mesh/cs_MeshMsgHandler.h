@@ -17,7 +17,7 @@
 class MeshMsgHandler {
 public:
 	void init();
-	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result);
+	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply);
 
 protected:
 	cs_ret_code_t handleTest(                    uint8_t* payload, size16_t payloadSize);
@@ -38,10 +38,12 @@ protected:
 	cs_ret_code_t handleTrackedDeviceHeartbeat(  uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceListSize(   uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleSyncRequest(             uint8_t* payload, size16_t payloadSize);
-	void handleStateSet(                         uint8_t* payload, size16_t payloadSize, cs_result_t& result);
+	void handleStateSet(                         uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply);
+	void handleControlCommand(                   uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply);
 	cs_ret_code_t handleResult(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
 	cs_ret_code_t handleSetIbeaconConfigId(      uint8_t* payload, size16_t payloadSize);
 
+	cs_ret_code_t dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEvent& meshMshEvent);
 private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
 
@@ -83,5 +85,7 @@ private:
 	 */
 	void checkStateReceived(int8_t rssi, uint8_t ttl);
 
-	void sendResult(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData);
+	void replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code_t retCode, mesh_reply_t* reply);
+
+	void sendResultToUart(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData);
 };

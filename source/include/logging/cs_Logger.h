@@ -32,7 +32,7 @@
 #include <cfg/cs_Strings.h> // Should actually be included by the files that use these.
 
 
-// To disable particular logs, but without commenting it.
+// Deprecated, use LOGvv instead. To disable particular logs, but without commenting it.
 #define LOGnone(fmt, ...)
 
 
@@ -48,6 +48,7 @@
 	#ifdef __cplusplus
 	extern "C" {
 	#endif
+		#define LOGvv NRF_LOG_DEBUG
 		#define LOGv NRF_LOG_DEBUG
 		#define LOGd NRF_LOG_DEBUG
 		#define LOGi NRF_LOG_INFO
@@ -98,6 +99,7 @@
 		#define _logArray(level, addNewLine, pointer, size, ...)
 	#endif
 
+	#define LOGvv(fmt, ...) _log(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)
 	#define LOGv(fmt, ...) _log(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)
 	#define LOGd(fmt, ...) _log(SERIAL_DEBUG,   true, fmt, ##__VA_ARGS__)
 	#define LOGi(fmt, ...) _log(SERIAL_INFO,    true, fmt, ##__VA_ARGS__)
@@ -275,6 +277,11 @@
 
 #endif
 
+
+#if SERIAL_VERBOSITY < SERIAL_VERY_VERBOSE
+	#undef LOGvv
+	#define LOGvv(fmt, ...)
+#endif
 
 #if SERIAL_VERBOSITY < SERIAL_VERBOSE
 	#undef LOGv

@@ -94,98 +94,98 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 //	LOGMeshInfo("Mesh event type=%u", p_evt->type);
 	switch (p_evt->type) {
 		case NRF_MESH_EVT_MESSAGE_RECEIVED:
-			LOGMeshDebug("NRF_MESH_EVT_MESSAGE_RECEIVED");
+			LOGMeshVerbose("NRF_MESH_EVT_MESSAGE_RECEIVED");
 //			LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
 //			LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
 //			BLEutil::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
 			break;
 		case NRF_MESH_EVT_TX_COMPLETE:
-			LOGMeshDebug("NRF_MESH_EVT_TX_COMPLETE");
+			LOGMeshVerbose("NRF_MESH_EVT_TX_COMPLETE");
 			break;
 		case NRF_MESH_EVT_IV_UPDATE_NOTIFICATION:
-			LOGMeshDebug("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
+			LOGMeshVerbose("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
 			break;
 		case NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION:
-			LOGMeshDebug("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
+			LOGMeshVerbose("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
 			break;
 		case NRF_MESH_EVT_NET_BEACON_RECEIVED:
-			LOGMeshDebug("NRF_MESH_EVT_NET_BEACON_RECEIVED");
+			LOGMeshVerbose("NRF_MESH_EVT_NET_BEACON_RECEIVED");
 			break;
 		case NRF_MESH_EVT_HB_MESSAGE_RECEIVED:
-			LOGMeshDebug("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
+			LOGMeshVerbose("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
 			break;
 		case NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE:
-			LOGMeshDebug("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
+			LOGMeshVerbose("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
 			break;
 		case NRF_MESH_EVT_DFU_REQ_RELAY:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_REQ_SOURCE");
 			break;
 		case NRF_MESH_EVT_DFU_REQ_SOURCE:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_REQ_SOURCE");
 			break;
 		case NRF_MESH_EVT_DFU_START:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_START");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_START");
 			break;
 		case NRF_MESH_EVT_DFU_END:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_END");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_END");
 			break;
 		case NRF_MESH_EVT_DFU_BANK_AVAILABLE:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
 			break;
 		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
 			break;
 		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH:
-			LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
 			break;
 		case NRF_MESH_EVT_FLASH_STABLE:
-			LOGMeshDebug("NRF_MESH_EVT_FLASH_STABLE");
+			LOGMeshVerbose("NRF_MESH_EVT_FLASH_STABLE");
 			MeshCore::getInstance().factoryResetDone();
 			break;
 		case NRF_MESH_EVT_RX_FAILED:
-			LOGMeshDebug("NRF_MESH_EVT_RX_FAILED");
+			LOGMeshVerbose("NRF_MESH_EVT_RX_FAILED");
 			break;
 		case NRF_MESH_EVT_SAR_FAILED:
-			LOGMeshDebug("NRF_MESH_EVT_SAR_FAILED");
+			LOGMeshVerbose("NRF_MESH_EVT_SAR_FAILED");
 			break;
 		case NRF_MESH_EVT_FLASH_FAILED:
-			LOGMeshDebug("NRF_MESH_EVT_FLASH_FAILED");
+			LOGMeshVerbose("NRF_MESH_EVT_FLASH_FAILED");
 			break;
 		case NRF_MESH_EVT_CONFIG_STABLE:
-			LOGMeshDebug("NRF_MESH_EVT_CONFIG_STABLE");
+			LOGMeshVerbose("NRF_MESH_EVT_CONFIG_STABLE");
 			break;
 		case NRF_MESH_EVT_CONFIG_STORAGE_FAILURE:
-			LOGMeshDebug("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
+			LOGMeshVerbose("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
 			break;
 		case NRF_MESH_EVT_CONFIG_LOAD_FAILURE:
-			LOGMeshDebug("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
+			LOGMeshVerbose("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
 			break;
 		case NRF_MESH_EVT_LPN_FRIEND_OFFER:
-			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_OFFER");
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_OFFER");
 			break;
 		case NRF_MESH_EVT_LPN_FRIEND_UPDATE:
-			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
 			break;
 		case NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT:
-			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
 			break;
 		case NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE:
-			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
 			break;
 		case NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED:
-			LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
+			LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
 			break;
 		case NRF_MESH_EVT_FRIENDSHIP_TERMINATED:
-			LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
+			LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
 			break;
 		case NRF_MESH_EVT_DISABLED:
-			LOGMeshDebug("NRF_MESH_EVT_DISABLED");
+			LOGMeshVerbose("NRF_MESH_EVT_DISABLED");
 			break;
 		case NRF_MESH_EVT_PROXY_STOPPED:
-			LOGMeshDebug("NRF_MESH_EVT_PROXY_STOPPED");
+			LOGMeshVerbose("NRF_MESH_EVT_PROXY_STOPPED");
 			break;
 		case NRF_MESH_EVT_FRIEND_REQUEST:
-			LOGMeshDebug("NRF_MESH_EVT_FRIEND_REQUEST");
+			LOGMeshVerbose("NRF_MESH_EVT_FRIEND_REQUEST");
 			break;
 	}
 }
@@ -306,22 +306,13 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	// have non-connectable address one value higher than connectable one
 	macAddress.addr[0] -= 1;
 	macAddress.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
+	for (uint8_t i = 0; i < CORE_TX_ROLE_COUNT; ++i) {
+		mesh_opt_core_adv_addr_set((core_tx_role_t)i, &macAddress);
+	}
 
-	radio_tx_power_t radioTxPower = RADIO_POWER_NRF_0DBM;
 	TYPIFY(CONFIG_TX_POWER) txPower;
 	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	switch (txPower) {
-	case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
-		radioTxPower = (radio_tx_power_t)txPower;
-		break;
-	default:
-		radioTxPower = RADIO_POWER_NRF_POS4DBM;
-		break;
-	}
-	for (uint8_t i=0; i<CORE_TX_ROLE_COUNT; ++i) {
-		mesh_opt_core_adv_addr_set((core_tx_role_t)i, &macAddress);
-		mesh_opt_core_tx_power_set((core_tx_role_t)i, radioTxPower);
-	}
+	setTxPower(txPower);
 
 //	EventDispatcher::getInstance().addListener(this);
 	if (!_isProvisioned) {
@@ -475,6 +466,27 @@ void MeshCore::stop() {
 }
 
 
+cs_ret_code_t MeshCore::setTxPower(int8_t txPower) {
+	LOGi("setTxPower %i", txPower);
+	radio_tx_power_t radioTxPower = RADIO_POWER_NRF_POS4DBM;
+	switch (txPower) {
+		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
+			radioTxPower = (radio_tx_power_t)txPower;
+			break;
+	}
+	for (uint8_t i = 0; i < CORE_TX_ROLE_COUNT; ++i) {
+		// @retval NRF_SUCCESS The TX power was successfully set.
+		// @retval NRF_ERROR_INVALID_PARAMS Invalid options parameters
+		// @retval NRF_ERROR_NOT_FOUND Unknown role.
+		uint32_t nrfCode = mesh_opt_core_tx_power_set((core_tx_role_t)i, radioTxPower);
+		if (nrfCode != NRF_SUCCESS) {
+			LOGe("mesh_opt_core_tx_power_set nrfCode=%u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
+	return ERR_SUCCESS;
+}
+
 
 void MeshCore::factoryReset() {
 	LOGw("factoryReset");
@@ -557,6 +569,11 @@ void MeshCore::handleEvent(event_t & event) {
 				[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
 				LOGMeshDebug("Scanner stats: success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
 			}
+			break;
+		}
+		case CS_TYPE::CONFIG_TX_POWER: {
+			auto packet = CS_TYPE_CAST(CONFIG_TX_POWER, event.data);
+			setTxPower(*packet);
 			break;
 		}
 #if MESH_PERSISTENT_STORAGE == 2

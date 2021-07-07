@@ -43,6 +43,7 @@
 #pragma once
 
 #include <protocol/cs_CuckooFilterStructs.h>
+#include <util/cs_FilterInterface.h>
 
 /**
  * A CuckooFilter is a probabilistic datatype is made for approximate membership queries.
@@ -65,8 +66,26 @@
  * More details can be found in `https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf`.
  * "Cuckoo Filter: Better Than Bloom" by Bin Fan, Dave Andersen, and Michael Kaminsky
  */
-class CuckooFilter {
+class CuckooFilter : public FilterInterface {
 public:
+	// -------------------------------------------------------------
+	// Interface methods.
+	// -------------------------------------------------------------
+
+	bool isValid() override;
+
+	bool contains(const void* key, size_t keyLengthInBytes) override {
+		return contains(getExtendedFingerprint(key, keyLengthInBytes));
+	}
+
+	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
+
+	/**
+	 * Total number of bytes this instance occypies.
+	 * Use this function instead of sizeof for this class to take the buffer into account.
+	 */
+	constexpr size_t size() { return size(bucketCount(), _data->nestsPerBucket); }
+
 	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
 	// -------------------------------------------------------------
@@ -92,9 +111,12 @@ public:
 		return remove(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-	bool contains(cuckoo_key_t key, size_t keyLengthInBytes) {
-		return contains(getExtendedFingerprint(key, keyLengthInBytes));
-	}
+
+	/**
+	 * Reduces a key (element) to a compressed fingerprint, consisting of
+	 * the fingerprint of the key and its associated primary position in the fingerprint array.
+	 */
+	cuckoo_compressed_fingerprint_t getCompressedFingerprint(cuckoo_key_t key, size_t keyLengthInBytes);
 
 	// -------------------------------------------------------------
 	// Init/deinit like stuff.
@@ -103,7 +125,12 @@ public:
 	/**
 	 * Wraps a data struct into a CuckooFilter object
 	 */
-	CuckooFilter(cuckoo_filter_data_t& data) : data(data) {}
+	CuckooFilter(cuckoo_filter_data_t* data) : _data(data) {}
+
+	/**
+	 * Use this with loads of care, _data is never checked to be non-nullptr in this class.
+	 */
+	CuckooFilter() : _data(nullptr) {}
 
 	/**
 	 * Memsets the bucket_array to 0x00 and sets victim to 0.
@@ -125,14 +152,14 @@ public:
 	// Sizing helpers
 	// -------------------------------------------------------------
 
-	static constexpr size_t fingerprintCount(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+	static constexpr size_t fingerprintCount(size_t bucketCount, cuckoo_index_t nestsPerBucket) {
 		return bucketCount * nestsPerBucket;
 	}
 
 	/**
 	 * Size of the byte buffer in bytes.
 	 */
-	static constexpr size_t bufferSize(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+	static constexpr size_t bufferSize(size_t bucketCount, cuckoo_index_t nestsPerBucket) {
 		return fingerprintCount(bucketCount, nestsPerBucket) * sizeof(cuckoo_fingerprint_t);
 	}
 
@@ -150,15 +177,10 @@ public:
 	/**
 	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
 	 */
-	constexpr auto bucketCount() { return 1 << data.bucketCountLog2; }
+	constexpr size_t bucketCount() { return 1 << _data->bucketCountLog2; }
 
-	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nestsPerBucket); }
+	constexpr size_t bufferSize() { return bufferSize(bucketCount(), _data->nestsPerBucket); }
 
-	/**
-	 * Total number of bytes this instance occypies.
-	 * Use this function instead of sizeof for this class to take the buffer into account.
-	 */
-	constexpr size_t size() { return size(bucketCount(), data.nestsPerBucket); }
 
 private:
 	// -------------------------------------------------------------
@@ -171,7 +193,7 @@ private:
 	// Run time variables
 	// -------------------------------------------------------------
 
-	cuckoo_filter_data_t& data;
+	cuckoo_filter_data_t* _data;
 
 	// -------------------------------------------------------------
 	// ----- Private methods -----
@@ -194,20 +216,25 @@ private:
 	cuckoo_extended_fingerprint_t getExtendedFingerprint(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
 
 	/**
-	 * A hash of this filters current contents (data).
+	 * A crc16 hash of this filters current contents (_data).
 	 */
-	cuckoo_fingerprint_t filterhash();
+	cuckoo_fingerprint_t filterHash();
 
 	/**
-	 * Hashes the given key (data) into a fingerprint.
+	 * Hashes the given key into a fingerprint.
 	 */
-	cuckoo_fingerprint_t hash(cuckoo_key_t key, size_t keyLengthInBytes);
+	cuckoo_fingerprint_t hashToFingerprint(cuckoo_key_t key, size_t keyLengthInBytes);
+
+	/**
+	 * Hashes the given key to obtain an (untruncated) bucket index.
+	 */
+	cuckoo_fingerprint_t hashToBucket(cuckoo_key_t key, size_t keyLengthInBytes);
 
 	/**
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
 	cuckoo_fingerprint_t& lookupFingerprint(cuckoo_index_t bucketIndex, cuckoo_index_t fingerIndex) {
-		return data.bucketArray[(bucketIndex * data.nestsPerBucket) + fingerIndex];
+		return _data->bucketArray[(bucketIndex * _data->nestsPerBucket) + fingerIndex];
 	}
 
 	/**

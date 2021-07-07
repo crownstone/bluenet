@@ -8,14 +8,16 @@
 #pragma once
 
 // Debug logs
-#define LOGMeshInfo LOGnone
-#define LOGMeshDebug LOGnone
 #define LOGMeshWarning LOGw
+#define LOGMeshInfo LOGvv
+#define LOGMeshDebug LOGvv
+#define LOGMeshVerbose LOGvv
 
 // Debug logs
-#define LOGMeshModelInfo    LOGnone
-#define LOGMeshModelDebug   LOGnone
-#define LOGMeshModelVerbose LOGnone
+#define LOGMeshModelInfo    LOGvv
+#define LOGMeshModelDebug   LOGvv
+#define LOGMeshModelVerbose LOGvv
+#define LogLevelMeshModelVerbose SERIAL_VERY_VERBOSE
 
 /*
  * 0 to disable test.

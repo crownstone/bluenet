@@ -66,6 +66,7 @@ typedef uint32_t ret_code_t;
 
 #ifndef BOOTLOADER_COMPILATION
 #include <crc16.h>
+#include <crc32.h>
 #include <nrf_gpiote.h>
 #include <nrf_ppi.h>
 #include <nrf_saadc.h>

@@ -9,25 +9,41 @@
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <util/cs_BleError.h>
 
-void MeshModelSelector::init(MeshModelMulticast* multicastModel, MeshModelMulticastAcked* multicastAckedModel, MeshModelUnicast* unicastModel) {
-	_multicastModel = multicastModel;
-	_multicastAckedModel = multicastAckedModel;
-	_unicastModel = unicastModel;
+void MeshModelSelector::init(
+		MeshModelMulticast& multicastModel,
+		MeshModelMulticastAcked& multicastAckedModel,
+		MeshModelMulticastNeighbours& multicastNeighboursModel,
+		MeshModelUnicast& unicastModel) {
+	_multicastModel           = &multicastModel;
+	_multicastAckedModel      = &multicastAckedModel;
+	_multicastNeighboursModel = &multicastNeighboursModel;
+	_unicastModel             = &unicastModel;
 }
 
 cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
 	assert(_multicastModel != nullptr && _unicastModel != nullptr, "Model not set");
 	if (item.broadcast) {
 		if (item.reliable) {
-			return _multicastAckedModel->addToQueue(item);
+			if (item.noHop) {
+				return ERR_NOT_IMPLEMENTED;
+			}
+			else {
+				return _multicastAckedModel->addToQueue(item);
+			}
 		}
 		else {
-			return _multicastModel->addToQueue(item);
+			if (item.noHop) {
+				return _multicastNeighboursModel->addToQueue(item);
+			}
+			else {
+				return _multicastModel->addToQueue(item);
+			}
 		}
 	}
 	else {
 		if (item.reliable) {
 			if (item.numIds == 1) {
+				// Unicast model can send with and without hops.
 				return _unicastModel->addToQueue(item);
 			}
 			else {

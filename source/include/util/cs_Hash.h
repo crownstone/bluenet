@@ -40,3 +40,20 @@
  *  
  */
 uint32_t Fletcher(const uint8_t* const data, const size_t len, uint32_t previousFletcherHash = 0);
+
+/**
+ * @brief Calculates a djb2 hash of given data.
+ *
+ * See http://www.cse.yorku.ca/~oz/hash.html for implementation details
+ *
+ * @param[in] Pointer to the data.
+ * @param[in] Size of the data.
+ * @retval    The hash.
+ */
+inline uint16_t Djb2(const uint8_t* data, const uint16_t size) {
+	uint16_t hash = 5381;
+	for (int i=0; i<size; ++i) {
+		hash = ((hash << 5) + hash) + data[i];
+	}
+	return hash;
+}

@@ -1,7 +1,13 @@
 include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
 
+if(EXISTS "${DEFAULT_CONFIG_FILE}")
+	load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
+endif()
+
 # Overwrite with runtime config
-load_configuration(${CONFIG_FILE} CONFIG_LIST)
+if(EXISTS "${CONFIG_FILE}")
+	load_configuration(${CONFIG_FILE} CONFIG_LIST)
+endif()
 
 message(STATUS "Device: ${DEVICE}")
 message(STATUS "Serial number: ${SERIAL_NUM}")

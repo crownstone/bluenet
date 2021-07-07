@@ -45,6 +45,7 @@ enum CrownstoneCharacteristicsIDs {
 	CONTROL_UUID                            = 0xC,
 	RESULT_UUID                             = 0xD,
 	SESSION_DATA_UUID                       = 0xE,
+	SESSION_DATA_UNENCRYPTED_UUID           = 0xF,
 };
 
 enum SetupCharacteristicsIDs {
@@ -62,5 +63,6 @@ enum SetupCharacteristicsIDs {
 	SETUP_CONTROL_UUID                      = 0xC,
 	SETUP_RESULT_UUID                       = 0xD,
 //	SESSION_DATA_UUID                       = 0xE, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
+//	SESSION_DATA_UNENCRYPTED_UUID           = 0xF, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
 };
 

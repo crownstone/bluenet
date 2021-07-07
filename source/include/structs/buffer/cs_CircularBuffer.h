@@ -11,7 +11,7 @@
 #include <logging/cs_Logger.h>
 #include <cfg/cs_Strings.h>
 
-//#define PRINT_CIRCULARBUFFER_VERBOSE
+#define LOGCircularBufferDebug LOGvv
 
 #define CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND 0xFFFF
 
@@ -51,15 +51,12 @@ public:
 			return false;
 		}
 		// Allocate memory
+		LOGCircularBufferDebug(FMT_ALLOCATE_MEMORY, _array);
 		_array = (T*)calloc(_capacity, sizeof(T));
 		if (_array == NULL) {
 			LOGw(STR_ERR_ALLOCATE_MEMORY);
 			return false;
 		}
-
-#ifdef PRINT_CIRCULARBUFFER_VERBOSE
-		LOGd(FMT_ALLOCATE_MEMORY, _array);
-#endif
 
 		_allocatedSelf = true;
 		// Also call clear to make sure we start with a clean buffer
@@ -90,11 +87,8 @@ public:
 			LOGd(FMT_ERR_ASSIGN_BUFFER, buffer, bufferSize);
 			return false;
 		}
+		LOGCircularBufferDebug(FMT_ASSIGN_BUFFER_LEN, buffer, bufferSize);
 		_array = (T*) buffer;
-
-#ifdef PRINT_CIRCULARBUFFER_VERBOSE
-		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, bufferSize);
-#endif
 
 		// Also call clear to make sure we start with a clean buffer
 		clear();

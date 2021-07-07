@@ -11,8 +11,8 @@
 #include <processing/cs_Scanner.h>
 #include <storage/cs_State.h>
 
-//#define PRINT_SCANNER_VERBOSE
-//#define PRINT_DEBUG
+#define LOGScannerDebug LOGvv
+#define LOGScannerVerbose LOGvv
 
 Scanner::Scanner() :
 	_opCode(SCAN_START),
@@ -51,9 +51,7 @@ void Scanner::manualStartScan() {
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
-#ifdef PRINT_SCANNER_VERBOSE
-		LOGi(FMT_START, "Scanner");
-#endif
+		LOGScannerDebug("Start scanner");
 		_stack->startScanning();
 	}
 }
@@ -67,9 +65,7 @@ void Scanner::manualStopScan() {
 	_scanning = false;
 
 	if (_stack->isScanning()) {
-#ifdef PRINT_SCANNER_VERBOSE
-		LOGi(FMT_STOP, "Scanner");
-#endif
+		LOGScannerDebug("Stop scanner");
 		_stack->stopScanning();
 	}
 }
@@ -134,10 +130,7 @@ void Scanner::executeScan() {
 
 	if (!_running) return;
 
-#ifdef PRINT_SCANNER_VERBOSE
-	LOGd("Execute Scan");
-#endif
-
+	LOGScannerDebug("Execute Scan");
 	switch (_opCode) {
 		case SCAN_START: {
 
@@ -154,10 +147,6 @@ void Scanner::executeScan() {
 
 			// stop scanning
 			manualStopScan();
-
-#ifdef PRINT_DEBUG
-			_scanResult->print();
-#endif
 
 			// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
 			Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);

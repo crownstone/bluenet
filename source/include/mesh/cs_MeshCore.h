@@ -89,6 +89,11 @@ public:
 	void stop();
 
 	/**
+	 * Set the TX power of mesh messages.
+	 */
+	cs_ret_code_t setTxPower(int8_t txPower);
+
+	/**
 	 * Factory reset.
 	 *
 	 * Clear all stored data.

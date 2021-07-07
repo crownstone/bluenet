@@ -4,6 +4,11 @@
 
 #pragma once
 
+struct mesh_reply_t {
+	cs_mesh_model_msg_type_t type;     // Type of message.
+	cs_data_t buf;                     // Buffer to write payload to.
+	uint8_t dataSize;                  // Size of the payload.
+};
 
 template<cs_mesh_model_msg_type_t E>
 struct MeshPacketTraits;
@@ -33,15 +38,38 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT> {
 	using type = nearest_witness_report_t;
 };
 
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_STONE_MAC> {
+	using type = cs_mesh_model_msg_stone_mac_t;
+};
 
-class MeshMsgEvent{
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION> {
+	using type = cs_mesh_model_msg_asset_filter_version_t;
+};
+
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC> {
+	using type = cs_mesh_model_msg_asset_rssi_mac_t;
+};
+
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI> {
+	using type = cs_mesh_model_msg_neighbour_rssi_t;
+};
+
+class MeshMsgEvent {
 public:
-	cs_data_t msg;
-	cs_mesh_model_msg_type_t type;
-	uint16_t srcAddress; // of the original sender
-	int8_t rssi; // of the last hop
-	uint8_t hops; // 0 hops means the msg was received directly from the original source.
-	uint8_t channel;
+	cs_mesh_model_msg_type_t type;     // Type of message
+	cs_data_t msg;                     // Message payload
+	bool macAddressValid;              // True when the following MAC address is valid.
+	uint8_t macAddress[MAC_ADDRESS_LEN]; // MAC address of the relaying node, which is the src in case of 0 hops.
+	uint16_t srcAddress;               // Address of the original sender
+	uint8_t hops;                      // 0 hops means the msg was received directly from the original source.
+	int8_t rssi;                       // RSSI of the last hop
+	uint8_t channel;                   // Channel of the last hop
+	mesh_reply_t* reply = nullptr;     // If set, a reply is expected. Set the message type, write your payload to the buffer,
+	                                   // and set the data size to the size of the payload.
 
 	/**
 	 * Returns the message data of this event as the original
@@ -57,9 +85,7 @@ public:
 	 * printf("%d", sync_packet.sender);
 	 */
 	template<cs_mesh_model_msg_type_t MeshModelType>
-	auto& getPacket(){
-		return *reinterpret_cast<
-				typename MeshPacketTraits<MeshModelType>::type*>(
-						msg.data);
+	auto& getPacket() {
+		return *reinterpret_cast<typename MeshPacketTraits<MeshModelType>::type*>(msg.data);
 	}
 };

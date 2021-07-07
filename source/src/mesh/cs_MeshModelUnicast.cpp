@@ -71,22 +71,44 @@ void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
 }
 
 cs_ret_code_t MeshModelUnicast::setPublishAddress(stone_id_t id) {
-	uint32_t retCode;
-
+	LOGMeshModelVerbose("setPublishAddress %u", id);
 	// First clean up the previous one.
-	dsm_address_publish_remove(_publishAddressHandle);
+	uint32_t nrfCode = dsm_address_publish_remove(_publishAddressHandle);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+		case NRF_ERROR_NOT_FOUND: {
+			break;
+		}
+		default: {
+			LOGw("Failed to remove publish address: nrfCode=%u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
 
 	// All addresses with first 2 bits 0, are unicast addresses.
 	uint16_t address = id;
-	retCode = dsm_address_publish_add(address, &_publishAddressHandle);
-	assert(retCode == NRF_SUCCESS, "failed to add publish address");
-	if (retCode != NRF_SUCCESS) {
+	nrfCode = dsm_address_publish_add(address, &_publishAddressHandle);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to add publish address: nrfCode=%u", nrfCode);
 		return ERR_UNSPECIFIED;
 	}
-	retCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
-	assert(retCode == NRF_SUCCESS, "failed to set publish address");
-	if (retCode != NRF_SUCCESS) {
+	nrfCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to set publish address: nrfCode=%u", nrfCode);
 		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MeshModelUnicast::setTtl(uint8_t ttl, bool temp) {
+	LOGMeshModelVerbose("setTtl %u", ttl);
+	uint32_t nrfCode = access_model_publish_ttl_set(_accessModelHandle, ttl);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to set TTL: nrfCode=%u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	if (!temp) {
+		_ttl = ttl;
 	}
 	return ERR_SUCCESS;
 }
@@ -116,40 +138,40 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");
 #endif
 	}
-//	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type == NRF_MESH_ADDRESS_TYPE_UNICAST);
+
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
 	if (ownMsg) {
 		return;
 	}
-	MeshUtil::cs_mesh_received_msg_t msg =
-			MeshUtil::fromAccessMessageRX(*accessMsg);
+	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
 		// Handle the message, don't send a reply.
 		_replyReceived = true;
-		cs_result_t result;
-		_msgCallback(msg, result);
+		_msgCallback(msg, nullptr);
 		checkDone();
 		return;
 	}
 
-	// Prepare a reply message, to send the result back.
+	// Prepare a reply message.
 	uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
-	replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
 
-	cs_mesh_model_msg_result_header_t* resultHeader = (cs_mesh_model_msg_result_header_t*) (replyMsg + MESH_HEADER_SIZE);
+	mesh_reply_t reply = {
+			.type = CS_MESH_MODEL_TYPE_UNKNOWN,
+			.buf = cs_data_t(replyMsg + MESH_HEADER_SIZE, sizeof(replyMsg) - MESH_HEADER_SIZE),
+			.dataSize = 0
+	};
 
-	uint8_t headerSize = MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_result_header_t);
-	cs_data_t resultData(replyMsg + headerSize, sizeof(replyMsg) - headerSize);
-	cs_result_t result(resultData);
+	// Handle the message, get the reply msg.
+	_msgCallback(msg, &reply);
 
-	// Handle the message, get the result.
-	_msgCallback(msg, result);
-
-	// Send the result as reply.
-	resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
-	resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
-	sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
+	// Send the reply.
+	if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
+		LOGw("Data size was set to %u", reply.dataSize);
+		reply.dataSize = sizeof(replyMsg) - MESH_HEADER_SIZE;
+	}
+	replyMsg[0] = reply.type;
+	sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 }
 
 cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
@@ -162,14 +184,30 @@ cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, 
 	accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
 	accessReplyMsg.access_token = nrf_mesh_unique_token_get();
 
-	uint32_t retVal = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
-	LOGMeshModelVerbose("send reply %u", retVal);
-	return retVal;
+	// Publish address is taken from the received accessMsg.
+	// TTL is only taken from the received accessMsg if it's 0, else it uses the current model TTL.
+	if (accessMsg->meta_data.ttl) {
+		setTtl(CS_MESH_DEFAULT_TTL, true);
+	}
+
+	uint32_t nrfCode = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
+	LOGMeshModelVerbose("send reply nrfCode=%u", nrfCode);
+
+	// Restore TTL
+	if (accessMsg->meta_data.ttl) {
+		setTtl(_ttl, true);
+	}
+
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to send reply: nrfCode=%u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs) {
 	if (!access_reliable_model_is_free(_accessModelHandle)) {
-		LOGMeshModelVerbose("Busy");
+		LOGw("Busy");
 		return ERR_BUSY;
 	}
 	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
@@ -187,9 +225,13 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, ui
 	_accessReliableMsg.status_cb = staticReliableStatusHandler;
 	_accessReliableMsg.timeout = timeoutUs;
 
-	uint32_t retVal = access_model_reliable_publish(&_accessReliableMsg);
-	LOGd("reliable send ret=%u", retVal);
-	return retVal;
+	uint32_t nrfCode = access_model_reliable_publish(&_accessReliableMsg);
+	LOGd("reliable send nrfCode=%u", nrfCode);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to send msg: nrfCode=%u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
 }
 
 void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
@@ -252,6 +294,7 @@ void MeshModelUnicast::checkDone() {
 		}
 		case ACCESS_RELIABLE_TRANSFER_SUCCESS:
 			if (_replyReceived) {
+				// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 				CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type);
 				result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
 				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
@@ -271,6 +314,7 @@ void MeshModelUnicast::checkDone() {
 }
 
 void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode) {
+	// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 	CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(msgType);
 
 	uart_msg_mesh_result_packet_header_t resultHeader;
@@ -293,9 +337,13 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	}
 #endif
 	size16_t msgSize = MeshUtil::getMeshMessageSize(item.msgPayload.len);
+	if (msgSize == 0 || msgSize > MAX_MESH_MSG_SIZE) {
+		LOGw("Wrong payload length: %u", msgSize);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
-	assert(msgSize != 0, "Empty message");
-	assert(msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
 	assert(item.numIds == 1, "Single ID only");
 	assert(item.broadcast == false, "Unicast only");
 	assert(item.reliable == true, "Reliable only");
@@ -320,8 +368,9 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
 			it->targetId = item.stoneIdsPtr[0];
 			it->msgSize = msgSize;
+			it->metaData.noHop = item.noHop;
 			LOGMeshModelVerbose("added to ind=%u", index);
-			BLEutil::printArray(it->msgPtr, it->msgSize);
+			_logArray(LogLevelMeshModelVerbose, true, it->msgPtr, it->msgSize);
 
 			// If queue was empty, we can start sending this item.
 			sendMsgFromQueue();
@@ -385,8 +434,17 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 	_reliableStatus = 255;
 
 	cs_unicast_queue_item_t* item = &(_queue[index]);
-	setPublishAddress(item->targetId);
-	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->msgSize, item->metaData.transmissionsOrTimeout * 1000 * 1000);
+	cs_ret_code_t retCode = setPublishAddress(item->targetId);
+	if (retCode != ERR_SUCCESS) {
+		return false;
+	}
+
+	retCode = setTtl(item->metaData.noHop ? 0 : CS_MESH_DEFAULT_TTL);
+	if (retCode != ERR_SUCCESS) {
+		return false;
+	}
+
+	retCode = sendMsg(item->msgPtr, item->msgSize, item->metaData.transmissionsOrTimeout * 1000 * 1000);
 	if (retCode != ERR_SUCCESS) {
 		return false;
 	}

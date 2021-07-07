@@ -53,14 +53,38 @@ uint8_t getChannel(const nrf_mesh_rx_metadata_t* metaData) {
 	return 0xff;
 }
 
-cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg) {
+bool getMac(const nrf_mesh_rx_metadata_t* metaData, uint8_t* target) {
+	switch (metaData->source) {
+		case NRF_MESH_RX_SOURCE_SCANNER: {
+			memcpy(target, metaData->params.scanner.adv_addr.addr, MAC_ADDRESS_LEN);
+			target[0] += 1; // Mesh MAC is offset by 1.
+			return true;
+		}
+		case NRF_MESH_RX_SOURCE_INSTABURST:
+		case NRF_MESH_RX_SOURCE_GATT:
+		case NRF_MESH_RX_SOURCE_LOOPBACK:
+		default:
+			return false;
+	}
+}
+
+cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t& accessMsg) {
 	cs_mesh_received_msg_t msg;
 	msg.opCode = accessMsg.opcode.opcode;
 	msg.srcAddress = accessMsg.meta_data.src.value;
+	msg.macAddressValid = getMac(accessMsg.meta_data.p_core_metadata, msg.macAddress);
 	msg.msg = (uint8_t*)(accessMsg.p_data);
 	msg.msgSize = accessMsg.length;
 	msg.rssi = getRssi(accessMsg.meta_data.p_core_metadata);
-	msg.hops = ACCESS_DEFAULT_TTL - accessMsg.meta_data.ttl;
+
+	// When receiving a TTL:
+	// 0 = has not been relayed and will not be relayed
+	// 1 = may have been relayed, but will not be relayed
+	// 2 - 126 = may have been relayed and can be relayed
+	// 127 = has not been relayed and can be relayed
+//	msg.hops = ACCESS_DEFAULT_TTL - accessMsg.meta_data.ttl;
+	msg.hops = accessMsg.meta_data.ttl;
+
 	msg.channel = getChannel(accessMsg.meta_data.p_core_metadata);
 
 	return msg;

@@ -158,7 +158,7 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 	}
 
 	if (outputSize > outputPrefix.len + output.len) {
-		LOGw("Output buffer too small: prefix=%u output=%u", outputPrefix.len, output.len);
+		LOGw("Output buffer too small: required=%u prefix=%u output=%u", outputSize, outputPrefix.len, output.len);
 		return ERR_BUFFER_TOO_SMALL;
 	}
 

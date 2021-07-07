@@ -51,7 +51,7 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
 		_scanner.onScan(scanData);
 	});
-	_modelSelector.init(&_modelMulticast, &_modelMulticastAcked, &_modelUnicast);
+	_modelSelector.init(_modelMulticast, _modelMulticastAcked, _modelMulticastNeighbours, _modelUnicast);
 	_msgSender.init(&_modelSelector);
 
 	cs_ret_code_t retCode = _core->init(board);
@@ -66,26 +66,32 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 
 void Mesh::initModels() {
 	LOGi("Initializing and adding models");
-	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
-		_msgHandler.handleMsg(msg, result);
+	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
+		_msgHandler.handleMsg(msg, nullptr);
 	});
 	_modelMulticast.init(0);
 
-	_modelMulticastAcked.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
-		_msgHandler.handleMsg(msg, result);
+	_modelMulticastAcked.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) -> void {
+		_msgHandler.handleMsg(msg, reply);
 	});
 	_modelMulticastAcked.init(1);
 
-	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
-		_msgHandler.handleMsg(msg, result);
+	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply) -> void {
+		_msgHandler.handleMsg(msg, reply);
 	});
 	_modelUnicast.init(2);
+
+	_modelMulticastNeighbours.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
+			_msgHandler.handleMsg(msg, nullptr);
+	});
+	_modelMulticastNeighbours.init(3);
 }
 
 void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 	_modelMulticast.configureSelf(appkeyHandle);
 	_modelMulticastAcked.configureSelf(appkeyHandle);
 	_modelUnicast.configureSelf(appkeyHandle);
+	_modelMulticastNeighbours.configureSelf(appkeyHandle);
 }
 
 void Mesh::start() {
@@ -193,7 +199,7 @@ void Mesh::onTick(uint32_t tickCount) {
 				_synced = !requestSync(false);
 
 				if (!_synced) {
-					LOGw("Sync failed");
+					LOGi("Sync failed");
 					event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
 					syncFailEvent.dispatch();
 
@@ -215,6 +221,7 @@ void Mesh::onTick(uint32_t tickCount) {
 #endif
 	_modelMulticast.tick(tickCount);
 	_modelMulticastAcked.tick(tickCount);
+	_modelMulticastNeighbours.tick(tickCount);
 	_modelUnicast.tick(tickCount);
 }
 

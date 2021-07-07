@@ -11,8 +11,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <uart/cs_UartHandler.h>
 
-#define LOGAdvertiserDebug LOGnone
-#define LOGAdvertiserVerbose LOGnone
+#define LOGAdvertiserDebug LOGvv
+#define LOGAdvertiserVerbose LOGvv
 
 Advertiser::Advertiser() {
 	_stack = &(Stack::getInstance());
@@ -34,7 +34,7 @@ void Advertiser::init() {
 	}
 	_isInitialized = true;
 	EventDispatcher::getInstance().addListener(this);
-	updateDeviceName(_device_name);
+	updateDeviceName(_deviceName);
 	updateAppearance(_appearance);
 	configureAdvertisementParameters();
 }
@@ -58,11 +58,11 @@ void Advertiser::setAppearance(uint16_t appearance) {
 
 void Advertiser::setDeviceName(const std::string& deviceName) {
 	isInitialized(false);
-	_device_name = deviceName;
+	_deviceName = deviceName;
 }
 
 std::string & Advertiser::getDeviceName() {
-	return _device_name;
+	return _deviceName;
 }
 
 void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
@@ -83,11 +83,11 @@ void Advertiser::updateAdvertisingInterval(uint16_t advertisingInterval) {
 }
 
 void Advertiser::updateDeviceName(const std::string& deviceName) {
-	LOGd("Set device name to %s", _device_name.c_str());
-	_device_name = deviceName;
+	LOGd("Set device name to %s", _deviceName.c_str());
+	_deviceName = deviceName;
 	if (!isInitialized()) return;
 
-	std::string name = _device_name.empty() ? "none" : deviceName;
+	std::string name = _deviceName.empty() ? "none" : deviceName;
 
 	// Although this has nothing to do with advertising, this is required when changing the name on the soft device.
 	ble_gap_conn_sec_mode_t nameCharacteristicSecurityMode;
@@ -107,10 +107,7 @@ void Advertiser::updateAppearance(uint16_t appearance) {
 }
 
 void Advertiser::updateTxPower(int8_t powerDBm) {
-#ifdef PRINT_STACK_VERBOSE
-	LOGd(FMT_SET_INT_VAL, "TX power", powerDBm);
-#endif
-
+	LOGAdvertiserDebug("updateTxPower %i", powerDBm);
 	switch (powerDBm) {
 		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
 			// accepted values
@@ -126,7 +123,6 @@ void Advertiser::updateTxPower(int8_t powerDBm) {
 }
 
 void Advertiser::changeToLowTxPower() {
-	// TODO: get from board config.
 	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
 	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
 	updateTxPower(lowTxPower);
@@ -151,11 +147,11 @@ void Advertiser::updateTxPower() {
 		return;
 	}
 	if (_advHandle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
-		LOGw("Invalid handle");
+		LOGd("Invalid handle");
 		return;
 	}
 	uint32_t ret_code;
-	LOGd("Update tx power level %i for handle %i", _txPower, _advHandle);
+	LOGd("Update TX power to %i for handle %u", _txPower, _advHandle);
 	LOGAdvertiserDebug("sd_ble_gap_tx_power_set");
 	ret_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _advHandle, _txPower);
 	APP_ERROR_CHECK(ret_code);
@@ -429,10 +425,10 @@ void Advertiser::printAdvertisement() {
 	LOGd("_adv_handle=%u", _advHandle);
 
 	_log(SERIAL_DEBUG, false, "adv_data len=%u data: ", _advData.adv_data.len);
-	BLEutil::printArray(_advData.adv_data.p_data, _advData.adv_data.len);
+	_logArray(SERIAL_DEBUG, true, _advData.adv_data.p_data, _advData.adv_data.len);
 
 	_log(SERIAL_DEBUG, false, "scan_rsp_data len=%u data: ", _advData.scan_rsp_data.len);
-	BLEutil::printArray(_advData.scan_rsp_data.p_data, _advData.scan_rsp_data.len);
+	_logArray(SERIAL_DEBUG, true, _advData.scan_rsp_data.p_data, _advData.scan_rsp_data.len);
 
 	LOGd("type=%u", _advParams.properties.type);
 	LOGd("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
@@ -518,7 +514,6 @@ void Advertiser::handleEvent(event_t & event) {
 			else {
 				stopAdvertising();
 			}
-			// TODO: should be done via event.
 			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
 			break;
 		}

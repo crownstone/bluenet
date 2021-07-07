@@ -32,6 +32,15 @@ typedef uint8_t  adc_buffer_seq_nr_t;
 // Actually wanted something like: typedef uint24_t cs_tracked_device_token_t;
 #define TRACKED_DEVICE_TOKEN_SIZE 3
 
+/**
+ * Length of a MAC address
+ */
+static constexpr uint8_t MAC_ADDRESS_LEN = 6;
+
+typedef struct {
+	uint8_t data[MAC_ADDRESS_LEN];
+} mac_address_t;
+
 typedef struct {
   uint8_t uuid128[16];
 } cs_uuid128_t;

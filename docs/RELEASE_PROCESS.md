@@ -1,11 +1,23 @@
 # Release process
 
+## Memory usage test
+
+Perform a [memory usage test](MEMORY_USAGE_TEST.md), and commit the result.
+
 ## Bluenet
 
 The release process starts with updating version information. The application version has to be bumped. This is an integer that is checked by the bootloader to make sure that the
 application is actually newer than the previous release.
 
-* Update the `VERSION` file in `source/VERSION`.
+Update the `VERSION` file in `source/VERSION`:
+```
+3.0.1
+54
+RC0
+```
+The first line is the version string in the form `<major>.<minor>.<patch>`.
+The second line is the integer version (used for the DFU process), and should be increased by 1 each time.
+The third line is empty for a release, and `RC<int>` for a release candidate.
 
 For further instructions, we set the version in a variable:
 
