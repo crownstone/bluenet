@@ -1,4 +1,4 @@
-#!/usr/bin/python2
+#!/usr/bin/env python3
 
 import re
 import pygame
@@ -139,10 +139,7 @@ os.environ['SDL_VIDEODRIVER'] = 'dummy'
 
 def drawRect(rect, color):
 	# Rect: left, top, width, height
-	# width of 0 to fill
-        # print(rect)
 	s = pygame.Surface((rect[2], rect[3]))  # the size of your rect
-	#s.set_alpha(128)                # alpha level
 	s.fill((color))           # this fills the entire surface
 	background.blit(s, (rect[0],rect[1]))    # (0,0) are the top-left coordinates
 
@@ -318,11 +315,10 @@ def drawVarList(varList, filename, lengthInBits):
 	# Draw the text "byte"
 	xVar = x + byteLabel.get_width()
 	yVar = y + byteLabel.get_height()
-	
-        drawRect([0, 0, xVar-2, yVar], BLACK)
+
+	drawRect([0, 0, xVar-2, yVar], BLACK)
 	background.blit(byteLabel, (x, y))
-	
-        x += byteLabel.get_width() + 2
+	x += byteLabel.get_width() + 2
 
 	cycleColorInd = 0
 	prevColorInd = -1
