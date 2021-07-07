@@ -22,8 +22,9 @@ public:
 	AssetFilter _filter;
 	const scanned_device_t& _asset;
 	short_asset_id_t _id;
-	uint8_t acceptedFilterIdBitmask;
+	uint8_t _acceptedFilterIdBitmask;
 
-	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset, short_asset_id_t id)
-		: _filter(filter), _asset(asset), _id(id) {}
+	AssetAcceptedEvent(
+			AssetFilter filter, const scanned_device_t& asset, short_asset_id_t id, uint8_t acceptedFilterIdBitmask)
+		: _filter(filter), _asset(asset), _id(id), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
 };

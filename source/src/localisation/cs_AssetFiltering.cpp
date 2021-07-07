@@ -120,13 +120,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 
 
 	// Accept check: loop over inclusion filters and check which filters are accepting.
-	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(acceptedIndexBitmask), "too many filters for bitmask");
 
-	[[maybe_unused]] uint8_t acceptedFilterIdBitmaskMac = 0;
-	[[maybe_unused]] uint8_t acceptedFilterIdBitmaskShortId = 0;
+	uint8_t acceptedFilterIdBitmaskMac = 0;
+	uint8_t acceptedFilterIdBitmaskShortId = 0;
 
-	[[maybe_unused]] uint8_t firstAcceptedFilterIdMac = 0;
-	[[maybe_unused]] uint8_t firstAcceptedFilterIdShortId = 0;
+	uint8_t firstAcceptedFilterIdShortId = 0;
+
+	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(acceptedFilterIdBitmaskMac),
+			"too many filters for bitmask");
 
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter (_filterStore->getFilter(i));
@@ -136,10 +137,6 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 				// update the relevant acceptedFilterIdBitmask
 				switch (*filter.filterdata().metadata().outputType().outFormat()) {
 					case AssetFilterOutputFormat::Mac: {
-						if (acceptedFilterIdBitmaskMac == 0) {
-							firstAcceptedFilterIdMac = i;
-
-						}
 						acceptedFilterIdBitmaskMac |= 1 << i;
 						break;
 					}
@@ -156,49 +153,27 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		}
 	}
 
-	// send out relevant events in batch
+	// Dispatch events: send out relevant events in batch
 	if (acceptedFilterIdBitmaskShortId) {
 		// TODO: dispatch event nearest.
 		auto filter = AssetFilter (_filterStore->getFilter(firstAcceptedFilterIdShortId));
 		auto shortAssetId = filterOutputResultShortAssetId(filter, device);
 		uint8_t acceptedFilterIdBitmask = acceptedFilterIdBitmaskShortId | acceptedFilterIdBitmaskMac;
+
+		AssetAcceptedEvent evtData(
+				filter,
+				device,
+				shortAssetId,
+				acceptedFilterIdBitmask);
+
+		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
+		assetEvent.dispatch();
 	}
 
 	if (acceptedFilterIdBitmaskMac && _assetForwarder != nullptr) {
-		// TODO: call _assetForwarder.
-		_assetForwarder->handleAcceptedAsset(asset);
+		_assetForwarder->handleAcceptedAsset(device);
 	}
 }
-//
-//AssetFilterOutputFormat AssetFiltering::processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset) {
-//	LOGAssetFilteringDebug("processAcceptedAsset");
-//	dispatchAcceptedAssetEvent(filter,asset);
-//
-//	switch (*filter.filterdata().metadata().outputType().outFormat()) {
-//		case AssetFilterOutputFormat::Mac: {
-//			if (_assetForwarder != nullptr) {
-//				_assetForwarder->handleAcceptedAsset(asset);
-//			}
-//			break;
-//		}
-//
-//		case AssetFilterOutputFormat::ShortAssetId: {
-//			shortAssetId = filterOutputResultShortAssetId(filter, device);
-//			break;
-//		}
-//	}
-//
-//	return *filter.filterdata().metadata().outputType().outFormat();
-//}
-
-void AssetFiltering::dispatchAcceptedAssetEvent(AssetFilter filter, const scanned_device_t& asset) {
-	AssetAcceptedEvent evtData(filter, asset, filterOutputResultShortAssetId(filter,asset));
-
-	event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
-	assetEvent.dispatch();
-}
-
-
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 
