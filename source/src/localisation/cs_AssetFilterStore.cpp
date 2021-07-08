@@ -527,9 +527,6 @@ bool AssetFilterStore::validateFilters() {
 			LOGAssetFilterDebug("Filter %u not yet commited", index);
 			// Filter changed since commit.
 
-			size_t filterdata_offset = filter.filterdata()._data - filter._data;
-			LOGAssetFilterWarn("filterdata_offset: %d", filterdata_offset);
-
 			if (!filter.filterdata().isValid()) {
 				LOGAssetFilterWarn("Deallocating filter ID=%u because it is invalid.", filter.runtimedata()->filterId);
 				deallocateFilterByIndex(index);

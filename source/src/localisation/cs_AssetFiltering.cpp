@@ -157,7 +157,8 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 
 	// Dispatch events: send out relevant events in batch
 	if (acceptedFilterIdBitmaskShortId) {
-		// TODO: dispatch event nearest.
+		LOGAssetFilteringDebug("Dispatch event for short asset id output filters");
+
 		auto filter = AssetFilter (_filterStore->getFilter(firstAcceptedFilterIdShortId));
 		auto shortAssetId = filterOutputResultShortAssetId(filter, device);
 		uint8_t acceptedFilterIdBitmask = acceptedFilterIdBitmaskShortId | acceptedFilterIdBitmaskMac;
@@ -173,6 +174,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 	}
 
 	if (acceptedFilterIdBitmaskMac && _assetForwarder != nullptr) {
+		LOGAssetFilteringDebug("Dispatch event for mac output filters");
 		_assetForwarder->handleAcceptedAsset(device);
 	}
 }
