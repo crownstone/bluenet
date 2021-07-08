@@ -72,8 +72,16 @@ private:
 	 *  - when full, remove worst personal_rssi.
 	 *  - only store if observed the asset personally.
 	 *  - ...
+	 *
+	 *  The array is 'front loaded'. entries with index < _assetRecordCount
+	 *  are valid, other entries are not.
 	 */
 	report_asset_record_t _assetRecords[MAX_REPORTS];
+
+	/**
+	 * Current number of valid records in the _assetRecords array.
+	 */
+	uint8_t _assetRecordCount = 0;
 
 	/**
 	 * Called on EVT_RECV_MESH_MSG events.

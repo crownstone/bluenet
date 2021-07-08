@@ -174,10 +174,30 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 }
 
 NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
-	_assetRecords[0].assetId = id;
-	return &_assetRecords[0];// TODO: find winning report for this id..
-	// TODO: set rssi values to -127 if creating default so that anything will win
-	// against it.
+	// linear search
+	for (uint8_t i = 0; i < _assetRecordCount; i++) {
+		auto& rec = _assetRecords[i];
+		if (rec.assetId == id) {
+			return &rec;
+		}
+	}
+
+	// not found. create new report if there is space available
+	if (_assetRecordCount < MAX_REPORTS) {
+		LOGNearestCrownstoneTrackerVerbose("creating new report record");
+		auto& rec = _assetRecords[_assetRecordCount];
+		rec.assetId = id;
+		rec.personalRssi = -127;
+		rec.winningRssi = -127;
+		rec.winningStoneId = 0;
+
+		_assetRecordCount += 1;
+		return &rec;
+	} else {
+		LOGNearestCrownstoneTrackerVerbose("can't create new report record, maximum reached");
+	}
+
+	return nullptr;
 }
 
 // --------------------------- Report processing ------------------------
@@ -195,11 +215,6 @@ void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, int
 void NearestCrownstoneTracker::resetReports() {
 	for (auto& rec : _assetRecords){
 		rec = {};
-
-		// TODO: remove this, it's only necessary when getOrCreateRecord is called.
-		// empty reports can be completely empty.
-		rec.personalRssi = -127;
-		rec.winningRssi = -127;
 	}
 }
 

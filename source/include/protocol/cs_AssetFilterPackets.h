@@ -7,6 +7,7 @@
 
 #pragma once
 #include <cstdint>
+#include <cstring>
 #include <protocol/cs_CuckooFilterStructs.h>
 
 
@@ -91,6 +92,11 @@ struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
 
 struct __attribute__((__packed__)) short_asset_id_t {
 	uint8_t data[3];
+
+	// default implementation according to C++20
+	bool operator==(const short_asset_id_t& other) const {
+		return std::memcmp(data, other.data, sizeof(data)) == 0;
+	}
 };
 
 struct __attribute__((__packed__)) asset_filters_version_t {
