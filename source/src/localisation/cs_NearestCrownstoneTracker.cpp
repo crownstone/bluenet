@@ -19,6 +19,15 @@
 #define LOGNearestCrownstoneTrackerDebug LOGvv
 #define LOGNearestCrownstoneTrackerInfo LOGvv
 
+
+
+void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
+	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(%u, %d dB) me(%d dB)",
+			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
+			record.winningStoneId, record.winningRssi, record.personalRssi);
+}
+
+
 void NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 
@@ -77,6 +86,8 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 		return;
 	}
 	auto& record = *recordPtr;
+
+	logRecord(record);
 
 	savePersonalReport(record, incomingReport.rssi);
 
@@ -163,6 +174,7 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 }
 
 NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
+	_assetRecords[0].assetId = id;
 	return &_assetRecords[0];// TODO: find winning report for this id..
 	// TODO: set rssi values to -127 if creating default so that anything will win
 	// against it.
@@ -183,6 +195,11 @@ void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, int
 void NearestCrownstoneTracker::resetReports() {
 	for (auto& rec : _assetRecords){
 		rec = {};
+
+		// TODO: remove this, it's only necessary when getOrCreateRecord is called.
+		// empty reports can be completely empty.
+		rec.personalRssi = -127;
+		rec.winningRssi = -127;
 	}
 }
 

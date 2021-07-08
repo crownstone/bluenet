@@ -171,5 +171,8 @@ private:
 	 */
 	void resetReports();
 
+
+	void logRecord(report_asset_record_t& record);
+
 };
 
