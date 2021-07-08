@@ -15,9 +15,9 @@
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
 
-#define LOGNearestCrownstoneTrackerVerbose LOGnone
-#define LOGNearestCrownstoneTrackerDebug LOGnone
-#define LOGNearestCrownstoneTrackerInfo LOGnone
+#define LOGNearestCrownstoneTrackerVerbose LOGd
+#define LOGNearestCrownstoneTrackerDebug LOGvv
+#define LOGNearestCrownstoneTrackerInfo LOGvv
 
 void NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
@@ -110,7 +110,8 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 }
 
 void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingReport, stone_id_t reporter) {
-	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i)", _myId, incomingReport.reporter, incomingReport.rssi);
+	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i)",
+			_myId, reporter, incomingReport.rssi);
 
 	if (reporter == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
