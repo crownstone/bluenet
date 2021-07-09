@@ -1219,6 +1219,46 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			result.returnCode = ERR_SUCCESS;
 			break;
 		}
+//		case POWER_SAMPLES_TYPE_SWITCHCRAFT:
+//		case POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED: {
+//			if (index >= numSwitchSamplesBuffers / 2) {
+//				LOGw("index=%u", index);
+//				result.returnCode = ERR_WRONG_PARAMETER;
+//				return;
+//			}
+//			uint8_t actualIndex = index * 2;
+//			if (type == POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED) {
+//				actualIndex += 1;
+//			}
+//
+//			// Check size
+//			size16_t samplesSize = _lastSwitchSamplesHeader.count * sizeof(int16_t);
+//			size16_t requiredSize = sizeof(_lastSwitchSamplesHeader) + samplesSize;
+//			if (result.buf.len < requiredSize) {
+//				LOGw("size=%u required=%u", result.buf.len, requiredSize);
+//				result.returnCode = ERR_BUFFER_TOO_SMALL;
+//				return;
+//			}
+//
+//			// Set header data
+//			_lastSwitchSamplesHeader.index = index;
+//			if (actualIndex % 2 == 0) {
+//					_lastSwitchSamplesHeader.offset = _avgZeroVoltage / 1024;;
+//					_lastSwitchSamplesHeader.multiplier = _voltageMultiplier;
+//			}
+//			else {
+//					_lastSwitchSamplesHeader.offset = _avgZeroCurrent / 1024;;
+//					_lastSwitchSamplesHeader.multiplier = _currentMultiplier;
+//			}
+//
+//			// Copy data to buffer.
+//			memcpy(result.buf.data, &_lastSwitchSamplesHeader, sizeof(_lastSwitchSamplesHeader));
+//			memcpy(result.buf.data + sizeof(_lastSwitchSamplesHeader), _lastSwitchSamples + actualIndex * _lastSwitchSamplesHeader.count, samplesSize);
+//
+//			result.dataSize = requiredSize;
+//			result.returnCode = ERR_SUCCESS;
+//			break;
+//		}
 		case POWER_SAMPLES_TYPE_SWITCH: {
 			if (index >= numSwitchSamplesBuffers) {
 				LOGw("index=%u", index);
