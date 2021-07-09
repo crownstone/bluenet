@@ -151,7 +151,7 @@ void asACR01B10D(boards_config_t* p_config) {
 
 void asACR01B13B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 15;
-//	p_config->pinGpioEnablePwm                   = 10; // Not needed anymore.
+	p_config->pinGpioEnablePwm                   = 20; // Patch that connects the IN+ to IO4 (with a pull down) instead of 3v3.
 	p_config->pinGpioRelayOn                     = 17;
 	p_config->pinGpioRelayOff                    = 18;
 	p_config->pinAinCurrentGainHigh              = 0; // highest gain
