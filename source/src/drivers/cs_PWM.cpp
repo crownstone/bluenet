@@ -416,10 +416,14 @@ void PWM::_handleAdcInterrupt(uint32_t rtcTicks) {
 }
 
 void PWM::onZeroCrossingInterrupt() {
-	uint32_t rtcTicks = RTC::getCount();
-	uint32_t errorCode = app_sched_event_put(&rtcTicks, sizeof(rtcTicks), onAdcInterrupt);
-	APP_ERROR_CHECK(errorCode);
+//	uint32_t rtcTicks = RTC::getCount();
+//	uint32_t errorCode = app_sched_event_put(&rtcTicks, sizeof(rtcTicks), onAdcInterrupt);
+//	APP_ERROR_CHECK(errorCode);
 
+	_onZeroCrossingInterrupt();
+}
+
+void PWM::_onZeroCrossingInterrupt() {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
@@ -776,12 +780,19 @@ void PWM::_handleGpioteInterrupt(gpiote_int_data_t* data) {
 }
 
 // Interrupt handler
+static uint32_t prevGpioteIntRtcTicks = 0;
 extern "C" void GPIOTE_IRQHandler(void) {
 	uint8_t channel = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
 	nrf_gpiote_events_t event = PWM::getGpioteEvent(channel);
 	uint32_t mask = 1 << channel;
 	if (nrf_gpiote_event_is_set(event) && nrf_gpiote_int_is_enabled(mask)) {
+		uint32_t ticks = RTC::getCount();
+		if (RTC::difference(ticks, prevGpioteIntRtcTicks) > RTC::msToTicks(16)) {
+			prevGpioteIntRtcTicks = ticks;
+//			PWM::getInstance()._onZeroCrossingInterrupt();
+		}
 		nrf_gpiote_event_clear(event);
+
 		gpiote_int_data_t data = {
 				.rtcTicks = RTC::getCount(),
 				.pinVal = nrf_gpio_pin_read(PWM::getInstance()._pinZeroCross)
@@ -789,6 +800,5 @@ extern "C" void GPIOTE_IRQHandler(void) {
 
 		uint32_t errorCode = app_sched_event_put(&data, sizeof(data), onGpioteInterrupt);
 		APP_ERROR_CHECK(errorCode);
-//		LOGi("gpiote interrupt channel=%u", channel);
 	}
 }

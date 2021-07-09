@@ -84,6 +84,7 @@ public:
 
 	//! Function to be called on a zero crossing interrupt.
 	void onZeroCrossingInterrupt();
+	void _onZeroCrossingInterrupt();
 
 	//! Internal use! Called when started from a zero crossing.
 	void _zeroCrossingStart();
@@ -97,8 +98,8 @@ public:
 	uint32_t _prevRtcTicks = 0;
 	uint32_t _lastAdcZeroCrossInterruptRtcTicks = 0;
 
-//	const static uint32_t _pinZeroCross = 32 + 9;
-	const static uint32_t _pinZeroCross = 11;
+	const static uint32_t _pinZeroCross = 32 + 9; // Voltage zero
+//	const static uint32_t _pinZeroCross = 11; // Current zero
 	const static uint32_t _gpioteZeroCross = CS_PWM_GPIOTE_CHANNEL_START + CS_PWM_GPIOTE_CHANNEL_COUNT;
 
 	void _handleGpioteInterrupt(gpiote_int_data_t* data);
