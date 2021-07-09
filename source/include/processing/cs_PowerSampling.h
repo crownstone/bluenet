@@ -94,6 +94,8 @@ private:
 	//! Operation mode of this device.
 	OperationMode _operationMode;
 
+	uint64_t _processCount = 0;
+
 	/**
 	 * Queue of buffers we can use for processing.
 	 *

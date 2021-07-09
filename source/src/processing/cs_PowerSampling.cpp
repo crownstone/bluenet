@@ -325,6 +325,7 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
 void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
+	++_processCount;
 	adc_buffer_seq_nr_t seqNr = AdcBuffer::getInstance().getBuffer(bufIndex)->seqNr;
 	LOGPowerSamplingVerbose("bufId=%u seqNr=%u", bufIndex, seqNr);
 	PS_TEST_PIN_TOGGLE
@@ -392,6 +393,24 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 			}
 		}
 	}
+
+	if (_processCount <= numSwitchSamplesBuffers / 2) {
+		printBuf(filteredBufIndex);
+
+		// Store first raw samples after boot in last switch samples.
+		uint16_t count = AdcBuffer::getChannelLength();
+		_lastSwitchSamplesHeader.type = POWER_SAMPLES_TYPE_SWITCH;
+		_lastSwitchSamplesHeader.count = count;
+		_lastSwitchSamplesHeader.unixTimestamp = SystemTime::posix();
+		_lastSwitchSamplesHeader.delayUs = 0;
+		_lastSwitchSamplesHeader.sampleIntervalUs = AdcBuffer::getInstance().getBuffer(bufIndex)->config[0].samplingIntervalUs;
+
+		for (adc_sample_value_id_t i = 0; i < count; ++i) {
+			_lastSwitchSamples[i + (2 * bufIndex + 0) * count] = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
+			_lastSwitchSamples[i + (2 * bufIndex + 1) * count] = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
+		}
+	}
+
 
 	PS_TEST_PIN_TOGGLE
 
