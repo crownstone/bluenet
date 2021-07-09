@@ -1406,7 +1406,7 @@ void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
 	LOGd("ADC buf:");
 	// Copy to buf and log that buf, instead of doing a uart msg per sample.
 	// Only works if channel length is divisible by 10.
-	__attribute__((unused)) adc_sample_value_id_t buf[10];
+	__attribute__((unused)) adc_sample_value_t buf[10];
 	for (adc_channel_id_t channel = 0; channel < AdcBuffer::getChannelCount(); ++channel) {
 		LOGd("channel %u:", channel);
 		for (adc_sample_value_id_t i = 0, j = 0; i < AdcBuffer::getChannelLength(); ++i) {
