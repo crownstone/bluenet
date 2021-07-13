@@ -45,6 +45,10 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 			handleAssetAcceptedEvent(evt);
 			break;
 		}
+		case CS_TYPE::EVT_FILTERS_UPDATED: {
+			resetReports();
+			break;
+		}
 		default: {
 			break;
 		}

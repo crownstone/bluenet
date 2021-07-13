@@ -193,6 +193,7 @@ public:
 	 * Handlers for:
 	 * EVT_MESH_NEAREST_WITNESS_REPORT
 	 * EVT_ASSET_ACCEPTED
+	 * EVT_FILTERS_UPDATED
 	 */
 	void handleEvent(event_t &evt);
 
