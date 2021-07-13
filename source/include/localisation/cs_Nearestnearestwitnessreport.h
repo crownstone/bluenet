@@ -32,26 +32,3 @@ struct __attribute__((__packed__)) internal_report_asset_mac_t {
 	report_asset_mac_t report;
 	stone_id_t reporter;
 };
-
-//
-//class NearestWitnessReport {
-//public:
-//	TrackableId trackable;
-//	int8_t rssi = 0;
-//	stone_id_t reporter = 0;
-//
-//	/**
-//	 * copy constructor enables assignment.
-//	 */
-//	NearestWitnessReport(NearestWitnessReport &other) :
-//			trackable(other.trackable),
-//			rssi(other.rssi),
-//			reporter(other.reporter) {
-//	}
-//
-//	NearestWitnessReport(TrackableId mac, int8_t rssi, stone_id_t id) :
-//			trackable(mac), rssi(rssi), reporter(id) {
-//	}
-//
-//	NearestWitnessReport() = default;
-//};

@@ -49,7 +49,7 @@ void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 	meshMsgEvt.dispatch();
 
 
-	// forward message over uart (i.e. it's also interesting if the hub receives asset advertisement)
+	// forward message over uart (i.e. it's also interesting if the hub dongle directly receives asset advertisement)
 	forwardAssetToUart(asset_msg, _myId);
 }
 

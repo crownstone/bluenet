@@ -598,7 +598,7 @@ struct __attribute__((packed)) cs_asset_rssi_data_t {
  * identifier of three bytes. This allows this message to be sent as unsegmented message through the mesh.
  */
 struct __attribute__((packed)) cs_nearest_stone_update_t {
-	uint8_t assetId[3];
+	short_asset_id_t assetId;
 	uint8_t stoneId;
 	int8_t rssi;
 	uint8_t channel;
@@ -609,7 +609,7 @@ struct __attribute__((packed)) cs_nearest_stone_update_t {
  * in the given mesh for a particular time period.
  */
 struct __attribute__((packed)) cs_nearest_stone_timeout_t {
-	uint8_t assetId[3];
+	short_asset_id_t assetId;
 };
 
 // ========================= functions =========================
