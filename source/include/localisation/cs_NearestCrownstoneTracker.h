@@ -83,6 +83,10 @@ private:
 	 */
 	uint8_t _assetRecordCount = 0;
 
+	// -------------------------------------------
+	// ------------- Incoming events -------------
+	// -------------------------------------------
+
 	/**
 	 * Called on EVT_RECV_MESH_MSG events.
 	 * Extract report from other crownstones that come in from the mesh
@@ -123,25 +127,9 @@ private:
 	 */
 	void onReceiveAssetReport(report_asset_id_t& report, stone_id_t reporter);
 
-	/**
-	 * Copy relevant data of the TrackableEvent and assign _myId as reporter.
-	 */
-	internal_report_asset_id_t createReport(TrackableEvent* trackedEvent);
-
-	/**
-	 * Copy relevant data of the MeshMsgEvent and set reporter equal to the sender of the msg.
-	 */
-	internal_report_asset_id_t createReport(MeshMsgEvent* trackableAdvertisement);
-
-	/**
-	 * saves the rssi as personal
-	 */
-	void savePersonalReport(report_asset_record_t& rec, int8_t personalRssi);
-
-	/**
-	 * saves the report in the _winning list.
-	 */
-	void saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId);
+	// -------------------------------------------
+	// ------------- Outgoing events -------------
+	// -------------------------------------------
 
 	/**
 	 * Sends a mesh broadcast for the given report.
@@ -156,6 +144,12 @@ private:
 	void broadcastPersonalReport(report_asset_record_t& record);
 
 	/**
+	 * Sends a message over UART containing the winner, its rssi
+	 * and the asset id.
+	 */
+	void sendUartUpdate(report_asset_record_t& record);
+
+	/**
 	 * Currently dispatches an event for CMD_SWITCH_[ON,OFF] depending on
 	 * whether this crownstone is closest (ON) or not the closest.
 	 *
@@ -163,13 +157,27 @@ private:
 	 */
 	void onWinnerChanged(bool winnerIsThisCrownstone);
 
+	// ---------------------------------
+	// ------------- Utils -------------
+	// ---------------------------------
+
+
+	/**
+	 * saves the rssi as personal
+	 */
+	void savePersonalReport(report_asset_record_t& rec, int8_t personalRssi);
+
+	/**
+	 * saves the report in the _winning list.
+	 */
+	void saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId);
+
 	/**
 	 * returns a pointer to the found record, possibly empty.
 	 * returns nullptr if not found and creating a new one was
 	 * impossible.
 	 */
 	report_asset_record_t* getOrCreateRecord(short_asset_id_t& id);
-
 
 	/**
 	 * Assumes my_id is set to the stone id of this crownstone.

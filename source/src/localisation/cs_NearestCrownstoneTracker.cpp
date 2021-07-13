@@ -12,8 +12,11 @@
 #include <localisation/cs_TrackableId.h>
 #include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
+#include <protocol/cs_UartOpcodes.h>
+#include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
+#include <uart/cs_UartHandler.h>
 
 #define LOGNearestCrownstoneTrackerVerbose LOGd
 #define LOGNearestCrownstoneTrackerDebug LOGvv
@@ -21,18 +24,15 @@
 
 
 
-void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
-	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(%u, %d dB) me(%d dB)",
-			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
-			record.winningStoneId, record.winningRssi, record.personalRssi);
-}
-
-
 void NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 
 	resetReports();
 }
+
+// -------------------------------------------
+// ------------- Incoming events -------------
+// -------------------------------------------
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	switch(evt.type) {
@@ -74,6 +74,8 @@ void NearestCrownstoneTracker::handleAssetAcceptedEvent(event_t& evt){
 	rep.rssi = assetAcceptedEvent->_asset.rssi;
 
 	onReceiveAssetAdvertisement(rep);
+
+	evt.result = ERR_SUCCESS;
 }
 
 
@@ -105,13 +107,19 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 		saveWinningReport(record, incomingReport.rssi, _myId);
 
 		broadcastReport(incomingReport);
+
+		sendUartUpdate(record);
 	}
 	else {
 		LOGNearestCrownstoneTrackerVerbose("we didn't win before");
 		if (incomingReport.rssi > record.winningRssi)  {
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
 			saveWinningReport(record, incomingReport.rssi, _myId);
+
 			broadcastReport(incomingReport);
+
+			sendUartUpdate(record);
+
 			onWinnerChanged(true);
 		}
 		else {
@@ -146,19 +154,67 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 			LOGNearestCrownstoneTrackerVerbose("Broadcast my personal report to update the mesh.");
 			broadcastPersonalReport(record);
 
+			sendUartUpdate(record);
+
 			onWinnerChanged(true);
 		} else {
 			LOGNearestCrownstoneTrackerVerbose("It still wins, so I'll just update the value of my winning report.");
 			saveWinningReport(record, incomingReport.rssi, reporter);
+
+			sendUartUpdate(record);
 		}
 	}
 	else {
 		if (incomingReport.rssi > record.winningRssi) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
 			saveWinningReport(record, incomingReport.rssi, reporter);
+
+			sendUartUpdate(record);
+
 			onWinnerChanged(false);
 		}
 	}
+}
+
+// -------------------------------------------
+// ------------- Outgoing events -------------
+// -------------------------------------------
+
+
+void NearestCrownstoneTracker::broadcastReport(report_asset_id_t& report) {
+
+	cs_mesh_msg_t reportMsgWrapper;
+	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_REPORT_ASSET_ID;
+	reportMsgWrapper.payload = reinterpret_cast<uint8_t*>(&report);
+	reportMsgWrapper.size = sizeof(report);
+	reportMsgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
+	reportMsgWrapper.urgency = CS_MESH_URGENCY_LOW;
+
+	event_t reportMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &reportMsgWrapper, sizeof(reportMsgWrapper));
+
+	reportMsgEvt.dispatch();
+}
+
+void NearestCrownstoneTracker::broadcastPersonalReport(report_asset_record_t& record) {
+	report_asset_id_t report = {};
+	report.id = record.assetId;
+	report.rssi = record.personalRssi;
+
+	broadcastReport(report);
+}
+
+void NearestCrownstoneTracker::sendUartUpdate(report_asset_record_t& record) {
+	auto uartMsg = cs_nearest_stone_update_t{
+			.assetId = record.assetId,
+			.stoneId = record.winningStoneId,
+			.rssi = record.winningRssi,
+			.channel = 0
+	};
+
+	UartHandler::getInstance().writeMsg(
+			UartOpcodeTx::UART_OPCODE_TX_NEAREST_CROWNSTONE_UPDATE,
+			reinterpret_cast<uint8_t*>(&uartMsg),
+			sizeof(uartMsg));
 }
 
 void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
@@ -171,6 +227,21 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 
 	event_t event(onOff, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 	event.dispatch();
+}
+
+
+// ---------------------------------
+// ------------- Utils -------------
+// ---------------------------------
+
+
+void NearestCrownstoneTracker::savePersonalReport(report_asset_record_t& rec, int8_t personalRssi) {
+	rec.personalRssi = personalRssi;
+}
+
+void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId) {
+	rec.winningStoneId = winningId;
+	rec.winningRssi = winningRssi;
 }
 
 NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
@@ -200,45 +271,14 @@ NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOr
 	return nullptr;
 }
 
-// --------------------------- Report processing ------------------------
-
-
-void NearestCrownstoneTracker::savePersonalReport(report_asset_record_t& rec, int8_t personalRssi) {
-	rec.personalRssi = personalRssi;
-}
-
-void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId) {
-	rec.winningStoneId = winningId;
-	rec.winningRssi = winningRssi;
-}
-
 void NearestCrownstoneTracker::resetReports() {
 	for (auto& rec : _assetRecords){
 		rec = {};
 	}
 }
 
-// ------------------- Mesh related stuff ----------------------
-
-void NearestCrownstoneTracker::broadcastPersonalReport(report_asset_record_t& record) {
-	report_asset_id_t report = {};
-	report.id = record.assetId;
-	report.rssi = record.personalRssi;
-
-	broadcastReport(report);
-}
-
-void NearestCrownstoneTracker::broadcastReport(report_asset_id_t& report) {
-
-	cs_mesh_msg_t reportMsgWrapper;
-	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_REPORT_ASSET_ID;
-	reportMsgWrapper.payload = reinterpret_cast<uint8_t*>(&report);
-	reportMsgWrapper.size = sizeof(report);
-	reportMsgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
-	reportMsgWrapper.urgency = CS_MESH_URGENCY_LOW;
-
-	event_t reportMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &reportMsgWrapper, sizeof(reportMsgWrapper));
-
-	reportMsgEvt.dispatch();
-
+void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
+	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(%u, %d dB) me(%d dB)",
+			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
+			record.winningStoneId, record.winningRssi, record.personalRssi);
 }
