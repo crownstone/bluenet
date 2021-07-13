@@ -221,6 +221,18 @@ void NearestCrownstoneTracker::sendUartUpdate(report_asset_record_t& record) {
 			sizeof(uartMsg));
 }
 
+
+void NearestCrownstoneTracker::sendUartTimeout(const short_asset_id_t& assetId) {
+	auto uartMsg = cs_nearest_stone_timeout_t{
+			.assetId = assetId
+	};
+
+	UartHandler::getInstance().writeMsg(
+			UartOpcodeTx::UART_OPCODE_TX_NEAREST_CROWNSTONE_TIMEOUT,
+			reinterpret_cast<uint8_t*>(&uartMsg),
+			sizeof(uartMsg));
+}
+
 void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 	LOGd("Nearest changed. I'm turning %s",
 			winnerIsThisCrownstone ? "on" : "off");

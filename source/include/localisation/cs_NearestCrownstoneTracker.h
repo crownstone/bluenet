@@ -143,6 +143,11 @@ private:
 	void sendUartUpdate(report_asset_record_t& record);
 
 	/**
+	 * Report to uart host that this report is timing out.
+	 */
+	void sendUartTimeout(const short_asset_id_t& record);
+
+	/**
 	 * Currently dispatches an event for CMD_SWITCH_[ON,OFF] depending on
 	 * whether this crownstone is closest (ON) or not the closest.
 	 *
