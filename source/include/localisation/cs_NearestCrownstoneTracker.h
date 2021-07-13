@@ -31,16 +31,9 @@
 class NearestCrownstoneTracker: public EventListener {
 public:
 	/**
-	 * Caches CONFIG_CROWNSTONE_ID, and resets the report maps.
+	 * Caches CONFIG_CROWNSTONE_ID, and resets the _assetRecords cache.
 	 */
 	void init();
-
-	/**
-	 * Handlers for:
-	 * EVT_MESH_NEAREST_WITNESS_REPORT
-	 * EVT_ASSET_ACCEPTED
-	 */
-	void handleEvent(event_t &evt);
 
 private:
 	static constexpr auto MAX_REPORTS = 10u;
@@ -189,6 +182,14 @@ private:
 
 
 	void logRecord(report_asset_record_t& record);
+
+public:
+	/**
+	 * Handlers for:
+	 * EVT_MESH_NEAREST_WITNESS_REPORT
+	 * EVT_ASSET_ACCEPTED
+	 */
+	void handleEvent(event_t &evt);
 
 };
 
