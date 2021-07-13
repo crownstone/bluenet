@@ -198,12 +198,18 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 	uint8_t reserved : 7;    // @arend maybe use these bits to increase version size.
 };
 
+
+struct __attribute__((__packed__)) compressed_rssi_data_t {
+	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
+	uint8_t rssi_halved : 6; // half of the absolute value of the original rssi.
+};
+
 /**
  * Packed version of NearestWitnessReport.
  */
 struct __attribute__((__packed__)) report_asset_mac_t {
 	uint8_t trackableDeviceMac[6];
-	int8_t rssi;
+	compressed_rssi_data_t rssi;
 };
 
 
@@ -211,7 +217,7 @@ struct __attribute__((__packed__)) report_asset_mac_t {
 struct __attribute__((__packed__)) report_asset_id_t {
 	short_asset_id_t id;
 	uint8_t reserved[3];
-	int8_t rssi;
+	compressed_rssi_data_t compressedRssi;
 };
 
 /**
@@ -260,10 +266,6 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 	rssi_data_t channel39;
 };
 
-struct __attribute__((__packed__)) compressed_rssi_data_t {
-	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssi_halved : 6; // half of the absolute value of the original rssi.
-};
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_neighbour_rssi_t {
 	uint8_t type = 0; // Type of report, always 0 for now.

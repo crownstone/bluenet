@@ -59,11 +59,11 @@ private:
 		/**
 		 * Most recent rssi value observed by this crownstone.
 		 */
-		int8_t personalRssi;
+		compressed_rssi_data_t personalRssi;
 		/**
 		 * rssi between asset and closest stone. only valid if winning_id != 0.
 		 */
-		int8_t winningRssi;
+		compressed_rssi_data_t winningRssi;
 	};
 
 	/**
@@ -165,12 +165,12 @@ private:
 	/**
 	 * saves the rssi as personal
 	 */
-	void savePersonalReport(report_asset_record_t& rec, int8_t personalRssi);
+	void savePersonalReport(report_asset_record_t& rec, compressed_rssi_data_t personalRssi);
 
 	/**
 	 * saves the report in the _winning list.
 	 */
-	void saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId);
+	void saveWinningReport(report_asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
 
 	/**
 	 * returns a pointer to the found record, possibly empty.

@@ -17,6 +17,7 @@
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
 #include <uart/cs_UartHandler.h>
+#include <util/cs_Rssi.h>
 
 #define LOGNearestCrownstoneTrackerVerbose LOGd
 #define LOGNearestCrownstoneTrackerDebug LOGvv
@@ -71,7 +72,9 @@ void NearestCrownstoneTracker::handleAssetAcceptedEvent(event_t& evt){
 
 	report_asset_id_t rep = {};
 	rep.id = assetAcceptedEvent->_id;
-	rep.rssi = assetAcceptedEvent->_asset.rssi;
+	rep.compressedRssi = compressRssi(
+					assetAcceptedEvent->_asset.rssi,
+					assetAcceptedEvent->_asset.channel);
 
 	onReceiveAssetAdvertisement(rep);
 
@@ -91,7 +94,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 
 	logRecord(record);
 
-	savePersonalReport(record, incomingReport.rssi);
+	savePersonalReport(record, incomingReport.compressedRssi);
 
 	// REVIEW: Does it matter who reported it?
 	// @Bart: Yes. The crownstone always saves a 'personal report', but the rssi value between
@@ -104,7 +107,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	if (record.winningStoneId == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so it's time to send an update towards the mesh");
 
-		saveWinningReport(record, incomingReport.rssi, _myId);
+		saveWinningReport(record, incomingReport.compressedRssi, _myId);
 
 		broadcastReport(incomingReport);
 
@@ -112,9 +115,10 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	else {
 		LOGNearestCrownstoneTrackerVerbose("we didn't win before");
-		if (incomingReport.rssi > record.winningRssi)  {
+		if (rssiIsCloser(incomingReport.compressedRssi, record.winningRssi))  {
+			// we win because the incoming report is a first hand observation.
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
-			saveWinningReport(record, incomingReport.rssi, _myId);
+			saveWinningReport(record, incomingReport.compressedRssi, _myId);
 
 			broadcastReport(incomingReport);
 
@@ -129,8 +133,8 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 }
 
 void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingReport, stone_id_t reporter) {
-	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i)",
-			_myId, reporter, incomingReport.rssi);
+	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i #%u)",
+			_myId, reporter, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
 	if (reporter == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
@@ -147,7 +151,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	if (reporter == record.winningStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if (record.personalRssi > incomingReport.rssi) {
+		if (rssiIsCloser(record.personalRssi, incomingReport.compressedRssi) ) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
 			saveWinningReport(record, record.personalRssi, _myId);
 
@@ -159,15 +163,15 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 			onWinnerChanged(true);
 		} else {
 			LOGNearestCrownstoneTrackerVerbose("It still wins, so I'll just update the value of my winning report.");
-			saveWinningReport(record, incomingReport.rssi, reporter);
+			saveWinningReport(record, incomingReport.compressedRssi, reporter);
 
 			sendUartUpdate(record);
 		}
 	}
 	else {
-		if (incomingReport.rssi > record.winningRssi) {
+		if (rssiIsCloser(incomingReport.compressedRssi, record.winningRssi)) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
-			saveWinningReport(record, incomingReport.rssi, reporter);
+			saveWinningReport(record, incomingReport.compressedRssi, reporter);
 
 			sendUartUpdate(record);
 
@@ -198,7 +202,7 @@ void NearestCrownstoneTracker::broadcastReport(report_asset_id_t& report) {
 void NearestCrownstoneTracker::broadcastPersonalReport(report_asset_record_t& record) {
 	report_asset_id_t report = {};
 	report.id = record.assetId;
-	report.rssi = record.personalRssi;
+	report.compressedRssi = record.personalRssi;
 
 	broadcastReport(report);
 }
@@ -207,8 +211,8 @@ void NearestCrownstoneTracker::sendUartUpdate(report_asset_record_t& record) {
 	auto uartMsg = cs_nearest_stone_update_t{
 			.assetId = record.assetId,
 			.stoneId = record.winningStoneId,
-			.rssi = record.winningRssi,
-			.channel = 0
+			.rssi = getRssi(record.winningRssi),
+			.channel = getChannel(record.winningRssi)
 	};
 
 	UartHandler::getInstance().writeMsg(
@@ -235,11 +239,11 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 // ---------------------------------
 
 
-void NearestCrownstoneTracker::savePersonalReport(report_asset_record_t& rec, int8_t personalRssi) {
+void NearestCrownstoneTracker::savePersonalReport(report_asset_record_t& rec, compressed_rssi_data_t personalRssi) {
 	rec.personalRssi = personalRssi;
 }
 
-void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, int8_t winningRssi, stone_id_t winningId) {
+void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
 	rec.winningStoneId = winningId;
 	rec.winningRssi = winningRssi;
 }
@@ -258,9 +262,11 @@ NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOr
 		LOGNearestCrownstoneTrackerVerbose("creating new report record");
 		auto& rec = _assetRecords[_assetRecordCount];
 		rec.assetId = id;
-		rec.personalRssi = -127;
-		rec.winningRssi = -127;
 		rec.winningStoneId = 0;
+
+		// set rssi's unreasonably low so that they will be overwritten on the first observation
+		rec.personalRssi = compressRssi(-127, 0);
+		rec.winningRssi = compressRssi(-127, 0);
 
 		_assetRecordCount += 1;
 		return &rec;

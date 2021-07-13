@@ -37,3 +37,20 @@ inline int8_t getRssi(const compressed_rssi_data_t& compressed) {
 inline uint8_t getRssiUnsigned(const compressed_rssi_data_t& compressed) {
 	return 2 * compressed.rssi_halved;
 }
+
+/**
+ * Returns true if the rssi value of lhs represents a shorter
+ * physical distance than rhs. Ignores channel.
+ */
+inline bool rssiIsCloser(
+		const compressed_rssi_data_t& lhs,
+		const compressed_rssi_data_t& rhs) {
+	// usually higher values are shorter distances, but abs reverses inequality.
+	return lhs.rssi_halved < rhs.rssi_halved;
+}
+
+inline bool rssiIsCloserEqual(
+		const compressed_rssi_data_t& lhs,
+		const compressed_rssi_data_t& rhs) {
+	return rssiIsCloser(lhs,rhs) || lhs.rssi_halved == rhs.rssi_halved;
+}
