@@ -300,7 +300,10 @@ void NearestCrownstoneTracker::resetReports() {
 }
 
 void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
-	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(%u, %d dB) me(%d dB)",
+	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(%u, %d dB ch%u) me(%d dB ch %u)",
 			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
-			record.winningStoneId, record.winningRssi, record.personalRssi);
+			record.winningStoneId,
+			getRssi(record.winningRssi), getChannel(record.winningRssi),
+			getRssi(record.personalRssi), getChannel(record.personalRssi)
+			);
 }
