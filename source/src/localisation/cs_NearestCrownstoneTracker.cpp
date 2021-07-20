@@ -91,7 +91,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 
 	auto recordPtr = getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
-		// TODO: add error message. Too many local assets to track.
+		onAssetListFull(incomingReport);
 		return;
 	}
 	auto& record = *recordPtr;
@@ -147,7 +147,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 
 	auto recordPtr = getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
-		// TODO: add error message. Too many local assets to track.
+		onAssetListFull(incomingReport);
 		return;
 	}
 	auto& record = *recordPtr;
@@ -306,4 +306,12 @@ void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
 			getRssi(record.winningRssi), getChannel(record.winningRssi),
 			getRssi(record.personalRssi), getChannel(record.personalRssi)
 			);
+}
+
+
+void NearestCrownstoneTracker::onAssetListFull(report_asset_id_t& report) {
+	LOGw("Too many local assets to track, ignoring 0x%x 0x%x 0x%x",
+					report.id.data[0],
+					report.id.data[1],
+					report.id.data[2] );
 }

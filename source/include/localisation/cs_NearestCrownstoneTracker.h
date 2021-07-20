@@ -188,6 +188,11 @@ private:
 
 	void logRecord(report_asset_record_t& record);
 
+	/**
+	 * Log a warning.
+	 */
+	void onAssetListFull(report_asset_id_t& report);
+
 public:
 	/**
 	 * Handlers for:
