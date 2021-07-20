@@ -67,14 +67,6 @@ cuckoo_fingerprint_t CuckooFilter::hashToBucket(cuckoo_key_t key, size_t keyLeng
 				Djb2(static_cast<const uint8_t*>(key), keyLengthInBytes));
 }
 
-short_asset_id_t CuckooFilter::shortAssetId(const void* item, size_t itemSize) {
-	assert(sizeof(short_asset_id_t) == sizeof(cuckoo_compressed_fingerprint_t),
-		   "can't cast compressed fingerprint to asset id");
-
-	cuckoo_compressed_fingerprint_t ccf = getCompressedFingerprint(item, itemSize);
-
-	return *reinterpret_cast<short_asset_id_t*>(&ccf);
-}
 
 /* ------------------------------------------------------------------------- */
 

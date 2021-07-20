@@ -26,10 +26,14 @@ An SID will be generated when at least one of the accepting filters `outputDescr
 Each `filterType` has their own implementation. This is because the ExactMatchFilter is able to guarantee being collision free while CuckooFilters work optimally when using hashes.
 
 
+#### Default SIDs
+Hash (crc32) of the data selected by the accepting filters' `outputDescription.in_format`, trunkated to the lowest 3 bytes.
+
+
 #### CuckooFilter SIDs
-Hash of the `outputDescription.in_format`, trunkated to the last(?) 3 bytes.
+Generates default SIDs.
 
 Note: this may be _more_ bytes than are stored in the CuckooFilter for that asset, which means that eventhough two assets collide in the filter, they may be distinguished in other parts of the system.
 
 #### ExactMatchFilter SIDs
-If `outputDescription.in_format` is equal to `inputDescription.in_format` so if `i` is the index of match in the array, the SID will be `{(i>>0) & 0xff, (i>>8) & 0xff, 0xff}`.
+If the data selected by the `outputDescription.in_format` matches an entry in the array with index `i`, the SID will be `{(i>>0) & 0xff, (i>>8) & 0xff,(i>>16) & 0xff}`. When the selected data is not found, default SIDs are generated.

@@ -78,8 +78,6 @@ public:
 		return contains(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
-
 	/**
 	 * Total number of bytes this instance occypies.
 	 * Use this function instead of sizeof for this class to take the buffer into account.
