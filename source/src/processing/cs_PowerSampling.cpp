@@ -1064,7 +1064,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 	if (voltageRmsMilliVolt != 0 && (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt)) {
 		_adcChannelSwaps.count++;
 		_adcChannelSwaps.lastTimestamp = SystemTime::posix();
-		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
+//		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
 		return;
 	}
 

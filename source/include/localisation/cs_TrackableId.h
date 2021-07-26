@@ -45,7 +45,7 @@ struct __attribute__((__packed__)) TrackableId {
 
 	// REVIEW: string as argument can't be left out from binary size.
 	void print(const char* headerstr) {
-		LOGd("%s mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
+		LOGnone("%s mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
 				headerstr,
 				bytes[0],
 				bytes[1],
