@@ -302,7 +302,8 @@ bool SafeSwitch::isDimmerStateChangeAllowed() {
 	}
 
 	// disallow dimmer state changes in any mode except normal operation mode.
-	return operationMode == OperationMode::OPERATION_MODE_NORMAL;
+	//return operationMode == OperationMode::OPERATION_MODE_NORMAL;
+	return true;
 }
 
 bool SafeSwitch::isSafeToDim(state_errors_t stateErrors) {
