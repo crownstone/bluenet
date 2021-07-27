@@ -87,7 +87,8 @@ void NearestCrownstoneTracker::handleAssetAcceptedEvent(event_t& evt){
 
 
 void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& incomingReport) {
-	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u)", _myId);
+	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u), report(%d dB ch.%u)",
+			_myId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
 	auto recordPtr = getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
@@ -296,14 +297,17 @@ NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOr
 void NearestCrownstoneTracker::resetReports() {
 	for (auto& rec : _assetRecords){
 		rec = {};
+
+		// set rssi's unreasonably low so that they will be overwritten on the first observation
+		rec.personalRssi = compressRssi(-127, 0);
+		rec.winningRssi = compressRssi(-127, 0);
 	}
 }
 
 void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
-	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(%u, %d dB ch%u) me(%d dB ch %u)",
+	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(#%u, %d dB ch%u [%u]) me(%d dB ch %u)",
 			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
-			record.winningStoneId,
-			getRssi(record.winningRssi), getChannel(record.winningRssi),
+			record.winningStoneId, getRssi(record.winningRssi), getChannel(record.winningRssi), record.winningRssi,
 			getRssi(record.personalRssi), getChannel(record.personalRssi)
 			);
 }
