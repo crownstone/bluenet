@@ -297,6 +297,10 @@ NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOr
 void NearestCrownstoneTracker::resetReports() {
 	for (auto& rec : _assetRecords){
 		rec = {};
+
+		// set rssi's unreasonably low so that they will be overwritten on the first observation
+		rec.personalRssi = compressRssi(-127, 0);
+		rec.winningRssi = compressRssi(-127, 0);
 	}
 }
 
