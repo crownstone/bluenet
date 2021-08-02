@@ -85,7 +85,7 @@ bool AssetFilterOutput::isValid() {
 	}
 
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac:
+		case AssetFilterOutputFormat::MacOverMesh:
 		case AssetFilterOutputFormat::ShortAssetId: {
 			return true;
 		}
@@ -98,7 +98,7 @@ bool AssetFilterOutput::isValid() {
 size_t AssetFilterOutput::length() {
 	size_t len = sizeof(AssetFilterOutputFormat);
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac: {
+		case AssetFilterOutputFormat::MacOverMesh: {
 			break;
 		}
 		case AssetFilterOutputFormat::ShortAssetId: {

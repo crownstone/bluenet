@@ -68,8 +68,9 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	Mac          = 0, // TODO: this isn't just "MAC" this also determines it is forwarded to the hub.
-	ShortAssetId = 1,
+	MacOverMesh          = 0,
+	ShortAssetId         = 1,
+	ShortAssetIdOverMesh = 2,
 };
 
 union __attribute__((__packed__)) asset_filter_flags_t {

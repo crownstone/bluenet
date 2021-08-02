@@ -74,6 +74,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
 	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
 	CS_MESH_MODEL_TYPE_REPORT_ASSET_ID           = 30, // Payload: report_asset_id_t
+	CS_MESH_MODEL_TYPE_ASSET_RSSI_SID            = 31, // Payload: cs_mesh_model_msg_asset_rssi_sid_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -303,4 +304,11 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_mac_t {
 	compressed_rssi_data_t rssiData;
 	uint8_t mac[MAC_ADDRESS_LEN];
+};
+
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_sid_t {
+	compressed_rssi_data_t rssiData;
+	short_asset_id_t sid;
+	uint8_t reserved[3];
 };
