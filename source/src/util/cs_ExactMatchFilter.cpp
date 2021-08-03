@@ -18,7 +18,7 @@ ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data
 
 bool ExactMatchFilter::isValid() {
 	if (_data == nullptr) {
-		LogExactMatchFilterWarn("data is nullptr");
+		LogExactMatchFilterWarn("Data is nullptr.");
 		return false;
 	}
 	if (_data->itemCount == 0) {

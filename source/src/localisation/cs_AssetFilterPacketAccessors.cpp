@@ -43,7 +43,7 @@ bool AssetFilterInput::isValid() {
 			return true;
 		}
 	}
-	LogAssetFilterPacketAccessorsWarn("invalid assetfilter input type");
+	LogAssetFilterPacketAccessorsWarn("Unknown input type: %u", *type());
 	return false;
 }
 
@@ -79,19 +79,20 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 }
 
 bool AssetFilterOutput::isValid() {
-	if (inFormat().isValid() == false) {
-		LogAssetFilterPacketAccessorsWarn("invalid informat for filter output");
-		return false;
-	}
-
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac:
+		case AssetFilterOutputFormat::Mac: {
+			return true;
+		}
 		case AssetFilterOutputFormat::ShortAssetId: {
+			if (inFormat().isValid() == false) {
+				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
+				return false;
+			}
 			return true;
 		}
 	}
 
-	LogAssetFilterPacketAccessorsWarn("unknown outFormat descriptor");
+	LogAssetFilterPacketAccessorsWarn("Unknown outFormat: %u", *outFormat());
 	return false;
 }
 
@@ -169,7 +170,7 @@ ExactMatchFilter AssetFilterData::exactMatchFilter() {
 
 bool AssetFilterData::isValid() {
 	if (metadata().isValid() == false) {
-		LogAssetFilterPacketAccessorsWarn("invalid metadata");
+		LogAssetFilterPacketAccessorsWarn("Invalid metadata.");
 		return false;
 	}
 	switch (*metadata().filterType()) {
@@ -180,7 +181,7 @@ bool AssetFilterData::isValid() {
 			return exactMatchFilter().isValid();
 		}
 		default: {
-			LogAssetFilterPacketAccessorsWarn("unknown filterType");
+			LogAssetFilterPacketAccessorsWarn("Unknown filterType: %u", *metadata().filterType());
 			return false;
 		}
 	}
