@@ -32,6 +32,8 @@ private:
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender);
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg, stone_id_t sender);
 
-	cs_asset_rssi_data_t constructUartMsg(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg,
+	cs_asset_rssi_data_mac_t constructUartMsg(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg,
 			 stone_id_t sender);
+	cs_asset_rssi_data_sid_t constructUartMsg(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg,
+				 stone_id_t sender);
 };

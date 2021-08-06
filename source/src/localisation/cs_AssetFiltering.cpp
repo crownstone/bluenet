@@ -188,7 +188,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	auto filter = AssetFilter (_filterStore->getFilter(reinterpret_cast<uint8_t>(0xff & firstAcceptedFilterIdSid)));
+	auto filter = AssetFilter (_filterStore->getFilter(static_cast<uint8_t>(firstAcceptedFilterIdSid)));
 	auto shortAssetId = filterOutputResultShortAssetId(filter, device);
 
 	if (acceptedFilterIdBitmaskSidOverMesh && _assetForwarder != nullptr) {

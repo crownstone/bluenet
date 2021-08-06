@@ -170,6 +170,9 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 		case CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC: {
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_ASSET_RSSI_SID: {
+			break;
+		}
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: {
 			break;
 		}

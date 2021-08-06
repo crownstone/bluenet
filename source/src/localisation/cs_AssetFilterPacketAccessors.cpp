@@ -12,11 +12,6 @@
 #define LogAssetFilterPacketAccessorsWarn LOGw
 
 
-/**
- * AssetFilterInput struct:
- * - type
- * - payload (optional)
- */
 AssetFilterInputType* AssetFilterInput::type() {
 	return reinterpret_cast<AssetFilterInputType*>(_data + 0);
 }
@@ -65,11 +60,6 @@ size_t AssetFilterInput::length() {
 	return len;
 }
 
-/**
- * AssetFilterOutput struct:
- * - type
- * - payload (optional)
- */
 AssetFilterOutputFormat* AssetFilterOutput::outFormat() {
 	return reinterpret_cast<AssetFilterOutputFormat*>(_data + 0);
 }
@@ -86,7 +76,8 @@ bool AssetFilterOutput::isValid() {
 
 	switch (*outFormat()) {
 		case AssetFilterOutputFormat::MacOverMesh:
-		case AssetFilterOutputFormat::ShortAssetId: {
+		case AssetFilterOutputFormat::ShortAssetId:
+		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
 			return true;
 		}
 	}
@@ -105,18 +96,14 @@ size_t AssetFilterOutput::length() {
 			len += inFormat().length();
 			break;
 		}
+		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+			len += inFormat().length();
+			break;
+		}
 	}
 	return len;
 }
 
-/**
- * AssetFilterMetadata struct:
- * - filterType
- * - flags
- * - profileId
- * - input
- * - output
- */
 AssetFilterType* AssetFilterMetadata::filterType() {
 	return reinterpret_cast<AssetFilterType*>(_data + 0);
 }
@@ -150,11 +137,6 @@ size_t AssetFilterMetadata::length() {
 			+ outputType().length();
 }
 
-/**
- * AssetFilterData struct:
- * - metadata
- * - filter data
- */
 AssetFilterMetadata AssetFilterData::metadata() {
 	return AssetFilterMetadata(_data + 0);
 }
@@ -204,11 +186,6 @@ size_t AssetFilterData::length() {
 	return len;
 }
 
-/**
- * AssetFilter struct:
- * - runtime data
- * - asset filter data
- */
 asset_filter_runtime_data_t* AssetFilter::runtimedata() {
 	return reinterpret_cast<asset_filter_runtime_data_t*>(_data + 0);
 }

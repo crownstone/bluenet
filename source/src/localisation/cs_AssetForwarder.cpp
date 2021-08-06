@@ -15,7 +15,7 @@
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 
-#define LOGAssetForwarderDebug LOGnone
+#define LOGAssetForwarderDebug LOGd
 
 void printAsset(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
 	LOGAssetForwarderDebug("mesh_model_msg_asset: ch%u @ -%u dB",
@@ -32,10 +32,11 @@ cs_ret_code_t AssetForwarder::init() {
 
 void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
+
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
 	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));
+
 	LOGAssetForwarderDebug("handledAcceptedAsset ch%u, %d dB", asset.channel, asset.rssi);
-	printAsset(asset_msg);
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC;
@@ -53,15 +54,16 @@ void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 }
 
 
-void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
-	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
+void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid) {
+	cs_mesh_model_msg_asset_rssi_sid_t asset_msg = {};
+
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
-	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));
+	asset_msg.sid = sid;
+
 	LOGAssetForwarderDebug("handledAcceptedAsset ch%u, %d dB", asset.channel, asset.rssi);
-	printAsset(asset_msg);
 
 	cs_mesh_msg_t msgWrapper;
-	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC;
+	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_RSSI_SID;
 	msgWrapper.payload     = reinterpret_cast<uint8_t*>(&asset_msg);
 	msgWrapper.size        = sizeof(asset_msg);
 	msgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -108,7 +110,7 @@ void AssetForwarder::handleEvent(event_t & event) {
 void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender) {
 	printAsset(assetMsg);
 
-	cs_asset_rssi_data_t uartAssetMsg = constructUartMsg(assetMsg, sender);
+	cs_asset_rssi_data_mac_t uartAssetMsg = constructUartMsg(assetMsg, sender);
 
 	UartHandler::getInstance().writeMsg(
 			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_DATA,
@@ -117,10 +119,9 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t
 }
 
 void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg, stone_id_t sender) {
-	// TODO implement.
-	printAsset(assetMsg);
+	LOGAssetForwarderDebug("forwarding sid asset msg to uart");
 
-	cs_asset_rssi_data_t uartAssetMsg = constructUartMsg(assetMsg, sender);
+	cs_asset_rssi_data_sid_t uartAssetMsg = constructUartMsg(assetMsg, sender);
 
 	UartHandler::getInstance().writeMsg(
 			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_DATA,
@@ -128,9 +129,9 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t
 			sizeof(uartAssetMsg));
 }
 
-cs_asset_rssi_data_t AssetForwarder::constructUartMsg(
+cs_asset_rssi_data_mac_t AssetForwarder::constructUartMsg(
 		const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender) {
-	auto assetData = cs_asset_rssi_data_t{
+	auto assetData = cs_asset_rssi_data_mac_t{
 			.address = {},
 			.stoneId = sender,
 			.rssi    = getRssi(assetMsg.rssiData),
@@ -141,16 +142,14 @@ cs_asset_rssi_data_t AssetForwarder::constructUartMsg(
 	return assetData;
 }
 
-cs_asset_rssi_data_t AssetForwarder::constructUartMsg(
+cs_asset_rssi_data_sid_t AssetForwarder::constructUartMsg(
 		const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg, stone_id_t sender) {
-	// TODO implement.
-	auto assetData = cs_asset_rssi_data_t{
-			.address = {},
+	auto assetData = cs_asset_rssi_data_sid_t{
+			.assetId = assetMsg.sid,
 			.stoneId = sender,
 			.rssi    = getRssi(assetMsg.rssiData),
 			.channel = getChannel(assetMsg.rssiData),
 	};
-	memcpy (assetData.address, assetMsg.mac, sizeof(assetMsg.mac));
 
 	return assetData;
 }
