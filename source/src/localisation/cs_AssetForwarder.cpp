@@ -113,7 +113,7 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t
 	cs_asset_rssi_data_mac_t uartAssetMsg = constructUartMsg(assetMsg, sender);
 
 	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_DATA,
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_MAC_DATA,
 			reinterpret_cast<uint8_t*>(&uartAssetMsg),
 			sizeof(uartAssetMsg));
 }
@@ -124,7 +124,7 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t
 	cs_asset_rssi_data_sid_t uartAssetMsg = constructUartMsg(assetMsg, sender);
 
 	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_DATA,
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_SID_DATA,
 			reinterpret_cast<uint8_t*>(&uartAssetMsg),
 			sizeof(uartAssetMsg));
 }
