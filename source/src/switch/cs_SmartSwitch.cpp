@@ -228,6 +228,11 @@ void SmartSwitch::store(switch_state_t newState) {
 
 cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 	LOGi("setAllowSwitching %u", allowed);
+
+	if (allowed && allowDimming) {
+		LOGw("Dimming is allowed, so cannot lock switch.");
+		return ERR_WRONG_STATE;
+	}
 	_allowSwitching = allowed;
 
 	// must use the actual persisted value _allowSwitching rather than the returnvalue of allowSwitching here!
@@ -239,10 +244,17 @@ cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	LOGi("setAllowDimming %u", allowed);
 	allowDimming = allowed;
+
+	if (allowed && !_allowSwitching) {
+		LOGw("Disabling switch lock.");
+		_allowSwitching = true;
+		TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked = !_allowSwitching;
+		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
+	}
+
+	// This will trigger event CONFIG_DIMMING_ALLOWED, which will call handleAllowDimmingSet().
 	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &allowDimming, sizeof(allowDimming));
 
-	// This will trigger event CONFIG_PWM_ALLOWED, which will call handleAllowDimmingSet().
-//	handleAllowDimmingSet();
 	return ERR_SUCCESS;
 }
 
