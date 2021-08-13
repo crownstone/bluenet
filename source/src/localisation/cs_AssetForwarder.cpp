@@ -31,12 +31,11 @@ cs_ret_code_t AssetForwarder::init() {
 }
 
 void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
+	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
 
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
 	memcpy(asset_msg.mac, asset.address, sizeof(asset_msg.mac));
-
-	LOGAssetForwarderDebug("handledAcceptedAsset ch%u, %d dB", asset.channel, asset.rssi);
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC;
@@ -55,12 +54,11 @@ void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 
 
 void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid) {
+	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_rssi_sid_t asset_msg = {};
 
 	asset_msg.rssiData = compressRssi(asset.rssi, asset.channel);
 	asset_msg.sid = sid;
-
-	LOGAssetForwarderDebug("handledAcceptedAsset ch%u, %d dB", asset.channel, asset.rssi);
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_RSSI_SID;

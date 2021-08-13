@@ -7,6 +7,7 @@
 
 #include <localisation/cs_AssetFiltering.h>
 #include <util/cs_Utils.h>
+#include <util/cs_BitUtils.h>
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGi
@@ -122,13 +123,11 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 
 	// Accept check: loop over inclusion filters and check which filters are accepting.
 
-	uint8_t acceptedFilterIdBitmaskMacOverMesh = 0;
-	uint8_t acceptedFilterIdBitmaskSidOverMesh = 0;
-	uint8_t acceptedFilterIdBitmaskSidFirmwareEvent = 0;
+	uint8_t forwardMacBitmask = 0;
+	uint8_t forwardSidBitmask = 0;
+	uint8_t nearestSidBitmask = 0;
 
-	int firstAcceptedFilterIdSid = -1;
-
-	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(acceptedFilterIdBitmaskMacOverMesh),
+	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(forwardMacBitmask),
 			"too many filters for bitmask");
 
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
@@ -141,23 +140,17 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 				// update the relevant bitmask
 				switch (*filter.filterdata().metadata().outputType().outFormat()) {
 					case AssetFilterOutputFormat::MacOverMesh: {
-						acceptedFilterIdBitmaskMacOverMesh |= 1 << i;
+						forwardMacBitmask |= 1 << i;
 						break;
 					}
 
 					case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
-						if (firstAcceptedFilterIdSid < 0) {
-							firstAcceptedFilterIdSid = i;
-						}
-						acceptedFilterIdBitmaskSidOverMesh |= 1 << i;
+						forwardSidBitmask |= 1 << i;
 						break;
 					}
 
 					case AssetFilterOutputFormat::ShortAssetId: {
-						if (firstAcceptedFilterIdSid < 0) {
-							firstAcceptedFilterIdSid = i;
-						}
-						acceptedFilterIdBitmaskSidFirmwareEvent |= 1 << i;
+						nearestSidBitmask |= 1 << i;
 						break;
 					}
 				}
@@ -165,50 +158,60 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		}
 	}
 
-	uint8_t acceptedFiltersBitmask = acceptedFilterIdBitmaskMacOverMesh
-			| acceptedFilterIdBitmaskSidFirmwareEvent
-			| acceptedFilterIdBitmaskSidOverMesh;
+	uint8_t filterBitmask = forwardMacBitmask
+			| nearestSidBitmask
+			| forwardSidBitmask;
 
-	if(acceptedFiltersBitmask) {
-		LOGAssetFilteringDebug("bitmask shortid: %x. bitmask mac: %x",
-				acceptedFilterIdBitmaskSidFirmwareEvent, acceptedFilterIdBitmaskMacOverMesh);
-	}
-
-	// Dispatch events: send out relevant events in batch
-	if (acceptedFilterIdBitmaskMacOverMesh && _assetForwarder != nullptr) {
-		LOGAssetFilteringDebug("Dispatch event for mac-over-meshoutput filters");
-		_assetForwarder->handleAcceptedAsset(device);
-	}
-
-	// handle SId based output
-	if (firstAcceptedFilterIdSid < 0) {
-		// early return if there is no filter that is able to generate SId.
-		// if acceptedFilterIdBitmaskSidFirmwareEvent | acceptedFilterIdBitmaskSidOverMesh
-		// is true, we have an unexpected state.
+	if (!filterBitmask) {
+		// early return when no filter accepts the advertisement.
 		return;
 	}
 
-	auto filter = AssetFilter (_filterStore->getFilter(static_cast<uint8_t>(firstAcceptedFilterIdSid)));
-	auto shortAssetId = filterOutputResultShortAssetId(filter, device);
+	LOGAssetFilteringDebug("bitmask shortid: %x. bitmask mac: %x", nearestSidBitmask, forwardMacBitmask);
 
-	if (acceptedFilterIdBitmaskSidOverMesh && _assetForwarder != nullptr) {
-		LOGAssetFilteringDebug("Dispatch event for sid-over-mesh output filters");
+	// construct Sid if possible
+	uint8_t sidFilterBitmask = nearestSidBitmask | forwardSidBitmask;
+	short_asset_id_t shortAssetId = INVALID_ASSET_ID;
+
+	if (sidFilterBitmask) {
+		uint8_t primarySidFilterIndex = lowestBitSet(sidFilterBitmask);
+		auto primarySidFilter = AssetFilter (_filterStore->getFilter(primarySidFilterIndex));
+		shortAssetId = filterOutputResultShortAssetId(filter, device);
+	}
+
+	// Dispatch events: send out relevant events in batch
+
+	if (forwardMacBitmask && _assetForwarder != nullptr) {
 		_assetForwarder->handleAcceptedAsset(device);
 	}
 
-	if (acceptedFilterIdBitmaskSidFirmwareEvent) {
-		LOGAssetFilteringDebug("Dispatch event for sid-to-firmware output filters");
+	if (forwardSidBitmask && _assetForwarder != nullptr) {
+		_assetForwarder->handleAcceptedAsset(device, shortAssetId);
+	}
+
+	if (nearestSidBitmask) {
+		LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM");
 
 		AssetAcceptedEvent evtData(
-				filter,
 				device,
 				shortAssetId,
-				acceptedFiltersBitmask);
+				filterBitmask);
+
+		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM, &evtData, sizeof(evtData));
+		assetEvent.dispatch();
+	}
+
+	if (filterBitmask) {
+		LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED");
+
+		AssetAcceptedEvent evtData(
+				device,
+				shortAssetId,
+				filterBitmask);
 
 		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
 		assetEvent.dispatch();
 	}
-
 }
 
 // ---------------------------- Extracting data from the filter  ----------------------------
