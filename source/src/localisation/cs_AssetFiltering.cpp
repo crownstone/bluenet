@@ -11,7 +11,7 @@
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGi
-#define LOGAssetFilteringDebug LOGd
+#define LOGAssetFilteringDebug LOGvv
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 

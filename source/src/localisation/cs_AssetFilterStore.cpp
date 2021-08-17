@@ -17,7 +17,7 @@
 
 #define LOGAssetFilterWarn LOGw
 #define LOGAssetFilterInfo LOGi
-#define LOGAssetFilterDebug LOGd
+#define LOGAssetFilterDebug LOGvv
 
 cs_ret_code_t AssetFilterStore::init() {
 	LOGAssetFilterInfo("init");

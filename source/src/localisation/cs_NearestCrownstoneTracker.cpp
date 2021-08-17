@@ -19,8 +19,8 @@
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Rssi.h>
 
-#define LOGNearestCrownstoneTrackerVerbose LOGd
-#define LOGNearestCrownstoneTrackerDebug LOGd
+#define LOGNearestCrownstoneTrackerVerbose LOGvv
+#define LOGNearestCrownstoneTrackerDebug LOGvv
 #define LOGNearestCrownstoneTrackerInfo LOGvv
 
 

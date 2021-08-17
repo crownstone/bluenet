@@ -15,7 +15,7 @@
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 
-#define LOGAssetForwarderDebug LOGd
+#define LOGAssetForwarderDebug LOGvv
 
 void printAsset(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg) {
 	LOGAssetForwarderDebug("mesh_model_msg_asset: ch%u @ -%u dB",
