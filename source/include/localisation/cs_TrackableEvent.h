@@ -7,24 +7,27 @@
 
 #pragma once
 
-#include <localisation/cs_TrackableId.h>
 #include <localisation/cs_AssetFilterPacketAccessors.h>
-
-// TODO(Arend) remove this class
-class TrackableEvent {
-public:
-	TrackableId id;
-	int8_t rssi;
-};
 
 class AssetAcceptedEvent {
 public:
-	AssetFilter _filter;
+	AssetFilter _primaryFilter;
+	const scanned_device_t& _asset;
+	uint8_t _acceptedFilterIdBitmask;
+
+	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset, uint8_t acceptedFilterIdBitmask)
+		: _primaryFilter(filter), _asset(asset), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
+};
+
+class AssetWithSidAcceptedEvent {
+public:
+	AssetFilter _primaryFilter;
+
 	const scanned_device_t& _asset;
 	short_asset_id_t _id;
 	uint8_t _acceptedFilterIdBitmask;
 
-	AssetAcceptedEvent(
+	AssetWithSidAcceptedEvent(
 			AssetFilter filter, const scanned_device_t& asset, short_asset_id_t id, uint8_t acceptedFilterIdBitmask)
-		: _filter(filter), _asset(asset), _id(id), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
+		: _primaryFilter(filter), _asset(asset), _id(id), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
 };

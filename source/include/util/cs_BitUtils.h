@@ -20,11 +20,13 @@
  * 		uint16_t u = 0; lowestBitSet(u) == 16;
  * 		uint32_t u = 0; lowestBitSet(u) == 32;
  *
+ * Note: not checked for validity on signed types.
  */
-constexpr auto lowestBitSet(auto v) -> decltype(v) {
-	auto numBits = sizeof(v) * 8;
+template<class T>
+inline constexpr T lowestBitSet(T v){
+	T numBits = sizeof(v) * 8;
 
-	for (auto i{0}; i < numBits; i++) {
+	for (T i = 0; i < numBits; i++) {
 		if(v & 1) {
 			return i;
 		}

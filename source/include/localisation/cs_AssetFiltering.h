@@ -13,6 +13,8 @@
 #include <localisation/cs_AssetHandler.h>
 #include <localisation/cs_AssetForwarder.h>
 
+#include <util/cs_BitUtils.h>
+
 class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
@@ -54,6 +56,33 @@ private:
 	short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
 
 	// --------- Processing of accepted Assest ---------------
+
+	/**
+	 * bitmask of filters per type.
+	 */
+	struct filterBitmasks {
+		uint8_t _forwardSid;
+		uint8_t _forwardMac;
+		uint8_t _nearestSid;
+
+		uint8_t combined() { return _forwardMac | _nearestSid | _forwardSid; }
+		uint8_t sid() { return _forwardSid | _nearestSid; }
+
+		uint8_t primaryFilter() { return lowestBitSet(combined()); }
+		uint8_t primarySidFilter() { return lowestBitSet(sid()); }
+	};
+
+	/**
+	 * Loop over inclusion filters and check which filters are accepting.
+	 * Return a set of bitmasks containing the result.
+	 */
+	filterBitmasks getAcceptedBitmasks(const scanned_device_t& device);
+
+	/**
+	 * Returns true if there is a filter that rejects this device.
+	 * (Does not check if the filterstore is ready.)
+	 */
+	bool isAssetRejected(const scanned_device_t& device);
 
 	/**
 	 * Constructs the output of the filter for an accepted asset

@@ -61,7 +61,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 		case CS_TYPE::EVT_ASSET_ACCEPTED: {
 			auto acceptedAssetEventData = reinterpret_cast<TYPIFY(EVT_ASSET_ACCEPTED)*>(evt.data);
 
-			uint8_t profileId = *acceptedAssetEventData->_filter.filterdata().metadata().profileId();
+			uint8_t profileId = *acceptedAssetEventData->_primaryFilter.filterdata().metadata().profileId();
 			uint8_t location  = 0; // Location 0 signifies 'in sphere, no specific room'
 			bool forwardToMesh = true;
 

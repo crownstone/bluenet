@@ -20,7 +20,7 @@
 #include <util/cs_Rssi.h>
 
 #define LOGNearestCrownstoneTrackerVerbose LOGd
-#define LOGNearestCrownstoneTrackerDebug LOGvv
+#define LOGNearestCrownstoneTrackerDebug LOGd
 #define LOGNearestCrownstoneTrackerInfo LOGvv
 
 
@@ -41,7 +41,7 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 			handleMeshMsgEvent(evt);
 			break;
 		}
-		case CS_TYPE::EVT_ASSET_ACCEPTED: {
+		case CS_TYPE::EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM: {
 			handleAssetAcceptedEvent(evt);
 			break;
 		}
@@ -72,7 +72,7 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 
 void NearestCrownstoneTracker::handleAssetAcceptedEvent(event_t& evt){
 	// an asset advertisement passed this crownstones filters.
-	AssetAcceptedEvent* assetAcceptedEvent = CS_TYPE_CAST(EVT_ASSET_ACCEPTED, evt.data);
+	AssetWithSidAcceptedEvent* assetAcceptedEvent = CS_TYPE_CAST(EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM, evt.data);
 
 	report_asset_id_t rep = {};
 	rep.id = assetAcceptedEvent->_id;
