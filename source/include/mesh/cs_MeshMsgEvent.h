@@ -59,6 +59,11 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC> {
 };
 
 template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_RSSI_SID> {
+	using type = cs_mesh_model_msg_asset_rssi_sid_t;
+};
+
+template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI> {
 	using type = cs_mesh_model_msg_neighbour_rssi_t;
 };

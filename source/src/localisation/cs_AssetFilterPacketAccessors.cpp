@@ -12,11 +12,6 @@
 #define LogAssetFilterPacketAccessorsWarn LOGw
 
 
-/**
- * AssetFilterInput struct:
- * - type
- * - payload (optional)
- */
 AssetFilterInputType* AssetFilterInput::type() {
 	return reinterpret_cast<AssetFilterInputType*>(_data + 0);
 }
@@ -43,7 +38,7 @@ bool AssetFilterInput::isValid() {
 			return true;
 		}
 	}
-	LogAssetFilterPacketAccessorsWarn("Unknown input type: %u", *type());
+	LogAssetFilterPacketAccessorsWarn("invalid assetfilter input type");
 	return false;
 }
 
@@ -65,11 +60,6 @@ size_t AssetFilterInput::length() {
 	return len;
 }
 
-/**
- * AssetFilterOutput struct:
- * - type
- * - payload (optional)
- */
 AssetFilterOutputFormat* AssetFilterOutput::outFormat() {
 	return reinterpret_cast<AssetFilterOutputFormat*>(_data + 0);
 }
@@ -80,10 +70,17 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 
 bool AssetFilterOutput::isValid() {
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac: {
+		case AssetFilterOutputFormat::MacOverMesh: {
 			return true;
 		}
 		case AssetFilterOutputFormat::ShortAssetId: {
+			if (inFormat().isValid() == false) {
+				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
+				return false;
+			}
+			return true;
+		}
+		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
 			if (inFormat().isValid() == false) {
 				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
 				return false;
@@ -99,10 +96,14 @@ bool AssetFilterOutput::isValid() {
 size_t AssetFilterOutput::length() {
 	size_t len = sizeof(AssetFilterOutputFormat);
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac: {
+		case AssetFilterOutputFormat::MacOverMesh: {
 			break;
 		}
 		case AssetFilterOutputFormat::ShortAssetId: {
+			len += inFormat().length();
+			break;
+		}
+		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
 			len += inFormat().length();
 			break;
 		}
@@ -110,14 +111,6 @@ size_t AssetFilterOutput::length() {
 	return len;
 }
 
-/**
- * AssetFilterMetadata struct:
- * - filterType
- * - flags
- * - profileId
- * - input
- * - output
- */
 AssetFilterType* AssetFilterMetadata::filterType() {
 	return reinterpret_cast<AssetFilterType*>(_data + 0);
 }
@@ -151,11 +144,6 @@ size_t AssetFilterMetadata::length() {
 			+ outputType().length();
 }
 
-/**
- * AssetFilterData struct:
- * - metadata
- * - filter data
- */
 AssetFilterMetadata AssetFilterData::metadata() {
 	return AssetFilterMetadata(_data + 0);
 }
@@ -205,11 +193,6 @@ size_t AssetFilterData::length() {
 	return len;
 }
 
-/**
- * AssetFilter struct:
- * - runtime data
- * - asset filter data
- */
 asset_filter_runtime_data_t* AssetFilter::runtimedata() {
 	return reinterpret_cast<asset_filter_runtime_data_t*>(_data + 0);
 }

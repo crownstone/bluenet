@@ -68,8 +68,9 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	Mac          = 0, // TODO: this isn't just "MAC" this also determines it is forwarded to the hub.
-	ShortAssetId = 1,
+	MacOverMesh          = 0,
+	ShortAssetId         = 1,
+	ShortAssetIdOverMesh = 2,
 };
 
 union __attribute__((__packed__)) asset_filter_flags_t {
@@ -98,6 +99,9 @@ struct __attribute__((__packed__)) short_asset_id_t {
 		return std::memcmp(data, other.data, sizeof(data)) == 0;
 	}
 };
+
+constexpr short_asset_id_t INVALID_ASSET_ID { .data{0xff, 0xff, 0xff} };
+
 
 struct __attribute__((__packed__)) asset_filters_version_t {
 	uint16_t masterVersion = 0;

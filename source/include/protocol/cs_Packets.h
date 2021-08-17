@@ -586,8 +586,15 @@ const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
  * A packet that represents RSSI data about an asset received by a particular Crownstone. There is no timestamp in it.
  * Timestamps can be added on the hub.
  */
-struct __attribute__((packed)) cs_asset_rssi_data_t {
+struct __attribute__((packed)) cs_asset_rssi_data_mac_t {
 	uint8_t address[6];
+	uint8_t stoneId;
+	int8_t rssi;
+	uint8_t channel;
+};
+
+struct __attribute__((packed)) cs_asset_rssi_data_sid_t {
+	short_asset_id_t assetId;
 	uint8_t stoneId;
 	int8_t rssi;
 	uint8_t channel;

@@ -7,6 +7,7 @@
 
 #include <localisation/cs_AssetFiltering.h>
 #include <util/cs_Utils.h>
+#include <util/cs_BitUtils.h>
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGi
@@ -30,6 +31,8 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 
 
 cs_ret_code_t AssetFiltering::init() {
+	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(uint8_t) * 8, "too many filters for bitmask");
+
 	LOGAssetFilteringInfo("init");
 	cs_ret_code_t retCode = ERR_UNSPECIFIED;
 
@@ -104,6 +107,103 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
+	if (isAssetRejected(device)) {
+		return;
+	}
+
+	filterBitmasks masks = getAcceptedBitmasks(device);
+
+	if (!masks.combined()) {
+		// early return when no filter accepts the advertisement.
+		return;
+	}
+
+	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
+			masks._forwardSid,
+			masks._forwardMac,
+			masks._nearestSid);
+
+	if (masks.sid()) {
+		// construct short asset id
+		AssetFilter primarySidFilter = _filterStore->getFilter(masks.primarySidFilter());
+		short_asset_id_t shortAssetId = filterOutputResultShortAssetId(primarySidFilter, device);
+
+		// forward sid to mesh
+		if (masks._forwardSid && _assetForwarder != nullptr) {
+			_assetForwarder->handleAcceptedAsset(device, shortAssetId);
+		}
+
+		// nearest algorithm
+		if (masks._nearestSid) {
+			LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM");
+
+			AssetWithSidAcceptedEvent evtData(
+					primarySidFilter,
+					device,
+					shortAssetId,
+					masks.combined());
+
+			event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM, &evtData, sizeof(evtData));
+			assetEvent.dispatch();
+		}
+	}
+
+	// Dispatch other events
+	if (masks._forwardMac && _assetForwarder != nullptr) {
+		_assetForwarder->handleAcceptedAsset(device);
+	}
+
+	// send general asset accepted event to the firmware
+	if (masks.combined()) {
+		LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED");
+
+		AssetAcceptedEvent evtData(
+				_filterStore->getFilter(masks.primaryFilter()),
+				device,
+				masks.combined());
+
+		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
+		assetEvent.dispatch();
+	}
+}
+
+
+AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned_device_t& device) {
+	filterBitmasks masks = {};
+
+	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
+		auto filter = AssetFilter (_filterStore->getFilter(i));
+
+		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
+			if (filterAcceptsScannedDevice(filter, device)) {
+				LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
+
+				// update the relevant bitmask
+				switch (*filter.filterdata().metadata().outputType().outFormat()) {
+					case AssetFilterOutputFormat::MacOverMesh: {
+						masks._forwardMac |= 1 << i;
+						break;
+					}
+
+					case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+						masks._forwardSid |= 1 << i;
+						break;
+					}
+
+					case AssetFilterOutputFormat::ShortAssetId: {
+						masks._nearestSid |= 1 << i;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return masks;
+}
+
+
+bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 	// Rejection check: looping over exclusion filters.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
@@ -112,76 +212,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 			if (filterAcceptsScannedDevice(filter, device)) {
 				// Reject by early return.
 				LogAcceptedDevice(filter, device, true);
-				return;
-			}
-		}
-	}
-	// Device was not rejected
-
-
-
-	// Accept check: loop over inclusion filters and check which filters are accepting.
-
-	uint8_t acceptedFilterIdBitmaskMac = 0;
-	uint8_t acceptedFilterIdBitmaskShortId = 0;
-
-	uint8_t firstAcceptedFilterIdShortId = 0;
-
-	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(acceptedFilterIdBitmaskMac),
-			"too many filters for bitmask");
-
-	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
-		auto filter = AssetFilter (_filterStore->getFilter(i));
-
-		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
-			if (filterAcceptsScannedDevice(filter, device)) {
-				LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
-				// update the relevant acceptedFilterIdBitmask
-				switch (*filter.filterdata().metadata().outputType().outFormat()) {
-					case AssetFilterOutputFormat::Mac: {
-						acceptedFilterIdBitmaskMac |= 1 << i;
-						break;
-					}
-
-					case AssetFilterOutputFormat::ShortAssetId: {
-						if (acceptedFilterIdBitmaskShortId == 0) {
-							firstAcceptedFilterIdShortId = i;
-						}
-						acceptedFilterIdBitmaskShortId |= 1 << i;
-						break;
-					}
-				}
+				return true;
 			}
 		}
 	}
 
-	if(acceptedFilterIdBitmaskMac |acceptedFilterIdBitmaskShortId ) {
-		LOGAssetFilteringDebug("bitmask shortid: %x. bitmask mac: %x", acceptedFilterIdBitmaskShortId, acceptedFilterIdBitmaskMac);
-	}
-
-	// Dispatch events: send out relevant events in batch
-	if (acceptedFilterIdBitmaskShortId) {
-		LOGAssetFilteringDebug("Dispatch event for short assset id output filters");
-
-		auto filter = AssetFilter (_filterStore->getFilter(firstAcceptedFilterIdShortId));
-		auto shortAssetId = filterOutputResultShortAssetId(filter, device);
-		uint8_t acceptedFilterIdBitmask = acceptedFilterIdBitmaskShortId | acceptedFilterIdBitmaskMac;
-
-		AssetAcceptedEvent evtData(
-				filter,
-				device,
-				shortAssetId,
-				acceptedFilterIdBitmask);
-
-		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
-		assetEvent.dispatch();
-	}
-
-	if (acceptedFilterIdBitmaskMac && _assetForwarder != nullptr) {
-		LOGAssetFilteringDebug("Dispatch event for mac output filters");
-		_assetForwarder->handleAcceptedAsset(device);
-	}
+	return false;
 }
+
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 

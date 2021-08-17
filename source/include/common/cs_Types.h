@@ -316,7 +316,6 @@ enum class CS_TYPE: uint16_t {
 	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
 	EVT_PRESENCE_CHANGE,                              // The presence has changed. When the first user enters, multiple events will be sent.
 	CMD_GET_PRESENCE,                                 // Get the current presence.
-	EVT_TRACKABLE,                                    // TrackableParser emits updates of this type.
 
 	CMD_UPLOAD_FILTER,                                // Update data chunk for a filter.                 See PROTOCOL.md CTRL_CMD_FILTER_UPLOAD
 	CMD_REMOVE_FILTER,                                // Remove a filter by id.                          See PROTOCOL.md CTRL_CMD_FILTER_REMOVE
@@ -326,6 +325,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_FILTER_MODIFICATION,                          // Sent when filter modification has started (payload is true) or stopped (payload is false).
 
 	EVT_ASSET_ACCEPTED,                               // Sent by AssetFiltering an incoming scan is accepted by a filter.
+	EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM,         // Sent by AssetFiltering when a filter that is configured for NearestCrownstoneAlgorithm accepts an advertisement.
 
 
 	// System
@@ -635,7 +635,6 @@ typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION
 typedef presence_change_t TYPIFY(EVT_PRESENCE_CHANGE);
 typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
-typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 
 typedef asset_filter_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
 typedef asset_filter_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
@@ -644,6 +643,7 @@ typedef void TYPIFY(CMD_GET_FILTER_SUMMARIES);
 typedef void TYPIFY(EVT_FILTERS_UPDATED);
 typedef bool TYPIFY(EVT_FILTER_MODIFICATION);
 typedef AssetAcceptedEvent TYPIFY(EVT_ASSET_ACCEPTED);
+typedef AssetWithSidAcceptedEvent TYPIFY(EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
