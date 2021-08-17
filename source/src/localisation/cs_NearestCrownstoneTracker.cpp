@@ -25,10 +25,15 @@
 
 
 
+
+asset_record_t* getOrCreateRecord(short_asset_id_t& id) {
+	// TODO stub to be removed
+	return nullptr;
+}
+
 void NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 
-	resetReports();
 }
 
 // -------------------------------------------
@@ -43,10 +48,6 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 		}
 		case CS_TYPE::EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM: {
 			handleAssetAcceptedEvent(evt);
-			break;
-		}
-		case CS_TYPE::EVT_FILTERS_UPDATED: {
-			resetReports();
 			break;
 		}
 		default: {
@@ -92,12 +93,10 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 
 	auto recordPtr = getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
-		onAssetListFull(incomingReport);
+		// (warning is already logged in getOrCreateRecord)
 		return;
 	}
 	auto& record = *recordPtr;
-
-	logRecord(record);
 
 	savePersonalReport(record, incomingReport.compressedRssi);
 
@@ -148,7 +147,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 
 	auto recordPtr = getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
-		onAssetListFull(incomingReport);
+		// (warning is already logged in getOrCreateRecord)
 		return;
 	}
 	auto& record = *recordPtr;
@@ -265,57 +264,4 @@ void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed
 	rec.winningRssi = winningRssi;
 }
 
-asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
-	// linear search
-	for (uint8_t i = 0; i < _assetRecordCount; i++) {
-		auto& rec = _assetRecords[i];
-		if (rec.assetId == id) {
-			return &rec;
-		}
-	}
 
-	// not found. create new report if there is space available
-	if (_assetRecordCount < MAX_REPORTS) {
-		LOGNearestCrownstoneTrackerVerbose("creating new report record");
-		auto& rec = _assetRecords[_assetRecordCount];
-		rec.assetId = id;
-		rec.winningStoneId = 0;
-
-		// set rssi's unreasonably low so that they will be overwritten on the first observation
-		rec.personalRssi = compressRssi(-127, 0);
-		rec.winningRssi = compressRssi(-127, 0);
-
-		_assetRecordCount += 1;
-		return &rec;
-	} else {
-		LOGNearestCrownstoneTrackerVerbose("can't create new report record, maximum reached");
-	}
-
-	return nullptr;
-}
-
-void NearestCrownstoneTracker::resetReports() {
-	for (auto& rec : _assetRecords){
-		rec = {};
-
-		// set rssi's unreasonably low so that they will be overwritten on the first observation
-		rec.personalRssi = compressRssi(-127, 0);
-		rec.winningRssi = compressRssi(-127, 0);
-	}
-}
-
-void NearestCrownstoneTracker::logRecord(asset_record_t& record) {
-	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(#%u, %d dB ch%u [%u]) me(%d dB ch %u)",
-			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
-			record.winningStoneId, getRssi(record.winningRssi), getChannel(record.winningRssi), record.winningRssi,
-			getRssi(record.personalRssi), getChannel(record.personalRssi)
-			);
-}
-
-
-void NearestCrownstoneTracker::onAssetListFull(report_asset_id_t& report) {
-	LOGw("Too many local assets to track, ignoring 0x%x 0x%x 0x%x",
-					report.id.data[0],
-					report.id.data[1],
-					report.id.data[2] );
-}

@@ -19,7 +19,6 @@ class AssetFiltering : EventListener {
 public:
 	cs_ret_code_t init();
 
-
 private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;

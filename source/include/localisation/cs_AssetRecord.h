@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <util/cs_Rssi.h>
+
 struct __attribute__((__packed__)) asset_record_t {
 	short_asset_id_t assetId;
 	/**
@@ -24,4 +26,11 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * rssi between asset and closest stone. only valid if winning_id != 0.
 	 */
 	compressed_rssi_data_t winningRssi;
+
+	static asset_record_t empty() {
+		asset_record_t rec = {};
+		rec.personalRssi = compressRssi(-127,0);
+		rec.winningRssi = compressRssi(-127, 0);
+		return rec;
+	}
 };

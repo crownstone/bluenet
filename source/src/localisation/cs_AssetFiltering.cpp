@@ -29,7 +29,6 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 }
 
 
-
 cs_ret_code_t AssetFiltering::init() {
 	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(uint8_t) * 8, "too many filters for bitmask");
 
@@ -202,7 +201,6 @@ AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned
 	return masks;
 }
 
-
 bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 	// Rejection check: looping over exclusion filters.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
@@ -219,7 +217,6 @@ bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 
 	return false;
 }
-
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 

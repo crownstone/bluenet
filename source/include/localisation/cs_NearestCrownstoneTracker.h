@@ -37,26 +37,7 @@ public:
 	void init();
 
 private:
-	static constexpr auto MAX_REPORTS = 10u;
-
 	stone_id_t _myId; // cached for efficiency
-
-	/**
-	 * Relevant data for this algorithm per asset_id.
-	 * Possible strategies to reduce memory:
-	 *  - when full, remove worst personal_rssi.
-	 *  - only store if observed the asset personally.
-	 *  - ...
-	 *
-	 *  The array is 'front loaded'. entries with index < _assetRecordCount
-	 *  are valid, other entries are not.
-	 */
-	asset_record_t _assetRecords[MAX_REPORTS];
-
-	/**
-	 * Current number of valid records in the _assetRecords array.
-	 */
-	uint8_t _assetRecordCount = 0;
 
 	// -------------------------------------------
 	// ------------- Incoming events -------------
@@ -151,29 +132,6 @@ private:
 	 * saves the report in the _winning list.
 	 */
 	void saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
-
-	/**
-	 * returns a pointer to the found record, possibly empty.
-	 * returns nullptr if not found and creating a new one was
-	 * impossible.
-	 */
-	asset_record_t* getOrCreateRecord(short_asset_id_t& id);
-
-	/**
-	 * Assumes my_id is set to the stone id of this crownstone.
-	 * Sets the reporter id of the personal report to my_id.
-	 * Sets the reporter id of the winning report to 0.
-	 * Sets the rssi value of both these reports to -127.
-	 */
-	void resetReports();
-
-
-	void logRecord(asset_record_t& record);
-
-	/**
-	 * Log a warning.
-	 */
-	void onAssetListFull(report_asset_id_t& report);
 
 public:
 	/**
