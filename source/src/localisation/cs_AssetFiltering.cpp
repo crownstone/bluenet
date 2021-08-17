@@ -118,8 +118,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	LOGAssetFilteringDebug(
-			"bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
+	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
 			masks._forwardSid,
 			masks._forwardMac,
 			masks._nearestSid);
