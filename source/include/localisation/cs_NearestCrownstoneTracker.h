@@ -51,7 +51,7 @@ private:
 	 *  The array is 'front loaded'. entries with index < _assetRecordCount
 	 *  are valid, other entries are not.
 	 */
-	report_asset_record_t _assetRecords[MAX_REPORTS];
+	asset_record_t _assetRecords[MAX_REPORTS];
 
 	/**
 	 * Current number of valid records in the _assetRecords array.
@@ -116,13 +116,13 @@ private:
 	 * makes a report from the records personalRssi field
 	 * and broadcast it over the mesh.
 	 */
-	void broadcastPersonalReport(report_asset_record_t& record);
+	void broadcastPersonalReport(asset_record_t& record);
 
 	/**
 	 * Sends a message over UART containing the winner, its rssi
 	 * and the asset id.
 	 */
-	void sendUartUpdate(report_asset_record_t& record);
+	void sendUartUpdate(asset_record_t& record);
 
 	/**
 	 * Report to uart host that this report is timing out.
@@ -145,19 +145,19 @@ private:
 	/**
 	 * saves the rssi as personal
 	 */
-	void savePersonalReport(report_asset_record_t& rec, compressed_rssi_data_t personalRssi);
+	void savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi);
 
 	/**
 	 * saves the report in the _winning list.
 	 */
-	void saveWinningReport(report_asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
+	void saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
 
 	/**
 	 * returns a pointer to the found record, possibly empty.
 	 * returns nullptr if not found and creating a new one was
 	 * impossible.
 	 */
-	report_asset_record_t* getOrCreateRecord(short_asset_id_t& id);
+	asset_record_t* getOrCreateRecord(short_asset_id_t& id);
 
 	/**
 	 * Assumes my_id is set to the stone id of this crownstone.
@@ -168,7 +168,7 @@ private:
 	void resetReports();
 
 
-	void logRecord(report_asset_record_t& record);
+	void logRecord(asset_record_t& record);
 
 	/**
 	 * Log a warning.

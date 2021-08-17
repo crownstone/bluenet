@@ -204,7 +204,7 @@ void NearestCrownstoneTracker::broadcastReport(report_asset_id_t& report) {
 	reportMsgEvt.dispatch();
 }
 
-void NearestCrownstoneTracker::broadcastPersonalReport(report_asset_record_t& record) {
+void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 	report_asset_id_t report = {};
 	report.id = record.assetId;
 	report.compressedRssi = record.personalRssi;
@@ -212,7 +212,7 @@ void NearestCrownstoneTracker::broadcastPersonalReport(report_asset_record_t& re
 	broadcastReport(report);
 }
 
-void NearestCrownstoneTracker::sendUartUpdate(report_asset_record_t& record) {
+void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	auto uartMsg = cs_nearest_stone_update_t{
 			.assetId = record.assetId,
 			.stoneId = record.winningStoneId,
@@ -256,16 +256,16 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 // ---------------------------------
 
 
-void NearestCrownstoneTracker::savePersonalReport(report_asset_record_t& rec, compressed_rssi_data_t personalRssi) {
+void NearestCrownstoneTracker::savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi) {
 	rec.personalRssi = personalRssi;
 }
 
-void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
+void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
 	rec.winningStoneId = winningId;
 	rec.winningRssi = winningRssi;
 }
 
-report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
+asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
 	// linear search
 	for (uint8_t i = 0; i < _assetRecordCount; i++) {
 		auto& rec = _assetRecords[i];
@@ -304,7 +304,7 @@ void NearestCrownstoneTracker::resetReports() {
 	}
 }
 
-void NearestCrownstoneTracker::logRecord(report_asset_record_t& record) {
+void NearestCrownstoneTracker::logRecord(asset_record_t& record) {
 	LOGNearestCrownstoneTrackerVerbose("ID(%x %x %x) winner(#%u, %d dB ch%u [%u]) me(%d dB ch %u)",
 			record.assetId.data[0], record.assetId.data[1], record.assetId.data[2],
 			record.winningStoneId, getRssi(record.winningRssi), getChannel(record.winningRssi), record.winningRssi,

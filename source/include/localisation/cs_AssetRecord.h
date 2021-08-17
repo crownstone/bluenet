@@ -7,7 +7,7 @@
 
 #pragma once
 
-struct __attribute__((__packed__)) report_asset_record_t {
+struct __attribute__((__packed__)) asset_record_t {
 	short_asset_id_t assetId;
 	/**
 	 * Stone id of currently closest stone.
