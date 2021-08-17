@@ -265,7 +265,7 @@ void NearestCrownstoneTracker::saveWinningReport(report_asset_record_t& rec, com
 	rec.winningRssi = winningRssi;
 }
 
-NearestCrownstoneTracker::report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
+report_asset_record_t* NearestCrownstoneTracker::getOrCreateRecord(short_asset_id_t& id) {
 	// linear search
 	for (uint8_t i = 0; i < _assetRecordCount; i++) {
 		auto& rec = _assetRecords[i];
