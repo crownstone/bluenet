@@ -65,7 +65,6 @@ cs_ret_code_t AssetFiltering::init() {
 	if (safe_allocate(_nearestCrownstoneTracker) != ERR_SUCCESS) {
 		return ERR_NO_SPACE;
 	}
-	_nearestCrownstoneTracker->init();
 
 	addComponent(_nearestCrownstoneTracker);
 #endif
@@ -73,21 +72,10 @@ cs_ret_code_t AssetFiltering::init() {
 	addComponents({_filterStore, _filterSyncer, _assetForwarder});
 
 	// Init components
-	cs_ret_code_t retCode = ERR_UNSPECIFIED;
-
-	retCode = _filterStore->init();
-	if (retCode != ERR_SUCCESS) {
+	if (cs_ret_code_t retCode = initChildren() != ERR_SUCCESS) {
 		return retCode;
-	}
-
-	retCode = _filterSyncer->init();
-	if (retCode != ERR_SUCCESS) {
-		return retCode;
-	}
-
-	retCode = _assetForwarder->init();
-	if (retCode != ERR_SUCCESS) {
-		return retCode;
+	} else {
+		LOGAssetFilteringWarn("init failed with code: %x", retCode);
 	}
 
 	listen();

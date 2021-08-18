@@ -9,6 +9,12 @@
 
 #include <vector>
 
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_Typedefs.h>
+
+#include <logging/cs_Logger.h>
+
+
 /**
  * Helper class to manage decoupling of components.
  * Using this class 'sibling components' can query for
@@ -100,12 +106,8 @@ public:
 		return nullptr;
 	}
 
-	/**
-	 * TODO
-	 */
-	template<class T>
-	T* getSubComponent() {
-		return nullptr;
+	std::vector<Component*> getChildren() {
+		return _children;
 	}
 
 	// ============== Add/Remove components ===============
@@ -139,4 +141,48 @@ public:
 		_children.shrink_to_fit();
 		c->_parent = nullptr;
 	}
+
+	// ============== life cycle events ===============
+
+	/**
+	 * components can implement this if they need to find sibling
+	 * components or do specific initialization.
+	 *
+	 * - Components are responsible for call init() on their children.
+	 * - init is allowed to assume all siblings are constructed.
+	 *
+	 * E.g.
+	 *
+	 * class componentX : public Component {
+	 * public:
+	 * 		cs_ret_code_t init() {
+	 * 			// construct childA
+	 * 			...
+	 * 			// construct childZ
+	 *
+	 * 			return initChildren();
+	 * 		}
+	 * };
+	 */
+	virtual cs_ret_code_t init() { return ERR_SUCCESS; }
+
+	/**
+	 * Initializes all children in the order that they were added to this component.
+	 * Stops as soon as a child returns != ERR_SUCCESS and returns that error code.
+	 *
+	 * Components are not required to use this. They can call all inits of children
+	 * in custom order if they need to. (And implement elegant failure)
+	 */
+	cs_ret_code_t initChildren() {
+		for (Component* child : _children) {
+			LOGd("init children: 0x%x", child);
+			if(auto retval = child->init() != ERR_SUCCESS) {
+				return retval;
+			}
+		}
+		return ERR_SUCCESS;
+	}
+
+
+
 };
