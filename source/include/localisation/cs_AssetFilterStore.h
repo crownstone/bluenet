@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
 
 #include <localisation/cs_AssetFilterPacketAccessors.h>
@@ -23,7 +24,7 @@
  * - Keeps up the master version and CRC.
  * - Keeps up "modification in progress".
  */
-class AssetFilterStore : public EventListener {
+class AssetFilterStore : public EventListener, public Component {
 public:
 	/**
 	 * set _filterModificationInProgress to false.

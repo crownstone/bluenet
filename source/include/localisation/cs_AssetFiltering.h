@@ -7,7 +7,9 @@
 
 #pragma once
 
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
+
 #include <localisation/cs_AssetFilterStore.h>
 #include <localisation/cs_AssetFilterSyncer.h>
 #include <localisation/cs_AssetHandler.h>
@@ -15,7 +17,7 @@
 
 #include <util/cs_BitUtils.h>
 
-class AssetFiltering : EventListener {
+class AssetFiltering : public EventListener, public Component {
 public:
 	cs_ret_code_t init();
 

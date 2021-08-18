@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include <common/cs_Component.h>
+#include <events/cs_EventListener.h>
+
 #include <protocol/cs_Typedefs.h>
 #include <localisation/cs_AssetFilterStore.h>
-#include <events/cs_EventListener.h>
 
 /**
  * Class that takes care of synchronizing the asset filters between crownstones.
@@ -17,7 +19,7 @@
  * - Regularly informs other crownstones of the master version and CRC.
  * - Will connect and update the asset filters of a crownstone with an older master version.
  */
-class AssetFilterSyncer : EventListener {
+class AssetFilterSyncer : public EventListener, public Component {
 public:
 	/**
 	 * Interval at which the master version is broadcasted.

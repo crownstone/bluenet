@@ -74,6 +74,9 @@ cs_ret_code_t AssetFiltering::init() {
 		return retCode;
 	}
 
+
+	addComponents({_filterStore, _filterSyncer, _assetForwarder});
+
 	listen();
 	return ERR_SUCCESS;
 }

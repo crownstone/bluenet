@@ -7,12 +7,14 @@
 
 #pragma once
 
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-#include <localisation/cs_Nearestnearestwitnessreport.h>
-#include <localisation/cs_TrackableEvent.h>
+
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+#include <localisation/cs_Nearestnearestwitnessreport.h>
+#include <localisation/cs_TrackableEvent.h>
 #include <localisation/cs_AssetRecord.h>
 #include <localisation/cs_AssetHandler.h>
 
@@ -29,7 +31,7 @@
  * if necessary (for optimization purposes perhaps). When doing that, the resulting nearest
  * crownstone will be an element of this subset.
  */
-class NearestCrownstoneTracker: public EventListener {
+class NearestCrownstoneTracker: public EventListener, public Component {
 public:
 	/**
 	 * Caches CONFIG_CROWNSTONE_ID, and resets the _assetRecords cache.
