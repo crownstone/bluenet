@@ -16,6 +16,7 @@
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableEvent.h>
 #include <localisation/cs_AssetRecord.h>
+#include <localisation/cs_AssetStore.h>
 #include <localisation/cs_AssetHandler.h>
 
 /**
@@ -34,12 +35,16 @@
 class NearestCrownstoneTracker : public EventListener, public Component {
 public:
 	/**
-	 * Caches CONFIG_CROWNSTONE_ID, and resets the _assetRecords cache.
+	 * Caches CONFIG_CROWNSTONE_ID and AssetStore.
+	 * If assetstore is not available, ERR_NOT_FOUND is returned.
 	 */
-	cs_ret_code_t init();
+	cs_ret_code_t init() override;
+
 
 private:
-	stone_id_t _myId; // cached for efficiency
+	// cached objects for efficiency
+	stone_id_t _myId;
+	AssetStore* _assetStore;
 
 	// -------------------------------------------
 	// ------------- Incoming events -------------

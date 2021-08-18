@@ -26,23 +26,14 @@
 #define LOGNearestCrownstoneTrackerDebug LOGvv
 #define LOGNearestCrownstoneTrackerInfo LOGvv
 
-
-
-
-asset_record_t* getOrCreateRecord(short_asset_id_t& id) {
-	// TODO stub to be removed in favour of this idiom.
-
-	//	if (auto store = getComponent<AssetStore>()) {
-	//		return store->getOrCreateRecord(id);
-	//	}
-
-	// note: scope of this function is not NearestCrownstoneTracker.
-
-	return nullptr;
-}
-
 cs_ret_code_t NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
+
+	_assetStore = getComponent<AssetStore>();
+	if (_assetStore == nullptr) {
+		LOGd("no asset store found, Nearest crownstone refuses init.");
+		return ERR_NOT_FOUND;
+	}
 
 	listen();
 
@@ -104,7 +95,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u), report(%d dB ch.%u)",
 			_myId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
-	auto recordPtr = getOrCreateRecord(incomingReport.id);
+	auto recordPtr = _assetStore->getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
 		// (warning is already logged in getOrCreateRecord)
 		return;
@@ -158,7 +149,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		return;
 	}
 
-	auto recordPtr = getOrCreateRecord(incomingReport.id);
+	auto recordPtr = _assetStore->getOrCreateRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
 		// (warning is already logged in getOrCreateRecord)
 		return;

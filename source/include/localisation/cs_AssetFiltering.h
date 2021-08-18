@@ -26,6 +26,7 @@ private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;
 	AssetForwarder* _assetForwarder   = nullptr;
+	AssetStore* _assetStore = nullptr;
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker* _nearestCrownstoneTracker = nullptr;

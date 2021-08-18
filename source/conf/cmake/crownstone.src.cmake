@@ -45,6 +45,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterPacketAccess
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterStore.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterSyncer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetForwarder.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetStore.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/logging/cs_Logger.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/logging/cs_CLogger.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresenceCondition.cpp")
