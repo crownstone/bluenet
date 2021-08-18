@@ -19,6 +19,9 @@
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Rssi.h>
 
+#include <localisation/cs_AssetFilterStore.h>
+#include <common/cs_Component.h>
+
 #define LOGNearestCrownstoneTrackerVerbose LOGvv
 #define LOGNearestCrownstoneTrackerDebug LOGvv
 #define LOGNearestCrownstoneTrackerInfo LOGvv
@@ -29,9 +32,11 @@
 asset_record_t* getOrCreateRecord(short_asset_id_t& id) {
 	// TODO stub to be removed in favour of this idiom.
 
-	if (auto store = getComponent<AssetStore>()) {
-		return store->getOrCreateRecord(id);
-	}
+	//	if (auto store = getComponent<AssetStore>()) {
+	//		return store->getOrCreateRecord(id);
+	//	}
+
+	// note: scope of this function is not NearestCrownstoneTracker.
 
 	return nullptr;
 }
