@@ -31,7 +31,7 @@
  * if necessary (for optimization purposes perhaps). When doing that, the resulting nearest
  * crownstone will be an element of this subset.
  */
-class NearestCrownstoneTracker: public EventListener, public Component {
+class NearestCrownstoneTracker : public EventListener, public Component {
 public:
 	/**
 	 * Caches CONFIG_CROWNSTONE_ID, and resets the _assetRecords cache.
@@ -143,6 +143,4 @@ public:
 	 * EVT_FILTERS_UPDATED
 	 */
 	void handleEvent(event_t &evt);
-
 };
-

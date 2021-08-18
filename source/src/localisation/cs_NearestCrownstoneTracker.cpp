@@ -27,7 +27,12 @@
 
 
 asset_record_t* getOrCreateRecord(short_asset_id_t& id) {
-	// TODO stub to be removed
+	// TODO stub to be removed in favour of this idiom.
+
+	if (auto store = getComponent<AssetStore>()) {
+		return store->getOrCreateRecord(id);
+	}
+
 	return nullptr;
 }
 

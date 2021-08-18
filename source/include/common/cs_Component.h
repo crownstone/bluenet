@@ -60,17 +60,51 @@ public:
 	// ================== Getters ==================
 
 	/**
-	 * Returns a component of type T owned by the parent of this component.
+	 * Returns a component of type T* from _children, or
+	 * owned by the parent of this component.
 	 * If none-exists, a nullptr is returned.
 	 */
 	template <class T>
-	T* getComponent() {
+	T* getComponent(Component* requester = nullptr) {
+		// jump up in hierarchy to parent.
+		if (requester == nullptr) {
+			if (_parent != nullptr) {
+				// request from the parent to find a sibling.
+				// keeping track of the original requester.
+				return _parent->getComponent<T>(this);
+			} else {
+				// no parent means no siblings.
+				// use get subcomponents if you want that.
+				return nullptr;
+			}
+		}
+
+		// traverse children
 		for (auto c : _children) {
+			if (c == requester) {
+				// skip original requester to avoid infinite recursions.
+				continue;
+			}
+
 			T* t = dynamic_cast<T*>(c);
 			if (t != nullptr) {
 				return t;
 			}
 		}
+
+		// jump up in hierarchy one stack frame deeper
+		if (_parent != nullptr) {
+			return _parent->getComponent<T>(this);
+		}
+
+		return nullptr;
+	}
+
+	/**
+	 * TODO
+	 */
+	template<class T>
+	T* getSubComponent() {
 		return nullptr;
 	}
 
