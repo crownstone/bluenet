@@ -60,6 +60,9 @@ cs_ret_code_t AssetFiltering::init() {
 	if (safe_allocate(_assetForwarder) != ERR_SUCCESS) {
 		return ERR_NO_SPACE;
 	}
+	if (safe_allocate(_assetStore) != ERR_SUCCESS) {
+		return ERR_NO_SPACE;
+	}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	if (safe_allocate(_nearestCrownstoneTracker) != ERR_SUCCESS) {
@@ -69,7 +72,7 @@ cs_ret_code_t AssetFiltering::init() {
 	addComponent(_nearestCrownstoneTracker);
 #endif
 
-	addComponents({_filterStore, _filterSyncer, _assetForwarder});
+	addComponents({_filterStore, _filterSyncer, _assetForwarder, _assetStore});
 
 	// Init components
 	if (cs_ret_code_t retCode = initChildren() != ERR_SUCCESS) {

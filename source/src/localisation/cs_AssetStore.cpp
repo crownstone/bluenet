@@ -15,9 +15,9 @@
 #define LogAssetStoreVerbose LOGv
 
 
-void AssetStore::init() {
-
+cs_ret_code_t AssetStore::init() {
 	resetReports();
+	return ERR_SUCCESS;
 }
 
 void AssetStore::handleEvent(event_t& evt) {

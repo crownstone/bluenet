@@ -8,13 +8,14 @@
 
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetRecord.h>
+#include <common/cs_Component.h>
 
-class AssetStore  : EventListener {
+class AssetStore : public EventListener, public Component {
 private:
 	static constexpr auto MAX_REPORTS = 10u;
 
 public:
-	void init();
+	cs_ret_code_t init() override;
 
 	void handleEvent(event_t& evt) override;
 
@@ -57,5 +58,4 @@ private:
 
 
 	void logRecord(asset_record_t& record);
-
 };
