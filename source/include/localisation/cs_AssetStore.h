@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include <events/cs_EventListener.h>.h>
+#include <events/cs_EventListener.h>
 #include <localisation/cs_AssetRecord.h>
 
 class AssetStore  : EventListener {

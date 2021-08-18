@@ -8,7 +8,7 @@
 
 #include <localisation/cs_AssetStore.h>
 #include <logging/cs_Logger.h>
-#include <util/cs_Rssi.h>>
+#include <util/cs_Rssi.h>
 
 #define LogAssetStoreWarn LOGw
 #define LogAssetStoreDebug LOGd
@@ -16,6 +16,7 @@
 
 
 void AssetStore::init() {
+
 	resetReports();
 }
 
@@ -23,6 +24,9 @@ void AssetStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
 			resetReports();
+			break;
+		}
+		default: {
 			break;
 		}
 	}
