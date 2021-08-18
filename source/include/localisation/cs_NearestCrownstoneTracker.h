@@ -36,7 +36,7 @@ public:
 	/**
 	 * Caches CONFIG_CROWNSTONE_ID, and resets the _assetRecords cache.
 	 */
-	void init();
+	cs_ret_code_t init();
 
 private:
 	stone_id_t _myId; // cached for efficiency

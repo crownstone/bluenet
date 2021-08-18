@@ -66,7 +66,6 @@ cs_ret_code_t AssetFiltering::init() {
 		return ERR_NO_SPACE;
 	}
 	_nearestCrownstoneTracker->init();
-	_nearestCrownstoneTracker->listen();
 
 	addComponent(_nearestCrownstoneTracker);
 #endif

@@ -41,8 +41,12 @@ asset_record_t* getOrCreateRecord(short_asset_id_t& id) {
 	return nullptr;
 }
 
-void NearestCrownstoneTracker::init() {
+cs_ret_code_t NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
+
+	listen();
+
+	return ERR_SUCCESS;
 }
 
 // -------------------------------------------
