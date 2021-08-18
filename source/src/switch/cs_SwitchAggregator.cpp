@@ -47,12 +47,6 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	pushTestDataToHost();
 }
 
-SwitchAggregator& SwitchAggregator::getInstance() {
-	static SwitchAggregator instance;
-
-	return instance;
-}
-
 void SwitchAggregator::switchPowered() {
 	smartSwitch.start();
 }

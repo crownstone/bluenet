@@ -10,7 +10,7 @@
  * General includes
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-#include <behaviour/cs_BehaviourHandler.h>
+
 #include <behaviour/cs_BehaviourStore.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_BleCentral.h>
@@ -34,6 +34,7 @@
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
+#include <switch/cs_SwitchAggregator.h>
 #include <time/cs_SystemTime.h>
 #include <tracking/cs_TrackedDevices.h>
 
@@ -349,6 +350,8 @@ private:
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 #endif
+
+	SwitchAggregator _switchAggregator;
 	AssetFiltering _assetFiltering;
 
 	BehaviourStore _behaviourStore;
