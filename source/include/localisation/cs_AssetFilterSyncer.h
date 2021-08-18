@@ -36,7 +36,7 @@ public:
 	 * Init the class:
 	 * - Starts listening for events.
 	 */
-	cs_ret_code_t init(AssetFilterStore& store);
+	cs_ret_code_t init();
 
 private:
 	/**

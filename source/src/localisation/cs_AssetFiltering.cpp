@@ -41,7 +41,7 @@ cs_ret_code_t AssetFiltering::init() {
 	// TODO: cleanup all if init fails?
 
 	// Allocate components
-	auto safe_allocate = []<class T>(T* target) {
+	auto safe_allocate = []<class T>(T*& target) {
 		if (target == nullptr) {
 			target = new T();					// allocates object of desired type,
 			if (target == nullptr) {			// double checking for success.
@@ -80,7 +80,7 @@ cs_ret_code_t AssetFiltering::init() {
 		return retCode;
 	}
 
-	retCode = _filterSyncer->init(*_filterStore);
+	retCode = _filterSyncer->init();
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
