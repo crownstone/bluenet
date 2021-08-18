@@ -18,7 +18,7 @@
 
 cs_ret_code_t AssetFilterSyncer::init(AssetFilterStore& store) {
 	LOGAssetFilterSyncerInfo("Init");
-	_store = &store;
+	_store = &store; // TODO: getComponent<AssetFilterStore>();
 
 	sendVersionAtLowInterval();
 	listen();

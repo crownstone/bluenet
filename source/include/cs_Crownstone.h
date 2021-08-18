@@ -21,7 +21,6 @@
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFiltering.h>
 #include <localisation/cs_MeshTopology.h>
-#include <localisation/cs_NearestCrownstoneTracker.h>
 #include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
@@ -346,10 +345,6 @@ private:
 	SystemTime _systemTime;
 
 	MeshTopology _meshTopology;
-
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	NearestCrownstoneTracker _nearestCrownstoneTracker;
-#endif
 
 	SwitchAggregator _switchAggregator;
 	AssetFiltering _assetFiltering;

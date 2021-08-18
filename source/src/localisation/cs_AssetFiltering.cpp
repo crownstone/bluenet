@@ -74,6 +74,19 @@ cs_ret_code_t AssetFiltering::init() {
 		return retCode;
 	}
 
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+
+	if (_nearestCrownstoneTracker == nullptr) {
+		_nearestCrownstoneTracker = new NearestCrownstoneTracker();
+		if (_nearestCrownstoneTracker == nullptr) {
+			return ERR_NO_SPACE;
+		}
+	}
+	_nearestCrownstoneTracker->init();
+	_nearestCrownstoneTracker->listen();
+
+	addComponent(_nearestCrownstoneTracker);
+#endif
 
 	addComponents({_filterStore, _filterSyncer, _assetForwarder});
 

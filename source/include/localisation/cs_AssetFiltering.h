@@ -14,6 +14,7 @@
 #include <localisation/cs_AssetFilterSyncer.h>
 #include <localisation/cs_AssetHandler.h>
 #include <localisation/cs_AssetForwarder.h>
+#include <localisation/cs_NearestCrownstoneTracker.h>
 
 #include <util/cs_BitUtils.h>
 
@@ -25,6 +26,10 @@ private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;
 	AssetForwarder* _assetForwarder   = nullptr;
+
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+	NearestCrownstoneTracker* _nearestCrownstoneTracker = nullptr;
+#endif
 
 	/**
 	 * Returns true if init has been called successfully and

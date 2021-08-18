@@ -619,10 +619,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			_assetFiltering.init();
 
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-			_nearestCrownstoneTracker.init();
-			_nearestCrownstoneTracker.listen();
-#endif
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {
