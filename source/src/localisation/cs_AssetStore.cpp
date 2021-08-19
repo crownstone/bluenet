@@ -10,9 +10,9 @@
 #include <logging/cs_Logger.h>
 #include <util/cs_Rssi.h>
 
-#define LogAssetStoreWarn LOGw
-#define LogAssetStoreDebug LOGd
-#define LogAssetStoreVerbose LOGv
+#define LOGAssetStoreWarn LOGw
+#define LOGAssetStoreDebug LOGd
+#define LOGAssetStoreVerbose LOGv
 
 AssetStore::AssetStore()
 	: updateLastReceivedCounterRoutine([this]() {
@@ -82,7 +82,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 
 	// not found. create new report if there is space available
 	if (_assetRecordCount < MAX_REPORTS) {
-		LogAssetStoreVerbose("creating new report record");
+		LOGAssetStoreVerbose("creating new report record");
 		auto& rec = _assetRecords[_assetRecordCount];
 		rec = asset_record_t::empty();
 		rec.assetId = id;
@@ -90,7 +90,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 		_assetRecordCount += 1;
 		return &rec;
 	} else {
-		LogAssetStoreVerbose("can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
+		LOGAssetStoreVerbose("can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
 							id.data[0], id.data[1], id.data[2] );
 	}
 
@@ -100,8 +100,15 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 
 void AssetStore::incrementLastReceivedCounters() {
 	for (auto& rec: _assetRecords) {
+		// TODO: only increment if record is non-empty!
+
 		if (rec.lastReceivedCounter < 0xff) {
 			rec.lastReceivedCounter++;
+		}
+
+		if(rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD) {
+			LOGAssetStoreDebug("Asset timed out. %x:%x:%x", rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
+			rec = asset_record_t::empty();
 		}
 	}
 }

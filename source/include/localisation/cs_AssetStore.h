@@ -18,6 +18,8 @@ private:
 	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
 	static constexpr auto LAST_SENT_COUNTER_PERIOD_MS = 50;
 
+	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 250;
+
 
 public:
 	AssetStore();

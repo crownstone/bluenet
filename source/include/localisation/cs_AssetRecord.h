@@ -43,7 +43,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * Empty asset records have (compressed) rssi values of -127 set
 	 * rather than 0 to ensure 'empty' is 'far away'.
 	 */
-	static asset_record_t empty() {
+	static constexpr asset_record_t empty() {
 		asset_record_t rec = {};
 		rec.myRssi = compressRssi(-127,0);
 
