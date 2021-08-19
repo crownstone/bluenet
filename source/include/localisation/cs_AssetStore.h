@@ -54,7 +54,4 @@ private:
 	 */
 	void resetReports();
 
-
-
-	void logRecord(asset_record_t& record);
 };

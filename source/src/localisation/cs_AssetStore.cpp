@@ -51,12 +51,8 @@ asset_record_t* AssetStore::getOrCreateRecord(short_asset_id_t& id) {
 	if (_assetRecordCount < MAX_REPORTS) {
 		LogAssetStoreVerbose("creating new report record");
 		auto& rec = _assetRecords[_assetRecordCount];
+		rec = asset_record_t::empty();
 		rec.assetId = id;
-		rec.closestStoneId = 0;
-
-		// set rssi's unreasonably low so that they will be overwritten on the first observation
-		rec.myRssi = compressRssi(-127, 0);
-		rec.closestRssi = compressRssi(-127, 0);
 
 		_assetRecordCount += 1;
 		return &rec;
@@ -66,18 +62,4 @@ asset_record_t* AssetStore::getOrCreateRecord(short_asset_id_t& id) {
 	}
 
 	return nullptr;
-}
-
-void AssetStore::logRecord(asset_record_t& record) {
-	LogAssetStoreVerbose(
-			"ID(%x %x %x) winner(#%u, %d dB ch%u [%u]) me(%d dB ch %u)",
-			record.assetId.data[0],
-			record.assetId.data[1],
-			record.assetId.data[2],
-			record.closestStoneId,
-			getRssi(record.closestRssi),
-			getChannel(record.closestRssi),
-			record.closestRssi,
-			getRssi(record.myRssi),
-			getChannel(record.myRssi));
 }
