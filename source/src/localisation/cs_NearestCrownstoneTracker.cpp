@@ -127,9 +127,10 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		return;
 	}
 
-	auto recordPtr = _assetStore->getOrCreateRecord(incomingReport.id);
+	auto recordPtr = _assetStore->getRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
-		// (warning is already logged in getOrCreateRecord)
+		// if we don't have a record in the assetStore it means we're not close
+		// and can simply ignore the message.
 		return;
 	}
 	auto& record = *recordPtr;
