@@ -25,11 +25,24 @@ public:
 	void handleEvent(event_t& evt) override;
 
 	/**
-	 * returns a pointer to the found record, possibly empty.
-	 * returns nullptr if not found and creating a new one was
-	 * impossible.
+	 * Get or create a record for the given assetId.
+	 * Then update rssi values according to the incoming scan and
+	 * revert the lastReceivedCounter to 0.
 	 */
-	asset_record_t* getOrCreateRecord(short_asset_id_t& id);
+	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId);
+
+	/**
+	 * returns a pointer of record if found,
+	 * else tries to create a new blank record and return a pointer to that,
+	 * else returns nullptr.
+	 */
+	asset_record_t* getOrCreateRecord(const short_asset_id_t& id);
+
+	/**
+	 * returns a pointer of record if found,
+	 * else returns nullptr.
+	 */
+	asset_record_t* getRecord(const short_asset_id_t& id);
 
 
 private:

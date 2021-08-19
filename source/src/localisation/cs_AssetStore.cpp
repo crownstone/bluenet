@@ -45,19 +45,35 @@ void AssetStore::handleEvent(event_t& evt) {
 	}
 }
 
+void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+	if(auto rec = getOrCreateRecord(assetId)) {
+		rec->myRssi = compressRssi(asset.rssi,asset.channel);
+		rec->lastReceivedCounter = 0;
+	}
+
+	// asset store is full. Warning logged in the getOrCreate method.
+}
+
 void AssetStore::resetReports() {
 	for (auto& rec : _assetRecords){
 		rec = asset_record_t::empty();
 	}
 }
 
-asset_record_t* AssetStore::getOrCreateRecord(short_asset_id_t& id) {
+asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 	// linear search
 	for (uint8_t i = 0; i < _assetRecordCount; i++) {
 		auto& rec = _assetRecords[i];
 		if (rec.assetId == id) {
 			return &rec;
 		}
+	}
+	return nullptr;
+}
+
+asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
+	if(auto rec = getRecord(id)) {
+		return rec;
 	}
 
 	// not found. create new report if there is space available

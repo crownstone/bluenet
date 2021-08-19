@@ -130,7 +130,9 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		AssetFilter primarySidFilter = _filterStore->getFilter(masks.primarySidFilter());
 		short_asset_id_t shortAssetId = filterOutputResultShortAssetId(primarySidFilter, device);
 
-		// TODO: AssetStore->handleAcceptedAsset.
+		if(_assetStore != nullptr) {
+			_assetStore->handleAcceptedAsset(device, shortAssetId);
+		}
 
 		// forward sid to mesh
 		if (masks._forwardSid && _assetForwarder != nullptr) {

@@ -83,23 +83,13 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u), report(%d dB ch.%u)",
 			_myId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
-	auto recordPtr = _assetStore->getOrCreateRecord(incomingReport.id);
+	auto recordPtr = _assetStore->getRecord(incomingReport.id);
 	if (recordPtr == nullptr) {
-		// (warning is already logged in getOrCreateRecord)
+		LOGw("No record for incoming asset in Store. Is it full?");
 		return;
 	}
 	auto& record = *recordPtr;
 
-	savePersonalReport(record, incomingReport.compressedRssi);
-
-	// REVIEW: Does it matter who reported it?
-	// @Bart: Yes. The crownstone always saves a 'personal report', but the rssi value between
-	// this crownstone and the trackable only becomes relevant to other crownstones when it is (or becomes)
-	// the new nearest. Those are the cases you see:
-	// - we are already the nearest. Then all updates are relevant.
-	// - we are becoming the nearest. Then 'winner' changes, and we start updating towards the mesh.
-	// - we are not the nearest. Then we don't need to do anything beyond keeping track of our own distance to the trackable.
-	//   (Which was already done before the ifstatement.)
 	if (record.nearestStoneId == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("we already believed we were nearest, so it's time to send an update towards the mesh");
 
@@ -246,10 +236,6 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 // ------------- Utils -------------
 // ---------------------------------
 
-
-void NearestCrownstoneTracker::savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi) {
-	rec.myRssi = personalRssi;
-}
 
 void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
 	rec.nearestStoneId = winningId;

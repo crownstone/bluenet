@@ -40,8 +40,7 @@ public:
 	 */
 	cs_ret_code_t init() override;
 
-	void handleAcceptedAsset(const scanned_device_t& device, const short_asset_id_t& id);
-
+	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
 
 private:
 	// cached objects for efficiency
@@ -130,12 +129,6 @@ private:
 	// ---------------------------------
 	// ------------- Utils -------------
 	// ---------------------------------
-
-
-	/**
-	 * saves the rssi as personal
-	 */
-	void savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi);
 
 	/**
 	 * saves the report in the _winning list.

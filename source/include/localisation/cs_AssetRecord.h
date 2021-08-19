@@ -34,9 +34,8 @@ struct __attribute__((__packed__)) asset_record_t {
 	stone_id_t nearestStoneId;
 #endif
 
-
-	uint8_t lastReceivedCounter;
-	uint8_t lastSentCounter;
+	uint8_t lastReceivedCounter;  // used for time-outs
+	uint8_t lastSentCounter;      // used for throttling
 
 	// ------------- utility functions -------------
 
