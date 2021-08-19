@@ -73,9 +73,8 @@ cs_ret_code_t AssetFiltering::init() {
 
 	// Init components
 	if (cs_ret_code_t retCode = initChildren() != ERR_SUCCESS) {
-		return retCode;
-	} else {
 		LOGAssetFilteringWarn("init failed with code: %x", retCode);
+		return retCode;
 	}
 
 	listen();
@@ -135,13 +134,13 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 
 		// forward sid to mesh
 		if (masks._forwardSid && _assetForwarder != nullptr) {
-			_assetForwarder->handleAcceptedAsset(device, shortAssetId);
+			_assetForwarder->handleAcceptedAsset(device, shortAssetId); // TODO: change to 'record Updated'?
 		}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
 		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) {
-			_nearestCrownstoneTracker->handleAcceptedAsset(device, shortAssetId);
+			_nearestCrownstoneTracker->handleAcceptedAsset(device, shortAssetId); // TODO: change to 'record Updated'?
 		}
 #endif
 	}
