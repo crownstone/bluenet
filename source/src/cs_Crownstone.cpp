@@ -55,7 +55,6 @@
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
-#include <switch/cs_SwitchAggregator.h>
 #include <time/cs_SystemTime.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
@@ -390,7 +389,7 @@ void Crownstone::initDrivers1() {
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		LOGi(FMT_INIT, "switch");
-		SwitchAggregator::getInstance().init(_boardsConfig);
+		_switchAggregator.init(_boardsConfig);
 
 		LOGi(FMT_INIT, "temperature guard");
 		_temperatureGuard->init(_boardsConfig);
@@ -620,10 +619,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			_assetFiltering.init();
 
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-			_nearestCrownstoneTracker.init();
-			_nearestCrownstoneTracker.listen();
-#endif
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {
@@ -666,7 +661,7 @@ void Crownstone::startUp() {
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		SwitchAggregator::getInstance().switchPowered();
+		_switchAggregator.switchPowered();
 
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");

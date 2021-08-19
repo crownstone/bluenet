@@ -29,12 +29,10 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 }
 
 
-
 cs_ret_code_t AssetFiltering::init() {
 	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(uint8_t) * 8, "too many filters for bitmask");
 
 	LOGAssetFilteringInfo("init");
-	cs_ret_code_t retCode = ERR_UNSPECIFIED;
 
 	// TODO: it seems there's a bunch of code to make multiple calls to init() possible,
 	// though listen() now can be called multiple times.
@@ -42,37 +40,45 @@ cs_ret_code_t AssetFiltering::init() {
 
 	// TODO: cleanup all if init fails?
 
-	if (_filterStore == nullptr) {
-		_filterStore = new AssetFilterStore();
-		if (_filterStore == nullptr) {
-			return ERR_NO_SPACE;
+	// Allocate components
+	auto safe_allocate = []<class T>(T*& target) {
+		if (target == nullptr) {
+			target = new T();					// allocates object of desired type,
+			if (target == nullptr) {			// double checking for success.
+				return ERR_NO_SPACE;
+			}
 		}
+		return ERR_SUCCESS;
+	};
+
+	if (safe_allocate(_filterStore) != ERR_SUCCESS) {
+		return ERR_NO_SPACE;
 	}
-	retCode = _filterStore->init();
-	if (retCode != ERR_SUCCESS) {
-		return retCode;
+	if (safe_allocate(_filterSyncer) != ERR_SUCCESS) {
+		return ERR_NO_SPACE;
+	}
+	if (safe_allocate(_assetForwarder) != ERR_SUCCESS) {
+		return ERR_NO_SPACE;
+	}
+	if (safe_allocate(_assetStore) != ERR_SUCCESS) {
+		return ERR_NO_SPACE;
 	}
 
-	if (_filterSyncer == nullptr) {
-		_filterSyncer = new AssetFilterSyncer();
-		if (_filterSyncer == nullptr) {
-			return ERR_NO_SPACE;
-		}
-	}
-	retCode = _filterSyncer->init(*_filterStore);
-	if (retCode != ERR_SUCCESS) {
-		return retCode;
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+	if (safe_allocate(_nearestCrownstoneTracker) != ERR_SUCCESS) {
+		return ERR_NO_SPACE;
 	}
 
-	if (_assetForwarder == nullptr) {
-		_assetForwarder = new AssetForwarder();
-		if (_assetForwarder == nullptr) {
-			return ERR_NO_SPACE;
-		}
-	}
-	retCode = _assetForwarder->init();
-	if (retCode != ERR_SUCCESS) {
+	addComponent(_nearestCrownstoneTracker);
+#endif
+
+	addComponents({_filterStore, _filterSyncer, _assetForwarder, _assetStore});
+
+	// Init components
+	if (cs_ret_code_t retCode = initChildren() != ERR_SUCCESS) {
 		return retCode;
+	} else {
+		LOGAssetFilteringWarn("init failed with code: %x", retCode);
 	}
 
 	listen();
@@ -202,7 +208,6 @@ AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned
 	return masks;
 }
 
-
 bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 	// Rejection check: looping over exclusion filters.
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
@@ -219,7 +224,6 @@ bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 
 	return false;
 }
-
 
 // ---------------------------- Extracting data from the filter  ----------------------------
 

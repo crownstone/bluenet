@@ -16,12 +16,12 @@
 #define LOGAssetFilterSyncerDebug LOGvv
 #define LOGAssetFilterSyncerVerbose LOGvv
 
-cs_ret_code_t AssetFilterSyncer::init(AssetFilterStore& store) {
-	LOGAssetFilterSyncerInfo("Init");
-	_store = &store;
+cs_ret_code_t AssetFilterSyncer::init() {
+	_store = getComponent<AssetFilterStore>();
 
 	sendVersionAtLowInterval();
 	listen();
+
 	return ERR_SUCCESS;
 }
 

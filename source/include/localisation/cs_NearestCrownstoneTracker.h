@@ -7,12 +7,16 @@
 
 #pragma once
 
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-#include <localisation/cs_Nearestnearestwitnessreport.h>
-#include <localisation/cs_TrackableEvent.h>
+
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+#include <localisation/cs_Nearestnearestwitnessreport.h>
+#include <localisation/cs_TrackableEvent.h>
+#include <localisation/cs_AssetRecord.h>
+#include <localisation/cs_AssetStore.h>
 #include <localisation/cs_AssetHandler.h>
 
 /**
@@ -28,53 +32,19 @@
  * if necessary (for optimization purposes perhaps). When doing that, the resulting nearest
  * crownstone will be an element of this subset.
  */
-class NearestCrownstoneTracker: public EventListener {
+class NearestCrownstoneTracker : public EventListener, public Component {
 public:
 	/**
-	 * Caches CONFIG_CROWNSTONE_ID, and resets the _assetRecords cache.
+	 * Caches CONFIG_CROWNSTONE_ID and AssetStore.
+	 * If assetstore is not available, ERR_NOT_FOUND is returned.
 	 */
-	void init();
+	cs_ret_code_t init() override;
+
 
 private:
-	static constexpr auto MAX_REPORTS = 10u;
-
-	stone_id_t _myId; // cached for efficiency
-
-	struct __attribute__((__packed__)) report_asset_record_t {
-		short_asset_id_t assetId;
-		/**
-		 * Stone id of currently closest stone.
-		 *  - Equal to 0 if unknown
-		 *  - Equal to _myId if this crownstone believes it's itself
-		 *    the closest stone to this asset.
-		 */
-		stone_id_t winningStoneId;
-		/**
-		 * Most recent rssi value observed by this crownstone.
-		 */
-		compressed_rssi_data_t personalRssi;
-		/**
-		 * rssi between asset and closest stone. only valid if winning_id != 0.
-		 */
-		compressed_rssi_data_t winningRssi;
-	};
-
-	/**
-	 * Relevant data for this algorithm per asset_id.
-	 * Possible strategies to reduce memory:
-	 *  - when full, remove worst personal_rssi.
-	 *  - only store if observed the asset personally.
-	 *  - ...
-	 *
-	 *  The array is 'front loaded'. entries with index < _assetRecordCount
-	 *  are valid, other entries are not.
-	 */
-	report_asset_record_t _assetRecords[MAX_REPORTS];
-
-	/**
-	 * Current number of valid records in the _assetRecords array.
-	 */
-	uint8_t _assetRecordCount = 0;
+	// cached objects for efficiency
+	stone_id_t _myId;
+	AssetStore* _assetStore;
 
 	// -------------------------------------------
 	// ------------- Incoming events -------------
@@ -134,13 +104,13 @@ private:
 	 * makes a report from the records personalRssi field
 	 * and broadcast it over the mesh.
 	 */
-	void broadcastPersonalReport(report_asset_record_t& record);
+	void broadcastPersonalReport(asset_record_t& record);
 
 	/**
 	 * Sends a message over UART containing the winner, its rssi
 	 * and the asset id.
 	 */
-	void sendUartUpdate(report_asset_record_t& record);
+	void sendUartUpdate(asset_record_t& record);
 
 	/**
 	 * Report to uart host that this report is timing out.
@@ -163,35 +133,12 @@ private:
 	/**
 	 * saves the rssi as personal
 	 */
-	void savePersonalReport(report_asset_record_t& rec, compressed_rssi_data_t personalRssi);
+	void savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi);
 
 	/**
 	 * saves the report in the _winning list.
 	 */
-	void saveWinningReport(report_asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
-
-	/**
-	 * returns a pointer to the found record, possibly empty.
-	 * returns nullptr if not found and creating a new one was
-	 * impossible.
-	 */
-	report_asset_record_t* getOrCreateRecord(short_asset_id_t& id);
-
-	/**
-	 * Assumes my_id is set to the stone id of this crownstone.
-	 * Sets the reporter id of the personal report to my_id.
-	 * Sets the reporter id of the winning report to 0.
-	 * Sets the rssi value of both these reports to -127.
-	 */
-	void resetReports();
-
-
-	void logRecord(report_asset_record_t& record);
-
-	/**
-	 * Log a warning.
-	 */
-	void onAssetListFull(report_asset_id_t& report);
+	void saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
 
 public:
 	/**
@@ -201,6 +148,4 @@ public:
 	 * EVT_FILTERS_UPDATED
 	 */
 	void handleEvent(event_t &evt);
-
 };
-

@@ -10,7 +10,7 @@
  * General includes
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
-#include <behaviour/cs_BehaviourHandler.h>
+
 #include <behaviour/cs_BehaviourStore.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_BleCentral.h>
@@ -21,7 +21,6 @@
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFiltering.h>
 #include <localisation/cs_MeshTopology.h>
-#include <localisation/cs_NearestCrownstoneTracker.h>
 #include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
@@ -34,6 +33,7 @@
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
+#include <switch/cs_SwitchAggregator.h>
 #include <time/cs_SystemTime.h>
 #include <tracking/cs_TrackedDevices.h>
 
@@ -346,9 +346,7 @@ private:
 
 	MeshTopology _meshTopology;
 
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	NearestCrownstoneTracker _nearestCrownstoneTracker;
-#endif
+	SwitchAggregator _switchAggregator;
 	AssetFiltering _assetFiltering;
 
 	BehaviourStore _behaviourStore;

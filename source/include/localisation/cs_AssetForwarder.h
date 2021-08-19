@@ -7,10 +7,12 @@
 
 #pragma once
 
-#include <localisation/cs_AssetHandler.h>
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
 
-class AssetForwarder : public EventListener {
+#include <localisation/cs_AssetHandler.h>
+
+class AssetForwarder : public EventListener, public Component {
 public:
 	cs_ret_code_t init();
 

@@ -21,7 +21,7 @@
  */
 class SwitchAggregator : public EventListener {
 public:
-	static SwitchAggregator& getInstance();
+	SwitchAggregator();
 
 	void init(const boards_config_t& board);
 
@@ -38,10 +38,6 @@ public:
 	void switchPowered();
 
 private:
-	SwitchAggregator();
-	virtual ~SwitchAggregator() noexcept {};
-	SwitchAggregator& operator= (const SwitchAggregator&) = delete;
-
 	TwilightHandler twilightHandler;
 	BehaviourHandler behaviourHandler;
 
