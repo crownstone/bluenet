@@ -112,7 +112,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	// - we are becoming the closest. Then 'winner' changes, and we start updating towards the mesh.
 	// - we are not the closest. Then we don't need to do anything beyond keeping track of our own distance to the trackable.
 	//   (Which was already done before the ifstatement.)
-	if (record.winningStoneId == _myId) {
+	if (record.closestStoneId == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so it's time to send an update towards the mesh");
 
 		saveWinningReport(record, incomingReport.compressedRssi, _myId);
@@ -123,7 +123,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	else {
 		LOGNearestCrownstoneTrackerVerbose("we didn't win before");
-		if (rssiIsCloser(incomingReport.compressedRssi, record.winningRssi))  {
+		if (rssiIsCloser(incomingReport.compressedRssi, record.closestRssi))  {
 			// we win because the incoming report is a first hand observation.
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
 			saveWinningReport(record, incomingReport.compressedRssi, _myId);
@@ -156,12 +156,12 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	}
 	auto& record = *recordPtr;
 
-	if (reporter == record.winningStoneId) {
+	if (reporter == record.closestStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if (rssiIsCloser(record.personalRssi, incomingReport.compressedRssi) ) {
+		if (rssiIsCloser(record.myRssi, incomingReport.compressedRssi) ) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
-			saveWinningReport(record, record.personalRssi, _myId);
+			saveWinningReport(record, record.myRssi, _myId);
 
 			LOGNearestCrownstoneTrackerVerbose("Broadcast my personal report to update the mesh.");
 			broadcastPersonalReport(record);
@@ -177,7 +177,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		}
 	}
 	else {
-		if (rssiIsCloser(incomingReport.compressedRssi, record.winningRssi)) {
+		if (rssiIsCloser(incomingReport.compressedRssi, record.closestRssi)) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
 			saveWinningReport(record, incomingReport.compressedRssi, reporter);
 
@@ -210,7 +210,7 @@ void NearestCrownstoneTracker::broadcastReport(report_asset_id_t& report) {
 void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 	report_asset_id_t report = {};
 	report.id = record.assetId;
-	report.compressedRssi = record.personalRssi;
+	report.compressedRssi = record.myRssi;
 
 	broadcastReport(report);
 }
@@ -218,9 +218,9 @@ void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	auto uartMsg = cs_nearest_stone_update_t{
 			.assetId = record.assetId,
-			.stoneId = record.winningStoneId,
-			.rssi = getRssi(record.winningRssi),
-			.channel = getChannel(record.winningRssi)
+			.stoneId = record.closestStoneId,
+			.rssi = getRssi(record.closestRssi),
+			.channel = getChannel(record.closestRssi)
 	};
 
 	UartHandler::getInstance().writeMsg(
@@ -260,12 +260,12 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 
 
 void NearestCrownstoneTracker::savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi) {
-	rec.personalRssi = personalRssi;
+	rec.myRssi = personalRssi;
 }
 
 void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
-	rec.winningStoneId = winningId;
-	rec.winningRssi = winningRssi;
+	rec.closestStoneId = winningId;
+	rec.closestRssi = winningRssi;
 }
 
 
