@@ -17,53 +17,51 @@
 
 /**
  * Helper class to manage decoupling of components.
+ *
+ * Features that have many parts, can be organized in components
+ * E.g.:
+ *
+ * AssetFiltering
+ * - FilterSyncer
+ * - AssetStore
+ * - AssetFilterStore
+ * - AssetForwarder
+ *
+ * These parts may depend on each other, but we don't want to expose
+ * their existance to the whole firmware through global/static variables.
+ *
  * Using this class 'sibling components' can query for
- * eachothers presence in a unified way, without need
- * for static classes or other hard dependencies.
+ * each others presence in a unified way, without need
+ * for static classes or other rigid dependencies.
  */
 class Component {
 private:
 	Component* _parent = nullptr;
 	std::vector<Component*> _children;
 
-	/**
-	 * Removes all entries in _children equal to element.
-	 */
-	void erase(Component* element) {
-		for (auto it = _children.begin(); it != _children.end();) {
-			if (*it == element) {
-				it = _children.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
-	}
-
 public:
 	// ================== Constructors ==================
 
 	/**
-	 * Default construction leaves _children empty and assures no memory is claimed for that empty array.
+	 * Leaves _children empty and shrinks the _children vector to capacity 0.
 	 */
-	Component() { _children.shrink_to_fit(); }
+	Component();
 
 	/**
-	 * this constructor takes a list of Component pointers, deletes any nullptrs from that list
-	 * and shrinks it to fit.
+	 * Takes a brace enclosed list of Component pointers,
+	 *  - deletes any nullptrs from that list,
+	 *  - parents the component to `this`,
+	 *  - and shrinks it to fit.
 	 */
-	Component(std::initializer_list<Component*> children) : _children(children) {
-		erase(nullptr);
-		_children.shrink_to_fit();
-
-		for (auto child: children) {
-			child->_parent = this;
-		}
-	}
+	Component(std::initializer_list<Component*> children);
 
 	virtual ~Component() = default;
 
 	// ================== Getters ==================
+
+	inline std::vector<Component*> getChildren() {
+		return _children;
+	}
 
 	/**
 	 * Returns a component of type T* from _children, or
@@ -71,82 +69,29 @@ public:
 	 * If none-exists, a nullptr is returned.
 	 */
 	template <class T>
-	T* getComponent(Component* requester = nullptr) {
-		// jump up in hierarchy to parent.
-		if (requester == nullptr) {
-			if (_parent != nullptr) {
-				// request from the parent to find a sibling.
-				// keeping track of the original requester.
-				return _parent->getComponent<T>(this);
-			} else {
-				// no parent means no siblings.
-				// use get subcomponents if you want that.
-				return nullptr;
-			}
-		}
+	T* getComponent(Component* requester = nullptr);
 
-		// traverse children
-		for (auto c : _children) {
-			if (c == requester) {
-				// skip original requester to avoid infinite recursions.
-				continue;
-			}
-
-			T* t = dynamic_cast<T*>(c);
-			if (t != nullptr) {
-				return t;
-			}
-		}
-
-		// jump up in hierarchy one stack frame deeper
-		if (_parent != nullptr) {
-			return _parent->getComponent<T>(this);
-		}
-
-		return nullptr;
-	}
-
-	std::vector<Component*> getChildren() {
-		return _children;
-	}
 
 	// ============== Add/Remove components ===============
 
 	/**
 	 * adds a new child to this component, changing its parent to `this`.
 	 */
-	void addComponent(Component* child) {
-		if (child != nullptr) {
-			_children.push_back(child);
-			_children.shrink_to_fit();
-			child->_parent = this;
-		}
-	}
+	void addComponent(Component* child);
 
-	void addComponents(std::initializer_list<Component*> children) {
-		_children.insert(_children.end(), children.begin(), children.end());
-		erase(nullptr);
-		_children.shrink_to_fit();
+	void addComponents(std::initializer_list<Component*> children);
 
-		for (auto child : children) {
-			child->_parent = this;
-		}
-	}
 
 	/**
 	 * removes the component from the _children and sets its parent to nullptr.
 	 */
-	void removeComponent(Component* c) {
-		erase(c);
-		_children.shrink_to_fit();
-		c->_parent = nullptr;
-	}
+	void removeComponent(Component* c);
 
 	// ============== life cycle events ===============
 
 	/**
-	 * components can implement this if they need to find sibling
-	 * components or do specific initialization.
+	 * Components can implement this if they need to get references to sibling
+	 * or if they need to do specific initialization.
 	 *
 	 * - Components are responsible for call init() on their children.
 	 * - init is allowed to assume all siblings are constructed.
@@ -173,16 +118,50 @@ public:
 	 * Components are not required to use this. They can call all inits of children
 	 * in custom order if they need to. (And implement elegant failure)
 	 */
-	cs_ret_code_t initChildren() {
-		for (Component* child : _children) {
-			LOGd("init children: 0x%x", child);
-			if(auto retval = child->init() != ERR_SUCCESS) {
-				return retval;
-			}
+	cs_ret_code_t initChildren();
+
+private:
+	/**
+	 * Removes all entries in _children equal to element.
+	 */
+	void erase(Component* element);
+};
+
+// -------------------- Template implementation details -------------------
+
+template <class T>
+T* Component::getComponent(Component* requester) {
+	// jump up in hierarchy to parent.
+	if (requester == nullptr) {
+		if (_parent != nullptr) {
+			// request from the parent to find a sibling.
+			// keeping track of the original requester.
+			return _parent->getComponent<T>(this);
 		}
-		return ERR_SUCCESS;
+		else {
+			// no parent means no siblings.
+			// use get subcomponents if you want that.
+			return nullptr;
+		}
 	}
 
+	// traverse children
+	for (auto c : _children) {
+		if (c == requester) {
+			// skip original requester to avoid infinite recursions.
+			continue;
+		}
 
+		T* t = dynamic_cast<T*>(c);
+		if (t != nullptr) {
+			return t;
+		}
+	}
 
-};
+	// jump up in hierarchy one stack frame deeper
+	if (_parent != nullptr) {
+		return _parent->getComponent<T>(this);
+	}
+
+	return nullptr;
+}
