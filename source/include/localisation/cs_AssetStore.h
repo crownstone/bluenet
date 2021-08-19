@@ -6,9 +6,10 @@
  */
 #pragma once
 
-#include <events/cs_EventListener.h>
-#include <localisation/cs_AssetRecord.h>
 #include <common/cs_Component.h>
+#include <events/cs_EventListener.h>
+
+#include <localisation/cs_AssetRecord.h>
 
 class AssetStore : public EventListener, public Component {
 private:
@@ -18,8 +19,6 @@ public:
 	cs_ret_code_t init() override;
 
 	void handleEvent(event_t& evt) override;
-
-	asset_record_t* getRecord(short_asset_id_t sid);
 
 	/**
 	 * returns a pointer to the found record, possibly empty.
