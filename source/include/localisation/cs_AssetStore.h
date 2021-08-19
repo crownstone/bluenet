@@ -10,12 +10,16 @@
 #include <events/cs_EventListener.h>
 
 #include <localisation/cs_AssetRecord.h>
+#include <util/cs_Coroutine.h>
 
 class AssetStore : public EventListener, public Component {
 private:
-	static constexpr auto MAX_REPORTS = 10u;
+	static constexpr auto MAX_REPORTS = 20u;
+	static constexpr auto COUNTER_UPDATE_PERIOD_MS = 100;
+
 
 public:
+	AssetStore();
 	cs_ret_code_t init() override;
 
 	void handleEvent(event_t& evt) override;
@@ -53,5 +57,12 @@ private:
 	 * Sets the rssi value of both these reports to -127.
 	 */
 	void resetReports();
+
+	/**
+	 * Adds 1 to the update/sent counters of a record, until 0xff is reached.
+	 */
+	void incrementRecordCounters();
+
+	Coroutine counterUpdateRoutine;
 
 };

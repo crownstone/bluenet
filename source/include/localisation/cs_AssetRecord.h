@@ -35,8 +35,8 @@ struct __attribute__((__packed__)) asset_record_t {
 #endif
 
 
-	uint8_t timeSinceLastReceivedUpdate;
-	uint8_t timeSinceLastSentUpdate;
+	uint8_t lastReceivedCounter;
+	uint8_t lastSentCounter;
 
 	// ------------- utility functions -------------
 

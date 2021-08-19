@@ -15,12 +15,25 @@
 #define LogAssetStoreVerbose LOGv
 
 
+AssetStore::AssetStore() : counterUpdateRoutine([this]() {
+	incrementRecordCounters();
+	return Coroutine::delayMs(COUNTER_UPDATE_PERIOD_MS);
+}) {
+
+}
+
 cs_ret_code_t AssetStore::init() {
 	resetReports();
+	listen();
+
 	return ERR_SUCCESS;
 }
 
 void AssetStore::handleEvent(event_t& evt) {
+	if (counterUpdateRoutine.handleEvent(evt)) {
+		return;
+	}
+
 	switch (evt.type) {
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
 			resetReports();
@@ -62,4 +75,16 @@ asset_record_t* AssetStore::getOrCreateRecord(short_asset_id_t& id) {
 	}
 
 	return nullptr;
+}
+
+
+void AssetStore::incrementRecordCounters() {
+	for (auto& rec: _assetRecords) {
+		if (rec.lastReceivedCounter < 0xff) {
+			rec.lastReceivedCounter++;
+		}
+		if (rec.lastSentCounter < 0xff) {
+			rec.lastSentCounter++;
+		}
+	}
 }
