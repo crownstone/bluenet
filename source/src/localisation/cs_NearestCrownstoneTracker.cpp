@@ -50,10 +50,6 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 			handleMeshMsgEvent(evt);
 			break;
 		}
-		case CS_TYPE::EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM: {
-			handleAssetAcceptedEvent(evt);
-			break;
-		}
 		default: {
 			break;
 		}
@@ -75,19 +71,11 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 	}
 }
 
-void NearestCrownstoneTracker::handleAssetAcceptedEvent(event_t& evt){
-	// an asset advertisement passed this crownstones filters.
-	AssetWithSidAcceptedEvent* assetAcceptedEvent = CS_TYPE_CAST(EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM, evt.data);
-
+void NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id) {
 	report_asset_id_t rep = {};
-	rep.id = assetAcceptedEvent->_id;
-	rep.compressedRssi = compressRssi(
-					assetAcceptedEvent->_asset.rssi,
-					assetAcceptedEvent->_asset.channel);
-
+	rep.id = id;
+	rep.compressedRssi = compressRssi(asset.rssi,asset.channel);
 	onReceiveAssetAdvertisement(rep);
-
-	evt.result = ERR_SUCCESS;
 }
 
 

@@ -40,6 +40,8 @@ public:
 	 */
 	cs_ret_code_t init() override;
 
+	void handleAcceptedAsset(const scanned_device_t& device, const short_asset_id_t& id);
+
 
 private:
 	// cached objects for efficiency
