@@ -83,9 +83,9 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u), report(%d dB ch.%u)",
 			_myId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
-	auto recordPtr = _assetStore->getRecord(incomingReport.id);
+	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
-		LOGw("No record for incoming asset in Store. Is it full?");
+		// might just have been an old record. simply return.
 		return;
 	}
 	auto& record = *recordPtr;
@@ -127,7 +127,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		return;
 	}
 
-	auto recordPtr = _assetStore->getRecord(incomingReport.id);
+	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
 		// if we don't have a record in the assetStore it means we're not close
 		// and can simply ignore the message.
@@ -241,6 +241,20 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
 	rec.nearestStoneId = winningId;
 	rec.nearestRssi = winningRssi;
+}
+
+asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id_t& assetId) {
+	asset_record_t* record = _assetStore->getRecord(assetId);
+
+	if( record == nullptr ) {
+		return nullptr;
+	}
+	if(record->lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD) {
+		LOGd("ignored old record for nearest crownstone algorithm.");
+		return nullptr;
+	}
+
+	return record;
 }
 
 

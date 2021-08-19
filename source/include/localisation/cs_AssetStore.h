@@ -15,7 +15,8 @@
 class AssetStore : public EventListener, public Component {
 private:
 	static constexpr auto MAX_REPORTS = 20u;
-	static constexpr auto COUNTER_UPDATE_PERIOD_MS = 100;
+	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
+	static constexpr auto LAST_SENT_COUNTER_PERIOD_MS = 50;
 
 
 public:
@@ -74,8 +75,10 @@ private:
 	/**
 	 * Adds 1 to the update/sent counters of a record, until 0xff is reached.
 	 */
-	void incrementRecordCounters();
+	void incrementLastReceivedCounters();
+	void incrementLastSentCounters();
 
-	Coroutine counterUpdateRoutine;
+	Coroutine updateLastReceivedCounterRoutine;
+	Coroutine updateLastSentCounterRoutine;
 
 };

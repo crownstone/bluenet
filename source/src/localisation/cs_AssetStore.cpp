@@ -14,13 +14,17 @@
 #define LogAssetStoreDebug LOGd
 #define LogAssetStoreVerbose LOGv
 
+AssetStore::AssetStore()
+	: updateLastReceivedCounterRoutine([this]() {
+		incrementLastReceivedCounters();
+		return Coroutine::delayMs(LAST_RECEIVED_COUNTER_PERIOD_MS);
+	})
+	, updateLastSentCounterRoutine([this]() {
+		incrementLastSentCounters();
+		return Coroutine::delayMs(LAST_SENT_COUNTER_PERIOD_MS);
+	})
 
-AssetStore::AssetStore() : counterUpdateRoutine([this]() {
-	incrementRecordCounters();
-	return Coroutine::delayMs(COUNTER_UPDATE_PERIOD_MS);
-}) {
-
-}
+{}
 
 cs_ret_code_t AssetStore::init() {
 	resetReports();
@@ -30,7 +34,7 @@ cs_ret_code_t AssetStore::init() {
 }
 
 void AssetStore::handleEvent(event_t& evt) {
-	if (counterUpdateRoutine.handleEvent(evt)) {
+	if (updateLastReceivedCounterRoutine.handleEvent(evt)) {
 		return;
 	}
 
@@ -94,11 +98,16 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 }
 
 
-void AssetStore::incrementRecordCounters() {
+void AssetStore::incrementLastReceivedCounters() {
 	for (auto& rec: _assetRecords) {
 		if (rec.lastReceivedCounter < 0xff) {
 			rec.lastReceivedCounter++;
 		}
+	}
+}
+
+void AssetStore::incrementLastSentCounters() {
+	for (auto& rec: _assetRecords) {
 		if (rec.lastSentCounter < 0xff) {
 			rec.lastSentCounter++;
 		}
