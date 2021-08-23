@@ -34,7 +34,8 @@ cs_ret_code_t AssetStore::init() {
 }
 
 void AssetStore::handleEvent(event_t& evt) {
-	if (updateLastReceivedCounterRoutine.handleEvent(evt)) {
+	if (updateLastReceivedCounterRoutine.handleEvent(evt) || updateLastSentCounterRoutine.handleEvent(evt)) {
+		// short circuit: coroutines return true when they handle a EVT_TICK event.
 		return;
 	}
 
@@ -60,7 +61,7 @@ void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_
 
 void AssetStore::resetReports() {
 	for (auto& rec : _assetRecords){
-		rec = asset_record_t::empty();
+		rec = asset_record_t::clear();
 	}
 }
 
@@ -68,7 +69,7 @@ asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 	// linear search
 	for (uint8_t i = 0; i < _assetRecordCount; i++) {
 		auto& rec = _assetRecords[i];
-		if (rec.assetId == id) {
+		if (rec.isValid() && rec.assetId == id) {
 			return &rec;
 		}
 	}
@@ -100,21 +101,30 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 
 void AssetStore::incrementLastReceivedCounters() {
 	for (auto& rec: _assetRecords) {
-		// TODO: only increment if record is non-empty!
+		if(!rec.isValid()) {
+			// skip invalid records
+			continue;
+		}
 
 		if (rec.lastReceivedCounter < 0xff) {
 			rec.lastReceivedCounter++;
 		}
 
 		if(rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD) {
-			LOGAssetStoreDebug("Asset timed out. %x:%x:%x", rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
-			rec = asset_record_t::empty();
+			LOGAssetStoreDebug("Asset timed out. %x:%x:%x",
+					rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
+			rec = asset_record_t::clear();
 		}
 	}
 }
 
 void AssetStore::incrementLastSentCounters() {
 	for (auto& rec: _assetRecords) {
+		if(!rec.isValid()) {
+			// skip invalid records
+			continue;
+		}
+
 		if (rec.lastSentCounter < 0xff) {
 			rec.lastSentCounter++;
 		}

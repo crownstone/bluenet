@@ -53,4 +53,22 @@ struct __attribute__((__packed__)) asset_record_t {
 
 		return rec;
 	}
+
+	/**
+	 * A clear record is completely blank. They are invalid.
+	 */
+	static constexpr asset_record_t clear() {
+		return asset_record_t{};
+	}
+
+	/**
+	 * Default constructed asset records are filled with zeroes.
+	 * A record in this state is 'invalid'.
+	 *
+	 * Note that 'empty' records are valid.
+	 */
+	bool isValid() {
+		asset_record_t cleared = clear();
+		return memcmp(this, &cleared, sizeof(*this)) != 0;
+	}
 };
