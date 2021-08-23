@@ -62,21 +62,36 @@ private:
 	 */
 	short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
 
+
 	// --------- Processing of accepted Assest ---------------
 
 	/**
-	 * bitmask of filters per type.
+	 * bitmask of filters per type to describe the acceptance of an asset.
 	 */
 	struct filterBitmasks {
 		uint8_t _forwardSid;
 		uint8_t _forwardMac;
 		uint8_t _nearestSid;
 
-		uint8_t combined() { return _forwardMac | _nearestSid | _forwardSid; }
-		uint8_t sid() { return _forwardSid | _nearestSid; }
+		uint8_t combined() const { return _forwardMac | _nearestSid | _forwardSid; }
+		uint8_t sid() const { return _forwardSid | _nearestSid; }
 
-		uint8_t primaryFilter() { return lowestBitSet(combined()); }
-		uint8_t primarySidFilter() { return lowestBitSet(sid()); }
+		/**
+		 * returns the lowest filter id that accepted the asset.
+		 *
+		 * This filter is used to generate the short asset id when
+		 * no primarySidFilter is available.
+		 */
+		uint8_t const primaryFilter() const { return lowestBitSet(combined()); }
+
+		/**
+		 * returns the lowest filter id that accepted the asset and was
+		 * configured specifically to output a short asset id.
+		 * E.g. AssetFilterOutputFormat::ShortAssetIdOverMesh.
+		 *
+		 * This filter is used to generate the short asset id when available.
+		 */
+		uint8_t primarySidFilter() const { return lowestBitSet(sid()); }
 	};
 
 	/**
@@ -84,6 +99,15 @@ private:
 	 * Return a set of bitmasks containing the result.
 	 */
 	filterBitmasks getAcceptedBitmasks(const scanned_device_t& device);
+
+	/**
+	 * Returns the filter object that is to be used to generate the asset id.
+	 * This will be the primary sid filter, when it exists, and the primary filter
+	 * otherwise.
+	 *
+	 * Returns an AssetFilter with nullptr as _data when none of the masks bits are set.
+	 */
+	AssetFilter filterToUseForShortAssetId(const filterBitmasks& masks);
 
 	/**
 	 * Returns true if there is a filter that rejects this device.
@@ -104,9 +128,6 @@ private:
 	 * Returns the filters outputType.outputFormat.
 	 */
 	AssetFilterOutputFormat processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
-
-	void dispatchAcceptedAssetEvent(AssetFilter filter, const scanned_device_t& asset);
-
 
 public:
 	/**
