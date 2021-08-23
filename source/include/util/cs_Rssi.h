@@ -8,8 +8,8 @@
 
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
-inline compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
-	compressed_rssi_data_t compressed;
+inline constexpr compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
+	compressed_rssi_data_t compressed = {};
 	switch (channel) {
 		case 37: compressed.channel = 1; break;
 		case 38: compressed.channel = 2; break;

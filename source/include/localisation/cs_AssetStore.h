@@ -6,27 +6,46 @@
  */
 #pragma once
 
-#include <events/cs_EventListener.h>
-#include <localisation/cs_AssetRecord.h>
 #include <common/cs_Component.h>
+#include <events/cs_EventListener.h>
+
+#include <localisation/cs_AssetRecord.h>
+#include <util/cs_Coroutine.h>
 
 class AssetStore : public EventListener, public Component {
 private:
-	static constexpr auto MAX_REPORTS = 10u;
+	static constexpr auto MAX_REPORTS = 20u;
+	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
+	static constexpr auto LAST_SENT_COUNTER_PERIOD_MS = 50;
+
+	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 250;
+
 
 public:
+	AssetStore();
 	cs_ret_code_t init() override;
 
 	void handleEvent(event_t& evt) override;
 
-	asset_record_t* getRecord(short_asset_id_t sid);
+	/**
+	 * Get or create a record for the given assetId.
+	 * Then update rssi values according to the incoming scan and
+	 * revert the lastReceivedCounter to 0.
+	 */
+	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId);
 
 	/**
-	 * returns a pointer to the found record, possibly empty.
-	 * returns nullptr if not found and creating a new one was
-	 * impossible.
+	 * returns a pointer of record if found,
+	 * else tries to create a new blank record and return a pointer to that,
+	 * else returns nullptr.
 	 */
-	asset_record_t* getOrCreateRecord(short_asset_id_t& id);
+	asset_record_t* getOrCreateRecord(const short_asset_id_t& id);
+
+	/**
+	 * returns a pointer of record if found,
+	 * else returns nullptr.
+	 */
+	asset_record_t* getRecord(const short_asset_id_t& id);
 
 
 private:
@@ -55,7 +74,13 @@ private:
 	 */
 	void resetReports();
 
+	/**
+	 * Adds 1 to the update/sent counters of a record, until 0xff is reached.
+	 */
+	void incrementLastReceivedCounters();
+	void incrementLastSentCounters();
 
+	Coroutine updateLastReceivedCounterRoutine;
+	Coroutine updateLastSentCounterRoutine;
 
-	void logRecord(asset_record_t& record);
 };

@@ -10,17 +10,35 @@
 #include <logging/cs_Logger.h>
 #include <util/cs_Rssi.h>
 
-#define LogAssetStoreWarn LOGw
-#define LogAssetStoreDebug LOGd
-#define LogAssetStoreVerbose LOGv
+#define LOGAssetStoreWarn LOGw
+#define LOGAssetStoreDebug LOGd
+#define LOGAssetStoreVerbose LOGv
 
+AssetStore::AssetStore()
+	: updateLastReceivedCounterRoutine([this]() {
+		incrementLastReceivedCounters();
+		return Coroutine::delayMs(LAST_RECEIVED_COUNTER_PERIOD_MS);
+	})
+	, updateLastSentCounterRoutine([this]() {
+		incrementLastSentCounters();
+		return Coroutine::delayMs(LAST_SENT_COUNTER_PERIOD_MS);
+	})
+
+{}
 
 cs_ret_code_t AssetStore::init() {
 	resetReports();
+	listen();
+
 	return ERR_SUCCESS;
 }
 
 void AssetStore::handleEvent(event_t& evt) {
+	if (updateLastReceivedCounterRoutine.handleEvent(evt) || updateLastSentCounterRoutine.handleEvent(evt)) {
+		// short circuit: coroutines return true when they handle a EVT_TICK event.
+		return;
+	}
+
 	switch (evt.type) {
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
 			resetReports();
@@ -32,56 +50,83 @@ void AssetStore::handleEvent(event_t& evt) {
 	}
 }
 
+void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+	if(auto rec = getOrCreateRecord(assetId)) {
+		rec->myRssi = compressRssi(asset.rssi,asset.channel);
+		rec->lastReceivedCounter = 0;
+	}
+
+	// asset store is full. Warning logged in the getOrCreate method.
+}
+
 void AssetStore::resetReports() {
 	for (auto& rec : _assetRecords){
-		rec = {};
-
-		// set rssi's unreasonably low so that they will be overwritten on the first observation
-		rec.personalRssi = compressRssi(-127, 0);
-		rec.winningRssi = compressRssi(-127, 0);
+		rec = asset_record_t::clear();
 	}
 }
 
-asset_record_t* AssetStore::getOrCreateRecord(short_asset_id_t& id) {
+asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 	// linear search
 	for (uint8_t i = 0; i < _assetRecordCount; i++) {
 		auto& rec = _assetRecords[i];
-		if (rec.assetId == id) {
+		if (rec.isValid() && rec.assetId == id) {
 			return &rec;
 		}
+	}
+	return nullptr;
+}
+
+asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
+	if(auto rec = getRecord(id)) {
+		return rec;
 	}
 
 	// not found. create new report if there is space available
 	if (_assetRecordCount < MAX_REPORTS) {
-		LogAssetStoreVerbose("creating new report record");
+		LOGAssetStoreVerbose("creating new report record");
 		auto& rec = _assetRecords[_assetRecordCount];
+		rec = asset_record_t::empty();
 		rec.assetId = id;
-		rec.winningStoneId = 0;
-
-		// set rssi's unreasonably low so that they will be overwritten on the first observation
-		rec.personalRssi = compressRssi(-127, 0);
-		rec.winningRssi = compressRssi(-127, 0);
 
 		_assetRecordCount += 1;
 		return &rec;
 	} else {
-		LogAssetStoreVerbose("can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
+		LOGAssetStoreVerbose("can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
 							id.data[0], id.data[1], id.data[2] );
 	}
 
 	return nullptr;
 }
 
-void AssetStore::logRecord(asset_record_t& record) {
-	LogAssetStoreVerbose(
-			"ID(%x %x %x) winner(#%u, %d dB ch%u [%u]) me(%d dB ch %u)",
-			record.assetId.data[0],
-			record.assetId.data[1],
-			record.assetId.data[2],
-			record.winningStoneId,
-			getRssi(record.winningRssi),
-			getChannel(record.winningRssi),
-			record.winningRssi,
-			getRssi(record.personalRssi),
-			getChannel(record.personalRssi));
+
+void AssetStore::incrementLastReceivedCounters() {
+	for (auto& rec: _assetRecords) {
+		if(!rec.isValid()) {
+			// skip invalid records
+			continue;
+		}
+
+		if (rec.lastReceivedCounter < 0xff) {
+			rec.lastReceivedCounter++;
+		}
+
+		if(rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD) {
+			LOGAssetStoreDebug("Asset timed out. %x:%x:%x",
+					rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
+			rec = asset_record_t::clear();
+		}
+	}
+}
+
+void AssetStore::incrementLastSentCounters() {
+	for (auto& rec: _assetRecords) {
+		if(!rec.isValid()) {
+			// skip invalid records
+			continue;
+		}
+
+		if (rec.lastSentCounter < 0xff) {
+			rec.lastSentCounter++;
+		}
+	}
 }

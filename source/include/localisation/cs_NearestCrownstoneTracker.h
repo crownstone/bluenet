@@ -33,6 +33,8 @@
  * crownstone will be an element of this subset.
  */
 class NearestCrownstoneTracker : public EventListener, public Component {
+	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 180;
+
 public:
 	/**
 	 * Caches CONFIG_CROWNSTONE_ID and AssetStore.
@@ -40,6 +42,7 @@ public:
 	 */
 	cs_ret_code_t init() override;
 
+	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
 
 private:
 	// cached objects for efficiency
@@ -129,16 +132,18 @@ private:
 	// ------------- Utils -------------
 	// ---------------------------------
 
-
-	/**
-	 * saves the rssi as personal
-	 */
-	void savePersonalReport(asset_record_t& rec, compressed_rssi_data_t personalRssi);
-
 	/**
 	 * saves the report in the _winning list.
 	 */
 	void saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
+
+	/**
+	 * getRecord for assetId from assetStore and return it.
+	 * return nullptr if rec->lastReceivedCounter is above threshold.
+	 *
+	 * `this` must be init()-ialized.
+	 */
+	asset_record_t* getRecordFiltered(const short_asset_id_t& assetId);
 
 public:
 	/**

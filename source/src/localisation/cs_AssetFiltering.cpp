@@ -44,28 +44,25 @@ cs_ret_code_t AssetFiltering::init() {
 	auto safe_allocate = []<class T>(T*& target) {
 		if (target == nullptr) {
 			target = new T();					// allocates object of desired type,
-			if (target == nullptr) {			// double checking for success.
-				return ERR_NO_SPACE;
-			}
 		}
-		return ERR_SUCCESS;
+		return target;
 	};
 
-	if (safe_allocate(_filterStore) != ERR_SUCCESS) {
+	if (safe_allocate(_filterStore) == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (safe_allocate(_filterSyncer) != ERR_SUCCESS) {
+	if (safe_allocate(_filterSyncer) == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (safe_allocate(_assetForwarder) != ERR_SUCCESS) {
+	if (safe_allocate(_assetForwarder) == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (safe_allocate(_assetStore) != ERR_SUCCESS) {
+	if (safe_allocate(_assetStore) == nullptr) {
 		return ERR_NO_SPACE;
 	}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	if (safe_allocate(_nearestCrownstoneTracker) != ERR_SUCCESS) {
+	if (safe_allocate(_nearestCrownstoneTracker) == nullptr) {
 		return ERR_NO_SPACE;
 	}
 
@@ -76,9 +73,8 @@ cs_ret_code_t AssetFiltering::init() {
 
 	// Init components
 	if (cs_ret_code_t retCode = initChildren() != ERR_SUCCESS) {
-		return retCode;
-	} else {
 		LOGAssetFilteringWarn("init failed with code: %x", retCode);
+		return retCode;
 	}
 
 	listen();
@@ -134,24 +130,21 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		AssetFilter primarySidFilter = _filterStore->getFilter(masks.primarySidFilter());
 		short_asset_id_t shortAssetId = filterOutputResultShortAssetId(primarySidFilter, device);
 
+		if(_assetStore != nullptr) {
+			_assetStore->handleAcceptedAsset(device, shortAssetId);
+		}
+
 		// forward sid to mesh
 		if (masks._forwardSid && _assetForwarder != nullptr) {
-			_assetForwarder->handleAcceptedAsset(device, shortAssetId);
+			_assetForwarder->handleAcceptedAsset(device, shortAssetId); // TODO: change to 'record Updated'?
 		}
 
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
-		if (masks._nearestSid) {
-			LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM");
-
-			AssetWithSidAcceptedEvent evtData(
-					primarySidFilter,
-					device,
-					shortAssetId,
-					masks.combined());
-
-			event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED_FOR_NEAREST_ALGORITHM, &evtData, sizeof(evtData));
-			assetEvent.dispatch();
+		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) {
+			_nearestCrownstoneTracker->handleAcceptedAsset(device, shortAssetId); // TODO: change to 'record Updated'?
 		}
+#endif
 	}
 
 	// Dispatch other events
