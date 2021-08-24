@@ -120,8 +120,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 		return;
 	}
 
-	LOGAssetFilteringDebug(
-			"bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
+	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
 			masks._forwardSid,
 			masks._forwardMac,
 			masks._nearestSid);
@@ -145,32 +144,39 @@ void AssetFiltering::handleScannedDevice(filterBitmasks masks, const scanned_dev
 	bool throttle = assetRecord != nullptr && assetRecord->isThrottled();
 
 	if (!throttle) {
-		uint8_t throttlingCounterBumpMs = 0;
+		uint16_t throttlingCounterBumpMs = 0;
 
 		// forward sid to mesh
 		if (masks._forwardSid && _assetForwarder != nullptr) {
 			throttlingCounterBumpMs += _assetForwarder->handleAcceptedAsset(asset, shortAssetId);
+			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 
 		// forward mac to mesh
 		if (masks._forwardMac && _assetForwarder != nullptr) {
 			throttlingCounterBumpMs += _assetForwarder->handleAcceptedAsset(asset);
+			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
 		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) {
 			throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId);
+			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 #endif
 
 		// update the throttling counter
 		if(_assetStore != nullptr && assetRecord != nullptr) {
+			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 			_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 		}
 	}
 	else {
 		LOGAssetFilteringInfo("throttled incoming asset advertisement");
+		if (assetRecord != nullptr) {
+			LOGAssetFilteringDebug("counter: %u", assetRecord->throttlingCountdownTicks);
+		}
 	}
 
 	// send general asset accepted event to the firmware

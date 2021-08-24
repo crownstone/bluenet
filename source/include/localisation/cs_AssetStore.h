@@ -82,10 +82,14 @@ private:
 	void resetReports();
 
 	/**
-	 * Adds 1 to the update/sent counters of a record, until 0xff is reached.
+	 * Adds 1 to the update/sent counters of all valid records, until 0xff is reached.
 	 */
 	void incrementLastReceivedCounters();
-	void incrementLastSentCounters();
+
+	/**
+	 * Decrements throttlingCountdownTicks by 1of all valid records, until zero is reached.
+	 */
+	void decrementThrottlingCounters();
 
 	Coroutine updateLastReceivedCounterRoutine;
 	Coroutine updateLastSentCounterRoutine;

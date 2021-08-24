@@ -20,7 +20,7 @@ AssetStore::AssetStore()
 		return Coroutine::delayMs(LAST_RECEIVED_COUNTER_PERIOD_MS);
 	})
 	, updateLastSentCounterRoutine([this]() {
-		incrementLastSentCounters();
+		decrementThrottlingCounters();
 		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS);
 	})
 
@@ -34,7 +34,7 @@ cs_ret_code_t AssetStore::init() {
 }
 
 void AssetStore::handleEvent(event_t& evt) {
-	if (updateLastReceivedCounterRoutine.handleEvent(evt) || updateLastSentCounterRoutine.handleEvent(evt)) {
+	if (updateLastReceivedCounterRoutine.handleEvent(evt) && updateLastSentCounterRoutine.handleEvent(evt)) {
 		// short circuit: coroutines return true when they handle a EVT_TICK event.
 		return;
 	}
@@ -102,6 +102,8 @@ void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextTh
 	uint16_t ticks_rounded_up = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1)/ THROTTLE_COUNTER_PERIOD_MS;
 	uint16_t total_ticks = record.throttlingCountdownTicks + ticks_rounded_up;
 
+	LOGAssetStoreDebug("adding throttle ticks: %u for %u ms", total_ticks, timeToNextThrottleOpenMs);
+
 	if(total_ticks > 0xff) {
 		record.throttlingCountdownTicks = 0xff;
 	} else {
@@ -129,15 +131,15 @@ void AssetStore::incrementLastReceivedCounters() {
 	}
 }
 
-void AssetStore::incrementLastSentCounters() {
+void AssetStore::decrementThrottlingCounters() {
 	for (auto& rec: _assetRecords) {
 		if(!rec.isValid()) {
 			// skip invalid records
 			continue;
 		}
 
-		if (rec.throttlingCountdownTicks < 0xff) {
-			rec.throttlingCountdownTicks++;
+		if (rec.throttlingCountdownTicks > 0) {
+			rec.throttlingCountdownTicks--;
 		}
 	}
 }
