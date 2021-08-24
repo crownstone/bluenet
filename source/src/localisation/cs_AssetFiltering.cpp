@@ -10,7 +10,7 @@
 #include <util/cs_BitUtils.h>
 
 #define LOGAssetFilteringWarn LOGw
-#define LOGAssetFilteringInfo LOGi
+#define LOGAssetFilteringInfo LOGvv
 #define LOGAssetFilteringDebug LOGvv
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE

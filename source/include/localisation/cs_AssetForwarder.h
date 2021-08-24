@@ -29,7 +29,6 @@ public:
 	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_RSSI_SID to the mesh
 	 *
 	 * returns desired minimal time to next advertisement.
-	 * // TODO: change to 'record Updated'?
 	 */
 	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid);
 

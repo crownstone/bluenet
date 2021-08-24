@@ -43,7 +43,6 @@ public:
 	 */
 	cs_ret_code_t init() override;
 
-	// TODO: change to 'record Updated'?
 	/**
 	 * returns desired minimal time to next advertisement.
 	 */

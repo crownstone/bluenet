@@ -11,7 +11,7 @@
 #include <util/cs_Rssi.h>
 
 #define LOGAssetStoreWarn LOGw
-#define LOGAssetStoreDebug LOGd
+#define LOGAssetStoreDebug LOGvv
 #define LOGAssetStoreVerbose LOGv
 
 AssetStore::AssetStore()
