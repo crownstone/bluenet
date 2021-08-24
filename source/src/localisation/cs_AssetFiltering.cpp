@@ -120,54 +120,56 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		return;
 	}
 
-	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
+	LOGAssetFilteringDebug(
+			"bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
 			masks._forwardSid,
 			masks._forwardMac,
 			masks._nearestSid);
 
-
 	// construct short asset id
 	AssetFilter sidFilter         = filterToUseForShortAssetId(masks);
 	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, device);
-	uint8_t throttlingPenalty     = 0;
-	bool throttle                 = false;
 
 	if (_assetStore != nullptr) {
-		// TODO: throttle =
 		_assetStore->handleAcceptedAsset(device, shortAssetId);
 	}
 
+	// throttle if the record currently has a non-zero countdown.
+	asset_record_t* rec = _assetStore->getRecord(shortAssetId);
+	bool throttle       = rec != nullptr && rec->throttlingCountdown != 0;
+
 	if (!throttle) {
+		uint8_t throttlingCounterBump = 0;
 
 		// forward sid to mesh
 		if (masks._forwardSid && _assetForwarder != nullptr) {
-			// TODO: throttlingPenalty +=
-			_assetForwarder->handleAcceptedAsset(device, shortAssetId);  // TODO: change to 'record Updated'?
+			throttlingCounterBump += _assetForwarder->handleAcceptedAsset(device, shortAssetId);
 		}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
 		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) {
-			// TODO: throttlingPenalty +=
-			_nearestCrownstoneTracker->handleAcceptedAsset(device, shortAssetId);  // TODO: change to 'record Updated'?
+			throttlingCounterBump += _nearestCrownstoneTracker->handleAcceptedAsset(device, shortAssetId);
 		}
 #endif
 
 		// Dispatch other events
 		if (masks._forwardMac && _assetForwarder != nullptr) {
-			// TODO: throttlingPenalty +=
-			_assetForwarder->handleAcceptedAsset(device);
+			throttlingCounterBump += _assetForwarder->handleAcceptedAsset(device);
 		}
 
-		// TODO: _assetStore.updateThrottlingCountdown(throttlingPenalty)
+		// update the throttling counter
+		rec->throttlingCountdown += throttlingCounterBump;
+	}
+	else {
+		LOGAssetFilteringInfo("throttled incoming asset advertisement");
 	}
 
 	// send general asset accepted event to the firmware
 	if (masks.combined()) {
-		// TODO: anything handling this event is unthrottled by design:
+		// Note: anything handling this event is unthrottled by design:
 		// local firmware can keep up to date asap without penalty.
 		LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED");
-
 
 		AssetAcceptedEvent evtData(_filterStore->getFilter(masks.primaryFilter()), device, masks.combined());
 
@@ -175,7 +177,6 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		assetEvent.dispatch();
 	}
 }
-
 
 AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned_device_t& device) {
 	filterBitmasks masks = {};

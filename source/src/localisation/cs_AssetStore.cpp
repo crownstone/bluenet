@@ -125,8 +125,8 @@ void AssetStore::incrementLastSentCounters() {
 			continue;
 		}
 
-		if (rec.lastSentCounter < 0xff) {
-			rec.lastSentCounter++;
+		if (rec.throttlingCountdown < 0xff) {
+			rec.throttlingCountdown++;
 		}
 	}
 }

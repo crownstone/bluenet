@@ -42,6 +42,7 @@ public:
 	 */
 	cs_ret_code_t init() override;
 
+	// TODO: change to 'record Updated'?
 	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
 
 private:

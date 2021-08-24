@@ -35,7 +35,7 @@ struct __attribute__((__packed__)) asset_record_t {
 #endif
 
 	uint8_t lastReceivedCounter;  // used for time-outs
-	uint8_t lastSentCounter;      // used for throttling
+	uint8_t throttlingCountdown;      // used for throttling
 
 	// ------------- utility functions -------------
 
