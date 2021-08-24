@@ -13,15 +13,12 @@
 #include <util/cs_Coroutine.h>
 
 class AssetStore : public EventListener, public Component {
-private:
+public:
 	static constexpr auto MAX_REPORTS = 20u;
 	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
 	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 50;
+	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD_S = 250;
 
-	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 250;
-
-
-public:
 	AssetStore();
 	cs_ret_code_t init() override;
 

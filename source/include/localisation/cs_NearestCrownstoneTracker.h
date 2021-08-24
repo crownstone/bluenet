@@ -36,6 +36,16 @@ class NearestCrownstoneTracker : public EventListener, public Component {
 	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 180;
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 100;
 
+	static constexpr uint8_t RSSI_FALL_OFF_RATE_DB_PER_S = 1;
+	static constexpr int8_t RSSI_CUT_OFF_THRESHOLD = -90;
+
+	enum class FilterStrategy {
+		TIME_OUT,
+		RSSI_FALL_OFF
+	};
+
+	static constexpr auto FILTER_STRATEGY = FilterStrategy::TIME_OUT;
+
 public:
 	/**
 	 * Caches CONFIG_CROWNSTONE_ID and AssetStore.

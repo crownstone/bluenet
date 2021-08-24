@@ -123,7 +123,7 @@ void AssetStore::incrementLastReceivedCounters() {
 			rec.lastReceivedCounter++;
 		}
 
-		if(rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD) {
+		if(rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
 			LOGAssetStoreDebug("Asset timed out. %x:%x:%x",
 					rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
 			rec = asset_record_t::clear();

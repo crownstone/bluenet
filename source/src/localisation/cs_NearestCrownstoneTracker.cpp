@@ -250,9 +250,21 @@ asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id
 	if( record == nullptr ) {
 		return nullptr;
 	}
-	if(record->lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD) {
-		LOGd("ignored old record for nearest crownstone algorithm.");
-		return nullptr;
+
+	if constexpr (FILTER_STRATEGY == FilterStrategy::TIME_OUT) {
+		if (record->lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD) {
+			LOGd("ignored old record for nearest crownstone algorithm.");
+			return nullptr;
+		}
+	}
+	else if constexpr (FILTER_STRATEGY == FilterStrategy::RSSI_FALL_OFF) {
+		auto correctedRssi = getRssi(record->myRssi)
+							 - (record->lastReceivedCounter * RSSI_FALL_OFF_RATE_DB_PER_S * 1000)
+									   / AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS;
+
+		if (correctedRssi < RSSI_CUT_OFF_THRESHOLD) {
+			return nullptr;
+		}
 	}
 
 	return record;
