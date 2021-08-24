@@ -13,20 +13,25 @@
 #include <localisation/cs_AssetHandler.h>
 
 class AssetForwarder : public EventListener, public Component {
+	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 1000;
+
 public:
 	cs_ret_code_t init();
 
 	/**
 	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC to the mesh
+	 *
+	 * returns desired minimal time to next advertisement.
 	 */
-	void handleAcceptedAsset(const scanned_device_t& asset);
+	uint16_t handleAcceptedAsset(const scanned_device_t& asset);
 
 	/**
 	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_RSSI_SID to the mesh
 	 *
+	 * returns desired minimal time to next advertisement.
 	 * // TODO: change to 'record Updated'?
 	 */
-	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid);
+	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid);
 
 	virtual void handleEvent(event_t & event);
 

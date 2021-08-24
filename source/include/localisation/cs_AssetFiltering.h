@@ -109,6 +109,8 @@ private:
 	 */
 	AssetFilter filterToUseForShortAssetId(const filterBitmasks& masks);
 
+	void handleScannedDevice(filterBitmasks masks, const scanned_device_t& asset);
+
 	/**
 	 * Returns true if there is a filter that rejects this device.
 	 * (Does not check if the filterstore is ready.)

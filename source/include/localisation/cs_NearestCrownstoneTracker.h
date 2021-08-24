@@ -34,6 +34,7 @@
  */
 class NearestCrownstoneTracker : public EventListener, public Component {
 	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 180;
+	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 100;
 
 public:
 	/**
@@ -43,7 +44,10 @@ public:
 	cs_ret_code_t init() override;
 
 	// TODO: change to 'record Updated'?
-	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
+	/**
+	 * returns desired minimal time to next advertisement.
+	 */
+	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
 
 private:
 	// cached objects for efficiency

@@ -21,7 +21,7 @@ AssetStore::AssetStore()
 	})
 	, updateLastSentCounterRoutine([this]() {
 		incrementLastSentCounters();
-		return Coroutine::delayMs(LAST_SENT_COUNTER_PERIOD_MS);
+		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS);
 	})
 
 {}
@@ -98,6 +98,17 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	return nullptr;
 }
 
+void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
+	uint16_t ticks_rounded_up = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1)/ THROTTLE_COUNTER_PERIOD_MS;
+	uint16_t total_ticks = record.throttlingCountdownTicks + ticks_rounded_up;
+
+	if(total_ticks > 0xff) {
+		record.throttlingCountdownTicks = 0xff;
+	} else {
+		record.throttlingCountdownTicks = total_ticks;
+	}
+}
+
 
 void AssetStore::incrementLastReceivedCounters() {
 	for (auto& rec: _assetRecords) {
@@ -125,8 +136,8 @@ void AssetStore::incrementLastSentCounters() {
 			continue;
 		}
 
-		if (rec.throttlingCountdown < 0xff) {
-			rec.throttlingCountdown++;
+		if (rec.throttlingCountdownTicks < 0xff) {
+			rec.throttlingCountdownTicks++;
 		}
 	}
 }

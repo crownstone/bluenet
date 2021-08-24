@@ -16,7 +16,7 @@ class AssetStore : public EventListener, public Component {
 private:
 	static constexpr auto MAX_REPORTS = 20u;
 	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
-	static constexpr auto LAST_SENT_COUNTER_PERIOD_MS = 50;
+	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 50;
 
 	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 250;
 
@@ -46,6 +46,13 @@ public:
 	 * else returns nullptr.
 	 */
 	asset_record_t* getRecord(const short_asset_id_t& id);
+
+	/**
+	 * Adds a value to the records' throttlingCountdownTicks.
+	 * This will ensure that the record.isThrottled() will be true
+	 * for (at least) timeToNextThrottleOpenMs.
+	 */
+	void addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs);
 
 
 private:

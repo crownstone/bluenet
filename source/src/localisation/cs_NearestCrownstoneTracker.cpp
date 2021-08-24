@@ -71,11 +71,12 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 	}
 }
 
-void NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id) {
+uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id) {
 	report_asset_id_t rep = {};
 	rep.id = id;
 	rep.compressedRssi = compressRssi(asset.rssi,asset.channel);
 	onReceiveAssetAdvertisement(rep);
+	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
 

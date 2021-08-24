@@ -104,16 +104,16 @@ void AssetFiltering::handleEvent(event_t& evt) {
 	}
 }
 
-void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
+void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 	if (!_filterStore->isReady()) {
 		return;
 	}
 
-	if (isAssetRejected(device)) {
+	if (isAssetRejected(asset)) {
 		return;
 	}
 
-	filterBitmasks masks = getAcceptedBitmasks(device);
+	filterBitmasks masks = getAcceptedBitmasks(asset);
 
 	if (!masks.combined()) {
 		// early return when no filter accepts the advertisement.
@@ -126,40 +126,48 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 			masks._forwardMac,
 			masks._nearestSid);
 
+	handleScannedDevice(masks, asset);
+}
+
+
+void AssetFiltering::handleScannedDevice(filterBitmasks masks, const scanned_device_t& asset) {
 	// construct short asset id
 	AssetFilter sidFilter         = filterToUseForShortAssetId(masks);
-	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, device);
+	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
+	asset_record_t* assetRecord = nullptr;
 
 	if (_assetStore != nullptr) {
-		_assetStore->handleAcceptedAsset(device, shortAssetId);
+		_assetStore->handleAcceptedAsset(asset, shortAssetId);
+		assetRecord = _assetStore->getRecord(shortAssetId);
 	}
 
-	// throttle if the record currently has a non-zero countdown.
-	asset_record_t* rec = _assetStore->getRecord(shortAssetId);
-	bool throttle       = rec != nullptr && rec->throttlingCountdown != 0;
+	// throttle if the record currently exists and requires it.
+	bool throttle = assetRecord != nullptr && assetRecord->isThrottled();
 
 	if (!throttle) {
-		uint8_t throttlingCounterBump = 0;
+		uint8_t throttlingCounterBumpMs = 0;
 
 		// forward sid to mesh
 		if (masks._forwardSid && _assetForwarder != nullptr) {
-			throttlingCounterBump += _assetForwarder->handleAcceptedAsset(device, shortAssetId);
+			throttlingCounterBumpMs += _assetForwarder->handleAcceptedAsset(asset, shortAssetId);
+		}
+
+		// forward mac to mesh
+		if (masks._forwardMac && _assetForwarder != nullptr) {
+			throttlingCounterBumpMs += _assetForwarder->handleAcceptedAsset(asset);
 		}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
 		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) {
-			throttlingCounterBump += _nearestCrownstoneTracker->handleAcceptedAsset(device, shortAssetId);
+			throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId);
 		}
 #endif
 
-		// Dispatch other events
-		if (masks._forwardMac && _assetForwarder != nullptr) {
-			throttlingCounterBump += _assetForwarder->handleAcceptedAsset(device);
-		}
-
 		// update the throttling counter
-		rec->throttlingCountdown += throttlingCounterBump;
+		if(_assetStore != nullptr && assetRecord != nullptr) {
+			_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
+		}
 	}
 	else {
 		LOGAssetFilteringInfo("throttled incoming asset advertisement");
@@ -171,12 +179,13 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& device) {
 		// local firmware can keep up to date asap without penalty.
 		LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED");
 
-		AssetAcceptedEvent evtData(_filterStore->getFilter(masks.primaryFilter()), device, masks.combined());
+		AssetAcceptedEvent evtData(_filterStore->getFilter(masks.primaryFilter()), asset, masks.combined());
 
 		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
 		assetEvent.dispatch();
 	}
 }
+
 
 AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned_device_t& device) {
 	filterBitmasks masks = {};

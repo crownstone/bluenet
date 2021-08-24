@@ -35,7 +35,7 @@ struct __attribute__((__packed__)) asset_record_t {
 #endif
 
 	uint8_t lastReceivedCounter;  // used for time-outs
-	uint8_t throttlingCountdown;      // used for throttling
+	uint8_t throttlingCountdownTicks;      // used for throttling
 
 	// ------------- utility functions -------------
 
@@ -70,5 +70,9 @@ struct __attribute__((__packed__)) asset_record_t {
 	bool isValid() {
 		asset_record_t cleared = clear();
 		return memcmp(this, &cleared, sizeof(*this)) != 0;
+	}
+
+	bool isThrottled() {
+		return throttlingCountdownTicks != 0;
 	}
 };

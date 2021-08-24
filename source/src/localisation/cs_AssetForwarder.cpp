@@ -30,7 +30,7 @@ cs_ret_code_t AssetForwarder::init() {
 	return ERR_SUCCESS;
 }
 
-void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
+uint16_t AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_rssi_mac_t asset_msg;
 
@@ -50,10 +50,12 @@ void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset) {
 
 	// forward message over uart (i.e. it's also interesting if the hub dongle directly receives asset advertisement)
 	forwardAssetToUart(asset_msg, _myId);
+
+	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
 
-void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid) {
+uint16_t AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_rssi_sid_t asset_msg = {};
 
@@ -73,6 +75,8 @@ void AssetForwarder::handleAcceptedAsset(const scanned_device_t& asset, const sh
 
 	// forward message over uart (i.e. it's also interesting if the hub dongle directly receives asset advertisement)
 	forwardAssetToUart(asset_msg, _myId);
+
+	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
 
