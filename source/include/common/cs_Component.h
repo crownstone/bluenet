@@ -14,6 +14,7 @@
 
 #include <logging/cs_Logger.h>
 
+// REVIEW: this class seems like a lot of RAM/code overhead for its current use case.
 
 /**
  * Helper class to manage decoupling of components.

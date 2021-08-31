@@ -587,7 +587,7 @@ const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
  * Timestamps can be added on the hub.
  */
 struct __attribute__((packed)) cs_asset_rssi_data_mac_t {
-	uint8_t address[6];
+	uint8_t address[MAC_ADDRESS_LEN];
 	uint8_t stoneId;
 	int8_t rssi;
 	uint8_t channel;
@@ -611,13 +611,6 @@ struct __attribute__((packed)) cs_nearest_stone_update_t {
 	uint8_t channel;
 };
 
-/**
- * The communication about a timeout being expired with respect to a given asset_id. It hasn't been seen by any node
- * in the given mesh for a particular time period.
- */
-struct __attribute__((packed)) cs_nearest_stone_timeout_t {
-	short_asset_id_t assetId;
-};
 
 // ========================= functions =========================
 

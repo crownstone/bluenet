@@ -11,6 +11,7 @@
 #include <events/cs_EventListener.h>
 
 #include <localisation/cs_AssetHandler.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 class AssetForwarder : public EventListener, public Component {
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 1000;
@@ -23,25 +24,26 @@ public:
 	 *
 	 * returns desired minimal time to next advertisement.
 	 */
-	uint16_t handleAcceptedAsset(const scanned_device_t& asset);
+	uint16_t sendAssetMacToMesh(const scanned_device_t& asset);
 
 	/**
 	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_RSSI_SID to the mesh
 	 *
 	 * returns desired minimal time to next advertisement.
 	 */
-	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& sid);
+	uint16_t sendAssetIdToMesh(const scanned_device_t& asset, const short_asset_id_t& sid);
 
 	virtual void handleEvent(event_t & event);
 
 private:
-	stone_id_t _myId;
+	stone_id_t _myStoneId;
 
-	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t sender);
-	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg, stone_id_t sender);
-
-	cs_asset_rssi_data_mac_t constructUartMsg(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg,
-			 stone_id_t sender);
-	cs_asset_rssi_data_sid_t constructUartMsg(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg,
-				 stone_id_t sender);
+	/**
+	 * Forward an asset mesh message to UART.
+	 *
+	 * @param[in] assetMsg             The mesh message to forward.
+	 * @param[in] seenByStoneId        The stone that scanned the asset.
+	 */
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t seenByStoneId);
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg, stone_id_t seenByStoneId);
 };

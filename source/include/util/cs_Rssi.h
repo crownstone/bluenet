@@ -8,6 +8,9 @@
 
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+// REVIEW: can't we add these functions to compressed_rssi_data_t ?
+
+// REVIEW: why inline?
 inline constexpr compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channel = 0) {
 	compressed_rssi_data_t compressed = {};
 	switch (channel) {
@@ -20,8 +23,12 @@ inline constexpr compressed_rssi_data_t compressRssi(int8_t rssi, uint8_t channe
 	if (rssi < 0) {
 		rssi = -rssi;
 	}
+	else {
+		// All positive values are compressed to 0.
+		rssi = 0;
+	}
 
-	compressed.rssi_halved = rssi / 2;
+	compressed.rssiHalved = rssi / 2;
 
 	return compressed;
 }
@@ -31,11 +38,7 @@ inline uint8_t getChannel(const compressed_rssi_data_t& compressed) {
 }
 
 inline int8_t getRssi(const compressed_rssi_data_t& compressed) {
-	return -2 * compressed.rssi_halved;
-}
-
-inline uint8_t getRssiUnsigned(const compressed_rssi_data_t& compressed) {
-	return 2 * compressed.rssi_halved;
+	return -2 * compressed.rssiHalved;
 }
 
 /**
@@ -46,11 +49,11 @@ inline bool rssiIsCloser(
 		const compressed_rssi_data_t& lhs,
 		const compressed_rssi_data_t& rhs) {
 	// usually higher values are shorter distances, but abs reverses inequality.
-	return lhs.rssi_halved < rhs.rssi_halved;
+	return lhs.rssiHalved < rhs.rssiHalved;
 }
 
 inline bool rssiIsCloserEqual(
 		const compressed_rssi_data_t& lhs,
 		const compressed_rssi_data_t& rhs) {
-	return rssiIsCloser(lhs,rhs) || lhs.rssi_halved == rhs.rssi_halved;
+	return rssiIsCloser(lhs, rhs) || lhs.rssiHalved == rhs.rssiHalved;
 }

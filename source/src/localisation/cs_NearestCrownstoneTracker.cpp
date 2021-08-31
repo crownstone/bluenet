@@ -27,7 +27,7 @@
 #define LOGNearestCrownstoneTrackerInfo LOGvv
 
 cs_ret_code_t NearestCrownstoneTracker::init() {
-	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myStoneId, sizeof(_myStoneId));
 
 	_assetStore = getComponent<AssetStore>();
 	if (_assetStore == nullptr) {
@@ -82,7 +82,7 @@ uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& a
 
 void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& incomingReport) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u), report(%d dB ch.%u)",
-			_myId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
+			_myStoneId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
 	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
@@ -91,10 +91,10 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	auto& record = *recordPtr;
 
-	if (record.nearestStoneId == _myId) {
+	if (record.nearestStoneId == _myStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("we already believed we were nearest, so it's time to send an update towards the mesh");
 
-		saveWinningReport(record, incomingReport.compressedRssi, _myId);
+		saveWinningReport(record, incomingReport.compressedRssi, _myStoneId);
 
 		broadcastReport(incomingReport);
 
@@ -105,7 +105,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 		if (rssiIsCloser(incomingReport.compressedRssi, record.nearestRssi))  {
 			// we win because the incoming report is a first hand observation.
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
-			saveWinningReport(record, incomingReport.compressedRssi, _myId);
+			saveWinningReport(record, incomingReport.compressedRssi, _myStoneId);
 
 			broadcastReport(incomingReport);
 
@@ -121,9 +121,10 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 
 void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingReport, stone_id_t reporter) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i #%u)",
-			_myId, reporter, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
+			_myStoneId, reporter, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
-	if (reporter == _myId) {
+	if (reporter == _myStoneId) {
+		// REVIEW: is this possible at all?
 		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
 		return;
 	}
@@ -136,12 +137,13 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	}
 	auto& record = *recordPtr;
 
+	// REVIEW: doesn't use the RSSI with fall off.
 	if (reporter == record.nearestStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
 		if (rssiIsCloser(record.myRssi, incomingReport.compressedRssi) ) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
-			saveWinningReport(record, record.myRssi, _myId);
+			saveWinningReport(record, record.myRssi, _myStoneId);
 
 			LOGNearestCrownstoneTrackerVerbose("Broadcast my personal report to update the mesh.");
 			broadcastPersonalReport(record);
@@ -203,20 +205,9 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 			.channel = getChannel(record.nearestRssi)
 	};
 
+	// REVIEW: doesn't have to be a different message than asset id report.
 	UartHandler::getInstance().writeMsg(
 			UartOpcodeTx::UART_OPCODE_TX_NEAREST_CROWNSTONE_UPDATE,
-			reinterpret_cast<uint8_t*>(&uartMsg),
-			sizeof(uartMsg));
-}
-
-
-void NearestCrownstoneTracker::sendUartTimeout(const short_asset_id_t& assetId) {
-	auto uartMsg = cs_nearest_stone_timeout_t{
-			.assetId = assetId
-	};
-
-	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_NEAREST_CROWNSTONE_TIMEOUT,
 			reinterpret_cast<uint8_t*>(&uartMsg),
 			sizeof(uartMsg));
 }
@@ -225,12 +216,13 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 	LOGd("Nearest changed. I'm turning %s",
 			winnerIsThisCrownstone ? "on" : "off");
 
-	CS_TYPE onOff = winnerIsThisCrownstone
-			? CS_TYPE::CMD_SWITCH_ON
-			: CS_TYPE::CMD_SWITCH_OFF;
-
-	event_t event(onOff, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
-	event.dispatch();
+	// REVIEW: this code shouldn't be enabled.
+//	CS_TYPE onOff = winnerIsThisCrownstone
+//			? CS_TYPE::CMD_SWITCH_ON
+//			: CS_TYPE::CMD_SWITCH_OFF;
+//
+//	event_t event(onOff, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
+//	event.dispatch();
 }
 
 
@@ -247,10 +239,11 @@ void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed
 asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id_t& assetId) {
 	asset_record_t* record = _assetStore->getRecord(assetId);
 
-	if( record == nullptr ) {
+	if (record == nullptr) {
 		return nullptr;
 	}
 
+	// REVIEW: why is there "constexpr" here? Seems like something the compiler easily can find out by itsself.
 	if constexpr (FILTER_STRATEGY == FilterStrategy::TIME_OUT) {
 		if (record->lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD) {
 			LOGd("ignored old record for nearest crownstone algorithm.");

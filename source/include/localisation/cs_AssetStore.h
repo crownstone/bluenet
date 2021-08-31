@@ -14,7 +14,7 @@
 
 class AssetStore : public EventListener, public Component {
 public:
-	static constexpr auto MAX_REPORTS = 20u;
+	static constexpr auto MAX_RECORDS = 20u;
 	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
 	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 50;
 	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD_S = 250;
@@ -63,7 +63,7 @@ private:
 	 *  The array is 'front loaded'. entries with index < _assetRecordCount
 	 *  are valid, other entries are not.
 	 */
-	asset_record_t _assetRecords[MAX_REPORTS];
+	asset_record_t _assetRecords[MAX_RECORDS];
 
 	/**
 	 * Current number of valid records in the _assetRecords array.
@@ -76,7 +76,7 @@ private:
 	 * Sets the reporter id of the winning report to 0.
 	 * Sets the rssi value of both these reports to -127.
 	 */
-	void resetReports();
+	void resetRecords();
 
 	/**
 	 * Adds 1 to the update/sent counters of all valid records, until 0xff is reached.

@@ -60,7 +60,7 @@ public:
 
 private:
 	// cached objects for efficiency
-	stone_id_t _myId;
+	stone_id_t _myStoneId;
 	AssetStore* _assetStore;
 
 	// -------------------------------------------
@@ -128,11 +128,6 @@ private:
 	 * and the asset id.
 	 */
 	void sendUartUpdate(asset_record_t& record);
-
-	/**
-	 * Report to uart host that this report is timing out.
-	 */
-	void sendUartTimeout(const short_asset_id_t& record);
 
 	/**
 	 * Currently dispatches an event for CMD_SWITCH_[ON,OFF] depending on

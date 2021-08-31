@@ -85,7 +85,6 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_RSSI_DATA_MESSAGE =                10107, // When MeshTopologyResearch receives an rssi_data_message, it is sent to host. Payload: RssiDataMessage.
 	UART_OPCODE_TX_ASSET_RSSI_MAC_DATA =              10108, // Payload: cs_asset_rssi_mac_data_t. Info about an asset a Crownstone on the mesh has forwarded.
 	UART_OPCODE_TX_NEAREST_CROWNSTONE_UPDATE =        10109, // Payload: cs_nearest_stone_update_t. The rssi between an asset and its nearest Crownstone changed.
-	UART_OPCODE_TX_NEAREST_CROWNSTONE_TIMEOUT =       10110, // Payload: cs_nearest_stone_timeout_t. A previously tracked asset hasn't been observed in a while.
 	UART_OPCODE_TX_NEIGHBOUR_RSSI =                   10111, // Payload: mesh_topology_neighbour_rssi_t
 	UART_OPCODE_TX_ASSET_RSSI_SID_DATA =              10112, // Payload: cs_asset_rssi_sid_data_t. Info about an asset a Crownstone on the mesh has forwarded.
 

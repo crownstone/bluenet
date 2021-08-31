@@ -73,7 +73,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
 	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
 	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
-	CS_MESH_MODEL_TYPE_REPORT_ASSET_ID           = 30, // Payload: report_asset_id_t
+	CS_MESH_MODEL_TYPE_REPORT_ASSET_ID           = 30, // Payload: report_asset_id_t // REVIEW: why a different message, can just use the same as asset id forward.
 	CS_MESH_MODEL_TYPE_ASSET_RSSI_SID            = 31, // Payload: cs_mesh_model_msg_asset_rssi_sid_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
@@ -202,14 +202,11 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 
 struct __attribute__((__packed__)) compressed_rssi_data_t {
 	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssi_halved : 6; // half of the absolute value of the original rssi.
+	uint8_t rssiHalved : 6; // half of the absolute value of the original rssi.
 };
 
-/**
- * Packed version of NearestWitnessReport.
- */
 struct __attribute__((__packed__)) report_asset_mac_t {
-	uint8_t trackableDeviceMac[6];
+	uint8_t trackableDeviceMac[MAC_ADDRESS_LEN];
 	compressed_rssi_data_t rssi;
 };
 
@@ -309,6 +306,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_mac_t {
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_sid_t {
 	compressed_rssi_data_t rssiData;
-	short_asset_id_t sid;
+	short_asset_id_t assetId;
 	uint8_t reserved[3];
 };

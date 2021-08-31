@@ -21,13 +21,13 @@ AssetStore::AssetStore()
 	})
 	, updateLastSentCounterRoutine([this]() {
 		decrementThrottlingCounters();
-		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS);
+		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS); // REVIEW: This doesn't work: 50 / 100 = 0.
 	})
 
 {}
 
 cs_ret_code_t AssetStore::init() {
-	resetReports();
+	resetRecords();
 	listen();
 
 	return ERR_SUCCESS;
@@ -36,12 +36,13 @@ cs_ret_code_t AssetStore::init() {
 void AssetStore::handleEvent(event_t& evt) {
 	if (updateLastReceivedCounterRoutine.handleEvent(evt) && updateLastSentCounterRoutine.handleEvent(evt)) {
 		// short circuit: coroutines return true when they handle a EVT_TICK event.
+		// REVIEW: I'm not sure this makes it any faster: it adds an if statement for each event.
 		return;
 	}
 
 	switch (evt.type) {
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
-			resetReports();
+			resetRecords();
 			break;
 		}
 		default: {
@@ -51,15 +52,15 @@ void AssetStore::handleEvent(event_t& evt) {
 }
 
 void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
-	if(auto rec = getOrCreateRecord(assetId)) {
-		rec->myRssi = compressRssi(asset.rssi,asset.channel);
+	if (auto rec = getOrCreateRecord(assetId)) {
+		rec->myRssi = compressRssi(asset.rssi, asset.channel);
 		rec->lastReceivedCounter = 0;
 	}
 
 	// asset store is full. Warning logged in the getOrCreate method.
 }
 
-void AssetStore::resetReports() {
+void AssetStore::resetRecords() {
 	for (auto& rec : _assetRecords){
 		rec = asset_record_t::clear();
 	}
@@ -77,12 +78,14 @@ asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 }
 
 asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
-	if(auto rec = getRecord(id)) {
+	if (auto rec = getRecord(id)) {
 		return rec;
 	}
 
+	// REVIEW: not using empty spots.
+
 	// not found. create new report if there is space available
-	if (_assetRecordCount < MAX_REPORTS) {
+	if (_assetRecordCount < MAX_RECORDS) {
 		LOGAssetStoreVerbose("creating new report record");
 		auto& rec = _assetRecords[_assetRecordCount];
 		rec = asset_record_t::empty();
@@ -91,6 +94,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 		_assetRecordCount += 1;
 		return &rec;
 	} else {
+		// REVIEW: overwrite oldest record instead?
 		LOGAssetStoreVerbose("can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
 							id.data[0], id.data[1], id.data[2] );
 	}
@@ -98,32 +102,34 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	return nullptr;
 }
 
+// REVIEW: why add instead of set?
 void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
-	uint16_t ticks_rounded_up = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1)/ THROTTLE_COUNTER_PERIOD_MS;
-	uint16_t total_ticks = record.throttlingCountdownTicks + ticks_rounded_up;
+	// REVIEW: this isn't rounded up, it gives 1 tick for 1 ms.
+	uint16_t ticksRoundedUp = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1) / THROTTLE_COUNTER_PERIOD_MS;
+	uint16_t ticksTotal = record.throttlingCountdownTicks + ticksRoundedUp;
 
-	LOGAssetStoreDebug("adding throttle ticks: %u for %u ms", total_ticks, timeToNextThrottleOpenMs);
+	LOGAssetStoreDebug("adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
-	if(total_ticks > 0xff) {
-		record.throttlingCountdownTicks = 0xff;
+	if (ticksTotal > 0xFF) {
+		record.throttlingCountdownTicks = 0xFF;
 	} else {
-		record.throttlingCountdownTicks = total_ticks;
+		record.throttlingCountdownTicks = ticksTotal;
 	}
 }
 
 
 void AssetStore::incrementLastReceivedCounters() {
 	for (auto& rec: _assetRecords) {
-		if(!rec.isValid()) {
+		if (!rec.isValid()) {
 			// skip invalid records
 			continue;
 		}
 
-		if (rec.lastReceivedCounter < 0xff) {
+		if (rec.lastReceivedCounter < 0xFF) {
 			rec.lastReceivedCounter++;
 		}
 
-		if(rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
+		if (rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
 			LOGAssetStoreDebug("Asset timed out. %x:%x:%x",
 					rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
 			rec = asset_record_t::clear();
@@ -133,7 +139,7 @@ void AssetStore::incrementLastReceivedCounters() {
 
 void AssetStore::decrementThrottlingCounters() {
 	for (auto& rec: _assetRecords) {
-		if(!rec.isValid()) {
+		if (!rec.isValid()) {
 			// skip invalid records
 			continue;
 		}

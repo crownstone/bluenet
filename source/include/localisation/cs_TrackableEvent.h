@@ -19,15 +19,3 @@ public:
 		: _primaryFilter(filter), _asset(asset), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
 };
 
-class AssetWithSidAcceptedEvent {
-public:
-	AssetFilter _primaryFilter;
-
-	const scanned_device_t& _asset;
-	short_asset_id_t _id;
-	uint8_t _acceptedFilterIdBitmask;
-
-	AssetWithSidAcceptedEvent(
-			AssetFilter filter, const scanned_device_t& asset, short_asset_id_t id, uint8_t acceptedFilterIdBitmask)
-		: _primaryFilter(filter), _asset(asset), _id(id), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
-};

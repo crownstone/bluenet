@@ -30,6 +30,7 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 
 
 cs_ret_code_t AssetFiltering::init() {
+	// REVIEW: make this a pre-compiler check instead of a runtime check.
 	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(uint8_t) * 8, "too many filters for bitmask");
 
 	LOGAssetFilteringInfo("init");
@@ -85,7 +86,10 @@ cs_ret_code_t AssetFiltering::init() {
 // ---------------------------- Handling events ----------------------------
 
 bool AssetFiltering::isInitialized() {
-	return _assetForwarder != nullptr && _filterSyncer != nullptr && _filterStore != nullptr;
+	return _assetStore != nullptr
+			&& _assetForwarder != nullptr
+			&& _filterSyncer != nullptr
+			&& _filterStore != nullptr;
 }
 
 void AssetFiltering::handleEvent(event_t& evt) {
@@ -135,9 +139,9 @@ void AssetFiltering::handleScannedDevice(filterBitmasks masks, const scanned_dev
 	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
 	asset_record_t* assetRecord = nullptr;
 
-	if (_assetStore != nullptr) {
-		_assetStore->handleAcceptedAsset(asset, shortAssetId);
-		assetRecord = _assetStore->getRecord(shortAssetId);
+	if (_assetStore != nullptr) { // Useless nullptr check?
+		_assetStore->handleAcceptedAsset(asset, shortAssetId); // Should return the record,
+		assetRecord = _assetStore->getRecord(shortAssetId); // because this iterates again
 	}
 
 	// throttle if the record currently exists and requires it.
@@ -147,27 +151,27 @@ void AssetFiltering::handleScannedDevice(filterBitmasks masks, const scanned_dev
 		uint16_t throttlingCounterBumpMs = 0;
 
 		// forward sid to mesh
-		if (masks._forwardSid && _assetForwarder != nullptr) {
-			throttlingCounterBumpMs += _assetForwarder->handleAcceptedAsset(asset, shortAssetId);
+		if (masks._forwardSid && _assetForwarder != nullptr) { // Useless nullptr check?
+			throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, shortAssetId);
 			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 
 		// forward mac to mesh
-		if (masks._forwardMac && _assetForwarder != nullptr) {
-			throttlingCounterBumpMs += _assetForwarder->handleAcceptedAsset(asset);
+		if (masks._forwardMac && _assetForwarder != nullptr) { // Useless nullptr check?
+			throttlingCounterBumpMs += _assetForwarder->sendAssetMacToMesh(asset);
 			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
-		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) {
+		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) { // Useless nullptr check?
 			throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId);
 			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 #endif
 
 		// update the throttling counter
-		if(_assetStore != nullptr && assetRecord != nullptr) {
+		if (_assetStore != nullptr && assetRecord != nullptr) { // Useless nullptr check?
 			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 			_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 		}
@@ -206,17 +210,17 @@ AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned
 				// update the relevant bitmask
 				switch (*filter.filterdata().metadata().outputType().outFormat()) {
 					case AssetFilterOutputFormat::MacOverMesh: {
-						masks._forwardMac |= 1 << i;
+						BLEutil::setBit(masks._forwardMac, i);
 						break;
 					}
 
 					case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
-						masks._forwardSid |= 1 << i;
+						BLEutil::setBit(masks._forwardSid, i);
 						break;
 					}
 
 					case AssetFilterOutputFormat::ShortAssetId: {
-						masks._nearestSid |= 1 << i;
+						BLEutil::setBit(masks._nearestSid, i);
 						break;
 					}
 				}
