@@ -7,7 +7,6 @@
 
 #include <localisation/cs_AssetFiltering.h>
 #include <util/cs_Utils.h>
-#include <util/cs_BitUtils.h>
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGvv
@@ -59,8 +58,8 @@ cs_ret_code_t AssetFiltering::initInternal() {
 	LOGAssetFilteringInfo("init");
 
 	// Can we change this to a compile time check?
-	assert(AssetFilterStore::MAX_FILTER_IDS <= sizeof(filter_output_bitmasks_t::_forwardSid) * 8, "Too many filters for bitmask.");
-	if (AssetFilterStore::MAX_FILTER_IDS > sizeof(filter_output_bitmasks_t::_forwardSid) * 8) {
+	assert(AssetFilterStore::MAX_FILTER_IDS <= sizeof(filter_output_bitmasks_t::_forwardAssetId) * 8, "Too many filters for bitmask.");
+	if (AssetFilterStore::MAX_FILTER_IDS > sizeof(filter_output_bitmasks_t::_forwardAssetId) * 8) {
 		LOGe("Too many filters for bitmask.");
 		return ERR_MISMATCH;
 	}
@@ -144,9 +143,9 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 	}
 
 	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
-			masks._forwardSid,
+			masks._forwardAssetId,
 			masks._forwardMac,
-			masks._nearestSid);
+			masks._nearestAssetId);
 
 	handleScannedDevice(masks, asset);
 }
@@ -170,7 +169,7 @@ void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const s
 		uint16_t throttlingCounterBumpMs = 0;
 
 		// forward sid to mesh
-		if (masks._forwardSid && _assetForwarder != nullptr) { // Useless nullptr check?
+		if (masks._forwardAssetId && _assetForwarder != nullptr) { // Useless nullptr check?
 			throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, shortAssetId);
 			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
@@ -183,7 +182,7 @@ void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const s
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
-		if (masks._nearestSid && _nearestCrownstoneTracker != nullptr) { // Useless nullptr check?
+		if (masks._nearestAssetId && _nearestCrownstoneTracker != nullptr) { // Useless nullptr check?
 			throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId);
 			LOGd("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
@@ -234,12 +233,12 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::getAcceptedBitmasks(con
 					}
 
 					case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
-						BLEutil::setBit(masks._forwardSid, i);
+						BLEutil::setBit(masks._forwardAssetId, i);
 						break;
 					}
 
 					case AssetFilterOutputFormat::ShortAssetId: {
-						BLEutil::setBit(masks._nearestSid, i);
+						BLEutil::setBit(masks._nearestAssetId, i);
 						break;
 					}
 				}
@@ -251,8 +250,8 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::getAcceptedBitmasks(con
 }
 
 AssetFilter AssetFiltering::filterToUseForShortAssetId(const filter_output_bitmasks_t& masks) {
-	if (masks.sid()) {
-		return AssetFilter(_filterStore->getFilter(masks.primarySidFilter()));
+	if (masks.assetId()) {
+		return AssetFilter(_filterStore->getFilter(masks.primaryAssetIdFilter()));
 	}
 	if (masks.combined()) {
 		return AssetFilter(_filterStore->getFilter(masks.primaryFilter()));

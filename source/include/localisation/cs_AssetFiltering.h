@@ -9,14 +9,12 @@
 
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
 #include <localisation/cs_AssetFilterStore.h>
 #include <localisation/cs_AssetFilterSyncer.h>
-#include <localisation/cs_AssetHandler.h>
 #include <localisation/cs_AssetForwarder.h>
+#include <localisation/cs_AssetHandler.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
-
-#include <util/cs_BitUtils.h>
+#include <util/cs_Utils.h>
 
 class AssetFiltering : public EventListener, public Component {
 public:
@@ -62,12 +60,12 @@ private:
 	 * bitmask of filters per type to describe the acceptance of an asset.
 	 */
 	struct filter_output_bitmasks_t {
-		uint8_t _forwardSid;
+		uint8_t _forwardAssetId;
 		uint8_t _forwardMac;
-		uint8_t _nearestSid;
+		uint8_t _nearestAssetId;
 
-		uint8_t combined() const { return _forwardMac | _nearestSid | _forwardSid; }
-		uint8_t sid() const { return _forwardSid | _nearestSid; }
+		uint8_t combined() const { return _forwardMac | _nearestAssetId | _forwardAssetId; }
+		uint8_t assetId() const { return _forwardAssetId | _nearestAssetId; }
 
 		/**
 		 * returns the lowest filter id that accepted the asset.
@@ -75,7 +73,7 @@ private:
 		 * This filter is used to generate the short asset id when
 		 * no primarySidFilter is available.
 		 */
-		uint8_t const primaryFilter() const { return lowestBitSet(combined()); }
+		uint8_t const primaryFilter() const { return BLEutil::lowestBitSet(combined()); }
 
 		/**
 		 * returns the lowest filter id that accepted the asset and was
@@ -84,7 +82,7 @@ private:
 		 *
 		 * This filter is used to generate the short asset id when available.
 		 */
-		uint8_t primarySidFilter() const { return lowestBitSet(sid()); }
+		uint8_t primaryAssetIdFilter() const { return BLEutil::lowestBitSet(assetId()); }
 	};
 
 

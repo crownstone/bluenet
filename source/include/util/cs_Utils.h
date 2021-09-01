@@ -111,6 +111,32 @@ inline bool clearBit(T& value, uint8_t bit) {
 }
 
 /**
+ * Returns the index of the lowest bit set in given value.
+ * If no bits are set, returns number of bits of value type.
+ *
+ * Examples:
+ * Value | Bit representation | Lowest bit
+ * 0     | 000000000          | 8
+ * 1     | 000000001          | 0
+ * 4     | 000000100          | 2
+ * 132	 | 100000100          | 2
+ */
+template<typename T>
+inline constexpr T lowestBitSet(T value) {
+	// TODO: there is a faster implementation for this.
+	T numBits = sizeof(T) * 8;
+	for (T i = 0; i < numBits; i++) {
+		if (value & 1) {
+			return i;
+		}
+		value >>= 1;
+	}
+	return numBits;
+}
+
+
+
+/**
  * Returns true when newValue is newer than previousValue, for a value that is increased all the time and overflows.
  */
 inline bool isNewer(uint8_t previousValue, uint8_t newValue) {
