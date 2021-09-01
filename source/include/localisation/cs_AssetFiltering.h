@@ -20,7 +20,18 @@
 
 class AssetFiltering : public EventListener, public Component {
 public:
+	/**
+	 * Initialize this class.
+	 *
+	 * Constructs and initializes member classes.
+	 * Checks result of previous call to init.
+	 */
 	cs_ret_code_t init();
+
+	/**
+	 * Returns true if init has been called successfully.
+	 */
+	bool isInitialized();
 
 private:
 	AssetFilterStore* _filterStore   = nullptr;
@@ -32,11 +43,50 @@ private:
 	NearestCrownstoneTracker* _nearestCrownstoneTracker = nullptr;
 #endif
 
+	// Keeps up the init state of this class.
+	enum class AssetFilteringState {
+		NONE,           // Nothing happened yet.
+		INIT_FAILED,    // Init failed.
+		INIT_SUCCESS    // Init was successful.
+	};
+	AssetFilteringState _initState = AssetFilteringState::NONE;
+
 	/**
-	 * Returns true if init has been called successfully and
-	 * _filterStore, _filterSyncer and _assetForwarder are non-nullptr.
+	 * Initializes this class.
+	 *
+	 * Constructs and initializes member classes.
 	 */
-	bool isInitialized();
+	cs_ret_code_t initInternal();
+
+	/**
+	 * bitmask of filters per type to describe the acceptance of an asset.
+	 */
+	struct filter_output_bitmasks_t {
+		uint8_t _forwardSid;
+		uint8_t _forwardMac;
+		uint8_t _nearestSid;
+
+		uint8_t combined() const { return _forwardMac | _nearestSid | _forwardSid; }
+		uint8_t sid() const { return _forwardSid | _nearestSid; }
+
+		/**
+		 * returns the lowest filter id that accepted the asset.
+		 *
+		 * This filter is used to generate the short asset id when
+		 * no primarySidFilter is available.
+		 */
+		uint8_t const primaryFilter() const { return lowestBitSet(combined()); }
+
+		/**
+		 * returns the lowest filter id that accepted the asset and was
+		 * configured specifically to output a short asset id.
+		 * E.g. AssetFilterOutputFormat::ShortAssetIdOverMesh.
+		 *
+		 * This filter is used to generate the short asset id when available.
+		 */
+		uint8_t primarySidFilter() const { return lowestBitSet(sid()); }
+	};
+
 
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
@@ -65,40 +115,13 @@ private:
 
 	// --------- Processing of accepted Assest ---------------
 
-	/**
-	 * bitmask of filters per type to describe the acceptance of an asset.
-	 */
-	struct filterBitmasks {
-		uint8_t _forwardSid;
-		uint8_t _forwardMac;
-		uint8_t _nearestSid;
 
-		uint8_t combined() const { return _forwardMac | _nearestSid | _forwardSid; }
-		uint8_t sid() const { return _forwardSid | _nearestSid; }
-
-		/**
-		 * returns the lowest filter id that accepted the asset.
-		 *
-		 * This filter is used to generate the short asset id when
-		 * no primarySidFilter is available.
-		 */
-		uint8_t const primaryFilter() const { return lowestBitSet(combined()); }
-
-		/**
-		 * returns the lowest filter id that accepted the asset and was
-		 * configured specifically to output a short asset id.
-		 * E.g. AssetFilterOutputFormat::ShortAssetIdOverMesh.
-		 *
-		 * This filter is used to generate the short asset id when available.
-		 */
-		uint8_t primarySidFilter() const { return lowestBitSet(sid()); }
-	};
 
 	/**
 	 * Loop over inclusion filters and check which filters are accepting.
 	 * Return a set of bitmasks containing the result.
 	 */
-	filterBitmasks getAcceptedBitmasks(const scanned_device_t& device);
+	filter_output_bitmasks_t getAcceptedBitmasks(const scanned_device_t& device);
 
 	/**
 	 * Returns the filter object that is to be used to generate the asset id.
@@ -107,9 +130,9 @@ private:
 	 *
 	 * Returns an AssetFilter with nullptr as _data when none of the masks bits are set.
 	 */
-	AssetFilter filterToUseForShortAssetId(const filterBitmasks& masks);
+	AssetFilter filterToUseForShortAssetId(const filter_output_bitmasks_t& masks);
 
-	void handleScannedDevice(filterBitmasks masks, const scanned_device_t& asset);
+	void handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset);
 
 	/**
 	 * Returns true if there is a filter that rejects this device.

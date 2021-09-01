@@ -28,42 +28,66 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 			device.address[0]);
 }
 
-
 cs_ret_code_t AssetFiltering::init() {
-	// REVIEW: make this a pre-compiler check instead of a runtime check.
-	assert(AssetFilterStore::MAX_FILTER_IDS >= sizeof(uint8_t) * 8, "too many filters for bitmask");
+	// Handle multiple calls to init.
+	switch (_initState) {
+		case AssetFilteringState::NONE: {
+			break;
+		}
+		case AssetFilteringState::INIT_SUCCESS: {
+			LOGw("Init was already called.");
+			return ERR_SUCCESS;
+		}
+		default: {
+			LOGe("Init was already called: state=%u", _initState);
+			return ERR_WRONG_STATE;
+		}
+	}
 
+	// Keep up init state.
+	auto retCode = initInternal();
+	if (retCode == ERR_SUCCESS) {
+		_initState = AssetFilteringState::INIT_SUCCESS;
+	}
+	else {
+		_initState = AssetFilteringState::INIT_FAILED;
+	}
+	return retCode;
+}
+
+cs_ret_code_t AssetFiltering::initInternal() {
 	LOGAssetFilteringInfo("init");
 
-	// TODO: it seems there's a bunch of code to make multiple calls to init() possible,
-	// though listen() now can be called multiple times.
-	// Do we even want to support this?
+	// Can we change this to a compile time check?
+	assert(AssetFilterStore::MAX_FILTER_IDS <= sizeof(filter_output_bitmasks_t::_forwardSid) * 8, "Too many filters for bitmask.");
+	if (AssetFilterStore::MAX_FILTER_IDS > sizeof(filter_output_bitmasks_t::_forwardSid) * 8) {
+		LOGe("Too many filters for bitmask.");
+		return ERR_MISMATCH;
+	}
 
-	// TODO: cleanup all if init fails?
-
-	// Allocate components
-	auto safe_allocate = []<class T>(T*& target) {
-		if (target == nullptr) {
-			target = new T();					// allocates object of desired type,
-		}
-		return target;
-	};
-
-	if (safe_allocate(_filterStore) == nullptr) {
+	_filterStore = new AssetFilterStore();
+	if (_filterStore == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (safe_allocate(_filterSyncer) == nullptr) {
+
+	_filterSyncer = new AssetFilterSyncer();
+	if (_filterSyncer == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (safe_allocate(_assetForwarder) == nullptr) {
+
+	_assetForwarder = new AssetForwarder();
+	if (_assetForwarder == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (safe_allocate(_assetStore) == nullptr) {
+
+	_assetStore = new AssetStore();
+	if (_assetStore == nullptr) {
 		return ERR_NO_SPACE;
 	}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	if (safe_allocate(_nearestCrownstoneTracker) == nullptr) {
+	_nearestCrownstoneTracker = new NearestCrownstoneTracker();
+	if (_nearestCrownstoneTracker == nullptr) {
 		return ERR_NO_SPACE;
 	}
 
@@ -83,13 +107,8 @@ cs_ret_code_t AssetFiltering::init() {
 }
 
 
-// ---------------------------- Handling events ----------------------------
-
 bool AssetFiltering::isInitialized() {
-	return _assetStore != nullptr
-			&& _assetForwarder != nullptr
-			&& _filterSyncer != nullptr
-			&& _filterStore != nullptr;
+	return _initState == AssetFilteringState::INIT_SUCCESS;
 }
 
 void AssetFiltering::handleEvent(event_t& evt) {
@@ -117,7 +136,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 		return;
 	}
 
-	filterBitmasks masks = getAcceptedBitmasks(asset);
+	filter_output_bitmasks_t masks = getAcceptedBitmasks(asset);
 
 	if (!masks.combined()) {
 		// early return when no filter accepts the advertisement.
@@ -133,7 +152,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 }
 
 
-void AssetFiltering::handleScannedDevice(filterBitmasks masks, const scanned_device_t& asset) {
+void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset) {
 	// construct short asset id
 	AssetFilter sidFilter         = filterToUseForShortAssetId(masks);
 	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
@@ -197,8 +216,8 @@ void AssetFiltering::handleScannedDevice(filterBitmasks masks, const scanned_dev
 }
 
 
-AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned_device_t& device) {
-	filterBitmasks masks = {};
+AssetFiltering::filter_output_bitmasks_t AssetFiltering::getAcceptedBitmasks(const scanned_device_t& device) {
+	filter_output_bitmasks_t masks = {};
 
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter (_filterStore->getFilter(i));
@@ -231,7 +250,7 @@ AssetFiltering::filterBitmasks AssetFiltering::getAcceptedBitmasks(const scanned
 	return masks;
 }
 
-AssetFilter AssetFiltering::filterToUseForShortAssetId(const filterBitmasks& masks) {
+AssetFilter AssetFiltering::filterToUseForShortAssetId(const filter_output_bitmasks_t& masks) {
 	if (masks.sid()) {
 		return AssetFilter(_filterStore->getFilter(masks.primarySidFilter()));
 	}
