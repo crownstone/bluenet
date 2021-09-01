@@ -13,23 +13,23 @@
 #define LOGSmartSwitchDebug LOGnone
 
 void SmartSwitch::init(const boards_config_t& board) {
-	State::getInstance().get(CS_TYPE::CONFIG_DIMMING_ALLOWED, &allowDimming, sizeof(allowDimming));
+	State::getInstance().get(CS_TYPE::CONFIG_DIMMING_ALLOWED, &_allowDimming, sizeof(_allowDimming));
 
 	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked;
 	State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
 	_allowSwitching = !switchLocked;
 
 	// Load intended state.
-	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &storedState, sizeof(storedState));
-	intendedState = getIntensityFromSwitchState(storedState);
-	LOGi("init stored=%u, intended=%u allowDimming=%u _allowSwitching=%u", storedState.asInt, intendedState, allowDimming, _allowSwitching);
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_storedState, sizeof(_storedState));
+	_intendedState = getIntensityFromSwitchState(_storedState);
+	LOGi("init stored=%u, intended=%u allowDimming=%u _allowSwitching=%u", _storedState.asInt, _intendedState, _allowDimming, _allowSwitching);
 
 
-	safeSwitch.onUnexpextedStateChange([&](switch_state_t newState) -> void {
+	_safeSwitch.onUnexpextedStateChange([&](switch_state_t newState) -> void {
 		handleUnexpectedStateChange(newState);
 	});
 
-	safeSwitch.init(board);
+	_safeSwitch.init(board);
 
 	listen();
 }
@@ -37,15 +37,15 @@ void SmartSwitch::init(const boards_config_t& board) {
 void SmartSwitch::start() {
 	LOGd("start");
 	// Start safe switch first, then set stored intended state.
-	safeSwitch.start();
-	LOGd("restore intended state: %u", intendedState);
-	allowSwitchingOverride = true;
-	set(intendedState);
-	allowSwitchingOverride = false;
+	_safeSwitch.start();
+	LOGd("restore intended state: %u", _intendedState);
+	_allowSwitchingOverride = true;
+	set(_intendedState);
+	_allowSwitchingOverride = false;
 }
 
 switch_state_t SmartSwitch::getActualState() {
-	return safeSwitch.getState();
+	return _safeSwitch.getState();
 }
 
 uint8_t SmartSwitch::getIntensityFromSwitchState(switch_state_t switchState) {
@@ -61,11 +61,11 @@ uint8_t SmartSwitch::getCurrentIntensity() {
 }
 
 uint8_t SmartSwitch::getIntendedState() {
-	return intendedState;
+	return _intendedState;
 }
 
 bool SmartSwitch::allowSwitching() {
-	return _allowSwitching || allowSwitchingOverride;
+	return _allowSwitching || _allowSwitchingOverride;
 }
 
 cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
@@ -74,15 +74,15 @@ cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
 		intensity = 100;
 //		return ERR_WRONG_PARAMETER;
 	}
-	intendedState = intensity;
+	_intendedState = intensity;
 	return resolveIntendedState();
 }
 
 cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitchDebug("resolveIntendedState intended=%u current=(%u %u%%)", intendedState, currentState.state.relay, currentState.state.dimmer);
+	LOGSmartSwitchDebug("resolveIntendedState intended=%u current=(%u %u%%)", _intendedState, currentState.state.relay, currentState.state.dimmer);
 
-	if (intendedState == 0) {
+	if (_intendedState == 0) {
 		// Set dimmer to 0 and turn relay off.
 		cs_ret_code_t retCode = ERR_SUCCESS;
 		cs_ret_code_t retCodeDimmer = setDimmer(0);
@@ -97,12 +97,12 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		LOGSmartSwitchDebug("retCodeDimmer=%u retCodeRelay=%u", retCodeDimmer, retCodeRelay);
 		return retCode;
 	}
-	else if (intendedState == 100) {
+	else if (_intendedState == 100) {
 		// Set dimmer to 100 or turn relay on.
-		if (currentState.state.relay && safeSwitch.isRelayStateAccurate()) {
+		if (currentState.state.relay && _safeSwitch.isRelayStateAccurate()) {
 			LOGSmartSwitchDebug("already on");
 			return ERR_SUCCESS;
-		} else if (!safeSwitch.isRelayStateAccurate()) {
+		} else if (!_safeSwitch.isRelayStateAccurate()) {
 			// Try the dimmer first, if that is already online there won't be any audible click.
 			// If it isn't active yet, or the setDimmer call below doesn't succeed we'll try relay.
 		}
@@ -123,9 +123,9 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		// Try to set dimmed value, and then turn relay off.
 		// If that doesn't work, turn on relay instead.
 		// Only fade if relay isn't on right now (else you get the effect that you go from 100% to 0%, then fade to N%).
-		bool fade = !(currentState.state.relay && safeSwitch.isRelayStateAccurate());
-		cs_ret_code_t retCode = setDimmer(intendedState, fade);
-		LOGSmartSwitchDebug("allowDimming=%u", allowDimming);
+		bool fade = !(currentState.state.relay && _safeSwitch.isRelayStateAccurate());
+		cs_ret_code_t retCode = setDimmer(_intendedState, fade);
+		LOGSmartSwitchDebug("allowDimming=%u", _allowDimming);
 		if (retCode == ERR_SUCCESS) {
 			retCode = setRelay(false);
 			if (retCode != ERR_SUCCESS) {
@@ -150,7 +150,7 @@ cs_ret_code_t SmartSwitch::setRelay(bool on) {
 	switch_state_t currentState = getActualState();
 	LOGSmartSwitchDebug("setRelay %u currenState=%u allowSwitching()=%u", on, currentState.asInt, allowSwitching() );
 	
-	if (currentState.state.relay == on && safeSwitch.isRelayStateAccurate()) {
+	if (currentState.state.relay == on && _safeSwitch.isRelayStateAccurate()) {
 		return ERR_SUCCESS;
 	}
 	// Check allow switching AFTER similarity, else error is returned while same value is set.
@@ -161,7 +161,7 @@ cs_ret_code_t SmartSwitch::setRelay(bool on) {
 }
 
 cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
-	cs_ret_code_t retCode = safeSwitch.setRelay(on);
+	cs_ret_code_t retCode = _safeSwitch.setRelay(on);
 	LOGSmartSwitchDebug("setRelayUnchecked %u retCode=%u", on, retCode);
 	switch_state_t currentState = getActualState();
 	store(currentState);
@@ -170,9 +170,9 @@ cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 
 cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity, bool fade) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitchDebug("setDimmer %u fade=%u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, fade, currentState.asInt, allowSwitching(), allowDimming);
+	LOGSmartSwitchDebug("setDimmer %u fade=%u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, fade, currentState.asInt, allowSwitching(), _allowDimming);
 
-	if (!allowDimming && intensity > 0) {
+	if (!_allowDimming && intensity > 0) {
 		return ERR_NO_ACCESS;
 	}
 	// Check similarity AFTER allow dimming, else success is returned when dimming allowed is set to false, while already dimming.
@@ -187,7 +187,7 @@ cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity, bool fade) {
 }
 
 cs_ret_code_t SmartSwitch::setDimmerUnchecked(uint8_t intensity, bool fade) {
-	cs_ret_code_t retCode = safeSwitch.setDimmer(intensity, fade);
+	cs_ret_code_t retCode = _safeSwitch.setDimmer(intensity, fade);
 	LOGSmartSwitchDebug("setDimmerUnchecked %u fade=%u retCode=%u", intensity, fade, retCode);
 	switch_state_t currentState = getActualState();
 	store(currentState);
@@ -203,21 +203,21 @@ void SmartSwitch::handleUnexpectedStateChange(switch_state_t newState) {
 }
 
 void SmartSwitch::onUnexpextedIntensityChange(const callback_on_intensity_change_t& closure) {
-	callbackOnIntensityChange = closure;
+	_callbackOnIntensityChange = closure;
 }
 
 void SmartSwitch::sendUnexpectedIntensityUpdate(uint8_t newIntensity) {
 	LOGd("sendUnexpectedIntensityUpdate");
-	callbackOnIntensityChange(newIntensity);
+	_callbackOnIntensityChange(newIntensity);
 }
 
 
 void SmartSwitch::store(switch_state_t newState) {
-	if (newState.asInt == storedState.asInt) {
+	if (newState.asInt == _storedState.asInt) {
 		return;
 	}
 	LOGd("store(%u, %u%%)", newState.state.relay, newState.state.dimmer);
-	storedState = newState;
+	_storedState = newState;
 
 	// Never persist immediately, as another store() call might follow soon.
 	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, reinterpret_cast<uint8_t*>(&newState), sizeof(newState));
@@ -229,7 +229,7 @@ void SmartSwitch::store(switch_state_t newState) {
 cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 	LOGi("setAllowSwitching %u", allowed);
 
-	if (allowed && allowDimming) {
+	if (allowed && _allowDimming) {
 		LOGw("Dimming is allowed, so cannot lock switch.");
 		return ERR_WRONG_STATE;
 	}
@@ -243,7 +243,7 @@ cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 
 cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	LOGi("setAllowDimming %u", allowed);
-	allowDimming = allowed;
+	_allowDimming = allowed;
 
 	if (allowed && !_allowSwitching) {
 		LOGw("Disabling switch lock.");
@@ -253,7 +253,7 @@ cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	}
 
 	// This will trigger event CONFIG_DIMMING_ALLOWED, which will call handleAllowDimmingSet().
-	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &allowDimming, sizeof(allowDimming));
+	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &_allowDimming, sizeof(_allowDimming));
 
 	return ERR_SUCCESS;
 }
@@ -262,7 +262,7 @@ void SmartSwitch::handleAllowDimmingSet() {
 	// Update the switch state, as it may need to be changed.
 	[[maybe_unused]] cs_ret_code_t retCode = resolveIntendedState();
 	uint8_t newIntensity = getCurrentIntensity();
-	if (newIntensity != intendedState) {
+	if (newIntensity != _intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
 	}
 }
@@ -271,7 +271,7 @@ cs_ret_code_t SmartSwitch::handleCommandSetRelay(bool on) {
 	LOGi("handleCommandSetRelay %u", on);
 	[[maybe_unused]] cs_ret_code_t retCode = setRelay(on);
 	uint8_t newIntensity = getCurrentIntensity();
-	if (newIntensity != intendedState) {
+	if (newIntensity != _intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
 	}
 	return retCode;
@@ -281,7 +281,7 @@ cs_ret_code_t SmartSwitch::handleCommandSetDimmer(uint8_t intensity) {
 	LOGi("handleCommandSetDimmer %u", intensity);
 	[[maybe_unused]] cs_ret_code_t retCode = setDimmer(intensity);
 	uint8_t newIntensity = getCurrentIntensity();
-	if (newIntensity != intendedState) {
+	if (newIntensity != _intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
 	}
 	return retCode;
@@ -315,7 +315,7 @@ void SmartSwitch::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CONFIG_DIMMING_ALLOWED: {
-			allowDimming = *reinterpret_cast<TYPIFY(CONFIG_DIMMING_ALLOWED)*>(evt.data);
+			_allowDimming = *reinterpret_cast<TYPIFY(CONFIG_DIMMING_ALLOWED)*>(evt.data);
 			handleAllowDimmingSet();
 			break;
 		}

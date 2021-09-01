@@ -74,21 +74,21 @@ public:
 	void handleEvent(event_t& evt) override;
 
 private:
-	SafeSwitch safeSwitch;
+	SafeSwitch _safeSwitch;
 
-	uint8_t intendedState;
+	uint8_t _intendedState;
 
-	callback_on_intensity_change_t callbackOnIntensityChange;
+	callback_on_intensity_change_t _callbackOnIntensityChange;
 
 	//! Cache of what is stored in State.
-	TYPIFY(STATE_SWITCH_STATE) storedState;
+	TYPIFY(STATE_SWITCH_STATE) _storedState;
 
-	TYPIFY(CONFIG_DIMMING_ALLOWED) allowDimming = false;
+	TYPIFY(CONFIG_DIMMING_ALLOWED) _allowDimming = false;
 
 	// returns _allowSwitching || allowSwitchingOverride.
 	bool allowSwitching();
 	bool _allowSwitching = true; // value persisted in flash and settable in the app
-	bool allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
+	bool _allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
 
 	/**
 	 * Get intensity from a switch state.
