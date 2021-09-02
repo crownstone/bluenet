@@ -229,7 +229,7 @@ void SmartSwitch::store(switch_state_t newState) {
 cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 	LOGi("setAllowSwitching %u", allowed);
 
-	if (allowed && _allowDimming) {
+	if (!allowed && _allowDimming) {
 		LOGw("Dimming is allowed, so cannot lock switch.");
 		return ERR_WRONG_STATE;
 	}
