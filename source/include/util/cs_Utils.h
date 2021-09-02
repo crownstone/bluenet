@@ -114,7 +114,7 @@ inline bool clearBit(T& value, uint8_t bit) {
  * Returns the index of the lowest bit set in given value.
  * If no bits are set, returns number of bits of value type.
  *
- * Examples:
+ * Examples for uint8_t:
  * Value | Bit representation | Lowest bit
  * 0     | 000000000          | 8
  * 1     | 000000001          | 0

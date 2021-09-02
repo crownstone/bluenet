@@ -81,7 +81,7 @@ uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& a
 
 
 void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& incomingReport) {
-	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u), report(%d dB ch.%u)",
+	LOGNearestCrownstoneTrackerVerbose("onReceiveAssetAdvertisement myId(%u), report(%d dB ch.%u)",
 			_myStoneId, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
 	auto recordPtr = getRecordFiltered(incomingReport.id);
@@ -91,30 +91,30 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	auto& record = *recordPtr;
 
-	if (record.nearestStoneId == _myStoneId) {
-		LOGNearestCrownstoneTrackerVerbose("we already believed we were nearest, so it's time to send an update towards the mesh");
-
+	if (record.nearestStoneId == 0 || record.nearestStoneId == _myStoneId) {
+		if (record.nearestStoneId == 0) {
+			LOGNearestCrownstoneTrackerDebug("First time this asset was seen, consider us nearest.");
+			onWinnerChanged(true);
+		}
+		else {
+			LOGNearestCrownstoneTrackerVerbose("We already believed we were nearest, so it's time to send an update towards the mesh");
+		}
 		saveWinningReport(record, incomingReport.compressedRssi, _myStoneId);
-
 		broadcastReport(incomingReport);
-
 		sendUartUpdate(record);
 	}
 	else {
-		LOGNearestCrownstoneTrackerVerbose("we didn't win before");
+		LOGNearestCrownstoneTrackerVerbose("We didn't win before");
 		if (rssiIsCloser(incomingReport.compressedRssi, record.nearestRssi))  {
 			// we win because the incoming report is a first hand observation.
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
 			saveWinningReport(record, incomingReport.compressedRssi, _myStoneId);
-
 			broadcastReport(incomingReport);
-
 			sendUartUpdate(record);
-
 			onWinnerChanged(true);
 		}
 		else {
-			LOGNearestCrownstoneTrackerVerbose("we still don't, so we're done.");
+			LOGNearestCrownstoneTrackerVerbose("We still don't, so we're done.");
 		}
 	}
 }
@@ -142,29 +142,23 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
 		if (rssiIsCloser(record.myRssi, incomingReport.compressedRssi) ) {
-			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
+			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now.");
 			saveWinningReport(record, record.myRssi, _myStoneId);
-
-			LOGNearestCrownstoneTrackerVerbose("Broadcast my personal report to update the mesh.");
 			broadcastPersonalReport(record);
-
 			sendUartUpdate(record);
-
 			onWinnerChanged(true);
-		} else {
+		}
+		else {
 			LOGNearestCrownstoneTrackerVerbose("It still wins, so I'll just update the value of my winning report.");
 			saveWinningReport(record, incomingReport.compressedRssi, reporter);
-
 			sendUartUpdate(record);
 		}
 	}
 	else {
-		if (rssiIsCloser(incomingReport.compressedRssi, record.nearestRssi)) {
+		if (record.nearestStoneId == 0 || rssiIsCloser(incomingReport.compressedRssi, record.nearestRssi)) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
 			saveWinningReport(record, incomingReport.compressedRssi, reporter);
-
 			sendUartUpdate(record);
-
 			onWinnerChanged(false);
 		}
 	}

@@ -14,10 +14,27 @@
 
 class AssetStore : public EventListener, public Component {
 public:
+	/**
+	 * Max number of asset records to keep up.
+	 */
 	static constexpr auto MAX_RECORDS = 20u;
-	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
-	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 50;
+
+	/**
+	 * Time in seconds after which a record is timed out.
+	 *
+	 * Must be smaller than 0xFF.
+	 */
 	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD_S = 250;
+
+	/**
+	 * Interval at which the timeout counter is increased, should be 1 second.
+	 */
+	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
+
+	/**
+	 * Interval at which the throttle countdown is decreased.
+	 */
+	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 100;
 
 	AssetStore();
 	cs_ret_code_t init() override;

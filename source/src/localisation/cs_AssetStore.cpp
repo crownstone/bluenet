@@ -21,7 +21,7 @@ AssetStore::AssetStore()
 	})
 	, updateLastSentCounterRoutine([this]() {
 		decrementThrottlingCounters();
-		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS); // REVIEW: This doesn't work: 50 / 100 = 0.
+		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS);
 	})
 
 {}
@@ -33,14 +33,11 @@ cs_ret_code_t AssetStore::init() {
 	return ERR_SUCCESS;
 }
 
-void AssetStore::handleEvent(event_t& evt) {
-	if (updateLastReceivedCounterRoutine.handleEvent(evt) && updateLastSentCounterRoutine.handleEvent(evt)) {
-		// short circuit: coroutines return true when they handle a EVT_TICK event.
-		// REVIEW: I'm not sure this makes it any faster: it adds an if statement for each event.
-		return;
-	}
+void AssetStore::handleEvent(event_t& event) {
+	updateLastReceivedCounterRoutine.handleEvent(event);
+	updateLastSentCounterRoutine.handleEvent(event);
 
-	switch (evt.type) {
+	switch (event.type) {
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
 			resetRecords();
 			break;
@@ -52,53 +49,64 @@ void AssetStore::handleEvent(event_t& evt) {
 }
 
 void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
-	if (auto rec = getOrCreateRecord(assetId)) {
-		rec->myRssi = compressRssi(asset.rssi, asset.channel);
-		rec->lastReceivedCounter = 0;
+	auto record = getOrCreateRecord(assetId);
+	if (record != nullptr) {
+		record->myRssi = compressRssi(asset.rssi, asset.channel);
+		record->lastReceivedCounter = 0;
 	}
-
-	// asset store is full. Warning logged in the getOrCreate method.
 }
 
 void AssetStore::resetRecords() {
-	for (auto& rec : _assetRecords){
-		rec = asset_record_t::clear();
+	for (auto& record : _assetRecords){
+		record.invalidate();
 	}
 }
 
 asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
-	// linear search
-	for (uint8_t i = 0; i < _assetRecordCount; i++) {
-		auto& rec = _assetRecords[i];
-		if (rec.isValid() && rec.assetId == id) {
-			return &rec;
+	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
+		auto& record = _assetRecords[i];
+		if (record.isValid() && record.assetId == id) {
+			return &record;
 		}
 	}
 	return nullptr;
 }
 
 asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
-	if (auto rec = getRecord(id)) {
-		return rec;
+	uint8_t emptyIndex = 0xFF;
+	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
+		auto& record = _assetRecords[i];
+		if (!record.isValid()) {
+			emptyIndex = i;
+		}
+		else if (record.assetId == id) {
+			return &record;
+		}
+	}
+	// Record did not exist yet, create a new one.
+
+	// First, use empty spots.
+	if (emptyIndex != 0xFF) {
+		LOGAssetStoreVerbose("Creating new report record on empty spot, index=%u", emptyIndex);
+		auto& record =_assetRecords[emptyIndex];
+		record.empty();
+		record.assetId = id;
+		return &record;
 	}
 
-	// REVIEW: not using empty spots.
-
-	// not found. create new report if there is space available
+	// Second, increase number of records.
 	if (_assetRecordCount < MAX_RECORDS) {
-		LOGAssetStoreVerbose("creating new report record");
-		auto& rec = _assetRecords[_assetRecordCount];
-		rec = asset_record_t::empty();
-		rec.assetId = id;
-
-		_assetRecordCount += 1;
-		return &rec;
-	} else {
-		// REVIEW: overwrite oldest record instead?
-		LOGAssetStoreVerbose("can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
-							id.data[0], id.data[1], id.data[2] );
+		LOGAssetStoreVerbose("Add new report record, index=%u", _assetRecordCount);
+		auto& record = _assetRecords[_assetRecordCount];
+		record.empty();
+		record.assetId = id;
+		_assetRecordCount++;
+		return &record;
 	}
 
+	// REVIEW: overwrite oldest record instead?
+	LOGAssetStoreDebug("Can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
+						id.data[0], id.data[1], id.data[2] );
 	return nullptr;
 }
 
@@ -106,46 +114,47 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
 	// REVIEW: this isn't rounded up, it gives 1 tick for 1 ms.
 	uint16_t ticksRoundedUp = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1) / THROTTLE_COUNTER_PERIOD_MS;
-	uint16_t ticksTotal = record.throttlingCountdownTicks + ticksRoundedUp;
+	uint16_t ticksTotal = record.throttlingCountdown + ticksRoundedUp;
 
 	LOGAssetStoreDebug("adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
 	if (ticksTotal > 0xFF) {
-		record.throttlingCountdownTicks = 0xFF;
-	} else {
-		record.throttlingCountdownTicks = ticksTotal;
+		record.throttlingCountdown = 0xFF;
+	}
+	else {
+		record.throttlingCountdown = ticksTotal;
 	}
 }
 
 
 void AssetStore::incrementLastReceivedCounters() {
-	for (auto& rec: _assetRecords) {
-		if (!rec.isValid()) {
+	for (auto& record: _assetRecords) {
+		if (!record.isValid()) {
 			// skip invalid records
 			continue;
 		}
 
-		if (rec.lastReceivedCounter < 0xFF) {
-			rec.lastReceivedCounter++;
+		if (record.lastReceivedCounter < 0xFF) {
+			record.lastReceivedCounter++;
 		}
 
-		if (rec.lastReceivedCounter > LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
+		if (record.lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
 			LOGAssetStoreDebug("Asset timed out. %x:%x:%x",
-					rec.assetId.data[0], rec.assetId.data[1], rec.assetId.data[2]);
-			rec = asset_record_t::clear();
+					record.assetId.data[0], record.assetId.data[1], record.assetId.data[2]);
+			record.invalidate();
 		}
 	}
 }
 
 void AssetStore::decrementThrottlingCounters() {
-	for (auto& rec: _assetRecords) {
-		if (!rec.isValid()) {
+	for (auto& record: _assetRecords) {
+		if (!record.isValid()) {
 			// skip invalid records
 			continue;
 		}
 
-		if (rec.throttlingCountdownTicks > 0) {
-			rec.throttlingCountdownTicks--;
+		if (record.throttlingCountdown > 0) {
+			record.throttlingCountdown--;
 		}
 	}
 }

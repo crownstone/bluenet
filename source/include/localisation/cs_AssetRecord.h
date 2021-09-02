@@ -10,69 +10,68 @@
 #include <util/cs_Rssi.h>
 
 struct __attribute__((__packed__)) asset_record_t {
-
+	/**
+	 * ID of the asset, unique field.
+	 */
 	short_asset_id_t assetId;
 
 	/**
-	 * Most recent rssi value observed by this crownstone.
+	 * Most recent RSSI value observed by this Crownstone.
 	 */
-
 	compressed_rssi_data_t myRssi;
+
+	/**
+	 * Set to 0 each time this asset is scanned.
+	 * Increment at regular interval.
+	 *
+	 * Value of 0xFF marks the record invalid.
+	 */
+	uint8_t lastReceivedCounter = 0xFF;
+
+	/**
+	 * When not 0, no mesh message should be sent for this asset.
+	 * Decrement at regular interval.
+	 */
+	uint8_t throttlingCountdown;
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	/**
-	 * rssi between asset and nearest stone. only valid if winning_id != 0.
-	 */
-	compressed_rssi_data_t nearestRssi;
-
-	/**
-	 * Stone id of currently nearest stone.
-	 *  - Equal to 0 if unknown
-	 *  - Equal to _myId if this crownstone believes it's itself
-	 *    the nearest stone to this asset.
+	 * Stone id of the stone nearest to the asset,
+	 * As always: stone ID of 0 is invalid.
 	 */
 	stone_id_t nearestStoneId;
-#endif
 
-	uint8_t lastReceivedCounter;  // used for time-outs
-	uint8_t throttlingCountdownTicks;      // used for throttling
+	/**
+	 * RSSI between asset and nearest stone.
+	 * Only valid when the nearest stone ID is valid.
+	 */
+	compressed_rssi_data_t nearestRssi;
+#endif
 
 	// ------------- utility functions -------------
 
-	/**
-	 * Empty asset records have (compressed) rssi values of -127 set
-	 * rather than 0 to ensure 'empty' is 'far away'.
-	 */
-	static constexpr asset_record_t empty() {
-		asset_record_t rec = {};
-		rec.myRssi = compressRssi(-127,0);
-
+	void empty() {
+		lastReceivedCounter = 0;
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-		rec.nearestRssi = compressRssi(-127, 0);
+		nearestStoneId = 0;
 #endif
-
-		return rec;
 	}
 
 	/**
-	 * A clear record is completely blank. They are invalid.
+	 * Invalidate this record.
 	 */
-	static constexpr asset_record_t clear() {
-		return asset_record_t{};
+	void invalidate() {
+		lastReceivedCounter = 0xFF;
 	}
 
 	/**
-	 * Default constructed asset records are filled with zeroes.
-	 * A record in this state is 'invalid'.
-	 *
-	 * Note that 'empty' records are valid.
+	 * Returns whether this record is valid.
 	 */
 	bool isValid() {
-		asset_record_t cleared = clear();
-		return memcmp(this, &cleared, sizeof(*this)) != 0;
+		return lastReceivedCounter == 0xFF;
 	}
 
 	bool isThrottled() {
-		return throttlingCountdownTicks != 0;
+		return throttlingCountdown != 0;
 	}
 };
