@@ -265,6 +265,24 @@ This will generate a `config.json` file with the proper information and use the 
 
 The `csutil` tool uses the Crownstone BLE library under the hood. That means that you can also setup hardware that is not attached to your machine. In that case make sure you have the right config values set (e.g. in `CMakeBuild.runtime.config`).
 
+## Running in a VM
+
+It is recommended to use a virtual machine (running Ubuntu 18.04 or newer) for compiling/developing bluenet if you're basic operating system is different (e.g. on archlinux).
+
+The user of the host machine has to be added to the vboxusers group. Log out and back in after running this command.
+
+    sudo gpasswd -a m vboxusers
+
+Also it is recommended to check if a J-Link programmer is correctly connected on the host machine.
+    
+    lsusb | grep J-Link
+    
+For VirtualBox "guest editions" has to be installed on the Ubuntu virtual machine. Insert the guest editions into the VM by going to the bar menu and pressing "Devices > Insert guest editions". Ubuntu should show a pop up to help you further.
+
+After this setup go to the bar menu to "Devices > USB > <J link name>". After selecting the J-link run the following command in the Ubuntu VM to check if the J-link correctly setup.
+    
+    lsusb | grep J-Link
+ 
 ## Common issues
 
 On older ubuntu versions, python2.7 is the default version. This gives issues with nrfutil.
