@@ -45,8 +45,13 @@ void SafeSwitch::start() {
 	
 	if (isDimmerStateChangeAllowed()) {
 		dimmer.start();
-	} else {
+	}
+	else {
 		LOGSafeSwitch("Not starting dimmer, operationMode = %u", static_cast<uint8_t>(operationMode));
+	}
+
+	if (isWarmBoot() && canDimOnWarmBoot()) {
+		dimmerPoweredUp();
 	}
 }
 
@@ -315,6 +320,31 @@ bool SafeSwitch::isDimmerStateChangeAllowed() {
 
 bool SafeSwitch::isSafeToDim(state_errors_t stateErrors) {
 	return !hasDimmerError(stateErrors) && !isSwitchOverLoaded(stateErrors);
+}
+
+bool SafeSwitch::isWarmBoot() {
+	uint32_t resetReason;
+	event_t event(CS_TYPE::CMD_GET_RESET_REASON);
+	event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resetReason), sizeof(resetReason));
+	event.dispatch();
+
+	// TODO: abstract this.
+	// A reset reason of 4 means it was a soft reset.
+	if (event.result.returnCode == ERR_SUCCESS) {
+		LOGSafeSwitch("Reset reason is %u", resetReason);
+		return resetReason == 4;
+	}
+	LOGSafeSwitch("Unable to get reset reason");
+	return false;
+}
+
+bool SafeSwitch::canDimOnWarmBoot() {
+	switch (hardwareBoard) {
+		case ACR01B10D:
+			return true;
+		default:
+			return false;
+	}
 }
 
 

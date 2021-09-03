@@ -223,6 +223,18 @@ private:
 	bool isRelayStateChangeAllowed();
 
 	/**
+	 * Returns true when the crownstone booted, while the hardware has been powered for a longer time.
+	 */
+	bool isWarmBoot();
+
+	/**
+	 * Returns true when the dimmer is ready on warm boot.
+	 *
+	 * Depends on hardware board.
+	 */
+	bool canDimOnWarmBoot();
+
+	/**
 	 * Send state update to listeners.
 	 * Only to be called when state changes due to events, not due to calls to setRelay() or setDimmer().
 	 * This prevents the user to get updates before the call is even finished, this is what return codes are for.
