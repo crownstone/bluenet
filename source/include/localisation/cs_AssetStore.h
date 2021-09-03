@@ -87,11 +87,11 @@ private:
 	 */
 	uint8_t _assetRecordCount = 0;
 
+	Coroutine updateLastReceivedCounterRoutine;
+	Coroutine updateLastSentCounterRoutine;
+
 	/**
-	 * Assumes my_id is set to the stone id of this crownstone.
-	 * Sets the reporter id of the personal report to my_id.
-	 * Sets the reporter id of the winning report to 0.
-	 * Sets the rssi value of both these reports to -127.
+	 * Invalidates all records.
 	 */
 	void resetRecords();
 
@@ -104,8 +104,4 @@ private:
 	 * Decrements throttlingCountdownTicks by 1of all valid records, until zero is reached.
 	 */
 	void decrementThrottlingCounters();
-
-	Coroutine updateLastReceivedCounterRoutine;
-	Coroutine updateLastSentCounterRoutine;
-
 };

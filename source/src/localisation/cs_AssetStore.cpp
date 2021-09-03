@@ -10,9 +10,10 @@
 #include <logging/cs_Logger.h>
 #include <util/cs_Rssi.h>
 
-#define LOGAssetStoreWarn LOGw
-#define LOGAssetStoreDebug LOGvv
-#define LOGAssetStoreVerbose LOGv
+#define LOGAssetStoreWarn    LOGw
+#define LOGAssetStoreInfo    LOGi
+#define LOGAssetStoreDebug   LOGvv
+#define LOGAssetStoreVerbose LOGvv
 
 AssetStore::AssetStore()
 	: updateLastReceivedCounterRoutine([this]() {
@@ -27,6 +28,7 @@ AssetStore::AssetStore()
 {}
 
 cs_ret_code_t AssetStore::init() {
+	LOGAssetStoreInfo("Init: using buffer of %u B", sizeof(_assetRecords));
 	resetRecords();
 	listen();
 
@@ -57,6 +59,7 @@ void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_
 }
 
 void AssetStore::resetRecords() {
+	LOGAssetStoreDebug("resetRecords");
 	for (auto& record : _assetRecords){
 		record.invalidate();
 	}
@@ -105,7 +108,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	}
 
 	// REVIEW: overwrite oldest record instead?
-	LOGAssetStoreDebug("Can't create new asset record, maximum reached. ID: 0x%x 0x%x 0x%x",
+	LOGAssetStoreInfo("Can't create new asset record, maximum reached. ID: %x:%x:%x",
 						id.data[0], id.data[1], id.data[2] );
 	return nullptr;
 }
@@ -116,7 +119,7 @@ void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextTh
 	uint16_t ticksRoundedUp = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1) / THROTTLE_COUNTER_PERIOD_MS;
 	uint16_t ticksTotal = record.throttlingCountdown + ticksRoundedUp;
 
-	LOGAssetStoreDebug("adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
+	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
 	if (ticksTotal > 0xFF) {
 		record.throttlingCountdown = 0xFF;
