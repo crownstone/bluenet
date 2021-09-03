@@ -417,14 +417,14 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	// TODO: if buffer is invalid, assume power remained similar and increase energy regardless?
 	calculateEnergy();
 
-	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+//	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
 //		int32_t powerUsage = _slowAvgPowerMilliWatt;
 //		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
 //		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 		int32_t slowAvgPowerMilliWatt = _slowAvgPowerMilliWatt;
 		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &slowAvgPowerMilliWatt, sizeof(slowAvgPowerMilliWatt));
 		State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
-	}
+//	}
 
 	PS_TEST_PIN_TOGGLE
 
