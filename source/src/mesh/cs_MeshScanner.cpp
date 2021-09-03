@@ -15,6 +15,14 @@
 void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 	switch (scanData->p_metadata->source) {
 		case NRF_MESH_RX_SOURCE_SCANNER: {
+
+			// Ignore when the CPU is busy.
+			uint16_t schedulerSpace = app_sched_queue_space_get();
+			if (schedulerSpace < MIN_SCHEDULER_FREE) {
+				LOGMeshWarning("Dropping scanned device: scheduler is quite full.");
+				return;
+			}
+
 			scanned_device_t _scannedDevice = {0};
 
 			memcpy(_scannedDevice.address,

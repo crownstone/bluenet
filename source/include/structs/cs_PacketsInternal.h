@@ -104,8 +104,7 @@ struct __attribute__((packed)) scanned_device_t {
 	uint8_t addressType;  // See CS_ADDRESS_TYPE
 	uint8_t channel;
 	uint8_t dataSize;
-	uint8_t* data;  // What is the content of this field?
-					// See ble_gap_evt_adv_report_t
+	uint8_t* data;  // Advertisement or scan response data.
 	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
 };
 
