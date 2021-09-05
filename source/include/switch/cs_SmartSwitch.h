@@ -76,19 +76,40 @@ public:
 private:
 	SafeSwitch _safeSwitch;
 
+	/**
+	 * Intended switch state by the user, as percentage.
+	 */
 	uint8_t _intendedState;
 
+	/**
+	 * Callback to be called when switch state changes unexpectedly, so anything but set().
+	 */
 	callback_on_intensity_change_t _callbackOnIntensityChange;
 
-	//! Cache of what is stored in State.
+	/**
+	 * Cached value of what's stored in State.
+	 */
 	TYPIFY(STATE_SWITCH_STATE) _storedState;
 
+	/**
+	 * Cached value of what's stored in State.
+	 */
 	TYPIFY(CONFIG_DIMMING_ALLOWED) _allowDimming = false;
 
-	// returns _allowSwitching || allowSwitchingOverride.
+	/**
+	 * Cached value of what's stored in State.
+	 */
+	TYPIFY(CONFIG_SWITCH_LOCKED)_switchLocked = false;
+
+	/**
+	 * Override of switch lock, necessary to restore state at startup.
+	 */
+	bool _allowSwitchingOverride = false;
+
+	/**
+	 * Whether switch state is allowed to be changed.
+	 */
 	bool allowSwitching();
-	bool _allowSwitching = true; // value persisted in flash and settable in the app
-	bool _allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
 
 	/**
 	 * Get intensity from a switch state.
@@ -144,10 +165,10 @@ private:
 	void store(switch_state_t newState);
 
 	/**
-	 * Set allow switching.
+	 * Set switch lock.
 	 * Also updates State.
 	 */
-	cs_ret_code_t setAllowSwitching(bool allowed);
+	cs_ret_code_t setSwitchLock(bool lock);
 
 	/**
 	 * Set allow dimming.

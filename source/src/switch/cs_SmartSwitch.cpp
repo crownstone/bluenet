@@ -15,14 +15,12 @@
 void SmartSwitch::init(const boards_config_t& board) {
 	State::getInstance().get(CS_TYPE::CONFIG_DIMMING_ALLOWED, &_allowDimming, sizeof(_allowDimming));
 
-	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked;
-	State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
-	_allowSwitching = !switchLocked;
+	State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &_switchLocked, sizeof(_switchLocked));
 
 	// Load intended state.
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_storedState, sizeof(_storedState));
 	_intendedState = getIntensityFromSwitchState(_storedState);
-	LOGi("init stored=%u, intended=%u allowDimming=%u _allowSwitching=%u", _storedState.asInt, _intendedState, _allowDimming, _allowSwitching);
+	LOGi("init stored=%u, intended=%u allowDimming=%u _switchLocked=%u", _storedState.asInt, _intendedState, _allowDimming, _switchLocked);
 
 
 	_safeSwitch.onUnexpextedStateChange([&](switch_state_t newState) -> void {
@@ -65,7 +63,7 @@ uint8_t SmartSwitch::getIntendedState() {
 }
 
 bool SmartSwitch::allowSwitching() {
-	return _allowSwitching || _allowSwitchingOverride;
+	return (!_switchLocked) || _allowSwitchingOverride;
 }
 
 cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
@@ -148,7 +146,7 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 
 cs_ret_code_t SmartSwitch::setRelay(bool on) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitchDebug("setRelay %u currenState=%u allowSwitching()=%u", on, currentState.asInt, allowSwitching() );
+	LOGSmartSwitchDebug("setRelay %u currenState=%u allowSwitching()=%u", on, currentState.asInt, allowSwitching());
 	
 	if (currentState.state.relay == on && _safeSwitch.isRelayStateAccurate()) {
 		return ERR_SUCCESS;
@@ -226,18 +224,16 @@ void SmartSwitch::store(switch_state_t newState) {
 
 
 
-cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
-	LOGi("setAllowSwitching %u", allowed);
+cs_ret_code_t SmartSwitch::setSwitchLock(bool lock) {
+	LOGi("setSwitchLock %u", lock);
 
-	if (!allowed && _allowDimming) {
+	if (lock && _allowDimming) {
 		LOGw("Dimming is allowed, so cannot lock switch.");
 		return ERR_WRONG_STATE;
 	}
-	_allowSwitching = allowed;
+	_switchLocked = lock;
 
-	// must use the actual persisted value _allowSwitching rather than the returnvalue of allowSwitching here!
-	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked = !_allowSwitching;
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
+	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &_switchLocked, sizeof(_switchLocked));
 	return ERR_SUCCESS;
 }
 
@@ -245,11 +241,10 @@ cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	LOGi("setAllowDimming %u", allowed);
 	_allowDimming = allowed;
 
-	if (allowed && !_allowSwitching) {
+	if (allowed && _switchLocked) {
 		LOGw("Disabling switch lock.");
-		_allowSwitching = true;
-		TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked = !_allowSwitching;
-		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
+		_switchLocked = false;
+		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &_switchLocked, sizeof(_switchLocked));
 	}
 
 	// This will trigger event CONFIG_DIMMING_ALLOWED, which will call handleAllowDimmingSet().
@@ -290,9 +285,9 @@ cs_ret_code_t SmartSwitch::handleCommandSetDimmer(uint8_t intensity) {
 
 void SmartSwitch::handleEvent(event_t& evt) {
 	switch (evt.type) {
-		case CS_TYPE::CMD_SWITCHING_ALLOWED: {
-			auto allowed = reinterpret_cast<TYPIFY(CMD_SWITCHING_ALLOWED)*>(evt.data);
-			evt.result.returnCode = setAllowSwitching(*allowed);
+		case CS_TYPE::CMD_LOCK_SWITCH: {
+			auto lock = reinterpret_cast<TYPIFY(CMD_LOCK_SWITCH)*>(evt.data);
+			evt.result.returnCode = setSwitchLock(*lock);
 			break;
 		}
 		case CS_TYPE::CMD_DIMMING_ALLOWED: {

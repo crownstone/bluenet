@@ -845,9 +845,9 @@ void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const Encryption
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CMD_SWITCHING_ALLOWED) allow = !payload->enable;
+	TYPIFY(CMD_LOCK_SWITCH) lock = payload->enable;
 
-	event_t evt(CS_TYPE::CMD_SWITCHING_ALLOWED, &allow, sizeof(allow));
+	event_t evt(CS_TYPE::CMD_LOCK_SWITCH, &lock, sizeof(lock));
 	EventDispatcher::getInstance().dispatch(evt);
 
 	result.returnCode = ERR_SUCCESS;
