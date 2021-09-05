@@ -375,11 +375,20 @@ uint16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should 
 uint16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
 
 
-#### Switch command value (uint8)
+#### Switch command value
+
+![Switch command](../docs/diagrams/switch-command.png)
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8 | Command value | 8 | Percentage or dedicated command
+
+The switch command is not bit-structured, but values up to 0x64 / 01100100b / 100 are used for dimming. All higher values can have special meanings.
 
 Value | Name | Description
 --- | --- | ---
 0-100 | Percentage | 0 for OFF, 100 fully ON, dimmed in between.
+101-252 | Reserved | Reserved for future use.
 253 | Toggle | Switch `OFF` when currently on, switch to `SMART_ON` when currently off.
 254 | Behaviour | Switch to the value according to _behaviour_ rules.
 255 | Smart on | Switch on, the value will be determined by _behaviour_ rules.
