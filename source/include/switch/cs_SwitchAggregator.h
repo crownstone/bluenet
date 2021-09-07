@@ -151,16 +151,11 @@ private:
 	uint8_t aggregatedBehaviourIntensity();
 
 	/**
-	 * When override state is the special value 'translucent on'
+	 * When override state is the special value 'smart on'
 	 * it should be interpreted according to the values of twilightHandler
 	 * and behaviourHandler. This getter centralizes that.
-	 *
-	 * When override is 0xff:
-	 * This method will return the minimum of respective handlers when both of them
-	 * have a non-zero value, otherwise return the non-zero value of the
-	 * handler that has a non-zero value (if there is such), otherwise 100.
 	 */
-	std::optional<uint8_t> resolveOverrideState();
+	uint8_t resolveOverrideState();
 
 	/**
 	 * Tries to set source as owner of the switch.
@@ -173,6 +168,5 @@ private:
 	void addToSwitchHistory(const cs_switch_history_item_t& cmd);
 	void printSwitchHistory();
 
-	void printStatus();
 	void pushTestDataToHost();
 };
