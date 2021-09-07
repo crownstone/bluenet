@@ -84,6 +84,7 @@ private:
 
 	/**
 	 * Current number of valid records in the _assetRecords array.
+	 * Not really necessary, but avoids having to iterate through all records when there are not many assets.
 	 */
 	uint8_t _assetRecordCount = 0;
 

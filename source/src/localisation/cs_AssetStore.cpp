@@ -77,6 +77,8 @@ asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 
 asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	uint8_t emptyIndex = 0xFF;
+	uint8_t oldestIndex = 0;
+	uint8_t highestCounter = 0;
 	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
 		auto& record = _assetRecords[i];
 		if (!record.isValid()) {
@@ -85,10 +87,14 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 		else if (record.assetId == id) {
 			return &record;
 		}
+		else if (record.lastReceivedCounter > highestCounter) {
+			highestCounter = record.lastReceivedCounter;
+			oldestIndex = i;
+		}
 	}
-	// Record did not exist yet, create a new one.
+	// Record with given asset ID does not exist yet, create a new one.
 
-	// First, use empty spots.
+	// First option, use empty spot.
 	if (emptyIndex != 0xFF) {
 		LOGAssetStoreVerbose("Creating new report record on empty spot, index=%u", emptyIndex);
 		auto& record =_assetRecords[emptyIndex];
@@ -97,7 +103,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 		return &record;
 	}
 
-	// Second, increase number of records.
+	// Second option, increase number of records.
 	if (_assetRecordCount < MAX_RECORDS) {
 		LOGAssetStoreVerbose("Add new report record, index=%u", _assetRecordCount);
 		auto& record = _assetRecords[_assetRecordCount];
@@ -107,10 +113,12 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 		return &record;
 	}
 
-	// REVIEW: overwrite oldest record instead?
-	LOGAssetStoreInfo("Can't create new asset record, maximum reached. ID: %x:%x:%x",
-						id.data[0], id.data[1], id.data[2] );
-	return nullptr;
+	// Last option, overwrite oldest record.
+	LOGAssetStoreVerbose("Overwriting oldest record, index=%u", oldestIndex);
+	auto& record =_assetRecords[oldestIndex];
+	record.empty();
+	record.assetId = id;
+	return &record;
 }
 
 // REVIEW: why add instead of set?
