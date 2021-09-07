@@ -100,7 +100,7 @@ load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 # Download urls and hashes
 #######################################################################################################################
 
-# If you update the version of a file, also update the md5 hashh, e.g. through `md5sum downloads/*`
+# If you update the version of a file, also update the md5 hash, e.g. through `md5sum downloads/*`
 
 set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
 
@@ -115,15 +115,14 @@ else()
 	message(FATAL_ERROR "Unkown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
 
-
 # The mesh
-set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/sDKS/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
+set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
 set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
 
 # The nrfjprog
-set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-12-1/nRFCommandLineTools10121Linuxamd64.tar.gz)
-set(NRFJPROG_DEB_FILE nRF-Command-Line-Tools_10_12_1_Linux-amd64.deb)
-set(NRFJPROG_MD5 a5d88595f13296614f07a8e8da6716b6)
+set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-14-0/nRF-Command-Line-Tools_10_14_0_Linux64.zip)
+set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.14.0_amd64.deb)
+set(NRFJPROG_MD5 8a049bacc67519561b77e014b652d5df)
 
 # The cross-compiler
 set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
