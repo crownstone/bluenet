@@ -16,7 +16,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregatorDebug LOGd
+#define LOGSwitchAggregatorDebug LOGvv
 #define LOGSwitchAggregatorEvent LOGd
 #define LOGSwitchHistory LOGvv
 
@@ -108,9 +108,15 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 	cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
 	if (aggregatedState) {
 		retCode = smartSwitch.set(*aggregatedState);
-		if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
-			LOGSwitchAggregatorDebug("Reset override state");
-			overrideState = {};
+		if (shouldResetOverrideState) {
+			if (retCode == ERR_SUCCESS) {
+				LOGSwitchAggregatorDebug("Reset override state");
+				overrideState = {};
+			}
+			else {
+				overrideState = smartSwitch.getCurrentIntensity();
+				LOGSwitchAggregatorDebug("Failed to reset override state, overrideState=%u", *overrideState);
+			}
 		}
 	}
 

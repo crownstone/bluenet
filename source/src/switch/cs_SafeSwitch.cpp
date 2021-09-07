@@ -11,7 +11,7 @@
 #include <storage/cs_State.h>
 #include <test/cs_Test.h>
 
-#define LOGSafeSwitch LOGnone
+#define LOGSafeSwitch LOGvv
 
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);

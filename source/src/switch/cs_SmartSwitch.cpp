@@ -10,7 +10,7 @@
 #include <storage/cs_State.h>
 #include <switch/cs_SmartSwitch.h>
 
-#define LOGSmartSwitchDebug LOGnone
+#define LOGSmartSwitchDebug LOGvv
 
 void SmartSwitch::init(const boards_config_t& board) {
 	State::getInstance().get(CS_TYPE::CONFIG_DIMMING_ALLOWED, &_allowDimming, sizeof(_allowDimming));
