@@ -55,7 +55,7 @@ public:
 	 */
 	void onTick(uint32_t currentTickCount) {
 		// TODO: not doing roll-over checks here yet..
-		if (currentTickCount > nextCallTickcount && action) {
+		if (currentTickCount >= nextCallTickcount && action) {
 			auto ticksToWait = action();
 			nextCallTickcount = currentTickCount + ticksToWait;
 		}
