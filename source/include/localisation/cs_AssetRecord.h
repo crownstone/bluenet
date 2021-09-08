@@ -32,7 +32,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * When not 0, no mesh message should be sent for this asset.
 	 * Decrement at regular interval.
 	 */
-	uint8_t throttlingCountdown;
+	uint8_t throttlingCountdown = 0;
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	/**
@@ -52,6 +52,7 @@ struct __attribute__((__packed__)) asset_record_t {
 
 	void empty() {
 		lastReceivedCounter = 0;
+		throttlingCountdown = 0;
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		nearestStoneId = 0;
 #endif
@@ -68,7 +69,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * Returns whether this record is valid.
 	 */
 	bool isValid() {
-		return lastReceivedCounter == 0xFF;
+		return lastReceivedCounter != 0xFF;
 	}
 
 	bool isThrottled() {
