@@ -12,8 +12,7 @@ Type | Name | Length | Description
 uint8_t | Message type | 1 | A type of mesh message (see table below)
 uint8_t | Payload | 7 | Payload for the mesh message
 
-This is in total 8 bytes (an unsegmented message). There's currently no versioning in use except for bumping the 
-identifier of a message.
+This is in total 8 bytes (an unsegmented message). There's currently no versioning in use except for bumping the identifier of a message.
 
 id | name | Payload | Result data
 ---|---|---|---
@@ -237,7 +236,7 @@ uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 2=INTERNAL, 3=
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint16_t | Command type | 2 | [Command type](PROTOCOL.md#Command-types).
+uint16_t | Command type | 2 | [Command type](PROTOCOL.md#command-types).
 
 
 #### high_resolution_time_stamp_t

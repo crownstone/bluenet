@@ -23,8 +23,12 @@ uint8 | AD Length | 1 | Length of the next AD structure.
 uint8 | AD Type | 1 | 0xFF: Manufacturer specific data.
 uint8 | Company id | 2 | 0x004C: Apple.
 uint8 | type | 1 | 0x01: Services bitmask.
-uint8 [] | Services bitmask | 16 | Consists of 3x the same [data](#background-adv-data) plus 2 unused bits.
+uint8 [] | Services bitmask | 16 | Consists of 3x the same [data](#background-broadcast-data) plus 2 unused bits.background
 
+
+#### Background broadcast data
+
+Either [v0](#background-broadcast-data-v0) or [v1](#background-broadcast-data-v1).
 
 #### Background broadcast data v0
 
@@ -34,7 +38,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Protocol | 2 | Protocol version = 0.
 uint8 | Sphere ID | 8 | Hash of the sphere ID, acts as filter, so that not every advertisement has to be decrypted.
-uint16 [] | Payload | 32 | Encrypted [payload](#background-adv-payload), using 32b RC5 with 128b localization key.
+uint16 [] | Payload | 32 | Encrypted [payload](#background-broadcast-payload), using 32b RC5 with 128b localization key.
 
 #### Background broadcast data v1
 
@@ -43,7 +47,7 @@ uint16 [] | Payload | 32 | Encrypted [payload](#background-adv-payload), using 3
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Protocol | 2 | Protocol version = 1.
-uint24 | device token | 24 | Token of this device, set via command [Register tracked device](PROTOCOL.md#command-types) or [Update tracked device](#command-adv-types).
+uint24 | device token | 24 | Token of this device, set via command [Register tracked device](PROTOCOL.md#command-types) or [Update tracked device](#command-broadcast-types).
 uint16 | reserved | 16 | Reserved for future use, should be 0 for now.
 
 #### Background broadcast payload
@@ -56,23 +60,7 @@ uint16 | Validation | 16 | Validation: current local time as unix timestamp, rig
 uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 3 | ID of the profile the user is using.
 uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
-uint8 | flags | 3 | [Flags](#background-adv-flags).
-
-
-#### RC5 broadcast payload
-
-![RC5 broadcast payload](../docs/diagrams/rc5_broadcast_payload.png)
-
-Type | Name | Length in bits | Description
---- | --- | --- | ---
-uint8 | Counter | 8 | Count of the broadcast command. This value should be increased for each newly broadcasted command.
-uint8 | Reserved | 8 | Reserved for future use.
-uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
-uint8 | Profile ID | 3 | ID of the profile the user is using.
-uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
-uint8 | flags | 3 | [Flags](#background-adv-flags).
-
-
+uint8 | Flags | 3 | [Flags](#background-broadcast-flags).
 
 #### Background broadcast flags
 
@@ -86,7 +74,7 @@ Bit | Name |  Description
 
 
 
-## Command broadcasts
+# Command broadcasts
 
 These are meant to be broadcasted by phones for specific commands, like switching Crownstones.
 
@@ -100,12 +88,12 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | AD Length | 1 | 9: Length of the next AD structure.
 uint8 | AD Type | 1 | 0x03: Complete list of 16 bit service UUIDs.
-uint16 [] | 16bit services | 8 | List of four 16 bit service UUIDs, which are used as [header](#command-adv-header) data.
+uint16 [] | 16bit services | 8 | List of four 16 bit service UUIDs, which are used as [header](#command-broadcast-header) data.
 uint8 | AD Length | 1 | 17: Length of the next AD structure.
 uint8 | AD Type | 1 | 0x07: Complete list of 128 bit service UUIDs.
-uint64[] | 128bit service | 16 | Single 128 bit service UUID, which is used as [encrypted payload](#command-adv-payload), sent as two uint64.
+uint64[] | 128bit service | 16 | Single 128 bit service UUID, which is used as [encrypted payload](#command-broadcast-payload), sent as two uint64.
 
-#### Command broadcast header
+## Command broadcast header
 
 ![Command broadcast header](../docs/diagrams/command_broadcast_header.png)
 
@@ -118,31 +106,44 @@ uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.
 uint8 | Reserved | 2 | Reserved for future use.
 uint8 | Device ID | 8 | ID of this device, should be unique per device (phone) in the sphere.
-uint16 | RC5 payload | 4 | First 4 bits of first block of [encrypted RC5 payload](#rc5-adv-payload).
+uint16 | RC5 payload | 4 | First 4 bits of first block of [encrypted RC5 payload](#rc5-broadcast-payload).
 uint8 | Sequence | 2 | 2: Sequence of this service UUID.
-uint16 | RC5 payload | 12 | Last 12 bits of first block of [encrypted RC5 payload](#rc5-adv-payload).
-uint16 | RC5 payload | 2 | First 2 bits of second block of [encrypted RC5 payload](#rc5-adv-payload).
+uint16 | RC5 payload | 12 | Last 12 bits of first block of [encrypted RC5 payload](#rc5-broadcast-payload).
+uint16 | RC5 payload | 2 | First 2 bits of second block of [encrypted RC5 payload](#rc5-broadcast-payload).
 uint8 | Sequence | 2 | 3: Sequence of this service UUID.
-uint16 | RC5 payload | 14 | Last 14 bits of second block of [encrypted RC5 payload](#rc5-adv-payload).
+uint16 | RC5 payload | 14 | Last 14 bits of second block of [encrypted RC5 payload](#rc5-broadcast-payload).
 
-#### Command broadcast payload
+#### RC5 broadcast payload
+
+![RC5 broadcast payload](../docs/diagrams/rc5_broadcast_payload.png)
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8 | Counter | 8 | Count of the broadcast command. This value should be increased for each newly broadcasted command.
+uint8 | Reserved | 8 | Reserved for future use.
+uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
+uint8 | Profile ID | 3 | ID of the profile the user is using.
+uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
+uint8 | Flags | 3 | [Flags](#background-broadcast-flags).
+
+## Command broadcast payload
 
 ![Command broadcast payload](../docs/diagrams/command_broadcast_payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Validation | 4 | Validation in the form of a local time unix timestamp.
-uint8 | Command type | 1 | See the list of [types](#command-adv-types).
+uint8 | Command type | 1 | See the list of [types](#command-broadcast-types).
 uint8[] | Command data | 11 | Depends on command type.
 
-#### Command broadcast types
+### Command broadcast types
 
 Type nr | Type name | Payload type | Payload Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | No operation | - | None | x | x | x |
 1 | Multi switch | [Multi switch short list packet](#multi-switch-short-list-packet) | List of switch commands | x | x | x |
 2 | Set time | [Set time packet](#set-time-packet) | Current time. | x | x | |
-3 | Behaviour settings | [Behaviour settings](#behaviour-settings-packet) | Currently only supports turning smart behaviour on/off | x | x | |
+3 | Behaviour settings | [Behaviour settings](#behaviour-settings) | Currently only supports turning smart behaviour on/off | x | x | |
 4 | Update tracked device | [Update tracked device packet](#update-tracked-device-packet) | Updates the data of a tracked device. Access level should match the original access level. | x | x | x |
 
 
@@ -153,7 +154,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Count | 1 | Number of valid entries.
-[Multi switch short entry](#multi-switch-short-entry-packet) [] | List | 10 | A list of switch commands.
+[Multi switch short entry](#multi-switch-short-entry) [] | List | 10 | A list of switch commands.
 
 
 ##### Multi switch short entry
@@ -215,7 +216,7 @@ uint 16 | Device ID | 2 | Unique ID of the device.
 uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 8 | Profile ID | 1 | Profile ID of the device.
 int 8 | RSSI offset | 1 | Offset from standard signal strength.
-uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background-adv-flags).
+uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background-broadcast-flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
 

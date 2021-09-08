@@ -45,12 +45,12 @@ Type | Packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | [Switch state](#switch-state-packet) | 1 | The state of the switch.
+uint 8 | [Switch state](#switch-state) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
-uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | [Error bitmask](#error-bitmask) | 4 | Error bitmask of the Crownstone.
 uint 8 | Counter | 1 | Simply counts up and overflows.
 uint 8 | Reserved | 4 | Reserved for future use, will be 0 for now.
 
@@ -99,7 +99,7 @@ The following type gives the latest state of the Crownstone.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
-uint 8 | [Switch state](#switch-state-packet) | 1 | The state of the switch.
+uint 8 | [Switch state](#switch-state) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
@@ -118,7 +118,7 @@ The following type only gets advertised in case there is an error. It will be in
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
-uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | [Error bitmask](#error-bitmask) | 4 | Error bitmask of the Crownstone.
 uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
@@ -134,7 +134,7 @@ The following type sends out the last known state of another Crownstone. It will
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
-uint 8 | [Switch state](#switch-state-packet) | 1 | The state of the switch.
+uint 8 | [Switch state](#switch-state) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get the actual power factor.
@@ -153,7 +153,7 @@ The following type sends out the last known error of another Crownstone. It will
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
-uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
+uint 32 | [Error bitmask](#error-bitmask) | 4 | Error bitmask of the Crownstone.
 uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
@@ -171,7 +171,7 @@ It's similar to the normal state, but replaces some less essential fields with o
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
-uint 8 | [Switch state](#switch-state-packet) | 1 | The state of the switch.
+uint 8 | [Switch state](#switch-state) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 uint 16 | Behaviour master hash | 2 | Part of behaviour master hash: divide hash by 65536.
 uint 16 | Asset filters version | 2 | Master version of the asset filters.
@@ -250,7 +250,7 @@ Bit | Name |  Description
 --- | --- | ---
 0   | Dimmer ready | When dimmer is ready to be used, this will be 1.
 1   | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-2   | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service-data-encrypted-error), or by reading the [error state](PROTOCOL.md#state-packet).
+2   | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#error-packet), or by reading the [error from state](PROTOCOL.md#state-get-packet).
 3   | Switch locked | When the switch state is locked, this will be 1.
 4   | Time set | If this is 1, the time is set on this Crownstone.
 5   | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.

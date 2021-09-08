@@ -1,6 +1,6 @@
-# Asset Filter Store
+# Asset filter store
 
-This page describes the commands and packets that affect Bluenets Asset Filter Store component public API.
+This page describes the commands and packets that affect Bluenets asset filter store component public API.
 Typical workflow for updating the filters of the parser:
 1. send a command [get summaries](#get-filter-summaries) to find out what [protocol](#asset-filter-store-protocol-version) the firmware uses and which filters are currently used
 2. send commands to [upload](#upload-filter) new filters and [remove](#remove-filter) outdated ones.
@@ -8,11 +8,9 @@ Typical workflow for updating the filters of the parser:
 
 When a crownstone reboots it loads any filters stored in its flash module into RAM. After a consistency check it will start parsing bluetooth advertisements.
 If an upload or remove command is received, it will change its run-time filters accordingly and set a flag `filterModificationInProgress` to true.
-During modifications the parser blocks all advertisements to prevent inconsistent behaviour. The progress flag stays active until a succesfully executed 
-commit command or a timeout occurs.
+During modifications the parser blocks all advertisements to prevent inconsistent behaviour. The progress flag stays active until a succesfully executed commit command or a timeout occurs.
 
-Filters are identified by a `uint8` called a filterId. These ids are free to be chosen by the device that uploads a filter. There is a maximum number of filters on the
-Crownstone, which is implementation defined. (`MAX_FILTER_IDS`)
+Filters are identified by a `uint8` called a filterId. These ids are free to be chosen by the device that uploads a filter. There is a maximum number of filters on the Crownstone, which is implementation defined (`MAX_FILTER_IDS`).
 
 ## Table of contents
 

@@ -26,7 +26,7 @@ The setup process goes as follows:
 - Phone connects to the Crownstone.
 - Phone reads the **session key** from the [setup service](#setup-service).
 - Phone reads the [session data](#session-data) from the [setup service](#setup-service).
-- From here on, all writes and read are encrypted using the session key and data, as explained [here](#encrypted-write-read).
+- From here on, all writes and read are encrypted using the session key and data, as explained [here](#reading-and-writing-characteristics).
 - Phone subscribes to [result](#setup-service) characteristic.
 - Phone commands Crownstone to [setup](#control-packet) via the control characteristic.
 - Phone waits for result to become SUCCESS (See [result packet](#result-packet)).
@@ -41,7 +41,7 @@ To write a command via connection, the process goes as follows:
 - Crownstone is in normal mode ([Crownstone service](#crownstone-service) active).
 - Phone connects to the Crownstone.
 - Phone reads the [session data](#session-data) from the [Crownstone service](#crownstone-service).
-- From here on, all writes and read are encrypted using the session key and data, as explained [here](#encrypted-write-read).
+- From here on, all writes and read are encrypted using the session key and data, as explained [here](#reading-and-writing-characteristics).
 - Phone subscribes to [result](#crownstone-service) characteristic.
 - Phone writes a [control command](#control-packet) to the [control characteristic](#crownstone-service).
 - Phone waits for result, see [result packet](#result-packet).
@@ -83,7 +83,7 @@ uint8[] | Session nonce | 5 | Session nonce, should be [read](#session-data) whe
 #### Session data
 
 After connecting, you should first read the session data from the [Crownstone service](#crownstone-service).
-The session data is [ECB encrypted](#ecb-encryption) with the basic key, or when in setup mode: the session key.
+The session data is [ECB encrypted](#aes-128-ecb-encryption) with the basic key, or when in setup mode: the session key.
 After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
 The session nonce and validation key will be different each time you connect.
 
@@ -125,7 +125,7 @@ Unlike the name suggests, only the payload of this packet is encrypted. The head
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#ctr-encryption).
+uint8[] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#aes-128-ctr-encryption).
 uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determines which key has been used for encryption.
 [Encrypted payload](#encrypted-payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
 
@@ -135,7 +135,7 @@ uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determi
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Validation key | 4 | Should be equal to the read [validation key](#session-info).
+uint32 | Validation key | 4 | Should be equal to the read [validation key](#session-data).
 uint8 | Payload |  | Whatever data would have been sent if encryption was disabled.
 uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
 
@@ -145,8 +145,8 @@ uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
 
 # Advertisements
-By default, [iBeacon advertisements](#ibeacon-adv-packet) will be broadcast  at a regular interval.
-On top of that, [advertisements with service data](#service-data-adv-packet) are also broadcasted at regular interval. The [service data](SERVICE-DATA.md) contains useful info about the state of the Crownstone.
+By default, [iBeacon advertisements](#ibeacon-advertisement-packet) will be broadcast  at a regular interval.
+On top of that, [advertisements with service data](#service-data-advertisement) are also broadcasted at regular interval. The [service data](SERVICE-DATA.md) contains useful info about the state of the Crownstone.
 
 The iBeacon advertisements have a different MAC address, since these advertisements need to have the connectable flag to be unset.
 The advertisements with service data will use the original MAC address, and will have the connectable flag set.
@@ -285,7 +285,7 @@ uint8 | Payload | Size | Payload data, depends on command type.
 
 The `A`, `M`, `B`, and `S` columns indicate which users have access to these commands if encryption is enabled.
 Admin access means the packet is encrypted with the admin key.
-Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup).
+Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup-mode).
 
 - A: Admin
 - M: Member
@@ -314,7 +314,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 23 | Relay | uint8 | - | Switch relay, 0 = off, 1 = on | x | x | x
 30 | Set time | uint32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
-32 | Reset errors | [Error bitmask](#state-error-bitmask) | - | Reset all errors which are set in the written bitmask. | x
+32 | Reset errors | [Error bitmask](#error-bitmask) | - | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Mesh command packet](#mesh-command-packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun-time-packet) | - | Update the reference times for sunrise and sunset | x | x
 35 | Get time | - | uint32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
@@ -327,10 +327,10 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace-behaviour-packet) | [Index and master hash](BEHAVIOUR.md#replace-behaviour-result-packet) | Replace the behaviour at given index. | x | x
 62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove-behaviour-packet) | [Index and master hash](BEHAVIOUR.md#remove-behaviour-result-packet) | Remove the behaviour at given index. | x | x
 63 | Get behaviour | [Index](BEHAVIOUR.md#get-behaviour-packet) | [Index and behaviour packet](BEHAVIOUR.md#get-behaviour-result-packet) | Obtain the behaviour stored at given index. | x | x
-64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get-behaviour-indices-packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
+64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#behaviour-indices-result-packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour-debug-packet) | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register-tracked-device-packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
-71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked-device-heartbeat-packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST-PROTOCOL.md#background-broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
+71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked-device-heartbeat-packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST_PROTOCOL.md#background-broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
 72 | Get presence | - | [Presence packet](presence_packet) | Get the current location of each profile. | x | x
 80 | Get uptime | - | uint32 | Time in seconds since boot. | x
 81 | Get ADC restarts | - | [ADC restarts packet](#adc-restarts-packet) | **Firmware debug.** Number of ADC restarts since boot. | x
@@ -348,10 +348,10 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
 95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
-110 | Upload filter | [Upload filter packet](./TRACKABLE_PARSER.md#upload-filter) | - | **Under development.** Uploads a part of a filter for the TrackableParser component. | x
-111 | Remove filter | [Remove filter packet](./TRACKABLE_PARSER.md#remove-filter) | - | **Under development.** Deletes a part of a filter for the TrackableParser component. | x
-112 | Commit filter changes |  [Commit filter changes packet](./TRACKABLE_PARSER.md#commit-filter-changes) | - | **Under development.** Commit changes made to the filters of the TrackableParser component. | x
-113 | Get filter summaries | [Get filter summaries packet](./TRACKABLE_PARSER.md#get-filter-summaries) | - | **Under development.** Obtain summaries of the filters for the TrackableParser component.  | x
+110 | Upload filter | [Upload filter packet](ASSET_FILTER_STORE.md#upload-filter-packet) | - | Upload (a part of) an asset filter. | x
+111 | Remove filter | [Remove filter packet](ASSET_FILTER_STORE.md#remove-filter-packet) | - | Delete an asset filter. | x
+112 | Commit filter changes | [Commit filter changes packet](ASSET_FILTER_STORE.md#commit-filter-packet) | - | Commit changes made to the asset filters. | x
+113 | Get filter summaries | - | [Get filter summaries packet](ASSET_FILTER_STORE.md#get-filter-summaries-result-packet) | Obtain summaries of the stored asset filters. | x
 
 
 #### Setup packet
@@ -411,7 +411,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint16 | [State type](#state-types) | 2 | Type of state to set.
 uint16 | id | 2 | ID of state to get. Most state types will only have ID 0.
-uint8 | [Persistence mode](#state-set-persistence-mode-set) | 1 | Type of persistence mode.
+uint8 | [Persistence mode](#state-set-persistence-mode) | 1 | Type of persistence mode.
 uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint8 | Payload | N | Payload data, depends on state type.
 
@@ -434,7 +434,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint16 | [State type](#state-types) | 2 | Type of state.
 uint16 | id | 2 | ID of state that was set.
-uint8 | [Persistence mode](#state-set-persistence-mode-set) | 1 | Type of persistence mode.
+uint8 | [Persistence mode](#state-set-persistence-mode) | 1 | Type of persistence mode.
 uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
 #### State get persistence mode
@@ -505,7 +505,7 @@ uint32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Count | 1 | Number of valid entries.
-[Multi switch entry](#multi-switch-entry-packet)[] | List | Count * 2 | A list of switch commands.
+[Multi switch entry](#multi-switch-entry)[] | List | Count * 2 | A list of switch commands.
 
 ##### Multi switch entry
 
@@ -665,7 +665,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 [Switch command](#switch-command-value) | Switch command | 1 | The switch command value.
-[Switch state](#switch-state-packet) | Switch state | 1 | The switch state after the command was executed.
+[Switch state](#switch-state) | Switch state | 1 | The switch state after the command was executed.
 [Command source](#command-source-packet) | Source | 2 | The source of the switch command.
 
 
@@ -677,15 +677,15 @@ Type | Name | Length in bits | Description
 uint8 | [Source type](#command-source-type) | 3 | What type of source ID. Bits 5-7.
 uint8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
 bool | External | 1 | Whether the command was received via the mesh. Bit 0.
-uint8 | [Source ID](#command-source-ID) | 8 | The ID of the source.
+uint8 | [Source ID](#command-source-id) | 8 | The ID of the source.
 
 ##### Command source type
 
 Value | Name | Description
 --- | --- | ---
-0 | Enum | ID is one of the [list](#command-source-ID).
+0 | Enum | ID is one of the [list](#command-source-id).
 1 | Behaviour | ID is the behaviour index, or 255 when unknown.
-3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command-adv-header)
+3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command-broadcast-header)
 4 | Uart | ID is the device ID
 
 ##### Command source ID
@@ -747,7 +747,7 @@ uint16 | Device ID | 2 | Unique ID of the device.
 uint8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 1 | Profile ID of the device.
 int8 | RSSI offset | 1 | Offset from standard signal strength.
-uint8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background-adv-flags).
+uint8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background-broadcast-flags).
 uint24 | Device token | 3 | Token that will be advertised by the device.
 uint16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
 
@@ -905,7 +905,7 @@ Value | Name | Description
 
 The `A`, `M`, `B`, and `S` columns indicate which users have access to these states: `r` for read access, `w` for write access.
 Admin access means the packet is encrypted with the admin key.
-Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup).
+Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup-mode).
 
 - A: Admin
 - M: Member
@@ -962,14 +962,14 @@ Type nr | Type name | Payload type | Payload description | A | M | B
 67 | Tap to toggle enabled | uint8 | Whether tap to toggle is enabled on this Crownstone. | rw |  | 
 68 | Tap to toggle RSSI threshold offset | int8 | RSSI threshold offset from default, above which tap to toggle will respond. | rw |  | 
 128 | Reset counter | uint16 | Counts the number of resets. | r | r | 
-129 | [Switch state](#switch-state-packet) | uint8 | Current switch state. | r | r | 
+129 | [Switch state](#switch-state) | uint8 | Current switch state. | r | r | 
 130 | Accumulated energy | int64 | Accumulated energy in μJ. | r | r | 
 131 | Power usage | int32 | Current power usage in mW. | r | r | 
 134 | Operation Mode | uint8 | Internal usage. |  |  | 
 135 | Temperature | int8 | Chip temperature in °C. | r | r | 
-139 | [Error bitmask](#state-error-bitmask) | uint32 | Bitmask with errors. | r | r | 
+139 | [Error bitmask](#error-bitmask) | uint32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun-time-packet) | Packet with sun rise and set times. | r | r | 
-150 | Behaviour settings | [Behaviour settings](#behaviour-settings-packet) | Behaviour settings. | rw | rw | r
+150 | Behaviour settings | [Behaviour settings](#behaviour-settings) | Behaviour settings. | rw | rw | r
 156 | Soft on speed | uint8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
 157 | Hub mode | uint8 | Whether hub mode is enabled. | rw
 158 | UART key | uint8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
