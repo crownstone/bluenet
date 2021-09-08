@@ -51,10 +51,14 @@ void AssetStore::handleEvent(event_t& event) {
 }
 
 void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+	LOGAssetStoreVerbose("handleAcceptedAsset id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	auto record = getOrCreateRecord(assetId);
 	if (record != nullptr) {
 		record->myRssi = compressRssi(asset.rssi, asset.channel);
 		record->lastReceivedCounter = 0;
+	}
+	else {
+		LOGAssetStoreDebug("Could not create a record for id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	}
 }
 
@@ -76,6 +80,7 @@ asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 }
 
 asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
+	LOGAssetStoreVerbose("getOrCreateRecord id=%02X:%02X:%02X", id.data[0], id.data[1], id.data[2]);
 	uint8_t emptyIndex = 0xFF;
 	uint8_t oldestIndex = 0;
 	uint8_t highestCounter = 0;
@@ -83,8 +88,10 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 		auto& record = _assetRecords[i];
 		if (!record.isValid()) {
 			emptyIndex = i;
+			LOGAssetStoreVerbose("Found empty spot at index=%u", i);
 		}
 		else if (record.assetId == id) {
+			LOGAssetStoreVerbose("Found asset at index=%u", i);
 			return &record;
 		}
 		else if (record.lastReceivedCounter > highestCounter) {
@@ -114,7 +121,8 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	}
 
 	// Last option, overwrite oldest record.
-	LOGAssetStoreVerbose("Overwriting oldest record, index=%u", oldestIndex);
+	LOGAssetStoreVerbose("Overwriting oldest record asset id=%02X:%02X:%02X, index=%u",
+			_assetRecords[oldestIndex].assetId.data[0], _assetRecords[oldestIndex].assetId.data[1], _assetRecords[oldestIndex].assetId.data[2], oldestIndex);
 	auto& record =_assetRecords[oldestIndex];
 	record.empty();
 	record.assetId = id;
@@ -150,7 +158,7 @@ void AssetStore::incrementLastReceivedCounters() {
 		}
 
 		if (record.lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
-			LOGAssetStoreDebug("Asset timed out. %x:%x:%x",
+			LOGAssetStoreDebug("Asset timed out. %02X:%02X:%02X",
 					record.assetId.data[0], record.assetId.data[1], record.assetId.data[2]);
 			record.invalidate();
 		}
