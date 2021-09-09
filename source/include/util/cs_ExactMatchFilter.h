@@ -24,12 +24,15 @@ public:
 
 	bool contains(const void* key, size_t keyLengthInBytes) override;
 
-	/**
-	 * A short asset id for an exact match filter is formatted as
-	 * 	- { index_lsb, index_msb, 0xff} when item is present
-	 *  - { 0xff, 0xff, 0xff} when item is not present.
-	 */
-	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
+	// REVIEW: this doesn't work, there might be multiple exact match filters.
+	// Also, it should check if the filter input matches the input for the output.
+	// The above points can be solved, but I think it's not worth the extra complexity.
+//	/**
+//	 * A short asset id for an exact match filter is formatted as
+//	 * 	- { index_lsb, index_msb, 0xff} when item is present
+//	 *  - { 0xff, 0xff, 0xff} when item is not present.
+//	 */
+//	short_asset_id_t shortAssetId(const void* item, size_t itemSize) override;
 
 	bool isValid() override;
 

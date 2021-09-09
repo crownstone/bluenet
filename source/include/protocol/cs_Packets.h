@@ -598,6 +598,7 @@ struct __attribute__((packed)) cs_asset_rssi_data_sid_t {
 	uint8_t stoneId;
 	int8_t rssi;
 	uint8_t channel;
+	// REVIEW: add asset filter ID (bitmask)?
 };
 
 /**
