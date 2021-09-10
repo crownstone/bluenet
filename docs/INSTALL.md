@@ -6,7 +6,10 @@
 Bluenet uses the `cmake` build system, `git` as versioning system, and `wget` to retrieve other files.
 
     sudo apt install cmake git wget python3 python3-pip
+    
+Note: In newer Ubuntu version you might get an unmet dependency issue for *libncurses5*. To fix this issue simply run the command:
 
+    sudo apt --fix-broken install
 
 ## Getting the Bluenet code
 
