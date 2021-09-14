@@ -89,6 +89,8 @@ typedef uint32_t ret_code_t;
 #define __ALIGN(n) __attribute__((aligned(n)))
 #endif
 
+#include <dummies.h>
+
 #define BLE_GAP_PASSKEY_LEN 6
 
 #if __clang__

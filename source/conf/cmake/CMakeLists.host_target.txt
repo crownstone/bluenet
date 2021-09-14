@@ -58,7 +58,7 @@ INCLUDE(crownstone.defs)
 #######################################################################################################################
 
 # Use C++14, for version before 5.2 you need to use -std=c++1y, in later versions you can use -std=c++14
-SET(DEFAULT_CXX_FLAGS        "-std=c++1y")
+SET(DEFAULT_CXX_FLAGS        "-std=c++17")
 SET(DEFAULT_C_FLAGS          "-std=gnu99")
 SET(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
 
@@ -86,18 +86,34 @@ ENDIF()
 SET(SOURCE_DIR "src")
 
 # Refer to each header file from the "include/" root
-SET(INCLUDE_DIR "include")
+SET(INCLUDE_DIR "include" "test/host" ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Add include directories
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
-IF(DEFINED HOST_TARGET) 
+IF(DEFINED HOST_TARGET)
 	MESSAGE(STATUS "Run with host as compilation target")
 ELSE()
 	MESSAGE(FATAL_ERROR "Can only be compiled for host")
 ENDIF()
 
 ADD_DEFINITIONS("-DHOST_TARGET")
+
+message(STATUS "Configure cs_Git.cpp file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp")
+
+message(STATUS "Configure cs_AutoConfig.cpp file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
+
+message(STATUS "Configure cs_StaticConfig.h file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
+
+message(STATUS "Configure cs_config.h file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
+
+#target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
