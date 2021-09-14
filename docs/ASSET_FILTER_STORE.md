@@ -339,7 +339,7 @@ Value | Name  | Payload type | Description
 ----- | ----- | ------------ | -----------
 0     | Mac     | -          | The (full) MAC address is selected.
 1     | AD type | uint8      | The data of the [AD field](#ad-field) with given AD type is selected.
-2     | Masked AD data | [Masked AD data](#masked-ad-data) | 5 | Same as *AD type*, but the data is now masked by a byte wise mask.
+2     | Masked AD data | [Masked AD data](#masked-ad-data) | Same as *AD type*, but the data is now masked by a byte wise mask.
 
 ### Masked AD data
 Adds a mask that defines which part of an AD field is relevant.
@@ -347,7 +347,7 @@ Adds a mask that defines which part of an AD field is relevant.
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 uint8 | AD type | 1 | The data of the [AD field](#ad-field) with given AD type is selected.
-uint32 | Mask | If the Nth bit is set, the Nth byte of the data is selected. All selected bytes are concatenated.
+uint32 | Mask | 4 | If the Nth bit is set, the Nth byte of the data is selected. All selected bytes are concatenated.
 
 *************************************************************************
 
