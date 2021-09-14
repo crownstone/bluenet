@@ -1,114 +1,373 @@
 # Asset filter store
 
-This page describes the commands and packets that affect Bluenets asset filter store component public API.
-Typical workflow for updating the filters of the parser:
-1. send a command [get summaries](#get-filter-summaries) to find out what [protocol](#asset-filter-store-protocol-version) the firmware uses and which filters are currently used
-2. send commands to [upload](#upload-filter) new filters and [remove](#remove-filter) outdated ones.
-3. send a [commit command](#commit-filter-changes) to complete the changes.
+This page describes the commands and packets for the asset filter store.
 
-When a crownstone reboots it loads any filters stored in its flash module into RAM. After a consistency check it will start parsing bluetooth advertisements.
-If an upload or remove command is received, it will change its run-time filters accordingly and set a flag `filterModificationInProgress` to true.
-During modifications the parser blocks all advertisements to prevent inconsistent behaviour. The progress flag stays active until a succesfully executed commit command or a timeout occurs.
-
-Filters are identified by a `uint8` called a filterId. These ids are free to be chosen by the device that uploads a filter. There is a maximum number of filters on the Crownstone, which is implementation defined (`MAX_FILTER_IDS`).
+Typical workflow for changing the filters:
+1. [Get summaries](#get-filter-summaries) to find out what [protocol](#asset-filter-store-protocol-version) the firmware uses and which filters are currently in store.
+2. [Upload](#upload-filter) new filters and [remove](#remove-filter) outdated ones.
+3. [Commit](#commit-filter-changes) to complete the changes.
 
 ## Table of contents
 
 Version
-- [Asset Filter Store protocol version](#asset-filter-store-protocol-version)
+- [Protocol version](#asset-filter-store-protocol-version)
 
 Commands packets
+- [Get filter summaries](#get-filter-summaries)
 - [Upload filter](#upload-filter)
 - [Remove filter](#remove-filter)
 - [Commit filter changes](#commit-filter-changes)
-- [Get filter summaries](#get-filter-summaries)
-
-Filter format packets
-- [Tracking filter data](#tracking-filter-data)
-- [Tracking filter meta data](#tracking-filter-meta-data)
-- [Filter type](#filter-type)
-
-Filter IO packets
-- [Filter input type](#filter-input-description)
-- [Filter output type](#filter-output-description)
-- [Filter output format](#filter-output-format)
-- [Advertisement subdata](#advertisement-subdata)
-- [Advertisement subdata type](#advertisement-subdata-type)
-- [Masked AD data type selector](#masked-ad-data-type-selector)
 
 Filter description packets
+- [Master version](#master-version)
+- [Master CRC](#master-crc)
 - [Filter summary](#filter-summary)
-- [Filter master CRC](#filter-master-crc)
-- [Filter version](#filter-master-version)
+- [Asset ID](#asset-id)
+
+Filter packets
+- [Filter packet](#filter-packet)
+- [Filter metadata](#filter-metadata)
+- [Filter type](#filter-type)
+- [Filter flags](#filter-flags)
+
+Filter data packets
+- [Exact match](#exact-match-filter-data)
+
+Filter input and output packets
+- [Input description](#filter-input-description)
+- [Output description](#filter-output-description)
+- [Output format](#filter-output-format)
+
+Output packets
+- [MAC](#mac-address-report)
+- [Asset ID](#asset-id-report)
+
+Advertisement data selection
+- [BLE advertisement](#ble-advertisement)
+- [Advertisement subdata](#advertisement-subdata)
+- [Advertisement subdata type](#advertisement-subdata-type)
+- [Masked AD data](#masked-ad-data)
 
 *************************************************************************
 
-## Version
 
-### Asset Filter Store protocol version
-All commands that the Asset Filter Store accepts contain a `uint8` command protocol version.
+## Protocol version
+
+### Asset filter store protocol version
+
+All asset filter store commands are prefixed with a protocol version.
 This version will be incremented when making breaking changes to the protocol.
 
-Name | type | Description
---- | --- | ---
-commandProtocolVersion | uint8 | Version identifier that describes the further format of the command.
+Value | Description
+----- | -----------
+0     | Current version.
 
-Value | Change Description
---- | ---
-0 | **Current version**  Initial protocol definitions. 
+*************************************************************************
+
 
 ## Commands
 
+### Get filter summaries
+
+Get a summary of all filters currently on the Crownstone and some extra metadata.
+
+#### Get filter summaries result packet
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Protocol version](#asset-filter-store-protocol-version) | Protocol | 1 | Protocol version of the Crownstone, commands should use the same protocol.
+uint16 | [Master version](#master-version) | 2 | Current master version on the Crownstone.
+uint32 | [Master CRC](#master-crc) | 4 | Current master CRC on the Crownstone.
+uint16 | Free space | 2 | The number of free bytes for filter data. Note that each filter will have overhead.
+[Filter summary](#filter-summary)[] | Summaries | N * 4 | Summaries of all filters currently on the Crownstone.
+
+Result codes:
+- `SUCCESS`: Success.
+- `BUSY`: There are uncommitted filter changes. Commit or wait for timeout.
+
+*************************************************************************
+
+
 ### Upload filter
 
-Command to upload a filter in chunks. All chunks will be merged by the Crownstone. If a previously committed filter with 
-the given filterId is already present on the Crownstone, it will be removed prior to handling the chunk.
-
-This command sets the `filterModificationInProgress` flag to true.
+Command to upload a filter in chunks. All chunks will be merged by the Crownstone. If a previously committed filter with the same filter ID is already present on the Crownstone, it will be removed prior to handling the chunk.
 
 #### Upload filter packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
-[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | 
-uint8_t | filterId | 1 | Which filter to add the entry to.
-uint16_t | chunkStartIndex | 2 |  Offset in bytes of this chunk.
-uint16_t | totalSize | 2 | Total size of the chunked data. Practical upper limit depends on command buffer size, prior allocated memory for filters in firmware etc. 
-uint16_t | chunkSize | 2 |
-uint8_t[] | chunk | `chunkSize` | Contiguous subspan of a [tracking filter data](#tracking-filter-data) packet starting from the byte at `chunkStartIndex` and `chunkSize` bytes in total.
+---- | ---- | ------ | -----------
+[Protocol version](#asset-filter-store-protocol-version) | Protocol | 1 | Protocol of this packet.
+uint8 | Filter ID | 1 | Which filter index to upload to.
+uint16 | Chunk start index | 2 | Offset in bytes of this chunk.
+uint16 | Total size | 2 | Total size of the filter data.
+uint16 | Chunk size | 2 | Size of this chunk.
+uint8[] | Chunk data | Chunk size | Chunk of a [filter packet](#filter-packet), starting at byte `Chunk start index` and `Chunk size` bytes in total.
 
-
-#### Upload filter result
-
-- `SUCCESS`: Chunk has been copied into the desired filter.
-- `INVALID_MESSAGE`: Chunk would overflow total size of the filter. Message dropped.
-- `WRONG_STATE`: Total size changed between upload commands. Filter deallocated. 
-- `NO_SPACE`: Message dropped.
-
+Result codes:
+- `SUCCESS`: Chunk has been stored.
+- `INVALID_MESSAGE`: Chunk would overflow total size of the filter.
+- `WRONG_STATE`: Total size changed between upload commands. All uploade chunks for this filter ID have been removed.
+- `NO_SPACE`: There is not enough space for the given total filter size.
 
 *************************************************************************
+
 
 ### Remove filter
 
 Removes the filter with given filter ID.
 
-This command sets the `filterModificationInProgress` flag to true.
-
 #### Remove filter packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
-[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | 
-uint8_t | filterId | 1 | Id of the filter to remove.
+---- | ---- | ------ | -----------
+[Protocol version](#asset-filter-store-protocol-version) | Protocol | 1 | Protocol of this packet.
+uint8 | Filter ID | 1 | ID of the filter to remove.
 
-#### Remove filter result
-
-- `SUCCESS`: filter was found and deallocated. Progress was started.
-- `SUCCESS_NO_CHANGE`: filter wasn't found. Progress was started.
+Result codes:
+- `SUCCESS`: Filter has been removed.
+- `SUCCESS_NO_CHANGE`: Filter was already removed.
 
 *************************************************************************
 
+
 ### Commit filter changes
+
+Commit the changes that were made.
+
+#### Commit filter packet
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Protocol version](#asset-filter-store-protocol-version) | Protocol | 1 | Protocol of this packet.
+uint16 | [Master version](#master-version) | 2 | The new master version value that will be set after successful commit.
+uint32 | [Master CRC](#master-crc) | 4 | Master CRC of the new filter set.
+
+Result codes:
+- `SUCCESS`: All filters passed the consistency checks and the master CRC matches. The master version is updated to the given value.
+- `MISMATCH`: The master CRC did not match.
+- `WRONG_STATE`: Some filters failed consistency checks, and have been removed.
+
+*************************************************************************
+
+
+# Packets
+
+## Filter description packets
+
+
+### Master version
+The master version is used to determine which Crownstone has a newer set of filters.
+The Crownstone with the newest version, will upload its filters to neighbouring Crownstones.
+The master version is a uint16 value and overflows to 1, because 0 has a special meaning:
+
+Value | Description
+----- | -----------
+0     | Unknown or unset version. Always older than non-zero versions.
+Other | Version `a` is newer than `b` when `a > b + n` when `1 <= n < 2^(16-1)`. Note that `b + n` also overflows to 1.
+
+
+### Master CRC
+
+The master CRC is the CRC-32 of all filter IDs and CRCs.
+For `N` filters, calculate the CRC-32 of the sorted list: `[ID_1, CRC_1, ID_2, CRC_2, .... , ID_N, CRC_N]`.
+Where, `ID_1` and `CRC_1` are the filter ID and CRC of the filter with the lowest filter ID.
+
+
+### Filter summary
+A summary of a filter.
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | Filter ID | 1 | The ID of this filter.
+uint32 | filter CRC | 4 | The CRC-32 of the [filter](#filter-packet).
+
+
+### Asset ID
+
+A **3 byte** identifier that is used to differentiate between assets.
+It is determined by calculating the CRC-32 of a part of the asset advertisement.
+Which part is determined by the input format of the [output description](#filter-output-description).
+The 3 least significant bytes of the calculated CRC-32 are the asset ID.
+
+*************************************************************************
+
+## Filter packets
+
+### Filter packet
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Filter metadata](#filter-metadata) | Metadata |  | Metadata determining how the filter behaves.
+uint8[] | Filter data |  | Byte representation of the filter, format depends on the filter type.
+
+
+### Filter metadata
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Filter type](#filter-type) | Filter type | 1 | Filter protocol of this filter. Determines the filter data format.
+[Filter flags](#filter-flags) | Flags | 1 | Flags bitmask.
+uint8 | Profile ID | 1 | Entries that pass this filter will be associated with this profile ID. Set to 255 for no profile ID.
+[Filter input description](#filter-input-description) | Input |  | Determines what part of the asset advertisement data to use as input for the filter.
+[Filter output description](#filter-output-description) | Output |  | Determines the output of the filter of asset advertisements that pass it.
+
+
+### Filter type
+
+A `uint8` defining the format and implementation of the filter datastructure.
+
+Value | Name | Description
+----- | ---- | -----------
+0     | Cuckoo filter | Good for many items (each item is compressed to 2B), but has more false positives. Filter data is interpreted as [cuckoo filter data](./CUCKOO_FILTER.md#cuckoo-filter-data).
+1     | Exact match filter | No, or few, false positives, but can generally hold fewer items. Filter data is interpreted as [exact match filter](#exact-match-filter-data).
+
+
+### Filter flags
+
+Bit | Name | Description
+--- | ---- | -----------
+0   | Exclude | If set, the asset advertisements that pass this filter will be ignored, even if it passes other filters. Note: this does not mean that assets that do not pass this filter result in an output.
+1-7 | Reserved | Reserved for future usage, must be 0 for now.
+
+*************************************************************************
+
+## Filter data packets
+
+### Exact match filter data
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | Item count | 1 | Number of items in the filter. Must be larger than 0.
+uint8 | Item size | 1 | Size of each item in bytes. Must be larger than 0.
+uint8[] | Items | Count * size | The item array. The items must be ordered (such that items[i] <= items[i+1]).
+
+*************************************************************************
+
+## Filter input and output packets
+
+### Filter input description
+The input description defines what part of the asset advertisement is matched against the filter entries, in order to determine wether or not the advertisement passes the filter.
+
+Type | Name | Description
+---- | ---- | -----------
+[Advertisement subdata](#advertisement-subdata) | Format | What part of the asset advertisment data is used to filter on.
+
+
+### Filter output description
+When an asset advertisement passed a filter, there will be an output. This output may use parts of the advertisement data.
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Output format](#filter-output-format) | Output format | 1 | Determines how the output is formatted.
+uint8[] | Input format data |  | Describes which part of the advertisment is used to construct the output. Type and length of this field depends on output format.
+
+
+### Filter output format
+This output format is a `uint8` that:
+- Determines the result of an asset advertisement that passes a filter.
+- Determines how the asset ID is determined.
+
+Value | Name | Input format type | Output description type
+----- | ---- | ----------------- | -----------------------
+0     | Mac  | None              | [MAC address report](#mac-address-report)
+1     | Asset ID | [Advertisement subdata](#advertisement-subdata) | [Asset ID](#asset-id)
+
+*************************************************************************
+
+## Ouput packets
+
+### MAC address report
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8[] | MAC | 6    | The MAC address of the asset.
+[rssi](#rssi-and-channel) | Rssi | 1 | Signal strength of the asset advertisement.
+
+
+### Asset ID report
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Asset ID](#asset-id) | Asset ID | 3 | The asset ID.
+uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
+[rssi](#rssi-and-channel) | Rssi | 1 | Signal strength of the asset advertisement.
+
+
+### RSSI and channel
+
+Type | Name | Length in bits | Description
+---- | ---- | -------------- | -----------
+uint8 | RSSI halved | 6      | Absolute of RSSI / 2, or 0 if RSSI is positive.
+uint8 | Channel | 2          | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
+
+*************************************************************************
+
+## Advertisement data selection.
+Before explaining the advertisement selection, let's first have a look at the data in an advertisement.
+
+### BLE advertisement
+A BLE advertisement has the following data:
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | Preamble | 1 | Always the same value (10101010b).
+uint32 | Access address | 4 | Always the same value (0x8E89BED6)
+uint8[] | Header | 2 | Contains type of advertisement, length, etc.
+uint8[] | MAC address | 6 | The MAC address.
+[AD field](#ad-field)[] | AD fields |  | A list of AD fields.
+
+#### AD field
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | Length | 1   | Length of this AD field.
+uint8 | Type   | 1   | Type of AD data, see *Generic Access Profile* in the BLE specifications.
+uint8[] | Data | Length - 1 | The data of this AD field.
+
+
+### Advertisement subdata
+This defines a dataformat/selection of data of an advertisement.
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Advertisement subdata type](#advertisement-subdata-type) | Type | 1 | See table below.
+uint8[] | Payload |  | Depends on *type*, see table below.
+
+### Advertisement subdata type
+The advertisement subdata type field can have the following values.
+
+Value | Name  | Payload type | Description
+----- | ----- | ------------ | -----------
+0     | Mac     | -          | The (full) MAC address is selected.
+1     | AD type | uint8      | The data of the [AD field](#ad-field) with given AD type is selected.
+2     | Masked AD data | [Masked AD data](#masked-ad-data) | 5 | Same as *AD type*, but the data is now masked by a byte wise mask.
+
+### Masked AD data
+Adds a mask that defines which part of an AD field is relevant.
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | AD type | 1 | The data of the [AD field](#ad-field) with given AD type is selected.
+uint32 | Mask | If the Nth bit is set, the Nth byte of the data is selected. All selected bytes are concatenated.
+
+*************************************************************************
+
+# Internals
+
+Explanation of the asset filter store implementation.
+
+## Modification in progress
+
+When a crownstone reboots it loads any filters stored on flash into RAM, and check whether the filters are valid.
+
+If an upload or remove command is received, it will change its run-time filters accordingly and set a flag `filterModificationInProgress` to true.
+During modifications the advertisement handler will be paused to prevent inconsistent behaviour.
+The progress flag stays active until a succesfully executed commit command or a timeout occurs.
+
+## Filter IDs
+
+Filters are identified by a `uint8` called a filter ID. These IDs are freely chosen by the user. There is a maximum number of filters on the Crownstone, which is implementation defined (`MAX_FILTER_IDS`).
+
+## Commit
 
 A commit filter changes command signifies the end of a sequence of changes. When this is received the firmware
 will perform several consistency checks:
@@ -117,200 +376,4 @@ will perform several consistency checks:
 
 Any malformed filters may immediately be deallocated to save resources and prevent firmware crashes. When return value is not `SUCCESS`, query the status with a [get filter summaries](#get-filter-summaries) command for more information.
 
-#### Commit filter packet
-
-Type | Name | Length | Description
---- | --- | --- | ---
-[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 |
-uint16_t | [MasterVersion](#master-version) | 2 | Value of the synchronization version of the Asset Filter Store that should be set to if this command is succesfully handled.
-uint32_t | [MasterCrc](#master-crc) | 4 | Master CRC at time of constructing this result.
-
-
-#### Commit filter result
-
-- `SUCCESS`: all filters passed the consistency checks and the master CRC matches. `MasterVersion` is updated to the value in the received command.
-- `MISMATCH`:the master CRC did not match but no consistency checks failed. `MasterVersion` is not changed.
-- `WRONG_STATE`: some filters have been deleted due to failed consistency checks. `MasterVersion` is not changed.
-
-
-*************************************************************************
-
-### Get filter summaries
-
-Obtain a summary of the state of all filters currently on the device and selected metadata about synchronization, memory usage and protocol.
-
-#### Get filter summaries packet
-
-Empty.
-
-#### Get filter summaries result packet
-
-Type | Name | Length | Description
---- | --- | --- | ---
-[CommandProtocolVersion](#asset-filter-store-protocol-version) | protocol | 1 | Asset Filter Store protocol version implemented in the firmware
-uint16_t | [MasterVersion](#master-version) | 2 | Synchronization version of the Asset Filter Store at time of constructing this result packet.
-uint32_t | [MasterCrc](#master-crc) | 4 | Master CRC at time of constructing this result packet.
-uint16_t | freeSpace | 2 | The number of bytes that the Asset Filter Store is still allowed to allocate. (Does not take into account free heap space on the firmware.)
-[Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 4 | Summaries of all filters currently on the Crownstone. 
-
-Result:
-- `SUCCESS`: No filter modifications in progress.
-- `BUSY`: There was a filter modification in progress while handling this command.
-
-
-*************************************************************************
-
-# Packets
-
-## Filter upload packets
-
-### Tracking filter data
-
-Type | Name | Length | Description
---- | --- | --- | ---
-[Tracking filter meta data](#tracking-filter-meta-data) | metadata | | Metadata determining how the filter behaves
-uint8[] | filterdata | | Byte representation of the filter, format depends on the `metadata`
-
-
-### Tracking filter meta data
-
-Type | Name | Length | Description
---- | --- | --- | ---
-[Filter type](#filter-type) | filterType | 1 | Filter protocol of this filter. Describes a `filterdata` format.
-[Filter flags](#filter-flags) | flags | 1 | Flags bitmask.
-uint8_t | profileId | 1 | Entries that pass this filter will be associated with this profile id.
-[Filter input type](#filter-input-description) | inputDescription |  | Determines how this filter interprets incoming entries.
-[Filter output type](#filter-output-description) | outputDescription |  | Determines how advertisements that pass this filter are handled by the system.
-
-
-### Filter type
-
-A `uint8` defining the format and implementation of the filter datastructure.
-
-Value | Name | Description 
---- | --- | ---
-0 | CuckooFilter | Filter data is interpreted as [Cuckoo filter data](./CUCKOO_FILTER.md#cuckoo-filter-data)
-
-
-### Filter flags
-
-Bit | Name |  Description
---- | --- | ---
-0 | Exclude | If set, the assets that pass this filter will be ignored. Note: this does not mean that assets that do not pass this filter are handled.
-1-7 | Reserved | Reserved for future usage, must be 0 for now.
-
-
-## Filter IO packets
-
-### Filter input description
-The input type metadata field of a filter defines what data is put into the filter when an advertisement is received
-in order to determine wether or not the advertisement 'passed' the filter or is 'rejected'.
-
-Type | Name | Description
---- | --- | ---
-[Advertisement subdata description](#advertisement-subdata-description) | format | What part of the advertisment is used to filter on.
-
-### Filter output description
-When a filter accepts an advertisement, 'output data' needs to be constructed. Depending on the use case this construction 
-may or may not need to use parts of the advertisement data. The output_t metadata field of a filter defines which part
-of the advertisement is used to produce the output data, and how this output data is formatted.
-
-Type | Name | Description 
---- | --- | ---
-[Filter output format](#filter-output-format) | out_format | Determines how the output is formatted. 
-uint8[] | in_format | Aux data describing which part of the advertisment is used to construct the output. Type/length of this field depends on `out_format`.
-
-
-
-### Filter output format
-This output format is a `uint8` used to:
-- determines the format of the unique identifyer of the Asset in the Crownstone mesh.
-- direct advertisements to the relevant firmware components (E.g. NearestCrownstoneAlgorithm,
-MeshTopology, ...) and
-- determines `in_format` that describes which data was used to construct the output with.
-
-
-Value | Name | `in_format` type | `in_format` size |  Output description type
---- | --- | --- | --- | ---
-0 | Mac | None | 0 | Mac address as `uint8_t[6]`
-1 | ShortAssetId | [Advertisement subdata](#advertisement-subdata) |  |  [Short asset id](#short-asset-id)
-
-
-
-### Advertisement subdata description
-This defines a dataformat/selection of data an advertisement. Given an advertisement_subdata_t value
-there is a function that transforms a pair `(macaddres,AD data) -> uint8_t[]` into a byte array.
-Effectively that function 'selects' part of that pair which can be used for further processing.
-
-Type | Name | Description
---- | --- | ---
-[Advertisement subdata type](#advertisement-subdata-type) | type | See table below
-uint8_t[] | auxData | depending on `type`, more descriptive information about the selection method.
-
-### Advertisement subdata type
-The advertisement subdata type field can have the following values. 
-
-The AD data is formatted as `(type0, data0[0], ... , data0[l0]), ..., (typeN, dataN[0], ... , dataN[lN])`. Each pair `(typeK, dataK[])` is called an entry. An advertisement consists of a mac address followed by a sequence of AD data entries.
-
-Value | Name  | auxData type | AuxTypeSize | Description
---- | --- | --- | --- | ---
-0 | Mac              | - | 0 | The (full) mac address is selected, and nothing more.
-1 | AdDataType       | ad_data_type_selector_t  | 1 | The advertisement is truncated to the data part `dataI` of an `(typeI, dataI)` where `typeI` is equal to the given `AdDataType`. If multiple such entries exist, they are treated separately. If that no entry is found with the given type, the advertisement is ignored.
-2 | MaskedAdDataType | [masked_ad_data_t](#masked-ad-data-type-selector) | 5 | Same as `AdDataType`, but the data `dataI` is now masked by a byte wise mask.
-
-### Masked AD data type selector
-Defines which entries of an advertisement to select based on their type field and defines a mask to blank out irrelevant parts.
-
-The i-th bit of the mask, `AdDataMask & (1 << i)`, is multiplied with `dataI[i]` to obtain the output array.
-
-Type | Name | Description
---- | --- | ---
-uint8_t | AdDataType | select an entry with `typeI` equal to `AdDataType`. If multiple such entries exist, they are treated separately.
-uint32_t | AdDataMask | bit-to-byte-wise mask for `dataI`.
-
-
-## Filter description packets
-
-### Filter summary
-A short summary of a filters state.
-
-Type | Name | Length
---- | --- | ---
-uint8_t | filterId | 1
-uint32_t | filterCrc | 4
-
-### Filter master CRC
-
-Given a list of filters `f[0], ... , f[k]`, in [tracking filter data](#tracking-filter-data) format, the `masterCrc` is computed as follows:
-- Sort the filters according to ascending `filterId` to obtain a new list: `f'[0], ... , f'[k]`
-- compute the CRC-32 values of this list: `c[0], ... , c[k]`.
-- create a new list by zipping the filterIds with these crcs: `id(f'[0]), c[0], ... , id(f'[k]), c[k]`.
-  Here `id(f'[i])` is the `filterId` of `f'[i]`. Note that these id's are `uint8`, while the CRCs are `uint32`.
-- the `masterCrc` the CRC-32 of this zipped list.
-
-The if the firmware needs to recompute its master CRC, it uses the filters it has in RAM,
-not the filters that are stored on flash.
-
-
-### Short asset id
-
-A **3-byte** identifier that is used in Crownstone mesh communication to differentiate between advertisements (or the entities broadcasting them). 
-For example, a filter may be configured with [input type](#input-type) `MAC`, and filter type [CuckooFilter](#filter-type). The short asset id
-can then be a [compressed filter entry](CUCKOO_FILTER.md#compressed-cuckoo-filter-entry-data).
-
-Each [filter type](#filter-type) is allowed to implement their own algorithm to construct a short asset id based on their input data. They are 
-required to make a _reasonable effort_ to avoid collisions. Currently implemented:
-
-[Filter type](#filter-type) | Short asset id type | Depends on input type
---- | --- | ---
-CuckooFilter | [compressed filter entry](CUCKOO_FILTER.md#compressed-cuckoo-filter-entry-data) | false
-
-
-### Filter master version
-A `uint16_t` "lollipop" value used for determining if a filter set is up-to-date.
-
-Value | Description
---- | --- 
-0 | Unknown or unset version. Always inferior to non-zero versions.
-other | For non zero versions `v` and all `1 <= n < 2^(16-1)`, `v` is inferior to `v+n`, including lollipop roll over.
 
