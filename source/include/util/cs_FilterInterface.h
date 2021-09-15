@@ -30,6 +30,7 @@ public:
 		// REVIEW: isn't this the same as:
 		// crc = crc & 0x00FFFFFF;
 		// memcpy(data, crc, 3);
+		// or even: memcpy(data, crc+1, 3);
 		short_asset_id_t id{
 			.data{
 				static_cast<uint8_t>((crc >>  0) & 0xFF),

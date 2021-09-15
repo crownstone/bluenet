@@ -144,6 +144,8 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		if (rssiIsCloser(record.myRssi, incomingReport.compressedRssi) ) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now.");
 			saveWinningReport(record, record.myRssi, _myStoneId);
+
+			// REVIEW: this report is outdated. Also, it may lead to many messages being sent.
 			broadcastPersonalReport(record);
 			sendUartUpdate(record);
 			onWinnerChanged(true);

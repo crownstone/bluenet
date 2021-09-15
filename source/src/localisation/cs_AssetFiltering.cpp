@@ -162,8 +162,8 @@ void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const s
 		if (_assetStore->getRecord(shortAssetId) == nullptr) {
 			LOGAssetFilteringDebug("Asset id=%02X:%02X:%02X not in store yet", shortAssetId.data[0], shortAssetId.data[1], shortAssetId.data[2]);
 		}
-		_assetStore->handleAcceptedAsset(asset, shortAssetId); // Should return the record,
-		assetRecord = _assetStore->getRecord(shortAssetId); // because this iterates again
+		_assetStore->handleAcceptedAsset(asset, shortAssetId); // REVIEW: Should return the record,
+		assetRecord = _assetStore->getRecord(shortAssetId); // REVIEW: because this iterates again
 	}
 
 	// throttle if the record currently exists and requires it.
@@ -173,27 +173,27 @@ void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const s
 		uint16_t throttlingCounterBumpMs = 0;
 
 		// forward sid to mesh
-		if (masks._forwardAssetId && _assetForwarder != nullptr) { // Useless nullptr check?
+		if (masks._forwardAssetId && _assetForwarder != nullptr) { // REVIEW: Useless nullptr check?
 			throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, shortAssetId);
 			LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 
 		// forward mac to mesh
-		if (masks._forwardMac && _assetForwarder != nullptr) { // Useless nullptr check?
+		if (masks._forwardMac && _assetForwarder != nullptr) { // REVIEW: Useless nullptr check?
 			throttlingCounterBumpMs += _assetForwarder->sendAssetMacToMesh(asset);
 			LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		// nearest algorithm
-		if (masks._nearestAssetId && _nearestCrownstoneTracker != nullptr) { // Useless nullptr check?
+		if (masks._nearestAssetId && _nearestCrownstoneTracker != nullptr) { // REVIEW: Useless nullptr check?
 			throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId);
 			LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 		}
 #endif
 
 		// update the throttling counter
-		if (_assetStore != nullptr && assetRecord != nullptr) { // Useless nullptr check?
+		if (_assetStore != nullptr && assetRecord != nullptr) { // REVIEW: Useless nullptr check?
 			LOGAssetFilteringDebug("Bump throttling %u ms for asset id=%02X:%02X:%02X", throttlingCounterBumpMs,
 					shortAssetId.data[0], shortAssetId.data[1], shortAssetId.data[2]);
 			_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
