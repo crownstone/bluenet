@@ -130,20 +130,13 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	return &record;
 }
 
-// REVIEW: why add instead of set?
-void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
+void AssetStore::setThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
 	// REVIEW: this isn't rounded up, it gives 1 tick for 1 ms.
 	uint16_t ticksRoundedUp = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1) / THROTTLE_COUNTER_PERIOD_MS;
-	uint16_t ticksTotal = record.throttlingCountdown + ticksRoundedUp;
 
 	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
-	if (ticksTotal > 0xFF) {
-		record.throttlingCountdown = 0xFF;
-	}
-	else {
-		record.throttlingCountdown = ticksTotal;
-	}
+	record.setThrottlingCountdown(ticksRoundedUp);
 }
 
 

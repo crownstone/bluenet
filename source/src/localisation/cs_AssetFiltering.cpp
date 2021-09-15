@@ -194,7 +194,7 @@ void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const s
 		// update the throttling counter
 		LOGAssetFilteringDebug("Bump throttling %u ms for asset id=%02X:%02X:%02X", throttlingCounterBumpMs,
 				shortAssetId.data[0], shortAssetId.data[1], shortAssetId.data[2]);
-		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
+		_assetStore->setThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 	}
 	else {
 		LOGAssetFilteringDebug("Throttled asset id=%02X:%02X:%02X counter=%u", shortAssetId.data[0], shortAssetId.data[1], shortAssetId.data[2], assetRecord->throttlingCountdown);

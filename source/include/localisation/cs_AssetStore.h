@@ -68,7 +68,7 @@ public:
 	 * This will ensure that the record.isThrottled() will be true
 	 * for (at least) timeToNextThrottleOpenMs.
 	 */
-	void addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs);
+	void setThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs);
 
 
 private:
