@@ -45,8 +45,10 @@ public:
 	 * Get or create a record for the given assetId.
 	 * Then update rssi values according to the incoming scan and
 	 * revert the lastReceivedCounter to 0.
+	 *
+	 * Returns the adjusted record if found, else returns nullptr
 	 */
-	void handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId);
+	asset_record_t* handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId);
 
 	/**
 	 * returns a pointer of record if found,

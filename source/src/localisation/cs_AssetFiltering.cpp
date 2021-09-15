@@ -162,8 +162,8 @@ void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const s
 	if (_assetStore->getRecord(shortAssetId) == nullptr) {
 		LOGAssetFilteringDebug("Asset id=%02X:%02X:%02X not in store yet", shortAssetId.data[0], shortAssetId.data[1], shortAssetId.data[2]);
 	}
-	_assetStore->handleAcceptedAsset(asset, shortAssetId); // REVIEW: Should return the record,
-	assetRecord = _assetStore->getRecord(shortAssetId); // REVIEW: because this iterates again
+
+	assetRecord = _assetStore->handleAcceptedAsset(asset, shortAssetId);
 
 	// throttle if the record currently exists and requires it.
 	bool throttle = assetRecord != nullptr && assetRecord->isThrottled();

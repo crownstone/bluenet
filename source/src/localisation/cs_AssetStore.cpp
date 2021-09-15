@@ -50,9 +50,9 @@ void AssetStore::handleEvent(event_t& event) {
 	}
 }
 
-void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
 	LOGAssetStoreVerbose("handleAcceptedAsset id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
-	auto record = getOrCreateRecord(assetId);
+	asset_record_t* record = getOrCreateRecord(assetId);
 	if (record != nullptr) {
 		record->myRssi = rssi_and_channel_t(asset.rssi, asset.channel);
 		record->lastReceivedCounter = 0;
@@ -60,6 +60,7 @@ void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_
 	else {
 		LOGAssetStoreDebug("Could not create a record for id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	}
+	return record;
 }
 
 void AssetStore::resetRecords() {
