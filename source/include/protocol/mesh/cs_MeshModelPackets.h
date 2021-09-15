@@ -11,6 +11,7 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/cs_CmdSource.h>
 #include <protocol/cs_AssetFilterPackets.h>
+#include <protocol/cs_CompressedRssiData.h>
 
 /**
  * Message opcodes.
@@ -200,10 +201,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 };
 
 
-struct __attribute__((__packed__)) compressed_rssi_data_t {
-	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssiHalved : 6; // half of the absolute value of the original rssi.
-};
 
 struct __attribute__((__packed__)) report_asset_mac_t {
 	uint8_t trackableDeviceMac[MAC_ADDRESS_LEN];
