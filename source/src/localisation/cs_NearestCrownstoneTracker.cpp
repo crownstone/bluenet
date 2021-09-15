@@ -17,7 +17,7 @@
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
 #include <uart/cs_UartHandler.h>
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 #include <localisation/cs_AssetFilterStore.h>
 #include <common/cs_Component.h>
@@ -74,7 +74,7 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id) {
 	report_asset_id_t rep = {};
 	rep.id = id;
-	rep.compressedRssi = compressRssi(asset.rssi,asset.channel);
+	rep.compressedRssi = rssi_and_channel_t(asset.rssi,asset.channel);
 	onReceiveAssetAdvertisement(rep);
 	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
@@ -105,7 +105,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	else {
 		LOGNearestCrownstoneTrackerVerbose("We didn't win before");
-		if (rssiIsCloser(incomingReport.compressedRssi, record.nearestRssi))  {
+		if (incomingReport.compressedRssi.isCloserThan(record.nearestRssi))  {
 			// we win because the incoming report is a first hand observation.
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
 			saveWinningReport(record, incomingReport.compressedRssi, _myStoneId);
@@ -141,7 +141,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	if (reporter == record.nearestStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if (rssiIsCloser(record.myRssi, incomingReport.compressedRssi) ) {
+		if (record.myRssi.isCloserThan(incomingReport.compressedRssi) ) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now.");
 			saveWinningReport(record, record.myRssi, _myStoneId);
 
@@ -157,7 +157,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		}
 	}
 	else {
-		if (record.nearestStoneId == 0 || rssiIsCloser(incomingReport.compressedRssi, record.nearestRssi)) {
+		if (record.nearestStoneId == 0 || incomingReport.compressedRssi.isCloserThan(record.nearestRssi)) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
 			saveWinningReport(record, incomingReport.compressedRssi, reporter);
 			sendUartUpdate(record);
@@ -197,8 +197,8 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	auto uartMsg = cs_nearest_stone_update_t{
 			.assetId = record.assetId,
 			.stoneId = record.nearestStoneId,
-			.rssi = getRssi(record.nearestRssi),
-			.channel = getChannel(record.nearestRssi)
+			.rssi = record.nearestRssi.getRssi(),
+			.channel = record.nearestRssi.getChannel()
 	};
 
 	// REVIEW: doesn't have to be a different message than asset id report.
@@ -227,7 +227,7 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 // ---------------------------------
 
 
-void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
+void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, rssi_and_channel_t winningRssi, stone_id_t winningId) {
 	rec.nearestStoneId = winningId;
 	rec.nearestRssi = winningRssi;
 }
@@ -247,7 +247,7 @@ asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id
 		}
 	}
 	else if constexpr (FILTER_STRATEGY == FilterStrategy::RSSI_FALL_OFF) {
-		auto correctedRssi = getRssi(record->myRssi)
+		auto correctedRssi = record->myRssi.getRssi()
 							 - (record->lastReceivedCounter * RSSI_FALL_OFF_RATE_DB_PER_S * 1000)
 									   / AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS;
 

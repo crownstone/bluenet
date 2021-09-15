@@ -144,7 +144,7 @@ private:
 	/**
 	 * saves the report in the _winning list.
 	 */
-	void saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId);
+	void saveWinningReport(asset_record_t& rec, rssi_and_channel_t winningRssi, stone_id_t winningId);
 
 	/**
 	 * getRecord for assetId from assetStore and return it.

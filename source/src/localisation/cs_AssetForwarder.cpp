@@ -9,7 +9,7 @@
 #include <localisation/cs_AssetForwarder.h>
 #include <mesh/cs_MeshMsgEvent.h>
 
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 #include <protocol/cs_Packets.h>
 #include <uart/cs_UartHandler.h>
 #include <logging/cs_Logger.h>
@@ -34,7 +34,7 @@ uint16_t AssetForwarder::sendAssetMacToMesh(const scanned_device_t& asset) {
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_rssi_mac_t assetMsg;
 
-	assetMsg.rssiData = compressRssi(asset.rssi, asset.channel);
+	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
 	memcpy(assetMsg.mac, asset.address, sizeof(assetMsg.mac));
 
 	cs_mesh_msg_t msgWrapper;
@@ -58,7 +58,7 @@ uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const 
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_rssi_sid_t assetMsg = {};
 
-	assetMsg.rssiData = compressRssi(asset.rssi, asset.channel);
+	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
 	assetMsg.assetId = assetId;
 
 	cs_mesh_msg_t msgWrapper;
@@ -111,8 +111,8 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t
 	auto uartAssetMsg = cs_asset_rssi_data_mac_t {
 			.address = {},
 			.stoneId = seenByStoneId,
-			.rssi    = getRssi(assetMsg.rssiData),
-			.channel = getChannel(assetMsg.rssiData),
+			.rssi    = assetMsg.rssiData.getRssi(),
+			.channel = assetMsg.rssiData.getChannel(),
 	};
 	memcpy(uartAssetMsg.address, assetMsg.mac, sizeof(assetMsg.mac));
 
@@ -128,8 +128,8 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t
 	auto uartAssetMsg = cs_asset_rssi_data_sid_t{
 			.assetId = assetMsg.assetId,
 			.stoneId = seenByStoneId,
-			.rssi    = getRssi(assetMsg.rssiData),
-			.channel = getChannel(assetMsg.rssiData),
+			.rssi    = assetMsg.rssiData.getRssi(),
+			.channel = assetMsg.rssiData.getChannel(),
 	};
 
 	UartHandler::getInstance().writeMsg(

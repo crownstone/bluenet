@@ -11,6 +11,7 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/cs_CmdSource.h>
 #include <protocol/cs_AssetFilterPackets.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 /**
  * Message opcodes.
@@ -200,14 +201,10 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 };
 
 
-struct __attribute__((__packed__)) compressed_rssi_data_t {
-	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssiHalved : 6; // half of the absolute value of the original rssi.
-};
 
 struct __attribute__((__packed__)) report_asset_mac_t {
 	uint8_t trackableDeviceMac[MAC_ADDRESS_LEN];
-	compressed_rssi_data_t rssi;
+	rssi_and_channel_t rssi;
 };
 
 
@@ -215,7 +212,7 @@ struct __attribute__((__packed__)) report_asset_mac_t {
 struct __attribute__((__packed__)) report_asset_id_t {
 	short_asset_id_t id;
 	uint8_t reserved[3];
-	compressed_rssi_data_t compressedRssi;
+	rssi_and_channel_t compressedRssi;
 };
 
 /**
@@ -299,13 +296,13 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_mac_t {
-	compressed_rssi_data_t rssiData;
+	rssi_and_channel_t rssiData;
 	uint8_t mac[MAC_ADDRESS_LEN];
 };
 
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_sid_t {
-	compressed_rssi_data_t rssiData;
+	rssi_and_channel_t rssiData;
 	short_asset_id_t assetId;
 	uint8_t reserved[3];
 };
