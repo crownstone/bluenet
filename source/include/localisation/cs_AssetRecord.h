@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 struct __attribute__((__packed__)) asset_record_t {
 	/**
@@ -18,7 +18,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	/**
 	 * Most recent RSSI value observed by this Crownstone.
 	 */
-	compressed_rssi_data_t myRssi;
+	rssi_and_channel_t myRssi;
 
 	/**
 	 * Set to 0 each time this asset is scanned.
@@ -45,7 +45,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * RSSI between asset and nearest stone.
 	 * Only valid when the nearest stone ID is valid.
 	 */
-	compressed_rssi_data_t nearestRssi;
+	rssi_and_channel_t nearestRssi;
 #endif
 
 	// ------------- utility functions -------------

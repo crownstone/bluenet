@@ -8,7 +8,7 @@
 #include <ble/cs_Nordic.h>
 #include <localisation/cs_MeshTopology.h>
 #include <storage/cs_State.h>
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 #include <util/cs_Utils.h>
 #include <uart/cs_UartHandler.h>
 

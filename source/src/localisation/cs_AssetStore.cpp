@@ -8,7 +8,7 @@
 
 #include <localisation/cs_AssetStore.h>
 #include <logging/cs_Logger.h>
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 #define LOGAssetStoreWarn    LOGw
 #define LOGAssetStoreInfo    LOGi
@@ -54,7 +54,7 @@ void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_
 	LOGAssetStoreVerbose("handleAcceptedAsset id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	auto record = getOrCreateRecord(assetId);
 	if (record != nullptr) {
-		record->myRssi = compressed_rssi_data_t(asset.rssi, asset.channel);
+		record->myRssi = rssi_and_channel_t(asset.rssi, asset.channel);
 		record->lastReceivedCounter = 0;
 	}
 	else {

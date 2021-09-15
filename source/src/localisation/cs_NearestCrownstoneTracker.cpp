@@ -17,7 +17,7 @@
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
 #include <uart/cs_UartHandler.h>
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 #include <localisation/cs_AssetFilterStore.h>
 #include <common/cs_Component.h>
@@ -74,7 +74,7 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id) {
 	report_asset_id_t rep = {};
 	rep.id = id;
-	rep.compressedRssi = compressed_rssi_data_t(asset.rssi,asset.channel);
+	rep.compressedRssi = rssi_and_channel_t(asset.rssi,asset.channel);
 	onReceiveAssetAdvertisement(rep);
 	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
@@ -227,7 +227,7 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 // ---------------------------------
 
 
-void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, compressed_rssi_data_t winningRssi, stone_id_t winningId) {
+void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, rssi_and_channel_t winningRssi, stone_id_t winningId) {
 	rec.nearestStoneId = winningId;
 	rec.nearestRssi = winningRssi;
 }

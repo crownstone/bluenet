@@ -9,13 +9,13 @@
 #pragma once
 
 
-struct __attribute__((__packed__)) compressed_rssi_data_t {
+struct __attribute__((__packed__)) rssi_and_channel_t {
 	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
 	uint8_t rssiHalved : 6; // half of the absolute value of the original rssi.
 
-	compressed_rssi_data_t() = default;
+	rssi_and_channel_t() = default;
 
-	compressed_rssi_data_t(int8_t rssi, uint8_t ch = 0) {
+	rssi_and_channel_t(int8_t rssi, uint8_t ch = 0) {
 		switch (ch) {
 			case 37: ch = 1; break;
 			case 38: ch = 2; break;
@@ -42,12 +42,12 @@ struct __attribute__((__packed__)) compressed_rssi_data_t {
 		return -2 * rssiHalved;
 	}
 
-	bool isCloserThan(const compressed_rssi_data_t& other) const {
+	bool isCloserThan(const rssi_and_channel_t& other) const {
 		// usually higher values are shorter distances, but abs reverses inequality.
 		return rssiHalved < other.rssiHalved;
 	}
 
-	bool isCloserEqual(const compressed_rssi_data_t& other) const {
+	bool isCloserEqual(const rssi_and_channel_t& other) const {
 		return isCloserThan(other) || rssiHalved == other.rssiHalved;
 	}
 };
