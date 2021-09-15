@@ -234,12 +234,12 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::getAcceptedBitmasks(con
 						break;
 					}
 
-					case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+					case AssetFilterOutputFormat::AssetIdOverMesh: {
 						BLEutil::setBit(masks._forwardAssetId, i);
 						break;
 					}
 
-					case AssetFilterOutputFormat::ShortAssetId: {
+					case AssetFilterOutputFormat::AssetId: {
 						BLEutil::setBit(masks._nearestAssetId, i);
 						break;
 					}

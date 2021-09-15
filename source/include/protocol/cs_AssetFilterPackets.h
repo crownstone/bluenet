@@ -68,9 +68,9 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	MacOverMesh          = 0,
-	ShortAssetId         = 1,
-	ShortAssetIdOverMesh = 2,
+	MacOverMesh     = 0,
+	AssetId         = 1,
+	AssetIdOverMesh = 2,
 };
 
 union __attribute__((__packed__)) asset_filter_flags_t {

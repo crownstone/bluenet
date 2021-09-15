@@ -73,14 +73,14 @@ bool AssetFilterOutput::isValid() {
 		case AssetFilterOutputFormat::MacOverMesh: {
 			return true;
 		}
-		case AssetFilterOutputFormat::ShortAssetId: {
+		case AssetFilterOutputFormat::AssetId: {
 			if (inFormat().isValid() == false) {
 				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
 				return false;
 			}
 			return true;
 		}
-		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+		case AssetFilterOutputFormat::AssetIdOverMesh: {
 			if (inFormat().isValid() == false) {
 				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
 				return false;
@@ -99,11 +99,11 @@ size_t AssetFilterOutput::length() {
 		case AssetFilterOutputFormat::MacOverMesh: {
 			break;
 		}
-		case AssetFilterOutputFormat::ShortAssetId: {
+		case AssetFilterOutputFormat::AssetId: {
 			len += inFormat().length();
 			break;
 		}
-		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+		case AssetFilterOutputFormat::AssetIdOverMesh: {
 			len += inFormat().length();
 			break;
 		}
