@@ -9,7 +9,7 @@
 #include <events/cs_Event.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <localisation/cs_TrackableEvent.h>
-#include <localisation/cs_TrackableId.h>
+
 #include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/cs_UartOpcodes.h>
