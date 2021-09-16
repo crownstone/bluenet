@@ -131,7 +131,9 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 }
 
 void AssetStore::setThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
-	// REVIEW: this isn't rounded up, it gives 1 tick for 1 ms.
+	// 'Ceil division' equal to:
+	//         timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if the division is exact
+	//     1 + timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if there is a remainder.
 	uint16_t ticksRoundedUp = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1) / THROTTLE_COUNTER_PERIOD_MS;
 
 	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
