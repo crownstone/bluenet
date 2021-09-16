@@ -191,7 +191,7 @@ void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 }
 
 void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
-	auto uartMsg = cs_asset_rssi_data_id_t{
+	auto uartMsg = cs_asset_info_id_t{
 			.assetId = record.assetId,
 			.stoneId = record.nearestStoneId,
 			.rssi = record.nearestRssi.getRssi(),
@@ -201,7 +201,7 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	// REVIEW: doesn't have to be a different message than asset id report.
 	// ANSWER(Arend): adjusted, but I'm suggesting further refactor
 	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_SID_DATA,
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_INFO_SID,
 			reinterpret_cast<uint8_t*>(&uartMsg),
 			sizeof(uartMsg));
 }
