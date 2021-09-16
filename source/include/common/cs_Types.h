@@ -293,7 +293,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_RSSI_DATA,                               // TODO: remove this type, it's not used.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
 	EVT_RECV_MESH_MSG,                                // A mesh message was received.
-	EVT_MESH_NEAREST_WITNESS_REPORT,                  // Payload: MeshMsgEvent with type CS_MESH_MODEL_TYPE_REPORT_ASSET_[MAC,ID]. Originates from MeshMsgHandler.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
@@ -683,7 +682,6 @@ typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_MAC);
 typedef mesh_topo_mac_result_t TYPIFY(EVT_MESH_TOPO_MAC_RESULT);
 typedef void TYPIFY(CMD_MESH_TOPO_RESET);
 typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_RSSI);
-typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 // TWI / I2C module
 typedef cs_twi_init_t TYPIFY(EVT_TWI_INIT);

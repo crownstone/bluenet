@@ -98,14 +98,6 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			retCode = handleRssiData(meshMsgEvent);
 			break;
 		}
-		case CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC: {
-			retCode = dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, meshMsgEvent);
-			break;
-		}
-		case CS_MESH_MODEL_TYPE_REPORT_ASSET_ID: {
-			retCode = dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, meshMsgEvent);
-			break;
-		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
 			retCode = handleCmdMultiSwitch(payload, payloadSize);
 			break;
@@ -167,10 +159,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			// TODO: do we need to do anything?
 			break;
 		}
-		case CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC: {
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
 			break;
 		}
-		case CS_MESH_MODEL_TYPE_ASSET_RSSI_SID: {
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_ID: {
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI: {
@@ -278,11 +270,6 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(MeshMsgEvent& mesh_msg_event) {
 
 cs_ret_code_t MeshMsgHandler::handleRssiData(MeshMsgEvent& mesh_msg_event) {
 	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_RSSI_DATA, mesh_msg_event);
-}
-
-cs_ret_code_t MeshMsgHandler::handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
-	return dispatchEventForMeshMsg(CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT, mesh_msg_event);
-
 }
 
 cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t payloadSize) {

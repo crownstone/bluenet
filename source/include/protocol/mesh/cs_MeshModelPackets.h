@@ -67,15 +67,14 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT  = 20, // Payload: cs_mesh_model_msg_device_heartbeat_t
 	CS_MESH_MODEL_TYPE_RSSI_PING                 = 21, // Payload: rssi_ping_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t
-	CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC          = 23, // Payload: report_asset_mac_t                        Only used in NearestCrownstone
+	// 23 removed
 	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
 	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
-	CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
+	CS_MESH_MODEL_TYPE_ASSET_INFO_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
 	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
 	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
-	CS_MESH_MODEL_TYPE_REPORT_ASSET_ID           = 30, // Payload: report_asset_id_t // REVIEW: why a different message, can just use the same as asset id forward.
-	CS_MESH_MODEL_TYPE_ASSET_RSSI_SID            = 31, // Payload: cs_mesh_model_msg_asset_rssi_sid_t
+	CS_MESH_MODEL_TYPE_ASSET_INFO_ID             = 30, // Payload: cs_mesh_model_msg_asset_info_id_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -202,17 +201,16 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 
 
 
-struct __attribute__((__packed__)) report_asset_mac_t {
-	uint8_t trackableDeviceMac[MAC_ADDRESS_LEN];
-	rssi_and_channel_t rssi;
+struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_mac_t {
+	rssi_and_channel_t rssiData;
+	uint8_t mac[MAC_ADDRESS_LEN];
 };
 
 
-
-struct __attribute__((__packed__)) report_asset_id_t {
+struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_id_t {
 	short_asset_id_t id;
 	uint8_t reserved[3];
-	rssi_and_channel_t compressedRssi;
+	rssi_and_channel_t rssiData;
 };
 
 /**
@@ -295,14 +293,3 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_filter_version_t {
 	uint32_t masterCrc;
 };
 
-struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_mac_t {
-	rssi_and_channel_t rssiData;
-	uint8_t mac[MAC_ADDRESS_LEN];
-};
-
-
-struct __attribute__((__packed__)) cs_mesh_model_msg_asset_rssi_sid_t {
-	rssi_and_channel_t rssiData;
-	short_asset_id_t assetId;
-	uint8_t reserved[3];
-};
