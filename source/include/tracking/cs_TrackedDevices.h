@@ -7,7 +7,6 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
-#include <forward_list>
 #include <cstdint>
 
 /**
@@ -85,22 +84,22 @@ private:
 	 *
 	 * Device ID should be unique.
 	 */
-	std::forward_list<TrackedDevice> devices;
+	TrackedDevice _devices[MAX_TRACKED_DEVICES];
 
-	uint8_t deviceListSize = 0;
+	uint8_t _deviceListSize = 0;
 
 	/**
 	 * Whether there has been a successful sync of tracked devices.
 	 *
 	 * For now, this means just getting a list of devices from another crownstone, after boot.
 	 */
-	bool deviceListIsSynced = false;
+	bool _deviceListIsSynced = false;
 
 	/**
 	 * When syncing, the remote crownstone will tell how many devices there are.
 	 * This number is cached in this variable, so we know when we're synced.
 	 */
-	uint8_t expectedDeviceListSize = 0xFF;
+	uint8_t _expectedDeviceListSize = 0xFF;
 
 	/**
 	 * Find device with given ID, else add a new device with given ID.
@@ -129,13 +128,6 @@ private:
 	 * returns null if couldn't be added.
 	 */
 	TrackedDevice* add();
-
-	/**
-	 * Remove a device from the list.
-	 *
-	 * Either a record with incomplete data, otherwise the oldest.
-	 */
-	cs_ret_code_t removeDevice();
 
 	cs_ret_code_t handleRegister(internal_register_tracked_device_packet_t& packet);
 	cs_ret_code_t handleUpdate(internal_update_tracked_device_packet_t& packet);
@@ -231,7 +223,7 @@ private:
 	/**
 	 * Send tracked devices list size to mesh.
 	 */
-	void sendListSizeToMesh();
+	void sendListSizeToMesh(uint8_t deviceCount);
 
 	/**
 	 * Send all tracked devices to mesh.

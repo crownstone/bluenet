@@ -12,13 +12,14 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#define LOGTrackedDevicesDebug LOGnone
-#define LOGTrackedDevicesVerbose LOGnone
+#define LOGTrackedDevicesDebug LOGvv
+#define LOGTrackedDevicesVerbose LOGvv
 
 TrackedDevices::TrackedDevices() {
 }
 
 void TrackedDevices::init() {
+	LOGi("Init. Using %u bytes of RAM.", sizeof(_devices));
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -90,7 +91,7 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 
 void TrackedDevices::handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet) {
 	LOGTrackedDevicesDebug("handleMeshListSize size=%u", packet.listSize);
-	expectedDeviceListSize = packet.listSize;
+	_expectedDeviceListSize = packet.listSize;
 }
 
 void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
@@ -173,6 +174,7 @@ TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	if (device == nullptr) {
 		device = add();
 		if (device != nullptr) {
+			device->fieldsSet = 0;
 			device->data.data.deviceId = deviceId;
 		}
 	}
@@ -180,10 +182,11 @@ TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 }
 
 TrackedDevices::TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (iter->data.data.deviceId == deviceId) {
-			LOGTrackedDevicesVerbose("found device");
-			return &(*iter);
+	LOGTrackedDevicesVerbose("find id=%u listSize=%u", deviceId, _deviceListSize);
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (_devices[i].data.data.deviceId == deviceId) {
+			LOGTrackedDevicesVerbose("found device at index=%u", i);
+			return &(_devices[i]);
 		}
 	}
 	return nullptr;
@@ -191,56 +194,59 @@ TrackedDevices::TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
 
 TrackedDevices::TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (memcmp(iter->data.data.deviceToken, deviceToken, size) == 0) {
-			LOGTrackedDevicesVerbose("found token id=%u", iter->data.data.deviceId);
-			return &(*iter);
+	LOGTrackedDevicesVerbose("find token=%02X:%02X:%02X listSize=%u", deviceToken[0], deviceToken[1], deviceToken[2], _deviceListSize);
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (memcmp(_devices[i].data.data.deviceToken, deviceToken, size) == 0) {
+			LOGTrackedDevicesVerbose("found token at index=%u id=%u", i, _devices[i].data.data.deviceId);
+			return &(_devices[i]);
 		}
 	}
 	return nullptr;
 }
 
 TrackedDevices::TrackedDevice* TrackedDevices::add() {
-	// Check number of devices.
-	if (deviceListSize >= MAX_TRACKED_DEVICES) {
-		cs_ret_code_t retCode = removeDevice();
-		if (retCode != ERR_SUCCESS) {
-			LOGTrackedDevicesDebug("no space to add");
-			return nullptr;
+	LOGTrackedDevicesDebug("add");
+
+	// Use empty spot.
+	uint8_t incompleteIndex = 0xFF;
+	uint16_t lowestTtl = 0xFFFF;
+	uint8_t lowestTtlIndex = 0xFF;
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (_devices[i].data.data.timeToLiveMinutes == 0) {
+			LOGTrackedDevicesDebug("Use empty spot: index=%u", i);
+			return &(_devices[i]);
+		}
+		if (!allFieldsSet(_devices[i])) {
+			incompleteIndex = i;
+		}
+		if (_devices[i].data.data.timeToLiveMinutes < lowestTtl) {
+			lowestTtlIndex = i;
 		}
 	}
-	LOGTrackedDevicesDebug("add device");
-	TrackedDevice device;
-	devices.push_front(device);
-	++deviceListSize;
-	return &(devices.front());
-}
 
-cs_ret_code_t TrackedDevices::removeDevice() {
-	uint16_t lowestTTL = 0xFFFF;
-	auto iterToRemove = devices.end();
-	auto prevIter = devices.before_begin();
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (iter->fieldsSet != ALL_FIELDS_SET) {
-			iterToRemove = prevIter;
-			break;
-		}
-		if (iter->data.data.timeToLiveMinutes <= lowestTTL) {
-			lowestTTL = iter->data.data.timeToLiveMinutes;
-			iterToRemove = prevIter;
-		}
-		prevIter = iter;
+	// Increase list size.
+	if (_deviceListSize < MAX_TRACKED_DEVICES) {
+		uint8_t index = _deviceListSize++;
+		LOGTrackedDevicesDebug("Increase list size: index=%u listSize=%u", index, _deviceListSize);
+		return &(_devices[index]);
 	}
-	[[maybe_unused]] auto removedIter = iterToRemove;
-	LOGTrackedDevicesDebug("remove device id=%u", (++removedIter)->data.data.deviceId);
-//	if (lowestTTL == 0xFFFF) {
-//		return ERR_NOT_AVAILABLE;
-//	}
-	devices.erase_after(iterToRemove);
-	--deviceListSize;
-	return ERR_SUCCESS;
-}
 
+	// Use spot with incomplete data.
+	if (incompleteIndex != 0xFF) {
+		LOGTrackedDevicesDebug("Use spot with incomplete data: index=%u", incompleteIndex);
+		return &(_devices[incompleteIndex]);
+	}
+
+	// Use spot with lowest TTL.
+	if (lowestTtlIndex != 0xFF) {
+		LOGTrackedDevicesDebug("Use spot with lowest TTL: index=%u", lowestTtlIndex);
+		return &(_devices[lowestTtlIndex]);
+	}
+
+	// Shouldn't happen.
+	LOGw("No space");
+	return nullptr;
+}
 
 bool TrackedDevices::hasAccess(TrackedDevice& device, uint8_t accessLevel) {
 	if (BLEutil::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL) &&
@@ -267,21 +273,21 @@ bool TrackedDevices::allFieldsSet(TrackedDevice& device) {
 }
 
 void TrackedDevices::checkSynced() {
-	if (deviceListIsSynced) {
+	if (_deviceListIsSynced) {
 		return;
 	}
-	if (deviceListSize < expectedDeviceListSize) {
-		LOGTrackedDevicesDebug("Expecting more devices, current=%u expected=%u", deviceListSize, expectedDeviceListSize);
+	if (_deviceListSize < _expectedDeviceListSize) {
+		LOGTrackedDevicesDebug("Expecting more devices, current=%u expected=%u", _deviceListSize, _expectedDeviceListSize);
 		return;
 	}
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (!allFieldsSet(*iter)) {
-			LOGTrackedDevicesDebug("Not all fields set for id=%u", iter->data.data.deviceId);
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (!allFieldsSet(_devices[i])) {
+			LOGTrackedDevicesDebug("Not all fields set for id=%u", _devices[i].data.data.deviceId);
 			return;
 		}
 	}
 	LOGi("Synced");
-	deviceListIsSynced = true;
+	_deviceListIsSynced = true;
 }
 
 
@@ -347,29 +353,38 @@ void TrackedDevices::print(TrackedDevice& device) {
 
 void TrackedDevices::tickMinute() {
 	LOGTrackedDevicesDebug("tickMinute");
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (iter->locationIdTTLMinutes != 0) {
-			iter->locationIdTTLMinutes--;
-			if (iter->locationIdTTLMinutes == 0) {
-				iter->data.data.locationId = 0;
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (_devices[i].locationIdTTLMinutes != 0) {
+			_devices[i].locationIdTTLMinutes--;
+			if (_devices[i].locationIdTTLMinutes == 0) {
+				_devices[i].data.data.locationId = 0;
 			}
 		}
-		if (iter->data.data.timeToLiveMinutes != 0) {
-			iter->data.data.timeToLiveMinutes--;
+		if (_devices[i].data.data.timeToLiveMinutes != 0) {
+			_devices[i].data.data.timeToLiveMinutes--;
 		}
-		if (iter->heartbeatTTLMinutes != 0) {
-			iter->heartbeatTTLMinutes--;
+		if (_devices[i].heartbeatTTLMinutes != 0) {
+			_devices[i].heartbeatTTLMinutes--;
 		}
-		print(*iter);
+		print(_devices[i]);
 	}
-	// Removed timed out devices.
-	devices.remove_if([](const TrackedDevice& device) { return device.data.data.timeToLiveMinutes == 0; });
+
+	// Remove trailing timed out devices.
+	if (_deviceListSize > 0) {
+		for (int i = _deviceListSize - 1; i >= 0; --i) {
+			if (_devices[i].data.data.timeToLiveMinutes != 0) {
+				break;
+			}
+			_deviceListSize--;
+			LOGTrackedDevicesDebug("Shrinking list size to %u", _deviceListSize);
+		}
+	}
 }
 
 void TrackedDevices::tickSecond() {
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (isValidTTL(*iter) && iter->heartbeatTTLMinutes != 0) {
-			sendHeartbeatLocation(*iter, false, true);
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (isValidTTL(_devices[i]) && _devices[i].heartbeatTTLMinutes != 0) {
+			sendHeartbeatLocation(_devices[i], false, true);
 		}
 	}
 }
@@ -439,21 +454,26 @@ void TrackedDevices::sendTokenToMesh(TrackedDevice& device) {
 	event.dispatch();
 }
 
-void TrackedDevices::sendListSizeToMesh() {
-	LOGTrackedDevicesDebug("sendListSizeToMesh size=%u", deviceListSize);
+void TrackedDevices::sendListSizeToMesh(uint8_t deviceCount) {
+	LOGTrackedDevicesDebug("sendListSizeToMesh size=%u", deviceCount);
 	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE) eventData;
-	eventData.listSize = deviceListSize;
+	eventData.listSize = deviceCount;
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
 void TrackedDevices::sendDeviceList() {
-	LOGTrackedDevicesDebug("sendDeviceList %u devices", deviceListSize);
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		sendRegisterToMesh(*iter);
-		sendTokenToMesh(*iter);
+	LOGTrackedDevicesDebug("sendDeviceList");
+	uint8_t sentDevicesCount = 0;
+	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (isValidTTL(_devices[i]) && allFieldsSet(_devices[i])) {
+			sendRegisterToMesh(_devices[i]);
+			sendTokenToMesh(_devices[i]);
+			++sentDevicesCount;
+		}
 	}
-	sendListSizeToMesh();
+
+	sendListSizeToMesh(sentDevicesCount);
 }
 
 void TrackedDevices::handleEvent(event_t& evt) {
@@ -510,16 +530,16 @@ void TrackedDevices::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
-			if (!deviceListIsSynced) {
+			if (!_deviceListIsSynced) {
 				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(evt.data);
 				req->bits.trackedDevices = true;
-				expectedDeviceListSize = 0xFF;
+				_expectedDeviceListSize = 0xFF;
 			}
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
 			auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)*>(evt.data);
-			if (req->bits.trackedDevices && deviceListIsSynced) {
+			if (req->bits.trackedDevices && _deviceListIsSynced) {
 				// Device list is requested by a crownstone in the mesh.
 				// If we are synced, send it.
 				// But only with a 0.15 chance (0.15 * 255 = 39), to prevent flooding the mesh.
@@ -531,7 +551,7 @@ void TrackedDevices::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::EVT_MESH_SYNC_FAILED: {
 			LOGTrackedDevicesDebug("Sync failed: consider synced");
-			deviceListIsSynced = true;
+			_deviceListIsSynced = true;
 			break;
 		}
 		default:
