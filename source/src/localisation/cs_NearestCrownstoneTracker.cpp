@@ -123,13 +123,6 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i #%u)",
 			_myStoneId, reporter, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
-	if (reporter == _myStoneId) {
-		// REVIEW: is this possible at all?
-		// ANSWER(Arend): only if nrf sdk can create cs_mesh_received_msg_t events with src equal to _myStoneId.
-		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
-		return;
-	}
-
 	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
 		// if we don't have a record in the assetStore it means we're not close
