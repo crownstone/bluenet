@@ -13,7 +13,6 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
-#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableEvent.h>
 #include <localisation/cs_AssetRecord.h>
 #include <localisation/cs_AssetStore.h>

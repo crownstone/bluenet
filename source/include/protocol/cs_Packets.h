@@ -604,18 +604,6 @@ struct __attribute__((packed)) cs_asset_rssi_data_sid_t {
 	// ANSWER(Arend): let's see after adjusting AssetStore
 };
 
-/**
- * A packet that informs about the nearest Crownstone with respect to an asset. The asset is represented by an
- * identifier of three bytes. This allows this message to be sent as unsegmented message through the mesh.
- */
-struct __attribute__((packed)) cs_nearest_stone_update_t {
-	short_asset_id_t assetId;
-	uint8_t stoneId;
-	int8_t rssi;
-	uint8_t channel;
-};
-
-
 // ========================= functions =========================
 
 /**

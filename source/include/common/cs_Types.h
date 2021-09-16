@@ -22,7 +22,6 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
-#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableEvent.h>
 
 #include <time/cs_TimeSyncMessage.h>

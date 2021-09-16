@@ -6,7 +6,7 @@
  */
 
 #include <cstring> // For memcpy
-#include <localisation/cs_Nearestnearestwitnessreport.h>
+
 #include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
