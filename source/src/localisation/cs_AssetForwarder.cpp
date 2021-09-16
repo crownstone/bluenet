@@ -125,7 +125,7 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_info_mac_t
 void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_info_id_t& assetMsg, stone_id_t seenByStoneId) {
 	LOGAssetForwarderDebug("forwarding sid asset msg to uart");
 
-	auto uartAssetMsg = cs_asset_rssi_data_sid_t{
+	auto uartAssetMsg = cs_asset_rssi_data_id_t{
 			.assetId = assetMsg.id,
 			.stoneId = seenByStoneId,
 			.rssi    = assetMsg.rssiData.getRssi(),

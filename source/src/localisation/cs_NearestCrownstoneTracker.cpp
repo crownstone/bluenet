@@ -191,7 +191,7 @@ void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 }
 
 void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
-	auto uartMsg = cs_asset_rssi_data_sid_t{
+	auto uartMsg = cs_asset_rssi_data_id_t{
 			.assetId = record.assetId,
 			.stoneId = record.nearestStoneId,
 			.rssi = record.nearestRssi.getRssi(),
