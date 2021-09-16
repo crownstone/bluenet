@@ -370,14 +370,9 @@ void TrackedDevices::tickMinute() {
 	}
 
 	// Remove trailing timed out devices.
-	if (_deviceListSize > 0) {
-		for (int i = _deviceListSize - 1; i >= 0; --i) {
-			if (_devices[i].data.data.timeToLiveMinutes != 0) {
-				break;
-			}
-			_deviceListSize--;
-			LOGTrackedDevicesDebug("Shrinking list size to %u", _deviceListSize);
-		}
+	while (_deviceListSize > 0 && _devices[_deviceListSize - 1].data.data.timeToLiveMinutes == 0) {
+		_deviceListSize--;
+		LOGTrackedDevicesDebug("Shrinking list size to %u", _deviceListSize);
 	}
 }
 
