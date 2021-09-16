@@ -48,20 +48,20 @@ public:
 	 *
 	 * Returns the adjusted record if found, else returns nullptr
 	 */
-	asset_record_t* handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId);
+	asset_record_t* handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& assetId);
 
 	/**
 	 * returns a pointer of record if found,
 	 * else tries to create a new blank record and return a pointer to that,
 	 * else returns nullptr.
 	 */
-	asset_record_t* getOrCreateRecord(const short_asset_id_t& id);
+	asset_record_t* getOrCreateRecord(const asset_id_t& id);
 
 	/**
 	 * returns a pointer of record if found,
 	 * else returns nullptr.
 	 */
-	asset_record_t* getRecord(const short_asset_id_t& id);
+	asset_record_t* getRecord(const asset_id_t& id);
 
 	/**
 	 * Adds a value to the records' throttlingCountdownTicks.

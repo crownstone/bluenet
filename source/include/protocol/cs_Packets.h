@@ -596,7 +596,7 @@ struct __attribute__((packed)) cs_asset_rssi_data_mac_t {
 };
 
 struct __attribute__((packed)) cs_asset_rssi_data_id_t {
-	short_asset_id_t assetId;
+	asset_id_t assetId;
 	uint8_t stoneId;
 	int8_t rssi;
 	uint8_t channel;

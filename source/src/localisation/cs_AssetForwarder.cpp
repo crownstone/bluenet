@@ -54,7 +54,7 @@ uint16_t AssetForwarder::sendAssetMacToMesh(const scanned_device_t& asset) {
 }
 
 
-uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_info_id_t assetMsg = {};
 

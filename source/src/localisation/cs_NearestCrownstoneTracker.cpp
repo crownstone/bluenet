@@ -71,7 +71,7 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 	}
 }
 
-uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id) {
+uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id) {
 	cs_mesh_model_msg_asset_info_id_t rep = {};
 	rep.id = id;
 	rep.rssiData = rssi_and_channel_t(asset.rssi,asset.channel);
@@ -221,7 +221,7 @@ void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, rssi_and_c
 	rec.nearestRssi = winningRssi;
 }
 
-asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id_t& assetId) {
+asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const asset_id_t& assetId) {
 	asset_record_t* record = _assetStore->getRecord(assetId);
 
 	if (record == nullptr) {

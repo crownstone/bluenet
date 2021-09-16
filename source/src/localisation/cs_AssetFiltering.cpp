@@ -156,7 +156,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 void AssetFiltering::handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset) {
 	// construct short asset id
 	AssetFilter sidFilter         = filterToUseForShortAssetId(masks);
-	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
+	asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
 	asset_record_t* assetRecord = nullptr;
 
 	if (_assetStore->getRecord(shortAssetId) == nullptr) {
@@ -397,7 +397,7 @@ bool AssetFiltering::filterAcceptsScannedDevice(AssetFilter assetFilter, const s
 			false);
 }
 
-short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
+asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
 	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
 	// preallocate the buffer that the MaskedAdData needs.)
@@ -408,5 +408,5 @@ short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter asse
 			[](FilterInterface* filter, const uint8_t* data, size_t len) {
 				return filter->shortAssetId(data, len);
 			},
-			short_asset_id_t{});
+			asset_id_t{});
 }

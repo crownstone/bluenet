@@ -208,7 +208,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_mac_t {
 
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_id_t {
-	short_asset_id_t id;
+	asset_id_t id;
 	uint8_t reserved[3];
 	rssi_and_channel_t rssiData;
 };

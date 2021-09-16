@@ -108,7 +108,7 @@ private:
 	 * constructed object is returned. (Data not sufficient can be detected:
 	 * filterInputResult will return false in that case.)
 	 */
-	short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
+	asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
 
 
 	// --------- Processing of accepted Assest ---------------

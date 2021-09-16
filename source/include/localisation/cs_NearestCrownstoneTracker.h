@@ -55,7 +55,7 @@ public:
 	/**
 	 * returns desired minimal time to next advertisement.
 	 */
-	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
+	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id);
 
 private:
 	// cached objects for efficiency
@@ -151,7 +151,7 @@ private:
 	 *
 	 * `this` must be init()-ialized.
 	 */
-	asset_record_t* getRecordFiltered(const short_asset_id_t& assetId);
+	asset_record_t* getRecordFiltered(const asset_id_t& assetId);
 
 public:
 	/**
