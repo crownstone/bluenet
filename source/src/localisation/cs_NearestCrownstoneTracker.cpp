@@ -123,12 +123,6 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i #%u)",
 			_myStoneId, reporter, getRssi(incomingReport.compressedRssi), getChannel(incomingReport.compressedRssi));
 
-	if (reporter == _myStoneId) {
-		// REVIEW: is this possible at all?
-		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
-		return;
-	}
-
 	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
 		// if we don't have a record in the assetStore it means we're not close
@@ -146,8 +140,11 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 			saveWinningReport(record, record.myRssi, _myStoneId);
 
 			// REVIEW: this report is outdated. Also, it may lead to many messages being sent.
+			// ANSWER(Arend): this is the first moment we can react to a change in nearest-status. We could:
+			//   - wait for another advertisement
+			//   - take fall-off into account.
 			broadcastPersonalReport(record);
-			sendUartUpdate(record);
+			sendUartUpdate(record);		// TODO: move into AssetFiltering to prevent duplicate messages on UART
 			onWinnerChanged(true);
 		}
 		else {
@@ -194,7 +191,7 @@ void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 }
 
 void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
-	auto uartMsg = cs_nearest_stone_update_t{
+	auto uartMsg = cs_asset_rssi_data_sid_t{
 			.assetId = record.assetId,
 			.stoneId = record.nearestStoneId,
 			.rssi = record.nearestRssi.getRssi(),
@@ -202,23 +199,15 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	};
 
 	// REVIEW: doesn't have to be a different message than asset id report.
+	// ANSWER(Arend): adjusted, but I'm suggesting further refactor
 	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_NEAREST_CROWNSTONE_UPDATE,
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_SID_DATA,
 			reinterpret_cast<uint8_t*>(&uartMsg),
 			sizeof(uartMsg));
 }
 
 void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
-	LOGd("Nearest changed. I'm turning %s",
-			winnerIsThisCrownstone ? "on" : "off");
-
-	// REVIEW: this code shouldn't be enabled.
-//	CS_TYPE onOff = winnerIsThisCrownstone
-//			? CS_TYPE::CMD_SWITCH_ON
-//			: CS_TYPE::CMD_SWITCH_OFF;
-//
-//	event_t event(onOff, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
-//	event.dispatch();
+	LOGd("Nearest changed. Winner is this crownstone: %u",	winnerIsThisCrownstone);
 }
 
 
@@ -240,6 +229,7 @@ asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id
 	}
 
 	// REVIEW: why is there "constexpr" here? Seems like something the compiler easily can find out by itsself.
+	// ANSWER(Arend): constexpr guarantees it. standard if statement isn't required to discard unused branch
 	if constexpr (FILTER_STRATEGY == FilterStrategy::TIME_OUT) {
 		if (record->lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD) {
 			LOGd("ignored old record for nearest crownstone algorithm.");
