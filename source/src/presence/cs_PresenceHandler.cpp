@@ -14,14 +14,16 @@
 #include <drivers/cs_RNG.h>
 #include <logging/cs_Logger.h>
 
-#define LOGPresenceHandlerDebug LOGd
+#define LOGPresenceHandlerDebug LOGvv
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
-PresenceHandler::PresenceRecord PresenceHandler::_presenceRecords[PresenceHandler::max_records];
+PresenceHandler::PresenceRecord PresenceHandler::_presenceRecords[PresenceHandler::MAX_RECORDS];
 
 void PresenceHandler::init() {
-	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
+	LOGi("init");
+
+	resetRecords();
 
 	// TODO Anne @Arend. The listener is now set in cs_Crownstone.cpp, outside of the class. This seems to be an
 	// implementation detail however that should be part of the class. If you want the user to start and stop
@@ -106,7 +108,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 
 void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, bool forwardToMesh) {
 	// Validate data.
-	if (profile > max_profile_id || location > max_location_id) {
+	if (profile > MAX_PROFILE_ID || location > MAX_LOCATION_ID) {
 		if (profile != 0xFF) {
 			LOGw("Invalid profile(%u) or location(%u)", profile, location);
 		}
@@ -144,7 +146,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 
 		if (prevdescription.value_or(0) != 0) {
 			// sphere exit
-			clearRecords();
+			resetRecords();
 			return MutationType::LastUserExitSphere;
 		}
 
@@ -157,7 +159,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 
 	PresenceHandler::PresenceRecord* record = findOrAddRecord(profile, location);
 	if (record != nullptr) {
-		record->timeoutCountdownSeconds = presence_time_out_s;
+		record->timeoutCountdownSeconds = PRESENCE_TIMEOUT_SECONDS;
 		meshCountdown = record->meshSendCountdownSeconds;
 		newLocation = false;
 	}
@@ -167,7 +169,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 		if (forwardToMesh) {
 			propagateMeshMessage(profile, location);
 		}
-		meshCountdown = presence_mesh_send_throttle_seconds + (RNG::getInstance().getRandom8() % presence_mesh_send_throttle_seconds_variation);
+		meshCountdown = PRESENCE_MESH_SEND_THROTTLE_SECONDS + (RNG::getInstance().getRandom8() % PRESENCE_MESH_SEND_THROTTLE_SECONDS_VARIATION);
 	}
 
 	if (record != nullptr) {
@@ -241,28 +243,28 @@ void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location) {
 
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription() {
-	if (SystemTime::up() < presence_uncertain_due_reboot_time_out_s) {
-		LOGPresenceHandlerDebug("Presence is uncertain after reboot");
+	if (SystemTime::up() < PRESENCE_UNCERTAIN_SECONDS_AFTER_BOOT) {
+		LOGPresenceHandlerDebug("Presence is uncertain after boot");
 		return {};
 	}
 	PresenceStateDescription presence;
-	for (uint8_t i = 0; i < max_records; ++i) {
+	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
 		if (!_presenceRecords[i].isValid()) {
 			continue;
 		}
-		presence.setRoom(_presenceRecords[i].where);
+		presence.setRoom(_presenceRecords[i].location);
 	}
 	return presence;
 }
 
 void PresenceHandler::tickSecond() {
 	auto prevdescription = getCurrentPresenceDescription();
-	for (uint8_t i = 0; i < max_records; ++i) {
+	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
 		if (_presenceRecords[i].isValid() && _presenceRecords[i].timeoutCountdownSeconds != 0) {
 			_presenceRecords[i].timeoutCountdownSeconds--;
 			if (_presenceRecords[i].timeoutCountdownSeconds == 0) {
-				LOGi("Timeout: profile=%u location=%u", _presenceRecords[i].who, _presenceRecords[i].where);
-				sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, _presenceRecords[i].who, _presenceRecords[i].where);
+				LOGi("Timeout: profile=%u location=%u", _presenceRecords[i].profile, _presenceRecords[i].location);
+				sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, _presenceRecords[i].profile, _presenceRecords[i].location);
 			}
 			else {
 				if (_presenceRecords[i].meshSendCountdownSeconds != 0) {
@@ -287,18 +289,18 @@ void PresenceHandler::tickSecond() {
 	}
 }
 
-void PresenceHandler::clearRecords() {
-	LOGi("clearRecords");
-	for (uint8_t i = 0; i < max_records; ++i) {
+void PresenceHandler::resetRecords() {
+	LOGi("resetRecords");
+	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
 		_presenceRecords[i].invalidate();
 	}
 }
 
 PresenceHandler::PresenceRecord* PresenceHandler::findOrAddRecord(uint8_t profile, uint8_t location) {
 	LOGPresenceHandlerDebug("findOrAddRecord profile=%u location=%u", profile, location);
-	for (uint8_t i = 0; i < max_records; ++i) {
+	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
 		if (_presenceRecords[i].isValid()) {
-			if (_presenceRecords[i].who == profile && _presenceRecords[i].where == location) {
+			if (_presenceRecords[i].profile == profile && _presenceRecords[i].location == location) {
 				LOGPresenceHandlerDebug("Found at index=%u", i);
 				return &(_presenceRecords[i]);
 			}
@@ -309,7 +311,7 @@ PresenceHandler::PresenceRecord* PresenceHandler::findOrAddRecord(uint8_t profil
 	uint8_t emptySpotIndex = 0xFF;
 	uint8_t oldestEntryCounter = 0xFF;
 	uint8_t oldestEntryIndex = 0xFF;
-	for (uint8_t i = 0; i < max_records; ++i) {
+	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
 		if (!_presenceRecords[i].isValid()) {
 			emptySpotIndex = i;
 			break;
@@ -334,19 +336,4 @@ PresenceHandler::PresenceRecord* PresenceHandler::findOrAddRecord(uint8_t profil
 
 	LOGw("No space");
 	return nullptr;
-}
-
-
-void PresenceHandler::print() {
-	// for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++) {
-	//     LOGPresenceHandlerDebug("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
-	// }
-
-	std::optional<PresenceStateDescription> desc = getCurrentPresenceDescription();
-	if (desc) {
-		// desc->print();
-	}
-	else {
-		LOGPresenceHandlerDebug("presenchandler status: unavailable");
-	}
 }

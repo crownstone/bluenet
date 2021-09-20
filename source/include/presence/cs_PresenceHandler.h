@@ -19,7 +19,17 @@
  * by other 
  */
 class PresenceHandler: public EventListener {
-public: 
+public:
+    void init();
+
+    /**
+     * Returns a simplified description of the current presence knowledge,
+     * each bit in the description indicates if a person is in that room
+     * or not.
+     */
+    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
+
+
     enum class MutationType : uint8_t {
         NothingChanged              ,
         Online                      , // when no previous PresenceStateDescription was available but now it is
@@ -29,30 +39,28 @@ public:
         OccupiedRoomsMaskChanged    ,
     };
 
-    static const constexpr uint8_t max_location_id = 63;
-    static const constexpr uint8_t max_profile_id = 7;
+    static const constexpr uint8_t MAX_LOCATION_ID = 63;
+    static const constexpr uint8_t MAX_PROFILE_ID = 7;
 
 private:
     // after this amount of seconds a presence_record becomes invalid.
-    static const constexpr uint8_t presence_time_out_s = 10;
+    static const constexpr uint8_t PRESENCE_TIMEOUT_SECONDS = 10;
 
     // For each presence entry, send it max every (x + variation) seconds over the mesh.
-    static const constexpr uint8_t presence_mesh_send_throttle_seconds = 10;
-    static const constexpr uint8_t presence_mesh_send_throttle_seconds_variation = 20;
+    static const constexpr uint8_t PRESENCE_MESH_SEND_THROTTLE_SECONDS = 10;
+    static const constexpr uint8_t PRESENCE_MESH_SEND_THROTTLE_SECONDS_VARIATION = 20;
 
     /**
      * after this amount of seconds it is assumed that presencehandler would have received 
      * message from all devices in vicinity of this device.
      */
-    static const constexpr uint32_t presence_uncertain_due_reboot_time_out_s = 30;
+    static const constexpr uint32_t PRESENCE_UNCERTAIN_SECONDS_AFTER_BOOT = 30;
 
+    static const constexpr uint8_t MAX_RECORDS = 20;
 
-    // using a list because of constant time insertion/deletion of
-    // any item in the container
-    static const constexpr uint8_t max_records = 20;
     struct PresenceRecord {
-        uint8_t who;    // profile id
-        uint8_t where;  // room id
+        uint8_t profile;
+        uint8_t location;
         /**
          * Used to determine when a record is timed out.
          * Decreases every seconds.
@@ -66,16 +74,16 @@ private:
     	 */
     	uint8_t meshSendCountdownSeconds;
     	PresenceRecord() {}
-        PresenceRecord(
-        		uint8_t profileId,
-				uint8_t roomId,
-				uint8_t timeoutSeconds = presence_time_out_s,
-				uint8_t meshThrottleSeconds = 0):
-        	who(profileId),
-			where(roomId),
-			timeoutCountdownSeconds(timeoutSeconds),
-			meshSendCountdownSeconds(meshThrottleSeconds)
-        {}
+    	PresenceRecord(
+    			uint8_t profileId,
+    			uint8_t roomId,
+    			uint8_t timeoutSeconds = PRESENCE_TIMEOUT_SECONDS,
+    			uint8_t meshThrottleSeconds = 0):
+    				profile(profileId),
+    				location(roomId),
+    				timeoutCountdownSeconds(timeoutSeconds),
+    				meshSendCountdownSeconds(meshThrottleSeconds)
+    	{}
 
         void invalidate() {
         	timeoutCountdownSeconds = 0;
@@ -88,17 +96,23 @@ private:
 
     /**
      * keeps track of a short history of presence events.
-     * will be lazily updated to remove old entries: 
+     * will be lazily updated to remove old entries:
      *  - when new presence is detected
      *  - when getCurrentPresenceDescription() is called
      */
-    static PresenceRecord _presenceRecords[max_records];
+    static PresenceRecord _presenceRecords[MAX_RECORDS];
 
     /**
-     * Clears the WhenWhoWhere list from entries that have a time stamp older than
-     * presence_time_out_s.
+     * Invalidate all presence records.
      */
-    void removeOldRecords();
+    void resetRecords();
+
+    /**
+     * Find a record with given profile and location.
+     * If not found, create a new one.
+     * Returns a null pointer if there is no space for a new record.
+     */
+    PresenceRecord* findOrAddRecord(uint8_t profile, uint8_t location);
 
     /**
      * Calls handleProfileLocationAdministration, and dispatches events based
@@ -146,32 +160,12 @@ private:
      */
     void tickSecond();
 
-
-    void clearRecords();
-
-    PresenceRecord* findOrAddRecord(uint8_t profile, uint8_t location);
-
-    // out of order
-    void print();
-    
-    TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
-
 public:
-    // register as event handler
-    void init();
-
     /**
      * receive background messages indicating where users are,
      * record the time and place and update the current presence description
      * when necessary
      */
     virtual void handleEvent(event_t& evt) override;
-
-    /**
-     * Returns a simplified description of the current presence knowledge,
-     * each bit in the description indicates if a person is in that room
-     * or not.
-     */
-    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
 };

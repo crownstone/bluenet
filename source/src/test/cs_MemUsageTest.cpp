@@ -125,13 +125,13 @@ bool MemUsageTest::sendNextRssiData() {
 }
 
 bool MemUsageTest::sendNextPresence() {
-	if (_presenceProfileId > PresenceHandler::max_profile_id) {
+	if (_presenceProfileId > PresenceHandler::MAX_PROFILE_ID) {
 		return true;
 	}
 	LOGi("sendNextPresence profile=%i location=%i", _presenceProfileId, _presenceLocationId);
 
 	int locationIdUntil = _presenceLocationId + 8;
-	int locationIdMaxUntil = (int)PresenceHandler::max_location_id + 1;
+	int locationIdMaxUntil = (int)PresenceHandler::MAX_LOCATION_ID + 1;
 	if (locationIdUntil > locationIdMaxUntil) {
 		locationIdUntil = locationIdMaxUntil;
 	}
