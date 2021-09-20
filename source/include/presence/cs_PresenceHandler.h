@@ -65,16 +65,25 @@ private:
     	 * Starts at presence_mesh_send_throttle_seconds, when 0, a mesh message can be sent.
     	 */
     	uint8_t meshSendCountdownSeconds;
+    	PresenceRecord() {}
         PresenceRecord(
         		uint8_t profileId,
 				uint8_t roomId,
 				uint8_t timeoutSeconds = presence_time_out_s,
-				uint8_t meshThrottleSeconds = presence_mesh_send_throttle_seconds):
+				uint8_t meshThrottleSeconds = 0):
         	who(profileId),
 			where(roomId),
 			timeoutCountdownSeconds(timeoutSeconds),
 			meshSendCountdownSeconds(meshThrottleSeconds)
         {}
+
+        void invalidate() {
+        	timeoutCountdownSeconds = 0;
+        }
+
+        bool isValid() {
+        	return timeoutCountdownSeconds != 0;
+        }
     };
 
     /**
@@ -83,7 +92,7 @@ private:
      *  - when new presence is detected
      *  - when getCurrentPresenceDescription() is called
      */
-    static std::list<PresenceRecord> WhenWhoWhere;
+    static PresenceRecord _presenceRecords[max_records];
 
     /**
      * Clears the WhenWhoWhere list from entries that have a time stamp older than
@@ -95,7 +104,7 @@ private:
      * Calls handleProfileLocationAdministration, and dispatches events based
      * on the returned mutation type.
      */
-	void handlePresenceEvent(uint8_t profile, uint8_t location, bool fromMesh);
+	void handlePresenceEvent(uint8_t profile, uint8_t location, bool forwardToMesh);
 
 	/**
      * Processes a new profile-location combination:
@@ -136,6 +145,11 @@ private:
      * To be called every second.
      */
     void tickSecond();
+
+
+    void clearRecords();
+
+    PresenceRecord* findOrAddRecord(uint8_t profile, uint8_t location);
 
     // out of order
     void print();

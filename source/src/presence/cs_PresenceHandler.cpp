@@ -14,11 +14,11 @@
 #include <drivers/cs_RNG.h>
 #include <logging/cs_Logger.h>
 
-#define LOGPresenceHandlerDebug LOGnone
+#define LOGPresenceHandlerDebug LOGd
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
-std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
+PresenceHandler::PresenceRecord PresenceHandler::_presenceRecords[PresenceHandler::max_records];
 
 void PresenceHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
@@ -54,7 +54,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 			uint8_t location = profileLocationEventData->locationId;
 			bool forwardToMesh = !profileLocationEventData->fromMesh;
 
-			LOGPresenceHandlerDebug("Received: profile=%u location=%u mesh=%u", profile, location, forwardToMesh);
+			LOGPresenceHandlerDebug("Received: profile=%u location=%u forwardToMesh=%u", profile, location, forwardToMesh);
 			handlePresenceEvent(profile, location, forwardToMesh);
 			return;
 		}
@@ -104,7 +104,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 	}
 }
 
-void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, bool fromMesh) {
+void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, bool forwardToMesh) {
 	// Validate data.
 	if (profile > max_profile_id || location > max_location_id) {
 		if (profile != 0xFF) {
@@ -113,7 +113,7 @@ void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, boo
 		return;
 	}
 
-	MutationType mutation = handleProfileLocationAdministration(profile, location, fromMesh);
+	MutationType mutation = handleProfileLocationAdministration(profile, location, forwardToMesh);
 
 	if (mutation != MutationType::NothingChanged) {
 		triggerPresenceMutation(mutation);
@@ -135,6 +135,7 @@ void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, boo
 }
 
 PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool forwardToMesh) {
+	LOGPresenceHandlerDebug("handleProfileLocationAdministration profile=%u location=%u forwardToMesh=%u", profile, location, forwardToMesh);
 	auto prevdescription = getCurrentPresenceDescription();
 
 #ifdef PRESENCE_HANDLER_TESTING_CODE
@@ -143,7 +144,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 
 		if (prevdescription.value_or(0) != 0) {
 			// sphere exit
-			WhenWhoWhere.clear();
+			clearRecords();
 			return MutationType::LastUserExitSphere;
 		}
 
@@ -151,30 +152,16 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 	}
 #endif
 
-	// purge whowhenwhere of old entries
-	if (WhenWhoWhere.size() >= max_records) {
-		LOGw("Reached max number of records");
-		PresenceRecord record = WhenWhoWhere.back();
-		sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, record.who, record.where);
-		WhenWhoWhere.pop_back();
-	}
-
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
 
-	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ++iter) {
-		if (iter->timeoutCountdownSeconds == 0) {
-			// Should not happen, record should've been removed.
-			LOGw("timed out record");
-		}
-		if (iter->who == profile && iter->where == location) {
-			LOGPresenceHandlerDebug("erasing old record profile(%u) location(%u)", profile, location);
-			meshCountdown = iter->meshSendCountdownSeconds;
-			WhenWhoWhere.erase(iter);
-			newLocation = false;
-			break;
-		}
+	PresenceHandler::PresenceRecord* record = findOrAddRecord(profile, location);
+	if (record != nullptr) {
+		record->timeoutCountdownSeconds = presence_time_out_s;
+		meshCountdown = record->meshSendCountdownSeconds;
+		newLocation = false;
 	}
+
 	// When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
 	if (meshCountdown == 0) {
 		if (forwardToMesh) {
@@ -183,9 +170,9 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 		meshCountdown = presence_mesh_send_throttle_seconds + (RNG::getInstance().getRandom8() % presence_mesh_send_throttle_seconds_variation);
 	}
 
-	// Add the new entry
-	LOGPresenceHandlerDebug("add record profile(%u) location(%u)", profile, location);
-	WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));
+	if (record != nullptr) {
+		record->meshSendCountdownSeconds = meshCountdown;
+	}
 
 	if (newLocation) {
 		sendPresenceChange(PresenceChange::PROFILE_LOCATION_ENTER, profile, location);
@@ -228,24 +215,13 @@ PresenceHandler::MutationType PresenceHandler::getMutationType(
 	return MutationType::NothingChanged;
 }
 
-void PresenceHandler::removeOldRecords() {
-	WhenWhoWhere.remove_if(
-			[&] (PresenceRecord www) {
-		if (www.timeoutCountdownSeconds == 0) {
-			LOGPresenceHandlerDebug("erasing timed out record profile=%u location=%u", www.who, www.where);
-			return true;
-		}
-		return false;
-	}
-	);
-}
-
 void PresenceHandler::triggerPresenceMutation(MutationType mutationtype) {
 	event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION, &mutationtype, sizeof(mutationtype));
 	presence_event.dispatch();
 }
 
 void PresenceHandler::sendPresenceChange(PresenceChange type, uint8_t profileId, uint8_t locationId) {
+	LOGi("sendPresenceChange type=%u profile=%u location=%u", type, profileId, locationId);
 	TYPIFY(EVT_PRESENCE_CHANGE) eventData;
 	eventData.type = static_cast<uint8_t>(type);
 	eventData.profileId = profileId;
@@ -255,6 +231,7 @@ void PresenceHandler::sendPresenceChange(PresenceChange type, uint8_t profileId,
 }
 
 void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location) {
+	LOGPresenceHandlerDebug("propagateMeshMessage profile=%u location=%u", profile, location);
 	TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
 	eventData.profile = profile;
 	eventData.location = location;
@@ -265,43 +242,39 @@ void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location) {
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription() {
 	if (SystemTime::up() < presence_uncertain_due_reboot_time_out_s) {
-		LOGPresenceHandlerDebug("presence_uncertain_due_reboot_time_out_s hasn't expired");
+		LOGPresenceHandlerDebug("Presence is uncertain after reboot");
 		return {};
 	}
 	PresenceStateDescription presence;
-	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ++iter) {
-		if (iter->timeoutCountdownSeconds == 0) {
-			// Should not happen, record should've been removed.
-			LOGw("timed out record");
+	for (uint8_t i = 0; i < max_records; ++i) {
+		if (!_presenceRecords[i].isValid()) {
+			continue;
 		}
-		else {
-			// appearently iter is valid, so the .where field describes an occupied room.
-			presence.setRoom(iter->where);
-			// LOGPresenceHandlerDebug("adding room %d to currentPresenceDescription", iter->where);
-		}
+		presence.setRoom(_presenceRecords[i].where);
 	}
 	return presence;
 }
 
 void PresenceHandler::tickSecond() {
 	auto prevdescription = getCurrentPresenceDescription();
-	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
-		if (iter->timeoutCountdownSeconds) {
-			iter->timeoutCountdownSeconds--;
-		}
-		if (iter->timeoutCountdownSeconds == 0) {
-			sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, iter->who, iter->where);
-			iter = WhenWhoWhere.erase(iter);
-		}
-		else {
-			if (iter->meshSendCountdownSeconds) {
-				iter->meshSendCountdownSeconds--;
+	for (uint8_t i = 0; i < max_records; ++i) {
+		if (_presenceRecords[i].isValid() && _presenceRecords[i].timeoutCountdownSeconds != 0) {
+			_presenceRecords[i].timeoutCountdownSeconds--;
+			if (_presenceRecords[i].timeoutCountdownSeconds == 0) {
+				LOGi("Timeout: profile=%u location=%u", _presenceRecords[i].who, _presenceRecords[i].where);
+				sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, _presenceRecords[i].who, _presenceRecords[i].where);
 			}
-			++iter;
+			else {
+				if (_presenceRecords[i].meshSendCountdownSeconds != 0) {
+					_presenceRecords[i].meshSendCountdownSeconds--;
+				}
+			}
 		}
 	}
+
 	auto nextdescription = getCurrentPresenceDescription();
 	auto mutation = getMutationType(prevdescription, nextdescription);
+	LOGPresenceHandlerDebug("mutation=%u", mutation);
 
 	switch (mutation) {
 		case MutationType::LastUserExitSphere: {
@@ -313,6 +286,56 @@ void PresenceHandler::tickSecond() {
 			break;
 	}
 }
+
+void PresenceHandler::clearRecords() {
+	LOGi("clearRecords");
+	for (uint8_t i = 0; i < max_records; ++i) {
+		_presenceRecords[i].invalidate();
+	}
+}
+
+PresenceHandler::PresenceRecord* PresenceHandler::findOrAddRecord(uint8_t profile, uint8_t location) {
+	LOGPresenceHandlerDebug("findOrAddRecord profile=%u location=%u", profile, location);
+	for (uint8_t i = 0; i < max_records; ++i) {
+		if (_presenceRecords[i].isValid()) {
+			if (_presenceRecords[i].who == profile && _presenceRecords[i].where == location) {
+				LOGPresenceHandlerDebug("Found at index=%u", i);
+				return &(_presenceRecords[i]);
+			}
+		}
+	}
+
+	// Find a new spot.
+	uint8_t emptySpotIndex = 0xFF;
+	uint8_t oldestEntryCounter = 0xFF;
+	uint8_t oldestEntryIndex = 0xFF;
+	for (uint8_t i = 0; i < max_records; ++i) {
+		if (!_presenceRecords[i].isValid()) {
+			emptySpotIndex = i;
+			break;
+		}
+		if (_presenceRecords[i].timeoutCountdownSeconds < oldestEntryCounter) {
+			oldestEntryCounter = _presenceRecords[i].timeoutCountdownSeconds;
+			oldestEntryIndex = i;
+		}
+	}
+
+	if (emptySpotIndex != 0xFF) {
+		LOGPresenceHandlerDebug("Using empty index=%u", emptySpotIndex);
+		_presenceRecords[emptySpotIndex] = PresenceRecord(profile, location);
+		return &(_presenceRecords[emptySpotIndex]);
+	}
+
+	if (oldestEntryIndex != 0xFF) {
+		LOGPresenceHandlerDebug("Using oldest index=%u", oldestEntryIndex);
+		_presenceRecords[oldestEntryIndex] = PresenceRecord(profile, location);
+		return &(_presenceRecords[oldestEntryIndex]);
+	}
+
+	LOGw("No space");
+	return nullptr;
+}
+
 
 void PresenceHandler::print() {
 	// for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++) {
