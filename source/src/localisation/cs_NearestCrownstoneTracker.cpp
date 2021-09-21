@@ -91,6 +91,11 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	auto& record = *recordPtr;
 
+	auto incomingRssiAndChannel = incomingReport.compressedRssi.toFloat();
+	auto recordedNearestRssiWithFallOff = record.nearestRssi.fallOff(
+			RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
+			1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
+
 	if (record.nearestStoneId == 0 || record.nearestStoneId == _myStoneId) {
 		if (record.nearestStoneId == 0) {
 			LOGNearestCrownstoneTrackerDebug("First time this asset was seen, consider us nearest.");
@@ -105,7 +110,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(report_asset_id_t& in
 	}
 	else {
 		LOGNearestCrownstoneTrackerVerbose("We didn't win before");
-		if (incomingReport.compressedRssi.isCloserThan(record.nearestRssi))  {
+		if (incomingRssiAndChannel.isCloserThan(recordedNearestRssiWithFallOff))  {
 			// we win because the incoming report is a first hand observation.
 			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
 			saveWinningReport(record, incomingReport.compressedRssi, _myStoneId);
@@ -131,19 +136,22 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 	}
 	auto& record = *recordPtr;
 
+	auto incomingRssiAndChannel = incomingReport.compressedRssi.toFloat();
+	auto recordedNearestRssiWithFallOff = record.nearestRssi.fallOff(
+			RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
+			1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
+	auto recordedPersonalRssiWithFallOff = record.myRssi.fallOff(
+				RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
+				1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
+
 	// REVIEW: doesn't use the RSSI with fall off.
 	if (reporter == record.nearestStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if (record.myRssi.isCloserThan(incomingReport.compressedRssi) ) {
+		if (recordedPersonalRssiWithFallOff.isCloserThan(incomingRssiAndChannel) ) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now.");
 			saveWinningReport(record, record.myRssi, _myStoneId);
 
-			// REVIEW: this report is outdated. Also, it may lead to many messages being sent.
-			// ANSWER(Arend): this is the first moment we can react to a change in nearest-status. We could:
-			//   - wait for another advertisement
-			//   - take fall-off into account.
-			broadcastPersonalReport(record);
 			sendUartUpdate(record);		// TODO: move into AssetFiltering to prevent duplicate messages on UART
 			onWinnerChanged(true);
 		}
@@ -154,7 +162,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(report_asset_id_t& incomingR
 		}
 	}
 	else {
-		if (record.nearestStoneId == 0 || incomingReport.compressedRssi.isCloserThan(record.nearestRssi)) {
+		if (record.nearestStoneId == 0 || incomingRssiAndChannel.isCloserThan(recordedNearestRssiWithFallOff)) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
 			saveWinningReport(record, incomingReport.compressedRssi, reporter);
 			sendUartUpdate(record);
@@ -198,8 +206,6 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 			.channel = record.nearestRssi.getChannel()
 	};
 
-	// REVIEW: doesn't have to be a different message than asset id report.
-	// ANSWER(Arend): adjusted, but I'm suggesting further refactor
 	UartHandler::getInstance().writeMsg(
 			UartOpcodeTx::UART_OPCODE_TX_ASSET_RSSI_SID_DATA,
 			reinterpret_cast<uint8_t*>(&uartMsg),
@@ -228,8 +234,6 @@ asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const short_asset_id
 		return nullptr;
 	}
 
-	// REVIEW: why is there "constexpr" here? Seems like something the compiler easily can find out by itsself.
-	// ANSWER(Arend): constexpr guarantees it. standard if statement isn't required to discard unused branch
 	if constexpr (FILTER_STRATEGY == FilterStrategy::TIME_OUT) {
 		if (record->lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD) {
 			LOGd("ignored old record for nearest crownstone algorithm.");
