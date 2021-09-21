@@ -155,11 +155,23 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
 
-	PresenceHandler::PresenceRecord* record = findOrAddRecord(profile, location);
-	if (record != nullptr) {
+	PresenceHandler::PresenceRecord* record = findRecord(profile, location);
+	if (record == nullptr) {
+		// Create a new record
+		record = addRecord(profile, location);
+
+		if (record == nullptr) {
+			// We cannot handle this presence event.
+			return MutationType::NothingChanged;
+		}
+	}
+	else {
+		// This record already exists.
+		newLocation = false;
+
+		// Reset the timeout countdown.
 		record->timeoutCountdownSeconds = PRESENCE_TIMEOUT_SECONDS;
 		meshCountdown = record->meshSendCountdownSeconds;
-		newLocation = false;
 	}
 
 	// When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
@@ -169,10 +181,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 		}
 		meshCountdown = PRESENCE_MESH_SEND_THROTTLE_SECONDS + (RNG::getInstance().getRandom8() % PRESENCE_MESH_SEND_THROTTLE_SECONDS_VARIATION);
 	}
-
-	if (record != nullptr) {
-		record->meshSendCountdownSeconds = meshCountdown;
-	}
+	record->meshSendCountdownSeconds = meshCountdown;
 
 	if (newLocation) {
 		sendPresenceChange(PresenceChange::PROFILE_LOCATION_ENTER, profile, location);
@@ -294,8 +303,8 @@ void PresenceHandler::resetRecords() {
 	}
 }
 
-PresenceHandler::PresenceRecord* PresenceHandler::findOrAddRecord(uint8_t profile, uint8_t location) {
-	LOGPresenceHandlerDebug("findOrAddRecord profile=%u location=%u", profile, location);
+PresenceHandler::PresenceRecord* PresenceHandler::findRecord(uint8_t profile, uint8_t location) {
+	LOGPresenceHandlerDebug("findRecord profile=%u location=%u", profile, location);
 	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
 		if (_presenceRecords[i].isValid()) {
 			if (_presenceRecords[i].profile == profile && _presenceRecords[i].location == location) {
@@ -304,8 +313,10 @@ PresenceHandler::PresenceRecord* PresenceHandler::findOrAddRecord(uint8_t profil
 			}
 		}
 	}
+	return nullptr;
+}
 
-	// Find a new spot.
+PresenceHandler::PresenceRecord* PresenceHandler::addRecord(uint8_t profile, uint8_t location) {
 	uint8_t emptySpotIndex = 0xFF;
 	uint8_t oldestEntryCounter = 0xFF;
 	uint8_t oldestEntryIndex = 0xFF;

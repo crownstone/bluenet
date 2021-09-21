@@ -110,11 +110,17 @@ private:
     void resetRecords();
 
     /**
-     * Find a record with given profile and location.
-     * If not found, create a new one.
-     * Returns a null pointer if there is no space for a new record.
+     * Finds a record with given profile and location.
+     * Returns a null pointer if not found.
      */
-    PresenceRecord* findOrAddRecord(uint8_t profile, uint8_t location);
+    PresenceRecord* findRecord(uint8_t profile, uint8_t location);
+
+    /**
+	 * Adds a record with given profile and location.
+	 * Does not check if it already exists!
+	 * Returns a null pointer if there is no space for a new record.
+	 */
+	PresenceRecord* addRecord(uint8_t profile, uint8_t location);
 
     /**
      * Calls handleProfileLocationAdministration, and dispatches events based
