@@ -20,16 +20,14 @@
 
 PresenceHandler::PresenceRecord PresenceHandler::_presenceRecords[PresenceHandler::MAX_RECORDS];
 
+PresenceHandler::PresenceHandler() {
+	resetRecords();
+}
+
 void PresenceHandler::init() {
 	LOGi("init");
 
-	resetRecords();
-
-	// TODO Anne @Arend. The listener is now set in cs_Crownstone.cpp, outside of the class. This seems to be an
-	// implementation detail however that should be part of the class. If you want the user to start and stop
-	// listening to events, I'd add member functions for those.
-
-	// EventDispatcher::getInstance().addListener(this);
+	listen();
 }
 
 void PresenceHandler::handleEvent(event_t& evt) {

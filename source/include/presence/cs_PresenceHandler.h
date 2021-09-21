@@ -20,6 +20,8 @@
  */
 class PresenceHandler: public EventListener {
 public:
+	PresenceHandler();
+
     void init();
 
     /**
@@ -66,7 +68,7 @@ private:
          * Decreases every seconds.
          * Starts at presence_time_out_s, when 0, it is timed out.
          */
-    	uint8_t timeoutCountdownSeconds;
+    	uint8_t timeoutCountdownSeconds = 0;
     	/**
     	 * Used to determine whether to send a mesh message.
     	 * Decreases every seconds.
