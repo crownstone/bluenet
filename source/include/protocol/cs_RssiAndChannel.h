@@ -8,6 +8,32 @@
 
 #pragma once
 
+#include <util/cs_Math.h>
+
+
+// ---------------------------------------------------------------------
+
+class rssi_and_channel_float_t {
+public:
+	uint8_t _channel;  // 37-39
+	float _rssi;       // signed rssi, usually negative. higher is closer.
+
+	rssi_and_channel_float_t(uint8_t channel, float rssi) : _channel(channel), _rssi(rssi) {}
+
+	bool isCloserThan(const rssi_and_channel_float_t& other) {
+		return _rssi > other._rssi;
+	}
+
+	bool isCloserEqual(const rssi_and_channel_float_t & other) {
+		return isCloserThan(other) || _rssi == other._rssi;
+	}
+
+	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) {
+		return rssi_and_channel_float_t(_channel, _rssi - rate_db_sec * dt_sec);
+	}
+};
+
+// ---------------------------------------------------------------------
 
 struct __attribute__((__packed__)) rssi_and_channel_t {
 	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
@@ -42,12 +68,12 @@ struct __attribute__((__packed__)) rssi_and_channel_t {
 		return -2 * rssiHalved;
 	}
 
-	bool isCloserThan(const rssi_and_channel_t& other) const {
-		// usually higher values are shorter distances, but abs reverses inequality.
-		return rssiHalved < other.rssiHalved;
+	rssi_and_channel_float_t toFloat() {
+		return rssi_and_channel_float_t (getChannel(), getRssi());
 	}
 
-	bool isCloserEqual(const rssi_and_channel_t& other) const {
-		return isCloserThan(other) || rssiHalved == other.rssiHalved;
+	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) {
+		return toFloat().fallOff(rate_db_sec, dt_sec);
 	}
+
 };
