@@ -172,7 +172,7 @@ cs_ret_code_t TrackedDevices::handleHeartbeat(TrackedDevice& device, uint8_t loc
 TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	TrackedDevice* device = find(deviceId);
 	if (device == nullptr) {
-		device = add();
+		device = add(); // REVIEW(22-09-2021): maybe just let add() set the device to default values and fill in deviceId.
 		if (device != nullptr) {
 			device->fieldsSet = 0;
 			device->data.data.deviceId = deviceId;
@@ -204,7 +204,7 @@ TrackedDevices::TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, u
 	return nullptr;
 }
 
-TrackedDevices::TrackedDevice* TrackedDevices::add() {
+TrackedDevices::TrackedDevice* TrackedDevices::add() { // REVIEW(22-09-2021): the added device is not cleared if it contains garbage. Also a more descriptive name would be nice :)
 	LOGTrackedDevicesDebug("add");
 
 	// Use empty spot.
@@ -216,7 +216,7 @@ TrackedDevices::TrackedDevice* TrackedDevices::add() {
 			LOGTrackedDevicesDebug("Use empty spot: index=%u", i);
 			return &(_devices[i]);
 		}
-		if (!allFieldsSet(_devices[i])) {
+		if (!allFieldsSet(_devices[i])) { // REVIEW(22-09-2021): maybe move the logic to the class that describes the data? I.e. change to !_devices[i].isValid() ?
 			incompleteIndex = i;
 		}
 		if (_devices[i].data.data.timeToLiveMinutes < lowestTtl) {
@@ -370,7 +370,7 @@ void TrackedDevices::tickMinute() {
 	}
 
 	// Remove trailing timed out devices.
-	while (_deviceListSize > 0 && _devices[_deviceListSize - 1].data.data.timeToLiveMinutes == 0) {
+	while (_deviceListSize > 0 && _devices[_deviceListSize - 1].data.data.timeToLiveMinutes == 0) { // REVIEW(22-09-2021): are all items within [0, _deviceListSize-1] valid?
 		_deviceListSize--;
 		LOGTrackedDevicesDebug("Shrinking list size to %u", _deviceListSize);
 	}
@@ -378,7 +378,7 @@ void TrackedDevices::tickMinute() {
 
 void TrackedDevices::tickSecond() {
 	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (isValidTTL(_devices[i]) && _devices[i].heartbeatTTLMinutes != 0) {
+		if (isValidTTL(_devices[i]) && _devices[i].heartbeatTTLMinutes != 0) { // REVIEW(22-09-2021): isValidTTL could be a member of TrackedDevice? E.g. _devices[i].isValidTTL()
 			sendHeartbeatLocation(_devices[i], false, true);
 		}
 	}

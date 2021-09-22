@@ -109,6 +109,8 @@ private:
     /**
 	 * Adds a record with given profile and location.
 	 * Does not check if it already exists!
+	 * Replaces oldest entry if there are no invalid record places to use.
+	 *
 	 * Returns a null pointer if there is no space for a new record.
 	 */
 	PresenceRecord* addRecord(uint8_t profile, uint8_t location);

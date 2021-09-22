@@ -152,14 +152,14 @@ PresenceMutation PresenceHandler::handleProfileLocation(uint8_t profile, uint8_t
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
 
-	PresenceHandler::PresenceRecord* record = findRecord(profile, location);
+	PresenceRecord* record = findRecord(profile, location);
 	if (record == nullptr) {
 		// Create a new record
 		record = addRecord(profile, location);
 
 		if (record == nullptr) {
 			// We cannot handle this presence event.
-			return PresenceMutation::NothingChanged;
+			return PresenceMutation::NothingChanged; // return Unhandled?
 		}
 	}
 	else {
