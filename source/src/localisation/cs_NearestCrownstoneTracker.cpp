@@ -22,9 +22,9 @@
 #include <localisation/cs_AssetFilterStore.h>
 #include <common/cs_Component.h>
 
-#define LOGNearestCrownstoneTrackerVerbose LOGvv
-#define LOGNearestCrownstoneTrackerDebug LOGvv
-#define LOGNearestCrownstoneTrackerInfo LOGvv
+#define LOGNearestCrownstoneTrackerVerbose LOGd
+#define LOGNearestCrownstoneTrackerDebug LOGd
+#define LOGNearestCrownstoneTrackerInfo LOGd
 
 cs_ret_code_t NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myStoneId, sizeof(_myStoneId));
@@ -72,6 +72,7 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 }
 
 uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id) {
+	LOGNearestCrownstoneTrackerVerbose("handleAcceptedAsset");
 	cs_mesh_model_msg_asset_info_id_t rep = {};
 	rep.id = id;
 	rep.rssiData = rssi_and_channel_t(asset.rssi,asset.channel);
@@ -82,7 +83,7 @@ uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& a
 
 void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_info_id_t& incomingReport) {
 	LOGNearestCrownstoneTrackerVerbose("onReceiveAssetAdvertisement myId(%u), report(%d dB ch.%u)",
-			_myStoneId, getRssi(incomingReport.rssiData), getChannel(incomingReport.rssiData));
+			_myStoneId, incomingReport.rssiData.getRssi(), incomingReport.rssiData.getChannel());
 
 	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
@@ -126,7 +127,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_ass
 
 void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_info_id_t& incomingReport, stone_id_t reporter) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i #%u)",
-			_myStoneId, reporter, getRssi(incomingReport.rssiData), getChannel(incomingReport.rssiData));
+			_myStoneId, reporter, incomingReport.rssiData.getRssi(), incomingReport.rssiData.getChannel());
 
 	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
@@ -144,7 +145,6 @@ void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_info
 				RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
 				1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
 
-	// REVIEW: doesn't use the RSSI with fall off.
 	if (reporter == record.nearestStoneId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
@@ -152,7 +152,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_info
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now.");
 			saveWinningReport(record, record.myRssi, _myStoneId);
 
-			sendUartUpdate(record);		// TODO: move into AssetFiltering to prevent duplicate messages on UART
+			sendUartUpdate(record);
 			onWinnerChanged(true);
 		}
 		else {

@@ -9,8 +9,8 @@
 #include <util/cs_Utils.h>
 
 #define LOGAssetFilteringWarn LOGw
-#define LOGAssetFilteringInfo LOGvv
-#define LOGAssetFilteringDebug LOGvv
+#define LOGAssetFilteringInfo LOGd
+#define LOGAssetFilteringDebug LOGd
 #define LOGAssetFilteringVerbose LOGvv
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
@@ -177,18 +177,21 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::handleAcceptFilters(con
 				switch (*filter.filterdata().metadata().outputType().outFormat()) {
 					case AssetFilterOutputFormat::MacOverMesh: {
 						BLEutil::setBit(masks._forwardMac, i);
+						LOGAssetFilteringDebug("Accepted MacOverMesh %d", i);
 						handleAssetAcceptedMacOverMesh(i, filter, device);
 						break;
 					}
 
 					case AssetFilterOutputFormat::AssetIdOverMesh: {
 						BLEutil::setBit(masks._forwardAssetId, i);
+						LOGAssetFilteringDebug("Accepted AssetIdOverMesh %d", i);
 						handleAssetAcceptedAssetIdOverMesh(i, filter, device);
 						break;
 					}
 
 					case AssetFilterOutputFormat::AssetId: {
 						BLEutil::setBit(masks._nearestAssetId, i);
+						LOGAssetFilteringDebug("Accepted NearestAssetId %d", i);
 						handleAssetAcceptedNearestAssetId(i, filter, device);
 						break;
 					}
@@ -282,8 +285,6 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 				shortAssetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
-
-	// TODO: send uart update
 
 	//#endif
 }
