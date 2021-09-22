@@ -462,10 +462,27 @@ fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
 fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
 
 # Regex patterns
+
+# Matches: "![Session data](../docs/diagrams/session-data.png)"
+# Backrefs:
+#   0: "session-data.png"
 patternFileNameString = "\\(" + DOCS_DIR + DIR + "([^\\)]+)\\)"
 patternFileName = re.compile(patternFileNameString)
+
+# Matches: "Type | Name | Length | Description" or "Type | Name | Length in bits | Description"
+# Backrefs:
+#   0: "in bits"
 patternTableHeader = re.compile("Type +\\| +Name +\\| +Length (in bits)? *\\| +Description")
+
+# Matches: "uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets."
+# Backrefs:
+#   0: "Session nonce"
+#   1: "5"
 patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
+
+# Matches: "[Encrypted payload](#encrypted-payload)"
+# Backrefs:
+#   0: "Encrypted payload"
 patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
 for filename in FILENAMES:
