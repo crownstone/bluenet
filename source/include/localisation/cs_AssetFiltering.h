@@ -119,7 +119,7 @@ private:
 	 * Loop over inclusion filters and check which filters are accepting.
 	 * Return a set of bitmasks containing the result.
 	 */
-	filter_output_bitmasks_t getAcceptedBitmasks(const scanned_device_t& device);
+	filter_output_bitmasks_t handleAcceptFilters(const scanned_device_t& device);
 
 	/**
 	 * Returns the filter object that is to be used to generate the asset id.

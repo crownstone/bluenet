@@ -130,7 +130,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	return &record;
 }
 
-void AssetStore::setThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
+void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
 	// 'Ceil division' equal to:
 	//         timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if the division is exact
 	//     1 + timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if there is a remainder.
@@ -138,7 +138,7 @@ void AssetStore::setThrottlingBump(asset_record_t& record, uint16_t timeToNextTh
 
 	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
-	record.setThrottlingCountdown(ticksRoundedUp);
+	record.addThrottlingCountdown(ticksRoundedUp);
 }
 
 

@@ -83,4 +83,9 @@ struct __attribute__((__packed__)) asset_record_t {
 			throttlingCountdown = ticks;
 		}
 	}
+
+	void addThrottlingCountdown(uint8_t ticks) {
+		auto val = uint16_t(throttlingCountdown) + ticks;
+		setThrottlingCountdown(val);
+	}
 };
