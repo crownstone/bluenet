@@ -108,7 +108,7 @@ private:
 	 * constructed object is returned. (Data not sufficient can be detected:
 	 * filterInputResult will return false in that case.)
 	 */
-	short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
+	asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
 
 
 	// --------- Processing of accepted Assest ---------------
@@ -134,6 +134,10 @@ private:
 	 * precondition: isInitialized() == true;
 	 */
 	void handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset);
+
+	void handleAssetAcceptedMacOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	void handleAssetAcceptedAssetIdOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	void handleAssetAcceptedNearestAssetId(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
 
 	/**
 	 * Returns true if there is a filter that rejects this device.

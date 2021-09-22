@@ -586,7 +586,7 @@ const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
  * A packet that represents RSSI data about an asset received by a particular Crownstone. There is no timestamp in it.
  * Timestamps can be added on the hub.
  */
-struct __attribute__((packed)) cs_asset_rssi_data_mac_t {
+struct __attribute__((packed)) cs_asset_info_mac_t {
 	uint8_t address[MAC_ADDRESS_LEN];
 	uint8_t stoneId;
 	int8_t rssi;
@@ -595,26 +595,14 @@ struct __attribute__((packed)) cs_asset_rssi_data_mac_t {
 	// ANSWER(Arend): let's see after adjusting AssetStore
 };
 
-struct __attribute__((packed)) cs_asset_rssi_data_sid_t {
-	short_asset_id_t assetId;
+struct __attribute__((packed)) cs_asset_info_id_t {
+	asset_id_t assetId;
 	uint8_t stoneId;
 	int8_t rssi;
 	uint8_t channel;
 	// REVIEW: add asset filter ID (bitmask)?
 	// ANSWER(Arend): let's see after adjusting AssetStore
 };
-
-/**
- * A packet that informs about the nearest Crownstone with respect to an asset. The asset is represented by an
- * identifier of three bytes. This allows this message to be sent as unsegmented message through the mesh.
- */
-struct __attribute__((packed)) cs_nearest_stone_update_t {
-	short_asset_id_t assetId;
-	uint8_t stoneId;
-	int8_t rssi;
-	uint8_t channel;
-};
-
 
 // ========================= functions =========================
 

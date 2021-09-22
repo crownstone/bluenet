@@ -13,7 +13,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	/**
 	 * ID of the asset, unique field.
 	 */
-	short_asset_id_t assetId;
+	asset_id_t assetId;
 
 	/**
 	 * Most recent RSSI value observed by this Crownstone.

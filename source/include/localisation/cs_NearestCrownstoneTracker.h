@@ -13,7 +13,6 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
-#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableEvent.h>
 #include <localisation/cs_AssetRecord.h>
 #include <localisation/cs_AssetStore.h>
@@ -56,7 +55,7 @@ public:
 	/**
 	 * returns desired minimal time to next advertisement.
 	 */
-	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& id);
+	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id);
 
 private:
 	// cached objects for efficiency
@@ -91,7 +90,7 @@ private:
 	 * and possibly broadcasts a message to inform other devices
 	 * in the mesh of relevant changes.
 	 */
-	void onReceiveAssetAdvertisement(report_asset_id_t& trackedEvent);
+	void onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_info_id_t& trackedEvent);
 
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.
@@ -105,7 +104,7 @@ private:
 	 * E.g. when the updated winning report now loses from this devices
 	 * personal report.
 	 */
-	void onReceiveAssetReport(report_asset_id_t& report, stone_id_t reporter);
+	void onReceiveAssetReport(cs_mesh_model_msg_asset_info_id_t& report, stone_id_t reporter);
 
 	// -------------------------------------------
 	// ------------- Outgoing events -------------
@@ -115,7 +114,7 @@ private:
 	 * Sends a mesh broadcast for the given report.
 	 * (stone id of reporter is contained in bluetooth metadata)
 	 */
-	void broadcastReport(report_asset_id_t& report);
+	void broadcastReport(cs_mesh_model_msg_asset_info_id_t& report);
 
 	/**
 	 * makes a report from the records personalRssi field
@@ -152,12 +151,11 @@ private:
 	 *
 	 * `this` must be init()-ialized.
 	 */
-	asset_record_t* getRecordFiltered(const short_asset_id_t& assetId);
+	asset_record_t* getRecordFiltered(const asset_id_t& assetId);
 
 public:
 	/**
 	 * Handlers for:
-	 * EVT_MESH_NEAREST_WITNESS_REPORT
 	 * EVT_ASSET_ACCEPTED
 	 * EVT_FILTERS_UPDATED
 	 */

@@ -34,16 +34,6 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_TIME_SYNC> {
 };
 
 template<>
-struct MeshPacketTraits<CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC> {
-	using type = report_asset_mac_t;
-};
-
-template<>
-struct MeshPacketTraits<CS_MESH_MODEL_TYPE_REPORT_ASSET_ID> {
-	using type = report_asset_id_t;
-};
-
-template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_STONE_MAC> {
 	using type = cs_mesh_model_msg_stone_mac_t;
 };
@@ -54,13 +44,13 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION> {
 };
 
 template<>
-struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC> {
-	using type = cs_mesh_model_msg_asset_rssi_mac_t;
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_INFO_MAC> {
+	using type = cs_mesh_model_msg_asset_info_mac_t;
 };
 
 template<>
-struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_RSSI_SID> {
-	using type = cs_mesh_model_msg_asset_rssi_sid_t;
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_INFO_ID> {
+	using type = cs_mesh_model_msg_asset_info_id_t;
 };
 
 template<>

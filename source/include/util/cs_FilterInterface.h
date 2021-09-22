@@ -25,11 +25,11 @@ public:
 	 * This can be overwritten for special use cases like ExactMatchFilter.
 	 */
 	// TODO remove 'short'
-	virtual short_asset_id_t shortAssetId(const void* key, size_t keyLengthInBytes) {
+	virtual asset_id_t shortAssetId(const void* key, size_t keyLengthInBytes) {
 		auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
 
 		// little endian byte by byte copy.
-		short_asset_id_t id{};
+		asset_id_t id{};
 		memcpy(id.data, reinterpret_cast<uint8_t*>(&crc), 3);
 
 		return id;

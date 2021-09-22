@@ -159,10 +159,10 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 	assetEvent.dispatch();
 }
 
-void AssetFitlering::handleAssetAcceptedMacOverMesh(
+void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
-
-	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
+	// construct short asset id
+	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
 
 	// throttle if the record currently exists and requires it.
@@ -187,10 +187,10 @@ void AssetFitlering::handleAssetAcceptedMacOverMesh(
 	// TODO: send uart update
 }
 
-void AssetFitlering::handleAssetAcceptedAssetIdOverMesh(
+void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
-	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
+	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
 
 	// throttle if the record currently exists and requires it.
@@ -215,10 +215,10 @@ void AssetFitlering::handleAssetAcceptedAssetIdOverMesh(
 	// TODO: send uart update
 }
 
-void AssetFitlering::handleAssetAcceptedNearestAssetId(
+void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	//#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	short_asset_id_t shortAssetId = filterOutputResultShortAssetId(sidFilter, asset);
+	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
 
 	// throttle if the record currently exists and requires it.
@@ -431,7 +431,7 @@ bool AssetFiltering::filterAcceptsScannedDevice(AssetFilter assetFilter, const s
 			false);
 }
 
-short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
+asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
 	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
 	// preallocate the buffer that the MaskedAdData needs.)
@@ -442,5 +442,5 @@ short_asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter asse
 			[](FilterInterface* filter, const uint8_t* data, size_t len) {
 				return filter->shortAssetId(data, len);
 			},
-			short_asset_id_t{});
+			asset_id_t{});
 }
