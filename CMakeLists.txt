@@ -130,16 +130,23 @@ set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
 # The JLink tool
 set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
+#set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
+#set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
+
 #set(JLINK_DEB_FILE JLink_Linux_V662d_x86_64.deb)
-set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
-set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
 #set(JLINK_MD5 9da2ff634edbe0c8adf68bdb3c850b90)
-set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
+
+set(JLINK_DEB_FILE JLink_Linux_V754b_x86_64.deb)
+set(JLINK_MD5 999c69c040168cffb272850fc62a3708)
+
+set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
+
 
 #######################################################################################################################
 # Local names
 #######################################################################################################################
 
+#https://www.nordicsemi.com/-/media/Software-and-other-downloads/SoftDevices/S132/s132nrf52720.zip
 
 #set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
 #set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_7.0.1_softdevice.hex)

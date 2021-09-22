@@ -130,6 +130,9 @@ private:
 	 */
 	AssetFilter filterToUseForShortAssetId(const filter_output_bitmasks_t& masks);
 
+	/**
+	 * precondition: isInitialized() == true;
+	 */
 	void handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset);
 
 	/**

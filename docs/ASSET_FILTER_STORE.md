@@ -297,7 +297,7 @@ uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement pas
 
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
-uint8 | RSSI halved | 6      | Absolute of RSSI / 2, or 0 if RSSI is positive.
+uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
 uint8 | Channel | 2          | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
 
 *************************************************************************
