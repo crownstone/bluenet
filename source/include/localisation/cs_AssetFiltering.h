@@ -118,17 +118,10 @@ private:
 	/**
 	 * Loop over inclusion filters and check which filters are accepting.
 	 * Return a set of bitmasks containing the result.
+	 *
+	 * Returns true if there was a filter that accepted the device
 	 */
 	filter_output_bitmasks_t handleAcceptFilters(const scanned_device_t& device);
-
-	/**
-	 * Returns the filter object that is to be used to generate the asset id.
-	 * This will be the primary sid filter, when it exists, and the primary filter
-	 * otherwise.
-	 *
-	 * Returns an AssetFilter with nullptr as _data when none of the masks bits are set.
-	 */
-	AssetFilter filterToUseForShortAssetId(const filter_output_bitmasks_t& masks);
 
 	/**
 	 * precondition: isInitialized() == true;

@@ -28,6 +28,8 @@ void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool 
 			device.address[0]);
 }
 
+// -------------------- init -----------------------
+
 cs_ret_code_t AssetFiltering::init() {
 	// Handle multiple calls to init.
 	switch (_initState) {
@@ -112,6 +114,8 @@ bool AssetFiltering::isInitialized() {
 	return _initState == AssetFilteringState::INIT_SUCCESS;
 }
 
+// -------------------- event handling -----------------------
+
 void AssetFiltering::handleEvent(event_t& evt) {
 	if (!isInitialized()) {
 		return;
@@ -158,6 +162,45 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 	event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
 	assetEvent.dispatch();
 }
+
+AssetFiltering::filter_output_bitmasks_t AssetFiltering::handleAcceptFilters(const scanned_device_t& device) {
+	filter_output_bitmasks_t masks = {};
+
+	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
+		auto filter = AssetFilter (_filterStore->getFilter(i));
+
+		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
+			if (filterAcceptsScannedDevice(filter, device)) {
+				LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
+
+				// update the relevant bitmask
+				switch (*filter.filterdata().metadata().outputType().outFormat()) {
+					case AssetFilterOutputFormat::MacOverMesh: {
+						BLEutil::setBit(masks._forwardMac, i);
+						handleAssetAcceptedMacOverMesh(i, filter, device);
+						break;
+					}
+
+					case AssetFilterOutputFormat::AssetIdOverMesh: {
+						BLEutil::setBit(masks._forwardAssetId, i);
+						handleAssetAcceptedAssetIdOverMesh(i, filter, device);
+						break;
+					}
+
+					case AssetFilterOutputFormat::AssetId: {
+						BLEutil::setBit(masks._nearestAssetId, i);
+						handleAssetAcceptedNearestAssetId(i, filter, device);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return masks;
+}
+
+// -------------------- filter handlers -----------------------
 
 void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
@@ -245,53 +288,8 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 	//#endif
 }
 
-AssetFiltering::filter_output_bitmasks_t AssetFiltering::handleAcceptFilters(const scanned_device_t& device) {
-	filter_output_bitmasks_t masks = {};
+// ---------------------------- utils ----------------------------
 
-	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
-		auto filter = AssetFilter (_filterStore->getFilter(i));
-
-		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
-			if (filterAcceptsScannedDevice(filter, device)) {
-				LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
-
-				// update the relevant bitmask
-				switch (*filter.filterdata().metadata().outputType().outFormat()) {
-					case AssetFilterOutputFormat::MacOverMesh: {
-						BLEutil::setBit(masks._forwardMac, i);
-						handleAssetAcceptedMacOverMesh(i, filter, device);
-						break;
-					}
-
-					case AssetFilterOutputFormat::AssetIdOverMesh: {
-						BLEutil::setBit(masks._forwardAssetId, i);
-						handleAssetAcceptedAssetIdOverMesh(i, filter, device);
-						break;
-					}
-
-					case AssetFilterOutputFormat::AssetId: {
-						BLEutil::setBit(masks._nearestAssetId, i);
-						handleAssetAcceptedNearestAssetId(i, filter, device);
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	return masks;
-}
-
-AssetFilter AssetFiltering::filterToUseForShortAssetId(const filter_output_bitmasks_t& masks) {
-	if (masks.assetId()) {
-		return AssetFilter(_filterStore->getFilter(masks.primaryAssetIdFilter()));
-	}
-	if (masks.combined()) {
-		return AssetFilter(_filterStore->getFilter(masks.primaryFilter()));
-	}
-
-	return AssetFilter(nullptr);
-}
 
 bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 	// Rejection check: looping over exclusion filters.
