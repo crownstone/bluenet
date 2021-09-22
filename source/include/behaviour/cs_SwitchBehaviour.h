@@ -76,11 +76,11 @@ public:
     // reintroduces the function name in this class's scope.
     using Behaviour::isValid;
     
-    protected:
+protected:
     // (serialized field)
     PresenceCondition presenceCondition;
 
-    private:
+private:
     // unserialized fields (runtime values)
     std::optional<uint32_t> prevInRoomTimeStamp = {}; // when was the last call to _isValid that returned true?
 

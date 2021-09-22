@@ -58,14 +58,14 @@ size_t ExtendedSwitchBehaviour::serializedSize() const {
 
 bool ExtendedSwitchBehaviour::requiresPresence() {
 	return extensionIsActive
-			? presenceCondition.pred.requiresPresence()
-			: extensionCondition.pred.requiresPresence();
+			? presenceCondition.predicate.requiresPresence()
+			: extensionCondition.predicate.requiresPresence();
 }
 
 bool ExtendedSwitchBehaviour::requiresAbsence() {
 	return extensionIsActive
-			? presenceCondition.pred.requiresAbsence()
-			: extensionCondition.pred.requiresAbsence();
+			? presenceCondition.predicate.requiresAbsence()
+			: extensionCondition.predicate.requiresAbsence();
 }
 
 bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
@@ -84,7 +84,7 @@ bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription
 		return false;
 	}
 
-	if (extensionCondition(currentPresence)) {
+	if (extensionCondition.isTrue(currentPresence)) {
 		// in extension and presence match
 		prevExtensionIsValidTimeStamp = SystemTime::now();
 		return true;
@@ -110,7 +110,7 @@ bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription
 void ExtendedSwitchBehaviour::print() {
 	LOGd("## ExtendedSwitchBehaviour:");
 	SwitchBehaviour::print();
-	extensionCondition.pred.print();
+	extensionCondition.predicate.print();
 
 	LOGd("extension is active: %d", extensionIsActive);
 

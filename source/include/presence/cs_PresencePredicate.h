@@ -14,7 +14,7 @@
 
 
 class PresencePredicate{
-    public:
+public:
     typedef std::array<uint8_t, 9> SerializedDataType;
 
     // user id restrictions?
@@ -28,11 +28,11 @@ class PresencePredicate{
 
     
     // private: DEBUG
-    Condition cond;
-    PresenceStateDescription RoomsBitMask;
+    Condition _condition;
+    PresenceStateDescription _presence;
 
-    public:
-    PresencePredicate(Condition c, PresenceStateDescription roomsMask);
+public:
+    PresencePredicate(Condition c, PresenceStateDescription presence);
 
     PresencePredicate(SerializedDataType arr);
 
@@ -44,16 +44,16 @@ class PresencePredicate{
     
     // parameter bit i is 1 whenever there is presence detected in the
     // room with index i.
-    bool operator()(PresenceStateDescription currentroomspresencebitmask);
+    bool isTrue(PresenceStateDescription presence);
 
-    void print(){
-        uint64_t roommask = RoomsBitMask;
+    void print() {
+        uint64_t locationBitmask = _presence.getBitmask();
 
-        [[maybe_unused]] uint32_t rooms[2] = {
-            static_cast<uint32_t>(roommask >> 0 ),
-            static_cast<uint32_t>(roommask >> 32)
+        [[maybe_unused]] uint32_t locationBitmasks[2] = {
+            static_cast<uint32_t>(locationBitmask >> 0 ),
+            static_cast<uint32_t>(locationBitmask >> 32)
         };
-        LOGd("PresencePredicate(condition: %d roommask: 0x%04x 0x%04x)", static_cast<uint8_t>(cond) , rooms[1], rooms[0]);
+        LOGd("PresencePredicate(condition: %d presence: 0x%04x 0x%04x)", static_cast<uint8_t>(_condition) , locationBitmasks[1], locationBitmasks[0]);
     }
 
 };

@@ -11,7 +11,7 @@
 #include <logging/cs_Logger.h>
 
 PresenceCondition::PresenceCondition(PresencePredicate p, uint32_t t) : 
-		pred(p), timeOut(t) {}
+		predicate(p), timeOut(t) {}
 
 PresenceCondition::PresenceCondition(SerializedDataType arr): 
 		PresenceCondition(
@@ -25,15 +25,15 @@ size_t PresenceCondition::serializedSize() const {
 
 PresenceCondition::SerializedDataType PresenceCondition::serialize() {
 	SerializedDataType result;
-	std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
+	std::copy_n(std::begin(WireFormat::serialize(predicate)),    9, std::begin(result) + 0);
 	std::copy_n(std::begin(WireFormat::serialize(timeOut)), 4, std::begin(result) + 9);
 
 	return result;
 }
 
-uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size) {
-	if (max_size != 0) {
-		if (outbuff == nullptr || max_size < serializedSize()) {
+uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t maxSize) {
+	if (maxSize != 0) {
+		if (outbuff == nullptr || maxSize < serializedSize()) {
 			return outbuff;
 		}
 	}
@@ -46,6 +46,6 @@ uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size) {
 			outbuff );
 }
 
-bool PresenceCondition::operator()(PresenceStateDescription currentPresence) {
-	return pred(currentPresence);
+bool PresenceCondition::isTrue(PresenceStateDescription currentPresence) {
+	return predicate.isTrue(currentPresence);
 }
