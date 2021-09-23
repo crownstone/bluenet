@@ -87,7 +87,6 @@ IF (BUILD_MESH_BOOTLOADER)
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/integration/nrfx")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/toolchain/cmsis/include")
 
-
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/util")
 #	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/timer")
 #	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/log")
@@ -201,6 +200,10 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/oberon/oberon_backend_eddsa.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/oberon/oberon_backend_hash.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/oberon/oberon_backend_hmac.c")
+	
+	IF(NORDIC_SDK_VERSION GREATER 15)
+		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/ble/nrf_ble_gq/nrf_ble_gq.c")
+	ENDIF()
 
 	MESSAGE(STATUS "bootloader: nrf log: ${CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED}")
 	IF (CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED)
@@ -236,6 +239,7 @@ ELSE()
 	
 	
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/ble/common")
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/ble/nrf_ble_gq")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/boards")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/ble/ble_services/ble_dis")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/atomic")

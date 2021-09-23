@@ -306,3 +306,23 @@
 #ifndef NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE
 #define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 64
 #endif
+
+#if NORDIC_SDK_VERSION > 15
+
+/*
+ * The BLE GATT Queue has been introduced in SDK16. 
+ * See: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fsdk_nrf5_v16.0.0%2Fmigration.html
+ */
+#ifndef NRF_BLE_GQ_ENABLED
+#define NRF_BLE_GQ_ENABLED 1
+#endif
+
+#ifndef NRF_BALLOC_ENABLED
+#define NRF_BALLOC_ENABLED 1
+#endif
+
+#ifndef NRF_QUEUE_ENABLED
+#define NRF_QUEUE_ENABLED 1
+#endif
+
+#endif

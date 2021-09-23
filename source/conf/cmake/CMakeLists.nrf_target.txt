@@ -136,7 +136,9 @@ INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/cmsis/include")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/config")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/fstorage")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_section_vars")
+INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/queue")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/ble_db_discovery")
+INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/nrf_ble_gq")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -205,7 +207,12 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
 	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
-	
+
+	IF(NORDIC_SDK_VERSION GREATER 15)
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/nrf_ble_gq/nrf_ble_gq.c")
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/queue/nrf_queue.c")
+	ENDIF()
+
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
 		MESSAGE(STATUS "SERIAL from NORDIC enabled")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
@@ -228,6 +235,11 @@ ELSE()
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
 		ENDIF()
 	ELSE()
+		IF(NORDIC_SDK_VERSION GREATER 15)
+			# Required now for gatt queue
+			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
+			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
+		ENDIF()
 		MESSAGE(STATUS "SERIAL from NORDIC disabled")
 	ENDIF()
 

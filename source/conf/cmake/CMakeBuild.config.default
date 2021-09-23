@@ -396,6 +396,42 @@ RAM_BOOTLOADER_START_OFFSET=0x718
 # 0x20020000 - RAM_R1_BASE = 0x1DC40
 #RAM_APPLICATION_AMOUNT=0x1DC40
 
+#######################################################################################################################
+# S132 7.2.0 (comes with SDK 17)
+#######################################################################################################################
+SOFTDEVICE_MAJOR=7
+SOFTDEVICE_MINOR=2
+SOFTDEVICE_SERIES=132
+SOFTDEVICE=s132_nrf52_7.2.0
+
+# Check ../tools/nrf5_sdk/components/softdevice/s132/doc/s132_nrf52_7.2.0_release-notes.pdf:
+# FLASH: 152 kB (0x26000 bytes)
+# RAM: 5.6 kB (0x1668 bytes)
+# Call stack: 1.75 kB (0x700 bytes)
+# Firmware id: 0x0101
+
+# We might get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
+#   FLASH (rx) : ORIGIN = 0x30000, LENGTH = 0x50000
+# However, this is MORE than above... Hence, we set it to 0x26000
+APPLICATION_START_ADDRESS=0x00026000
+
+# Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
+APPLICATION_LENGTH=0x50000
+
+# Start of RAM for the application (from 0x20000000 and up to RAM_R1_BASE it is reserved for the softdevice)
+# Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
+# TODO
+#RAM_R1_BASE=0x200023C0
+
+# On the nRF52833 we have 128kB of RAM, end is at 0x20020000, so the amount of RAM for the application becomes
+# 0x20020000 - RAM_R1_BASE = 0x1DC40
+# TODO
+#RAM_APPLICATION_AMOUNT=0x1DC40
+
+
+
+
+
 
 ## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you

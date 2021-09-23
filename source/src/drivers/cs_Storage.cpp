@@ -558,12 +558,31 @@ ret_code_t Storage::garbageCollectInternal() {
 	return fdsRetCode;
 }
 
+#if NORDIC_SDK_VERSION != 15
+/**
+ * This function can now be found as part of the example files themselves.
+ */
+static uint32_t nrf5_flash_end_addr_get()
+{
+    uint32_t const bootloader_addr = BOOTLOADER_ADDRESS;
+    uint32_t const page_sz         = NRF_FICR->CODEPAGESIZE;
+    uint32_t const code_sz         = NRF_FICR->CODESIZE;
+
+    return (bootloader_addr != 0xFFFFFFFF ?
+            bootloader_addr : (code_sz * page_sz));
+}
+#endif
+
 cs_ret_code_t Storage::eraseAllPages() {
 	LOGw("eraseAllPages");
 	if (_initialized || isErasingPages()) {
 		return ERR_NOT_AVAILABLE;
 	}
+#if NORDIC_SDK_VERSION == 15
 	uint32_t endAddr = fds_flash_end_addr();
+#else
+	uint32_t endAddr = nrf5_flash_end_addr_get();
+#endif
 	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
 	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
 	uint32_t startAddr = endAddr - flashSizeBytes;

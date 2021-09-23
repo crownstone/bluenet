@@ -70,12 +70,13 @@ void mesh_assertion_handler(uint32_t pc);
 
 #define APP_ERROR_CHECK_EXCEPT(cs_ret_code_t, EXCEPTION)                                                               \
 		if (cs_ret_code_t == EXCEPTION) {                                                                              \
-			CLOGw(STRINGIFY(EXCEPTION));                                                                                \
+			CLOGw(STRINGIFY((int)EXCEPTION));                                                                                \
 		} else {                                                                                                       \
 			APP_ERROR_CHECK(cs_ret_code_t);                                                                            \
 		}
 
 #ifdef __EXCEPTIONS
+#include <exception>
 
 	class ble_exception : public std::exception {
 	public:
