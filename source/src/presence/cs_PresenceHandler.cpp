@@ -158,8 +158,8 @@ PresenceMutation PresenceHandler::handleProfileLocation(uint8_t profile, uint8_t
 		record = addRecord(profile, location);
 
 		if (record == nullptr) {
-			// We cannot handle this presence event.
-			return PresenceMutation::NothingChanged; // return Unhandled?
+			// We cannot handle this presence event, so nothing changed.
+			return PresenceMutation::NothingChanged;
 		}
 	}
 	else {
