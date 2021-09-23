@@ -17,7 +17,7 @@ public:
 	/**
 	 * Max number of asset records to keep up.
 	 */
-	static constexpr auto MAX_RECORDS = 20u;
+	static constexpr auto MAX_RECORDS = 50u;
 
 	/**
 	 * Time in seconds after which a record is timed out.
