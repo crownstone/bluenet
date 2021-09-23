@@ -244,7 +244,8 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 
 	if (!throttle) {
 		uint16_t throttlingCounterBumpMs = 0;
-		throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, shortAssetId);
+		uint8_t filterBitmask = 1 << filterId;
+		throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, shortAssetId, filterBitmask);
 		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
@@ -273,8 +274,8 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 
 	if (!throttle) {
 		uint16_t throttlingCounterBumpMs = 0;
-
-		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId);
+		uint8_t filterBitmask = 1 << filterId;
+		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId, filterBitmask);
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
 	else {

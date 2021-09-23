@@ -54,12 +54,13 @@ uint16_t AssetForwarder::sendAssetMacToMesh(const scanned_device_t& asset) {
 }
 
 
-uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId) {
+uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 	cs_mesh_model_msg_asset_info_id_t assetMsg = {};
 
-	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
 	assetMsg.id = assetId;
+	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
+	assetMsg.filterBitmask = filterBitmask;
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;

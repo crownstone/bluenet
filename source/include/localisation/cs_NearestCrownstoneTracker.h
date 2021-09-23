@@ -55,7 +55,7 @@ public:
 	/**
 	 * returns desired minimal time to next advertisement.
 	 */
-	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id);
+	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id, uint8_t filterBitmask);
 
 private:
 	// cached objects for efficiency

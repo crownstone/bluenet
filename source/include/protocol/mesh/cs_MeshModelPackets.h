@@ -202,15 +202,16 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_mac_t {
-	rssi_and_channel_t rssiData;
 	uint8_t mac[MAC_ADDRESS_LEN];
+	rssi_and_channel_t rssiData;
 };
 
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_id_t {
 	asset_id_t id;
-	uint8_t reserved[3];
+	uint8_t filterBitmask;
 	rssi_and_channel_t rssiData;
+	uint8_t reserved[3];
 };
 
 /**
