@@ -68,9 +68,11 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	MacOverMesh     = 0,
+	Mac             = 0,
 	AssetId         = 1,
-	AssetIdOverMesh = 2,
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+	AssetIdNearest  = 2,
+#endif
 };
 
 union __attribute__((__packed__)) asset_filter_flags_t {

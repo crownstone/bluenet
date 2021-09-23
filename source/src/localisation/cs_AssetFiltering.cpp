@@ -175,26 +175,28 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::handleAcceptFilters(con
 
 				// update the relevant bitmask
 				switch (*filter.filterdata().metadata().outputType().outFormat()) {
-					case AssetFilterOutputFormat::MacOverMesh: {
+					case AssetFilterOutputFormat::Mac: {
 						BLEutil::setBit(masks._forwardMac, i);
 						LOGAssetFilteringDebug("Accepted MacOverMesh %d", i);
 						handleAssetAcceptedMacOverMesh(i, filter, device);
 						break;
 					}
 
-					case AssetFilterOutputFormat::AssetIdOverMesh: {
+					case AssetFilterOutputFormat::AssetId: {
 						BLEutil::setBit(masks._forwardAssetId, i);
 						LOGAssetFilteringDebug("Accepted AssetIdOverMesh %d", i);
 						handleAssetAcceptedAssetIdOverMesh(i, filter, device);
 						break;
 					}
 
-					case AssetFilterOutputFormat::AssetId: {
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+					case AssetFilterOutputFormat::AssetIdNearest: {
 						BLEutil::setBit(masks._nearestAssetId, i);
 						LOGAssetFilteringDebug("Accepted NearestAssetId %d", i);
 						handleAssetAcceptedNearestAssetId(i, filter, device);
 						break;
 					}
+#endif
 				}
 			}
 		}
@@ -262,15 +264,16 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 	// TODO: send uart update
 }
 
+
 void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
-	//#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
 
 	// throttle if the record currently exists and requires it.
 	// TODO: always throttle when not nearest
-	bool throttle = assetRecord != nullptr && assetRecord->isThrottled();
+	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		uint16_t throttlingCounterBumpMs = 0;
@@ -287,7 +290,7 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 				assetRecord->throttlingCountdown);
 	}
 
-	//#endif
+#endif
 }
 
 // ---------------------------- utils ----------------------------
