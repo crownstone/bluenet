@@ -92,6 +92,7 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 void TrackedDevices::handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet) {
 	LOGTrackedDevicesDebug("handleMeshListSize size=%u", packet.listSize);
 	_expectedDeviceListSize = packet.listSize;
+	checkSynced();
 }
 
 void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
@@ -305,6 +306,9 @@ void TrackedDevices::print(TrackedDevice& device) {
 void TrackedDevices::tickMinute() {
 	LOGTrackedDevicesDebug("tickMinute");
 	for (uint8_t i = 0; i < _deviceListSize; ++i) {
+		if (!_devices[i].isValid()) {
+			continue;
+		}
 		if (_devices[i].locationIdTTLMinutes != 0) {
 			_devices[i].locationIdTTLMinutes--;
 			if (_devices[i].locationIdTTLMinutes == 0) {
@@ -317,6 +321,7 @@ void TrackedDevices::tickMinute() {
 		}
 		if (_devices[i].data.data.timeToLiveMinutes == 0) {
 			// Always check if device is timed out, as it might be that the TTL was never set.
+			LOGTrackedDevicesDebug("Timed out id=%u", _devices[i].data.data.deviceId);
 			_devices[i].invalidate();
 		}
 
@@ -502,7 +507,7 @@ void TrackedDevices::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_FAILED: {
-			LOGTrackedDevicesDebug("Sync failed: consider synced");
+			LOGTrackedDevicesDebug("Mesh sync failed consider synced in any case. Device list is synced=%u", _deviceListIsSynced);
 			_deviceListIsSynced = true;
 			break;
 		}
