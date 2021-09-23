@@ -73,6 +73,8 @@ Get a summary of all filters currently on the Crownstone and some extra metadata
 
 #### Get filter summaries result packet
 
+![Filter summaries packet](../docs/diagrams/asset_filter_summaries_packet.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 [Protocol version](#asset-filter-store-protocol-version) | Protocol | 1 | Protocol version of the Crownstone, commands should use the same protocol.
@@ -93,6 +95,8 @@ Result codes:
 Command to upload a filter in chunks. All chunks will be merged by the Crownstone. If a previously committed filter with the same filter ID is already present on the Crownstone, it will be removed prior to handling the chunk.
 
 #### Upload filter packet
+
+![Upload filter packet](../docs/diagrams/asset_filter_upload_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -118,6 +122,8 @@ Removes the filter with given filter ID.
 
 #### Remove filter packet
 
+![Remove filter packet](../docs/diagrams/asset_filter_remove_packet.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 [Protocol version](#asset-filter-store-protocol-version) | Protocol | 1 | Protocol of this packet.
@@ -135,6 +141,8 @@ Result codes:
 Commit the changes that were made.
 
 #### Commit filter packet
+
+![Commit filter packet](../docs/diagrams/asset_filter_commit_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -176,6 +184,8 @@ Where, `ID_1` and `CRC_1` are the filter ID and CRC of the filter with the lowes
 ### Filter summary
 A summary of a filter.
 
+![Filter summary packet](../docs/diagrams/asset_filter_summary_packet.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 uint8 | Filter ID | 1 | The ID of this filter.
@@ -195,6 +205,8 @@ The 3 least significant bytes of the calculated CRC-32 are the asset ID.
 
 ### Filter packet
 
+![Filter packet](../docs/diagrams/asset_filter_packet.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 [Filter metadata](#filter-metadata) | Metadata |  | Metadata determining how the filter behaves.
@@ -202,6 +214,8 @@ uint8[] | Filter data |  | Byte representation of the filter, format depends on 
 
 
 ### Filter metadata
+
+![Filter metadata packet](../docs/diagrams/asset_filter_metadata_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -234,6 +248,8 @@ Bit | Name | Description
 ## Filter data packets
 
 ### Exact match filter data
+
+![Exact match filter data](../docs/diagrams/exact_match_filter_data.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -278,6 +294,8 @@ Value | Name | Input format type | Output description type
 
 ### MAC address report
 
+![MAC address report](../docs/diagrams/asset_filter_mac_address_report.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 uint8[] | MAC | 6    | The MAC address of the asset.
@@ -285,6 +303,8 @@ uint8[] | MAC | 6    | The MAC address of the asset.
 
 
 ### Asset ID report
+
+![Asset ID report](../docs/diagrams/asset_filter_asset_id_report.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -295,9 +315,11 @@ uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement pas
 
 ### RSSI and channel
 
+![RSSI and channel packet](../docs/diagrams/rssi_and_channel_packet.png)
+
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
-uint8 | RSSI halved | 6      | Absolute of RSSI / 2, or 0 if RSSI is positive.
+uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
 uint8 | Channel | 2          | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
 
 *************************************************************************
@@ -308,6 +330,8 @@ Before explaining the advertisement selection, let's first have a look at the da
 ### BLE advertisement
 A BLE advertisement has the following data:
 
+![BLE advertisement](../docs/diagrams/ble_adv_packet.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 uint8 | Preamble | 1 | Always the same value (10101010b).
@@ -317,6 +341,9 @@ uint8[] | MAC address | 6 | The MAC address.
 [AD field](#ad-field)[] | AD fields |  | A list of AD fields.
 
 #### AD field
+
+![BLE advertisement data field](../docs/diagrams/ble_adv_data_packet.png)
+
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
 uint8 | Length | 1   | Length of this AD field.
