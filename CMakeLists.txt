@@ -11,6 +11,7 @@ option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"          
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
 option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary logging"       OFF)
+option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -106,14 +107,19 @@ set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-do
 
 # The Nordic SDK
 if (NORDIC_SDK_VERSION EQUAL 15)
-	set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip)
+	set(NORDIC_SDK_URL_FILE "SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip")
 	set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
 elseif (NORDIC_SDK_VERSION EQUAL 16)
-	set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip)
+	set(NORDIC_SDK_URL_FILE "SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip")
 	set(NORDIC_NRF5_SDK_MD5 cc2ccb57d2c7159fd37f9e04fca6cc64)
+elseif (NORDIC_SDK_VERSION EQUAL 17)
+	set(NORDIC_SDK_URL_FILE "SDKs/nRF5/Binaries/nRF5_SDK_17.1.0_ddde560.zip")
+	set(NORDIC_NRF5_SDK_MD5 024efaa45cf2294a60f6308caba28e6e)
 else()
 	message(FATAL_ERROR "Unkown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
+
+set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/${NORDIC_SDK_URL_FILE})
 
 # The mesh
 set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
@@ -130,19 +136,19 @@ set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
 # The JLink tool
 set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-#set(JLINK_DEB_FILE JLink_Linux_V662d_x86_64.deb)
-set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
+set(JLINK_DEB_FILE JLink_Linux_V754b_x86_64.deb)
+set(JLINK_MD5 999c69c040168cffb272850fc62a3708)
+
 set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
-#set(JLINK_MD5 9da2ff634edbe0c8adf68bdb3c850b90)
-set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
 
 #######################################################################################################################
 # Local names
 #######################################################################################################################
 
-
-#set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
-#set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_7.0.1_softdevice.hex)
+# Softdevice is now set in CMakeBuild config file and a different one can be used depending on your target
+# It should be something like:
+#     SOFTDEVICE=s132_nrf52_7.0.1
+#
 set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/${SOFTDEVICE}_softdevice.hex)
 
 list(APPEND CMAKE_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FILE}")
@@ -151,17 +157,30 @@ list(APPEND CMAKE_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FILE}")
 # Download dependencies
 #######################################################################################################################
 
-ExternalProject_Add(nordic_sdk
-	DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-	SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
-	URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
-	URL_MD5 ${NORDIC_NRF5_SDK_MD5}
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-	PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
-	COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch && patch -p0 < patch/03nrf5.patch
-	)
+if (NORDIC_SDK_VERSION EQUAL 15)
+	ExternalProject_Add(nordic_sdk
+		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
+		URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
+		URL_MD5 ${NORDIC_NRF5_SDK_MD5}
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
+			COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch
+			COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/03nrf5.patch
+		)
+else()
+	ExternalProject_Add(nordic_sdk
+		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
+		URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
+		URL_MD5 ${NORDIC_NRF5_SDK_MD5}
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
+endif()
 
 set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
 list(APPEND CMAKE_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
@@ -309,25 +328,6 @@ if(VERBOSITY GREATER 5)
 	message(STATUS "list: ${CMAKE_ARGS}")
 endif()
 
-#git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
-#if(NOT GIT_BRANCH STREQUAL "")
-#  list(APPEND CMAKE_ARGS "-DGIT_BRANCH:STRING=${GIT_BRANCH}")
-#endif()
-#
-#if(NOT GIT_HASH STREQUAL "")
-#  list(APPEND CMAKE_ARGS "-DGIT_HASH:STRING=${GIT_HASH}")
-#endif()
-#
-#compilation_info(COMPILATION_DAY)
-#
-#if(NOT COMPILATION_DAY STREQUAL "")
-#  list(APPEND CMAKE_ARGS "-DCOMPILATION_DAY:STRING=${COMPILATION_DAY}")
-#endif()
-
-#message(STATUS "Git branch: ${GIT_BRANCH}")
-#message(STATUS "Git hash: ${GIT_HASH}")
-#message(STATUS "Compilation day: ${COMPILATION_DAY}")
-
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp)
 
@@ -335,7 +335,10 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 # Build encryption library (required by bootloader)
 #######################################################################################################################
 
+# We have added some commands to remove windows line endings and to set the exec bit
+# Reported at https://devzone.nordicsemi.com/f/nordic-q-a/47429/bug-windows-line-ending-characters
 ADD_CUSTOM_TARGET(micro_eec
+	COMMAND sed -i 's/\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMENT "Build micro-eec"
@@ -367,16 +370,28 @@ if(NOT FACTORY_IMAGE)
 		)
 endif()
 
+#######################################################################################################################
+# Build/compile for host
+#######################################################################################################################
+
+if(COMPILE_FOR_HOST)
+	ExternalProject_Add(bluenet-host
+		SOURCE_DIR ${WORKSPACE_DIR}/host
+		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}
+		INSTALL_DIR ${WORKSPACE_DIR}/bin/host/${BOARD_TARGET}
+		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/stamp
+		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/tmp
+		CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
+		CMAKE_ARGS "${CMAKE_ARGS}"
+		CMAKE_ARGS "-DHOST_TARGET:OPTION=ON"
+		BUILD_ALWAYS 1
+		)
+endif()
+
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 if(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 endif()
-
-# Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config .
-#ExternalProject_Add_Step(bluenet BUILD
-#  COMMAND ${CMAKE_COMMAND} -E echo "-- Execute git update-index --skip-worktree for default config file to prevent accidental commits"
-#  COMMAND git update-index --skip-worktree ${WORKSPACE_DIR}/config/default/CMakeBuild.config
-#  )
 
 if(NOT FACTORY_IMAGE)
 	add_dependencies(bluenet gcc_arm_none_eabi)

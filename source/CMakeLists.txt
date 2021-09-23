@@ -1,1 +1,1 @@
-/home/anne/workspace/bluenet/source/scripts/../conf/cmake/CMakeLists.host_target.txt
+/home/anne/workspace/bluenet/source/scripts/../conf/cmake/CMakeLists.nrf_target.txt
