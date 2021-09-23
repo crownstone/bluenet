@@ -7,6 +7,7 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
+#include <tracking/cs_TrackedDevice.h>
 #include <cstdint>
 
 /**
@@ -58,24 +59,6 @@ private:
 	static const uint16_t TICKS_PER_SECOND = (1000 / TICK_INTERVAL_MS);
 	static const uint16_t TICKS_PER_MINUTES = (60 * 1000 / TICK_INTERVAL_MS);
 
-	enum TrackedDeviceFields {
-		BIT_POS_ACCESS_LEVEL  = 0,
-		BIT_POS_LOCATION      = 1,
-		BIT_POS_PROFILE       = 2,
-		BIT_POS_RSSI_OFFSET   = 3,
-		BIT_POS_FLAGS         = 4,
-		BIT_POS_DEVICE_TOKEN  = 5,
-		BIT_POS_TTL           = 6,
-	};
-	static const uint8_t ALL_FIELDS_SET = 0x7F;
-
-	struct __attribute__((packed)) TrackedDevice {
-		uint8_t fieldsSet = 0;
-		uint8_t locationIdTTLMinutes = LOCATION_ID_TTL_MINUTES;
-		uint8_t heartbeatTTLMinutes = 0;
-		internal_register_tracked_device_packet_t data;
-	};
-
 	uint16_t ticksLeftSecond = TICKS_PER_SECOND;
 	uint16_t ticksLeftMinute = TICKS_PER_MINUTES;
 
@@ -86,6 +69,9 @@ private:
 	 */
 	TrackedDevice _devices[MAX_TRACKED_DEVICES];
 
+	/**
+	 * Current max size of the devices list: all other entries are invalid.
+	 */
 	uint8_t _deviceListSize = 0;
 
 	/**
@@ -104,28 +90,30 @@ private:
 	/**
 	 * Find device with given ID, else add a new device with given ID.
 	 *
-	 * returns null if couldn't be added.
+	 * Returns device with given ID when found or added.
+	 * Returns null if couldn't be added.
 	 */
 	TrackedDevice* findOrAdd(device_id_t deviceId);
 
 	/**
-	 * Find device with given id.
+	 * Find and return device with given id.
 	 *
-	 * returns null if it couldn't be found.
+	 * Returns null if it couldn't be found.
 	 */
 	TrackedDevice* find(device_id_t deviceId);
 
 	/**
-	 * Find device token.
+	 * Find and return device with given token.
 	 *
-	 * returns null if it couldn't be found.
+	 * Returns null if it couldn't be found.
 	 */
 	TrackedDevice* findToken(uint8_t* deviceToken, uint8_t size);
 
 	/**
 	 * Add device to list.
 	 *
-	 * returns null if couldn't be added.
+	 * Returns invalidated entry when added.
+	 * Returns null if couldn't be added.
 	 */
 	TrackedDevice* add();
 
@@ -143,11 +131,6 @@ private:
 	 * Return true when given access level is equal or higher than device access level.
 	 */
 	bool hasAccess(TrackedDevice& device, uint8_t accessLevel);
-
-	/**
-	 * Returns true when device has a valid TTL, that didn't expire yet.
-	 */
-	bool isValidTTL(TrackedDevice& device);
 
 	/**
 	 * Returns true when no other device has this token.
@@ -171,23 +154,9 @@ private:
 	void tickSecond();
 
 	/**
-	 * Returns true when all fields are set.
-	 */
-	bool allFieldsSet(TrackedDevice& device);
-
-	/**
 	 * Check if tracked device list is synced yet.
 	 */
 	void checkSynced();
-
-
-	void setAccessLevel(TrackedDevice& device, uint8_t accessLevel);
-	void setLocation(TrackedDevice& device, uint8_t locationId);
-	void setProfile(TrackedDevice& device, uint8_t profileId);
-	void setRssiOffset(TrackedDevice& device, int8_t rssiOffset);
-	void setFlags(TrackedDevice& device, uint8_t flags);
-	void setDevicetoken(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
-	void setTTL(TrackedDevice& device, uint16_t ttlMinutes);
 
 	/**
 	 * Send background adv event.
