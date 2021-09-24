@@ -169,35 +169,37 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::handleAcceptFilters(con
 	for (uint8_t i = 0; i < _filterStore->getFilterCount(); ++i) {
 		auto filter = AssetFilter (_filterStore->getFilter(i));
 
-		if (filter.filterdata().metadata().flags()->flags.exclude == false) {
-			if (filterAcceptsScannedDevice(filter, device)) {
-				LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
+		if (filter.filterdata().metadata().flags()->flags.exclude) {
+			continue;
+		}
 
-				// update the relevant bitmask
-				switch (*filter.filterdata().metadata().outputType().outFormat()) {
-					case AssetFilterOutputFormat::Mac: {
-						BLEutil::setBit(masks._forwardMac, i);
-						LOGAssetFilteringDebug("Accepted MacOverMesh %d", i);
-						handleAssetAcceptedMacOverMesh(i, filter, device);
-						break;
-					}
+		if (filterAcceptsScannedDevice(filter, device)) {
+			LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
 
-					case AssetFilterOutputFormat::AssetId: {
-						BLEutil::setBit(masks._forwardAssetId, i);
-						LOGAssetFilteringDebug("Accepted AssetIdOverMesh %d", i);
-						handleAssetAcceptedAssetIdOverMesh(i, filter, device);
-						break;
-					}
+			// update the relevant bitmask
+			switch (*filter.filterdata().metadata().outputType().outFormat()) {
+				case AssetFilterOutputFormat::Mac: {
+					BLEutil::setBit(masks._forwardMac, i);
+					LOGAssetFilteringDebug("Accepted MacOverMesh %u", i);
+					handleAssetAcceptedMacOverMesh(i, filter, device);
+					break;
+				}
+
+				case AssetFilterOutputFormat::AssetId: {
+					BLEutil::setBit(masks._forwardAssetId, i);
+					LOGAssetFilteringDebug("Accepted AssetIdOverMesh %u", i);
+					handleAssetAcceptedAssetIdOverMesh(i, filter, device);
+					break;
+				}
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-					case AssetFilterOutputFormat::AssetIdNearest: {
-						BLEutil::setBit(masks._nearestAssetId, i);
-						LOGAssetFilteringDebug("Accepted NearestAssetId %d", i);
-						handleAssetAcceptedNearestAssetId(i, filter, device);
-						break;
-					}
-#endif
+				case AssetFilterOutputFormat::AssetIdNearest: {
+					BLEutil::setBit(masks._nearestAssetId, i);
+					LOGAssetFilteringDebug("Accepted NearestAssetId %u", i);
+					handleAssetAcceptedNearestAssetId(i, filter, device);
+					break;
 				}
+#endif
 			}
 		}
 	}
@@ -210,11 +212,11 @@ AssetFiltering::filter_output_bitmasks_t AssetFiltering::handleAcceptFilters(con
 void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
-	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
-	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
+	asset_id_t assetId = filterOutputResultShortAssetId(filter, asset);
+	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
-	bool throttle = assetRecord != nullptr && assetRecord->isThrottled();
+	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		uint16_t throttlingCounterBumpMs = 0;
@@ -226,9 +228,9 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 	else {
 		LOGAssetFilteringVerbose(
 				"Throttled asset id=%02X:%02X:%02X counter=%u",
-				shortAssetId.data[0],
-				shortAssetId.data[1],
-				shortAssetId.data[2],
+				assetId.data[0],
+				assetId.data[1],
+				assetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
 
@@ -238,16 +240,17 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
-	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
-	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
+	asset_id_t assetId = filterOutputResultShortAssetId(filter, asset);
+	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
-	bool throttle = assetRecord != nullptr && assetRecord->isThrottled();
+	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		uint16_t throttlingCounterBumpMs = 0;
-		uint8_t filterBitmask = 1 << filterId;
-		throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, shortAssetId, filterBitmask);
+		uint8_t filterBitmask = 0;
+		BLEutil::setBit(filterBitmask, filterId);
+		throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, assetId, filterBitmask);
 		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
@@ -255,9 +258,9 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 	else {
 		LOGAssetFilteringVerbose(
 				"Throttled asset id=%02X:%02X:%02X counter=%u",
-				shortAssetId.data[0],
-				shortAssetId.data[1],
-				shortAssetId.data[2],
+				assetId.data[0],
+				assetId.data[1],
+				assetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
 
@@ -277,7 +280,8 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 
 	if (!throttle) {
 		uint16_t throttlingCounterBumpMs = 0;
-		uint8_t filterBitmask = 1 << filterId;
+		uint8_t filterBitmask = 0;
+		BLEutil::setBit(filterBitmask, filterId);
 		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId, filterBitmask);
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
@@ -289,7 +293,6 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 				shortAssetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
-
 #endif
 }
 
