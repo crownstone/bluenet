@@ -218,7 +218,7 @@ bool AssetFiltering::handleAcceptFilter(
 void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
-	asset_id_t assetId = filterOutputResultShortAssetId(filter, asset);
+	asset_id_t assetId = filterOutputResultAssetId(filter, asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -246,7 +246,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
-	asset_id_t assetId = filterOutputResultShortAssetId(filter, asset);
+	asset_id_t assetId = filterOutputResultAssetId(filter, asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -277,8 +277,8 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	asset_id_t shortAssetId = filterOutputResultShortAssetId(filter, asset);
-	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, shortAssetId);
+	asset_id_t assetId = filterOutputResultAssetId(filter, asset);
+	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
 	// TODO: always throttle when not nearest
@@ -289,7 +289,7 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		BLEutil::setBit(filterBitmask, filterId);
 
 		uint16_t throttlingCounterBumpMs = 0;
-		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId, filterBitmask);
+		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask);
 		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
@@ -297,9 +297,9 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 	else {
 		LOGAssetFilteringVerbose(
 				"Throttled asset id=%02X:%02X:%02X counter=%u",
-				shortAssetId.data[0],
-				shortAssetId.data[1],
-				shortAssetId.data[2],
+				assetId.data[0],
+				assetId.data[1],
+				assetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
 #endif
@@ -339,7 +339,7 @@ bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
  * of 31 bytes needs to be allocated on the stack.)
  *
  * The delegate return type is left as free template parameter so that this template can be
- * used for both `contains` and `shortAssetId` return values.
+ * used for both `contains` and `assetId` return values.
  */
 template <class ReturnType, class ExpressionType>
 ReturnType prepareFilterInputAndCallDelegate(
@@ -446,7 +446,7 @@ bool AssetFiltering::filterAcceptsScannedDevice(AssetFilter assetFilter, const s
 			false);
 }
 
-asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
+asset_id_t AssetFiltering::filterOutputResultAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
 	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
 	// preallocate the buffer that the MaskedAdData needs.)
@@ -455,7 +455,7 @@ asset_id_t AssetFiltering::filterOutputResultShortAssetId(AssetFilter assetFilte
 			asset,
 			assetFilter.filterdata().metadata().outputType().inFormat(),
 			[](FilterInterface* filter, const uint8_t* data, size_t len) {
-				return filter->shortAssetId(data, len);
+				return filter->assetId(data, len);
 			},
 			asset_id_t{});
 }

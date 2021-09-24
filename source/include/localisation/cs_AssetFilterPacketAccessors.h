@@ -72,7 +72,7 @@ public:
 	/**
 	 * Get the input format.
 	 *
-	 * Currently only valid if type is ShortAssetId.
+	 * Currently only valid if type is assetId.
 	 */
 	AssetFilterInput         inFormat();
 

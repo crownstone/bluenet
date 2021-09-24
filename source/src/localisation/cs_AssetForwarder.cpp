@@ -59,7 +59,8 @@ uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const 
 	cs_mesh_model_msg_asset_report_id_t assetMsg = {};
 
 	assetMsg.id = assetId;
-	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
+	assetMsg.rssi= asset.rssi;
+	assetMsg.channel = compressChannel(asset.channel);
 	assetMsg.filterBitmask = filterBitmask;
 
 	cs_mesh_msg_t msgWrapper;
@@ -130,8 +131,8 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_
 			.assetId         = assetMsg.id,
 			.stoneId         = seenByStoneId,
 			.filterBitmask   = assetMsg.filterBitmask,
-			.rssi            = assetMsg.rssiData.getRssi(),
-			.channel         = assetMsg.rssiData.getChannel(),
+			.rssi            = assetMsg.rssi,
+			.channel         = decompressChannel(assetMsg.channel),
 	};
 
 	UartHandler::getInstance().writeMsg(

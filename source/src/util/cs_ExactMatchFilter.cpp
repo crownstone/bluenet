@@ -79,23 +79,3 @@ bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
 uint8_t* ExactMatchFilter::getItem(size_t index) {
 	return _data->itemArray + index * _data->itemSize;
 }
-
-//short_asset_id_t ExactMatchFilter::shortAssetId(const void* item, size_t itemSize) {
-//	int index = find(item,itemSize);
-//	if (index < 0) {
-//		// if unknown, use the default construction for SID
-//
-//		return FilterInterface::shortAssetId(item, itemSize);
-//	}
-//	uint16_t indexUnsigned = static_cast<uint16_t>(index);
-//
-//	short_asset_id_t id {
-//		.data{
-//			static_cast<uint8_t>((indexUnsigned >>  0) & 0xff),
-//			static_cast<uint8_t>((indexUnsigned >>  8) & 0xff),
-//			static_cast<uint8_t>((indexUnsigned >> 16) & 0xff)
-//		}
-//	};
-//
-//	return id;
-//}

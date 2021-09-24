@@ -78,7 +78,7 @@ private:
 		/**
 		 * returns the lowest filter id that accepted the asset and was
 		 * configured specifically to output a short asset id.
-		 * E.g. AssetFilterOutputFormat::ShortAssetIdOverMesh.
+		 * E.g. AssetFilterOutputFormat::AssetIdOverMesh.
 		 *
 		 * This filter is used to generate the short asset id when available.
 		 */
@@ -108,7 +108,7 @@ private:
 	 * constructed object is returned. (Data not sufficient can be detected:
 	 * filterInputResult will return false in that case.)
 	 */
-	asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
+	asset_id_t filterOutputResultAssetId(AssetFilter filter, const scanned_device_t& asset);
 
 
 	// --------- Processing of accepted Assest ---------------

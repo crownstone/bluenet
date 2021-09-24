@@ -210,8 +210,14 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_mac_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_id_t {
 	asset_id_t id;
 	uint8_t filterBitmask;
-	rssi_and_channel_t rssiData; // TODO: why not the full rssi here, and put the channel in the reserved bytes?
-	uint8_t reserved[2] = {0}; // Must be 0 for now.
+	int8_t rssi; // TODO: why not the full rssi here, and put the channel in the reserved bytes?
+	union {
+		struct {
+			uint16_t channel : 2;
+			uint16_t reserved : 14; // Must be 0 for now.
+		};
+		uint16_t asInt = 0;
+	};
 };
 
 /**
