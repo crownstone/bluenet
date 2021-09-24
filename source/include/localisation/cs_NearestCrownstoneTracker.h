@@ -131,10 +131,7 @@ private:
 	void sendUartUpdate(asset_record_t& record);
 
 	/**
-	 * Currently dispatches an event for CMD_SWITCH_[ON,OFF] depending on
-	 * whether this crownstone is closest (ON) or not the closest.
-	 *
-	 * Also outputs the current winner to UART for demo purposes.
+	 * (Only logs a message)
 	 */
 	void onWinnerChanged(bool winnerIsThisCrownstone);
 

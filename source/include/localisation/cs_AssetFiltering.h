@@ -114,19 +114,17 @@ private:
 	// --------- Processing of accepted Assest ---------------
 
 
-
-	/**
-	 * Loop over inclusion filters and check which filters are accepting.
-	 * Return a set of bitmasks containing the result.
-	 *
-	 * Returns true if there was a filter that accepted the device
-	 */
-	filter_output_bitmasks_t handleAcceptFilters(const scanned_device_t& device);
-
 	/**
 	 * precondition: isInitialized() == true;
 	 */
 	void handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset);
+
+	/**
+	 * Check if the filter with given index accepts the device,
+	 * call the associated handleAssetAccepted[Mac..., Nearest...] if so
+	 * and update the masks accordingly.
+	 */
+	bool handleAcceptFilter(uint8_t _filterIndex, const scanned_device_t& device, filter_output_bitmasks_t& masks);
 
 	void handleAssetAcceptedMacOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
 	void handleAssetAcceptedAssetIdOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
