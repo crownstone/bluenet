@@ -157,6 +157,7 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 	// local firmware can keep up to date asap without penalty.
 	LOGAssetFilteringDebug("Dispatch EVT_ASSET_ACCEPTED");
 
+	// REVIEW: this event should also be sent for each filter that accepted the asset, as the may have a different profile / location.
 	AssetAcceptedEvent evtData(_filterStore->getFilter(masks.primaryFilter()), asset, masks.combined());
 
 	event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
@@ -284,6 +285,7 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		BLEutil::setBit(filterBitmask, filterId);
 		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, shortAssetId, filterBitmask);
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
+		// REVIEW: use throttlingCounterBumpMs: _assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
 	}
 	else {
 		LOGAssetFilteringVerbose(
