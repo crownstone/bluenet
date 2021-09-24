@@ -73,7 +73,7 @@ void NearestCrownstoneTracker::handleMeshMsgEvent(event_t& evt) {
 
 uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id, uint8_t filterBitmask) {
 	LOGNearestCrownstoneTrackerVerbose("handleAcceptedAsset");
-	cs_mesh_model_msg_asset_info_id_t assetMsg = {};
+	cs_mesh_model_msg_asset_report_id_t assetMsg = {};
 	assetMsg.id = id;
 	assetMsg.filterBitmask = filterBitmask;
 	assetMsg.rssiData = rssi_and_channel_t(asset.rssi,asset.channel);
@@ -83,7 +83,7 @@ uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& a
 }
 
 
-void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_info_id_t& incomingReport) {
+void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_report_id_t& incomingReport) {
 	LOGNearestCrownstoneTrackerVerbose("onReceiveAssetAdvertisement myId(%u), report(%d dB ch.%u)",
 			_myStoneId, incomingReport.rssiData.getRssi(), incomingReport.rssiData.getChannel());
 
@@ -127,7 +127,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_ass
 	}
 }
 
-void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_info_id_t& incomingReport, stone_id_t reporter) {
+void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_report_id_t& incomingReport, stone_id_t reporter) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i #%u)",
 			_myStoneId, reporter, incomingReport.rssiData.getRssi(), incomingReport.rssiData.getChannel());
 
@@ -178,7 +178,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_info
 // -------------------------------------------
 
 
-void NearestCrownstoneTracker::broadcastReport(cs_mesh_model_msg_asset_info_id_t& report) {
+void NearestCrownstoneTracker::broadcastReport(cs_mesh_model_msg_asset_report_id_t& report) {
 
 	cs_mesh_msg_t reportMsgWrapper;
 	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
@@ -193,7 +193,7 @@ void NearestCrownstoneTracker::broadcastReport(cs_mesh_model_msg_asset_info_id_t
 }
 
 void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
-	cs_mesh_model_msg_asset_info_id_t report = {};
+	cs_mesh_model_msg_asset_report_id_t report = {};
 	report.id = record.assetId;
 	report.rssiData = record.myRssi;
 
@@ -201,7 +201,7 @@ void NearestCrownstoneTracker::broadcastPersonalReport(asset_record_t& record) {
 }
 
 void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
-	auto uartMsg = cs_asset_info_id_t{
+	auto uartMsg = asset_report_uart_id_t{
 			.assetId = record.assetId,
 			.stoneId = record.nearestStoneId,
 			.rssi = record.nearestRssi.getRssi(),

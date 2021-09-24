@@ -44,6 +44,6 @@ private:
 	 * @param[in] assetMsg             The mesh message to forward.
 	 * @param[in] seenByStoneId        The stone that scanned the asset.
 	 */
-	void forwardAssetToUart(const cs_mesh_model_msg_asset_info_mac_t& assetMsg, stone_id_t seenByStoneId);
-	void forwardAssetToUart(const cs_mesh_model_msg_asset_info_id_t& assetMsg, stone_id_t seenByStoneId);
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId);
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId);
 };

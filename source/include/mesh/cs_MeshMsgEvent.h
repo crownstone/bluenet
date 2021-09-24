@@ -45,12 +45,12 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION> {
 
 template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_INFO_MAC> {
-	using type = cs_mesh_model_msg_asset_info_mac_t;
+	using type = cs_mesh_model_msg_asset_report_mac_t;
 };
 
 template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_ASSET_INFO_ID> {
-	using type = cs_mesh_model_msg_asset_info_id_t;
+	using type = cs_mesh_model_msg_asset_report_id_t;
 };
 
 template<>

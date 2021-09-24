@@ -90,7 +90,7 @@ private:
 	 * and possibly broadcasts a message to inform other devices
 	 * in the mesh of relevant changes.
 	 */
-	void onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_info_id_t& trackedEvent);
+	void onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_report_id_t& trackedEvent);
 
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.
@@ -104,7 +104,7 @@ private:
 	 * E.g. when the updated winning report now loses from this devices
 	 * personal report.
 	 */
-	void onReceiveAssetReport(cs_mesh_model_msg_asset_info_id_t& report, stone_id_t reporter);
+	void onReceiveAssetReport(cs_mesh_model_msg_asset_report_id_t& report, stone_id_t reporter);
 
 	// -------------------------------------------
 	// ------------- Outgoing events -------------
@@ -114,7 +114,7 @@ private:
 	 * Sends a mesh broadcast for the given report.
 	 * (stone id of reporter is contained in bluetooth metadata)
 	 */
-	void broadcastReport(cs_mesh_model_msg_asset_info_id_t& report);
+	void broadcastReport(cs_mesh_model_msg_asset_report_id_t& report);
 
 	/**
 	 * makes a report from the records personalRssi field

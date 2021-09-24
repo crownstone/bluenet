@@ -77,9 +77,9 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION:
 			return payloadSize == sizeof(cs_mesh_model_msg_asset_filter_version_t);
 		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC:
-			return payloadSize == sizeof(cs_mesh_model_msg_asset_info_mac_t);
+			return payloadSize == sizeof(cs_mesh_model_msg_asset_report_mac_t);
 		case CS_MESH_MODEL_TYPE_ASSET_INFO_ID:
-			return payloadSize == sizeof(cs_mesh_model_msg_asset_info_id_t);
+			return payloadSize == sizeof(cs_mesh_model_msg_asset_report_id_t);
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI:
 			return payloadSize == sizeof(cs_mesh_model_msg_neighbour_rssi_t);
 		case CS_MESH_MODEL_TYPE_CTRL_CMD:

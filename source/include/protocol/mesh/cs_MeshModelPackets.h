@@ -201,17 +201,17 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 
 
 
-struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_mac_t {
+struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_mac_t {
 	uint8_t mac[MAC_ADDRESS_LEN];
 	rssi_and_channel_t rssiData;
 };
 
 
-struct __attribute__((__packed__)) cs_mesh_model_msg_asset_info_id_t {
+struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_id_t {
 	asset_id_t id;
 	uint8_t filterBitmask;
-	rssi_and_channel_t rssiData;
-	uint8_t reserved[3];
+	rssi_and_channel_t rssiData; // TODO: why not the full rssi here, and put the channel in the reserved bytes?
+	uint8_t reserved[2] = {0}; // Must be 0 for now.
 };
 
 /**

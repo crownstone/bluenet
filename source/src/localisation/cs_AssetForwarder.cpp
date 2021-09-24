@@ -17,7 +17,7 @@
 
 #define LOGAssetForwarderDebug LOGvv
 
-void printAsset(const cs_mesh_model_msg_asset_info_mac_t& assetMsg) {
+void printAsset(const cs_mesh_model_msg_asset_report_mac_t& assetMsg) {
 	LOGAssetForwarderDebug("mesh_model_msg_asset: ch%u @ %i dB",
 			getChannel(assetMsg.rssiData),
 			getRssi(assetMsg.rssiData));
@@ -32,7 +32,7 @@ cs_ret_code_t AssetForwarder::init() {
 
 uint16_t AssetForwarder::sendAssetMacToMesh(const scanned_device_t& asset) {
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
-	cs_mesh_model_msg_asset_info_mac_t assetMsg;
+	cs_mesh_model_msg_asset_report_mac_t assetMsg;
 
 	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
 	memcpy(assetMsg.mac, asset.address, sizeof(assetMsg.mac));
@@ -56,7 +56,7 @@ uint16_t AssetForwarder::sendAssetMacToMesh(const scanned_device_t& asset) {
 
 uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
-	cs_mesh_model_msg_asset_info_id_t assetMsg = {};
+	cs_mesh_model_msg_asset_report_id_t assetMsg = {};
 
 	assetMsg.id = assetId;
 	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
@@ -106,10 +106,10 @@ void AssetForwarder::handleEvent(event_t & event) {
 	}
 }
 
-void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_info_mac_t& assetMsg, stone_id_t seenByStoneId) {
+void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId) {
 	printAsset(assetMsg);
 
-	auto uartAssetMsg = cs_asset_info_mac_t {
+	auto uartAssetMsg = asset_report_uart_mac_t {
 			.address = {},
 			.stoneId = seenByStoneId,
 			.rssi    = assetMsg.rssiData.getRssi(),
@@ -123,14 +123,15 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_info_mac_t
 			sizeof(uartAssetMsg));
 }
 
-void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_info_id_t& assetMsg, stone_id_t seenByStoneId) {
-	LOGAssetForwarderDebug("forwarding sid asset msg to uart");
+void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId) {
+	LOGAssetForwarderDebug("forwarding asset id msg to uart");
 
-	auto uartAssetMsg = cs_asset_info_id_t{
-			.assetId = assetMsg.id,
-			.stoneId = seenByStoneId,
-			.rssi    = assetMsg.rssiData.getRssi(),
-			.channel = assetMsg.rssiData.getChannel(),
+	auto uartAssetMsg = asset_report_uart_id_t{
+			.assetId         = assetMsg.id,
+			.stoneId         = seenByStoneId,
+			.filterBitmask   = assetMsg.filterBitmask,
+			.rssi            = assetMsg.rssiData.getRssi(),
+			.channel         = assetMsg.rssiData.getChannel(),
 	};
 
 	UartHandler::getInstance().writeMsg(
