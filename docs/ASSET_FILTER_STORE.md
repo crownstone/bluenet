@@ -311,6 +311,7 @@ Type | Name | Length | Description
 [Asset ID](#asset-id) | Asset ID | 3 | The asset ID.
 uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
 [rssi](#rssi-and-channel) | Rssi | 1 | Signal strength of the asset advertisement.
+uint8[] | Reserved | 2 | Reserved for future use, 0 for now.
 
 
 ### RSSI and channel
@@ -319,8 +320,9 @@ uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement pas
 
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
-uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
 uint8 | Channel | 2          | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
+uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
+
 
 *************************************************************************
 

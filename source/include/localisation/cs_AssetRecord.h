@@ -13,7 +13,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	/**
 	 * ID of the asset, unique field.
 	 */
-	short_asset_id_t assetId;
+	asset_id_t assetId;
 
 	/**
 	 * Most recent RSSI value observed by this Crownstone.
@@ -45,7 +45,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * RSSI between asset and nearest stone.
 	 * Only valid when the nearest stone ID is valid.
 	 */
-	rssi_and_channel_t nearestRssi;
+	rssi_and_channel_t nearestRssi; // REVIEW: use RSSI only, not channel.
 #endif
 
 	// ------------- utility functions -------------
@@ -82,5 +82,10 @@ struct __attribute__((__packed__)) asset_record_t {
 		} else {
 			throttlingCountdown = ticks;
 		}
+	}
+
+	void addThrottlingCountdown(uint8_t ticks) {
+		auto val = uint16_t(throttlingCountdown) + ticks;
+		setThrottlingCountdown(val);
 	}
 };

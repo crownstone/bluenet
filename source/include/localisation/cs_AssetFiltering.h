@@ -78,7 +78,7 @@ private:
 		/**
 		 * returns the lowest filter id that accepted the asset and was
 		 * configured specifically to output a short asset id.
-		 * E.g. AssetFilterOutputFormat::ShortAssetIdOverMesh.
+		 * E.g. AssetFilterOutputFormat::AssetIdOverMesh.
 		 *
 		 * This filter is used to generate the short asset id when available.
 		 */
@@ -108,32 +108,27 @@ private:
 	 * constructed object is returned. (Data not sufficient can be detected:
 	 * filterInputResult will return false in that case.)
 	 */
-	short_asset_id_t filterOutputResultShortAssetId(AssetFilter filter, const scanned_device_t& asset);
+	asset_id_t filterOutputResultAssetId(AssetFilter filter, const scanned_device_t& asset);
 
 
 	// --------- Processing of accepted Assest ---------------
 
 
-
-	/**
-	 * Loop over inclusion filters and check which filters are accepting.
-	 * Return a set of bitmasks containing the result.
-	 */
-	filter_output_bitmasks_t getAcceptedBitmasks(const scanned_device_t& device);
-
-	/**
-	 * Returns the filter object that is to be used to generate the asset id.
-	 * This will be the primary sid filter, when it exists, and the primary filter
-	 * otherwise.
-	 *
-	 * Returns an AssetFilter with nullptr as _data when none of the masks bits are set.
-	 */
-	AssetFilter filterToUseForShortAssetId(const filter_output_bitmasks_t& masks);
-
 	/**
 	 * precondition: isInitialized() == true;
 	 */
 	void handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset);
+
+	/**
+	 * Check if the filter with given index accepts the device,
+	 * call the associated handleAssetAccepted[Mac..., Nearest...] if so
+	 * and update the masks accordingly.
+	 */
+	bool handleAcceptFilter(uint8_t _filterIndex, const scanned_device_t& device, filter_output_bitmasks_t& masks);
+
+	void handleAssetAcceptedMacOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	void handleAssetAcceptedAssetIdOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	void handleAssetAcceptedNearestAssetId(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
 
 	/**
 	 * Returns true if there is a filter that rejects this device.

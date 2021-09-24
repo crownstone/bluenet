@@ -27,11 +27,11 @@ public:
 	uint16_t sendAssetMacToMesh(const scanned_device_t& asset);
 
 	/**
-	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_RSSI_SID to the mesh
+	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_INFO to the mesh
 	 *
 	 * returns desired minimal time to next advertisement.
 	 */
-	uint16_t sendAssetIdToMesh(const scanned_device_t& asset, const short_asset_id_t& sid);
+	uint16_t sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
 
 	virtual void handleEvent(event_t & event);
 
@@ -44,6 +44,6 @@ private:
 	 * @param[in] assetMsg             The mesh message to forward.
 	 * @param[in] seenByStoneId        The stone that scanned the asset.
 	 */
-	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_mac_t& assetMsg, stone_id_t seenByStoneId);
-	void forwardAssetToUart(const cs_mesh_model_msg_asset_rssi_sid_t& assetMsg, stone_id_t seenByStoneId);
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId);
+	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId);
 };

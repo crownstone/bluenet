@@ -50,7 +50,7 @@ void AssetStore::handleEvent(event_t& event) {
 	}
 }
 
-asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& assetId) {
 	LOGAssetStoreVerbose("handleAcceptedAsset id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	asset_record_t* record = getOrCreateRecord(assetId);
 	if (record != nullptr) {
@@ -70,7 +70,7 @@ void AssetStore::resetRecords() {
 	}
 }
 
-asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
+asset_record_t* AssetStore::getRecord(const asset_id_t& id) {
 	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
 		auto& record = _assetRecords[i];
 		if (record.isValid() && record.assetId == id) {
@@ -80,7 +80,7 @@ asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 	return nullptr;
 }
 
-asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
+asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	LOGAssetStoreVerbose("getOrCreateRecord id=%02X:%02X:%02X", id.data[0], id.data[1], id.data[2]);
 	uint8_t emptyIndex = 0xFF;
 	uint8_t oldestIndex = 0;
@@ -130,7 +130,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	return &record;
 }
 
-void AssetStore::setThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
+void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
 	// 'Ceil division' equal to:
 	//         timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if the division is exact
 	//     1 + timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if there is a remainder.
@@ -138,7 +138,7 @@ void AssetStore::setThrottlingBump(asset_record_t& record, uint16_t timeToNextTh
 
 	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
-	record.setThrottlingCountdown(ticksRoundedUp);
+	record.addThrottlingCountdown(ticksRoundedUp);
 }
 
 

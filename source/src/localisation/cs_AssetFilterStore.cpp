@@ -8,7 +8,7 @@
 #include <common/cs_Types.h>
 #include <localisation/cs_AssetFilterPacketAccessors.h>
 #include <localisation/cs_AssetFilterStore.h>
-#include <localisation/cs_Nearestnearestwitnessreport.h>
+
 #include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
