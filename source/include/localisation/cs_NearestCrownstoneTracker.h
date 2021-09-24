@@ -120,12 +120,14 @@ private:
 	 * makes a report from the records personalRssi field
 	 * and broadcast it over the mesh.
 	 */
+	// REVIEW: send incoming report instead of record? Prevents being able to send old data.
 	void broadcastPersonalReport(asset_record_t& record);
 
 	/**
 	 * Sends a message over UART containing the winner, its rssi
 	 * and the asset id.
 	 */
+	// REVIEW: send incoming report instead of record? Prevents being able to send old data..
 	void sendUartUpdate(asset_record_t& record);
 
 	/**

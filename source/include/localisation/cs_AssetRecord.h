@@ -45,7 +45,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * RSSI between asset and nearest stone.
 	 * Only valid when the nearest stone ID is valid.
 	 */
-	rssi_and_channel_t nearestRssi;
+	rssi_and_channel_t nearestRssi; // REVIEW: use RSSI only, not channel.
 #endif
 
 	// ------------- utility functions -------------
