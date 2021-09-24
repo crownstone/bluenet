@@ -26,7 +26,6 @@ protected:
 	cs_ret_code_t handleCmdNoop(                 uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleRssiPing(                MeshMsgEvent& evt);
 	cs_ret_code_t handleRssiData(                MeshMsgEvent& evt);
-	cs_ret_code_t handleNearestWitnessReport(    MeshMsgEvent& evt);
 	cs_ret_code_t handleTimeSync(                uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops);
 	cs_ret_code_t handleCmdMultiSwitch(          uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleState0(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
