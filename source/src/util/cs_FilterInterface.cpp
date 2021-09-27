@@ -8,12 +8,3 @@
 
 #include <util/cs_FilterInterface.h>
 
-asset_id_t FilterInterface::assetId(const void* key, size_t keyLengthInBytes) {
-	auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
-
-	// little endian byte by byte copy.
-	asset_id_t id{};
-	memcpy(id.data, reinterpret_cast<uint8_t*>(&crc), 3);
-
-	return id;
-}

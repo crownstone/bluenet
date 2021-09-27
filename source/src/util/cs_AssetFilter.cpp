@@ -23,11 +23,45 @@ AssetFilterData AssetFilter::filterdata() {
 	return AssetFilterData(_data + sizeof(asset_filter_runtime_data_t));
 }
 
-size_t AssetFilter::length() {
+// virtual functions
+
+size_t AssetFilter::size() {
 	return sizeof(asset_filter_runtime_data_t) + filterdata().length();
 }
 
+bool AssetFilter::isValid() {
+	switch (*filterdata().metadata().filterType()) {
+		case AssetFilterType::CuckooFilter: {
+			return filterdata().cuckooFilter().isValid();
+		}
+		case AssetFilterType::ExactMatchFilter: {
+			return filterdata().exactMatchFilter().isValid();
+		}
+		default: {
+			return false;
+		}
+	}
 
+	return false;
+}
+
+bool AssetFilter::contains(const void* key, size_t keyLengthInBytes)  {
+	// switch on filter type in metadata and call contain.
+
+	switch (*filterdata().metadata().filterType()) {
+		case AssetFilterType::CuckooFilter: {
+			return filterdata().cuckooFilter().contains(key, keyLengthInBytes);
+		}
+		case AssetFilterType::ExactMatchFilter: {
+			return filterdata().exactMatchFilter().contains(key, keyLengthInBytes);
+		}
+		default: {
+			return false;
+		}
+	}
+
+	return false;
+}
 
 
 
@@ -144,8 +178,20 @@ asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
 	return prepareFilterInputAndCallDelegate(
 			asset,
 			filterdata().metadata().outputType().inFormat(),
-			[](FilterInterface* filter, const uint8_t* data, size_t len) {
-				return filter->assetId(data, len);
+			[this](FilterInterface* filter, const uint8_t* data, size_t len) {
+				return assetId(data, len);
 			},
 			asset_id_t{});
 }
+
+asset_id_t AssetFilter::assetId(const void* key, size_t keyLengthInBytes) {
+	auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
+
+	// little endian byte by byte copy.
+	asset_id_t id{};
+	memcpy(id.data, reinterpret_cast<uint8_t*>(&crc), 3);
+
+	return id;
+}
+
+

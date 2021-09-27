@@ -10,6 +10,7 @@
 
 
 #include <localisation/cs_AssetFilterPacketAccessors.h>
+#include <util/cs_FilterInterface.h>
 #include <structs/cs_PacketsInternal.h>
 
 /**
@@ -17,7 +18,7 @@
  * - Runtime data.
  * - persisted data (filterdata).
  */
-class AssetFilter {
+class AssetFilter : FilterInterface {
 public:
 	uint8_t* _data;  // byte representation of this object.
 	AssetFilter(uint8_t* data) : _data(data) {}
@@ -35,7 +36,13 @@ public:
 	/**
 	 * Get the expected length of this class.
 	 */
-	size_t length();
+	size_t size() override;
+
+	bool contains(const void* key, size_t keyLengthInBytes) override;
+
+	bool isValid() override;
+
+
 
 	/**
 	 * Returns true if the device passes the filter according to its
@@ -51,6 +58,15 @@ public:
 	 * filterInputResult will return false in that case.)
 	 */
 	asset_id_t getAssetId(const scanned_device_t& asset);
+
+	/**
+	 * A assetId is generated as crc32 from filtered input data.
+	 *
+	 * TODO: For output type MAC the data is prepended with a fixed
+	 * value to avoid collisions with filters with assetId output based
+	 * on MAC.
+	 */
+	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes);
 
 private:
 	/**

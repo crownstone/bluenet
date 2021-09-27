@@ -21,14 +21,7 @@ public:
 
 	virtual bool contains(const void* key, size_t keyLengthInBytes) = 0;
 
-	/**
-	 * In most cases a assetId is generated as crc32 from filtered input data.
-	 * This can be overwritten for special use cases like ExactMatchFilter.
-	 */
-	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes);
 	virtual size_t size() = 0;
 
 	virtual bool isValid() = 0;
-
-
 };
