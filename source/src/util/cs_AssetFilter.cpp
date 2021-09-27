@@ -172,9 +172,12 @@ bool AssetFilter::filterAcceptsScannedDevice(const scanned_device_t& asset) {
 }
 
 asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
-	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
-	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
-	// preallocate the buffer that the MaskedAdData needs.)
+	if (*filterdata().metadata().outputType().outFormat() == AssetFilterOutputFormat::Mac) {
+		// special case to reduce collisions.
+		return assetId(asset.address, MAC_ADDRESS_LEN);
+	}
+
+
 	return prepareFilterInputAndCallDelegate(
 			asset,
 			filterdata().metadata().outputType().inFormat(),
