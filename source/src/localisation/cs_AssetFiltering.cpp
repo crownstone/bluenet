@@ -218,7 +218,7 @@ bool AssetFiltering::handleAcceptFilter(
 void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
-	asset_id_t assetId = filterOutputResultAssetId(filter, asset);
+	asset_id_t assetId = getAssetId(filter, asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -246,7 +246,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
-	asset_id_t assetId = filterOutputResultAssetId(filter, asset);
+	asset_id_t assetId = getAssetId(filter, asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -277,7 +277,7 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	asset_id_t assetId = filterOutputResultAssetId(filter, asset);
+	asset_id_t assetId = getAssetId(filter, asset);
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -323,139 +323,4 @@ bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 	}
 
 	return false;
-}
-
-// ---------------------------- Extracting data from the filter  ----------------------------
-
-/**
- * This method extracts the filters 'input description', prepares the input according to that
- * description and calls the delegate with the prepared data.
- *
- * delegateExpression should be of the form (FilterInterface&, void*, size_t) -> ReturnType.
- *
- * The argument that is passed into `delegateExpression` is based on the AssetFilterInputType
- * of the `assetFilter`.Buffers are only allocated when strictly necessary.
- * (E.g. MacAddress is already available in the `device`, but for MaskedAdDataType a buffer
- * of 31 bytes needs to be allocated on the stack.)
- *
- * The delegate return type is left as free template parameter so that this template can be
- * used for both `contains` and `assetId` return values.
- */
-template <class ReturnType, class ExpressionType>
-ReturnType prepareFilterInputAndCallDelegate(
-		AssetFilter assetFilter,
-		const scanned_device_t& device,
-		AssetFilterInput filterInputDescription,
-		ExpressionType delegateExpression,
-		ReturnType defaultValue) {
-
-	// obtain a pointer to an FilterInterface object of the correct filter type
-	// (can be made prettier...)
-	CuckooFilter cuckoo;     // Dangerous to use, it has a nullptr as data.
-	ExactMatchFilter exact;  // Dangerous to use, it has a nullptr as data.
-	FilterInterface* filter = nullptr;
-
-	switch (*assetFilter.filterdata().metadata().filterType()) {
-		case AssetFilterType::CuckooFilter: {
-			cuckoo = assetFilter.filterdata().cuckooFilter();
-			filter = &cuckoo;
-			break;
-		}
-		case AssetFilterType::ExactMatchFilter: {
-			exact  = assetFilter.filterdata().exactMatchFilter();
-			filter = &exact;
-			break;
-		}
-		default: {
-			LOGAssetFilteringWarn("Filter type not implemented");
-			return defaultValue;
-		}
-	}
-
-	// split out input type for the filter and prepare the input
-	switch (*filterInputDescription.type()) {
-		case AssetFilterInputType::MacAddress: {
-			return delegateExpression(filter, device.address, sizeof(device.address));
-		}
-		case AssetFilterInputType::AdDataType: {
-			// selects the first found field of configured type and checks if that field's
-			// data is contained in the filter. returns defaultValue if it can't be found.
-			cs_data_t result                  = {};
-			ad_data_type_selector_t* selector = filterInputDescription.AdTypeField();
-
-			if (selector == nullptr) {
-				LOGe("Filter metadata type check failed");
-				return defaultValue;
-			}
-
-			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
-				return delegateExpression(filter, result.data, result.len);
-			}
-
-			return defaultValue;
-		}
-		case AssetFilterInputType::MaskedAdDataType: {
-			// selects the first found field of configured type and checks if that field's
-			// data is contained in the filter. returns false if it can't be found.
-			cs_data_t result                         = {};
-			masked_ad_data_type_selector_t* selector = filterInputDescription.AdTypeMasked();
-
-			if (selector == nullptr) {
-				LOGe("Filter metadata type check failed");
-				return defaultValue;
-			}
-
-			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
-				// A normal advertisement payload size is 31B at most.
-				// We are also limited by the 32b bitmask.
-				if (result.len > 31) {
-					LOGw("Advertisement too large");
-					return defaultValue;
-				}
-				uint8_t buff[31];
-
-				// apply the mask
-				uint8_t buffIndex = 0;
-				for (uint8_t bitIndex = 0; bitIndex < result.len; bitIndex++) {
-					if (BLEutil::isBitSet(selector->adDataMask, bitIndex)) {
-						buff[buffIndex] = result.data[bitIndex];
-						buffIndex++;
-					}
-				}
-				_logArray(LogLevelAssetFilteringVerbose, true, buff, buffIndex);
-				return delegateExpression(filter, buff, buffIndex);
-			}
-
-			return defaultValue;
-		}
-	}
-
-	return defaultValue;
-}
-
-bool AssetFiltering::filterAcceptsScannedDevice(AssetFilter assetFilter, const scanned_device_t& asset) {
-	// The input result is nothing more than a call to .contains with the correctly prepared input.
-	// It is 'correctly preparing the input' that is fumbly.
-	return prepareFilterInputAndCallDelegate(
-			assetFilter,
-			asset,
-			assetFilter.filterdata().metadata().inputType(),
-			[](FilterInterface* filter, const uint8_t* data, size_t len) {
-				return filter->contains(data, len);
-			},
-			false);
-}
-
-asset_id_t AssetFiltering::filterOutputResultAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
-	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
-	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
-	// preallocate the buffer that the MaskedAdData needs.)
-	return prepareFilterInputAndCallDelegate(
-			assetFilter,
-			asset,
-			assetFilter.filterdata().metadata().outputType().inFormat(),
-			[](FilterInterface* filter, const uint8_t* data, size_t len) {
-				return filter->assetId(data, len);
-			},
-			asset_id_t{});
 }
