@@ -23,6 +23,10 @@ public:
 	uint8_t* _data;  // byte representation of this object.
 	AssetFilter(uint8_t* data) : _data(data) {}
 
+	// ================
+	// Accessor methods
+	// ================
+
 	/**
 	 * Get the runtime data.
 	 */
@@ -33,8 +37,12 @@ public:
 	 */
 	AssetFilterData filterdata();
 
+	// ===============
+	// FilterInterface
+	// ===============
+
 	/**
-	 * Get the expected length of this class.
+	 * Number of bytes of the data, according to the metadata contained in it.
 	 */
 	size_t size() override;
 
@@ -43,13 +51,15 @@ public:
 	bool isValid() override;
 
 
+	// ================
+	// Scan based utils
+	// ================
 
 	/**
 	 * Returns true if the device passes the filter according to its
 	 * metadata settings. Returns false otherwise.
 	 */
 	bool filterAcceptsScannedDevice(const scanned_device_t& asset);
-
 
 	/**
 	 * Returns a asset_id_t based on the configured selection of data
@@ -59,6 +69,8 @@ public:
 	 */
 	asset_id_t getAssetId(const scanned_device_t& asset);
 
+
+private:
 	/**
 	 * A assetId is generated as crc32 from filtered input data.
 	 *
@@ -68,7 +80,6 @@ public:
 	 */
 	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes);
 
-private:
 	/**
 	 * This method extracts the filters 'input description', prepares the input according to that
 	 * description and calls the delegate with the prepared data.
