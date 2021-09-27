@@ -14,7 +14,6 @@
 
 #include <logging/cs_Logger.h>
 
-// REVIEW: this class seems like a lot of RAM/code overhead for its current use case.
 
 /**
  * Helper class to manage decoupling of components.
@@ -34,6 +33,12 @@
  * Using this class 'sibling components' can query for
  * each others presence in a unified way, without need
  * for static classes or other rigid dependencies.
+ *
+ * Note:
+ * This class currently uses quite a bit of memory for a rarely used feature.
+ * Refactor idea: make getChildren virtual and let classes implement it so that
+ * its possible for subclasses with non-changing children to optimize. (at cost of
+ * getComponent speed)
  */
 class Component {
 private:

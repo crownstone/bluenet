@@ -101,7 +101,7 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_ass
 	auto incomingRssiAndChannelCompressed = rssi_and_channel_t(incomingReport.rssi, decompressChannel(incomingReport.channel));
 	auto incomingRssiAndChannel = incomingRssiAndChannelCompressed.toFloat();
 
-	auto recordedNearestRssiWithFallOff = record.nearestRssi.fallOff(
+	auto recordedNearestRssiWithFallOff = rssi_and_channel_float_t(record.nearestRssi).fallOff(
 			RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
 			1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
 
@@ -148,7 +148,7 @@ void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_repo
 	auto incomingRssiAndChannelCompressed = rssi_and_channel_t(incomingReport.rssi, decompressChannel(incomingReport.channel));
 	auto incomingRssiAndChannel = incomingRssiAndChannelCompressed.toFloat();
 
-	auto recordedNearestRssiWithFallOff = record.nearestRssi.fallOff(
+	auto recordedNearestRssiWithFallOff = rssi_and_channel_float_t(record.nearestRssi).fallOff(
 			RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
 			1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
 	auto recordedPersonalRssiWithFallOff = record.myRssi.fallOff(
@@ -212,8 +212,8 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	auto uartMsg = asset_report_uart_id_t{
 			.assetId = record.assetId,
 			.stoneId = record.nearestStoneId,
-			.rssi    = record.nearestRssi.getRssi(),
-			.channel = record.nearestRssi.getChannel()
+			.rssi    = record.nearestRssi,
+			.channel = 0
 	};
 
 	UartHandler::getInstance().writeMsg(
@@ -234,7 +234,7 @@ void NearestCrownstoneTracker::onWinnerChanged(bool winnerIsThisCrownstone) {
 
 void NearestCrownstoneTracker::saveWinningReport(asset_record_t& rec, rssi_and_channel_t winningRssi, stone_id_t winningId) {
 	rec.nearestStoneId = winningId;
-	rec.nearestRssi = winningRssi;
+	rec.nearestRssi = winningRssi.getRssi();
 }
 
 asset_record_t* NearestCrownstoneTracker::getRecordFiltered(const asset_id_t& assetId) {

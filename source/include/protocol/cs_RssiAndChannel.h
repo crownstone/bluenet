@@ -45,10 +45,10 @@ int8_t inline decompressRssi(uint8_t compressedRssi) {
 
 class rssi_and_channel_float_t {
 public:
-	uint8_t _channel;  // 37-39
 	float _rssi;       // signed rssi, usually negative. higher is closer.
+	uint8_t _channel;  // 37-39
 
-	rssi_and_channel_float_t(uint8_t channel, float rssi) : _channel(channel), _rssi(rssi) {}
+	rssi_and_channel_float_t(float rssi, uint8_t channel = 0) :_rssi(rssi),  _channel(channel) {}
 
 	bool isCloserThan(const rssi_and_channel_float_t& other) {
 		return _rssi > other._rssi;
@@ -59,7 +59,7 @@ public:
 	}
 
 	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) {
-		return rssi_and_channel_float_t(_channel, _rssi - rate_db_sec * dt_sec);
+		return rssi_and_channel_float_t(_rssi - rate_db_sec * dt_sec, _channel);
 	}
 };
 
@@ -85,7 +85,7 @@ struct __attribute__((__packed__)) rssi_and_channel_t {
 	}
 
 	rssi_and_channel_float_t toFloat() {
-		return rssi_and_channel_float_t (getChannel(), getRssi());
+		return rssi_and_channel_float_t (getRssi(), getChannel());
 	}
 
 	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) {
