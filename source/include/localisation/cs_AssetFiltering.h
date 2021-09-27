@@ -97,14 +97,6 @@ private:
 	void processFilter(AssetFilter f, const scanned_device_t& asset);
 
 
-	/**
-	 * Returns a asset_id_t based on the configured selection of data
-	 * in metadata.outputType.inFormat. If the data is not sufficient, a default
-	 * constructed object is returned. (Data not sufficient can be detected:
-	 * filterInputResult will return false in that case.)
-	 */
-	asset_id_t getAssetId(AssetFilter filter, const scanned_device_t& asset);
-
 
 	// --------- Processing of accepted Assest ---------------
 

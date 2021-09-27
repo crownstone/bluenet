@@ -180,7 +180,7 @@ bool AssetFiltering::handleAcceptFilter(
 		return false;
 	}
 
-	if (filterAcceptsScannedDevice(filter, device)) {
+	if (filter.filterAcceptsScannedDevice(device)) {
 		LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
 
 		// update the relevant bitmask
@@ -218,7 +218,7 @@ bool AssetFiltering::handleAcceptFilter(
 void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
-	asset_id_t assetId = getAssetId(filter, asset);
+	asset_id_t assetId = filter.getAssetId(asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -246,7 +246,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
-	asset_id_t assetId = getAssetId(filter, asset);
+	asset_id_t assetId = filter.getAssetId(asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -277,7 +277,7 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	asset_id_t assetId = getAssetId(filter, asset);
+	asset_id_t assetId = filter.getAssetId(asset);
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
@@ -314,7 +314,7 @@ bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 		auto filter = AssetFilter(_filterStore->getFilter(i));
 
 		if (filter.filterdata().metadata().flags()->flags.exclude == true) {
-			if (filterAcceptsScannedDevice(filter, device)) {
+			if (filter.filterAcceptsScannedDevice(device)) {
 				// Reject by early return.
 				LogAcceptedDevice(filter, device, true);
 				return true;

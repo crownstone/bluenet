@@ -10,6 +10,7 @@
 
 
 #include <localisation/cs_AssetFilterPacketAccessors.h>
+#include <structs/cs_PacketsInternal.h>
 
 /**
  * Class that contains all data required for an asset filter:
@@ -40,7 +41,16 @@ public:
 	 * Returns true if the device passes the filter according to its
 	 * metadata settings. Returns false otherwise.
 	 */
-	bool filterAcceptsScannedDevice(AssetFilter filter, const scanned_device_t& asset);
+	bool filterAcceptsScannedDevice(const scanned_device_t& asset);
+
+
+	/**
+	 * Returns a asset_id_t based on the configured selection of data
+	 * in metadata.outputType.inFormat. If the data is not sufficient, a default
+	 * constructed object is returned. (Data not sufficient can be detected:
+	 * filterInputResult will return false in that case.)
+	 */
+	asset_id_t getAssetId(const scanned_device_t& asset);
 
 private:
 	/**
@@ -59,7 +69,6 @@ private:
 	 */
 	template <class ReturnType, class ExpressionType>
 	ReturnType prepareFilterInputAndCallDelegate(
-			AssetFilter assetFilter,
 			const scanned_device_t& device,
 			AssetFilterInput filterInputDescription,
 			ExpressionType delegateExpression,

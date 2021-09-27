@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <localisation/cs_AssetFilterPacketAccessors.h>
+
 #include <protocol/cs_AssetFilterPackets.h>
 #include <util/cs_Crc32.h>
 

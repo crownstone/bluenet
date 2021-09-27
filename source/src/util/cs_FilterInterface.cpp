@@ -6,6 +6,8 @@
  */
 
 
+#include <util/cs_FilterInterface.h>
+
 asset_id_t FilterInterface::assetId(const void* key, size_t keyLengthInBytes) {
 	auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
 

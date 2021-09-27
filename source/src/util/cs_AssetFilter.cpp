@@ -6,7 +6,13 @@
  */
 
 
+#include <util/cs_AssetFilter.h>
 
+#include <logging/cs_Logger.h>
+#include <util/cs_Utils.h>
+
+#define LOGAssetFilterWarn LOGvv
+#define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
 
 asset_filter_runtime_data_t* AssetFilter::runtimedata() {
@@ -30,7 +36,6 @@ size_t AssetFilter::length() {
 
 template <class ReturnType, class ExpressionType>
 ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
-		AssetFilter assetFilter,
 		const scanned_device_t& device,
 		AssetFilterInput filterInputDescription,
 		ExpressionType delegateExpression,
@@ -42,19 +47,19 @@ ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
 	ExactMatchFilter exact;  // Dangerous to use, it has a nullptr as data.
 	FilterInterface* filter = nullptr;
 
-	switch (*assetFilter.filterdata().metadata().filterType()) {
+	switch (*filterdata().metadata().filterType()) {
 		case AssetFilterType::CuckooFilter: {
-			cuckoo = assetFilter.filterdata().cuckooFilter();
+			cuckoo = filterdata().cuckooFilter();
 			filter = &cuckoo;
 			break;
 		}
 		case AssetFilterType::ExactMatchFilter: {
-			exact  = assetFilter.filterdata().exactMatchFilter();
+			exact  = filterdata().exactMatchFilter();
 			filter = &exact;
 			break;
 		}
 		default: {
-			LOGAssetFilteringWarn("Filter type not implemented");
+			LOGAssetFilterWarn("Filter type not implemented");
 			return defaultValue;
 		}
 	}
@@ -120,27 +125,25 @@ ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
 	return defaultValue;
 }
 
-bool AssetFilter::filterAcceptsScannedDevice(AssetFilter assetFilter, const scanned_device_t& asset) {
+bool AssetFilter::filterAcceptsScannedDevice(const scanned_device_t& asset) {
 	// The input result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly.
 	return prepareFilterInputAndCallDelegate(
-			assetFilter,
 			asset,
-			assetFilter.filterdata().metadata().inputType(),
+			filterdata().metadata().inputType(),
 			[](FilterInterface* filter, const uint8_t* data, size_t len) {
 				return filter->contains(data, len);
 			},
 			false);
 }
 
-asset_id_t AssetFilter::getAssetId(AssetFilter assetFilter, const scanned_device_t& asset) {
+asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
 	// The ouput result is nothing more than a call to .contains with the correctly prepared input.
 	// It is 'correctly preparing the input' that is fumbly. (At least, if you don't want to always
 	// preallocate the buffer that the MaskedAdData needs.)
 	return prepareFilterInputAndCallDelegate(
-			assetFilter,
 			asset,
-			assetFilter.filterdata().metadata().outputType().inFormat(),
+			filterdata().metadata().outputType().inFormat(),
 			[](FilterInterface* filter, const uint8_t* data, size_t len) {
 				return filter->assetId(data, len);
 			},
