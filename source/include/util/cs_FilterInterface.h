@@ -24,7 +24,6 @@ public:
 	 * In most cases a assetId is generated as crc32 from filtered input data.
 	 * This can be overwritten for special use cases like ExactMatchFilter.
 	 */
-	// TODO remove 'short'
 	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes) {
 		auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
 
