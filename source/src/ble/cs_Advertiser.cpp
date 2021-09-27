@@ -376,7 +376,7 @@ void Advertiser::updateAdvertisementData() {
 	uint32_t err;
 
 	uint8_t bufIndex = (_advBufferInUse + 1) % 2;
-	LOGAdvertiserVerbose("updateAdvertisementData buf=%u", bufIndex);
+	LOGAdvertiserVerbose("updateAdvertisementData buf=%u pointer=%p", bufIndex, _advertisementDataBuffers[bufIndex]);
 	_advBufferInUse = bufIndex;
 	if (_includeAdvertisementData) {
 		LOGAdvertiserVerbose("include adv data");
