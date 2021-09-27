@@ -356,7 +356,7 @@ void Advertiser::updateAdvertisementParams() {
 		_advParamsChanged = true;
 	}
 
-	LOGAdvertiserDebug("updateAdvertisementParams connectable=%i change=%i", connectable, _advParamsChanged);
+	LOGAdvertiserDebug("updateAdvertisementParams connectable=%u change=%u", connectable, _advParamsChanged);
 	if (!_advParamsChanged) {
 		return;
 	}

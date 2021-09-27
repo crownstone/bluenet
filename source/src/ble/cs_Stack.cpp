@@ -594,6 +594,11 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 		if (_connectionIsOutgoing) {
 		}
 		else {
+			LOGStackDebug("adv: handle=%u data=%p scanResponse=%p",
+					p_ble_evt->evt.gap_evt.params.connected.adv_handle,
+					p_ble_evt->evt.gap_evt.params.connected.adv_data,adv_data.p_data,
+					p_ble_evt->evt.gap_evt.params.connected.adv_data,scan_rsp_data.p_data,
+					);
 			onIncomingConnected(p_ble_evt);
 		}
 }
