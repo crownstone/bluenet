@@ -62,7 +62,6 @@ if(NOT BOARD_TARGET)
 endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
-SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")

@@ -24,7 +24,7 @@ ADD_DEFINITIONS("-DBLE_STACK_SUPPORT_REQD")
 # We will assume the softdevice is always present
 ADD_DEFINITIONS("-DSOFTDEVICE_PRESENT")
 
-MESSAGE(STATUS "crownstone.defs.cmake: Build type: ${CMAKE_BUILD_TYPE}")
+MESSAGE(STATUS "crownstone.defs.cmake: Build type: \"${CMAKE_BUILD_TYPE}\"")
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
 	ADD_DEFINITIONS("-DDEBUG")
 ELSEIF(CMAKE_BUILD_TYPE MATCHES "Release")

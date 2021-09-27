@@ -11,7 +11,7 @@ extern "C"
 {
 #endif
 
-#ifndef HOST_TARGET
+#ifndef DISABLE_NRF_HEADERS
 #include <app_util_platform.h>
 typedef uint32_t ret_code_t;
 
@@ -83,13 +83,13 @@ typedef uint32_t ret_code_t;
 #undef APP_ERROR_HANDLER
 #endif
 
-#else // HOST_TARGET defined
+#else // DISABLE_NRF_HEADERS
 
 #ifndef __ALIGN
 #define __ALIGN(n) __attribute__((aligned(n)))
 #endif
 
-#include <dummies.h>
+#include <nrf_stubs.h>
 
 #define BLE_GAP_PASSKEY_LEN 6
 
