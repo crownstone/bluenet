@@ -64,3 +64,5 @@ add_executable(${TEST} ${SOURCE_FILES})
 enable_testing()
 
 add_test(NAME ${TEST} COMMAND ${TEST})
+
+install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
