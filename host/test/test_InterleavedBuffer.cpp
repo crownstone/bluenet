@@ -15,22 +15,25 @@ using namespace std;
 const uint8_t sin_table[]= {0,0,1,2,4,6,9,12,16,20,24,29,35,40,46,53,59,66,73,81,88,96,104,112,119,128,136,143,151,159,167,174,182,189,196,202,209,215,220,226,231,235,239,243,246,249,251,253,254,255,255,255,254,253,251,249,246,243,239,235,231,226,220,215,209,202,196,189,182,174,167,159,151,143,136,128,119,112,104,96,88,81,73,66,59,53,46,40,35,29,24,20,16,12,9,6,4,2,1,0};
 
 #define NUM_BUFFERS 4
-
-typedef adc_sample_value_t value_t;
+#define BUFFER_SIZE 200
 
 int main() {
 
 	cout << "Test InterleavedBuffer implementation" << endl;
 
 	AdcBuffer & buffer = AdcBuffer::getInstance();
-	value_t buf[4][200];
+	adc_buffer_t* buf[4] = { nullptr };
+	for (int i = 0; i < NUM_BUFFERS; ++i) {
+		buf[i] = new adc_buffer_t();
+		buf[i]->samples = new adc_sample_value_t[BUFFER_SIZE];
+	}
 
 	cout << "Fill buffers with current and voltage data" << endl;
 
 	for (int i = 0; i < NUM_BUFFERS; ++i) {
 		for (int j = 0; j < 100; ++j) {
-			buf[i][j*2] = sin_table[j];
-			buf[i][j*2+1] = 400;
+			buf[i]->samples[j*2] = sin_table[j];
+			buf[i]->samples[j*2+1] = 400;
 		}
 	}
 
@@ -42,12 +45,12 @@ int main() {
 	cout << "Retrieve values from buffers" << endl;
 
 	int cb_size = 10;
-	CircularBuffer<value_t> *circBuffer = new CircularBuffer<value_t>(cb_size);
+	CircularBuffer<adc_sample_value_t> *circBuffer = new CircularBuffer<adc_sample_value_t>(cb_size);
 	circBuffer->init();
 
 	int channel = 100;
 	int32_t vdifftot0 = 0, vdifftot1 = 0;
-	value_t value0, value1, value2, vdiff0, vdiff1, last;
+	adc_sample_value_t value0, value1, value2, vdiff0, vdiff1, last;
 	adc_buffer_id_t buffer_id = 0;
 
 	bool full = false;
