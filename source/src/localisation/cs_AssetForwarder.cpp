@@ -30,55 +30,108 @@ cs_ret_code_t AssetForwarder::init() {
 	return ERR_SUCCESS;
 }
 
-uint16_t AssetForwarder::sendAssetMacToMesh(const scanned_device_t& asset) {
+// ------------- outbox management -------------
+
+void AssetForwarder::flush() {
+	for(auto outMsg : outbox) {
+		dispatchOutboxMessage(outMsg);
+	}
+
+	clearOutbox();
+}
+
+void AssetForwarder::clearOutbox() {
+	memset(&outbox, 0x00, sizeof(outbox));
+}
+
+outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
+	for(auto& msg : outbox) {
+		if (!msg.isValid()) {
+			return &msg;
+		}
+	}
+	return nullptr;
+}
+
+void AssetForwarder::setThrottleCountdownBumpTicks(uint8_t ticks) {
+	_throttleCountdownBumpTicks = ticks;
+}
+
+// ------------- message management -------------
+
+void AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_device_t& asset) {
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
-	cs_mesh_model_msg_asset_report_mac_t assetMsg;
 
-	assetMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
-	memcpy(assetMsg.mac, asset.address, sizeof(assetMsg.mac));
+	outbox_msg_t* outMsg = getEmptyOutboxSlot();
 
-	cs_mesh_msg_t msgWrapper;
-	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_INFO_MAC;
-	msgWrapper.payload     = reinterpret_cast<uint8_t*>(&assetMsg);
-	msgWrapper.size        = sizeof(assetMsg);
-	msgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
-	msgWrapper.urgency     = CS_MESH_URGENCY_LOW;
+	if(outMsg == nullptr) {
+		return;
+	}
 
-	event_t meshMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &msgWrapper, sizeof(msgWrapper));
-	meshMsgEvt.dispatch();
+	outMsg->macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
+	memcpy(outMsg->macMsg.mac, asset.address, sizeof(outMsg->macMsg.mac));
 
-	// forward message over uart (i.e. it's also interesting if the hub dongle directly receives asset advertisement)
-	forwardAssetToUart(assetMsg, _myStoneId);
-
-	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
+	//	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
 
-uint16_t AssetForwarder::sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
+void AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
-	cs_mesh_model_msg_asset_report_id_t assetMsg = {};
+	// TODO: merge messages that differ only in filterbitmask
 
-	assetMsg.id = assetId;
-	assetMsg.rssi= asset.rssi;
-	assetMsg.channel = compressChannel(asset.channel);
-	assetMsg.filterBitmask = filterBitmask;
+	outbox_msg_t* outMsg = getEmptyOutboxSlot();
+
+	if(outMsg == nullptr) {
+		return;
+	}
+
+	outMsg->rec = record;
+	outMsg->msgtype = CS_MESH_MODEL_TYPE_ASSET_INFO_ID
+
+	outMsg->idMsg.id = assetId;
+	outMsg->idMsg.rssi= asset.rssi;
+	outMsg->idMsg.channel = compressChannel(asset.channel);
+	outMsg->idMsg.filterBitmask = filterBitmask;
+
+
+//	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
+}
+
+
+void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
+	if (outMsg.rec != nullptr) {
+		outMsg.rec->addThrottlingCountdown(_throttleCountdownBumpTicks);
+	}
+
+	// forward message over uart (e.g. hub dongle directly receives asset advertisement)
+	switch (outMsg.msgtype) {
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
+			forwardAssetToUart(outMsg.macMsg, _myStoneId);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_ID: {
+			forwardAssetToUart(outMsg.idMsg, _myStoneId);
+			break;
+		}
+		default: {
+			// outMsg invalid.
+			return;
+		}
+	}
 
 	cs_mesh_msg_t msgWrapper;
-	msgWrapper.type        = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
-	msgWrapper.payload     = reinterpret_cast<uint8_t*>(&assetMsg);
+	msgWrapper.type        = outMsg.msgtype;
+	msgWrapper.payload     = outMsg.rawMsg;
 	msgWrapper.size        = sizeof(assetMsg);
 	msgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
 	msgWrapper.urgency     = CS_MESH_URGENCY_LOW;
 
 	event_t meshMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &msgWrapper, sizeof(msgWrapper));
 	meshMsgEvt.dispatch();
-
-	// forward message over uart (i.e. it's also interesting if the hub dongle directly receives asset advertisement)
-	forwardAssetToUart(assetMsg, _myStoneId);
-
-	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
+
+// ------------- private stuff -------------
 
 void AssetForwarder::handleEvent(event_t & event) {
 	switch (event.type) {

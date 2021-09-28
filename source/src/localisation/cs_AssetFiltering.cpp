@@ -105,6 +105,9 @@ cs_ret_code_t AssetFiltering::initInternal() {
 		return retCode;
 	}
 
+	_assetForwarder->setThrottleCountdownBumpTicks(
+			_assetStore->throttlingBumpMsToTicks(THROTTLE_COUNTER_PERIOD_MS));
+
 	listen();
 	return ERR_SUCCESS;
 }
@@ -160,6 +163,10 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 
 	uint8_t combinedMasks = masks.combined();
 
+	_assetForwarder->flush();
+
+
+	// TODO: this can also be merged into the assetforwarder
 	for (uint8_t filterIndex = 0; filterIndex < _filterStore->getFilterCount(); ++filterIndex) {
 		if(BLEutil::isBitSet(combinedMasks, filterIndex)) {
 			auto filter = AssetFilter (_filterStore->getFilter(filterIndex));
@@ -225,11 +232,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
-		uint16_t throttlingCounterBumpMs = 0;
-		throttlingCounterBumpMs += _assetForwarder->sendAssetMacToMesh(asset);
-		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
-
-		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
+		_assetForwarder->sendAssetMacToMesh(assetRecord, asset);
 	}
 	else {
 		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
@@ -238,8 +241,6 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 				assetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
-
-	// TODO: send uart update
 }
 
 void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
@@ -252,11 +253,9 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
-		uint16_t throttlingCounterBumpMs = 0;
 		uint8_t filterBitmask = 0;
 		BLEutil::setBit(filterBitmask, filterId);
-		throttlingCounterBumpMs += _assetForwarder->sendAssetIdToMesh(asset, assetId, filterBitmask);
-		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
+		_assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
 
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
@@ -267,8 +266,6 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 				assetId.data[2],
 				assetRecord->throttlingCountdown);
 	}
-
-	// TODO: send uart update
 }
 
 
@@ -286,9 +283,9 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		uint8_t filterBitmask = 0;
 		BLEutil::setBit(filterBitmask, filterId);
 
-		uint16_t throttlingCounterBumpMs = 0;
-		throttlingCounterBumpMs += _nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask);
-		_assetStore->addThrottlingBump(*assetRecord, throttlingCounterBumpMs);
+		// TODO: return true if nearest crownstone would like to send a message
+		_nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask);
+		// TODO: _assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
 
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}

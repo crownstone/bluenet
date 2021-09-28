@@ -35,14 +35,16 @@ enum cs_mesh_model_opcode_t {
  * See https://devzone.nordicsemi.com/f/nordic-q-a/32854/max-size-of-data-to-send-from-one-node-to-other-ble-mesh
  * The minimum advertising interval that mesh are using now is 20ms, so each advertisement / segment, takes 20ms.
  */
-#define MAX_MESH_MSG_SIZE (3 * 12 - 4 - 3)
-#define MAX_MESH_MSG_NON_SEGMENTED_SIZE (15 - 4 - 3)
+static constexpr uint8_t MAX_MESH_MSG_SIZE = 3 * 12 - 4 - 3;
+static constexpr uint8_t MAX_MESH_MSG_NON_SEGMENTED_SIZE = 15 - 4 - 3;
 
 /**
  * Size of the header of each mesh model message.
  * 1B for the message type.
  */
-#define MESH_HEADER_SIZE 1
+static constexpr uint8_t MESH_HEADER_SIZE = 1;
+
+static constexpr uint8_t MAX_MESH_MSG_PAYLOAD_SIZE = MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE;
 
 enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TEST                      = 0,  // Payload: cs_mesh_model_msg_test_t
