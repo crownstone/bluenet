@@ -61,6 +61,6 @@ set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES})
 
 add_executable(${TEST} ${SOURCE_FILES})
 
-#enable_testing()
+enable_testing()
 
 add_test(NAME ${TEST} COMMAND ${TEST})
