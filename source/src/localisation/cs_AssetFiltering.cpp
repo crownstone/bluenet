@@ -232,8 +232,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
 	else {
-		LOGAssetFilteringVerbose(
-				"Throttled asset id=%02X:%02X:%02X counter=%u",
+		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
 				assetId.data[0],
 				assetId.data[1],
 				assetId.data[2],
@@ -262,8 +261,7 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
 	else {
-		LOGAssetFilteringVerbose(
-				"Throttled asset id=%02X:%02X:%02X counter=%u",
+		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
 				assetId.data[0],
 				assetId.data[1],
 				assetId.data[2],
@@ -295,8 +293,7 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
 	else {
-		LOGAssetFilteringVerbose(
-				"Throttled asset id=%02X:%02X:%02X counter=%u",
+		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
 				assetId.data[0],
 				assetId.data[1],
 				assetId.data[2],

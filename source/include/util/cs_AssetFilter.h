@@ -74,11 +74,11 @@ private:
 	/**
 	 * A assetId is generated as crc32 from filtered input data.
 	 *
-	 * TODO: For output type MAC the data is prepended with a fixed
+	 * For output type MAC the data is prepended with a fixed
 	 * value to avoid collisions with filters with assetId output based
 	 * on MAC.
 	 */
-	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes);
+	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes, uint32_t* startCrc = nullptr);
 
 	/**
 	 * This method extracts the filters 'input description', prepares the input according to that

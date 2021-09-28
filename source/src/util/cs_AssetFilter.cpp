@@ -174,7 +174,8 @@ bool AssetFilter::filterAcceptsScannedDevice(const scanned_device_t& asset) {
 asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
 	if (*filterdata().metadata().outputType().outFormat() == AssetFilterOutputFormat::Mac) {
 		// special case to reduce collisions.
-		return assetId(asset.address, MAC_ADDRESS_LEN);
+		uint32_t startCrc = 0xC0DEC0DE;
+		return assetId(asset.address, MAC_ADDRESS_LEN, &startCrc);
 	}
 
 
@@ -187,7 +188,7 @@ asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
 			asset_id_t{});
 }
 
-asset_id_t AssetFilter::assetId(const void* key, size_t keyLengthInBytes) {
+asset_id_t AssetFilter::assetId(const void* key, size_t keyLengthInBytes, uint32_t* startCrc) {
 	auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
 
 	// little endian byte by byte copy.
