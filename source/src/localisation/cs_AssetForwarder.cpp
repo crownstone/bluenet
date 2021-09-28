@@ -44,7 +44,7 @@ void AssetForwarder::clearOutbox() {
 	memset(&outbox, 0x00, sizeof(outbox));
 }
 
-outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
+AssetForwarder::outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
 	for(auto& msg : outbox) {
 		if (!msg.isValid()) {
 			return &msg;
@@ -86,15 +86,12 @@ void AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_dev
 	}
 
 	outMsg->rec = record;
-	outMsg->msgtype = CS_MESH_MODEL_TYPE_ASSET_INFO_ID
+	outMsg->msgtype = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
 
 	outMsg->idMsg.id = assetId;
 	outMsg->idMsg.rssi= asset.rssi;
 	outMsg->idMsg.channel = compressChannel(asset.channel);
 	outMsg->idMsg.filterBitmask = filterBitmask;
-
-
-//	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
 
@@ -122,7 +119,7 @@ void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = outMsg.msgtype;
 	msgWrapper.payload     = outMsg.rawMsg;
-	msgWrapper.size        = sizeof(assetMsg);
+	msgWrapper.size        = sizeof(outMsg.rawMsg);
 	msgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
 	msgWrapper.urgency     = CS_MESH_URGENCY_LOW;
 

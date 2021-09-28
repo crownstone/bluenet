@@ -105,8 +105,11 @@ cs_ret_code_t AssetFiltering::initInternal() {
 		return retCode;
 	}
 
+	// TODO: move these constants or tie the forward up to the store so that they
+	// can decide how fast to tick and trottle
 	_assetForwarder->setThrottleCountdownBumpTicks(
-			_assetStore->throttlingBumpMsToTicks(THROTTLE_COUNTER_PERIOD_MS));
+			_assetStore->throttlingBumpMsToTicks(
+					_assetForwarder->MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS));
 
 	listen();
 	return ERR_SUCCESS;

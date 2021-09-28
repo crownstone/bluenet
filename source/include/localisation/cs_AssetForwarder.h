@@ -16,9 +16,9 @@
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
 class AssetForwarder : public EventListener, public Component {
+public:
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 1000;
 
-public:
 	cs_ret_code_t init();
 
 	/**
