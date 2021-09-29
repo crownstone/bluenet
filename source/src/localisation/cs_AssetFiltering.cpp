@@ -279,16 +279,17 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
-	// TODO: always throttle when not nearest
 	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		uint8_t filterBitmask = 0;
 		BLEutil::setBit(filterBitmask, filterId);
 
-		// TODO: return true if nearest crownstone would like to send a message
-		_nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask);
-		// TODO: _assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
+		// if nearest wants to send a message, do so.
+		// (nearest algorithm only wants to send messages when we are nearest)
+		if(_nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask)) {
+			_assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
+		}
 	}
 	else {
 		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
