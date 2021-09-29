@@ -64,10 +64,19 @@ private:
 			uint8_t rawMsg[MAX_MESH_MSG_PAYLOAD_SIZE];
 		};
 
-		bool isValid() {
-			return msgtype == CS_MESH_MODEL_TYPE_ASSET_INFO_MAC ||
-					msgtype == CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
-		}
+		// util funcs
+
+		/**
+		 * returns true if msgType is one of:
+		 *   CS_MESH_MODEL_TYPE_ASSET_INFO_MAC
+		 *   CS_MESH_MODEL_TYPE_ASSET_INFO_ID
+		 */
+		bool isValid();
+
+		/**
+		 * returns true if they have the same msgType and the addresses are the same.
+		 */
+		bool isSimilar(const outbox_msg_t& other);
 	};
 
 	outbox_msg_t outbox[8] = {};

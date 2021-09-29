@@ -131,6 +131,31 @@ void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 	meshMsgEvt.dispatch();
 }
 
+// ------------- outbox_msg_t -------------
+
+
+bool AssetForwarder::outbox_msg_t::isValid() {
+	return msgType == CS_MESH_MODEL_TYPE_ASSET_INFO_MAC ||
+			msgType == CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
+}
+
+bool AssetForwarder::outbox_msg_t::isSimilar(const outbox_msg_t& other) {
+	if(msgType != other.msgType) {
+		return false;
+	}
+
+	switch(msgType) {
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
+			return macMsg.mac == other.macMsg.mac;
+		}
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_ID: {
+			return idMsg.id == other.idMsg.id;
+		}
+		default: {
+			return false;
+		}
+	}
+}
 
 // ------------- private stuff -------------
 
