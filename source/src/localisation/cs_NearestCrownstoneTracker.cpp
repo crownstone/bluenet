@@ -87,14 +87,14 @@ uint16_t NearestCrownstoneTracker::handleAcceptedAsset(const scanned_device_t& a
 }
 
 
-void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_report_id_t& incomingReport) {
+bool NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_report_id_t& incomingReport) {
 	LOGNearestCrownstoneTrackerVerbose("onReceiveAssetAdvertisement myId(%u), report(%d dB ch.%u)",
 			_myStoneId, incomingReport.rssi, decompressChannel(incomingReport.channel));
 
 	auto recordPtr = getRecordFiltered(incomingReport.id);
 	if (recordPtr == nullptr) {
-		// might just have been an old record. simply return.
-		return;
+		// might just have been an old record. no further action required.
+		return false;
 	}
 	auto& record = *recordPtr;
 
@@ -105,32 +105,28 @@ void NearestCrownstoneTracker::onReceiveAssetAdvertisement(cs_mesh_model_msg_ass
 			RSSI_FALL_OFF_RATE_DB_PER_S, record.lastReceivedCounter *
 			1e-3f * AssetStore::LAST_RECEIVED_COUNTER_PERIOD_MS);
 
-	if (record.nearestStoneId == 0 || record.nearestStoneId == _myStoneId) {
-		if (record.nearestStoneId == 0) {
-			LOGNearestCrownstoneTrackerDebug("First time this asset was seen, consider us nearest.");
-			onWinnerChanged(true);
-		}
-		else {
-			LOGNearestCrownstoneTrackerVerbose("We already believed we were nearest, so it's time to send an update towards the mesh");
-		}
+	if (record.nearestStoneId == 0) {
+		LOGNearestCrownstoneTrackerDebug("First time this asset was seen, consider us nearest.");
+		onWinnerChanged(true);
+		return true;
+	}
+
+	if (record.nearestStoneId == _myStoneId) {
+		LOGNearestCrownstoneTrackerVerbose("We already believed we were nearest");
 		saveWinningReport(record, incomingRssiAndChannelCompressed, _myStoneId);
-		broadcastReport(incomingReport);
-		sendUartUpdate(record);
+		return true;
 	}
-	else {
-		LOGNearestCrownstoneTrackerVerbose("We didn't win before");
-		if (incomingRssiAndChannel.isCloserThan(recordedNearestRssiWithFallOff))  {
-			// we win because the incoming report is a first hand observation.
-			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
-			saveWinningReport(record, incomingRssiAndChannelCompressed, _myStoneId);
-			broadcastReport(incomingReport);
-			sendUartUpdate(record);
-			onWinnerChanged(true);
-		}
-		else {
-			LOGNearestCrownstoneTrackerVerbose("We still don't, so we're done.");
-		}
+
+	LOGNearestCrownstoneTrackerVerbose("We didn't win before");
+	if (incomingRssiAndChannel.isCloserThan(recordedNearestRssiWithFallOff))  {
+		LOGNearestCrownstoneTrackerVerbose("but now we do");
+		saveWinningReport(record, incomingRssiAndChannelCompressed, _myStoneId);
+		onWinnerChanged(true);
+		return true;
 	}
+
+	LOGNearestCrownstoneTrackerVerbose("We still don't");
+	return false;
 }
 
 void NearestCrownstoneTracker::onReceiveAssetReport(cs_mesh_model_msg_asset_report_id_t& incomingReport, stone_id_t reporter) {

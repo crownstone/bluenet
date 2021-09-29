@@ -33,7 +33,7 @@ void AssetForwarder::flush() {
 		sendCount += dispatchOutboxMessage(outMsg) ? 1u : 0u;
 	}
 
-	LOGAssetForwarderDebug("Flushed %u messaged", sendCount); // TODO: D Flushed 0 messaged????
+	LOGAssetForwarderDebug("Flushed %u messaged", sendCount);
 
 	clearOutbox();
 }
