@@ -10,8 +10,8 @@
 
 #define LOGAssetFilteringWarn LOGw
 #define LOGAssetFilteringInfo LOGd
-#define LOGAssetFilteringDebug LOGvv
-#define LOGAssetFilteringVerbose LOGvv
+#define LOGAssetFilteringDebug LOGd
+#define LOGAssetFilteringVerbose LOGd
 #define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
@@ -180,6 +180,8 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 			assetEvent.dispatch();
 		}
 	}
+
+	LOGAssetFilteringDebug("----------------------------------");
 }
 
 bool AssetFiltering::handleAcceptFilter(
@@ -259,8 +261,6 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 		uint8_t filterBitmask = 0;
 		BLEutil::setBit(filterBitmask, filterId);
 		_assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
-
-		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
 	else {
 		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
@@ -289,8 +289,6 @@ void AssetFiltering::handleAssetAcceptedNearestAssetId(
 		// TODO: return true if nearest crownstone would like to send a message
 		_nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask);
 		// TODO: _assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
-
-		LOGAssetFilteringVerbose("throttling bump ms: %u", throttlingCounterBumpMs);
 	}
 	else {
 		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",

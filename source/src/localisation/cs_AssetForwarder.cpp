@@ -15,17 +15,12 @@
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 
-#define LOGAssetForwarderDebug LOGvv
-
-void printAsset(const cs_mesh_model_msg_asset_report_mac_t& assetMsg) {
-	LOGAssetForwarderDebug("mesh_model_msg_asset: ch%u @ %i dB",
-			getChannel(assetMsg.rssiData),
-			getRssi(assetMsg.rssiData));
-}
+#define LOGAssetForwarderDebug LOGd
 
 
 cs_ret_code_t AssetForwarder::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myStoneId, sizeof(_myStoneId));
+	clearOutbox();
 	listen();
 	return ERR_SUCCESS;
 }
@@ -33,15 +28,20 @@ cs_ret_code_t AssetForwarder::init() {
 // ------------- outbox management -------------
 
 void AssetForwarder::flush() {
+	uint8_t sendCount = 0;
 	for(auto outMsg : outbox) {
-		dispatchOutboxMessage(outMsg);
+		sendCount += dispatchOutboxMessage(outMsg) ? 1u : 0u;
 	}
+
+	LOGAssetForwarderDebug("Flushed %u messaged", sendCount); // TODO: D Flushed 0 messaged????
 
 	clearOutbox();
 }
 
 void AssetForwarder::clearOutbox() {
-	memset(&outbox, 0x00, sizeof(outbox));
+	for(auto& msg : outbox) {
+		msg = outbox_msg_t();
+	}
 }
 
 AssetForwarder::outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
@@ -55,7 +55,7 @@ AssetForwarder::outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
 
 AssetForwarder::outbox_msg_t* AssetForwarder::findSimilar(outbox_msg_t outMsg) {
 	for (auto& msg : outbox) {
-		if (!outMsg.isSimilar(msg)) {
+		if (outMsg.isSimilar(msg)) {
 			return &msg;
 		}
 	}
@@ -80,6 +80,8 @@ bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 
 	// merge message with similarMsg if posible.
 	if(outbox_msg_t* similarMsg = findSimilar(outMsg)) {
+		LOGAssetForwarderDebug("found similar message");
+
 		if(similarMsg->rec == nullptr){
 			similarMsg->rec = outMsg.rec;  // copy record if it doesn't exist.
 		}
@@ -95,10 +97,9 @@ bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 		return true;
 	}
 
+	LOGAssetForwarderDebug("failed to find place in outbox");
+
 	return false;
-
-
-	//	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
 
 
@@ -137,9 +138,9 @@ bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_dev
 }
 
 
-void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
+bool AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 	if(!outMsg.isValid()) {
-		return;
+		return false;
 	}
 
 	if (outMsg.rec != nullptr) {
@@ -158,9 +159,11 @@ void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 		}
 		default: {
 			// outMsg invalid. shouldn't occur as it is already checked.
-			return;
+			return false;
 		}
 	}
+
+	LOGAssetForwarderDebug("dispatched outbox message");
 
 	cs_mesh_msg_t msgWrapper;
 	msgWrapper.type        = outMsg.msgType;
@@ -171,6 +174,8 @@ void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 
 	event_t meshMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &msgWrapper, sizeof(msgWrapper));
 	meshMsgEvt.dispatch();
+
+	return true;
 }
 
 // ------------- outbox_msg_t -------------
@@ -233,7 +238,9 @@ void AssetForwarder::handleEvent(event_t & event) {
 }
 
 void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId) {
-	printAsset(assetMsg);
+	LOGAssetForwarderDebug("forward asset report MAC to uart: ch%u @ %i dB",
+				assetMsg.rssiData.getChannel(),
+				assetMsg.rssiData.getRssi());
 
 	auto uartAssetMsg = asset_report_uart_mac_t {
 			.address = assetMsg.mac,
@@ -249,7 +256,9 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac
 }
 
 void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId) {
-	LOGAssetForwarderDebug("forwarding asset id msg to uart");
+	LOGAssetForwarderDebug("forward asset report ID to uart: ch%u @ %i dB",
+					assetMsg.channel,
+					assetMsg.rssi);
 
 	auto uartAssetMsg = asset_report_uart_id_t{
 			.assetId         = assetMsg.id,

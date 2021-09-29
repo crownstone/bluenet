@@ -91,8 +91,10 @@ private:
 	 * update throttle
 	 * send over uart
 	 * send over mesh
+	 *
+	 * returns true if message was valid
 	 */
-	void dispatchOutboxMessage(outbox_msg_t outMsg);
+	bool dispatchOutboxMessage(outbox_msg_t outMsg);
 
 	void clearOutbox();
 
