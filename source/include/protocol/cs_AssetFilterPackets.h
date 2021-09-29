@@ -68,9 +68,11 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	MacOverMesh          = 0,
-	ShortAssetId         = 1,
-	ShortAssetIdOverMesh = 2,
+	Mac             = 0,
+	AssetId         = 1,
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+	AssetIdNearest  = 2,
+#endif
 };
 
 union __attribute__((__packed__)) asset_filter_flags_t {
@@ -91,16 +93,16 @@ struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
 };
 
 
-struct __attribute__((__packed__)) short_asset_id_t {
+struct __attribute__((__packed__)) asset_id_t {
 	uint8_t data[3];
 
 	// default implementation according to C++20
-	bool operator==(const short_asset_id_t& other) const {
+	bool operator==(const asset_id_t& other) const {
 		return std::memcmp(data, other.data, sizeof(data)) == 0;
 	}
 };
 
-constexpr short_asset_id_t INVALID_ASSET_ID { .data{0xff, 0xff, 0xff} };
+constexpr asset_id_t INVALID_ASSET_ID { .data{0xff, 0xff, 0xff} };
 
 
 struct __attribute__((__packed__)) asset_filters_version_t {

@@ -341,16 +341,17 @@ private:
 	FactoryReset* _factoryReset = nullptr;
 	CommandAdvHandler* _commandAdvHandler = nullptr;
 	MultiSwitchHandler* _multiSwitchHandler = nullptr;
-	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
-	MeshTopology _meshTopology;
-
 	SwitchAggregator _switchAggregator;
-	AssetFiltering _assetFiltering;
 
+	// TODO: allocate and init only in normal mode.
+	TrackedDevices _trackedDevices;
+	MeshTopology _meshTopology;
+	AssetFiltering _assetFiltering;
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
+
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	Microapp* _microapp;

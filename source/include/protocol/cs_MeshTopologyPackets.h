@@ -9,7 +9,7 @@
 
 #include <cstdint>
 #include <protocol/cs_Typedefs.h>
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 static constexpr uint8_t MESH_TOPOLOGY_CHANNEL_COUNT = 3;
 

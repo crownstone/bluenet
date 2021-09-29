@@ -7,7 +7,7 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
-#include <forward_list>
+#include <tracking/cs_TrackedDevice.h>
 #include <cstdint>
 
 /**
@@ -59,24 +59,6 @@ private:
 	static const uint16_t TICKS_PER_SECOND = (1000 / TICK_INTERVAL_MS);
 	static const uint16_t TICKS_PER_MINUTES = (60 * 1000 / TICK_INTERVAL_MS);
 
-	enum TrackedDeviceFields {
-		BIT_POS_ACCESS_LEVEL  = 0,
-		BIT_POS_LOCATION      = 1,
-		BIT_POS_PROFILE       = 2,
-		BIT_POS_RSSI_OFFSET   = 3,
-		BIT_POS_FLAGS         = 4,
-		BIT_POS_DEVICE_TOKEN  = 5,
-		BIT_POS_TTL           = 6,
-	};
-	static const uint8_t ALL_FIELDS_SET = 0x7F;
-
-	struct __attribute__((packed)) TrackedDevice {
-		uint8_t fieldsSet = 0;
-		uint8_t locationIdTTLMinutes = LOCATION_ID_TTL_MINUTES;
-		uint8_t heartbeatTTLMinutes = 0;
-		internal_register_tracked_device_packet_t data;
-	};
-
 	uint16_t ticksLeftSecond = TICKS_PER_SECOND;
 	uint16_t ticksLeftMinute = TICKS_PER_MINUTES;
 
@@ -85,57 +67,55 @@ private:
 	 *
 	 * Device ID should be unique.
 	 */
-	std::forward_list<TrackedDevice> devices;
+	TrackedDevice _devices[MAX_TRACKED_DEVICES];
 
-	uint8_t deviceListSize = 0;
+	/**
+	 * Current max size of the devices list: all other entries are invalid.
+	 */
+	uint8_t _deviceListSize = 0;
 
 	/**
 	 * Whether there has been a successful sync of tracked devices.
 	 *
 	 * For now, this means just getting a list of devices from another crownstone, after boot.
 	 */
-	bool deviceListIsSynced = false;
+	bool _deviceListIsSynced = false;
 
 	/**
 	 * When syncing, the remote crownstone will tell how many devices there are.
 	 * This number is cached in this variable, so we know when we're synced.
 	 */
-	uint8_t expectedDeviceListSize = 0xFF;
+	uint8_t _expectedDeviceListSize = 0xFF;
 
 	/**
 	 * Find device with given ID, else add a new device with given ID.
 	 *
-	 * returns null if couldn't be added.
+	 * Returns device with given ID when found or added.
+	 * Returns null if couldn't be added.
 	 */
 	TrackedDevice* findOrAdd(device_id_t deviceId);
 
 	/**
-	 * Find device with given id.
+	 * Find and return device with given id.
 	 *
-	 * returns null if it couldn't be found.
+	 * Returns null if it couldn't be found.
 	 */
 	TrackedDevice* find(device_id_t deviceId);
 
 	/**
-	 * Find device token.
+	 * Find and return device with given token.
 	 *
-	 * returns null if it couldn't be found.
+	 * Returns null if it couldn't be found.
 	 */
 	TrackedDevice* findToken(uint8_t* deviceToken, uint8_t size);
 
 	/**
 	 * Add device to list.
 	 *
-	 * returns null if couldn't be added.
+	 * Returns invalidated entry when added.
+	 * Returns null if couldn't be added.
 	 */
 	TrackedDevice* add();
-
-	/**
-	 * Remove a device from the list.
-	 *
-	 * Either a record with incomplete data, otherwise the oldest.
-	 */
-	cs_ret_code_t removeDevice();
 
 	cs_ret_code_t handleRegister(internal_register_tracked_device_packet_t& packet);
 	cs_ret_code_t handleUpdate(internal_update_tracked_device_packet_t& packet);
@@ -151,11 +131,6 @@ private:
 	 * Return true when given access level is equal or higher than device access level.
 	 */
 	bool hasAccess(TrackedDevice& device, uint8_t accessLevel);
-
-	/**
-	 * Returns true when device has a valid TTL, that didn't expire yet.
-	 */
-	bool isValidTTL(TrackedDevice& device);
 
 	/**
 	 * Returns true when no other device has this token.
@@ -179,23 +154,9 @@ private:
 	void tickSecond();
 
 	/**
-	 * Returns true when all fields are set.
-	 */
-	bool allFieldsSet(TrackedDevice& device);
-
-	/**
 	 * Check if tracked device list is synced yet.
 	 */
 	void checkSynced();
-
-
-	void setAccessLevel(TrackedDevice& device, uint8_t accessLevel);
-	void setLocation(TrackedDevice& device, uint8_t locationId);
-	void setProfile(TrackedDevice& device, uint8_t profileId);
-	void setRssiOffset(TrackedDevice& device, int8_t rssiOffset);
-	void setFlags(TrackedDevice& device, uint8_t flags);
-	void setDevicetoken(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
-	void setTTL(TrackedDevice& device, uint16_t ttlMinutes);
 
 	/**
 	 * Send background adv event.
@@ -231,7 +192,7 @@ private:
 	/**
 	 * Send tracked devices list size to mesh.
 	 */
-	void sendListSizeToMesh();
+	void sendListSizeToMesh(uint8_t deviceCount);
 
 	/**
 	 * Send all tracked devices to mesh.

@@ -146,10 +146,9 @@ Type  | Type name                     | Encrypted | Data   | Description
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh-result-packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result-packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | Deprecated.
-10108 | Asset Rssi Data               | Yes       | [Asset rssi data](#asset-rssi-data-packet) | Information about an asset a crownstone on the mesh has forwarded.
-10109 | Nearest crownstone update     | Yes       | [Nearest crownstone update](#nearest-crownstone-update) | The rssi between an asset and its nearest Crownstone changed.
-10110 | Nearest crownstone timed out  | Yes       | [Nearest crownstone timeout](#nearest-crownstone-timeout) | A previously tracked asset hasn't been observed in a
+10108 | Asset MAC report              | Yes       | [Asset MAC report](#asset-mac-report) | Report of an asset a Crownstone on the mesh has seen.
 10111 | RSSI between stones report    | Yes       | [RSSI between stones report](#rssi-between-stones-report) | A report of the RSSI between 2 Crownstones.
+10112 | Asset ID report               | Yes       | [Asset ID report](#asset-id-report) | Report of an asset a Crownstone on the mesh has seen.
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -279,29 +278,24 @@ Value | Name | Description
 5 | Profile location exit  | The first user of given profile left the given location.
 
 
-### Asset rssi data packet
+### Asset MAC report
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | AssetMac | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
-uint8 | StoneId | 1 | Id of the Crownstone that observed the asset.
-int8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone.
+uint8[] | MAC | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
+uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
+int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
 uint8 | Channel | 1 | Channel of the observed advertisement.
 
-### Nearest Crownstone update
+### Asset ID report
 
 Type | Name | Length | Description
---- | --- | --- | ---
-uint8[] | AssetId | 3 | ShortAssetId of the observed asset
-uint8 | ClosestStoneId | 1 | Id of the Crownstone that this Crownstone thinks is closest to the asset
-int8 | Rssi | 1 | Rssi between the observed asset and the observing Crownstone
-uint8 | Channel | 1 | Channel of the observed advertisement
-
-### nearest Crownstone timeout
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint8[] | AssetId | 3 | ShortAssetId of the asset that timed out
+---- | ---- | ------ | -----------
+[Asset ID](ASSET_FILTER_STORE.md#asset-id) | Asset ID | 3 | The asset ID.
+uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
+uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
+int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
+uint8 | Channel | 1 | BLE channel of the observed advertisement.
 
 
 ### RSSI between stones report

@@ -18,7 +18,7 @@
  *   room. It would be much nicer if it delayed this until the user left. 
  */
 class ExtendedSwitchBehaviour: public SwitchBehaviour {
-    public:
+public:
     typedef std::array<uint8_t, 
         WireFormat::size<SwitchBehaviour>() + 
         WireFormat::size<PresenceCondition>()> SerializedDataType;
@@ -56,7 +56,7 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
 
     bool extensionPeriodIsActive() { return extensionIsActive; }
 
-    private:
+private:
 
     PresenceCondition extensionCondition;
 

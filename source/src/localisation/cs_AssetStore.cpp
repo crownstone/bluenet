@@ -8,7 +8,7 @@
 
 #include <localisation/cs_AssetStore.h>
 #include <logging/cs_Logger.h>
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 #define LOGAssetStoreWarn    LOGw
 #define LOGAssetStoreInfo    LOGi
@@ -50,16 +50,17 @@ void AssetStore::handleEvent(event_t& event) {
 	}
 }
 
-void AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const short_asset_id_t& assetId) {
+asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& assetId) {
 	LOGAssetStoreVerbose("handleAcceptedAsset id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
-	auto record = getOrCreateRecord(assetId);
+	asset_record_t* record = getOrCreateRecord(assetId);
 	if (record != nullptr) {
-		record->myRssi = compressRssi(asset.rssi, asset.channel);
+		record->myRssi = rssi_and_channel_t(asset.rssi, asset.channel);
 		record->lastReceivedCounter = 0;
 	}
 	else {
 		LOGAssetStoreDebug("Could not create a record for id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	}
+	return record;
 }
 
 void AssetStore::resetRecords() {
@@ -69,7 +70,7 @@ void AssetStore::resetRecords() {
 	}
 }
 
-asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
+asset_record_t* AssetStore::getRecord(const asset_id_t& id) {
 	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
 		auto& record = _assetRecords[i];
 		if (record.isValid() && record.assetId == id) {
@@ -79,7 +80,7 @@ asset_record_t* AssetStore::getRecord(const short_asset_id_t& id) {
 	return nullptr;
 }
 
-asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
+asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	LOGAssetStoreVerbose("getOrCreateRecord id=%02X:%02X:%02X", id.data[0], id.data[1], id.data[2]);
 	uint8_t emptyIndex = 0xFF;
 	uint8_t oldestIndex = 0;
@@ -129,20 +130,15 @@ asset_record_t* AssetStore::getOrCreateRecord(const short_asset_id_t& id) {
 	return &record;
 }
 
-// REVIEW: why add instead of set?
 void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
-	// REVIEW: this isn't rounded up, it gives 1 tick for 1 ms.
+	// 'Ceil division' equal to:
+	//         timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if the division is exact
+	//     1 + timeToNextThrottleOpenMs / THROTTLE_COUNTER_PERIOD_MS if there is a remainder.
 	uint16_t ticksRoundedUp = (timeToNextThrottleOpenMs + THROTTLE_COUNTER_PERIOD_MS - 1) / THROTTLE_COUNTER_PERIOD_MS;
-	uint16_t ticksTotal = record.throttlingCountdown + ticksRoundedUp;
 
 	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
 
-	if (ticksTotal > 0xFF) {
-		record.throttlingCountdown = 0xFF;
-	}
-	else {
-		record.throttlingCountdown = ticksTotal;
-	}
+	record.addThrottlingCountdown(ticksRoundedUp);
 }
 
 

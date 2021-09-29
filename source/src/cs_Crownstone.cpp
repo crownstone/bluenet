@@ -592,8 +592,9 @@ void Crownstone::setName(bool firstTime) {
 }
 
 void Crownstone::startOperationMode(const OperationMode & mode) {
+	// TODO: should only be needed in normal mode.
 	_behaviourStore.listen();
-	_presenceHandler.listen();
+	_presenceHandler.init();
 
 	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
@@ -622,7 +623,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {
-			// TODO: Why this hack?
+			// In setup mode, we want to listen for incoming UART commands,
+			// so that the programmer can use UART to test it.
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 				UartHandler::getInstance().init(SERIAL_ENABLE_RX_ONLY);

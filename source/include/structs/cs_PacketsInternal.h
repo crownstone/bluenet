@@ -228,6 +228,15 @@ struct __attribute__((__packed__)) adv_background_parsed_v1_t {
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 };
 
+enum class PresenceMutation: uint8_t {
+    NothingChanged              ,
+    Online                      , // when no previous PresenceStateDescription was available but now it is
+    Offline                     , // when a previous PresenceStateDescription was available but now it isn't
+    LastUserExitSphere          ,
+    FirstUserEnterSphere        ,
+    OccupiedRoomsMaskChanged    ,
+};
+
 struct profile_location_t {
 	uint8_t profileId;
 	uint8_t locationId;

@@ -56,10 +56,10 @@ size_t SwitchBehaviour::serializedSize() const {
 }
 
 bool SwitchBehaviour::requiresPresence() { 
-	return presenceCondition.pred.requiresPresence();
+	return presenceCondition.predicate.requiresPresence();
 }
 bool SwitchBehaviour::requiresAbsence() {
-	return presenceCondition.pred.requiresAbsence();
+	return presenceCondition.predicate.requiresAbsence();
 }
 
 bool SwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
@@ -141,7 +141,7 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentPresence) {
 }
 
 bool SwitchBehaviour::_isValid(PresenceStateDescription currentPresence) {
-	return presenceCondition(currentPresence);
+	return presenceCondition.isTrue(currentPresence);
 }
 
 void SwitchBehaviour::print() {
@@ -151,10 +151,10 @@ void SwitchBehaviour::print() {
 			until().h(), until().m(), until().s(),
 			activeIntensity,
 			activeDays,
-			presenceCondition.pred.cond,
+			presenceCondition.predicate._condition,
 			presenceCondition.timeOut,
 			(isValid(SystemTime::now()) ? "valid" : "invalid")
 	);
-	presenceCondition.pred.RoomsBitMask.print();
+	presenceCondition.predicate._presence.print();
 #endif
 }

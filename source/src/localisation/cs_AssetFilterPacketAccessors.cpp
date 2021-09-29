@@ -70,17 +70,13 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 
 bool AssetFilterOutput::isValid() {
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::MacOverMesh: {
+		case AssetFilterOutputFormat::Mac: {
 			return true;
 		}
-		case AssetFilterOutputFormat::ShortAssetId: {
-			if (inFormat().isValid() == false) {
-				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
-				return false;
-			}
-			return true;
-		}
-		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+		case AssetFilterOutputFormat::AssetIdNearest:
+#endif
+		case AssetFilterOutputFormat::AssetId: {
 			if (inFormat().isValid() == false) {
 				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
 				return false;
@@ -96,14 +92,13 @@ bool AssetFilterOutput::isValid() {
 size_t AssetFilterOutput::length() {
 	size_t len = sizeof(AssetFilterOutputFormat);
 	switch (*outFormat()) {
-		case AssetFilterOutputFormat::MacOverMesh: {
+		case AssetFilterOutputFormat::Mac: {
 			break;
 		}
-		case AssetFilterOutputFormat::ShortAssetId: {
-			len += inFormat().length();
-			break;
-		}
-		case AssetFilterOutputFormat::ShortAssetIdOverMesh: {
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+		case AssetFilterOutputFormat::AssetIdNearest:
+#endif
+		case AssetFilterOutputFormat::AssetId: {
 			len += inFormat().length();
 			break;
 		}

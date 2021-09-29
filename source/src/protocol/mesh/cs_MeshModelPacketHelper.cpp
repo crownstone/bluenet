@@ -6,7 +6,7 @@
  */
 
 #include <cstring> // For memcpy
-#include <localisation/cs_Nearestnearestwitnessreport.h>
+
 #include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
@@ -72,18 +72,14 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize >= sizeof(rssi_data_message_t);
 		case CS_MESH_MODEL_TYPE_TIME_SYNC:
 			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t);
-		case CS_MESH_MODEL_TYPE_REPORT_ASSET_MAC:
-			return payloadSize == sizeof(report_asset_mac_t);
-		case CS_MESH_MODEL_TYPE_REPORT_ASSET_ID:
-			return payloadSize == sizeof(report_asset_id_t);
 		case CS_MESH_MODEL_TYPE_STONE_MAC:
 			return payloadSize == sizeof(cs_mesh_model_msg_stone_mac_t);
 		case CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION:
 			return payloadSize == sizeof(cs_mesh_model_msg_asset_filter_version_t);
-		case CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC:
-			return payloadSize == sizeof(cs_mesh_model_msg_asset_rssi_mac_t);
-		case CS_MESH_MODEL_TYPE_ASSET_RSSI_SID:
-			return payloadSize == sizeof(cs_mesh_model_msg_asset_rssi_sid_t);
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC:
+			return payloadSize == sizeof(cs_mesh_model_msg_asset_report_mac_t);
+		case CS_MESH_MODEL_TYPE_ASSET_INFO_ID:
+			return payloadSize == sizeof(cs_mesh_model_msg_asset_report_id_t);
 		case CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI:
 			return payloadSize == sizeof(cs_mesh_model_msg_neighbour_rssi_t);
 		case CS_MESH_MODEL_TYPE_CTRL_CMD:

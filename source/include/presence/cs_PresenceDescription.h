@@ -8,69 +8,43 @@
 #pragma once
 
 #include <logging/cs_Logger.h>
-
+#include <util/cs_Utils.h>
 #include <cstdint>
 
-// this typedef is expected to expand to a full class when implementing 
-// the presence detection.
-// Current datatype: each bit indicates whether there is some user present
-// in the room labeled with that bit index.
+/**
+ * Class that holds the presence of a profile.
+ *
+ * When the Nth bit is set, the profile is present at location N.
+ */
 class PresenceStateDescription {
 private:
-	uint64_t val;
+	uint64_t _bitmask;
 public:
 
-	PresenceStateDescription(uint64_t v = 0) : val(v) {}
+	PresenceStateDescription(uint64_t bitmask = 0) : _bitmask(bitmask) {}
 
-	// operator uint64_t(){return val;}
-	operator uint64_t() const {return val;}
+//	operator uint64_t() const { return _bitmask; }
 
-	friend bool operator== (
-			const PresenceStateDescription& lhs,
-			const PresenceStateDescription& rhs) {
-		return lhs.val == rhs.val;
+	friend bool operator== (const PresenceStateDescription& lhs, const PresenceStateDescription& rhs) {
+		return lhs._bitmask == rhs._bitmask;
 	}
 
-	// TODO: why templated?
-	template<class T>
-	friend bool operator== (
-			const PresenceStateDescription& lhs,
-			const T& rhs) {
-		return lhs == PresenceStateDescription(rhs);
-	}
-
-	// TODO: why templated?
-	template<class T>
-	friend bool operator== (
-			const T& lhs,
-			const PresenceStateDescription& rhs) {
-		return rhs == lhs;
-	}
-
-	void setRoom(uint8_t index) {
+	void setLocation(uint8_t locationId) {
 		// TODO: is this if even needed?
-		// TODO: use util setBit function.
-		if (index < 64) {
-			val |= 1 << index;
-		}
-	}
-	void clearRoom(uint8_t index) {
-		// TODO: is this if even needed?
-		// TODO: use util setBit function.
-		if (index < 64) {
-			val &= ~(1 << index);
+		if (locationId < sizeof(_bitmask) * 8) {
+			BLEutil::setBit(_bitmask, locationId);
 		}
 	}
 
 	uint64_t getBitmask() {
-		return val;
+		return _bitmask;
 	}
 
 	void print() {
-		[[maybe_unused]] uint32_t rooms[2] = {
-				static_cast<uint32_t>(val >> 0 ),
-				static_cast<uint32_t>(val >> 32)
+		[[maybe_unused]] uint32_t bitmasks[2] = {
+				static_cast<uint32_t>(_bitmask >> 0 ),
+				static_cast<uint32_t>(_bitmask >> 32)
 		};
-		LOGd("PresenceDesc(0x%04x 0x%04x)" , rooms[1], rooms[0]);
+		LOGd("PresenceDesc(0x%04x 0x%04x)" , bitmasks[1], bitmasks[0]);
 	}
 };

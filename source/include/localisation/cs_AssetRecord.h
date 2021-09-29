@@ -7,18 +7,18 @@
 
 #pragma once
 
-#include <util/cs_Rssi.h>
+#include <protocol/cs_RssiAndChannel.h>
 
 struct __attribute__((__packed__)) asset_record_t {
 	/**
 	 * ID of the asset, unique field.
 	 */
-	short_asset_id_t assetId;
+	asset_id_t assetId;
 
 	/**
 	 * Most recent RSSI value observed by this Crownstone.
 	 */
-	compressed_rssi_data_t myRssi;
+	rssi_and_channel_t myRssi;
 
 	/**
 	 * Set to 0 each time this asset is scanned.
@@ -45,7 +45,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	 * RSSI between asset and nearest stone.
 	 * Only valid when the nearest stone ID is valid.
 	 */
-	compressed_rssi_data_t nearestRssi;
+	int8_t nearestRssi;
 #endif
 
 	// ------------- utility functions -------------
@@ -74,5 +74,18 @@ struct __attribute__((__packed__)) asset_record_t {
 
 	bool isThrottled() {
 		return throttlingCountdown != 0;
+	}
+
+	void setThrottlingCountdown(uint8_t ticks) {
+		if (ticks >= 0xff) {
+			throttlingCountdown = 0xff - 1;
+		} else {
+			throttlingCountdown = ticks;
+		}
+	}
+
+	void addThrottlingCountdown(uint8_t ticks) {
+		auto val = uint16_t(throttlingCountdown) + ticks;
+		setThrottlingCountdown(val);
 	}
 };

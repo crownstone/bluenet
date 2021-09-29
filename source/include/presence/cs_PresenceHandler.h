@@ -7,52 +7,54 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
+#include <optional>
 #include <presence/cs_PresenceDescription.h>
 #include <time/cs_SystemTime.h>
 
-#include <list>
-#include <optional>
-
 /**
- * This handler listens for background advertisements to 
- * find out which users are in which room. It can be queried
- * by other 
+ * Keeps up all the locations each profile is present in.
+ * Sends out event when this changes.
+ * Sends out throttled mesh messages when the location of a profile is received.
  */
 class PresenceHandler: public EventListener {
-public: 
-    enum class MutationType : uint8_t {
-        NothingChanged              ,
-        Online                      , // when no previous PresenceStateDescription was available but now it is
-        Offline                     , // when a previous PresenceStateDescription was available but now it isn't
-        LastUserExitSphere          , 
-        FirstUserEnterSphere        , 
-        OccupiedRoomsMaskChanged    ,
-    };
+public:
+	PresenceHandler();
 
-    static const constexpr uint8_t max_location_id = 63;
-    static const constexpr uint8_t max_profile_id = 7;
-
-private:
-    // after this amount of seconds a presence_record becomes invalid.
-    static const constexpr uint8_t presence_time_out_s = 10;
-
-    // For each presence entry, send it max every (x + variation) seconds over the mesh.
-    static const constexpr uint8_t presence_mesh_send_throttle_seconds = 10;
-    static const constexpr uint8_t presence_mesh_send_throttle_seconds_variation = 20;
+    void init();
 
     /**
-     * after this amount of seconds it is assumed that presencehandler would have received 
-     * message from all devices in vicinity of this device.
+     * Returns a simplified description of the current presence knowledge,
+     * each bit in the description indicates if a person is in that room
+     * or not.
      */
-    static const constexpr uint32_t presence_uncertain_due_reboot_time_out_s = 30;
+    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
+    static const constexpr uint8_t MAX_LOCATION_ID = 63;
+    static const constexpr uint8_t MAX_PROFILE_ID = 7;
 
-    // using a list because of constant time insertion/deletion of
-    // any item in the container
-    static const constexpr uint8_t max_records = 20;
+private:
+    /** Number of seconds before presence times out. */
+    static const constexpr uint8_t PRESENCE_TIMEOUT_SECONDS = 10;
+
+    /** For each presence entry, send it max every (x + variation) seconds over the mesh. */
+    static const constexpr uint8_t PRESENCE_MESH_SEND_THROTTLE_SECONDS = 10;
+    static const constexpr uint8_t PRESENCE_MESH_SEND_THROTTLE_SECONDS_VARIATION = 20;
+
+    /**
+     * Number of seconds after boot it is assumed to take to receive the location of all devices.
+     */
+    static const constexpr uint32_t PRESENCE_UNCERTAIN_SECONDS_AFTER_BOOT = 30;
+
+    /**
+     * Maximum number of presence records that is kept up.
+     *
+     * Must be smaller than 0xFF.
+     */
+    static const constexpr uint8_t MAX_RECORDS = 20;
+
     struct PresenceRecord {
-        uint8_t who;    // profile id
-        uint8_t where;  // room id
+        uint8_t profile;
+        uint8_t location;
         /**
          * Used to determine when a record is timed out.
          * Decreases every seconds.
@@ -65,99 +67,113 @@ private:
     	 * Starts at presence_mesh_send_throttle_seconds, when 0, a mesh message can be sent.
     	 */
     	uint8_t meshSendCountdownSeconds;
-        PresenceRecord(
-        		uint8_t profileId,
-				uint8_t roomId,
-				uint8_t timeoutSeconds = presence_time_out_s,
-				uint8_t meshThrottleSeconds = presence_mesh_send_throttle_seconds):
-        	who(profileId),
-			where(roomId),
-			timeoutCountdownSeconds(timeoutSeconds),
-			meshSendCountdownSeconds(meshThrottleSeconds)
-        {}
+
+    	PresenceRecord() : timeoutCountdownSeconds(0) {}
+
+    	PresenceRecord(
+    			uint8_t profileId,
+    			uint8_t roomId,
+    			uint8_t timeoutSeconds = PRESENCE_TIMEOUT_SECONDS,
+    			uint8_t meshThrottleSeconds = 0):
+    				profile(profileId),
+    				location(roomId),
+    				timeoutCountdownSeconds(timeoutSeconds),
+    				meshSendCountdownSeconds(meshThrottleSeconds)
+    	{}
+
+        void invalidate() {
+        	timeoutCountdownSeconds = 0;
+        }
+
+        bool isValid() {
+        	return timeoutCountdownSeconds != 0;
+        }
     };
 
     /**
-     * keeps track of a short history of presence events.
-     * will be lazily updated to remove old entries: 
-     *  - when new presence is detected
-     *  - when getCurrentPresenceDescription() is called
+     * Stores presence records.
      */
-    static std::list<PresenceRecord> WhenWhoWhere;
+    static PresenceRecord _presenceRecords[MAX_RECORDS];
 
     /**
-     * Clears the WhenWhoWhere list from entries that have a time stamp older than
-     * presence_time_out_s.
+     * Invalidate all presence records.
      */
-    void removeOldRecords();
+    void resetRecords();
 
     /**
-     * Calls handleProfileLocationAdministration, and dispatches events based
-     * on the returned mutation type.
+     * Finds a record with given profile and location.
+     * Returns a null pointer if not found.
      */
-	void handlePresenceEvent(uint8_t profile, uint8_t location, bool fromMesh);
+    PresenceRecord* findRecord(uint8_t profile, uint8_t location);
+
+    /**
+	 * Adds a record with given profile and location.
+	 * Does not check if it already exists!
+	 * Replaces oldest entry if there are no invalid record places to use.
+	 *
+	 * Returns a null pointer if there is no space for a new record.
+	 */
+	PresenceRecord* addRecord(uint8_t profile, uint8_t location);
+
+    /**
+     * Handle an incoming profile-location combination.
+     * - Validates profile and location.
+     * - Calls handleProfileLocation().
+     * - Dispatches events based on the returned mutation type.
+     */
+	void handlePresenceEvent(uint8_t profile, uint8_t location, bool forwardToMesh);
 
 	/**
-     * Processes a new profile-location combination:
-     * - a new entry is placed in the WhenWhoWhere list, 
-     * - previous entries with the same p-l combo are deleted
-     * - the WhenWhoWhere list is purged of old entries
-     * @param[in] forwardToMesh If true, the update will be pushed into the mesh (throttled).
+     * Handle an incoming profile-location combination.
+     * - Stores the profile-location.
+     * - Sends a mesh message.
+     * - Dispatches change event.
+     *
+     * @param[in] profile         The profile ID.
+     * @param[in] location        The location ID.
+     * @param[in] forwardToMesh   If true, the update will be pushed into the mesh (throttled).
+     * @return                    Mutation type.
      */
-    MutationType handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool forwardToMesh);
+    PresenceMutation handleProfileLocation(uint8_t profile, uint8_t location, bool forwardToMesh);
 
     /**
      * Resolves the type of mutation from previous and next descriptions.
      */
-    static MutationType getMutationType(
-        std::optional<PresenceStateDescription> prevdescription, 
-        std::optional<PresenceStateDescription> nextdescription);
+    static PresenceMutation getMutationType(
+        std::optional<PresenceStateDescription> prevDescription, 
+        std::optional<PresenceStateDescription> nextDescription);
 
     /**
-     * Triggers a EVT_PROFILE_LOCATION event matching the given parameters.
+     * Send a mesh message with profile and location.
      */
-    void propagateMeshMessage(uint8_t profile, uint8_t location);
+    void sendMeshMessage(uint8_t profile, uint8_t location);
 
     /**
-     * Sends event with profile location change.
+     * Sends presence change event.
      *
      * @param[in] type                 Type of change.
      * @param[in] profileId            The profile ID that entered/left a location.
      * @param[in] locationId           The location ID that was entered/left.
      */
-    void sendPresenceChange(PresenceChange type, uint8_t profileId = 0, uint8_t locationId = 0);
+    void dispatchPresenceChangeEvent(PresenceChange type, uint8_t profileId = 0, uint8_t locationId = 0);
 
     /**
-     * Triggers a EVT_PRESENCE_MUTATION event of the given type.
+     * Sends presence mutation event.
+     * This event is deprecated, but still used.
      */
-    void triggerPresenceMutation(MutationType mutationtype);
+    void dispatchPresenceMutationEvent(PresenceMutation mutation);
 
     /**
      * To be called every second.
      */
     void tickSecond();
 
-    // out of order
-    void print();
-    
-    TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
-
 public:
-    // register as event handler
-    void init();
-
     /**
      * receive background messages indicating where users are,
      * record the time and place and update the current presence description
      * when necessary
      */
     virtual void handleEvent(event_t& evt) override;
-
-    /**
-     * Returns a simplified description of the current presence knowledge,
-     * each bit in the description indicates if a person is in that room
-     * or not.
-     */
-    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
 };

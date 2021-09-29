@@ -118,4 +118,14 @@ namespace CsMath{
                 : (low < val || val < high); // yup, only one can hold
         }
     };
+
+    /**
+     * Rounds a numeric value.
+     */
+    template<class T>
+    T round(float val) {
+    	// since numeric types are implicitly converted from float by flooring them,
+    	// adding 0.5 results in conventional rounding.
+    	return T(val + 0.5);
+    }
 }

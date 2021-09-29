@@ -215,10 +215,10 @@ bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 	if (event.type == CS_TYPE::EVT_PRESENCE_MUTATION) {
 		LOGSwitchAggregatorEvent("handlePresence");
 
-		PresenceHandler::MutationType mutationtype = *reinterpret_cast<PresenceHandler::MutationType*>(event.data);
+		PresenceMutation mutationtype = *reinterpret_cast<PresenceMutation*>(event.data);
 
 		switch (mutationtype) {
-			case PresenceHandler::MutationType::LastUserExitSphere: {
+			case PresenceMutation::LastUserExitSphere: {
 				LOGd("SwitchAggregator LastUserExit");
 				if (overrideState) {
 					Time now = SystemTime::now();

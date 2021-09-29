@@ -12,7 +12,7 @@
 
 
 /**
- * Used in AssetFiltering as a generic way to query a filter for containment and shortAssetId.
+ * Used in AssetFiltering as a generic way to query a filter for containment and assetId.
  */
 class FilterInterface {
 public:
@@ -21,19 +21,16 @@ public:
 	virtual bool contains(const void* key, size_t keyLengthInBytes) = 0;
 
 	/**
-	 * In most cases a shortAssetId is generated as crc32 from filtered input data.
+	 * In most cases a assetId is generated as crc32 from filtered input data.
 	 * This can be overwritten for special use cases like ExactMatchFilter.
 	 */
-	virtual short_asset_id_t shortAssetId(const void* key, size_t keyLengthInBytes) {
+	// TODO remove 'short'
+	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes) {
 		auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
 
-		short_asset_id_t id{
-			.data{
-				static_cast<uint8_t>((crc >>  0) & 0xff),
-				static_cast<uint8_t>((crc >>  8) & 0xff),
-				static_cast<uint8_t>((crc >> 16) & 0xff),
-			}
-		};
+		// little endian byte by byte copy.
+		asset_id_t id{};
+		memcpy(id.data, reinterpret_cast<uint8_t*>(&crc), 3);
 
 		return id;
 	}

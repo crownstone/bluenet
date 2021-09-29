@@ -26,6 +26,6 @@ public:
 	 * To be called when the AssetFiltering component has accepted an asset that can
 	 * be identified by its mac address.
 	 */
-	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset, short_asset_id_t assetId) = 0;
+	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset, asset_id_t assetId) = 0;
 	virtual ~AssetHandlerShortId() = default;
 };
