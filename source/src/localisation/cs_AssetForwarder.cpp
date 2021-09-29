@@ -15,7 +15,7 @@
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 
-#define LOGAssetForwarderDebug LOGd
+#define LOGAssetForwarderDebug LOGvv
 
 
 cs_ret_code_t AssetForwarder::init() {

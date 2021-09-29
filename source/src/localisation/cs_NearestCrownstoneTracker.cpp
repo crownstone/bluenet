@@ -22,8 +22,8 @@
 #include <localisation/cs_AssetFilterStore.h>
 #include <common/cs_Component.h>
 
-#define LOGNearestCrownstoneTrackerVerbose LOGd
-#define LOGNearestCrownstoneTrackerDebug LOGd
+#define LOGNearestCrownstoneTrackerVerbose LOGvv
+#define LOGNearestCrownstoneTrackerDebug LOGvv
 #define LOGNearestCrownstoneTrackerInfo LOGd
 
 cs_ret_code_t NearestCrownstoneTracker::init() {
