@@ -16,16 +16,23 @@ set(CMAKE_C_AND_CXX_FLAGS    "${DEFAULT_C_AND_CXX_FLAGS}"       CACHE STRING "C 
 set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
-if(${HOST_TARGET})
+if(HOST_TARGET)
 	add_compile_definitions("HOST_TARGET")
+endif()
+
+if(DISABLE_NRF_HEADERS)
 	add_compile_definitions("DISABLE_NRF_HEADERS")
 endif()
 
-set(DEFAULT_MODULES_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_BLUENET_SOURCE_DIR}/conf;${DEFAULT_MODULES_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
+
+message(STATUS "${CMAKE_MODULE_PATH}")
+
 set(DEFAULT_CONFIG_FILE "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
 
-include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
+include(load_configuration)
 load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
 
 # Only contains Nordic specific compiler options
@@ -52,6 +59,12 @@ message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
 
 include_directories( "../source/include" "include" "${CMAKE_BLUENET_BINARY_DIR}/include")
+
+# Get all includes from nordic
+include(nordic.src)
+
+include_directories(${CMAKE_BLUENET_SOURCE_DIR}/include/third)
+include_directories(${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf)
 
 set(TEST test_InterleavedBuffer)
 

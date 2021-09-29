@@ -12,6 +12,7 @@ extern "C"
 #endif
 
 #ifndef DISABLE_NRF_HEADERS
+#include <cmsis_compiler.h>
 #include <app_util_platform.h>
 typedef uint32_t ret_code_t;
 
