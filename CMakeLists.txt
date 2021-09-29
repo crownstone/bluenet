@@ -27,6 +27,7 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
+set(NRF5_DIR                                     ${WORKSPACE_DIR}/tools/nrf5_sdk)
 
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
@@ -182,7 +183,6 @@ else()
 		)
 endif()
 
-set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
 list(APPEND CMAKE_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 ExternalProject_Add(nordic_mesh_sdk
