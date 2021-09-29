@@ -110,6 +110,8 @@ private:
 	 * Check if the filter with given index accepts the device,
 	 * call the associated handleAssetAccepted[Mac..., Nearest...] if so
 	 * and update the masks accordingly.
+	 *
+	 * Returns true if the filter accepts the device and the exclude flag is false.
 	 */
 	bool handleAcceptFilter(uint8_t _filterIndex, const scanned_device_t& device, filter_output_bitmasks_t& masks);
 

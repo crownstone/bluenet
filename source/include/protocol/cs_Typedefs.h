@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <cstring>
 
 typedef uint8_t* buffer_ptr_t;
 typedef uint16_t cs_buffer_size_t;
@@ -37,10 +38,14 @@ typedef uint8_t  adc_buffer_seq_nr_t;
  */
 static constexpr uint8_t MAC_ADDRESS_LEN = 6;
 
-typedef struct {
+struct __attribute__((__packed__)) mac_address_t {
 	uint8_t data[MAC_ADDRESS_LEN];
-} mac_address_t;
 
-typedef struct {
+	void copy(const void* macAddress) { memcpy(data, macAddress, MAC_ADDRESS_LEN); }
+
+	bool operator==(const mac_address_t& other) { return memcmp(this, &other, MAC_ADDRESS_LEN) == 0; }
+};
+
+struct __attribute__((__packed__)) cs_uuid128_t{
   uint8_t uuid128[16];
-} cs_uuid128_t;
+};

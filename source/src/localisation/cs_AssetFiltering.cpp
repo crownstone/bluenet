@@ -105,7 +105,7 @@ cs_ret_code_t AssetFiltering::initInternal() {
 		return retCode;
 	}
 
-	// TODO: move these constants or tie the forward up to the store so that they
+	// TODO: move these constants or tie the forwarder up with the store so that they
 	// can decide how fast to tick and trottle
 	_assetForwarder->setThrottleCountdownBumpTicks(
 			_assetStore->throttlingBumpMsToTicks(

@@ -204,7 +204,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_mac_t {
-	uint8_t mac[MAC_ADDRESS_LEN];
+	mac_address_t mac;
 	rssi_and_channel_t rssiData;
 };
 

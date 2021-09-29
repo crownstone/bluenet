@@ -587,7 +587,7 @@ const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
  * Timestamps can be added on the hub.
  */
 struct __attribute__((packed)) asset_report_uart_mac_t {
-	uint8_t address[MAC_ADDRESS_LEN];
+	mac_address_t address;
 	uint8_t stoneId;
 	// No filter bitmask, as that doesn't fit in the mesh message.
 	int8_t rssi;

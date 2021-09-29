@@ -57,7 +57,7 @@ private:
 
 	struct outbox_msg_t {
 		asset_record_t* rec;
-		cs_mesh_model_msg_type_t msgtype;
+		cs_mesh_model_msg_type_t msgType;
 		union {
 			cs_mesh_model_msg_asset_report_id_t idMsg;
 			cs_mesh_model_msg_asset_report_mac_t macMsg;

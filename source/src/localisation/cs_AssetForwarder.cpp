@@ -69,7 +69,7 @@ void AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 	}
 
 	outMsg->macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
-	memcpy(outMsg->macMsg.mac, asset.address, sizeof(outMsg->macMsg.mac));
+	outMsg->macMsg.mac.copy(asset.address);
 
 	//	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
@@ -86,7 +86,7 @@ void AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_dev
 	}
 
 	outMsg->rec = record;
-	outMsg->msgtype = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
+	outMsg->msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
 
 	outMsg->idMsg.id = assetId;
 	outMsg->idMsg.rssi= asset.rssi;
@@ -96,12 +96,16 @@ void AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_dev
 
 
 void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
+	if(!outMsg.isValid()) {
+		return;
+	}
+
 	if (outMsg.rec != nullptr) {
 		outMsg.rec->addThrottlingCountdown(_throttleCountdownBumpTicks);
 	}
 
 	// forward message over uart (e.g. hub dongle directly receives asset advertisement)
-	switch (outMsg.msgtype) {
+	switch (outMsg.msgType) {
 		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
 			forwardAssetToUart(outMsg.macMsg, _myStoneId);
 			break;
@@ -111,13 +115,13 @@ void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 			break;
 		}
 		default: {
-			// outMsg invalid.
+			// outMsg invalid. shouldn't occur as it is already checked.
 			return;
 		}
 	}
 
 	cs_mesh_msg_t msgWrapper;
-	msgWrapper.type        = outMsg.msgtype;
+	msgWrapper.type        = outMsg.msgType;
 	msgWrapper.payload     = outMsg.rawMsg;
 	msgWrapper.size        = sizeof(outMsg.rawMsg);
 	msgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -161,12 +165,11 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac
 	printAsset(assetMsg);
 
 	auto uartAssetMsg = asset_report_uart_mac_t {
-			.address = {},
+			.address = assetMsg.mac,
 			.stoneId = seenByStoneId,
 			.rssi    = assetMsg.rssiData.getRssi(),
 			.channel = assetMsg.rssiData.getChannel(),
 	};
-	memcpy(uartAssetMsg.address, assetMsg.mac, sizeof(assetMsg.mac));
 
 	UartHandler::getInstance().writeMsg(
 			UartOpcodeTx::UART_OPCODE_TX_ASSET_INFO_MAC,
