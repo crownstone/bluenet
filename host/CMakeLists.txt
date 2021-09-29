@@ -24,6 +24,8 @@ if(DISABLE_NRF_HEADERS)
 	add_compile_definitions("DISABLE_NRF_HEADERS")
 endif()
 
+add_compile_definitions("NRF52832_XXAA")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
