@@ -43,7 +43,7 @@ public:
 	 * on the outbox. If an identical message is already contained in
 	 * the outbox, nothing happens.
 	 */
-	void sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
+	bool sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
 
 	/**
 	 * sets how many ticks will be added to records upon sending a message.
@@ -65,6 +65,7 @@ private:
 		};
 
 		// util funcs
+		outbox_msg_t();
 
 		/**
 		 * returns true if msgType is one of:
@@ -92,6 +93,7 @@ private:
 	void clearOutbox();
 
 	outbox_msg_t* getEmptyOutboxSlot();
+	outbox_msg_t* findSimilar(outbox_msg_t outMsg);
 
 	/**
 	 * Forward an asset mesh message to UART.

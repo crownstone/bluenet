@@ -53,6 +53,15 @@ AssetForwarder::outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
 	return nullptr;
 }
 
+AssetForwarder::outbox_msg_t* AssetForwarder::findSimilar(outbox_msg_t outMsg) {
+	for (auto& msg : outbox) {
+		if (!outMsg.isSimilar(msg)) {
+			return &msg;
+		}
+	}
+	return nullptr;
+}
+
 void AssetForwarder::setThrottleCountdownBumpTicks(uint8_t ticks) {
 	_throttleCountdownBumpTicks = ticks;
 }
@@ -75,23 +84,32 @@ void AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 }
 
 
-void AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
+bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
-	// TODO: merge messages that differ only in filterbitmask
+	outbox_msg_t outMsg;
+	outMsg.rec = record;
+	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
 
-	outbox_msg_t* outMsg = getEmptyOutboxSlot();
+	outMsg.idMsg.id = assetId;
+	outMsg.idMsg.rssi= asset.rssi;
+	outMsg.idMsg.channel = compressChannel(asset.channel);
+	outMsg.idMsg.filterBitmask = filterBitmask;
 
-	if(outMsg == nullptr) {
-		return;
+	// TODO: merge message with similarMsg if posible.
+	if(outbox_msg_t* similarMsg = findSimilar(outMsg)) {
+		(void)similarMsg;
+
+
+		return true;
 	}
 
-	outMsg->rec = record;
-	outMsg->msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
+	// otherwise create a new entry
+	if(outbox_msg_t* emptySlot = getEmptyOutboxSlot()) {
+		*emptySlot = outMsg;
+		return true;
+	}
 
-	outMsg->idMsg.id = assetId;
-	outMsg->idMsg.rssi= asset.rssi;
-	outMsg->idMsg.channel = compressChannel(asset.channel);
-	outMsg->idMsg.filterBitmask = filterBitmask;
+	return false;
 }
 
 
@@ -132,6 +150,10 @@ void AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 }
 
 // ------------- outbox_msg_t -------------
+
+AssetForwarder::outbox_msg_t::outbox_msg_t() : rec(nullptr), msgType(CS_MESH_MODEL_TYPE_UNKNOWN), rawMsg{}  {
+
+}
 
 
 bool AssetForwarder::outbox_msg_t::isValid() {
