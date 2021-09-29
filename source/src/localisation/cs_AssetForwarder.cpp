@@ -68,17 +68,35 @@ void AssetForwarder::setThrottleCountdownBumpTicks(uint8_t ticks) {
 
 // ------------- message management -------------
 
-void AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_device_t& asset) {
+bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_device_t& asset) {
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 
-	outbox_msg_t* outMsg = getEmptyOutboxSlot();
+	outbox_msg_t outMsg;
+	outMsg.rec = record;
+	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_MAC;
 
-	if(outMsg == nullptr) {
-		return;
+	outMsg.macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
+	outMsg.macMsg.mac.copy(asset.address);
+
+	// merge message with similarMsg if posible.
+	if(outbox_msg_t* similarMsg = findSimilar(outMsg)) {
+		if(similarMsg->rec == nullptr){
+			similarMsg->rec = outMsg.rec;  // copy record if it doesn't exist.
+		}
+
+		// other information (rssi, channel) will not be overwritten.
+
+		return true;
 	}
 
-	outMsg->macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
-	outMsg->macMsg.mac.copy(asset.address);
+	// otherwise create a new entry
+	if(outbox_msg_t* emptySlot= getEmptyOutboxSlot()) {
+		*emptySlot = outMsg;
+		return true;
+	}
+
+	return false;
+
 
 	//	return MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS;
 }
@@ -86,6 +104,7 @@ void AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 
 bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
+
 	outbox_msg_t outMsg;
 	outMsg.rec = record;
 	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
@@ -95,10 +114,15 @@ bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_dev
 	outMsg.idMsg.channel = compressChannel(asset.channel);
 	outMsg.idMsg.filterBitmask = filterBitmask;
 
-	// TODO: merge message with similarMsg if posible.
+	// merge message with similarMsg if posible.
 	if(outbox_msg_t* similarMsg = findSimilar(outMsg)) {
-		(void)similarMsg;
+		similarMsg->idMsg.filterBitmask |= outMsg.idMsg.filterBitmask;  // combine bitmasks
 
+		if(similarMsg->rec == nullptr){
+			similarMsg->rec = outMsg.rec;  // copy record if it doesn't exist.
+		}
+
+		// other information (rssi, channel) will not be overwritten.
 
 		return true;
 	}

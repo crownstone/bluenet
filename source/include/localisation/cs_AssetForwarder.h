@@ -35,13 +35,17 @@ public:
 	 * the outbox, nothing happens.
 	 *
 	 * Record is required for throttling. If not available, throttling will not be updated.
+	 *
+	 * Returns true if there was enough space in the outbox to place the message. Else, false.
 	 */
-	void sendAssetMacToMesh(asset_record_t* record, const scanned_device_t& asset);
+	bool sendAssetMacToMesh(asset_record_t* record, const scanned_device_t& asset);
 
 	/**
 	 * Prepare a CS_MESH_MODEL_TYPE_ASSET_INFO message and put it
 	 * on the outbox. If an identical message is already contained in
 	 * the outbox, nothing happens.
+	 *
+	 * Returns true if there was enough space in the outbox to place the message. Else, false.
 	 */
 	bool sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
 
