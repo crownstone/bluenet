@@ -72,9 +72,12 @@ set(TEST test_InterleavedBuffer)
 
 set(TEST_SOURCE_DIR "test")
 
-set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES})
+list(APPEND TEST_SOURCE_FILES "src/nrf_stubs.c")
+list(APPEND TEST_SOURCE_FILES "test/${TEST}.cpp")
 
-add_executable(${TEST} ${SOURCE_FILES})
+add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
+
+add_executable(${TEST} ${TEST_SOURCE_FILES})
 
 enable_testing()
 
