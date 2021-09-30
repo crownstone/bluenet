@@ -436,13 +436,12 @@ void Crownstone::configure() {
 
 	increaseResetCounter();
 
-	setName(true);
-
 	LOGi("> advertisement ...");
 	configureAdvertisement();
 }
 
 void Crownstone::configureAdvertisement() {
+	setName();
 
 	// Set the stored advertisement interval
 	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
@@ -454,9 +453,8 @@ void Crownstone::configureAdvertisement() {
 	_serviceData = new ServiceData();
 	_serviceData->init(_boardsConfig.deviceType);
 
-	// Assign service data to stack
-	_advertiser->setServiceData(_serviceData);
-	_advertiser->configureAdvertisement(_boardsConfig.deviceType);
+	// Set the service data as advertisement data.
+	_advertiser->configureAdvertisement(*_serviceData, false);
 }
 
 void Crownstone::createService(const ServiceEvent event) {
@@ -534,7 +532,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
 			LOGd("Configure setup mode");
 //			_advertiser->changeToLowTxPower();
-			_advertiser->changeToNormalTxPower();
+			_advertiser->setNormalTxPower();
 			break;
 		}
 		case OperationMode::OPERATION_MODE_FACTORY_RESET: {
@@ -545,7 +543,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			_mesh->start();
 #endif
 			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
-			_advertiser->changeToNormalTxPower();
+			_advertiser->setNormalTxPower();
 			break;
 		}
 		case OperationMode::OPERATION_MODE_DFU: {
@@ -553,11 +551,11 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			// TODO: have this function somewhere else.
 			cs_result_t result;
 			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_with_counter_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
-			_advertiser->changeToNormalTxPower();
+			_advertiser->setNormalTxPower();
 			break;
 		}
 		default:
-			_advertiser->changeToNormalTxPower();
+			_advertiser->setNormalTxPower();
 	}
 
 	// Enable AES encryption.
@@ -569,7 +567,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 //	_operationMode = newMode;
 }
 
-void Crownstone::setName(bool firstTime) {
+void Crownstone::setName() {
 	char device_name[32];
 	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)device_name, sizeof(device_name));
 	_state->get(stateNameData);
@@ -581,14 +579,11 @@ void Crownstone::setName(bool firstTime) {
 		char devicename_resetCounter[32];
 		sprintf(devicename_resetCounter, "%.*s_%d", MIN(stateNameData.size, 5), device_name, resetCounter);
 		deviceName = std::string(devicename_resetCounter);
-	} else {
+	}
+	else {
 		deviceName = std::string(device_name, MIN(stateNameData.size, 5));
 	}
-	if (firstTime) {
-		_advertiser->setDeviceName(deviceName);
-	} else {
-		_advertiser->updateDeviceName(deviceName);
-	}
+	_advertiser->setDeviceName(deviceName);
 }
 
 void Crownstone::startOperationMode(const OperationMode & mode) {
@@ -649,14 +644,8 @@ void Crownstone::startUp() {
 		nrf_delay_ms(bootDelay);
 	}
 
-	//! start advertising
 	LOGi("Start advertising");
 	_advertiser->startAdvertising();
-
-	// Set the stored tx power, must be done after advertising has started.
-	TYPIFY(CONFIG_TX_POWER) txPower = 0;
-	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	_advertiser->updateTxPower(txPower);
 
 	// Have to give the stack a moment of pause to start advertising, otherwise we get into race conditions.
 	// TODO: Is this still the case? Can we solve this differently?

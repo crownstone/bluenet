@@ -16,212 +16,196 @@
 
 Advertiser::Advertiser() {
 	_stack = &(Stack::getInstance());
-	_advData.adv_data.p_data = NULL;
+	_advData.adv_data.p_data = nullptr;
 	_advData.adv_data.len = 0;
-	_advData.scan_rsp_data.p_data = NULL;
+	_advData.scan_rsp_data.p_data = nullptr;
 	_advData.scan_rsp_data.len = 0;
+
+	configureAdvertisementParameters();
 }
 
 void Advertiser::init() {
-	if (!isInitialized(false)) {
+	LOGd("init");
+	if (_isInitialized) {
 		LOGw("Already initialized");
 		return;
 	}
-	// Can't update device name or appearance when radio is not initialized (error 0x3001 == BLE_ERROR_NOT_ENABLED).
+	// Can't update device name when radio is not initialized (error 0x3001 == BLE_ERROR_NOT_ENABLED).
 	if (!_stack->checkCondition(Stack::C_RADIO_INITIALIZED, true)) {
-		LOGw("Radio not (yet) initialized");
+		LOGw("Radio not initialized");
 		return;
 	}
+
 	_isInitialized = true;
+	// Now that we're initialized, we can update the device name.
+	setDeviceName(_deviceName);
+
 	EventDispatcher::getInstance().addListener(this);
-	updateDeviceName(_deviceName);
-	updateAppearance(_appearance);
-	configureAdvertisementParameters();
 }
 
-bool Advertiser::isInitialized(bool expected) {
-	if (expected != _isInitialized) {
-		LOGw("Advertiser is %sinitialized", expected ? "not " : "");
-	}
-	return expected == _isInitialized;
-}
-
-void Advertiser::setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
-	isInitialized(false);
-	_advertisingTimeout = advertisingTimeoutSeconds;
-}
-
-void Advertiser::setAppearance(uint16_t appearance) {
-	isInitialized(false);
-	_appearance = appearance;
-}
-
-void Advertiser::setDeviceName(const std::string& deviceName) {
-	isInitialized(false);
-	_deviceName = deviceName;
-}
-
-std::string & Advertiser::getDeviceName() {
-	return _deviceName;
-}
 
 void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
-	isInitialized(false);
+	LOGd("Set advertising interval %u", advertisingInterval);
 	if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
-		LOGw("Invalid advertising interval");
+		LOGw("Invalid advertising interval %u", advertisingInterval);
 		return;
 	}
 	_advertisingInterval = advertisingInterval;
-}
-
-void Advertiser::updateAdvertisingInterval(uint16_t advertisingInterval) {
-	LOGd("Update advertising interval");
-	if (!isInitialized()) return;
-	setAdvertisingInterval(advertisingInterval);
 	configureAdvertisementParameters();
+
+	if (!_isInitialized) {
+		return;
+	}
+
 	updateAdvertisementParams();
 }
 
-void Advertiser::updateDeviceName(const std::string& deviceName) {
-	LOGd("Set device name to %s", _deviceName.c_str());
+void Advertiser::setDeviceName(const std::string& deviceName) {
+	LOGd("Set device name to %s", deviceName.c_str());
 	_deviceName = deviceName;
-	if (!isInitialized()) return;
 
-	std::string name = _deviceName.empty() ? "none" : deviceName;
+	if (!_isInitialized) {
+		return;
+	}
+
+	std::string name = _deviceName.empty() ? "none" : _deviceName;
 
 	// Although this has nothing to do with advertising, this is required when changing the name on the soft device.
 	ble_gap_conn_sec_mode_t nameCharacteristicSecurityMode;
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&nameCharacteristicSecurityMode);
 
-	uint32_t ret_code;
 	LOGAdvertiserDebug("sd_ble_gap_device_name_set %s %u", name.c_str(), name.length());
-	ret_code = sd_ble_gap_device_name_set(&nameCharacteristicSecurityMode, (uint8_t*) name.c_str(), name.length());
-	APP_ERROR_CHECK(ret_code);
+	uint32_t nrfCode = sd_ble_gap_device_name_set(&nameCharacteristicSecurityMode, (uint8_t*) name.c_str(), name.length());
+	/**
+	 * @retval ::NRF_SUCCESS GAP device name and permissions set successfully.
+	 * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+	 * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+	 * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
+	 * @retval ::NRF_ERROR_FORBIDDEN Device name is not writable.
+	 */
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to set device name: nrfCode=%u", nrfCode);
+		return;
+	}
 }
 
-void Advertiser::updateAppearance(uint16_t appearance) {
-	if (!isInitialized()) return;
-	_appearance = appearance;
-	LOGAdvertiserDebug("sd_ble_gap_appearance_set");
-	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
-}
+void Advertiser::setTxPower(int8_t powerDBm) {
+	if (_txPower == powerDBm) {
+		return;
+	}
+	LOGAdvertiserDebug("setTxPower %i", powerDBm);
 
-void Advertiser::updateTxPower(int8_t powerDBm) {
-	LOGAdvertiserDebug("updateTxPower %i", powerDBm);
 	switch (powerDBm) {
 		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
 			// accepted values
 			break;
 		default:
+			LOGw("Invalid TX power: %i", powerDBm);
 			// other values are not accepted
 			return;
 	}
-	if (_txPower != powerDBm) {
-		_txPower = powerDBm;
+
+	_txPower = powerDBm;
+
+	if (_isInitialized && _advHandle != BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
 		updateTxPower();
 	}
 }
 
-void Advertiser::changeToLowTxPower() {
+void Advertiser::updateTxPower() {
+	if (!_isInitialized) {
+		LOGw("Not initialized");
+		return;
+	}
+
+	if (_advHandle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
+		LOGw("Invalid handle");
+		return;
+	}
+
+	LOGi("Update TX power to %i for handle %u", _txPower, _advHandle);
+	uint32_t nrfCode = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _advHandle, _txPower);
+	/**
+	 * @retval ::NRF_SUCCESS Successfully changed the transmit power.
+	 * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+	 * @retval ::BLE_ERROR_INVALID_ADV_HANDLE Advertising handle not found.
+	 * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+	 */
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to set TX power: nrfCode=%u", nrfCode);
+		return;
+	}
+}
+
+void Advertiser::setLowTxPower() {
 	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
 	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
-	updateTxPower(lowTxPower);
+	setTxPower(lowTxPower);
 }
 
-void Advertiser::changeToNormalTxPower() {
+void Advertiser::setNormalTxPower() {
 	TYPIFY(CONFIG_TX_POWER) txPower;
 	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	updateTxPower(txPower);
-}
-
-int8_t Advertiser::getTxPower() {
-	return _txPower;
-}
-
-/**
- * It seems that if we have a connectable advertisement and a subsequent connection, we cannot update the TX
- * power while already being connected. At least it returns a BLE_ERROR_INVALID_ADV_HANDLE.
- */
-void Advertiser::updateTxPower() {
-	if (!isInitialized()) {
-		return;
-	}
-	if (_advHandle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
-		LOGd("Invalid handle");
-		return;
-	}
-	uint32_t ret_code;
-	LOGd("Update TX power to %i for handle %u", _txPower, _advHandle);
-	LOGAdvertiserDebug("sd_ble_gap_tx_power_set");
-	ret_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _advHandle, _txPower);
-	APP_ERROR_CHECK(ret_code);
+	setTxPower(txPower);
 }
 
 
 
 
-void Advertiser::configureIBeaconAdvData(IBeacon* beacon) {
-	LOGd("Configure iBeacon adv data");
+void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanResponse) {
+	LOGd("Set service data");
 
-	memset(&_ibeaconManufData, 0, sizeof(_ibeaconManufData));
-	_ibeaconManufData.company_identifier = 0x004C;
-	_ibeaconManufData.data.p_data = beacon->getArray();
-	_ibeaconManufData.data.size = beacon->size();
+	_serviceData = &serviceData;
 
-	memset(&_configAdvertisementData, 0, sizeof(_configAdvertisementData));
-
-	_configAdvertisementData.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	_configAdvertisementData.p_manuf_specific_data = &_ibeaconManufData;
-	_configAdvertisementData.name_type = BLE_ADVDATA_NO_NAME;
-	_configAdvertisementData.include_appearance = false;
-
-	_includeAdvertisementData = true;
-}
-
-void Advertiser::configureServiceData(uint8_t deviceType, bool asScanResponse) {
-	LOGd("Configure service data");
-
-	uint8_t serviceDataLength = 0;
 	ble_advdata_t* advData = &_configAdvertisementData;
 	if (asScanResponse) {
 		advData = &_configScanResponse;
 	}
 
 	memset(advData, 0, sizeof(*advData));
+	uint8_t advertisementDataSize = 0;
 
-	advData->name_type = BLE_ADVDATA_SHORT_NAME;
-
+	// Add the flags.
 	if (!asScanResponse) {
 		advData->flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 		advData->include_appearance = false;
+		// 1 byte AD LEN, 1 byte AD TYPE, 1 byte FLAGS.
+		advertisementDataSize += 3;
 	}
 
-	if (_serviceData && deviceType != DEVICE_UNDEF) {
-		memset(&_crownstoneServiceData, 0, sizeof(_crownstoneServiceData));
+	// Add the service data.
+	memset(&_crownstoneServiceData, 0, sizeof(_crownstoneServiceData));
+	_crownstoneServiceData.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
+	_crownstoneServiceData.data.p_data = _serviceData->getArray();
+	_crownstoneServiceData.data.size = _serviceData->getArraySize();
 
-		_crownstoneServiceData.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
+	advData->p_service_data_array = &_crownstoneServiceData;
+	advData->service_data_count = 1;
 
-		_crownstoneServiceData.data.p_data = _serviceData->getArray();
-		_crownstoneServiceData.data.size = _serviceData->getArraySize();
+	LOGd("Add service data UUID %04X", _crownstoneServiceData.service_uuid);
+	// 1 byte AD LEN, 1 byte AD TYPE, 2 bytes UUID, N bytes payload.
+	advertisementDataSize += 2 + sizeof(_crownstoneServiceData.service_uuid) + _crownstoneServiceData.data.size;
 
-		advData->p_service_data_array = &_crownstoneServiceData;
-		advData->service_data_count = 1;
-
-		LOGd("Add UUID %X", _crownstoneServiceData.service_uuid);
-		serviceDataLength += 2 + sizeof(_crownstoneServiceData.service_uuid) + _crownstoneServiceData.data.size; // 2 For service data header.
-	}
-
-	uint8_t nameLength = 31 - 3 - serviceDataLength - 2; // 3 For flags field, 2 for name field header.
+	// Add the name
+	advData->name_type = BLE_ADVDATA_SHORT_NAME;
+	// 1 byte AD LEN, 1 byte AD TYPE.
+	advertisementDataSize += 2;
+	uint8_t nameLength = 31 - advertisementDataSize;
 	LOGd("Max name length = %u", nameLength);
-	uint8_t deviceNameLength = getDeviceName().length();
+	uint8_t deviceNameLength = _deviceName.length();
 	nameLength = std::min(nameLength, deviceNameLength);
 	LOGd("Set BLE name to length %i", nameLength);
 	advData->short_name_len = nameLength;
 
 	if (nameLength == 0) {
-		LOGe("Scan response payload too large or device name not set");
+		LOGe("Advertisement too large for a name.");
 		return;
 	}
+
+	if (!allocateAdvertisementDataBuffers(asScanResponse)) {
+		return;
+	}
+
 	if (asScanResponse) {
 		_includeScanResponseData = true;
 	}
@@ -230,16 +214,83 @@ void Advertiser::configureServiceData(uint8_t deviceType, bool asScanResponse) {
 	}
 }
 
-void Advertiser::configureAdvertisement(__attribute__((unused))IBeacon* beacon, uint8_t deviceType) {
+void Advertiser::setAdvertisementData(IBeacon& beacon, bool asScanResponse) {
+	LOGd("Set iBeacon data");
+
+	ble_advdata_t* advData = &_configAdvertisementData;
+	if (asScanResponse) {
+		advData = &_configScanResponse;
+	}
+
+	memset(advData, 0, sizeof(*advData));
+	uint8_t advertisementDataSize = 0;
+
+	// Add the flags.
+	if (!asScanResponse) {
+		advData->flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+		advData->include_appearance = false;
+		// 1 byte AD LEN, 1 byte AD TYPE, 1 byte FLAGS.
+		advertisementDataSize += 3;
+	}
+
+	// Add the iBeacon data
+	memset(&_ibeaconManufData, 0, sizeof(_ibeaconManufData));
+	_ibeaconManufData.company_identifier = 0x004C; // APPLE
+	_ibeaconManufData.data.p_data = beacon.getArray();
+	_ibeaconManufData.data.size = beacon.size();
+	advData->p_manuf_specific_data = &_ibeaconManufData;
+	// 1 byte AD LEN, 1 byte AD TYPE, 2 bytes UUID, N bytes payload.
+	advertisementDataSize += 2 + sizeof(_crownstoneServiceData.service_uuid) + _crownstoneServiceData.data.size;
+
+	// Add no name, there is no space for that.
+	advData->name_type = BLE_ADVDATA_NO_NAME;
+
+	if (!allocateAdvertisementDataBuffers(asScanResponse)) {
+		return;
+	}
+
+	if (asScanResponse) {
+		_includeScanResponseData = true;
+	}
+	else {
+		_includeAdvertisementData = true;
+	}
+}
+
+
+bool Advertiser::allocateAdvertisementDataBuffers(bool scanResponse) {
+	LOGAdvertiserDebug("allocateAdvertisementDataBuffers");
+
+	uint8_t** bufferPointers = _advertisementDataBuffers;
+	if (scanResponse) {
+		bufferPointers = _scanResponseBuffers;
+	}
+
+	LOGAdvertiserDebug("&(_advertisementDataBuffers[0])=%p &(bufferPointers[0])=%p", &(_advertisementDataBuffers[0]), &(bufferPointers[0]));
+
+	for (uint8_t i = 0; i < _advertisementDataBufferCount; ++i) {
+		if (bufferPointers[i] == nullptr) {
+			bufferPointers[i] = (uint8_t*)calloc(sizeof(uint8_t), _advertisementDataBufferSize);
+			if (bufferPointers[i] == nullptr) {
+				// Out of memory, this shouldn't happen.
+				// Instead of complicated deallocating, we just return false.
+				LOGw("Could not allocate advertisement data buffer");
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+
+void Advertiser::configureAdvertisement(__attribute__((unused))IBeacon& beacon, bool asScanResponse) {
 //	configureIBeaconAdvData(beacon);
-	configureServiceData(deviceType, false);
-//	configureAdvertisementParameters();
+	setAdvertisementData(beacon, asScanResponse);
 	updateAdvertisementData();
 }
 
-void Advertiser::configureAdvertisement(uint8_t deviceType) {
-	configureServiceData(deviceType, false);
-//	configureAdvertisementParameters();
+void Advertiser::configureAdvertisement(ServiceData& serviceData, bool asScanResponse) {
+	setAdvertisementData(serviceData, asScanResponse);
 	updateAdvertisementData();
 }
 
@@ -247,67 +298,120 @@ void Advertiser::configureAdvertisement(uint8_t deviceType) {
  * It is only possible to include TX power if the advertisement is an "extended" type.
  */
 void Advertiser::configureAdvertisementParameters() {
-	LOGd("set _advParams");
+	LOGAdvertiserDebug("set _advParams");
 	_advParams.primary_phy                 = BLE_GAP_PHY_1MBPS;
 	_advParams.properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
 	_advParams.properties.anonymous        = 0;
 	_advParams.properties.include_tx_power = 0;
-	_advParams.p_peer_addr                 = NULL;
+	_advParams.p_peer_addr                 = nullptr;
 	_advParams.filter_policy               = BLE_GAP_ADV_FP_ANY;
 	_advParams.interval                    = _advertisingInterval;
-	_advParams.duration                    = _advertisingTimeout;
+	_advParams.duration                    = 0;
 }
 
 void Advertiser::setConnectable(bool connectable) {
 	LOGAdvertiserDebug("setConnectable %i", connectable);
 	_wantConnectable = connectable;
+
+	updateAdvertisementParams();
 }
 
-uint32_t Advertiser::startAdvertising() {
+void Advertiser::startAdvertising() {
 	LOGd("Start advertising");
 	_wantAdvertising = true;
-	if (!isInitialized()) {
-		return NRF_ERROR_INVALID_STATE;
+	if (!_isInitialized) {
+		LOGw("Not initialized");
+		return;
 	}
 	if (_advertising) {
 		LOGAdvertiserDebug("Already advertising");
-		return NRF_SUCCESS;
+//		return NRF_SUCCESS;
 	}
-	uint32_t err;
+
+	uint8_t prevAdvHandle = _advHandle;
+
 	LOGAdvertiserDebug("sd_ble_gap_adv_set_configure with params");
-	err = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, &_advParams);
-	if (err != NRF_SUCCESS) {
-		LOGw("sd_ble_gap_adv_set_configure failed: %u", err);
+	uint32_t nrfCode = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, &_advParams);
+	/*
+	 * @retval ::NRF_SUCCESS                               Advertising set successfully configured.
+	 * @retval ::NRF_ERROR_INVALID_PARAM                   Invalid parameter(s) supplied:
+	 *                                                      - Invalid advertising data configuration specified. See @ref ble_gap_adv_data_t.
+	 *                                                      - Invalid configuration of p_adv_params. See @ref ble_gap_adv_params_t.
+	 *                                                      - Use of whitelist requested but whitelist has not been set,
+	 *                                                        see @ref sd_ble_gap_whitelist_set.
+	 * @retval ::BLE_ERROR_GAP_INVALID_BLE_ADDR            ble_gap_adv_params_t::p_peer_addr is invalid.
+	 * @retval ::NRF_ERROR_INVALID_STATE                   Invalid state to perform operation. Either:
+	 *                                                     - It is invalid to provide non-NULL advertising set parameters while advertising.
+	 *                                                     - It is invalid to provide the same data buffers while advertising. To update
+	 *                                                       advertising data, provide new advertising buffers.
+	 * @retval ::BLE_ERROR_GAP_DISCOVERABLE_WITH_WHITELIST Discoverable mode and whitelist incompatible.
+	 * @retval ::BLE_ERROR_INVALID_ADV_HANDLE              The provided advertising handle was not found. Use @ref BLE_GAP_ADV_SET_HANDLE_NOT_SET to
+	 *                                                     configure a new advertising handle.
+	 * @retval ::NRF_ERROR_INVALID_ADDR                    Invalid pointer supplied.
+	 * @retval ::NRF_ERROR_INVALID_FLAGS                   Invalid combination of advertising flags supplied.
+	 * @retval ::NRF_ERROR_INVALID_DATA                    Invalid data type(s) supplied. Check the advertising data format specification
+	 *                                                     given in Bluetooth Specification Version 5.0, Volume 3, Part C, Chapter 11.
+	 * @retval ::NRF_ERROR_INVALID_LENGTH                  Invalid data length(s) supplied.
+	 * @retval ::NRF_ERROR_NOT_SUPPORTED                   Unsupported data length or advertising parameter configuration.
+	 * @retval ::NRF_ERROR_NO_MEM                          Not enough memory to configure a new advertising handle. Update an
+	 *                                                     existing advertising handle instead.
+	 * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
+	 */
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Configure advertisement failed: nrfCode=%u", nrfCode);
 		printAdvertisement();
-		return err;
+		return;
 	}
+
+	if (prevAdvHandle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
+		// Now that there's a handle, we can update the TX power.
+		updateTxPower();
+	}
+
 	_advParamsChanged = false;
+
+	// This often fails because this function is called, while the SD is already connected.
+	// The on connect event is scheduled, but not processed by us yet.
 	LOGAdvertiserDebug("sd_ble_gap_adv_start(_adv_handle=%u)", _advHandle);
-	err = sd_ble_gap_adv_start(_advHandle, APP_BLE_CONN_CFG_TAG); // Only one advertiser may be active at any time.
-	if (err == NRF_SUCCESS) {
-		_advertising = true;
+	nrfCode = sd_ble_gap_adv_start(_advHandle, APP_BLE_CONN_CFG_TAG); // Only one advertiser may be active at any time.
+	/**
+	 * @retval ::NRF_SUCCESS                  The BLE stack has started advertising.
+	 * @retval ::NRF_ERROR_INVALID_STATE      adv_handle is not configured or already advertising.
+	 * @retval ::NRF_ERROR_CONN_COUNT         The limit of available connections has been reached; connectable advertiser cannot be started.
+	 * @retval ::BLE_ERROR_INVALID_ADV_HANDLE Advertising handle not found. Configure a new adveriting handle with @ref sd_ble_gap_adv_set_configure.
+	 * @retval ::NRF_ERROR_NOT_FOUND          conn_cfg_tag not found.
+	 * @retval ::NRF_ERROR_INVALID_PARAM      Invalid parameter(s) supplied:
+	 *                                        - Invalid configuration of p_adv_params. See @ref ble_gap_adv_params_t.
+	 *                                        - Use of whitelist requested but whitelist has not been set, see @ref sd_ble_gap_whitelist_set.
+	 * @retval ::NRF_ERROR_RESOURCES          Either:
+	 *                                        - adv_handle is configured with connectable advertising, but the event_length parameter
+	 *                                          associated with conn_cfg_tag is too small to be able to establish a connection on
+	 *                                          the selected advertising phys. Use @ref sd_ble_cfg_set to increase the event length.
+	 *                                        - Not enough BLE role slots available.
+	 *                                          Stop one or more currently active roles (Central, Peripheral, Broadcaster or Observer) and try again.
+	 *                                        - p_adv_params is configured with connectable advertising, but the event_length parameter
+	 *                                          associated with conn_cfg_tag is too small to be able to establish a connection on
+	 *                                          the selected advertising phys. Use @ref sd_ble_cfg_set to increase the event length.
+	 * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
+	 */
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Start advertising failed: nrfCode=%u", nrfCode);
+		return;
 	}
-	else {
-		// This often fails because this function is called, while the SD is already connected.
-		// The on connect event is scheduled, but not processed by us yet.
-		LOGw("startAdvertising failed: %u", err);
-//		APP_ERROR_CHECK(err);
-	}
-	return err;
+	_advertising = true;
 }
 
 void Advertiser::stopAdvertising() {
 	LOGd("Stop advertising");
 	_wantAdvertising = false;
-	if (!isInitialized()) {
+	if (!_isInitialized) {
+		LOGw("Not initialized");
 		return;
 	}
 	if (!_advertising) {
 		LOGAdvertiserDebug("Not advertising");
-		return;
+//		return;
 	}
-	LOGAdvertiserDebug("sd_ble_gap_adv_stop(_adv_handle=%u)", _advHandle);
-	uint32_t ret_code = sd_ble_gap_adv_stop(_advHandle);
 
 	// This often fails because this function is called, while the SD is already connected, thus advertising was stopped.
 	// The on connect event is scheduled, but not processed by us yet.
@@ -315,7 +419,17 @@ void Advertiser::stopAdvertising() {
 	// 30-10-2019 However: there also seems to be the case where stopAdvertising() is called right after startAdvertising()
 	// In this case, we also get the invalid state error, and advertising isn't actually stopped.
 	// So we can't really trust _advertising to be correct.
-	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
+	LOGAdvertiserDebug("sd_ble_gap_adv_stop(_adv_handle=%u)", _advHandle);
+	uint32_t nrfCode = sd_ble_gap_adv_stop(_advHandle);
+	/**
+	 * @retval ::NRF_SUCCESS The BLE stack has stopped advertising.
+	 * @retval ::BLE_ERROR_INVALID_ADV_HANDLE Invalid advertising handle.
+	 * @retval ::NRF_ERROR_INVALID_STATE The advertising handle is not advertising.
+	 */
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Stop advertising failed: nrfCode=%u", nrfCode);
+		return;
+	}
 	_advertising = false;
 }
 
@@ -337,7 +451,8 @@ void Advertiser::updateAdvertisementParams() {
 	if (!_advertising && !_wantAdvertising) {
 		return;
 	}
-	if (!isInitialized()) {
+	if (!_isInitialized) {
+		LOGw("Not initialized");
 		return;
 	}
 
@@ -370,39 +485,84 @@ void Advertiser::updateAdvertisementParams() {
 }
 
 void Advertiser::updateAdvertisementData() {
-	if (!isInitialized()) {
+	if (!_isInitialized) {
+		LOGw("Not initialized");
 		return;
 	}
-	uint32_t err;
+	uint32_t nrfCode;
 
-	uint8_t bufIndex = (_advBufferInUse + 1) % 2;
+	uint8_t bufIndex = (_advBufferInUse + 1) % _advertisementDataBufferCount;
 	LOGAdvertiserVerbose("updateAdvertisementData buf=%u pointer=%p", bufIndex, _advertisementDataBuffers[bufIndex]);
 	_advBufferInUse = bufIndex;
 	if (_includeAdvertisementData) {
 		LOGAdvertiserVerbose("include adv data");
-		_advData.adv_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
-		if (_advertisementDataBuffers[bufIndex] == NULL) {
-			_advertisementDataBuffers[bufIndex] = (uint8_t*)calloc(sizeof(uint8_t), _advData.adv_data.len);
-		}
+		_advData.adv_data.len = _advertisementDataBufferSize;
 		_advData.adv_data.p_data = _advertisementDataBuffers[bufIndex];
-		err = ble_advdata_encode(&_configAdvertisementData, _advData.adv_data.p_data, &_advData.adv_data.len);
-		APP_ERROR_CHECK(err);
+		nrfCode = ble_advdata_encode(&_configAdvertisementData, _advData.adv_data.p_data, &_advData.adv_data.len);
+		/**
+		 * @retval NRF_SUCCESS             If the operation was successful.
+		 * @retval NRF_ERROR_INVALID_PARAM If the operation failed because a wrong parameter was provided in
+		 *                                 \p p_advdata.
+		 * @retval NRF_ERROR_DATA_SIZE     If the operation failed because not all the requested data could
+		 *                                 fit into the provided buffer or some encoded AD structure is too
+		 *                                 long and its length cannot be encoded with one octet.
+		 */
+		if (nrfCode != NRF_SUCCESS) {
+			LOGw("Encode advertisement data failed: nrfCode=%u", nrfCode);
+			return;
+		}
 	}
 	if (_includeScanResponseData) {
 		LOGAdvertiserVerbose("include scan response");
-		_advData.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
-		if (_scanResponseBuffers[bufIndex] == NULL) {
-			_scanResponseBuffers[bufIndex] = (uint8_t*)calloc(sizeof(uint8_t), _advData.scan_rsp_data.len);
-		}
+		_advData.scan_rsp_data.len = _advertisementDataBufferSize;
 		_advData.scan_rsp_data.p_data = _scanResponseBuffers[bufIndex];
-		err = ble_advdata_encode(&_configScanResponse, _advData.scan_rsp_data.p_data, &_advData.scan_rsp_data.len);
-		APP_ERROR_CHECK(err);
+		nrfCode = ble_advdata_encode(&_configScanResponse, _advData.scan_rsp_data.p_data, &_advData.scan_rsp_data.len);
+		/**
+		 * @retval NRF_SUCCESS             If the operation was successful.
+		 * @retval NRF_ERROR_INVALID_PARAM If the operation failed because a wrong parameter was provided in
+		 *                                 \p p_advdata.
+		 * @retval NRF_ERROR_DATA_SIZE     If the operation failed because not all the requested data could
+		 *                                 fit into the provided buffer or some encoded AD structure is too
+		 *                                 long and its length cannot be encoded with one octet.
+		 */
+		if (nrfCode != NRF_SUCCESS) {
+			LOGw("Encode scan response failed: nrfCode=%u", nrfCode);
+			return;
+		}
 	}
 
 	if (_advHandle != BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
 		LOGAdvertiserVerbose("sd_ble_gap_adv_set_configure without params");
-		err = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, NULL);
-		APP_ERROR_CHECK(err);
+		nrfCode = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, nullptr);
+		/**
+		 * @retval ::NRF_SUCCESS                               Advertising set successfully configured.
+		 * @retval ::NRF_ERROR_INVALID_PARAM                   Invalid parameter(s) supplied:
+		 *                                                      - Invalid advertising data configuration specified. See @ref ble_gap_adv_data_t.
+		 *                                                      - Invalid configuration of p_adv_params. See @ref ble_gap_adv_params_t.
+		 *                                                      - Use of whitelist requested but whitelist has not been set,
+		 *                                                        see @ref sd_ble_gap_whitelist_set.
+		 * @retval ::BLE_ERROR_GAP_INVALID_BLE_ADDR            ble_gap_adv_params_t::p_peer_addr is invalid.
+		 * @retval ::NRF_ERROR_INVALID_STATE                   Invalid state to perform operation. Either:
+		 *                                                     - It is invalid to provide non-NULL advertising set parameters while advertising.
+		 *                                                     - It is invalid to provide the same data buffers while advertising. To update
+		 *                                                       advertising data, provide new advertising buffers.
+		 * @retval ::BLE_ERROR_GAP_DISCOVERABLE_WITH_WHITELIST Discoverable mode and whitelist incompatible.
+		 * @retval ::BLE_ERROR_INVALID_ADV_HANDLE              The provided advertising handle was not found. Use @ref BLE_GAP_ADV_SET_HANDLE_NOT_SET to
+		 *                                                     configure a new advertising handle.
+		 * @retval ::NRF_ERROR_INVALID_ADDR                    Invalid pointer supplied.
+		 * @retval ::NRF_ERROR_INVALID_FLAGS                   Invalid combination of advertising flags supplied.
+		 * @retval ::NRF_ERROR_INVALID_DATA                    Invalid data type(s) supplied. Check the advertising data format specification
+		 *                                                     given in Bluetooth Specification Version 5.0, Volume 3, Part C, Chapter 11.
+		 * @retval ::NRF_ERROR_INVALID_LENGTH                  Invalid data length(s) supplied.
+		 * @retval ::NRF_ERROR_NOT_SUPPORTED                   Unsupported data length or advertising parameter configuration.
+		 * @retval ::NRF_ERROR_NO_MEM                          Not enough memory to configure a new advertising handle. Update an
+		 *                                                     existing advertising handle instead.
+		 * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
+		 */
+		if (nrfCode != NRF_SUCCESS) {
+			LOGw("Set advertisement data failed: nrfCode=%u", nrfCode);
+			return;
+		}
 	}
 
 	// Sometimes startAdvertising fails, so for now, just retry in here.
@@ -451,11 +611,6 @@ void Advertiser::onConnect() {
 }
 
 void Advertiser::onDisconnect() {
-//	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-////			_advertiser->changeToLowTxPower();
-//		_advertiser->changeToNormalTxPower();
-//		_advertiser->updateAdvertisementParams();
-//	}
 	updateAdvertisementParams();
 }
 
@@ -495,15 +650,15 @@ void Advertiser::handleEvent(event_t & event) {
 		}
 
 		case CS_TYPE::CONFIG_NAME: {
-			updateDeviceName(std::string((char*)event.data, event.size));
+			setDeviceName(std::string((char*)event.data, event.size));
 			break;
 		}
 		case CS_TYPE::CONFIG_TX_POWER: {
-			updateTxPower(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
+			setTxPower(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_ADV_INTERVAL: {
-			updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
+			setAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
 			break;
 		}
 		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
