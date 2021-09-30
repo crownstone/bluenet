@@ -190,17 +190,21 @@ void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanRespo
 	advData->name_type = BLE_ADVDATA_SHORT_NAME;
 	// 1 byte AD LEN, 1 byte AD TYPE.
 	advertisementDataSize += 2;
-	uint8_t nameLength = 31 - advertisementDataSize;
-	LOGd("Max name length = %u", nameLength);
-	uint8_t deviceNameLength = _deviceName.length();
-	nameLength = std::min(nameLength, deviceNameLength);
-	LOGd("Set BLE name to length %i", nameLength);
-	advData->short_name_len = nameLength;
+	uint8_t bytesLeft = BLE_GAP_ADV_SET_DATA_SIZE_MAX - advertisementDataSize;
+	if (advertisementDataSize > BLE_GAP_ADV_SET_DATA_SIZE_MAX) {
+		bytesLeft = 0;
+	}
+
+	LOGd("Max name length = %u", bytesLeft);
+	uint8_t nameLength = _deviceName.length();
+	nameLength = std::min(bytesLeft, nameLength);
 
 	if (nameLength == 0) {
-		LOGe("Advertisement too large for a name.");
-		return;
+		LOGw("Advertisement too large for a name.");
+		advData->name_type = BLE_ADVDATA_NO_NAME;
 	}
+	LOGd("Set name to length %u", nameLength);
+	advData->short_name_len = nameLength;
 
 	if (!allocateAdvertisementDataBuffers(asScanResponse)) {
 		return;
