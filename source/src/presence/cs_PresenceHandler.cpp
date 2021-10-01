@@ -33,7 +33,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			auto parsedAdvEventData = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(event.data);
 
-			if (BLEutil::isBitSet(parsedAdvEventData->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
+			if (CsUtils::isBitSet(parsedAdvEventData->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
 				return;
 			}
 

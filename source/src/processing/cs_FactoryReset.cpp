@@ -150,7 +150,7 @@ bool FactoryReset::performFactoryReset() {
 }
 
 void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
-	BLEutil::setBit(_successfullyFactoryResetBitmask, bit);
+	CsUtils::setBit(_successfullyFactoryResetBitmask, bit);
 	LOGi("onClassFactoryResetDone bit=%u bitmask=%u", bit, _successfullyFactoryResetBitmask);
 
 	if ((_successfullyFactoryResetBitmask & FACTORY_RESET_MASK_ALL) == FACTORY_RESET_MASK_ALL) {

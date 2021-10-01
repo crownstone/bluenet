@@ -13,7 +13,7 @@
 #include <util/cs_Math.h>
 
 //void txComplete(advertiser_t * p_adv, nrf_mesh_tx_token_t token, timestamp_t timestamp) {
-//	LOGd("tx complete int=%u", BLEutil::getInterruptLevel());
+//	LOGd("tx complete int=%u", CsUtils::getInterruptLevel());
 //}
 
 void MeshAdvertiser::init() {

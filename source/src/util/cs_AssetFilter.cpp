@@ -114,7 +114,7 @@ ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
 				return defaultValue;
 			}
 
-			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
+			if (CsUtils::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				return delegateExpression(filter, result.data, result.len);
 			}
 
@@ -131,7 +131,7 @@ ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
 				return defaultValue;
 			}
 
-			if (BLEutil::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
+			if (CsUtils::findAdvType(selector->adDataType, device.data, device.dataSize, &result) == ERR_SUCCESS) {
 				// A normal advertisement payload size is 31B at most.
 				// We are also limited by the 32b bitmask.
 				if (result.len > 31) {
@@ -143,7 +143,7 @@ ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
 				// apply the mask
 				uint8_t buffIndex = 0;
 				for (uint8_t bitIndex = 0; bitIndex < result.len; bitIndex++) {
-					if (BLEutil::isBitSet(selector->adDataMask, bitIndex)) {
+					if (CsUtils::isBitSet(selector->adDataMask, bitIndex)) {
 						buff[buffIndex] = result.data[bitIndex];
 						buffIndex++;
 					}

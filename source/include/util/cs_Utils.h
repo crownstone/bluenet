@@ -11,11 +11,11 @@
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
 
-/** @namespace BLEutil
+/** @namespace CsUtils
  *
  * Utilities, e.g. for printing over UART.
  */
-namespace BLEutil {
+namespace CsUtils {
 
 /** Convert a short (uint16_t) from LSB (little-endian) to
  * MSB (big-endian) and vice versa

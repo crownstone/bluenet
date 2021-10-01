@@ -231,7 +231,7 @@ void AssetFiltering::handleAcceptedAssetOutputAssetId(
 
 	if (!throttle) {
 		uint8_t filterBitmask = 0;
-		BLEutil::setBit(filterBitmask, filterId);
+		CsUtils::setBit(filterBitmask, filterId);
 		_assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
 	}
 	else {
@@ -255,7 +255,7 @@ void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 
 	if (!throttle) {
 		uint8_t filterBitmask = 0;
-		BLEutil::setBit(filterBitmask, filterId);
+		CsUtils::setBit(filterBitmask, filterId);
 
 		// if nearest wants to send a message, do so.
 		// (nearest algorithm only wants to send messages when we are nearest)

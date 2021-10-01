@@ -386,7 +386,7 @@ void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 		return;
 	}
 
-	retCode = BleCentral::getInstance().discoverServices(_serviceUuids, BLEutil::ArraySize(_serviceUuids));
+	retCode = BleCentral::getInstance().discoverServices(_serviceUuids, CsUtils::ArraySize(_serviceUuids));
 	if (retCode != ERR_WAIT_FOR_SUCCESS) {
 		finalizeOperation(Operation::CONNECT, retCode);
 		return;

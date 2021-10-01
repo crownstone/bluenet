@@ -20,7 +20,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 
 	switch (data.type) {
 	case CS_TYPE::CONFIG_NAME: {
-		uint16_t nameSize = BLEutil::stringLen(STRINGIFY(BLUETOOTH_NAME), sizeof(STRINGIFY(BLUETOOTH_NAME)));
+		uint16_t nameSize = CsUtils::stringLen(STRINGIFY(BLUETOOTH_NAME), sizeof(STRINGIFY(BLUETOOTH_NAME)));
 		data.size = MIN(data.size, nameSize);
 		memcpy(data.value, STRINGIFY(BLUETOOTH_NAME), data.size);
 		return ERR_SUCCESS;
@@ -63,7 +63,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_UUID: {
 		std::string uuidString = g_BEACON_UUID;
-		if (BLEutil::parseUuid(uuidString.c_str(), uuidString.size(), data.value, data.size)) {
+		if (CsUtils::parseUuid(uuidString.c_str(), uuidString.size(), data.value, data.size)) {
 			return ERR_SUCCESS;
 		}
 		return ERR_WRONG_PAYLOAD_LENGTH;

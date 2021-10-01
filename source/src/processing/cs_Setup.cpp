@@ -89,46 +89,46 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 	LOGd("storage done %u", to_underlying_type(type));
 	switch (type) {
 	case CS_TYPE::CONFIG_CROWNSTONE_ID:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_STONE_ID);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_STONE_ID);
 		break;
 	case CS_TYPE::CONFIG_SPHERE_ID:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SPHERE_ID);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SPHERE_ID);
 		break;
 	case CS_TYPE::CONFIG_KEY_ADMIN:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_ADMIN_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_ADMIN_KEY);
 		break;
 	case CS_TYPE::CONFIG_KEY_MEMBER:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MEMBER_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MEMBER_KEY);
 		break;
 	case CS_TYPE::CONFIG_KEY_BASIC:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_BASIC_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_BASIC_KEY);
 		break;
 	case CS_TYPE::CONFIG_KEY_SERVICE_DATA:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SERVICE_DATA_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SERVICE_DATA_KEY);
 		break;
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_LOCALIZATION_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_LOCALIZATION_KEY);
 		break;
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_DEVICE_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_DEVICE_KEY);
 		break;
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_APP_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_APP_KEY);
 		break;
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_NET_KEY);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_NET_KEY);
 		break;
 	case CS_TYPE::CONFIG_IBEACON_UUID:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_UUID);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_UUID);
 		break;
 	case CS_TYPE::CONFIG_IBEACON_MAJOR:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MAJOR);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MAJOR);
 		break;
 	case CS_TYPE::CONFIG_IBEACON_MINOR:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MINOR);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MINOR);
 		break;
 	case CS_TYPE::STATE_SWITCH_STATE:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SWITCH);
+		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SWITCH);
 		break;
 	case CS_TYPE::STATE_OPERATION_MODE:
 		// Check, so that we don't finalize if operation mode was set for some other reason than setup.

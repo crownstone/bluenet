@@ -415,7 +415,7 @@ bool SwitchAggregator::checkAndSetOwner(const cmd_source_with_counter_t& source)
 		return false;
 	}
 
-	if (!BLEutil::isNewer(_source.count, source.count)) {
+	if (!CsUtils::isNewer(_source.count, source.count)) {
 		// A command with newer counter has been received already.
 		LOGSwitchAggregatorDebug("Old command count: %u, already got: %u", source.count, _source.count);
 		return false;

@@ -92,7 +92,7 @@ ret_code_t UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t s
 			return ERR_SUCCESS;
 		default:
 //			_log(SERIAL_DEBUG, "writeMsg opCode=%u data=", opCode);
-//			BLEutil::printArray(data, size);
+//			CsUtils::printArray(data, size);
 			return ERR_SUCCESS;
 	}
 #endif

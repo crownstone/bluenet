@@ -439,7 +439,7 @@ void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 ////		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
 //		LOGi("Stack scan: address=%02X:%02X:%02X:%02X:%02X:%02X addrType=%u type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], advReport->peer_addr.addr_type, type, scan.rssi, scan.channel);
 //		LOGi("  adv_type=%u len=%u data=", type, scan.dataSize);
-//		BLEutil::printArray(scan.data, scan.dataSize);
+//		CsUtils::printArray(scan.data, scan.dataSize);
 //	}
 	event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 	EventDispatcher::getInstance().dispatch(event);

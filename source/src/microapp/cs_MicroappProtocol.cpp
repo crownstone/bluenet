@@ -343,7 +343,7 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 			eventData.appUuid = (payload[3] << 8) + payload[4];
 			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
 			eventData.data.data = &(payload[5]);
-			//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
+			//			CsUtils::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
 			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 			event.dispatch();
 			break;

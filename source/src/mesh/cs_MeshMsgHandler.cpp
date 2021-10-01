@@ -317,7 +317,7 @@ cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSiz
 	_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
 	_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
 	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
-	BLEutil::setBit(_lastReceivedState.partsReceivedBitmask, 0);
+	CsUtils::setBit(_lastReceivedState.partsReceivedBitmask, 0);
 	checkStateReceived(rssi, hops);
 	return ERR_SUCCESS;
 }
@@ -341,7 +341,7 @@ cs_ret_code_t MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSiz
 	_lastReceivedState.state.data.extState.temperature = packet->temperature;
 	_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
 	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
-	BLEutil::setBit(_lastReceivedState.partsReceivedBitmask, 1);
+	CsUtils::setBit(_lastReceivedState.partsReceivedBitmask, 1);
 	checkStateReceived(rssi, hops);
 	return ERR_SUCCESS;
 }
