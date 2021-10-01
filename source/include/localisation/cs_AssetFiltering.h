@@ -56,88 +56,53 @@ private:
 	 */
 	cs_ret_code_t initInternal();
 
-	/**
-	 * bitmask of filters per type to describe the acceptance of an asset.
-	 */
-	struct filter_output_bitmasks_t {
-		uint8_t _forwardAssetId;
-		uint8_t _forwardMac;
-		uint8_t _nearestAssetId;
 
-		uint8_t combined() const { return _forwardMac | _nearestAssetId | _forwardAssetId; }
-		uint8_t assetId() const { return _forwardAssetId | _nearestAssetId; }
-
-		/**
-		 * returns the lowest filter id that accepted the asset.
-		 *
-		 * This filter is used to generate the short asset id when
-		 * no primarySidFilter is available.
-		 */
-		uint8_t const primaryFilter() const { return BLEutil::lowestBitSet(combined()); }
-
-		/**
-		 * returns the lowest filter id that accepted the asset and was
-		 * configured specifically to output a short asset id.
-		 * E.g. AssetFilterOutputFormat::AssetIdOverMesh.
-		 *
-		 * This filter is used to generate the short asset id when available.
-		 */
-		uint8_t primaryAssetIdFilter() const { return BLEutil::lowestBitSet(assetId()); }
-	};
-
+	// --------- Processing of accepted Assest ---------------
 
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
 	void handleScannedDevice(const scanned_device_t& asset);
 
-	/**
-	 * Handles a specific filter.
-	 */
-	void processFilter(AssetFilter f, const scanned_device_t& asset);
-
-
-
-	// --------- Processing of accepted Assest ---------------
 
 
 	/**
-	 * precondition: isInitialized() == true;
-	 */
-	void handleScannedDevice(filter_output_bitmasks_t masks, const scanned_device_t& asset);
-
-	/**
-	 * Check if the filter with given index accepts the device,
-	 * call the associated handleAssetAccepted[Mac..., Nearest...] if so
-	 * and update the masks accordingly.
+	 * Check if the filter with given index accepts the device, call handleAcceptedAsset and.
+	 * dispatches EVT_ASSET_ACCEPTED if so.
 	 *
 	 * Returns true if the filter accepts the device and the exclude flag is false.
 	 */
-	bool handleAcceptFilter(uint8_t _filterIndex, const scanned_device_t& device, filter_output_bitmasks_t& masks);
+	bool checkIfFilterAccepts(uint8_t filterIndex, const scanned_device_t& device);
 
-	void handleAssetAcceptedMacOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
-	void handleAssetAcceptedAssetIdOverMesh(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
-	void handleAssetAcceptedNearestAssetId(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	/**
+	 * splits out into subhandlers based on filter output type.
+	 * Performs desired actions for said output type.
+	 */
+	void handleAcceptedAsset(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& asset);
+
+	void handleAcceptedAssetOutputMac(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	void handleAcceptedAssetOutputAssetId(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
+	void handleAcceptedAssetOutputAssetIdNearest(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset);
 
 	/**
 	 * Returns true if there is a filter that rejects this device.
 	 * (Does not check if the filterstore is ready.)
 	 */
 	bool isAssetRejected(const scanned_device_t& device);
-
-	/**
-	 * Constructs the output of the filter for an accepted asset
-	 * and dispatches it to one of the specific handlers, among which:
-	 * - processAcceptedAssetMac,
-	 * - _assetHandlerMac
-	 * - _assetHandlerShortId
-	 *
-	 * filter: the filter that accepted this device.
-	 * device: the device that was accepted
-	 *
-	 * Returns the filters outputType.outputFormat.
-	 */
-	AssetFilterOutputFormat processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
+//
+//	/**
+//	 * Constructs the output of the filter for an accepted asset
+//	 * and dispatches it to one of the specific handlers, among which:
+//	 * - processAcceptedAssetMac,
+//	 * - _assetHandlerMac
+//	 * - _assetHandlerShortId
+//	 *
+//	 * filter: the filter that accepted this device.
+//	 * device: the device that was accepted
+//	 *
+//	 * Returns the filters outputType.outputFormat.
+//	 */
+//	AssetFilterOutputFormat processAcceptedAsset(AssetFilter filter, const scanned_device_t& asset);
 
 public:
 	/**

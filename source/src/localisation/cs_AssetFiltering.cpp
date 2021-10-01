@@ -61,13 +61,6 @@ cs_ret_code_t AssetFiltering::init() {
 cs_ret_code_t AssetFiltering::initInternal() {
 	LOGAssetFilteringInfo("init");
 
-	// Can we change this to a compile time check?
-	assert(AssetFilterStore::MAX_FILTER_IDS <= sizeof(filter_output_bitmasks_t::_forwardAssetId) * 8, "Too many filters for bitmask.");
-	if (AssetFilterStore::MAX_FILTER_IDS > sizeof(filter_output_bitmasks_t::_forwardAssetId) * 8) {
-		LOGe("Too many filters for bitmask.");
-		return ERR_MISMATCH;
-	}
-
 	_filterStore = new AssetFilterStore();
 	if (_filterStore == nullptr) {
 		return ERR_NO_SPACE;
@@ -148,13 +141,13 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 	}
 
 	for (uint8_t filterIndex = 0; filterIndex < _filterStore->getFilterCount(); ++filterIndex) {
-		handleAcceptFilter(filterIndex, asset);
+		checkIfFilterAccepts(filterIndex, asset);
 	}
 
 	_assetForwarder->flush();
 }
-bool AssetFiltering::handleAcceptFilter(
-		uint8_t filterIndex, const scanned_device_t& device) {
+
+bool AssetFiltering::checkIfFilterAccepts(uint8_t filterIndex, const scanned_device_t& device) {
 	auto filter = AssetFilter(_filterStore->getFilter(filterIndex));
 
 	if (filter.filterdata().metadata().flags()->flags.exclude) {
@@ -162,12 +155,12 @@ bool AssetFiltering::handleAcceptFilter(
 	}
 
 	if (filter.filterAcceptsScannedDevice(device)) {
-		handleAcceptFilter(filterIndex, filter, device);
+		handleAcceptedAsset(filterIndex, filter, device);
 
 		AssetAcceptedEvent evtData(filter, device);
 		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
-
 		assetEvent.dispatch();
+
 		return true;
 
 	}
@@ -175,17 +168,17 @@ bool AssetFiltering::handleAcceptFilter(
 	return false;
 }
 
-void handleAcceptFilter(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& device) {
+void AssetFiltering::handleAcceptedAsset(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
 			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::Mac", filterIndex);
-			handleAssetAcceptedMacOverMesh(filterIndex, filter, device);
+			handleAcceptedAssetOutputMac(filterIndex, filter, asset);
 			return;
 		}
 
 		case AssetFilterOutputFormat::AssetId: {
 			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetId", filterIndex);
-			handleAssetAcceptedAssetIdOverMesh(filterIndex, filter, device);
+			handleAcceptedAssetOutputAssetId(filterIndex, filter, asset);
 			return;
 		}
 
@@ -197,7 +190,7 @@ void handleAcceptFilter(uint8_t filterIndex, AssetFilter filter, const scanned_d
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		case AssetFilterOutputFormat::AssetIdNearest: {
 			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetIdNearest", filterIndex);
-			handleAssetAcceptedNearestAssetId(filterIndex, filter, device);
+			handleAcceptedAssetOutputAssetIdNearest(filterIndex, filter, asset);
 			return;
 		}
 #endif
@@ -206,7 +199,7 @@ void handleAcceptFilter(uint8_t filterIndex, AssetFilter filter, const scanned_d
 
 // -------------------- filter handlers -----------------------
 
-void AssetFiltering::handleAssetAcceptedMacOverMesh(
+void AssetFiltering::handleAcceptedAssetOutputMac(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
 	asset_id_t assetId = filter.getAssetId(asset);
@@ -227,7 +220,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 	}
 }
 
-void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
+void AssetFiltering::handleAcceptedAssetOutputAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
 	asset_id_t assetId = filter.getAssetId(asset);
@@ -251,7 +244,7 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 }
 
 
-void AssetFiltering::handleAssetAcceptedNearestAssetId(
+void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	asset_id_t assetId = filter.getAssetId(asset);
