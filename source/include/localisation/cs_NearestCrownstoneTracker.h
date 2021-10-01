@@ -53,9 +53,10 @@ public:
 	cs_ret_code_t init() override;
 
 	/**
-	 * returns desired minimal time to next advertisement.
+ 	 * Returns true if it is desired to send a message to inform other devices
+	 * in the mesh of relevant changes.
 	 */
-	uint16_t handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id, uint8_t filterBitmask);
+	bool handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id, uint8_t filterBitmask);
 
 private:
 	// cached objects for efficiency
@@ -86,11 +87,12 @@ private:
 	 * This method implements what a crownstone needs to communicate when
 	 * it directly receives an advertisement from a trackable device.
 	 *
-	 * Updates personal report, possibly updates winning report
-	 * and possibly broadcasts a message to inform other devices
+	 * Updates personal report, possibly updates winning report.
+	 *
+	 * Returns true if it is desired to send a message to inform other devices
 	 * in the mesh of relevant changes.
 	 */
-	void onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_report_id_t& trackedEvent);
+	bool onReceiveAssetAdvertisement(cs_mesh_model_msg_asset_report_id_t& trackedEvent);
 
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.

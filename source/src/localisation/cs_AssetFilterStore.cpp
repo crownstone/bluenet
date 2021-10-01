@@ -232,7 +232,7 @@ size_t AssetFilterStore::getTotalHeapAllocatedSize() {
 			// reached back of the list (nullptr).
 			break;
 		}
-		total += AssetFilter(filter).length();
+		total += AssetFilter(filter).size();
 	}
 
 	LOGAssetFilterDebug("Total heap allocated = %u", total);

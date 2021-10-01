@@ -188,14 +188,3 @@ size_t AssetFilterData::length() {
 	return len;
 }
 
-asset_filter_runtime_data_t* AssetFilter::runtimedata() {
-	return reinterpret_cast<asset_filter_runtime_data_t*>(_data + 0);
-}
-
-AssetFilterData AssetFilter::filterdata() {
-	return AssetFilterData(_data + sizeof(asset_filter_runtime_data_t));
-}
-
-size_t AssetFilter::length() {
-	return sizeof(asset_filter_runtime_data_t) + filterdata().length();
-}

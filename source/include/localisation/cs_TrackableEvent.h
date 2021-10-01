@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <localisation/cs_AssetFilterPacketAccessors.h>
+#include <util/cs_AssetFilter.h>
 
 class AssetAcceptedEvent {
 public:
