@@ -40,7 +40,7 @@ void Advertiser::init() {
 	// Now that we're initialized, we can update the device name.
 	setDeviceName(_deviceName);
 
-	EventDispatcher::getInstance().addListener(this);
+	listen();
 }
 
 /**
@@ -76,7 +76,7 @@ void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
 
 void Advertiser::setDeviceName(const std::string& deviceName) {
 	LOGd("Set device name to %s", deviceName.c_str());
-	_deviceName = deviceName;
+	_deviceName = deviceName; // REVIEW: shouldn't this also be guarded by the if statement below?
 
 	if (!_isInitialized) {
 		return;
@@ -86,7 +86,7 @@ void Advertiser::setDeviceName(const std::string& deviceName) {
 
 	// Although this has nothing to do with advertising, this is required when changing the name on the soft device.
 	ble_gap_conn_sec_mode_t nameCharacteristicSecurityMode;
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&nameCharacteristicSecurityMode);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&nameCharacteristicSecurityMode); // REVIEW: can this be set back to 'closed' afterwards or am I misunderstanding?
 
 	LOGAdvertiserDebug("sd_ble_gap_device_name_set %s len=%u", name.c_str(), name.length());
 	uint32_t nrfCode = sd_ble_gap_device_name_set(&nameCharacteristicSecurityMode, (uint8_t*) name.c_str(), name.length());
@@ -326,7 +326,6 @@ void Advertiser::startAdvertising() {
 	}
 	if (_advertising) {
 		LOGAdvertiserDebug("Already advertising");
-//		return NRF_SUCCESS;
 	}
 
 	uint8_t prevAdvHandle = _advHandle;
@@ -396,6 +395,7 @@ void Advertiser::startAdvertising() {
 	 * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
 	 */
 	if (nrfCode != NRF_SUCCESS) {
+		// TODO: keep track of failed start?
 		LOGw("Start advertising failed: nrfCode=%u", nrfCode);
 		return;
 	}
@@ -411,7 +411,6 @@ void Advertiser::stopAdvertising() {
 	}
 	if (!_advertising) {
 		LOGAdvertiserDebug("Not advertising");
-//		return;
 	}
 
 	// This often fails because this function is called, while the SD is already connected, thus advertising was stopped.
@@ -436,11 +435,7 @@ void Advertiser::stopAdvertising() {
 
 void Advertiser::restartAdvertising() {
 	LOGAdvertiserDebug("Restart advertising");
-	// 30-10-2019 See stopAdvertising(): _advertising isn't always up to date, so we might want to ignore it and stop
-	// regardless.
-	if (_advertising) {
-		stopAdvertising();
-	}
+	stopAdvertising();
 	startAdvertising();
 }
 
@@ -456,10 +451,9 @@ void Advertiser::updateAdvertisementParams() {
 	}
 
 	if (_stack->isScanning()) {
+		// REVIEW change log and remove comment?
 		// Skip while scanning or we will get invalid state results when stopping/starting advertisement.
-		// TODO: is that so???
 		LOGw("Updating while scanning");
-//		return;
 	}
 
 	bool connectable = _wantConnectable;
