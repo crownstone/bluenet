@@ -43,6 +43,20 @@ void Advertiser::init() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
+/**
+ * It is only possible to include TX power if the advertisement is an "extended" type.
+ */
+void Advertiser::configureAdvertisementParameters() {
+	LOGAdvertiserDebug("configureAdvertisementParameters");
+	_advParams.primary_phy                 = BLE_GAP_PHY_1MBPS;
+	_advParams.properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+	_advParams.properties.anonymous        = 0;
+	_advParams.properties.include_tx_power = 0;
+	_advParams.p_peer_addr                 = nullptr;
+	_advParams.filter_policy               = BLE_GAP_ADV_FP_ANY;
+	_advParams.interval                    = _advertisingInterval;
+	_advParams.duration                    = 0;
+}
 
 void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
 	LOGd("Set advertising interval %u", advertisingInterval);
@@ -74,7 +88,7 @@ void Advertiser::setDeviceName(const std::string& deviceName) {
 	ble_gap_conn_sec_mode_t nameCharacteristicSecurityMode;
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&nameCharacteristicSecurityMode);
 
-	LOGAdvertiserDebug("sd_ble_gap_device_name_set %s %u", name.c_str(), name.length());
+	LOGAdvertiserDebug("sd_ble_gap_device_name_set %s len=%u", name.c_str(), name.length());
 	uint32_t nrfCode = sd_ble_gap_device_name_set(&nameCharacteristicSecurityMode, (uint8_t*) name.c_str(), name.length());
 	/**
 	 * @retval ::NRF_SUCCESS GAP device name and permissions set successfully.
@@ -112,6 +126,18 @@ void Advertiser::setTxPower(int8_t powerDBm) {
 	}
 }
 
+void Advertiser::setLowTxPower() {
+	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
+	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
+	setTxPower(lowTxPower);
+}
+
+void Advertiser::setNormalTxPower() {
+	TYPIFY(CONFIG_TX_POWER) txPower;
+	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
+	setTxPower(txPower);
+}
+
 void Advertiser::updateTxPower() {
 	if (!_isInitialized) {
 		LOGw("Not initialized");
@@ -137,20 +163,24 @@ void Advertiser::updateTxPower() {
 	}
 }
 
-void Advertiser::setLowTxPower() {
-	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
-	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
-	setTxPower(lowTxPower);
-}
+void Advertiser::setConnectable(bool connectable) {
+	LOGAdvertiserDebug("setConnectable %i", connectable);
+	_wantConnectable = connectable;
 
-void Advertiser::setNormalTxPower() {
-	TYPIFY(CONFIG_TX_POWER) txPower;
-	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	setTxPower(txPower);
+	updateAdvertisementParams();
 }
 
 
 
+void Advertiser::configureAdvertisement(IBeacon& beacon, bool asScanResponse) {
+	setAdvertisementData(beacon, asScanResponse);
+	updateAdvertisementData();
+}
+
+void Advertiser::configureAdvertisement(ServiceData& serviceData, bool asScanResponse) {
+	setAdvertisementData(serviceData, asScanResponse);
+	updateAdvertisementData();
+}
 
 void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanResponse) {
 	LOGd("Set service data");
@@ -243,8 +273,8 @@ void Advertiser::setAdvertisementData(IBeacon& beacon, bool asScanResponse) {
 	_ibeaconManufData.data.p_data = beacon.getArray();
 	_ibeaconManufData.data.size = beacon.size();
 	advData->p_manuf_specific_data = &_ibeaconManufData;
-	// 1 byte AD LEN, 1 byte AD TYPE, 2 bytes UUID, N bytes payload.
-	advertisementDataSize += 2 + sizeof(_crownstoneServiceData.service_uuid) + _crownstoneServiceData.data.size;
+	// 1 byte AD LEN, 1 byte AD TYPE, 2 bytes company ID, N bytes payload.
+	advertisementDataSize += 2 + sizeof(_ibeaconManufData.company_identifier) + _ibeaconManufData.data.size;
 
 	// Add no name, there is no space for that.
 	advData->name_type = BLE_ADVDATA_NO_NAME;
@@ -260,7 +290,6 @@ void Advertiser::setAdvertisementData(IBeacon& beacon, bool asScanResponse) {
 		_includeAdvertisementData = true;
 	}
 }
-
 
 bool Advertiser::allocateAdvertisementDataBuffers(bool scanResponse) {
 	LOGAdvertiserDebug("allocateAdvertisementDataBuffers");
@@ -287,38 +316,6 @@ bool Advertiser::allocateAdvertisementDataBuffers(bool scanResponse) {
 }
 
 
-void Advertiser::configureAdvertisement(__attribute__((unused))IBeacon& beacon, bool asScanResponse) {
-//	configureIBeaconAdvData(beacon);
-	setAdvertisementData(beacon, asScanResponse);
-	updateAdvertisementData();
-}
-
-void Advertiser::configureAdvertisement(ServiceData& serviceData, bool asScanResponse) {
-	setAdvertisementData(serviceData, asScanResponse);
-	updateAdvertisementData();
-}
-
-/**
- * It is only possible to include TX power if the advertisement is an "extended" type.
- */
-void Advertiser::configureAdvertisementParameters() {
-	LOGAdvertiserDebug("set _advParams");
-	_advParams.primary_phy                 = BLE_GAP_PHY_1MBPS;
-	_advParams.properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-	_advParams.properties.anonymous        = 0;
-	_advParams.properties.include_tx_power = 0;
-	_advParams.p_peer_addr                 = nullptr;
-	_advParams.filter_policy               = BLE_GAP_ADV_FP_ANY;
-	_advParams.interval                    = _advertisingInterval;
-	_advParams.duration                    = 0;
-}
-
-void Advertiser::setConnectable(bool connectable) {
-	LOGAdvertiserDebug("setConnectable %i", connectable);
-	_wantConnectable = connectable;
-
-	updateAdvertisementParams();
-}
 
 void Advertiser::startAdvertising() {
 	LOGd("Start advertising");
@@ -376,7 +373,7 @@ void Advertiser::startAdvertising() {
 
 	// This often fails because this function is called, while the SD is already connected.
 	// The on connect event is scheduled, but not processed by us yet.
-	LOGAdvertiserDebug("sd_ble_gap_adv_start(_adv_handle=%u)", _advHandle);
+	LOGAdvertiserDebug("sd_ble_gap_adv_start(handle=%u)", _advHandle);
 	nrfCode = sd_ble_gap_adv_start(_advHandle, APP_BLE_CONN_CFG_TAG); // Only one advertiser may be active at any time.
 	/**
 	 * @retval ::NRF_SUCCESS                  The BLE stack has started advertising.
@@ -437,19 +434,17 @@ void Advertiser::stopAdvertising() {
 	_advertising = false;
 }
 
-void Advertiser::setConnectableAdvParams() {
-	LOGAdvertiserDebug("setConnectableAdvParams");
-	// The mac address cannot be changed while advertising, scanning or creating a connection. Maybe Have a
-	// function that sets address, which sends an event "set address" that makes the scanner pause (etc).
-	_advParams.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-	_isConnectable = true;
+void Advertiser::restartAdvertising() {
+	LOGAdvertiserDebug("Restart advertising");
+	// 30-10-2019 See stopAdvertising(): _advertising isn't always up to date, so we might want to ignore it and stop
+	// regardless.
+	if (_advertising) {
+		stopAdvertising();
+	}
+	startAdvertising();
 }
 
-void Advertiser::setNonConnectableAdvParams() {
-	LOGAdvertiserDebug("setNonConnectableAdvParams");
-	_advParams.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
-	_isConnectable = false;
-}
+
 
 void Advertiser::updateAdvertisementParams() {
 	if (!_advertising && !_wantAdvertising) {
@@ -487,6 +482,22 @@ void Advertiser::updateAdvertisementParams() {
 	}
 	restartAdvertising();
 }
+
+void Advertiser::setConnectableAdvParams() {
+	LOGAdvertiserDebug("setConnectableAdvParams");
+	// The mac address cannot be changed while advertising, scanning or creating a connection. Maybe Have a
+	// function that sets address, which sends an event "set address" that makes the scanner pause (etc).
+	_advParams.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+	_isConnectable = true;
+}
+
+void Advertiser::setNonConnectableAdvParams() {
+	LOGAdvertiserDebug("setNonConnectableAdvParams");
+	_advParams.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
+	_isConnectable = false;
+}
+
+
 
 void Advertiser::updateAdvertisementData() {
 	if (!_isInitialized) {
@@ -575,16 +586,6 @@ void Advertiser::updateAdvertisementData() {
 	}
 }
 
-void Advertiser::restartAdvertising() {
-	LOGAdvertiserDebug("Restart advertising");
-	// 30-10-2019 See stopAdvertising(): _advertising isn't always up to date, so we might want to ignore it and stop
-	// regardless.
-	if (_advertising) {
-		stopAdvertising();
-	}
-	startAdvertising();
-}
-
 void Advertiser::printAdvertisement() {
 	LOGd("_adv_handle=%u", _advHandle);
 
@@ -603,13 +604,15 @@ void Advertiser::printAdvertisement() {
 			_advParams.channel_mask[4]);
 }
 
+
+
 void Advertiser::onConnect() {
 	// Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	// Do this after _conn_handle is set, as that's used to check if isConnected().
 	// Also after callbacks, so that in the callback, parameters can be updated.
-	if (_advertising) {
-		_advertising = false;
-		setNonConnectableAdvParams();
+	_advertising = false;
+	setNonConnectableAdvParams();
+	if (_wantAdvertising) {
 		startAdvertising();
 	}
 }
@@ -620,6 +623,7 @@ void Advertiser::onDisconnect() {
 
 void Advertiser::onConnectOutgoing() {
 	// When making an outgoing connection, we should not advertise as being connectable anymore.
+	// Since there can be only 1 connection at a time.
 	if (_advertising) {
 		setNonConnectableAdvParams();
 		restartAdvertising();
