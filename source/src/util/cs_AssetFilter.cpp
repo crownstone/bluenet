@@ -178,6 +178,12 @@ asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
 		return assetId(asset.address, MAC_ADDRESS_LEN, &startCrc);
 	}
 
+	// fall back on MAC address if an asset id is requested for a filter that doesn't
+	// have to process the AD data. (E.g. output type None)
+	if (filterdata().metadata().outputType().hasInFormat() == false) {
+		return assetId(asset.address, MAC_ADDRESS_LEN);
+	}
+
 
 	return prepareFilterInputAndCallDelegate(
 			asset,
