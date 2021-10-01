@@ -541,7 +541,7 @@ void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAcc
 
 void CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "increase TX");
-	Advertiser::getInstance().changeToNormalTxPower();
+	Advertiser::getInstance().setNormalTxPower();
 	result.returnCode = ERR_SUCCESS;
 }
 

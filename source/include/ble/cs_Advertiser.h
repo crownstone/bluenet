@@ -20,7 +20,9 @@ class Advertiser: EventListener {
 private:
 	Advertiser();
 public:
-	//! Gets a static singleton (no dynamic memory allocation)
+	/**
+	 * Get the static singleton instance.
+	 */
 	static Advertiser& getInstance() {
 		static Advertiser instance;
 		return instance;
@@ -28,81 +30,217 @@ public:
 	Advertiser(Advertiser const&) = delete;
 	void operator=(Advertiser const&) = delete;
 
-	//! Initialize the advertiser.
+	/**
+	 * Initialize the advertiser.
+	 *
+	 * Can only be done after the radio has been initialized.
+	 * It's best to configure the advertiser before initializing.
+	 *
+	 * Starts listening for events.
+	 */
 	void init();
 
-	//! Set initial appearance (for example BLE_APPEARANCE_GENERIC_TAG), not applied unless done before init.
-	void setAppearance(uint16_t appearance);
-
-	//! Set initial device name, not applied unless done before radio init.
+	/**
+	 * Set the name of this Crownstone.
+	 */
 	void setDeviceName(const std::string& deviceName);
 
-	//! Set initial advertising interval in 0.625 ms units, not applied unless done before init.
+	/**
+	 * Set the advertising interval in 0.625 ms units.
+	 */
 	void setAdvertisingInterval(uint16_t advertisingInterval);
 
-	//! Set initial advertising timeout in seconds. Set to 0 for no timeout.
-	void setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds);
-
-	//! Update the appearance (for example BLE_APPEARANCE_GENERIC_TAG).
-	void updateAppearance(uint16_t appearance);
-
-	//! Update the advertising interval in 0.625ms units.
-	void updateAdvertisingInterval(uint16_t advertisingInterval);
-
-	//! Update the device name.
-	void updateDeviceName(const std::string& deviceName);
-
-	std::string & getDeviceName();
-
 	/**
-	 * Set and update radio transmit power.
+	 * Set the radio transmit power.
 	 *
-	 * @param[in] powerLevel           Power in dBm. Accepted values are -40, -20, -16, -12, -8, -4, 0, and 4.
+	 * @param[in] power      Power in dBm. Accepted values are -40, -20, -16, -12, -8, -4, 0, and 4.
 	 */
-	void updateTxPower(int8_t power);
-
-	void changeToLowTxPower();
-
-	void changeToNormalTxPower();
-
-	int8_t getTxPower();
+	void setTxPower(int8_t power);
 
 	/**
-	 * Give the stack a pointer to the crownstone service data.
+	 * Sets TX power to low TX power as stored in State.
+	 */
+	void setLowTxPower();
+
+	/**
+	 * Sets TX power to normal TX power as stored in State.
+	 */
+	void setNormalTxPower();
+
+	/**
+	 * Set whether to advertise being connectable.
 	 *
-	 * This is used to set the advertisement data.
-	 * 13-sep-2019 TODO: Get this data in some other way?
+	 * @param[in] connectable          True when connectable.
 	 */
-	void setServiceData(ServiceData* serviceData) {
-		_serviceData = serviceData;
-	}
+	void setConnectable(bool connectable);
 
 	/**
+	 * Configure the advertisement to hold iBeacon data.
 	 * Sets and updates the advertisement data.
 	 *
 	 * @param[in] beacon               Object with the iBeacon parameters.
-	 * @param[in] deviceType           Device type, for example DEVICE_CROWNSTONE_PLUG.
+	 * @param[in] asScanResponse       Whether to set the iBeacon data in the scan response.
 	 */
-	void configureAdvertisement(IBeacon* beacon, uint8_t deviceType);
+	void configureAdvertisement(IBeacon& beacon, bool asScanResponse = false);
 
 	/**
+	 * Configure the advertisement to hold Crownstone service data.
 	 * Sets and updates the advertisement data.
 	 *
-	 * @param[in] deviceType           Device type, for example DEVICE_CROWNSTONE_PLUG.
+	 * @param[in] serviceData          The Crownstone service data class.
+	 * @param[in] asScanResponse       Whether to set the service data in the scan response.
 	 */
-	void configureAdvertisement(uint8_t deviceType);
+	void configureAdvertisement(ServiceData& serviceData, bool asScanResponse = false);
 
 	/**
 	 * Start advertising.
 	 *
-	 * @return nrf return code.
+	 * Make sure you configured an advertisement before starting to advertise.
 	 */
-	uint32_t startAdvertising();
+	void startAdvertising();
 
 	/**
 	 * Stop advertising.
 	 */
 	void stopAdvertising();
+
+	/**
+	 * Internal usage.
+	 */
+	void handleEvent(event_t & event);
+
+
+private:
+	// Pointer to the BLE stack.
+	Stack*                                      _stack = nullptr;
+
+
+	////////////////////////////// State //////////////////////////////
+
+	// Whether the advertiser has been initialized.
+	bool                                        _isInitialized = false;
+
+	// Whether currently advertising. This value might be out of sync.
+	bool                                        _advertising = false;
+
+	// Whether we should be advertising.
+	bool                                        _wantAdvertising = false;
+
+	// Advertisement handle for softdevice. Set by first call to: sd_ble_gap_adv_set_configure().
+	uint8_t                                     _advHandle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
+
+
+	////////////////////////////// Parameters //////////////////////////////
+
+	// Transmit power.
+	int8_t                                      _txPower = 0;
+
+	// Advertisement parameter: interval.
+	uint16_t                                    _advertisingInterval = g_ADVERTISEMENT_INTERVAL;
+
+	// Advertisement parameters for softdevice.
+	ble_gap_adv_params_t                        _advParams;
+
+	// Whether advertising parameters have been changed.
+	bool                                        _advParamsChanged = false;
+
+	// Whether the advertisement is connectable.
+	bool                                        _isConnectable = false;
+
+	// Whether we want to advertise being connectable.
+	bool                                        _wantConnectable = true;
+
+
+	////////////////////////////// Advertisement data fields //////////////////////////////
+
+	// iBeacon data field to be encoded into advertisement data.
+	ble_advdata_manuf_data_t 					_ibeaconManufData;
+
+	// Service data field to be encoded into advertisement data.
+	ble_advdata_service_data_t                  _crownstoneServiceData;
+
+	// Pointer to up to data crownstone service data.
+	ServiceData*                                _serviceData = nullptr;
+
+	// Advertised name
+	std::string                                 _deviceName = "none";
+
+
+	////////////////////////////// Advertisement data //////////////////////////////
+
+	/**
+	 * Advertisement data config, filled by one or more advertisement data fields.
+	 * In between step to be encoded into an advertisement data buffer.
+	 */
+	ble_advdata_t                               _configAdvertisementData;
+
+	/**
+	 * Scan response data config, filled by one or more advertisement data fields.
+	 * In between step to be encoded into a scan response data buffer.
+	 */
+	ble_advdata_t                               _configScanResponse;
+
+	/**
+	 * Whether the advertisement data config has been filled.
+	 * When true, the advertisement data buffers are also allocated.
+	 */
+	bool                                        _includeAdvertisementData = false;
+
+	/**
+	 * Whether the scan response data config has been filled.
+	 * When true, the scan response data buffers are also allocated.
+	 */
+	bool                                        _includeScanResponseData = false;
+
+	// Number of buffers for advertisement / scan response data.
+	const static uint8_t                        _advertisementDataBufferCount = 2;
+
+	// Size of advertisement / scan response data buffers.
+	const static uint8_t                        _advertisementDataBufferSize = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+
+	// Pointers to advertisement data buffers.
+	uint8_t*                                    _advertisementDataBuffers[_advertisementDataBufferCount] = { nullptr };
+
+	// Pointers to scan response data buffers.
+	uint8_t*                                    _scanResponseBuffers[_advertisementDataBufferCount] = { nullptr };
+
+	// Pointers to the currently advertised advertisement and scan response data buffer.
+	ble_gap_adv_data_t                          _advData;
+
+	// Which of the advertisement and scan response data buffers are currently being advertised..
+	uint8_t                                     _advBufferInUse = 1;
+
+
+
+	/**
+	 * Set advertisement parameters from member variables.
+	 */
+	void configureAdvertisementParameters();
+
+	/**
+	 * Sets the advertisement data.
+	 *
+	 * @param[in] serviceData          The Crownstone service data class.
+	 * @param[in] asScanResponse       Whether to set the service data in the scan response.
+	 */
+	void setAdvertisementData(ServiceData& serviceData, bool asScanResponse);
+
+	/**
+	 * Sets the advertisement data.
+	 *
+	 * Writes to _config_advdata.
+	 *
+	 * @param[in] beacon               The iBeacon data.
+	 * @param[in] asScanResponse       Whether to set the iBeacon data in the scan response.
+	 */
+	void setAdvertisementData(IBeacon& beacon, bool asScanResponse);
+
+	/**
+	 * Allocate the advertisement data buffers.
+	 *
+	 * Returns true on success.
+	 */
+	bool allocateAdvertisementDataBuffers(bool scanResponse);
 
 	/**
 	 * Sets and updates advertisement data.
@@ -121,130 +259,11 @@ public:
 	void updateAdvertisementParams();
 
 	/**
-	 * Set whether to advertise being connectable.
+	 * Set the cached TX power at the softdevice.
 	 *
-	 * Call updateAdvertisementParams() to apply.
-	 *
-	 * @param[in] connectable          True when connectable.
+	 * Can only be done once the advHandle is set.
 	 */
-	void setConnectable(bool connectable);
-
-	//! Handle events as EventListener
-	void handleEvent(event_t & event);
-
-
-	//! The default BLE appearance, for unknown reason set to generic tag.
-	// See: https://devzone.nordicsemi.com/question/2973/an36-ble_appearance/
-	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_TAG;
-	//! The low-frequency clock, currently generated from the high frequency clock
-	static const nrf_clock_lf_cfg_t        defaultClockSource;
-	//! Advertising interval in 0.625 ms.
-	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = g_ADVERTISEMENT_INTERVAL;
-	//! Time after which advertising stops.
-	static const uint16_t                  defaultAdvertisingTimeout_seconds = ADVERTISING_TIMEOUT;
-
-protected:
-	///////////////////// Advertising /////////////////////
-	// 13-sep-2019 TODO: move advertising to separate class.
-
-	//! Whether the advertiser has been initialized.
-	bool                                        _isInitialized = false;
-
-	//! Pointer to the stack.
-	Stack*                                      _stack;
-
-	//! Whether currently advertising.
-	bool                                        _advertising = false;
-
-	//! Whether we should be advertising.
-	bool                                        _wantAdvertising = false;
-
-	//! Advertisement handle for softdevice. Set by first call to: sd_ble_gap_adv_set_configure().
-	uint8_t                                     _advHandle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
-
-	//! Advertised name
-	std::string                                 _deviceName = "none";
-
-	//! Advertised appearance.
-	uint16_t                                    _appearance = BLE_APPEARANCE_GENERIC_TAG;
-
-	//! Transmit power.
-	int8_t                                      _txPower = 0;
-
-	//! Advertisement parameter: interval.
-	uint16_t                                    _advertisingInterval = defaultAdvertisingInterval_0_625_ms;
-
-	//! Advertisement parameter: timeout.
-	uint16_t                                    _advertisingTimeout = defaultAdvertisingTimeout_seconds;
-
-	//! Advertisement parameters for softdevice.
-	ble_gap_adv_params_t                        _advParams;
-
-	//! Whether advertising parameters have been changed.
-	bool                                        _advParamsChanged = false;
-
-	//! Whether we want to advertise being connectable.
-	bool                                        _wantConnectable = true;
-
-	//! Whether the advertisement is connectable.
-	bool                                        _isConnectable = false;
-
-	//! Whether the advertisement data should be used.
-	bool                                        _includeAdvertisementData = false;
-
-	//! Whether the scan response data should be used.
-	bool                                        _includeScanResponseData = false;
-
-	//! Advertisement data config.
-	ble_advdata_t                               _configAdvertisementData;
-
-	//! Scan response data config.
-	ble_advdata_t                               _configScanResponse;
-
-	//! Pointers to advertisement data buffers. Buffers will be allocated on first use.
-	uint8_t*                                    _advertisementDataBuffers[2] = { NULL };
-
-	//! Pointers to scan response data buffers. Buffers will be allocated on first use.
-	uint8_t*                                    _scanResponseBuffers[2] = { NULL };
-
-	//! Encoded advertisement data, has pointers to buffers.
-	ble_gap_adv_data_t                          _advData;
-
-	//! Which of the advertisement data buffers is in use by the softdevice.
-	uint8_t                                     _advBufferInUse = 1;
-
-	//! iBeacon data field to be encoded into advertisement data.
-	ble_advdata_manuf_data_t 					_ibeaconManufData;
-
-	//! Service data field to be encoded into advertisement data.
-	ble_advdata_service_data_t                  _crownstoneServiceData;
-
-	//! Pointer to up to data crownstone service data.
-	ServiceData*                                _serviceData = NULL;
-
-	/**
-	 * Set advertisement parameters from member variables.
-	 */
-	void configureAdvertisementParameters();
-
-	/**
-	 * Sets crownstone service data as advertisement data.
-	 *
-	 * Writes to _config_advdata or _config_scanrsp.
-	 *
-	 * @param[in] deviceType           Type of device (e.g. DEVICE_CROWNSTONE_PLUG).
-	 * @param[in] asScanResponse       Whether the advertisement data is scan response.
-	 */
-	void configureServiceData(uint8_t deviceType, bool asScanResponse);
-
-	/**
-	 * Sets iBeacon as advertisement data.
-	 *
-	 * Writes to _config_advdata.
-	 *
-	 * @param[in] beacon               The iBeacon data.
-	 */
-	void configureIBeaconAdvData(IBeacon* beacon);
+	void updateTxPower();
 
 	/**
 	 * Stop and start advertising.
@@ -252,8 +271,6 @@ protected:
 	 * This will make sure new advertising parameters are applied.
 	 */
 	void restartAdvertising();
-
-	void printAdvertisement();
 
 	/**
 	 * Sets advertisement parameters to be connectable.
@@ -265,19 +282,12 @@ protected:
 	 */
 	void setNonConnectableAdvParams();
 
-	/**
-	 * Updates the TX power.
-	 */
-	void updateTxPower();
-
-	/**
-	 * Check if advertiser is initialized.
-	 */
-	bool isInitialized(bool expected=true);
 
 	void onConnect();
 
 	void onDisconnect();
 
 	void onConnectOutgoing();
+
+	void printAdvertisement();
 };

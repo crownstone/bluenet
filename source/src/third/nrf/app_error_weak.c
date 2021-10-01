@@ -65,9 +65,15 @@ __WEAK void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
     {
 #if defined(SOFTDEVICE_PRESENT) && SOFTDEVICE_PRESENT
         case NRF_FAULT_ID_SD_ASSERT:
+        	/**< SoftDevice assertion. The info parameter is reserved for future used. */
             NRF_LOG_ERROR("SOFTDEVICE: ASSERTION FAILED");
             break;
         case NRF_FAULT_ID_APP_MEMACC:
+            /**< Application invalid memory access. The info parameter will contain 0x00000000,
+            in case of SoftDevice RAM access violation. In case of SoftDevice peripheral
+            register violation the info parameter will contain the sub-region number of
+            PREGION[0], on whose address range the disallowed write access caused the
+            memory access fault. */
             NRF_LOG_ERROR("SOFTDEVICE: INVALID MEMORY ACCESS");
             break;
 #endif
