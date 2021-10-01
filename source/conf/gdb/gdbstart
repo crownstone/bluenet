@@ -9,7 +9,7 @@ info files
 
 monitor reset
 
-#b app_error_fault_handler
+# Add breakpoints here
 b app_error_handler
 
 continue

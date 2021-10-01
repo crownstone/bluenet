@@ -80,6 +80,7 @@ static inline const char* get_hardware_version() {
 	if (hardwareBoard == PCA10036) return "PCA10036";
 	if (hardwareBoard == PCA10040) return "PCA10040";
 	if (hardwareBoard == PCA10100) return "PCA10100";
+	if (hardwareBoard == PCA10056) return "PCA10056";
 
 	// Can't use LOGe here, as the bootloader also uses this file.
 //	LOGe("Failed to define version for hardware board");

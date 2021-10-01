@@ -55,6 +55,8 @@ UART_BAUDRATE=230400
 # ## Nordic boards
 # PCA10036             40
 # PCA10040             41
+# PCA10100             42
+# PCA10056             43
 # ## Guidestone
 # GUIDESTONE           100
 # ## Crownstone USB dongle
@@ -79,10 +81,7 @@ UART_BAUDRATE=230400
 HARDWARE_BOARD=PCA10040
 
 # The default pin layout as defined by Nordic and used by the bootloader.
-# Use PCA10040 for the nRF52832, and PCA10100 for the nRF52833.
-NORDIC_HARDWARE_BOARD=PCA10040
-
-# The default pin layout as defined by Nordic and used by the bootloader
+# Use PCA10040 for the nRF52832, PCA10100 for the nRF52833, PCA10056 for the nRF52840.
 NORDIC_HARDWARE_BOARD=PCA10040
 
 # The default hardware board, in case no board is written in UICR.

@@ -100,6 +100,17 @@ load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 
 #######################################################################################################################
+# Some important configuration values that have been loaded above
+#######################################################################################################################
+
+message(STATUS "Board target: ${BOARD_TARGET}")
+if(DEFINED NORDIC_HARDWARE_BOARD)
+	message(STATUS "Nordic hardware development board: ${NORDIC_HARDWARE_BOARD}")
+else()
+	message(STATUS "Not on a Nordic hardware development board")
+endif()
+
+#######################################################################################################################
 # Download urls and hashes
 #######################################################################################################################
 

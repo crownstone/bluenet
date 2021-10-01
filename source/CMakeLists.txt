@@ -78,6 +78,8 @@ MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 # Show variables
 #######################################################################################################################
 
+message(STATUS "Hardware board: ${HARDWARE_BOARD}")
+
 MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
@@ -148,6 +150,9 @@ ELSE()
 	ELSEIF (DEVICE STREQUAL "nRF52833")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
 		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S" PROPERTY LANGUAGE C)
+	ELSEIF (DEVICE STREQUAL "nRF52840_xxAA")
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52840.S")
+		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52850.S" PROPERTY LANGUAGE C)
 	ELSE()
 		MESSAGE(FATAL_ERROR "Unkown device: ${DEVICE}")
 	ENDIF()
@@ -462,7 +467,6 @@ ELSE()
 		#message(STATUS "Descend into test directory and compile if needed")
 		#add_subdirectory(test)
 
-		#set(DEFAULT_CONFIG_FILE "${DEFAULT_CONFIGURATION_FILE}")
 		set(DEFAULT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
 		set(TARGET_CONFIG_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config")
 		set(TARGET_CONFIG_OVERWRITE_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config")
@@ -607,9 +611,12 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
 			)
-		
+	
+		# TODO: Rename CONFIG_FILE here to TARGET_RUNTIME_CONFIG_FILE
 		SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
 			-DDEFAULT_CONFIG_FILE:STRING=${DEFAULT_CONFIG_FILE}\
+			-DTARGET_CONFIG_FILE:STRING=${TARGET_CONFIG_FILE}\
+			-DTARGET_CONFIG_OVERWRITE_FILE:STRING=${TARGET_CONFIG_OVERWRITE_FILE}\
 			-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config\
 			-DDEVICE:STRING=${DEVICE}\
 			-DNRF_DEVICE_FAMILY:STRING=${NRF_DEVICE_FAMILY}\
@@ -651,9 +658,17 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
+			)
+		
+		ADD_CUSTOM_TARGET(debug_bootloader
+			COMMAND ${CMAKE_COMMAND} -E echo "** Debug bootloader"
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=bootloader.elf bootloader.elf
+			WORKING_DIRECTORY bootloader
+			DEPENDS bootloader
+			COMMENT "Debug bootloader.elf"
 			)
 
 		ADD_CUSTOM_TARGET(write_application

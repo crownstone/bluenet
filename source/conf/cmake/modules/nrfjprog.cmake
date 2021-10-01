@@ -61,6 +61,8 @@ if(INSTRUCTION STREQUAL "READ")
 				message(STATUS "Softdevice S132 6.1.1")
 			elseif ("${Value}" STREQUAL "FFFF00CB")
 				message(STATUS "Softdevice S132 7.0.1")
+			elseif ("${Value}" STREQUAL "FFFF0101")
+				message(STATUS "Softdevice S132 7.2.0")
 			else()
 				message(STATUS "Unknown softdevice (${Value})!!")
 			endif()
@@ -72,7 +74,7 @@ if(INSTRUCTION STREQUAL "READ")
 			if ("${Value}" STREQUAL "00052832")
 				message(STATUS "Part: nRF52832")
 			else()
-				message(STATUS "Unknow chipset")
+				message(STATUS "Unknown chipset")
 			endif()
 		elseif ("${ADDRESS}" STREQUAL "0x10000104") # NRF chip version: Variant
 			string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+)" Tmp ${output})
@@ -167,9 +169,13 @@ elseif(INSTRUCTION STREQUAL "LIST")
 	endif()
 
 elseif(INSTRUCTION STREQUAL "WRITE_BINARY")
-	#message(STATUS "Flashing ${APP}")
+	set(ERASE_OPTION "--sectorerase")
+	# chiperase includes UICR (but cannot be used in a sequence for bootloader, softdevice, and firmware)
+	#set(ERASE_OPTION "--chiperase") 
+	message(STATUS "Flashing ${BINARY} with erase option ${ERASE_OPTION}")
+	#message(STATUS "nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
 	execute_process(
-		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 		RESULT_VARIABLE status
 		OUTPUT_VARIABLE output
 		ERROR_VARIABLE error
