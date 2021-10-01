@@ -20,7 +20,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 
 	switch (data.type) {
 	case CS_TYPE::CONFIG_NAME: {
-		data.size = MIN(data.size, sizeof(STRINGIFY(BLUETOOTH_NAME)));
+		uint16_t nameSize = BLEutil::stringLen(STRINGIFY(BLUETOOTH_NAME), sizeof(STRINGIFY(BLUETOOTH_NAME)));
+		data.size = MIN(data.size, nameSize);
 		memcpy(data.value, STRINGIFY(BLUETOOTH_NAME), data.size);
 		return ERR_SUCCESS;
 	}

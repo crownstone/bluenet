@@ -178,6 +178,22 @@ inline static cs_ret_code_t findAdvType(uint8_t type, uint8_t* advData, uint8_t 
 	return ERR_NOT_FOUND;
 }
 
+/**
+ * Gets the string length of a null terminated constant string.
+ * Unlike strlen(), this function is guaranteed to be optimized out.
+ *
+ * @param[in] str       The string.
+ * @param[in] maxSize   The max size to look for a null terminator. Simply provide sizeof("string").
+ * @retval The number of bytes of the string, without the null terminator.
+ */
+constexpr uint16_t stringLen(const char* str, uint16_t maxSize) {
+	uint16_t size = 0;
+	while ((str[size] != '\0') && (size < maxSize)) {
+		++size;
+	}
+	return size;
+}
+
 
 
 inline uint32_t getInterruptLevel() {

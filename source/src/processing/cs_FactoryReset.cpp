@@ -50,7 +50,7 @@ void FactoryReset::timeout() {
 	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
 		LOGi("Change to normal mode");
-		Advertiser::getInstance().changeToNormalTxPower();
+		Advertiser::getInstance().setNormalTxPower();
 	}
 	resetState = FACTORY_RESET_STATE_NORMAL;
 	State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
@@ -67,7 +67,7 @@ void FactoryReset::process() {
 		resetState = FACTORY_RESET_STATE_LOWTX;
 		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 		LOGd("recovery: go to low tx");
-		Advertiser::getInstance().changeToLowTxPower();
+		Advertiser::getInstance().setLowTxPower();
 		Stack::getInstance().disconnect();
 		resetTimeout();
 	}
