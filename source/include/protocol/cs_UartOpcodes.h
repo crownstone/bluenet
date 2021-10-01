@@ -86,7 +86,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_ASSET_INFO_MAC =                   10108, // Payload: cs_asset_info_mac_t. Info about an asset a Crownstone on the mesh has forwarded.
 
 	UART_OPCODE_TX_NEIGHBOUR_RSSI =                   10111, // Payload: mesh_topology_neighbour_rssi_t
-	UART_OPCODE_TX_ASSET_INFO_SID =                   10112, // Payload: cs_asset_info_id_t. Info about an asset a Crownstone on the mesh has forwarded.
+	UART_OPCODE_TX_ASSET_INFO_ID =                    10112, // Payload: cs_asset_info_id_t. Info about an asset a Crownstone on the mesh has forwarded.
 
 	UART_OPCODE_TX_LOG =                              10200, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
 	UART_OPCODE_TX_LOG_ARRAY =                        10201, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]

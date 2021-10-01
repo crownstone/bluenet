@@ -7,6 +7,7 @@
 
 #pragma once
 
+
 #include <protocol/cs_AssetFilterPackets.h>
 #include <util/cs_Crc32.h>
 
@@ -19,21 +20,6 @@ public:
 	virtual ~FilterInterface() = default;
 
 	virtual bool contains(const void* key, size_t keyLengthInBytes) = 0;
-
-	/**
-	 * In most cases a assetId is generated as crc32 from filtered input data.
-	 * This can be overwritten for special use cases like ExactMatchFilter.
-	 */
-	// TODO remove 'short'
-	virtual asset_id_t assetId(const void* key, size_t keyLengthInBytes) {
-		auto crc = crc32(static_cast<const uint8_t*>(key), keyLengthInBytes, nullptr);
-
-		// little endian byte by byte copy.
-		asset_id_t id{};
-		memcpy(id.data, reinterpret_cast<uint8_t*>(&crc), 3);
-
-		return id;
-	}
 
 	virtual size_t size() = 0;
 
