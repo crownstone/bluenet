@@ -29,7 +29,7 @@ cs_ret_code_t AssetForwarder::init() {
 
 void AssetForwarder::flush() {
 	uint8_t sendCount = 0;
-	for(auto outMsg : outbox) {
+	for (auto outMsg : _outbox) {
 		sendCount += dispatchOutboxMessage(outMsg) ? 1u : 0u;
 	}
 
@@ -39,13 +39,14 @@ void AssetForwarder::flush() {
 }
 
 void AssetForwarder::clearOutbox() {
-	for(auto& msg : outbox) {
+	for (auto& msg : _outbox) {
+		// REVIEW: just invalidate them, instead of copying a whole message to each?
 		msg = outbox_msg_t();
 	}
 }
 
 AssetForwarder::outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
-	for(auto& msg : outbox) {
+	for (auto& msg : _outbox) {
 		if (!msg.isValid()) {
 			return &msg;
 		}
@@ -53,8 +54,8 @@ AssetForwarder::outbox_msg_t* AssetForwarder::getEmptyOutboxSlot() {
 	return nullptr;
 }
 
-AssetForwarder::outbox_msg_t* AssetForwarder::findSimilar(outbox_msg_t outMsg) {
-	for (auto& msg : outbox) {
+AssetForwarder::outbox_msg_t* AssetForwarder::findSimilar(outbox_msg_t& outMsg) {
+	for (auto& msg : _outbox) {
 		if (outMsg.isSimilar(msg)) {
 			return &msg;
 		}
@@ -72,34 +73,13 @@ bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 
 	outbox_msg_t outMsg;
-	outMsg.rec = record;
+	outMsg.record = record;
 	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_MAC;
 
 	outMsg.macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
 	outMsg.macMsg.mac.copy(asset.address);
 
-	// merge message with similarMsg if posible.
-	if(outbox_msg_t* similarMsg = findSimilar(outMsg)) {
-		LOGAssetForwarderDebug("found similar message");
-
-		if(similarMsg->rec == nullptr){
-			similarMsg->rec = outMsg.rec;  // copy record if it doesn't exist.
-		}
-
-		// other information (rssi, channel) will not be overwritten.
-
-		return true;
-	}
-
-	// otherwise create a new entry
-	if(outbox_msg_t* emptySlot= getEmptyOutboxSlot()) {
-		*emptySlot = outMsg;
-		return true;
-	}
-
-	LOGAssetForwarderDebug("failed to find place in outbox");
-
-	return false;
+	return addToOutbox(outMsg);
 }
 
 
@@ -107,44 +87,52 @@ bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_dev
 	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 
 	outbox_msg_t outMsg;
-	outMsg.rec = record;
+	outMsg.record = record;
 	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
 
 	outMsg.idMsg.id = assetId;
 	outMsg.idMsg.rssi= asset.rssi;
 	outMsg.idMsg.channel = compressChannel(asset.channel);
+	outMsg.idMsg.reserved = 0;
 	outMsg.idMsg.filterBitmask = filterBitmask;
 
-	// merge message with similarMsg if posible.
-	if(outbox_msg_t* similarMsg = findSimilar(outMsg)) {
-		similarMsg->idMsg.filterBitmask |= outMsg.idMsg.filterBitmask;  // combine bitmasks
+	return addToOutbox(outMsg);
+}
 
-		if(similarMsg->rec == nullptr){
-			similarMsg->rec = outMsg.rec;  // copy record if it doesn't exist.
+bool AssetForwarder::addToOutbox(outbox_msg_t& outMsg) {
+	// Search for a similar message to merge with.
+	outbox_msg_t* outSlot = findSimilar(outMsg);
+	if (outSlot != nullptr) {
+		outSlot->idMsg.filterBitmask |= outMsg.idMsg.filterBitmask;  // combine bitmasks
+
+		if (outSlot->record == nullptr) {
+			LOGw("record is null");
+			outSlot->record = outMsg.record;  // copy record if it doesn't exist.
 		}
 
 		// other information (rssi, channel) will not be overwritten.
-
 		return true;
 	}
 
 	// otherwise create a new entry
-	if(outbox_msg_t* emptySlot = getEmptyOutboxSlot()) {
-		*emptySlot = outMsg;
-		return true;
-	}
-
-	return false;
-}
-
-
-bool AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
-	if(!outMsg.isValid()) {
+	outSlot = getEmptyOutboxSlot();
+	if (outSlot == nullptr) {
+		// No space for a new entry.
 		return false;
 	}
 
-	if (outMsg.rec != nullptr) {
-		outMsg.rec->addThrottlingCountdown(_throttleCountdownBumpTicks);
+	*outSlot = outMsg;
+	return true;
+}
+
+
+bool AssetForwarder::dispatchOutboxMessage(outbox_msg_t& outMsg) {
+	if (!outMsg.isValid()) {
+		return false;
+	}
+
+	if (outMsg.record != nullptr) {
+		outMsg.record->addThrottlingCountdown(_throttleCountdownBumpTicks);
 	}
 
 	// forward message over uart (e.g. hub dongle directly receives asset advertisement)
@@ -180,7 +168,7 @@ bool AssetForwarder::dispatchOutboxMessage(outbox_msg_t outMsg) {
 
 // ------------- outbox_msg_t -------------
 
-AssetForwarder::outbox_msg_t::outbox_msg_t() : rec(nullptr), msgType(CS_MESH_MODEL_TYPE_UNKNOWN), rawMsg{}  {
+AssetForwarder::outbox_msg_t::outbox_msg_t() : record(nullptr), msgType(CS_MESH_MODEL_TYPE_UNKNOWN), rawMsg{}  {
 
 }
 
@@ -191,11 +179,11 @@ bool AssetForwarder::outbox_msg_t::isValid() {
 }
 
 bool AssetForwarder::outbox_msg_t::isSimilar(const outbox_msg_t& other) {
-	if(msgType != other.msgType) {
+	if (msgType != other.msgType) {
 		return false;
 	}
 
-	switch(msgType) {
+	switch (msgType) {
 		case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
 			return macMsg.mac == other.macMsg.mac;
 		}

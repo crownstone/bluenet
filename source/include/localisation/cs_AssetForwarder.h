@@ -15,8 +15,10 @@
 
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+// REVIEW: add description, that explains roughly what this class is and how to use it.
 class AssetForwarder : public EventListener, public Component {
 public:
+	// REVIEW: unused variable?
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 1000;
 
 	cs_ret_code_t init();
@@ -60,7 +62,7 @@ private:
 	uint8_t _throttleCountdownBumpTicks = 0;
 
 	struct outbox_msg_t {
-		asset_record_t* rec;
+		asset_record_t* record;
 		cs_mesh_model_msg_type_t msgType;
 		union {
 			cs_mesh_model_msg_asset_report_id_t idMsg;
@@ -84,7 +86,7 @@ private:
 		bool isSimilar(const outbox_msg_t& other);
 	};
 
-	outbox_msg_t outbox[8] = {};
+	outbox_msg_t _outbox[8] = {};
 
 	/**
 	 * validates the message, then
@@ -94,12 +96,28 @@ private:
 	 *
 	 * returns true if message was valid
 	 */
-	bool dispatchOutboxMessage(outbox_msg_t outMsg);
+	bool dispatchOutboxMessage(outbox_msg_t& outMsg);
 
 	void clearOutbox();
 
+	/**
+	 * Returns an empty slot in the outbox.
+	 * Returns null pointer when there is no empty slot.
+	 */
 	outbox_msg_t* getEmptyOutboxSlot();
-	outbox_msg_t* findSimilar(outbox_msg_t outMsg);
+
+	/**
+	 * Returns a similar message in the outbox.
+	 * Returns null pointer when not found.
+	 */
+	outbox_msg_t* findSimilar(outbox_msg_t& outMsg);
+
+	/**
+	 * Adds a message to the outbox.
+	 * Merges wit message in outbox if possible.
+	 * Returns true on success.
+	 */
+	bool addToOutbox(outbox_msg_t& outMsg);
 
 	/**
 	 * Forward an asset mesh message to UART.
