@@ -568,7 +568,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 }
 
 void Crownstone::setName() {
-	char stateName[32];
+	char stateName[TypeSize(CS_TYPE::CONFIG_NAME)];
 	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)stateName, sizeof(stateName));
 	_state->get(stateNameData);
 	std::string name;
@@ -576,7 +576,7 @@ void Crownstone::setName() {
 		// clip name and add reset counter at the end.
 		TYPIFY(STATE_RESET_COUNTER) resetCounter;
 		_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
-		char nameResetCounter[32];
+		char nameResetCounter[TypeSize(CS_TYPE::CONFIG_NAME)];
 		sprintf(nameResetCounter, "%.*s%u", MIN(stateNameData.size, 2), stateName, resetCounter);
 		name = std::string(nameResetCounter);
 	}
