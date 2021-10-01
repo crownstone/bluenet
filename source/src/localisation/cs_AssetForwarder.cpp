@@ -77,14 +77,14 @@ bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_MAC;
 
 	outMsg.macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
-	outMsg.macMsg.mac.copy(asset.address);
+	outMsg.macMsg.mac.copyFrom(asset.address);
 
 	return addToOutbox(outMsg);
 }
 
 
 bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
-	LOGAssetForwarderDebug("Forward sid-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
+	LOGAssetForwarderDebug("Forward asset-id-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 
 	outbox_msg_t outMsg;
 	outMsg.record = record;
@@ -257,7 +257,7 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_
 	};
 
 	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_ASSET_INFO_SID,
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_INFO_ID,
 			reinterpret_cast<uint8_t*>(&uartAssetMsg),
 			sizeof(uartAssetMsg));
 }

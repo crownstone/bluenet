@@ -41,7 +41,7 @@ static constexpr uint8_t MAC_ADDRESS_LEN = 6;
 struct __attribute__((__packed__)) mac_address_t {
 	uint8_t data[MAC_ADDRESS_LEN];
 
-	void copy(const void* macAddress) { memcpy(data, macAddress, MAC_ADDRESS_LEN); }
+	void copyFrom(const void* macAddress) { memcpy(data, macAddress, MAC_ADDRESS_LEN); }
 
 	bool operator==(const mac_address_t& other) { return memcmp(this, &other, MAC_ADDRESS_LEN) == 0; }
 };

@@ -16,16 +16,16 @@
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
 
-void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool excluded){
-	LOGAssetFilteringDebug("FilterId=%u %s device with mac: %02X:%02X:%02X:%02X:%02X:%02X",
+void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool excluded) {
+	LOGAssetFilteringDebug("FilterId=%u passed device with mac: %02X:%02X:%02X:%02X:%02X:%02X exclude=%u",
 			filter.runtimedata()->filterId,
-			excluded ? "excluded" : "accepted",
 			device.address[5],
 			device.address[4],
 			device.address[3],
 			device.address[2],
 			device.address[1],
-			device.address[0]);
+			device.address[0],
+			excluded);
 }
 
 // -------------------- init -----------------------

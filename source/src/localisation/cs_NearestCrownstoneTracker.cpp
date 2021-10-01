@@ -212,7 +212,7 @@ void NearestCrownstoneTracker::sendUartUpdate(asset_record_t& record) {
 	};
 
 	UartHandler::getInstance().writeMsg(
-			UartOpcodeTx::UART_OPCODE_TX_ASSET_INFO_SID,
+			UartOpcodeTx::UART_OPCODE_TX_ASSET_INFO_ID,
 			reinterpret_cast<uint8_t*>(&uartMsg),
 			sizeof(uartMsg));
 }
