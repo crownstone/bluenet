@@ -15,10 +15,21 @@
 
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
-// REVIEW: add description, that explains roughly what this class is and how to use it.
+/**
+ * AssetForwarder makes it possible for the AssetFiltering to merge mesh messages when
+ * they have very similar data.
+ *
+ * To use it, you place messages in the 'outbox' with sendAssetMacToMesh(..) or
+ * sendAssetIdToMesh(..). These functions merge the message with a similar one depending
+ * on the respective type.
+ *
+ * After all messages have been created, call flush() to send the message, or clearOutbox() to
+ * cancel your plans.
+ *
+ * By passing an asset_record along the flush() function will update the throttling counter.
+ */
 class AssetForwarder : public EventListener, public Component {
 public:
-	// REVIEW: unused variable?
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 1000;
 
 	cs_ret_code_t init();
@@ -30,6 +41,12 @@ public:
 	 * Messages are sent over both Uart and Mesh
 	 */
 	void flush();
+
+	/**
+	 * Removes all messages currently queued for sending.
+	 */
+	void clearOutbox();
+
 
 	/**
 	 * Prepare a CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC message and put it
@@ -98,7 +115,6 @@ private:
 	 */
 	bool dispatchOutboxMessage(outbox_msg_t& outMsg);
 
-	void clearOutbox();
 
 	/**
 	 * Returns an empty slot in the outbox.
