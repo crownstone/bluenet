@@ -72,14 +72,20 @@ public:
 	/**
 	 * Get the input format.
 	 *
-	 * Currently only valid if type is assetId.
+	 * Currently only valid if type is assetId. Do not use for other output types!
 	 */
 	AssetFilterInput         inFormat();
+
+	/**
+	 * Returns true if inFormat() is safe to use.
+	 */
+	bool hasInFormat();
 
 	/**
 	 * Checks if the data has valid values.
 	 */
 	bool isValid();
+
 
 	/**
 	 * Get the expected length of this class, depends on type.

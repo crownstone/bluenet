@@ -13,9 +13,8 @@ class AssetAcceptedEvent {
 public:
 	AssetFilter _primaryFilter;
 	const scanned_device_t& _asset;
-	uint8_t _acceptedFilterIdBitmask;
 
-	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset, uint8_t acceptedFilterIdBitmask)
-		: _primaryFilter(filter), _asset(asset), _acceptedFilterIdBitmask(acceptedFilterIdBitmask) {}
+	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset)
+		: _primaryFilter(filter), _asset(asset) {}
 };
 

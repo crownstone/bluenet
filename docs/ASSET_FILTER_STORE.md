@@ -287,6 +287,7 @@ Value | Name | Input format type | Output description type
 ----- | ---- | ----------------- | -----------------------
 0     | Mac  | None              | [MAC address report](#mac-address-report)
 1     | Asset ID | [Advertisement subdata](#advertisement-subdata) | [Asset ID](#asset-id)
+2     | None | None              | No mesh output is generated. Firmware will still update its internal presence information for the asset.
 
 *************************************************************************
 

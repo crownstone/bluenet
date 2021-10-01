@@ -61,13 +61,6 @@ cs_ret_code_t AssetFiltering::init() {
 cs_ret_code_t AssetFiltering::initInternal() {
 	LOGAssetFilteringInfo("init");
 
-	// Can we change this to a compile time check?
-	assert(AssetFilterStore::MAX_FILTER_IDS <= sizeof(filter_output_bitmasks_t::_forwardAssetId) * 8, "Too many filters for bitmask.");
-	if (AssetFilterStore::MAX_FILTER_IDS > sizeof(filter_output_bitmasks_t::_forwardAssetId) * 8) {
-		LOGe("Too many filters for bitmask.");
-		return ERR_MISMATCH;
-	}
-
 	_filterStore = new AssetFilterStore();
 	if (_filterStore == nullptr) {
 		return ERR_NO_SPACE;
@@ -147,45 +140,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 		return;
 	}
 
-
-	filter_output_bitmasks_t masks = {};
-
 	for (uint8_t filterIndex = 0; filterIndex < _filterStore->getFilterCount(); ++filterIndex) {
-		handleAcceptFilter(filterIndex, asset, masks);
+		checkIfFilterAccepts(filterIndex, asset);
 	}
-
-	if (!masks.combined()) {
-		// early return when no filter accepts the advertisement.
-		return;
-	}
-
-	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
-			masks._forwardAssetId,
-			masks._forwardMac,
-			masks._nearestAssetId);
-
-	uint8_t combinedMasks = masks.combined();
 
 	_assetForwarder->flush();
-
-
-	// TODO: this can also be merged into the assetforwarder
-	for (uint8_t filterIndex = 0; filterIndex < _filterStore->getFilterCount(); ++filterIndex) {
-		if(BLEutil::isBitSet(combinedMasks, filterIndex)) {
-			auto filter = AssetFilter (_filterStore->getFilter(filterIndex));
-
-			AssetAcceptedEvent evtData(filter, asset, combinedMasks);
-			event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
-
-			assetEvent.dispatch();
-		}
-	}
-
-	LOGAssetFilteringDebug("----------------------------------");
 }
 
-bool AssetFiltering::handleAcceptFilter(
-		uint8_t filterIndex, const scanned_device_t& device, filter_output_bitmasks_t& masks) {
+bool AssetFiltering::checkIfFilterAccepts(uint8_t filterIndex, const scanned_device_t& device) {
 	auto filter = AssetFilter(_filterStore->getFilter(filterIndex));
 
 	if (filter.filterdata().metadata().flags()->flags.exclude) {
@@ -193,41 +155,51 @@ bool AssetFiltering::handleAcceptFilter(
 	}
 
 	if (filter.filterAcceptsScannedDevice(device)) {
-		LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
+		handleAcceptedAsset(filterIndex, filter, device);
 
-		// update the relevant bitmask
-		switch (*filter.filterdata().metadata().outputType().outFormat()) {
-			case AssetFilterOutputFormat::Mac: {
-				BLEutil::setBit(masks._forwardMac, filterIndex);
-				LOGAssetFilteringDebug("Accepted MacOverMesh %u", filterIndex);
-				handleAssetAcceptedMacOverMesh(filterIndex, filter, device);
-				return true;
-			}
+		AssetAcceptedEvent evtData(filter, device);
+		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
+		assetEvent.dispatch();
 
-			case AssetFilterOutputFormat::AssetId: {
-				BLEutil::setBit(masks._forwardAssetId, filterIndex);
-				LOGAssetFilteringDebug("Accepted AssetIdOverMesh %u", masks);
-				handleAssetAcceptedAssetIdOverMesh(filterIndex, filter, device);
-				return true;
-			}
+		return true;
 
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-			case AssetFilterOutputFormat::AssetIdNearest: {
-				BLEutil::setBit(masks._nearestAssetId, filterIndex);
-				LOGAssetFilteringDebug("Accepted NearestAssetId %u", masks);
-				handleAssetAcceptedNearestAssetId(filterIndex, filter, device);
-				return true;
-			}
-#endif
-		}
 	}
 
 	return false;
 }
 
+void AssetFiltering::handleAcceptedAsset(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& asset) {
+	switch (*filter.filterdata().metadata().outputType().outFormat()) {
+		case AssetFilterOutputFormat::Mac: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::Mac", filterIndex);
+			handleAcceptedAssetOutputMac(filterIndex, filter, asset);
+			return;
+		}
+
+		case AssetFilterOutputFormat::AssetId: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetId", filterIndex);
+			handleAcceptedAssetOutputAssetId(filterIndex, filter, asset);
+			return;
+		}
+
+		case AssetFilterOutputFormat::None: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::None", filterIndex);
+			return;
+		}
+
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+		case AssetFilterOutputFormat::AssetIdNearest: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetIdNearest", filterIndex);
+			handleAcceptedAssetOutputAssetIdNearest(filterIndex, filter, asset);
+			return;
+		}
+#endif
+	}
+}
+
 // -------------------- filter handlers -----------------------
 
-void AssetFiltering::handleAssetAcceptedMacOverMesh(
+void AssetFiltering::handleAcceptedAssetOutputMac(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
 	asset_id_t assetId = filter.getAssetId(asset);
@@ -248,7 +220,7 @@ void AssetFiltering::handleAssetAcceptedMacOverMesh(
 	}
 }
 
-void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
+void AssetFiltering::handleAcceptedAssetOutputAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
 	asset_id_t assetId = filter.getAssetId(asset);
@@ -272,7 +244,7 @@ void AssetFiltering::handleAssetAcceptedAssetIdOverMesh(
 }
 
 
-void AssetFiltering::handleAssetAcceptedNearestAssetId(
+void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	asset_id_t assetId = filter.getAssetId(asset);
