@@ -736,6 +736,11 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001014" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader address"
 			)
+		
+		ADD_CUSTOM_TARGET(read_mbr_parameter_page_address
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001018" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read MBR parameter page address"
+			)
 	
 		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
 		# cmake utility function
