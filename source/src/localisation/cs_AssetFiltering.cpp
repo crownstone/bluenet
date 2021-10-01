@@ -147,45 +147,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 		return;
 	}
 
-
-	filter_output_bitmasks_t masks = {};
-
 	for (uint8_t filterIndex = 0; filterIndex < _filterStore->getFilterCount(); ++filterIndex) {
-		handleAcceptFilter(filterIndex, asset, masks);
+		handleAcceptFilter(filterIndex, asset);
 	}
-
-	if (!masks.combined()) {
-		// early return when no filter accepts the advertisement.
-		return;
-	}
-
-	LOGAssetFilteringDebug("bitmask forwardSid: %x. forwardMac: %x, nearestSid: %x",
-			masks._forwardAssetId,
-			masks._forwardMac,
-			masks._nearestAssetId);
-
-	uint8_t combinedMasks = masks.combined();
 
 	_assetForwarder->flush();
-
-
-	// TODO: this can also be merged into the assetforwarder
-	for (uint8_t filterIndex = 0; filterIndex < _filterStore->getFilterCount(); ++filterIndex) {
-		if(BLEutil::isBitSet(combinedMasks, filterIndex)) {
-			auto filter = AssetFilter (_filterStore->getFilter(filterIndex));
-
-			AssetAcceptedEvent evtData(filter, asset, combinedMasks);
-			event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
-
-			assetEvent.dispatch();
-		}
-	}
-
-	LOGAssetFilteringDebug("----------------------------------");
 }
-
 bool AssetFiltering::handleAcceptFilter(
-		uint8_t filterIndex, const scanned_device_t& device, filter_output_bitmasks_t& masks) {
+		uint8_t filterIndex, const scanned_device_t& device) {
 	auto filter = AssetFilter(_filterStore->getFilter(filterIndex));
 
 	if (filter.filterdata().metadata().flags()->flags.exclude) {
@@ -193,36 +162,46 @@ bool AssetFiltering::handleAcceptFilter(
 	}
 
 	if (filter.filterAcceptsScannedDevice(device)) {
-		LOGAssetFilteringDebug("Accepted filterAcceptsScannedDevice");
+		handleAcceptFilter(filterIndex, filter, device);
 
-		// update the relevant bitmask
-		switch (*filter.filterdata().metadata().outputType().outFormat()) {
-			case AssetFilterOutputFormat::Mac: {
-				BLEutil::setBit(masks._forwardMac, filterIndex);
-				LOGAssetFilteringDebug("Accepted MacOverMesh %u", filterIndex);
-				handleAssetAcceptedMacOverMesh(filterIndex, filter, device);
-				return true;
-			}
+		AssetAcceptedEvent evtData(filter, device);
+		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
 
-			case AssetFilterOutputFormat::AssetId: {
-				BLEutil::setBit(masks._forwardAssetId, filterIndex);
-				LOGAssetFilteringDebug("Accepted AssetIdOverMesh %u", masks);
-				handleAssetAcceptedAssetIdOverMesh(filterIndex, filter, device);
-				return true;
-			}
+		assetEvent.dispatch();
+		return true;
 
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-			case AssetFilterOutputFormat::AssetIdNearest: {
-				BLEutil::setBit(masks._nearestAssetId, filterIndex);
-				LOGAssetFilteringDebug("Accepted NearestAssetId %u", masks);
-				handleAssetAcceptedNearestAssetId(filterIndex, filter, device);
-				return true;
-			}
-#endif
-		}
 	}
 
 	return false;
+}
+
+void handleAcceptFilter(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& device) {
+	switch (*filter.filterdata().metadata().outputType().outFormat()) {
+		case AssetFilterOutputFormat::Mac: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::Mac", filterIndex);
+			handleAssetAcceptedMacOverMesh(filterIndex, filter, device);
+			return;
+		}
+
+		case AssetFilterOutputFormat::AssetId: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetId", filterIndex);
+			handleAssetAcceptedAssetIdOverMesh(filterIndex, filter, device);
+			return;
+		}
+
+		case AssetFilterOutputFormat::None: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::None", filterIndex);
+			return;
+		}
+
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+		case AssetFilterOutputFormat::AssetIdNearest: {
+			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetIdNearest", filterIndex);
+			handleAssetAcceptedNearestAssetId(filterIndex, filter, device);
+			return;
+		}
+#endif
+	}
 }
 
 // -------------------- filter handlers -----------------------
