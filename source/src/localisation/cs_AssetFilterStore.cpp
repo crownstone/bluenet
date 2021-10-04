@@ -461,7 +461,7 @@ void AssetFilterStore::sendInProgressStatus() {
 
 cs_ret_code_t AssetFilterStore::commit(uint16_t masterVersion, uint32_t masterCrc, bool store) {
 	LOGAssetFilterInfo("Commit version=%u CRC=%u store=%u", masterVersion, masterCrc, store);
-	if (validateFilters()) {
+	if (!validateFilters()) {
 		return ERR_WRONG_STATE;
 	}
 
@@ -513,7 +513,7 @@ uint32_t AssetFilterStore::computeMasterCrc() {
 
 bool AssetFilterStore::validateFilters() {
 	LOGAssetFilterDebug("validateFilters");
-	bool checksFailed = false;
+	bool valid = true;
 
 	for (size_t index = 0; index < _filtersCount; /* intentionally no index++ here */) {
 		auto filter = AssetFilter(_filters[index]);
@@ -530,7 +530,7 @@ bool AssetFilterStore::validateFilters() {
 			if (!filter.filterdata().isValid()) {
 				LOGAssetFilterWarn("Deallocating filter ID=%u because it is invalid.", filter.runtimedata()->filterId);
 				deallocateFilterByIndex(index);
-				checksFailed = true;
+				valid = false;
 				// Intentionally skipping index++, deallocate shrinks the array we're looping over.
 				continue;
 			}
@@ -545,7 +545,7 @@ bool AssetFilterStore::validateFilters() {
 				_logArray(SERIAL_DEBUG, true, filter.filterdata()._data, filterDataSizeAllocated);
 
 				deallocateFilterByIndex(index);
-				checksFailed = true;
+				valid = false;
 
 				// Intentionally skipping index++, deallocate shrinks the array we're looping over.
 				continue;
@@ -555,7 +555,7 @@ bool AssetFilterStore::validateFilters() {
 		index++;
 	}
 
-	return checksFailed;
+	return valid;
 }
 
 void AssetFilterStore::computeFilterCrcs() {
