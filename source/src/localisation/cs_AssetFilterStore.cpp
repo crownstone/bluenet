@@ -334,12 +334,12 @@ cs_ret_code_t AssetFilterStore::handleCommitFilterChangesCommand(const asset_fil
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 
-	commit(cmdData.masterVersion, cmdData.masterCrc, true);
+	cs_ret_code_t retCode = commit(cmdData.masterVersion, cmdData.masterCrc, true);
 
 	event_t event(CS_TYPE::EVT_FILTERS_UPDATED);
 	event.dispatch();
 
-	return ERR_SUCCESS;
+	return retCode;
 }
 
 void AssetFilterStore::handleGetFilterSummariesCommand(cs_result_t& result) {
