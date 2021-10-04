@@ -132,7 +132,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 
 void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
 
-	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", ticksTotal, timeToNextThrottleOpenMs);
+	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", throttlingBumpMsToTicks(timeToNextThrottleOpenMs), timeToNextThrottleOpenMs);
 
 	record.addThrottlingCountdown(throttlingBumpMsToTicks(timeToNextThrottleOpenMs));
 }

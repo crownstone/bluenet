@@ -136,6 +136,16 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 		return;
 	}
 
+	LOGAssetFilteringVerbose("Scanned device mac=%02X:%02X:%02X:%02X:%02X:%02X",
+			asset.address[5],
+			asset.address[4],
+			asset.address[3],
+			asset.address[2],
+			asset.address[1],
+			asset.address[0]
+	);
+	_logArray(LogLevelAssetFilteringVerbose, true, asset.data, asset.dataSize);
+
 	if (isAssetRejected(asset)) {
 		return;
 	}
@@ -171,13 +181,13 @@ bool AssetFiltering::checkIfFilterAccepts(uint8_t filterIndex, const scanned_dev
 void AssetFiltering::handleAcceptedAsset(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& asset) {
 	switch (*filter.filterdata().metadata().outputType().outFormat()) {
 		case AssetFilterOutputFormat::Mac: {
-			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::Mac", filterIndex);
+			LOGAssetFilteringDebug("FilterId %u accepted OutputFormat::Mac", filterIndex);
 			handleAcceptedAssetOutputMac(filterIndex, filter, asset);
 			return;
 		}
 
 		case AssetFilterOutputFormat::AssetId: {
-			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetId", filterIndex);
+			LOGAssetFilteringDebug("FilterId %u accepted OutputFormat::AssetId", filterIndex);
 			handleAcceptedAssetOutputAssetId(filterIndex, filter, asset);
 			return;
 		}
@@ -189,7 +199,7 @@ void AssetFiltering::handleAcceptedAsset(uint8_t filterIndex, AssetFilter filter
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		case AssetFilterOutputFormat::AssetIdNearest: {
-			LOGAssetFilteringDebug("FilterId %u Accepted OutputFormat::AssetIdNearest", filterIndex);
+			LOGAssetFilteringDebug("FilterId %u accepted OutputFormat::AssetIdNearest", filterIndex);
 			handleAcceptedAssetOutputAssetIdNearest(filterIndex, filter, asset);
 			return;
 		}
@@ -259,7 +269,7 @@ void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 
 		// if nearest wants to send a message, do so.
 		// (nearest algorithm only wants to send messages when we are nearest)
-		if(_nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask)) {
+		if (_nearestCrownstoneTracker->handleAcceptedAsset(asset, assetId, filterBitmask)) {
 			_assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
 		}
 	}
