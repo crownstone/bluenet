@@ -7,11 +7,13 @@
 
 #pragma once
 
+#include <type_traits>
+
 /**
  * A storage utility for objects of type Rec.
  *
  * Rec should implement:
- *   - KeyType key();
+ *   - IdType id();
  *   - bool isValid();
  *   - void invalidate();
  *
@@ -25,28 +27,31 @@ private:
 
 public:
 	/**
-	 * The type of object on which the records are checked for equality.
-	 * (ref removed to avoid complications)
+	 * Identifies and simplifies the type returned by the id() method of Rec.
+	 *
+	 * Notes:
+	 *  - remove_reference to avoid complications
+	 *  - decltype doesn't dereference the nullptr
 	 */
-	typedef std::remove_reference<decltype(Rec::key())> KeyType;
+	typedef std::remove_reference<decltype(((Rec*)nullptr)->id())> IdType;
 
 	/**
 	 * invalidate all records.
 	 */
 	void clear() {
-		for (auto& rec : _record) {
+		for (auto& rec : _records) {
 			rec.invalidate();
 		}
 	}
 
 	/**
-	 * linear search for the first record which has key() == k.
+	 * linear search for the first record which has id() == id.
 	 *
 	 * Returns nullptr if no such element exists.
 	 */
-	Rec* get(const KeyType& k) {
+	Rec* get(const IdType& id) {
 		for (auto& rec : _records) {
-			if (rec.isValid() && rec.key() == k) {
+			if (rec.isValid() && rec.id() == id) {
 				return &rec;
 			}
 		}
@@ -59,11 +64,11 @@ public:
 	 *
 	 * Returns nullptr if full();
 	 */
-	Rec* getOrAdd(KeyType k) {
+	Rec* getOrAdd(IdType k) {
 		Rec* retval = nullptr;
 		for (auto& rec : _records) {
 			if (rec.isValid()) {
-				if (rec.key() == k) {
+				if (rec.id() == k) {
 					return &rec;
 				}
 			} else {

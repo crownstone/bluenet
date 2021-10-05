@@ -11,6 +11,7 @@
 
 #include <localisation/cs_AssetRecord.h>
 #include <util/cs_Coroutine.h>
+#include <util/cs_Store.h>
 
 class AssetStore : public EventListener, public Component {
 public:
@@ -71,6 +72,8 @@ public:
 	void addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs);
 	uint16_t throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs);
 
+
+	Store<asset_record_t, MAX_RECORDS> _assetRecords_v2;
 
 private:
 	/**
