@@ -393,7 +393,22 @@ uint8_t SwitchAggregator::resolveOverrideState() {
 	}
 
 	LOGSwitchAggregatorDebug("Override is smart on");
-	return aggregatedBehaviourIntensity();
+	std::optional<uint8_t> opt0 = {0}; // to simplify following expressions.
+
+	// Only use behaviour and twilight state only when it has a value and when that value is not 0.
+	if (behaviourState > opt0 && twilightState > opt0) {
+		return CsMath::min(*behaviourState, *twilightState);
+	}
+
+	if (behaviourState > opt0) {
+		return *behaviourState;
+	}
+
+	if (twilightState > opt0) {
+		return *twilightState;
+	}
+
+	return 100;
 }
 
 bool SwitchAggregator::checkAndSetOwner(const cmd_source_with_counter_t& source) {
