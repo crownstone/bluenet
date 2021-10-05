@@ -427,6 +427,30 @@ APPLICATION_LENGTH=0x50000
 # TODO
 #RAM_APPLICATION_AMOUNT=0x1DC40
 
+# TODO:
+# - Move the defaults of the different hardware to the /config directories.
+# - Create easier defaults that reflect the actual hardware and derive the others. For example, a default like RAM_TOTAL_AMOUNT for a particular hardware series. Then calculate RAM_APPLICATION_AMOUNT where neessary (for example in the linker files).
+# - Have some way to select a softdevice. This file can then select a softdevice while details on the softdevice are then set where needed. This makes it easier to switch between softdevices when e.g. working on branches.
+
+# If you just run the firmware with the wrong RAM_R1_BASE setting, it will end up in an error handler.
+# When running debug output it will tell you exactly which RAM_R1_BASE setting it expects. If you are
+# really lazy, set it like that for new hardware.
+RAM_R1_BASE=0x20002a48
+
+# For the nRF52832 we have either 32kB or 64kB of RAM. This version has 64kB. Note that if you set
+# RAM_APPLICATION_AMOUNT too large, you will hardfaults. In gdb, if you use python, you'll not be
+# able to see a very obvious reason (imprecise data bus error). However, you will see something about
+# the stack. Because the stack grows down, this gives away that your RAM_APPLICATION_AMOUNT is likely
+# having the wrong value.
+#
+# (gdb) svd SCB CFSR_UFSR_BFSR_MMFSR
+#   Fields in SCB CFSR_UFSR_BFSR_MMFSR:
+#     ...
+#     IMPRECISERR:  1  Imprecise data bus error
+#     UNSTKERR:     0  Bus fault on unstacking for a return from exception
+#     STKERR:       1  Bus fault on stacking for exception entry
+#     ...
+RAM_APPLICATION_AMOUNT=0xd5b8
 
 
 
