@@ -41,6 +41,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 			uint8_t location = parsedAdvEventData->locationId;
 			bool forwardToMesh = true;
 
+			LOGPresenceHandlerDebug("From background adv: profile=%u location=%u forwardToMesh=%u", profile, location, forwardToMesh);
 			handlePresenceEvent(profile, location, forwardToMesh);
 			return;
 		}
@@ -62,7 +63,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 			uint8_t location  = 0; // Location 0 signifies 'in sphere, no specific room'
 			bool forwardToMesh = true;
 
-			LOGPresenceHandlerDebug("PresenceHandler received EVT_ASSET_ACCEPTED (profileId %u, location 0)", profileId);
+			LOGPresenceHandlerDebug("From asset: profile=%u location=%u forwardToMesh=%u", profileId, location, forwardToMesh);
 			handlePresenceEvent(profileId, location, forwardToMesh);
 			break;
 		}
@@ -132,7 +133,7 @@ void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, boo
 }
 
 PresenceMutation PresenceHandler::handleProfileLocation(uint8_t profile, uint8_t location, bool forwardToMesh) {
-	LOGPresenceHandlerDebug("handleProfileLocationAdministration profile=%u location=%u forwardToMesh=%u", profile, location, forwardToMesh);
+	LOGPresenceHandlerDebug("handleProfileLocation profile=%u location=%u forwardToMesh=%u", profile, location, forwardToMesh);
 	auto prevdescription = getCurrentPresenceDescription();
 
 #ifdef PRESENCE_HANDLER_TESTING_CODE

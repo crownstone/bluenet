@@ -270,7 +270,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 				event.result.returnCode = ERR_NO_ACCESS;
 				return false;
 			}
-			LOGd("packet intensity: %d, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
+			LOGd("packet intensity: %u, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
 			executeStateIntentionUpdate(packet->switchCmd, event.source);
 
 			break;
