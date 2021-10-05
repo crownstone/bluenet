@@ -28,7 +28,7 @@ AssetStore::AssetStore()
 {}
 
 cs_ret_code_t AssetStore::init() {
-	LOGAssetStoreInfo("Init: using buffer of %u B", sizeof(_assetRecords));
+	LOGAssetStoreInfo("Init: using buffer of %u B", sizeof(_store));
 	resetRecords();
 	listen();
 
@@ -65,14 +65,14 @@ asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, c
 
 void AssetStore::resetRecords() {
 	LOGAssetStoreDebug("resetRecords");
-	for (auto& record : _assetRecords){
+	for (auto& record : _store){
 		record.invalidate();
 	}
 }
 
 asset_record_t* AssetStore::getRecord(const asset_id_t& id) {
 	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
-		auto& record = _assetRecords[i];
+		auto& record = _store._records[i];
 		if (record.isValid() && record.assetId == id) {
 			return &record;
 		}
@@ -86,7 +86,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	uint8_t oldestIndex = 0;
 	uint8_t highestCounter = 0;
 	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
-		auto& record = _assetRecords[i];
+		auto& record = _store._records[i];
 		if (!record.isValid()) {
 			emptyIndex = i;
 			LOGAssetStoreVerbose("Found empty spot at index=%u", i);
@@ -105,7 +105,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	// First option, use empty spot.
 	if (emptyIndex != 0xFF) {
 		LOGAssetStoreVerbose("Creating new report record on empty spot, index=%u", emptyIndex);
-		auto& record =_assetRecords[emptyIndex];
+		auto& record =_store._records[emptyIndex];
 		record.empty();
 		record.assetId = id;
 		return &record;
@@ -114,7 +114,7 @@ asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	// Second option, increase number of records.
 	if (_assetRecordCount < MAX_RECORDS) {
 		LOGAssetStoreVerbose("Add new report record, index=%u", _assetRecordCount);
-		auto& record = _assetRecords[_assetRecordCount];
+		auto& record = _store._records[_assetRecordCount];
 		record.empty();
 		record.assetId = id;
 		_assetRecordCount++;
@@ -123,8 +123,8 @@ asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 
 	// Last option, overwrite oldest record.
 	LOGAssetStoreVerbose("Overwriting oldest record asset id=%02X:%02X:%02X, index=%u",
-			_assetRecords[oldestIndex].assetId.data[0], _assetRecords[oldestIndex].assetId.data[1], _assetRecords[oldestIndex].assetId.data[2], oldestIndex);
-	auto& record =_assetRecords[oldestIndex];
+			_store._records[oldestIndex].assetId.data[0], _store._records[oldestIndex].assetId.data[1], _store._records[oldestIndex].assetId.data[2], oldestIndex);
+	auto& record =_store._records[oldestIndex];
 	record.empty();
 	record.assetId = id;
 	return &record;
@@ -147,7 +147,7 @@ uint16_t AssetStore::throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs) 
 
 
 void AssetStore::incrementLastReceivedCounters() {
-	for (auto& record: _assetRecords) {
+	for (auto& record: _store) {
 		if (!record.isValid()) {
 			// skip invalid records
 			continue;
@@ -166,7 +166,7 @@ void AssetStore::incrementLastReceivedCounters() {
 }
 
 void AssetStore::decrementThrottlingCounters() {
-	for (auto& record: _assetRecords) {
+	for (auto& record: _store) {
 		if (!record.isValid()) {
 			// skip invalid records
 			continue;

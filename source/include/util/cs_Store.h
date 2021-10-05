@@ -15,7 +15,7 @@
  * Rec should implement:
  *   - IdType id();
  *   - bool isValid();
- *   - void invalidate();
+ *   - void clear();    // TODO:
  *
  * furthermore it must be default constructible.
  *
@@ -23,9 +23,11 @@
 template <class Rec, unsigned int Size>
 class Store {
 private:
-	Rec _records[Size]    = {};
 
 public:
+	Rec _records[Size]    = {};
+
+
 	/**
 	 * Identifies and simplifies the type returned by the id() method of Rec.
 	 *
@@ -40,7 +42,7 @@ public:
 	 */
 	void clear() {
 		for (auto& rec : _records) {
-			rec.invalidate();
+			rec.clear();
 		}
 	}
 
@@ -64,21 +66,35 @@ public:
 	 *
 	 * Returns nullptr if full();
 	 */
-	Rec* getOrAdd(IdType k) {
+	Rec* getOrAdd(IdType id) {
 		Rec* retval = nullptr;
 		for (auto& rec : _records) {
 			if (rec.isValid()) {
-				if (rec.id() == k) {
+				if (rec.id() == id) {
 					return &rec;
 				}
-			} else {
+			}
+			else {
 				if (retval == nullptr) {
-					// store the first invalid record as possible return value.
 					retval = &rec;
 				}
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * returns a pointer to the first invalid record.
+	 *
+	 * Returns nullptr if such element doesn't exist.
+	 */
+	Rec* add() {
+		for (auto& rec : _records) {
+			if (!rec.isValid()) {
+				return &rec;
+			}
+		}
+		return nullptr;
 	}
 
 	/**
@@ -96,4 +112,13 @@ public:
 	 * returns true if all elements are valid.
 	 */
 	bool full() { return size() == Size; }
+
+
+	Rec* begin() {
+		return _records;
+	}
+
+	Rec* end() {
+		return _records + Size;
+	}
 };

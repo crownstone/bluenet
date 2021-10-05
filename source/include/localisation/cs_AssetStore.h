@@ -73,7 +73,7 @@ public:
 	uint16_t throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs);
 
 
-	Store<asset_record_t, MAX_RECORDS> _assetRecords_v2;
+	Store<asset_record_t, MAX_RECORDS> _store;
 
 private:
 	/**
@@ -86,7 +86,7 @@ private:
 	 *  The array is 'front loaded'. entries with index < _assetRecordCount
 	 *  are valid, other entries are not.
 	 */
-	asset_record_t _assetRecords[MAX_RECORDS];
+//	asset_record_t _assetRecords[MAX_RECORDS];
 
 	/**
 	 * Current number of valid records in the _assetRecords array.
