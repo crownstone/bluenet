@@ -9,6 +9,9 @@
 
 #include <type_traits>
 
+#include <logging/cs_Logger.h>
+
+
 /**
  * A storage utility for objects of type Rec.
  *
@@ -28,11 +31,18 @@ private:
 	 * if _currentSize is less than Size, range based for loops
 	 * will loop over at most _currentSize items.
 	 */
-	uint16_t _currentSize;
+	uint16_t _currentSize = 0;
 
 public:
 	Rec _records[Size]    = {};
 
+	Rec* begin() {
+		return _records;
+	}
+
+	Rec* end() {
+		return _records + _currentSize;
+	}
 
 	/**
 	 * Identifies and simplifies the type returned by the id() method of Rec.
@@ -43,11 +53,14 @@ public:
 	 */
 	typedef typename std::remove_reference<decltype(((Rec*)nullptr)->id())>::type IdType;
 
+
 	/**
 	 * invalidate all records.
 	 */
-	void invalidateAll() {
-		for (auto& rec : _records) {
+	void clear() {
+		_currentSize = 0;
+		// TODO: @Bart practically we don't need to invalidate anything if size is shrunk to 0.
+		for (auto& rec : *this) {
 			rec.invalidate();
 		}
 	}
@@ -58,7 +71,7 @@ public:
 	 * Returns nullptr if no such element exists.
 	 */
 	Rec* get(const IdType& id) {
-		for (auto& rec : _records) {
+		for (auto& rec : *this) {
 			if (rec.isValid() && rec.id() == id) {
 				return &rec;
 			}
@@ -74,16 +87,12 @@ public:
 	 */
 	Rec* getOrAdd(IdType id) {
 		Rec* retval = nullptr;
-		for (auto& rec : _records) {
-			if (rec.isValid()) {
-				if (rec.id() == id) {
-					return &rec;
-				}
+		for (auto& rec : *this) {
+			if (!rec.isValid()) {
+				retval = &rec;
 			}
-			else {
-				if (retval == nullptr) {
-					retval = &rec;
-				}
+			else if (rec.id() == id) {
+				return &rec;
 			}
 		}
 
@@ -94,7 +103,9 @@ public:
 
 		if(_currentSize < Size) {
 			// still have space, increment size and return ref to last index.
-			return &_records[_currentSize++]; // (must postcrement)
+			Rec* retval = &_records[_currentSize++]; // must postcrement
+			retval->invalidate();
+			return retval;
 		}
 
 		return nullptr;
@@ -106,7 +117,7 @@ public:
 	 * Returns nullptr if such element doesn't exist.
 	 */
 	Rec* add() {
-		for (auto& rec : _records) {
+		for (auto& rec : *this) {
 			if (!rec.isValid()) {
 				return &rec;
 			}
@@ -123,23 +134,16 @@ public:
 	 */
 	uint16_t count() {
 		uint16_t s = 0;
-		for (auto& rec : _records ) {
+		for (auto& rec : *this ) {
 			s += rec.isValid() ? 1 : 0;
 		}
 		return s;
 	}
 
 	/**
-	 * returns true if all elements are valid.
+	 * returns true if all elements are occupied and valid.
 	 */
 	bool full() { return count() == Size; }
 
 
-	Rec* begin() {
-		return _records;
-	}
-
-	Rec* end() {
-		return _records + Size;
-	}
 };

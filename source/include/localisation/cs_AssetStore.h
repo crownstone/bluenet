@@ -15,10 +15,7 @@
 
 class AssetStore : public EventListener, public Component {
 public:
-	/**
-	 * Max number of asset records to keep up.
-	 */
-	static constexpr auto MAX_RECORDS = 50u;
+	// ===================== public settings =====================
 
 	/**
 	 * Time in seconds after which a record is timed out.
@@ -37,6 +34,8 @@ public:
 	 */
 	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 100;
 
+	// ===================== public methods =====================
+
 	AssetStore();
 	cs_ret_code_t init() override;
 
@@ -53,13 +52,6 @@ public:
 
 	/**
 	 * returns a pointer of record if found,
-	 * else tries to create a new blank record and return a pointer to that,
-	 * else returns nullptr.
-	 */
-	asset_record_t* getOrCreateRecord(const asset_id_t& id);
-
-	/**
-	 * returns a pointer of record if found,
 	 * else returns nullptr.
 	 */
 	asset_record_t* getRecord(const asset_id_t& id);
@@ -70,37 +62,31 @@ public:
 	 * for (at least) timeToNextThrottleOpenMs.
 	 */
 	void addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs);
+
+	/**
+	 * Convert ms to ticks, rounding fractional parts upwards.
+	 */
 	uint16_t throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs);
 
+private:
+	// =================== private settings ===================
+	static constexpr auto MAX_RECORDS = 50u;
+
+	// =================== private variables ===================
 
 	Store<asset_record_t, MAX_RECORDS> _store;
-
-private:
-	/**
-	 * Relevant data for this algorithm per asset_id.
-	 * Possible strategies to reduce memory:
-	 *  - when full, remove worst personal_rssi.
-	 *  - only store if observed the asset personally.
-	 *  - ...
-	 *
-	 *  The array is 'front loaded'. entries with index < _assetRecordCount
-	 *  are valid, other entries are not.
-	 */
-//	asset_record_t _assetRecords[MAX_RECORDS];
-
-	/**
-	 * Current number of valid records in the _assetRecords array.
-	 * Not really necessary, but avoids having to iterate through all records when there are not many assets.
-	 */
-	uint8_t _assetRecordCount = 0;
 
 	Coroutine updateLastReceivedCounterRoutine;
 	Coroutine updateLastSentCounterRoutine;
 
+	// =================== private methods ===================
+
 	/**
-	 * Invalidates all records.
+	 * returns a pointer of record if found,
+	 * else tries to create a new blank record and return a pointer to that,
+	 * else returns nullptr.
 	 */
-	void resetRecords();
+	asset_record_t* getOrCreateRecord(const asset_id_t& id);
 
 	/**
 	 * Adds 1 to the update/sent counters of all valid records, until 0xff is reached.
