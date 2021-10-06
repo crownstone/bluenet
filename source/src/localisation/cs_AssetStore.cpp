@@ -65,19 +65,11 @@ asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, c
 
 void AssetStore::resetRecords() {
 	LOGAssetStoreDebug("resetRecords");
-	for (auto& record : _store){
-		record.invalidate();
-	}
+	_store.invalidateAll();
 }
 
 asset_record_t* AssetStore::getRecord(const asset_id_t& id) {
-	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
-		auto& record = _store._records[i];
-		if (record.isValid() && record.assetId == id) {
-			return &record;
-		}
-	}
-	return nullptr;
+	return _store.get(id);
 }
 
 asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {

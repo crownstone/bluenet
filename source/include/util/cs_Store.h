@@ -15,7 +15,7 @@
  * Rec should implement:
  *   - IdType id();
  *   - bool isValid();
- *   - void clear();    // TODO:
+ *   - void invalidate();    // TODO:
  *
  * furthermore it must be default constructible.
  *
@@ -23,6 +23,12 @@
 template <class Rec, unsigned int Size>
 class Store {
 private:
+	/**
+	 * Current maximal number of valid records.
+	 * if _currentSize is less than Size, range based for loops
+	 * will loop over at most _currentSize items.
+	 */
+	uint16_t _currentSize;
 
 public:
 	Rec _records[Size]    = {};
@@ -35,14 +41,14 @@ public:
 	 *  - remove_reference to avoid complications
 	 *  - decltype doesn't dereference the nullptr
 	 */
-	typedef std::remove_reference<decltype(((Rec*)nullptr)->id())> IdType;
+	typedef typename std::remove_reference<decltype(((Rec*)nullptr)->id())>::type IdType;
 
 	/**
 	 * invalidate all records.
 	 */
-	void clear() {
+	void invalidateAll() {
 		for (auto& rec : _records) {
-			rec.clear();
+			rec.invalidate();
 		}
 	}
 
@@ -62,7 +68,7 @@ public:
 
 	/**
 	 * same as get, but will return pointer to an invalid element if
-	 * such element exists.
+	 * such element exists, possibly incrementing _currentSize.
 	 *
 	 * Returns nullptr if full();
 	 */
@@ -80,7 +86,18 @@ public:
 				}
 			}
 		}
-		return retval;
+
+		if(retval != nullptr)  {
+			// not found, but encountered an invalid record in the loop.
+			return retval;
+		}
+
+		if(_currentSize < Size) {
+			// still have space, increment size and return ref to last index.
+			return &_records[_currentSize++]; // (must postcrement)
+		}
+
+		return nullptr;
 	}
 
 	/**
@@ -97,10 +114,14 @@ public:
 		return nullptr;
 	}
 
+	uint16_t size() {
+		return _currentSize;
+	}
+
 	/**
 	 * returns number of valid elements.
 	 */
-	uint16_t size() {
+	uint16_t count() {
 		uint16_t s = 0;
 		for (auto& rec : _records ) {
 			s += rec.isValid() ? 1 : 0;
@@ -111,7 +132,7 @@ public:
 	/**
 	 * returns true if all elements are valid.
 	 */
-	bool full() { return size() == Size; }
+	bool full() { return count() == Size; }
 
 
 	Rec* begin() {
