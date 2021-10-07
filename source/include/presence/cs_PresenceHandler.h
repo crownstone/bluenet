@@ -10,6 +10,7 @@
 #include <optional>
 #include <presence/cs_PresenceDescription.h>
 #include <time/cs_SystemTime.h>
+#include <util/cs_Store.h>
 
 /**
  * Keeps up all the locations each profile is present in.
@@ -52,9 +53,16 @@ private:
      */
     static const constexpr uint8_t MAX_RECORDS = 20;
 
+    struct __attribute__((__packed__)) profile_location_t {
+    	uint8_t profile;
+		uint8_t location;
+		bool operator==(const profile_location_t& other) {
+			return memcmp(this, &other, sizeof(*this)) == 0;
+		}
+    };
+
     struct PresenceRecord {
-        uint8_t profile;
-        uint8_t location;
+    	profile_location_t profileLocation;
         /**
          * Used to determine when a record is timed out.
          * Decreases every seconds.
@@ -70,30 +78,30 @@ private:
 
     	PresenceRecord() : timeoutCountdownSeconds(0) {}
 
-    	PresenceRecord(
-    			uint8_t profileId,
-    			uint8_t roomId,
-    			uint8_t timeoutSeconds = PRESENCE_TIMEOUT_SECONDS,
-    			uint8_t meshThrottleSeconds = 0):
-    				profile(profileId),
-    				location(roomId),
-    				timeoutCountdownSeconds(timeoutSeconds),
-    				meshSendCountdownSeconds(meshThrottleSeconds)
-    	{}
+		PresenceRecord(
+				uint8_t profileId,
+				uint8_t roomId,
+				uint8_t timeoutSeconds      = PRESENCE_TIMEOUT_SECONDS,
+				uint8_t meshThrottleSeconds = 0)
+			: profileLocation{.profile = profileId, .location = roomId}
+			, timeoutCountdownSeconds(timeoutSeconds)
+			, meshSendCountdownSeconds(meshThrottleSeconds) {}
 
-        void invalidate() {
+		void invalidate() {
         	timeoutCountdownSeconds = 0;
         }
 
         bool isValid() {
         	return timeoutCountdownSeconds != 0;
         }
+
+        profile_location_t id() { return profileLocation; }
     };
 
     /**
      * Stores presence records.
      */
-    static PresenceRecord _presenceRecords[MAX_RECORDS];
+    static Store<PresenceRecord, MAX_RECORDS> _store;
 
     /**
      * Invalidate all presence records.

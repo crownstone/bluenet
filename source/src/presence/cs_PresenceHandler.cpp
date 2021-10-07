@@ -15,7 +15,7 @@
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
-PresenceHandler::PresenceRecord PresenceHandler::_presenceRecords[PresenceHandler::MAX_RECORDS];
+Store<PresenceHandler::PresenceRecord, PresenceHandler::MAX_RECORDS> PresenceHandler::_store;
 
 PresenceHandler::PresenceHandler() {
 	resetRecords();
@@ -256,11 +256,11 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 		return {};
 	}
 	PresenceStateDescription presence;
-	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
-		if (!_presenceRecords[i].isValid()) {
+	for (auto presenceRecord : _store) {
+		if (!presenceRecord.isValid()) {
 			continue;
 		}
-		presence.setLocation(_presenceRecords[i].location);
+		presence.setLocation(presenceRecord.profileLocation.location);
 	}
 	return presence;
 }
@@ -271,8 +271,8 @@ void PresenceHandler::tickSecond() {
 		if (_presenceRecords[i].isValid() && _presenceRecords[i].timeoutCountdownSeconds != 0) {
 			_presenceRecords[i].timeoutCountdownSeconds--;
 			if (_presenceRecords[i].timeoutCountdownSeconds == 0) {
-				LOGi("Timeout: profile=%u location=%u", _presenceRecords[i].profile, _presenceRecords[i].location);
-				dispatchPresenceChangeEvent(PresenceChange::PROFILE_LOCATION_EXIT, _presenceRecords[i].profile, _presenceRecords[i].location);
+				LOGi("Timeout: profile=%u location=%u", _presenceRecords[i].profileLocation.profile, _presenceRecords[i].profileLocation.location);
+				dispatchPresenceChangeEvent(PresenceChange::PROFILE_LOCATION_EXIT, _presenceRecords[i].profileLocation.profile, _presenceRecords[i].profileLocation.location);
 			}
 			else {
 				if (_presenceRecords[i].meshSendCountdownSeconds != 0) {
@@ -299,51 +299,29 @@ void PresenceHandler::tickSecond() {
 
 void PresenceHandler::resetRecords() {
 	LOGi("resetRecords");
-	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
-		_presenceRecords[i].invalidate();
-	}
+	_store.clear();
 }
 
 PresenceHandler::PresenceRecord* PresenceHandler::findRecord(uint8_t profile, uint8_t location) {
-	LOGPresenceHandlerDebug("findRecord profile=%u location=%u", profile, location);
-	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
-		if (_presenceRecords[i].isValid()) {
-			if (_presenceRecords[i].profile == profile && _presenceRecords[i].location == location) {
-				LOGPresenceHandlerDebug("Found at index=%u", i);
-				return &(_presenceRecords[i]);
-			}
-		}
-	}
-	return nullptr;
+	return _store.get(profile_location_t{.profile=profile, .location=location});
 }
 
 PresenceHandler::PresenceRecord* PresenceHandler::addRecord(uint8_t profile, uint8_t location) {
-	uint8_t emptySpotIndex = 0xFF;
-	uint8_t oldestEntryCounter = 0xFF;
-	uint8_t oldestEntryIndex = 0xFF;
-	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
-		if (!_presenceRecords[i].isValid()) {
-			emptySpotIndex = i;
-			break;
+	if(auto rec = _store.getOrAdd(profile_location_t{.profile=profile, .location=location})) {
+		// record found, or empty space was newly occupied.
+		*rec = PresenceRecord(profile, location);
+		return rec;
+	}
+
+	// Last option, overwrite oldest record.
+	auto oldestRecord = _store.begin();
+	for (auto record = _store.begin(); record != _store.end(); record++) {
+		if (record->timeoutCountdownSeconds < oldestRecord->timeoutCountdownSeconds) {
+			oldestRecord = record;
 		}
-		if (_presenceRecords[i].timeoutCountdownSeconds < oldestEntryCounter) {
-			oldestEntryCounter = _presenceRecords[i].timeoutCountdownSeconds;
-			oldestEntryIndex = i;
-		}
 	}
 
-	if (emptySpotIndex != 0xFF) {
-		LOGPresenceHandlerDebug("Add at empty index=%u", emptySpotIndex);
-		_presenceRecords[emptySpotIndex] = PresenceRecord(profile, location);
-		return &(_presenceRecords[emptySpotIndex]);
-	}
-
-	if (oldestEntryIndex != 0xFF) {
-		LOGPresenceHandlerDebug("Add at oldest index=%u", oldestEntryIndex);
-		_presenceRecords[oldestEntryIndex] = PresenceRecord(profile, location);
-		return &(_presenceRecords[oldestEntryIndex]);
-	}
-
-	LOGw("No space to add");
-	return nullptr;
+	LOGPresenceHandlerDebug("Overwriting oldest presence record");
+	*oldestRecord = PresenceRecord(profile, location);
+	return oldestRecord;
 }
