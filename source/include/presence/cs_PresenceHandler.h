@@ -160,10 +160,9 @@ private:
      * Sends presence change event.
      *
      * @param[in] type                 Type of change.
-     * @param[in] profileId            The profile ID that entered/left a location.
-     * @param[in] locationId           The location ID that was entered/left.
+     * @param[in] profileLocation      The relevant profile ID and location.
      */
-    void dispatchPresenceChangeEvent(PresenceChange type, uint8_t profileId = 0, uint8_t locationId = 0);
+    void dispatchPresenceChangeEvent(PresenceChange type, profile_location_t profileLocation = {});
 
     /**
      * Sends presence mutation event.

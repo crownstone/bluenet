@@ -113,6 +113,8 @@ void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, boo
 		return;
 	}
 
+	profile_location_t profileLocation = {.profile = profile, .location = location};
+
 	PresenceMutation mutation = handleProfileLocation(profile, location, forwardToMesh);
 
 	if (mutation != PresenceMutation::NothingChanged) {
@@ -122,12 +124,12 @@ void PresenceHandler::handlePresenceEvent(uint8_t profile, uint8_t location, boo
 	switch (mutation) {
 		case PresenceMutation::FirstUserEnterSphere: {
 			dispatchPresenceChangeEvent(PresenceChange::FIRST_SPHERE_ENTER);
-			dispatchPresenceChangeEvent(PresenceChange::PROFILE_SPHERE_ENTER, profile);
+			dispatchPresenceChangeEvent(PresenceChange::PROFILE_SPHERE_ENTER, profileLocation);
 			break;
 		}
 		case PresenceMutation::LastUserExitSphere: {
 			dispatchPresenceChangeEvent(PresenceChange::LAST_SPHERE_EXIT);
-			dispatchPresenceChangeEvent(PresenceChange::PROFILE_SPHERE_EXIT, profile);
+			dispatchPresenceChangeEvent(PresenceChange::PROFILE_SPHERE_EXIT, profileLocation);
 			break;
 		}
 		default: break;
@@ -154,6 +156,11 @@ PresenceMutation PresenceHandler::handleProfileLocation(uint8_t profile, uint8_t
 
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
+
+	profile_location_t profileLocation = {
+			.profile=profile,
+			.location=location
+	};
 
 	PresenceRecord* record = findRecord(profile, location);
 	if (record == nullptr) {
@@ -184,7 +191,7 @@ PresenceMutation PresenceHandler::handleProfileLocation(uint8_t profile, uint8_t
 	record->meshSendCountdownSeconds = meshCountdown;
 
 	if (newLocation) {
-		dispatchPresenceChangeEvent(PresenceChange::PROFILE_LOCATION_ENTER, profile, location);
+		dispatchPresenceChangeEvent(PresenceChange::PROFILE_LOCATION_ENTER, profileLocation);
 	}
 
 	auto nextdescription = getCurrentPresenceDescription();
@@ -232,12 +239,12 @@ void PresenceHandler::dispatchPresenceMutationEvent(PresenceMutation mutation) {
 	presence_event.dispatch();
 }
 
-void PresenceHandler::dispatchPresenceChangeEvent(PresenceChange type, uint8_t profileId, uint8_t locationId) {
-	LOGi("dispatchPresenceChangeEvent type=%u profile=%u location=%u", type, profileId, locationId);
+void PresenceHandler::dispatchPresenceChangeEvent(PresenceChange type, profile_location_t profileLocation) {
+	LOGi("dispatchPresenceChangeEvent type=%u profile=%u location=%u", type, profileLocation.profile, profileLocation.location);
 	TYPIFY(EVT_PRESENCE_CHANGE) eventData;
 	eventData.type = static_cast<uint8_t>(type);
-	eventData.profileId = profileId;
-	eventData.locationId = locationId;
+	eventData.profileId = profileLocation.profile;
+	eventData.locationId = profileLocation.location;
 	event_t event(CS_TYPE::EVT_PRESENCE_CHANGE, &eventData, sizeof(eventData));
 	event.dispatch();
 }
@@ -279,8 +286,7 @@ void PresenceHandler::tickSecond() {
 						presenceRecord.profileLocation.location);
 				dispatchPresenceChangeEvent(
 						PresenceChange::PROFILE_LOCATION_EXIT,
-						presenceRecord.profileLocation.profile,
-						presenceRecord.profileLocation.location);
+						presenceRecord.profileLocation);
 			}
 			else {
 				CsMath::Decrease(presenceRecord.meshSendCountdownSeconds);
@@ -295,7 +301,7 @@ void PresenceHandler::tickSecond() {
 	switch (mutation) {
 		case PresenceMutation::LastUserExitSphere: {
 			dispatchPresenceChangeEvent(PresenceChange::LAST_SPHERE_EXIT);
-			dispatchPresenceChangeEvent(PresenceChange::PROFILE_SPHERE_EXIT, 0);
+			dispatchPresenceChangeEvent(PresenceChange::PROFILE_SPHERE_EXIT);
 			break;
 		}
 		default:
