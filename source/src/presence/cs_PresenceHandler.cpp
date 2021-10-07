@@ -10,6 +10,8 @@
 #include <presence/cs_PresenceHandler.h>
 #include <storage/cs_State.h>
 #include <time/cs_TimeOfDay.h>
+#include <util/cs_Math.h>
+
 
 #define LOGPresenceHandlerDebug LOGvv
 
@@ -267,17 +269,21 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 
 void PresenceHandler::tickSecond() {
 	auto prevDescription = getCurrentPresenceDescription();
-	for (uint8_t i = 0; i < MAX_RECORDS; ++i) {
-		if (_presenceRecords[i].isValid() && _presenceRecords[i].timeoutCountdownSeconds != 0) {
-			_presenceRecords[i].timeoutCountdownSeconds--;
-			if (_presenceRecords[i].timeoutCountdownSeconds == 0) {
-				LOGi("Timeout: profile=%u location=%u", _presenceRecords[i].profileLocation.profile, _presenceRecords[i].profileLocation.location);
-				dispatchPresenceChangeEvent(PresenceChange::PROFILE_LOCATION_EXIT, _presenceRecords[i].profileLocation.profile, _presenceRecords[i].profileLocation.location);
+
+	for(auto& presenceRecord : _store) {
+		if (presenceRecord.isValid() && presenceRecord.timeoutCountdownSeconds != 0) {
+			presenceRecord.timeoutCountdownSeconds--;
+			if (presenceRecord.timeoutCountdownSeconds == 0) {
+				LOGi("Timeout: profile=%u location=%u",
+						presenceRecord.profileLocation.profile,
+						presenceRecord.profileLocation.location);
+				dispatchPresenceChangeEvent(
+						PresenceChange::PROFILE_LOCATION_EXIT,
+						presenceRecord.profileLocation.profile,
+						presenceRecord.profileLocation.location);
 			}
 			else {
-				if (_presenceRecords[i].meshSendCountdownSeconds != 0) {
-					_presenceRecords[i].meshSendCountdownSeconds--;
-				}
+				CsMath::Decrease(presenceRecord.meshSendCountdownSeconds);
 			}
 		}
 	}
