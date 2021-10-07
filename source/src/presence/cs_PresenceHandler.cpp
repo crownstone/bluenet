@@ -184,7 +184,7 @@ PresenceMutation PresenceHandler::handleProfileLocation(uint8_t profile, uint8_t
 	// When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
 	if (meshCountdown == 0) {
 		if (forwardToMesh) {
-			sendMeshMessage(profile, location);
+			sendMeshMessage(profileLocation);
 		}
 		meshCountdown = PRESENCE_MESH_SEND_THROTTLE_SECONDS + (RNG::getInstance().getRandom8() % PRESENCE_MESH_SEND_THROTTLE_SECONDS_VARIATION);
 	}
@@ -249,11 +249,11 @@ void PresenceHandler::dispatchPresenceChangeEvent(PresenceChange type, profile_l
 	event.dispatch();
 }
 
-void PresenceHandler::sendMeshMessage(uint8_t profile, uint8_t location) {
-	LOGPresenceHandlerDebug("sendMeshMessage profile=%u location=%u", profile, location);
+void PresenceHandler::sendMeshMessage(profile_location_t profileLocation) {
+	LOGPresenceHandlerDebug("sendMeshMessage profile=%u location=%u", profileLocation.profile, profileLocation.location);
 	TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
-	eventData.profile = profile;
-	eventData.location = location;
+	eventData.profile = profileLocation.profile;
+	eventData.location = profileLocation.location;
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION, &eventData, sizeof(eventData));
 	event.dispatch();
 }

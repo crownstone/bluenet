@@ -154,7 +154,7 @@ private:
     /**
      * Send a mesh message with profile and location.
      */
-    void sendMeshMessage(uint8_t profile, uint8_t location);
+    void sendMeshMessage(profile_location_t profileLocation);
 
     /**
      * Sends presence change event.
