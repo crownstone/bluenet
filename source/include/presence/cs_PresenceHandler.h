@@ -120,11 +120,6 @@ private:
      */
     static Store<PresenceRecord, MAX_RECORDS> _store;
 
-    /**
-     * Invalidate all presence records.
-     */
-    void resetRecords();
-
 	/**
 	 * finds oldest record and default constructs its present record,
 	 * then returns the pointer to it.

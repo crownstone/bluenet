@@ -20,7 +20,7 @@
 Store<PresenceHandler::PresenceRecord, PresenceHandler::MAX_RECORDS> PresenceHandler::_store;
 
 PresenceHandler::PresenceHandler() {
-	resetRecords();
+	_store.clear();
 }
 
 void PresenceHandler::init() {
@@ -152,7 +152,8 @@ PresenceMutation PresenceHandler::handleProfileLocation(profile_location_t profi
 
 		if (prevdescription.value_or(0) != 0) {
 			// sphere exit
-			resetRecords();
+			LOGi("resetRecords");
+			_store.clear();
 			return PresenceMutation::LastUserExitSphere;
 		}
 
@@ -308,10 +309,6 @@ void PresenceHandler::tickSecond() {
 	}
 }
 
-void PresenceHandler::resetRecords() {
-	LOGi("resetRecords");
-	_store.clear();
-}
 
 
 PresenceHandler::PresenceRecord* PresenceHandler::clearOldestRecord(profile_location_t profileLocation) {
