@@ -73,10 +73,10 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
 	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
-	CS_MESH_MODEL_TYPE_ASSET_INFO_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
+	CS_MESH_MODEL_TYPE_ASSET_INFO_MAC            = 27, // Payload: cs_mesh_model_msg_asset_report_mac_t
 	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
 	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
-	CS_MESH_MODEL_TYPE_ASSET_INFO_ID             = 30, // Payload: cs_mesh_model_msg_asset_info_id_t
+	CS_MESH_MODEL_TYPE_ASSET_INFO_ID             = 30, // Payload: cs_mesh_model_msg_asset_report_id_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };

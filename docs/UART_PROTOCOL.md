@@ -285,7 +285,7 @@ Type | Name | Length | Description
 uint8[] | MAC | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
 uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
 int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
-uint8 | Channel | 1 | Channel of the observed advertisement.
+uint8 | Channel | 1 | BLE channel of the observed advertisement.
 
 ### Asset ID report
 

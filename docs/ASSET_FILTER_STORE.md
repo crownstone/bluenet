@@ -38,10 +38,6 @@ Filter input and output packets
 - [Output description](#filter-output-description)
 - [Output format](#filter-output-format)
 
-Output packets
-- [MAC](#mac-address-report)
-- [Asset ID](#asset-id-report)
-
 Advertisement data selection
 - [BLE advertisement](#ble-advertisement)
 - [Advertisement subdata](#advertisement-subdata)
@@ -285,45 +281,9 @@ This output format is a `uint8` that:
 
 Value | Name | Input format type | Output description type
 ----- | ---- | ----------------- | -----------------------
-0     | Mac  | None              | [MAC address report](#mac-address-report)
-1     | Asset ID | [Advertisement subdata](#advertisement-subdata) | [Asset ID](#asset-id)
+0     | Mac  | None              | The full MAC address will be reported, see [mesh](MESH_PROTOCOL.md#asset-mac-report) and [UART](UART_PROTOCOL.md#asset-mac-report).
+1     | Asset ID | [Advertisement subdata](#advertisement-subdata) | The asset ID will be reported, see [mesh](MESH_PROTOCOL.md#asset-id-report) and [UART](UART_PROTOCOL.md#asset-id-report).
 2     | None | None              | No mesh output is generated. Firmware will still update its internal presence information for the asset.
-
-*************************************************************************
-
-## Ouput packets
-
-### MAC address report
-
-![MAC address report](../docs/diagrams/asset_filter_mac_address_report.png)
-
-Type | Name | Length | Description
----- | ---- | ------ | -----------
-uint8[] | MAC | 6    | The MAC address of the asset.
-[rssi](#rssi-and-channel) | Rssi | 1 | Signal strength of the asset advertisement.
-
-
-### Asset ID report
-
-![Asset ID report](../docs/diagrams/asset_filter_asset_id_report.png)
-
-Type | Name | Length | Description
----- | ---- | ------ | -----------
-[Asset ID](#asset-id) | Asset ID | 3 | The asset ID.
-uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
-[rssi](#rssi-and-channel) | Rssi | 1 | Signal strength of the asset advertisement.
-uint8[] | Reserved | 2 | Reserved for future use, 0 for now.
-
-
-### RSSI and channel
-
-![RSSI and channel packet](../docs/diagrams/rssi_and_channel_packet.png)
-
-Type | Name | Length in bits | Description
----- | ---- | -------------- | -----------
-uint8 | Channel | 2          | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
-uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
-
 
 *************************************************************************
 
