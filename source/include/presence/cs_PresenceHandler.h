@@ -30,8 +30,6 @@ public:
      */
     static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
-    static const constexpr uint8_t MAX_LOCATION_ID = 63;
-    static const constexpr uint8_t MAX_PROFILE_ID = 7;
 
 private:
     /** Number of seconds before presence times out. */
@@ -54,10 +52,18 @@ private:
     static const constexpr uint8_t MAX_RECORDS = 20;
 
     struct __attribute__((__packed__)) profile_location_t {
+		static const constexpr uint8_t MAX_LOCATION_ID = 63;
+		static const constexpr uint8_t MAX_PROFILE_ID = 7;
+
     	uint8_t profile;
 		uint8_t location;
+
 		bool operator==(const profile_location_t& other) {
 			return memcmp(this, &other, sizeof(*this)) == 0;
+		}
+
+		bool isValid() {
+			return profile <= MAX_PROFILE_ID && location <= MAX_LOCATION_ID;
 		}
     };
 
@@ -78,14 +84,25 @@ private:
 
     	PresenceRecord() : timeoutCountdownSeconds(0) {}
 
+
+		PresenceRecord(
+						profile_location_t profileLocation,
+						uint8_t timeoutSeconds      = PRESENCE_TIMEOUT_SECONDS,
+						uint8_t meshThrottleSeconds = 0)
+					: profileLocation(profileLocation)
+					, timeoutCountdownSeconds(timeoutSeconds)
+					, meshSendCountdownSeconds(meshThrottleSeconds) {}
+
 		PresenceRecord(
 				uint8_t profileId,
 				uint8_t roomId,
 				uint8_t timeoutSeconds      = PRESENCE_TIMEOUT_SECONDS,
 				uint8_t meshThrottleSeconds = 0)
-			: profileLocation{.profile = profileId, .location = roomId}
-			, timeoutCountdownSeconds(timeoutSeconds)
-			, meshSendCountdownSeconds(meshThrottleSeconds) {}
+			: PresenceRecord(
+					profile_location_t{.profile = profileId, .location = roomId},
+					timeoutSeconds,
+					meshThrottleSeconds) {
+		}
 
 		void invalidate() {
         	timeoutCountdownSeconds = 0;
@@ -112,7 +129,7 @@ private:
      * Finds a record with given profile and location.
      * Returns a null pointer if not found.
      */
-    PresenceRecord* findRecord(uint8_t profile, uint8_t location);
+    PresenceRecord* findRecord(profile_location_t profileLocation);
 
     /**
 	 * Adds a record with given profile and location.
@@ -121,7 +138,13 @@ private:
 	 *
 	 * Returns a null pointer if there is no space for a new record.
 	 */
-	PresenceRecord* addRecord(uint8_t profile, uint8_t location);
+	PresenceRecord* addRecord(profile_location_t profileLocation);
+
+	/**
+	 * finds oldest record and default constructs its present record,
+	 * then returns the pointer to it.
+	 */
+	PresenceRecord* clearOldestRecord(profile_location_t profileLocation);
 
     /**
      * Handle an incoming profile-location combination.
@@ -129,7 +152,7 @@ private:
      * - Calls handleProfileLocation().
      * - Dispatches events based on the returned mutation type.
      */
-	void handlePresenceEvent(uint8_t profile, uint8_t location, bool forwardToMesh);
+	void handlePresenceEvent(profile_location_t profileLocation, bool forwardToMesh);
 
 	/**
      * Handle an incoming profile-location combination.
@@ -142,7 +165,7 @@ private:
      * @param[in] forwardToMesh   If true, the update will be pushed into the mesh (throttled).
      * @return                    Mutation type.
      */
-    PresenceMutation handleProfileLocation(uint8_t profile, uint8_t location, bool forwardToMesh);
+    PresenceMutation handleProfileLocation(profile_location_t profileLocation, bool forwardToMesh);
 
     /**
      * Resolves the type of mutation from previous and next descriptions.
