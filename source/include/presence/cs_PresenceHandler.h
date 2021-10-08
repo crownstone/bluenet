@@ -125,21 +125,6 @@ private:
      */
     void resetRecords();
 
-    /**
-     * Finds a record with given profile and location.
-     * Returns a null pointer if not found.
-     */
-    PresenceRecord* findRecord(profile_location_t profileLocation);
-
-    /**
-	 * Adds a record with given profile and location.
-	 * Does not check if it already exists!
-	 * Replaces oldest entry if there are no invalid record places to use.
-	 *
-	 * Returns a null pointer if there is no space for a new record.
-	 */
-	PresenceRecord* addRecord(profile_location_t profileLocation);
-
 	/**
 	 * finds oldest record and default constructs its present record,
 	 * then returns the pointer to it.

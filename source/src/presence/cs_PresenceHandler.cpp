@@ -163,18 +163,16 @@ PresenceMutation PresenceHandler::handleProfileLocation(profile_location_t profi
 	uint8_t meshCountdown = 0;
 	bool newLocation = true;
 
-	PresenceRecord* record = findRecord(profileLocation);
+	PresenceRecord* record = _store.getOrAdd(profileLocation);
 	if (record == nullptr) {
-		// Create a new record
-		record = addRecord(profileLocation);
-
-		if (record == nullptr) {
-			// We cannot handle this presence event, so nothing changed.
-			return PresenceMutation::NothingChanged;
-		}
+		// All spots in the store are occupied, clear the oldest.
+		record = clearOldestRecord(profileLocation);
+	} else if (!record->isValid() ){
+		// Invalid record was found in the store, clean up and use that one.
+		*record = PresenceRecord(profileLocation);
 	}
 	else {
-		// This record already exists.
+		// Record already exists for this profile location.
 		newLocation = false;
 
 		// Reset the timeout countdown.
@@ -315,19 +313,6 @@ void PresenceHandler::resetRecords() {
 	_store.clear();
 }
 
-PresenceHandler::PresenceRecord* PresenceHandler::findRecord(profile_location_t profileLocation) {
-	return _store.get(profileLocation);
-}
-
-PresenceHandler::PresenceRecord* PresenceHandler::addRecord(profile_location_t profileLocation) {
-	if(auto rec = _store.getOrAdd(profileLocation)) {
-		// record found, or empty space was newly occupied.
-		*rec = PresenceRecord(profileLocation);
-		return rec;
-	}
-
-	return clearOldestRecord(profileLocation);
-}
 
 PresenceHandler::PresenceRecord* PresenceHandler::clearOldestRecord(profile_location_t profileLocation) {
 	// Last option, overwrite oldest record.
