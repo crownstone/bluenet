@@ -82,27 +82,13 @@ private:
     	 */
     	uint8_t meshSendCountdownSeconds;
 
-    	PresenceRecord() : timeoutCountdownSeconds(0) {}
-
-
 		PresenceRecord(
-						profile_location_t profileLocation,
+						profile_location_t profileLocation = {},
 						uint8_t timeoutSeconds      = PRESENCE_TIMEOUT_SECONDS,
 						uint8_t meshThrottleSeconds = 0)
 					: profileLocation(profileLocation)
 					, timeoutCountdownSeconds(timeoutSeconds)
 					, meshSendCountdownSeconds(meshThrottleSeconds) {}
-
-		PresenceRecord(
-				uint8_t profileId,
-				uint8_t roomId,
-				uint8_t timeoutSeconds      = PRESENCE_TIMEOUT_SECONDS,
-				uint8_t meshThrottleSeconds = 0)
-			: PresenceRecord(
-					profile_location_t{.profile = profileId, .location = roomId},
-					timeoutSeconds,
-					meshThrottleSeconds) {
-		}
 
 		void invalidate() {
         	timeoutCountdownSeconds = 0;
@@ -174,7 +160,8 @@ private:
     void dispatchPresenceMutationEvent(PresenceMutation mutation);
 
     /**
-     * To be called every second.
+     * To be called every second. Decreases timeoutCountdownSeconds of the records
+     * and dispatches exit-events when necessary.
      */
     void tickSecond();
 
