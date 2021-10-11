@@ -9,6 +9,10 @@
 #include <util/cs_Utils.h>
 
 
+device_id_t TrackedDevice::id() {
+	return data.data.deviceId;
+}
+
 bool TrackedDevice::isValid() {
 	return fieldsSet != 0;
 }

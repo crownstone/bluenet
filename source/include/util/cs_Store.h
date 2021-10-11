@@ -70,13 +70,61 @@ public:
 	 *
 	 * Returns nullptr if no such element exists.
 	 */
-	Rec* get(const IdType& id) {
+	constexpr Rec* get(const IdType& id) {
 		for (auto& rec : *this) {
 			if (rec.isValid() && rec.id() == id) {
 				return &rec;
 			}
 		}
 		return nullptr;
+	}
+
+	/**
+	 * returns the first object `obj` in the store satisfying `p(obj) == true`.
+	 * (useful if comparing to other things than `obj.id()`
+	 *
+	 * NOTE: this does _not_ check for isValid, because you may want to find the
+	 * first invalid item for example!
+	 */
+	template<class UnaryPredicate>
+	constexpr Rec* get(UnaryPredicate  p) {
+		for (auto& obj : *this) {
+			if (p(obj)) {
+				return &obj;
+			}
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Returns a pointer to the element in the store which minimizes
+	 * the value function `val`.
+	 *
+	 * Only considers records with `isValid() == true`.
+	 *
+	 * ValueFunction is a function (or function like object) that
+	 * takes an object of type `Rec` as argument and returns the value
+	 * that should be minimized.
+	 */
+	template<class ValueFunction>
+	constexpr Rec* getMin(ValueFunction getValue) {
+		Rec* smallest = get([] (auto rec) { return rec.isValid();});
+
+		if(smallest == nullptr){
+			return nullptr;
+		}
+
+		for(Rec* obj = smallest + 1; obj != end(); obj++) {
+			if(!obj.isValid()) {
+				continue;
+			}
+
+			if (getValue(*obj) <  getValue(*smallest)) {
+				smallest = obj;
+			}
+		}
+
+		return smallest;
 	}
 
 	/**
@@ -101,14 +149,7 @@ public:
 			return retval;
 		}
 
-		if(_currentSize < Size) {
-			// still have space, increment size and return ref to last index.
-			Rec* retval = &_records[_currentSize++]; // must postcrement
-			retval->invalidate();
-			return retval;
-		}
-
-		return nullptr;
+		return addAtEnd();
 	}
 
 	/**
@@ -122,6 +163,21 @@ public:
 				return &rec;
 			}
 		}
+		return nullptr;
+	}
+
+	/**
+	 * increases size of the store if possible and returns
+	 * the entry at the end(), after invalidating.
+	 */
+	Rec* addAtEnd() {
+		if(_currentSize < Size) {
+			// still have space, increment size and return ref to last index.
+			Rec* retval = &_records[_currentSize++]; // must postcrement
+			retval->invalidate();
+			return retval;
+		}
+
 		return nullptr;
 	}
 
