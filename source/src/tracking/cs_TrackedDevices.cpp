@@ -14,8 +14,8 @@
 #include <util/cs_Math.h>
 
 
-#define LOGTrackedDevicesDebug LOGd
-#define LOGTrackedDevicesVerbose LOGd
+#define LOGTrackedDevicesDebug LOGvv
+#define LOGTrackedDevicesVerbose LOGvv
 
 
 void TrackedDevices::print(TrackedDevice& device) {

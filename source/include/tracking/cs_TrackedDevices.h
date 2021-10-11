@@ -59,8 +59,8 @@ public:
 	static const uint16_t HEARTBEAT_TTL_MINUTES_MAX = 60;
 
 private:
-	static const uint16_t TICKS_PER_SECOND = (100 / TICK_INTERVAL_MS);
-	static const uint16_t TICKS_PER_MINUTES = (6 * 1000 / TICK_INTERVAL_MS);
+	static const uint16_t TICKS_PER_SECOND = (1000 / TICK_INTERVAL_MS);
+	static const uint16_t TICKS_PER_MINUTES = (60 * 1000 / TICK_INTERVAL_MS);
 
 	uint16_t ticksLeftSecond = TICKS_PER_SECOND;
 	uint16_t ticksLeftMinute = TICKS_PER_MINUTES;
@@ -70,7 +70,6 @@ private:
 	 *
 	 * Device ID should be unique.
 	 */
-//	TrackedDevice _devices[MAX_TRACKED_DEVICES];
 	Store<TrackedDevice, MAX_TRACKED_DEVICES> _store;
 
 	/**
