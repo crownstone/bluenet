@@ -270,9 +270,9 @@ uint8_t[] | MAC address | 6 | Mac address of the replier, ignored for request.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Protocol | 1 | Supported protocol.
-uint16_t | Master version | 2 | Master version.
-uint32_t | Master CRC | 4 | Master CRC.
+uint8_t | Protocol | 1 | Supported [protocol](ASSET_FILTERING.md#protocol-version).
+uint16_t | Master version | 2 | [Master version](ASSET_FILTERING.md#master-version).
+uint32_t | Master CRC | 4 | [Master CRC](ASSET_FILTERING.md#master-crc).
 
 ### Asset MAC report
 
@@ -298,8 +298,8 @@ uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
-[Asset ID](ASSET_FILTER_STORE.md#asset-id) | Asset ID | 3 | The asset ID.
-uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
+[Asset ID](ASSET_FILTERING.md#asset-id) | Asset ID | 3 | The asset ID.
+uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed [filter ID](ASSET_FILTERING.md#filter-id) = N, and lead to this asset ID.
 int8 | RSSI | 1 | Signal strength of the asset advertisement.
 [channel](#asset-id-report-channel) | Channel | 1 |
 uint8 | Reserved | 1 | Reserved for future use, 0 for now.

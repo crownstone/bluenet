@@ -14,7 +14,7 @@ FILENAMES = [DOCS_DIR + F for F in [
 "UART_PROTOCOL.md",
 "MESH_PROTOCOL.md",
 "IPC.md",
-"ASSET_FILTER_STORE.md"]]
+"ASSET_FILTERING.md"]]
 
 patternHeaderLink = re.compile(".*\]\(#([^\)]+)\)") # Matches: [some text](#header-to-link-to)
 patternHeaderLinkExternal = re.compile(".*\]\(([^#]+)#([^\)]+)\)") # Matches: [some text](File.md#header-to-link-to)

@@ -348,10 +348,10 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
 95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
-110 | Upload filter | [Upload filter packet](ASSET_FILTER_STORE.md#upload-filter-packet) | - | Upload (a part of) an asset filter. | x
-111 | Remove filter | [Remove filter packet](ASSET_FILTER_STORE.md#remove-filter-packet) | - | Delete an asset filter. | x
-112 | Commit filter changes | [Commit filter changes packet](ASSET_FILTER_STORE.md#commit-filter-packet) | - | Commit changes made to the asset filters. | x
-113 | Get filter summaries | - | [Get filter summaries packet](ASSET_FILTER_STORE.md#get-filter-summaries-result-packet) | Obtain summaries of the stored asset filters. | x
+110 | Upload filter | [Upload filter packet](ASSET_FILTERING.md#upload-filter-packet) | - | Upload (a part of) an asset filter. | x
+111 | Remove filter | [Remove filter packet](ASSET_FILTERING.md#remove-filter-packet) | - | Delete an asset filter. | x
+112 | Commit filter changes | [Commit filter changes packet](ASSET_FILTERING.md#commit-filter-packet) | - | Commit changes made to the asset filters. | x
+113 | Get filter summaries | - | [Get filter summaries packet](ASSET_FILTERING.md#get-filter-summaries-result-packet) | Obtain summaries of the stored asset filters. | x
 
 
 #### Setup packet
