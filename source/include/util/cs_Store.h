@@ -115,7 +115,7 @@ public:
 		}
 
 		for(Rec* obj = smallest + 1; obj != end(); obj++) {
-			if(!obj.isValid()) {
+			if(!obj->isValid()) {
 				continue;
 			}
 
@@ -157,7 +157,7 @@ public:
 	 *
 	 * Returns nullptr if such element doesn't exist.
 	 */
-	Rec* add() {
+	constexpr Rec* add() {
 		for (auto& rec : *this) {
 			if (!rec.isValid()) {
 				return &rec;
@@ -170,7 +170,7 @@ public:
 	 * increases size of the store if possible and returns
 	 * the entry at the end(), after invalidating.
 	 */
-	Rec* addAtEnd() {
+	constexpr Rec* addAtEnd() {
 		if(_currentSize < Size) {
 			// still have space, increment size and return ref to last index.
 			Rec* retval = &_records[_currentSize++]; // must postcrement
@@ -186,20 +186,29 @@ public:
 	}
 
 	/**
-	 * returns number of valid elements.
+	 * returns number of elements that satisfy the predicate.
 	 */
-	uint16_t count() {
+	template<class UnaryPredicate>
+	constexpr uint16_t countIf(UnaryPredicate p) {
 		uint16_t s = 0;
 		for (auto& rec : *this ) {
-			s += rec.isValid() ? 1 : 0;
+			s += p(rec) ? 1 : 0;
 		}
 		return s;
 	}
+	/**
+	 * returns number of valid elements.
+	 */
+	constexpr uint16_t count() {
+		return countIf([](auto& rec) { rec.isValid(); });
+	}
+
+
 
 	/**
 	 * returns true if all elements are occupied and valid.
 	 */
-	bool full() { return count() == Size; }
+	constexpr bool full() { return count() == Size; }
 
 
 };

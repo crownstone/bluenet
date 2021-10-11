@@ -15,7 +15,7 @@ namespace CsMath{
  * to the min/max values of lhs.
  */
 template<class T, class U>
-T SafeAdd (T lhs, U rhs) {
+constexpr inline T SafeAdd (T lhs, U rhs) {
 	T min = std::numeric_limits<T>::lowest();
 	T max = std::numeric_limits<T>::max();
 
@@ -32,7 +32,7 @@ T SafeAdd (T lhs, U rhs) {
  * roll over safe variant of ++some_value;
  */
 template<class T, class U=int>
-T& Increase(T& obj, U diff=1) {
+constexpr inline T& Increase(T& obj, U diff=1) {
 	obj = SafeAdd(obj, diff);
 	return obj;
 }
@@ -41,8 +41,20 @@ T& Increase(T& obj, U diff=1) {
  * roll over safe variant of --some_value;
  */
 template<class T, class U=int>
-T& Decrease(T& obj, U diff=1) {
+constexpr inline T& Decrease(T& obj, U diff=1) {
 	obj = SafeAdd(obj, -diff);
+	return obj;
+}
+
+/**
+ * Identical to the other decrease function.
+ *
+ * Use this pointer based variation if you get
+ * 'cannot bind packed field to ...&` errors.
+ */
+template<class T, class U=int>
+constexpr inline T* DecreaseByPointer(T* obj, U diff=1) {
+	Decrease(*obj, diff);
 	return obj;
 }
 
