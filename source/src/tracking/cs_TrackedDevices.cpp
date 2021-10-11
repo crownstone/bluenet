@@ -19,7 +19,7 @@ TrackedDevices::TrackedDevices() {
 }
 
 void TrackedDevices::init() {
-	LOGi("Init. Using %u bytes of RAM.", sizeof(_devices));
+	LOGi("Init. Using %u bytes of RAM.", sizeof(_store));
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -174,23 +174,17 @@ TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 }
 
 TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
-	LOGTrackedDevicesVerbose("find id=%u listSize=%u", deviceId, _deviceListSize);
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (_devices[i].isValid() && _devices[i].data.data.deviceId == deviceId) {
-			LOGTrackedDevicesVerbose("found device at index=%u", i);
-			return &(_devices[i]);
-		}
-	}
-	return nullptr;
+	return _store.get(deviceId);
 }
 
 TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
-	LOGTrackedDevicesVerbose("find token=%02X:%02X:%02X listSize=%u", deviceToken[0], deviceToken[1], deviceToken[2], _deviceListSize);
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (_devices[i].isValid() && memcmp(_devices[i].data.data.deviceToken, deviceToken, size) == 0) {
-			LOGTrackedDevicesVerbose("found token at index=%u id=%u", i, _devices[i].data.data.deviceId);
-			return &(_devices[i]);
+	LOGTrackedDevicesVerbose("find token=%02X:%02X:%02X listSize=%u", deviceToken[0], deviceToken[1], deviceToken[2], _store.size());
+
+	for (auto& device : _store) {
+		if (device.isValid() && memcmp(device.data.data.deviceToken, deviceToken, size) == 0) {
+			LOGTrackedDevicesVerbose("found token id=%u", device.data.data.deviceId);
+			return &device;
 		}
 	}
 	return nullptr;
@@ -199,43 +193,28 @@ TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 TrackedDevice* TrackedDevices::add() {
 	LOGTrackedDevicesDebug("add");
 
-	// Use empty spot.
-	uint8_t incompleteIndex = 0xFF;
-	uint16_t lowestTtl = 0xFFFF;
-	uint8_t lowestTtlIndex = 0xFF;
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (!_devices[i].isValid()) {
-			LOGTrackedDevicesDebug("Use empty spot: index=%u", i);
-			return &(_devices[i]);
-		}
-		if (!_devices[i].allFieldsSet()) {
-			incompleteIndex = i;
-		}
-		if (_devices[i].data.data.timeToLiveMinutes < lowestTtl) {
-			lowestTtlIndex = i;
-		}
+	// use invalid spot in current range if possible
+	if(auto emptyspot = _store.get([](auto device) { return !device.isValid();})) {
+		LOGTrackedDevicesDebug("Use empty spot");
+		return emptyspot;
 	}
 
-	// Increase list size.
-	if (_deviceListSize < MAX_TRACKED_DEVICES) {
-		uint8_t index = _deviceListSize++;
-		LOGTrackedDevicesDebug("Increase list size: index=%u listSize=%u", index, _deviceListSize);
-		_devices[index].invalidate();
-		return &(_devices[index]);
+	// Increase store size if possible.
+	if(auto newSpot = _store.addAtEnd()) {
+		LOGTrackedDevicesDebug("Create new spot");
+		return newSpot;
 	}
 
-	// Use spot with incomplete data.
-	if (incompleteIndex != 0xFF) {
-		LOGTrackedDevicesDebug("Use spot with incomplete data: index=%u", incompleteIndex);
-		_devices[incompleteIndex].invalidate();
-		return &(_devices[incompleteIndex]);
+	if(auto incomplete = _store.get([](auto device) { return !device.allFieldsSet();})) {
+		LOGTrackedDevicesDebug("Use spot of incomplete tracked device record");
+		incomplete->invalidate();
+		return incomplete;
 	}
 
-	// Use spot with lowest TTL.
-	if (lowestTtlIndex != 0xFF) {
-		LOGTrackedDevicesDebug("Use spot with lowest TTL: index=%u", lowestTtlIndex);
-		_devices[lowestTtlIndex].invalidate();
-		return &(_devices[lowestTtlIndex]);
+	if(auto lowestTtlRecord = _store.getMin([](auto device) { return device.data.data.timeToLiveMinutes; })){
+		LOGTrackedDevicesDebug("Use spot of lowest ttl record");
+		lowestTtlRecord->invalidate();
+		return lowestTtlRecord;
 	}
 
 	// Shouldn't happen.
