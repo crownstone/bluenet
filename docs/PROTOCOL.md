@@ -453,7 +453,7 @@ Value | Name | Description
 
 ##### UICR data packet
 
-This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](NAMING.md).
+This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](PRODUCT_NAMING.md).
 
 ![UICR data packet](../docs/diagrams/uicr_data_packet.png)
 

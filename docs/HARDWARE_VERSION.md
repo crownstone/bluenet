@@ -1,6 +1,6 @@
 # Hardware version
 
-See also the [naming](https://github.com/crownstone/bluenet/blob/master/docs/NAMING.md) document.
+See also the [product naming](https://github.com/crownstone/bluenet/blob/master/docs/PRODUCT_NAMING.md) document.
 
 
 ```
