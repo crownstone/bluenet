@@ -306,7 +306,7 @@ def drawVarList(varList, filename, lengthInBits):
 	size = [totalLen * STEP_X, STEP_Y]
 
 	# Add text "byte" or "bit" to screen size
-	byteTxt = "bit" if lengthInBits else "byte"
+	byteTxt = "bit " if lengthInBits else "byte "
 	byteLabel = fontBytes.render(byteTxt, True, WHITE)
 	size[0] += byteLabel.get_width()
 	size[1] += byteLabel.get_height()

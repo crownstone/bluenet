@@ -285,15 +285,15 @@ Type | Name | Length | Description
 uint8[] | MAC | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
 uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
 int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
-uint8 | Channel | 1 | Channel of the observed advertisement.
+uint8 | Channel | 1 | BLE channel of the observed advertisement.
 
 ### Asset ID report
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
-[Asset ID](ASSET_FILTER_STORE.md#asset-id) | Asset ID | 3 | The asset ID.
+[Asset ID](ASSET_FILTERING.md#asset-id) | Asset ID | 3 | The asset ID.
 uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
-uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
+uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed [filter ID](ASSET_FILTERING.md#filter-id) = N, and lead to this asset ID.
 int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
 uint8 | Channel | 1 | BLE channel of the observed advertisement.
 
