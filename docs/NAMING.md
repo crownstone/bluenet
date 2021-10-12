@@ -183,6 +183,44 @@ If values are not written they are still `FF`.
 
 Why for example the `PRODUCT_HOUSING` is important to be known to the firmware, is because a different form factor of the product housing might influence the antenna. It might very well be that additional metal requires us to broadcast slightly stronger for example or it might require us to use different parameters for the current measurements or modules that depend on the current measurements. The id for `PRODUCT_HOUSING` starts with `0x01` for each product line and is bumped for each mechanical alteration.
 
+## Currently release combinations
+
+These are defined as factory image configs, and written to UICR:
+
+| Board | Family | Market | Type | Major | Minor | Patch | Year | Week | Housing |
+| ----- | ------ | ------ | ---- | ----- | ----- | ----- | ---- | ---- | ------- |
+| 1007  | 1      | 1      | 6    | 0     | 0     | 1     | 19   | 40   | 1       |
+| 1008  | 1      | 1      | 6    | 0     | 1     | 0     | 20   | 22   | 1       |
+| 1008  | 1      | 1      | 6    | 0     | 1     | 1     | 20   | 34   | 1       |
+| 1008  | 1      | 2      | 6    | 0     | 1     | 2     | 20   | 34   | 1       |
+| 1502  | 1      | 1      | 2    | 1     | 0     | 2     | 20   | 9    | 1       |
+| 1504  | 1      | 1      | 2    | 1     | 3     | 3     | 20   | 9    | 1       |
+| 100   | 1      | 1      | 4    | 0     | 0     | 0     | 17   | 1    | 1       |
+| 200   | 1      | 1      | 5    | 0     | 0     | 0     | 18   | 10   | 1       |
+
+These are from hardware version strings, which are based on the board version only:
+
+| Board | Family | Market | Type | Major | Minor | Patch | Year | Week | Housing |
+| ----- | ------ | ------ | ---- | ----- | ----- | ----- | ---- | ---- | ------- |
+| 1000  | 1      | 1      | 3    | 0     | 1     | 0     | 00   | 00   | 0000    |
+| 1001  | 1      | 1      | 3    | 0     | 2     | 0     | 00   | 00   | 0000    |
+| 1002  | 1      | 1      | 3    | 0     | 3     | 0     | 00   | 00   | 0000    |
+| 1003  | 1      | 1      | 3    | 0     | 4     | 0     | 00   | 00   | 0000    |
+| 1004  | 1      | 1      | 3    | 0     | 5     | 0     | 00   | 00   | 0000    |
+| 1007  | 1      | 1      | 6    | 0     | 0     | 0     | 00   | 00   | 0000    |
+| 1008  | 1      | 1      | 6    | 0     | 1     | 0     | 00   | 00   | 0000    |
+| 1500  | 1      | 1      | 2    | 0     | 1     | 0     | 00   | 00   | 0000    |
+| 1501  | 1      | 1      | 2    | 0     | 2     | 0     | 00   | 00   | 0000    |
+| 1502  | 1      | 1      | 2    | 1     | 0     | 0     | 00   | 00   | 0000    |
+| 1503  | 1      | 1      | 2    | 1     | 1     | 0     | 00   | 00   | 0000    |
+| 1504  | 1      | 1      | 2    | 1     | 3     | 0     | 00   | 00   | 0000    |
+| 100   | 1      | 1      | 4    | 1     | 0     | 0     | 00   | 00   | 0000    |
+| 200   | 1      | 1      | 4    | 0     | 0     | 0     | 00   | 00   | 0000    |
+
+There may be Crownstones in the field with other, or empty, UICR values. These have not been documented.
+
+
+
 # Shops
 
 ## EAN
