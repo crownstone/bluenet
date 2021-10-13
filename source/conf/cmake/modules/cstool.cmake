@@ -42,7 +42,7 @@ if(INSTRUCTION STREQUAL "SETUP")
 	file(APPEND ${setupConfigJsonFile} "  \"ibeaconMinor\": ${BEACON_MINOR}\n")
 	file(APPEND ${setupConfigJsonFile} "}\n")
 	file(READ ${setupConfigJsonFile} FILE_CONTENTS)
-	message(STATUS "csutil ${KEYS_JSON_FILE} setup ${MAC_ADDRESS} ${setupConfigJsonFile}")
+	message(STATUS "csutil \"${KEYS_JSON_FILE}\" \"setup\" \"${MAC_ADDRESS}\" \"${setupConfigJsonFile}\"")
 	execute_process(
 		COMMAND ${DEFAULT_MODULES_PATH}/../../../../tools/csutil/csutil "${KEYS_JSON_FILE}" "setup" "${MAC_ADDRESS}" "${setupConfigJsonFile}"
 		TIMEOUT 60
@@ -56,6 +56,8 @@ if(INSTRUCTION STREQUAL "SETUP")
 	endif()
 	if (status)
 		message(STATUS "Status: ${status}")
+		message(STATUS "+ Are you e.g. sure that you ran cmake with -DDOWNLOAD_CSUTIL?")
+		message(STATUS "+ Did you set KEYS_JSON_FILE to a file with keys?")
 	endif()
 elseif(INSTRUCTION STREQUAL "FACTORY_RESET")
 	execute_process(

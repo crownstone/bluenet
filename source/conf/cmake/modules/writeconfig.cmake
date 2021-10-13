@@ -81,9 +81,16 @@ function(write_field FIELD_NAME FIELD_VALUE)
 
 endfunction()
 
+if(NOT SERIAL_NUM)
+	set(SERIAL_NUM "")
+endif()
+
+if(NOT MAC_ADDRESS)
+	set(MAC_ADDRESS "")
+endif()
+
 if(NOT CONFIG_FIELD)
-	message(STATUS "Write all fields")
-	get_mac_address(${SERIAL_NUM} MAC_ADDRESS)
+	get_mac_address("${SERIAL_NUM}" MAC_ADDRESS)
 	write_field("MAC_ADDRESS" ${MAC_ADDRESS})
 	write_field("BEACON_MAJOR" ${BEACON_MAJOR})
 	write_field("BEACON_MINOR" ${BEACON_MINOR})
