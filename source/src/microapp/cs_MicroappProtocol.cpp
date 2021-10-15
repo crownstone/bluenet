@@ -253,7 +253,7 @@ void handleTwiCommand(twi_cmd_t* twi_cmd) {
 }
 
 int handleCommand(uint8_t* payload, uint16_t length) {
-	_logArray(SERIAL_INFO, true, payload, length);
+	_logArray(SERIAL_DEBUG, true, payload, length);
 	uint8_t command = payload[0];
 	switch(command) {
 		case CS_MICROAPP_COMMAND_LOG: {
@@ -388,8 +388,6 @@ MicroappProtocol::MicroappProtocol(): EventListener() {
  * of that function to call back into the bluenet code.
  */
 void MicroappProtocol::setIpcRam() {
-
-
 	LOGi("Set IPC info for microapp");
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 
@@ -464,8 +462,8 @@ uint16_t MicroappProtocol::interpretRamdata() {
 			return ERR_SUCCESS;
 		}
 	} else {
-        	LOGi("Nothing found in RAM ret_code=%u", ret_code);
-        	return ERR_NOT_FOUND;
+		LOGi("Nothing found in RAM ret_code=%u", ret_code);
+		return ERR_NOT_FOUND;
 	}
 	return ERR_UNSPECIFIED;
 }
@@ -527,7 +525,7 @@ void MicroappProtocol::callSetupAndLoop(uint8_t appIndex) {
 				LOGi("Set loaded to true");
 				_loaded = true;
 			} else {
-				LOGw("Disable microapp. After boot not the right info available retcode: %u", ret_code);
+				LOGw("Disable microapp. After boot not the right info available. ret_code=%u", ret_code);
 				// Apparently, something went wrong?
 				_booted = false;
 			}
