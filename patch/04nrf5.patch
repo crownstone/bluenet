@@ -1,26 +1,44 @@
-85a86,90
-> static __INLINE uint8_t prev_index(uint8_t index)
-> {
->     return (index == 0) ? m_queue_size : (index - 1);
-> }
-> 
-166c171,172
-<                              app_sched_event_handler_t handler)
----
->                              app_sched_event_handler_t handler,
->                              bool                      no_duplicates)
-178,179c184,194
-<             event_index       = m_queue_end_index;
-<             m_queue_end_index = next_index(m_queue_end_index);
----
->             event_index = m_queue_end_index;
->             uint16_t prev_index = prev_index(m_queue_end_index);
->             if (no_duplicates
->                     && !app_sched_queue_empty()
->                     && prev_index != m_queue_start_index
->                     && m_queue_event_headers[prev_index].handler == handler) {
->                 event_index = 0xFFFE;
->                 }
->                 else {
->                     m_queue_end_index = next_index(m_queue_end_index);
->                 }
+--- tools/nrf5_sdk/components/libraries/scheduler/app_scheduler.c	2019-02-14 17:24:58.000000000 +0100
++++ tools/nrf5_sdk_patched/components/libraries/scheduler/app_scheduler.c	2021-10-18 11:30:34.949123332 +0200
+@@ -83,6 +83,11 @@
+     return (index < m_queue_size) ? (index + 1) : 0;
+ }
+ 
++static __INLINE uint8_t prev_index(uint8_t index)
++{
++    return (index == 0) ? m_queue_size : (index - 1);
++}
++
+ 
+ static __INLINE uint8_t app_sched_queue_full()
+ {
+@@ -163,7 +168,8 @@
+ 
+ uint32_t app_sched_event_put(void const              * p_event_data,
+                              uint16_t                  event_data_size,
+-                             app_sched_event_handler_t handler)
++                             app_sched_event_handler_t handler,
++                             bool                      no_duplicates)
+ {
+     uint32_t err_code;
+ 
+@@ -175,8 +181,17 @@
+ 
+         if (!APP_SCHED_QUEUE_FULL())
+         {
+-            event_index       = m_queue_end_index;
+-            m_queue_end_index = next_index(m_queue_end_index);
++            event_index = m_queue_end_index;
++            uint16_t prev_index = prev_index(m_queue_end_index);
++            if (no_duplicates
++                    && !app_sched_queue_empty()
++                    && prev_index != m_queue_start_index
++                    && m_queue_event_headers[prev_index].handler == handler) {
++                event_index = 0xFFFE;
++                }
++                else {
++                    m_queue_end_index = next_index(m_queue_end_index);
++                }
+ 
+         #if APP_SCHEDULER_WITH_PROFILER
+             // This function call must be protected with critical region because
