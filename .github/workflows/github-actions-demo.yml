@@ -1,5 +1,5 @@
 name: GitHub Actions Demo
-on: [push]
+on: [push, pull_request, release]
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
@@ -11,7 +11,22 @@ jobs:
         uses: actions/checkout@v2
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
+      - name: Install dependencies
         run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+          sudo apt-get update
+          sudo apt-get install cmake
+          cmake --version
+      - name: Create build dir
+        run: |
+          mkdir build
+      - name: Run cmake
+        working-directory: ./build
+        run: |
+          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
+      - name: Run make
+        working-directory: ./build
+        run: |
+          make
+      - name: Finish up
+        run: |
+          echo "🍏 This job's status is ${{ job.status }}."
