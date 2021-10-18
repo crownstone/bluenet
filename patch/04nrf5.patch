@@ -1,5 +1,5 @@
---- tools/nrf5_sdk/components/libraries/scheduler/app_scheduler.c	2019-02-14 17:24:58.000000000 +0100
-+++ tools/nrf5_sdk_patched/components/libraries/scheduler/app_scheduler.c	2021-10-18 11:30:34.949123332 +0200
+--- tools/nrf5_sdk/components/libraries/scheduler/app_scheduler.c	2021-10-18 13:49:38.474767618 +0200
++++ tools/nrf5_sdk_patched/components/libraries/scheduler/app_scheduler.c	2021-10-18 13:48:57.454749968 +0200
 @@ -83,6 +83,11 @@
      return (index < m_queue_size) ? (index + 1) : 0;
  }
@@ -12,33 +12,78 @@
  
  static __INLINE uint8_t app_sched_queue_full()
  {
-@@ -163,7 +168,8 @@
+@@ -160,11 +165,18 @@
+ }
+ #endif // APP_SCHEDULER_WITH_PROFILER
  
+-
  uint32_t app_sched_event_put(void const              * p_event_data,
                               uint16_t                  event_data_size,
--                             app_sched_event_handler_t handler)
-+                             app_sched_event_handler_t handler,
-+                             bool                      no_duplicates)
+                              app_sched_event_handler_t handler)
  {
++    return app_sched_event_put_extra_args(p_event_data, event_data_size, handler, false);
++}
++
++uint32_t app_sched_event_put_extra_args(void const   * p_event_data,
++                             uint16_t                  event_data_size,
++                             app_sched_event_handler_t handler,
++                             bool                      no_repetitions)
++{
      uint32_t err_code;
  
-@@ -175,8 +181,17 @@
+     if (event_data_size <= m_queue_event_size)
+@@ -175,8 +187,17 @@
  
          if (!APP_SCHED_QUEUE_FULL())
          {
 -            event_index       = m_queue_end_index;
 -            m_queue_end_index = next_index(m_queue_end_index);
 +            event_index = m_queue_end_index;
-+            uint16_t prev_index = prev_index(m_queue_end_index);
-+            if (no_duplicates
++            uint8_t prev_end_index = prev_index(m_queue_end_index);
++            if (no_repetitions
 +                    && !app_sched_queue_empty()
-+                    && prev_index != m_queue_start_index
-+                    && m_queue_event_headers[prev_index].handler == handler) {
++                    && prev_end_index != m_queue_start_index
++                    && m_queue_event_headers[prev_end_index].handler == handler) {
 +                event_index = 0xFFFE;
-+                }
-+                else {
-+                    m_queue_end_index = next_index(m_queue_end_index);
-+                }
++            }
++            else {
++                m_queue_end_index = next_index(m_queue_end_index);
++            }
  
          #if APP_SCHEDULER_WITH_PROFILER
              // This function call must be protected with critical region because
+@@ -187,6 +208,9 @@
+ 
+         CRITICAL_REGION_EXIT();
+ 
++        if (event_index == 0xFFFE) {
++            return NRF_SUCCESS;
++        }
+         if (event_index != 0xFFFF)
+         {
+             // NOTE: This can be done outside the critical region since the event consumer will
+--- tools/nrf5_sdk/components/libraries/scheduler/app_scheduler.h	2021-10-18 13:49:38.474767618 +0200
++++ tools/nrf5_sdk_patched/components/libraries/scheduler/app_scheduler.h	2021-10-18 13:26:12.386071919 +0200
+@@ -164,6 +164,11 @@
+                              uint16_t                  event_size,
+                              app_sched_event_handler_t handler);
+ 
++uint32_t app_sched_event_put_extra_args(void const *   p_event_data,
++                             uint16_t                  event_size,
++                             app_sched_event_handler_t handler,
++                             bool                      no_repetitions);
++
+ /**@brief Function for getting the maximum observed queue utilization.
+  *
+  * Function for tuning the module and determining QUEUE_SIZE value and thus module RAM usage.
+--- tools/nrf5_sdk/components/softdevice/common/nrf_sdh.c	2021-10-18 13:49:38.454767609 +0200
++++ tools/nrf5_sdk_patched/components/softdevice/common/nrf_sdh.c	2021-10-18 13:11:49.198049891 +0200
+@@ -387,7 +387,7 @@
+ 
+ void SD_EVT_IRQHandler(void)
+ {
+-    ret_code_t ret_code = app_sched_event_put(NULL, 0, appsh_events_poll);
++    ret_code_t ret_code = app_sched_event_put_extra_args(NULL, 0, appsh_events_poll, true);
+     APP_ERROR_CHECK(ret_code);
+ }
+ 
