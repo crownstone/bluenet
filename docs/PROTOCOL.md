@@ -76,7 +76,7 @@ The nonce is a combination of 2 pieces: the session nonce and the packet nonce
 ![Nonce](../docs/diagrams/nonce.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8[] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted-packet)). Should be different for each encrypted packet.
 uint8[] | Session nonce | 5 | Session nonce, should be [read](#session-data) when connected, each time you connect.
 
@@ -90,7 +90,7 @@ The session nonce and validation key will be different each time you connect.
 ![Session data](../docs/diagrams/session-data.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Validation | 4 | 0xCAFEBABE as validation.
 uint8 | Protocol | 1 | The protocol version to use for communication.
 uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
@@ -111,7 +111,7 @@ When data is sent via notifications, it will be done via multiple notification p
 ![Multipart notification packet](../docs/diagrams/multipart-notification-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Counter | 1 | Part counter: starts at 0, 255 for last packet.
 uint8[] | Data part |  | Part of the data.
 
@@ -124,7 +124,7 @@ Unlike the name suggests, only the payload of this packet is encrypted. The head
 ![Encrypted packet](../docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8[] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#aes-128-ctr-encryption).
 uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determines which key has been used for encryption.
 [Encrypted payload](#encrypted-payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
@@ -134,7 +134,7 @@ uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determi
 ![Encrypted payload](../docs/diagrams/encrypted-payload.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Validation key | 4 | Should be equal to the read [validation key](#session-data).
 uint8 | Payload |  | Whatever data would have been sent if encryption was disabled.
 uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
@@ -160,7 +160,7 @@ This packet is according to iBeacon spec, see for example [here](http://www.havl
 ![iBeacon packet](../docs/diagrams/ibeacon-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | AD Length | 1 | Length of the next AD structure.
 uint8 | AD Type | 1 | 0x01: flags.
 uint8 | Flags | 1 |
@@ -180,7 +180,7 @@ This packet contains the state of the Crownstone.
 ![Service data packet](../docs/diagrams/service-data-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | AD Length | 1 | Length of the next AD structure.
 uint8 | AD Type | 1 | 0x01: flags.
 uint8 | Flags | 1 | 
@@ -221,8 +221,8 @@ The following services are available (depending on state and config):
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
 
-Characteristic | UUID | Date type | Description | A | M | B
---- | --- | --- | --- | :---: | :---: | :---:
+Characteristic | UUID | Data type | Description | A     | M     | B
+-------------- | ---- | --------- | ----------- | :---: | :---: | :---:
 Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  | ECB
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x
@@ -244,8 +244,8 @@ The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only avai
  When encryption is enabled, the control and both config characteristics are encrypted with AES CTR. The key and session nonce for this are gotten from their
  characteristics.
 
-Characteristic | UUID | Date type | Description
---- | --- | --- | ---
+Characteristic | UUID | Data type | Description
+-------------- | ---- | --------- | -----------
 MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone.
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption.
 Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data.
@@ -274,7 +274,7 @@ __If encryption is enabled, this packet must be encrypted using any of the keys 
 ![Control packet](../docs/diagrams/control-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Protocol | 1 | Which protocol the command is. Should be similar to the protocol as received in the [session data](#session-data). Older protocols might be supported, but there's no guarantee.
 uint16 | [Command type](#command-types) | 2 | Type of the command.
 uint16 | Size | 2 | Size of the payload in bytes.
@@ -294,8 +294,8 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Result payload | Description | A | M | B | S
---- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
+Type nr | Type name | Payload type | Result payload | Description | A     | M     | B     | S
+------- | --------- | ------------ | -------------- | ----------- | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup-packet) | - | Perform setup. |  |  |  | x
 1 | Factory reset | uint32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state-get-packet) | [State get result packet](#state-get-result-packet) | Required access depends on the state type. | x | x | x
@@ -359,7 +359,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 ![Setup packet](../docs/diagrams/setup-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Stone ID | 1 | Crownstone ID. Should be unique per sphere.
 uint8 | Sphere ID | 1 | Short sphere ID. Should be the same for each Crownstone in the sphere.
 uint8[] | Admin key  | 16 | 16 byte key used to encrypt/decrypt admin access functions.
@@ -380,7 +380,7 @@ uint16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should 
 ![Switch command](../docs/diagrams/switch-command.png)
 
 Type | Name | Length in bits | Description
---- | --- | --- | ---
+---- | ---- | -------------- | -----------
 uint8 | Command value | 8 | Percentage or dedicated command
 
 The switch command is not bit-structured, but values up to 0x64 / 01100100b / 100 are used for dimming. All higher values can have special meanings.
@@ -397,7 +397,7 @@ Value | Name | Description
 #### State get packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint16 | [State type](#state-types) | 2 | Type of state to get.
 uint16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 uint8 | [Persistence mode](#state-get-persistence-mode) | 1 | Type of persistence mode.
@@ -408,7 +408,7 @@ uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
 Most configuration changes will only be applied after a reboot.
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint16 | [State type](#state-types) | 2 | Type of state to set.
 uint16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 uint8 | [Persistence mode](#state-set-persistence-mode) | 1 | Type of persistence mode.
@@ -421,7 +421,7 @@ Available configurations types:
 #### State get result packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint16 | [State type](#state-types) | 2 | Type of state.
 uint16 | id | 2 | ID of state.
 uint8 | [Persistence mode](#state-get-persistence-mode) | 1 | Type of persistence mode.
@@ -431,7 +431,7 @@ uint8 | Payload | N | Payload data, depends on state type.
 #### State set result packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint16 | [State type](#state-types) | 2 | Type of state.
 uint16 | id | 2 | ID of state that was set.
 uint8 | [Persistence mode](#state-set-persistence-mode) | 1 | Type of persistence mode.
@@ -458,7 +458,7 @@ This packet is meant for developers. For more information, see [UICR](UICR.md) a
 ![UICR data packet](../docs/diagrams/uicr_data_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Board | 4 | The board version.
 uint8 | Product type | 1 | Type of product.
 uint8 | Region | 1 | Which region the product is for.
@@ -479,7 +479,7 @@ uint8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 ![Ibeacon config ID packet](../docs/diagrams/ibeacon_config_id_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | ID | 1 | The ibeacon config ID to set.
 uint32 | Timestamp | 4 | Unix timestamp when the ibeacon config ID should be set (the first time).
 uint16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be set again, after the given timestamp.
@@ -493,7 +493,7 @@ uint16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be
 ![Sun time packet](../docs/diagrams/set_sun_time_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Sunrise | 4 | The moment when the upper limb of the sun appears on the horizon. Units: seconds since midnight.
 uint32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below the horizon. Units: seconds since midnight.
 
@@ -503,7 +503,7 @@ uint32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below
 ![Multi switch list](../docs/diagrams/multi_switch_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Count | 1 | Number of valid entries.
 [Multi switch entry](#multi-switch-entry)[] | List | Count * 2 | A list of switch commands.
 
@@ -512,7 +512,7 @@ uint8 | Count | 1 | Number of valid entries.
 ![Multi switch short entry](../docs/diagrams/multi_switch_entry_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
 uint8 | [Switch value](#switch-command-value) | 1 | The switch value to be set by the targeted crownstone.
 
@@ -547,7 +547,7 @@ Current white list:
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | [Type](#mesh-command-types) | 1 | Type of command, see table below.
 uint8 | [Flags](#mesh-command-flags) | 1 | Options.
 uint8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default (10s timeout or 3 transmissions).
@@ -558,7 +558,7 @@ uint8 | Command payload | N | The command payload data, which depends on the [ty
 ##### Mesh command types
 
 Type nr | Type name | Payload type | Payload description
---- | --- | --- | ---
+------- | --------- | ------------ | -------------------
 0 | Control | [Control](#control-packet) | Send a control command over the mesh, see control packet.
 
 ##### Mesh command flags
@@ -580,7 +580,7 @@ Bit | Name |  Description
 #### Hub data packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Encrypted | 1 | Whether the data should be sent encrypted over the UART: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
 uint8 | Reserved | 1 | Reserved for future use. Must be 0 for now.
 uint8 | Payload | N | Payload data to be sent to hub.
@@ -592,7 +592,7 @@ uint8 | Payload | N | Payload data to be sent to hub.
 A profile can be present at multiple locations/rooms.
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 
@@ -601,7 +601,7 @@ uint64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupie
 ![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Time | 4 | Current time. 0 if not set.
 uint32 | Sunrise | 4 | Sunrise time, seconds after midnight. 0 if not set.
 uint32 | Sunset | 4 | Sunset time, seconds after midnight. 0 if not set.
@@ -621,7 +621,7 @@ uint64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupie
 #### ADC restarts packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Restart count | 4 | Number of ADC restarts since boot.
 uint32 | Timestamp | 4 | Unix timestamp of the last ADC restart.
 
@@ -629,7 +629,7 @@ uint32 | Timestamp | 4 | Unix timestamp of the last ADC restart.
 #### ADC channel swaps packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Swap count | 4 | Number of detected ADC channel swaps since boot.
 uint32 | Timestamp | 4 | Unix timestamp of the last detected ADC channel swap.
 
@@ -637,7 +637,7 @@ uint32 | Timestamp | 4 | Unix timestamp of the last detected ADC channel swap.
 #### GPREGRET result packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Index | 1 | Which GPREGRET.
 uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to count resets, bit 5 is set on brownout (doesn't work yet), bit 6 is set to go to DFU mode, bit 7 is set after storage was recovered.
 
@@ -645,7 +645,7 @@ uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to c
 #### RAM stats packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Min stack end | 4 | Minimal observed stack end pointer since boot. It might take some time before this reflects the actual minimum.
 uint32 | Max heap end | 4 | Maximal observed heap end pointer since boot.
 uint32 | Min free | 4 | Minimal observed free RAM in bytes. It might take some time before this reflects the actual minimum.
@@ -655,14 +655,14 @@ uint32 | Sbrk fail count | 4 | Number of times sbrk failed to hand out space.
 #### Switch history packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Count | 1 | Number of items in the list.
 [Switch history item](#switch-history-item-packet)[] | List |
 
 ##### Switch history item packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 [Switch command](#switch-command-value) | Switch command | 1 | The switch command value.
 [Switch state](#switch-state) | Switch state | 1 | The switch state after the command was executed.
@@ -673,7 +673,7 @@ uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 #### Command source packet
 
 Type | Name | Length in bits | Description
---- | --- | --- | ---
+---- | ---- | -------------- | -----------
 uint8 | [Source type](#command-source-type) | 3 | What type of source ID. Bits 5-7.
 uint8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
 bool | External | 1 | Whether the command was received via the mesh. Bit 0.
@@ -704,7 +704,7 @@ Value | Name | Description
 #### Power samples request packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | [Type](#power-samples-type) | 1 | Type of samples.
 uint8 | Index | 1 | Some types have multiple lists of samples.
 
@@ -724,7 +724,7 @@ background broadcast
 ![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | [Type](#power-samples-type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
 uint8 | Index | 1 | Some types have multiple lists of samples, see the type description.
 uint16 | Count | 2 | Number of samples in the list.
@@ -742,7 +742,7 @@ int16[] | Samples | 2 | List of samples.
 ![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint16 | Device ID | 2 | Unique ID of the device.
 uint8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 1 | Profile ID of the device.
@@ -757,7 +757,7 @@ uint16 | Time to live | 2 | Time in minutes after which the device token will be
 ![Tracked device heartbeat packet](../docs/diagrams/tracked_device_heartbeat_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint16 | Device ID | 2 | Unique ID of the device.
 uint8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint24 | Device token | 3 | Token that has been registered.
@@ -768,7 +768,7 @@ uint8 | Time to live | 1 | How long (in minutes) the crownstone assumes the devi
 #### Microapp header packet
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Protocol | 1 | Protocol of the microapp command and result packets, should match what you get from the [microapp info packet](#microapp-info-packet).
 uint8 | App index | 1 | Index of the microapp on this Crownstone.
 
@@ -777,7 +777,7 @@ uint8 | App index | 1 | Index of the microapp on this Crownstone.
 ![Microapp upload packet](../docs/diagrams/microapp_upload_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 [Microapp header](#microapp-header-packet) | Header | 2 |
 uint16 | Offset | 2 | Offset in bytes of this chunk of data. Must be a multiple of 4.
 uint8[] | Data chunk | N | A chunk of the binary.
@@ -795,7 +795,7 @@ If the stored data does not match, you will get ERR_WRITE_DISABLED, meaning you 
 ![Microapp info packet](../docs/diagrams/microapp_info_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Protocol | 1 | Supported protocol of the microapp command and result packets.
 uint8 | Max apps | 1 | Maximum number of microapps.
 uint16 | Max app size | 2 | Maximum binary size of a microapp.
@@ -809,7 +809,7 @@ uint16 | Max ram usage | 2 | Maximum RAM usage of a microapp.
 The microapp SDK version determines the API for communication between bluenet firmware and microapps.
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Major | 1 | Major version: different major indicates breaking changes.
 uint8 | Minor | 1 | Minor version: higher minor means more features.
 
@@ -818,7 +818,7 @@ uint8 | Minor | 1 | Minor version: higher minor means more features.
 ![Microapp status packet](../docs/diagrams/microapp_status_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | Build version | 4 | Build version of this microapp, should increase each release.
 [SDK version](#microapp-sdk-version-packet) | SDK version | 2 | SDK version this microapp was built for.
 uint16 | Checksum | 2 | CRC-16-CCITT of the binary, after the header.
@@ -849,7 +849,7 @@ __If encryption is enabled, this packet will be encrypted using any of the keys 
 ![Result packet](../docs/diagrams/result-packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint8 | Protocol | 1 | Which protocol the result is. Should be similar to the protocol in the [control packet](#control-packet).
 uint16 | [Command type](#command-types) | 2 | Type of the command of which this packet is the result.
 uint16 | [Result code](#result-codes) | 2 | The result code.
@@ -912,8 +912,8 @@ Setup access means the packet is available in setup mode, and encrypted with the
 - B: Basic
 - S: Setup
 
-Type nr | Type name | Payload type | Payload description | A | M | B
-------- | ---------- | ------------- | ------------ | --- | --- | ---
+Type nr | Type name | Payload type | Payload description | A   | M   | B
+------- | --------- | ------------ | ------------------- | --- | --- | ---
 5 | PWM period | uint32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**  | rw |  | 
 6 | iBeacon major | uint16 | iBeacon major number.  | rw |  | 
 7 | iBeacon minor | uint16 | iBeacon minor number.  | rw |  | 
@@ -980,7 +980,7 @@ To be able to distinguish between the relay and dimmer state, the switch state i
 ![Switch state packet](../docs/diagrams/switch_state_packet.png)
 
 Type | Name | Length in bits | Description
---- | --- | --- | ---
+---- | ---- | -------------- | -----------
 bool | Relay | 1 | Value of the relay, where 0 = OFF, 1 = ON.
 uint8 | Dimmer | 7 | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
 
@@ -989,7 +989,7 @@ uint8 | Dimmer | 7 | Value of the dimmer, where 100 if fully on, 0 is OFF, dimme
 ![Behaviour settings packet](../docs/diagrams/behaviour_settings_packet.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
+---- | ---- | ------ | -----------
 uint32 | [Flags](#behaviour-settings-flags) | 4 | Flags.
 
 
@@ -998,6 +998,6 @@ uint32 | [Flags](#behaviour-settings-flags) | 4 | Flags.
 ![Behaviour settings flags](../docs/diagrams/behaviour_settings_flags.png)
 
 Type | Name | Length in bits | Description
---- | --- | --- | ---
+---- | ---- | -------------- | -----------
 bool | Enabled | 1 | Whether behaviours are enabled.
 uint32 | Reserved | 31| Reserved for future use, should be 0 for now.
