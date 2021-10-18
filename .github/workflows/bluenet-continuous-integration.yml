@@ -1,4 +1,4 @@
-name: GitHub Actions Demo
+name: Bluenet continuous integration
 on: [push, pull_request, release]
 jobs:
   Explore-GitHub-Actions:
