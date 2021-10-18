@@ -167,7 +167,7 @@ ExternalProject_Add(nordic_sdk
 	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
 	PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
-	COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch && patch -p0 < patch/03nrf5.patch
+	COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch && patch -p0 < patch/03nrf5.patch && patch -p0 < patch/04nrf5.patch
 	)
 
 set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)

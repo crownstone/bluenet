@@ -1,0 +1,26 @@
+85a86,90
+> static __INLINE uint8_t prev_index(uint8_t index)
+> {
+>     return (index == 0) ? m_queue_size : (index - 1);
+> }
+> 
+166c171,172
+<                              app_sched_event_handler_t handler)
+---
+>                              app_sched_event_handler_t handler,
+>                              bool                      no_duplicates)
+178,179c184,194
+<             event_index       = m_queue_end_index;
+<             m_queue_end_index = next_index(m_queue_end_index);
+---
+>             event_index = m_queue_end_index;
+>             uint16_t prev_index = prev_index(m_queue_end_index);
+>             if (no_duplicates
+>                     && !app_sched_queue_empty()
+>                     && prev_index != m_queue_start_index
+>                     && m_queue_event_headers[prev_index].handler == handler) {
+>                 event_index = 0xFFFE;
+>                 }
+>                 else {
+>                     m_queue_end_index = next_index(m_queue_end_index);
+>                 }
