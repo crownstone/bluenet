@@ -408,7 +408,7 @@ void MicroappProtocol::setIpcRam() {
 		len = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
 	}
 
-	uint32_t retCode = setRamData(IPC_INDEX_MICROAPP, buf, len);
+	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, buf, len);
 	LOGi("retCode=%u", retCode);
 }
 
