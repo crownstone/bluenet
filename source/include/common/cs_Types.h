@@ -363,7 +363,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.     See BleCentral::read().
 	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic.    See BleCentral::write().
 
-	EVT_BLE_CENTRAL_CONNECT_START,                    // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
+	EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST,        // Request for an outgoing connection, handlers should set the return code. Will always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
+	EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY,          // If the return code of the request was WAIT_FOR_SUCCESS, this event is what will be waited for.
 	EVT_BLE_CENTRAL_CONNECT_RESULT,                   // Result of a connection attempt.
 	EVT_BLE_CENTRAL_DISCONNECTED,                     // Outgoing connection was terminated. By request, or due to some error.
 	EVT_BLE_CENTRAL_DISCOVERY,                        // A single service or characteristic is discovered.
@@ -530,7 +531,8 @@ typedef  ble_central_read_t TYPIFY(CMD_BLE_CENTRAL_READ);
 typedef  ble_central_write_t TYPIFY(CMD_BLE_CENTRAL_WRITE);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
-typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_START);
+typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST);
+typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
 typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
