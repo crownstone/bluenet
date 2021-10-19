@@ -490,8 +490,13 @@ void UartHandler::onRead(uint8_t val) {
 		msgData.data = _readBuffer;
 		msgData.len = _readBufferIdx;
 		LOGUartHandlerRtt("onRead: dispatch msg of size %u\n", msgData.len);
-		uint32_t errorCode = app_sched_event_put(&msgData, sizeof(msgData), handle_msg);
-		APP_ERROR_CHECK(errorCode);
+
+
+		uint16_t schedulerSpace = app_sched_queue_space_get();
+		if (schedulerSpace > SCHED_QUEUE_SIZE - SCHEDULER_QUEUE_ALMOST_FULL) {
+			uint32_t errorCode = app_sched_event_put(&msgData, sizeof(msgData), handle_msg);
+			APP_ERROR_CHECK(errorCode);
+		}
 	}
 }
 

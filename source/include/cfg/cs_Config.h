@@ -56,6 +56,8 @@
 #define SCHED_QUEUE_SIZE                         32
 #endif
 
+#define SCHEDULER_QUEUE_ALMOST_FULL              (SCHED_QUEUE_SIZE - 10)
+
 
 #define APP_BLE_CONN_CFG_TAG                     1 // Connection configuration identifier.
 
