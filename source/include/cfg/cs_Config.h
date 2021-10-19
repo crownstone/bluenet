@@ -209,8 +209,13 @@
 /*
  * Determines how often the Central will ask for data from the Peripheral. When the Peripheral requests an update, it
  * supplies a maximum and a minimum wanted interval. The connection interval must be between 7.5 ms and 4 s.
+ * See https://devzone.nordicsemi.com/question/161154/minimum-connection-interval/
+ *
+ * If the connection interval is equal to RF_SDH_BLE_GAP_EVENT_LENGTH, the connection can take up 100% of the radio time, leaving none for the mesh.
+ * The shortest timeslot the mesh uses is 3.8ms (TIMESLOT_BASE_LENGTH_SHORT_US),
+ * so we could consider setting MIN_CONNECTION_INTERVAL to 4 * 1.25 ms larger than RF_SDH_BLE_GAP_EVENT_LENGTH.
  */
-#define MIN_CONNECTION_INTERVAL                  6   // In units of 1.25ms. Lowest possible, see https://devzone.nordicsemi.com/question/161154/minimum-connection-interval/
+#define MIN_CONNECTION_INTERVAL                  6   // In units of 1.25ms.
 #define MAX_CONNECTION_INTERVAL                  16  // In units of 1.25ms.
 
 /*
