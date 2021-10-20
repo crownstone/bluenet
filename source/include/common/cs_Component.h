@@ -33,65 +33,19 @@
  * Using this class 'sibling components' can query for
  * each others presence in a unified way, without need
  * for static classes or other rigid dependencies.
- *
- * Note:
- * This class currently uses quite a bit of memory for a rarely used feature.
- * Refactor idea: make getChildren virtual and let classes implement it so that
- * its possible for subclasses with non-changing children to optimize. (at cost of
- * getComponent speed)
  */
 class Component {
-private:
-	Component* _parent = nullptr;
-	std::vector<Component*> _children;
-
 public:
-	// ================== Constructors ==================
-
 	/**
-	 * Leaves _children empty and shrinks the _children vector to capacity 0.
-	 */
-	Component();
-
-	/**
-	 * Takes a brace enclosed list of Component pointers,
-	 *  - deletes any nullptrs from that list,
-	 *  - parents the component to `this`,
-	 *  - and shrinks it to fit.
-	 */
-	Component(std::initializer_list<Component*> children);
-
-	virtual ~Component() = default;
-
-	// ================== Getters ==================
-
-	inline std::vector<Component*> getChildren() {
-		return _children;
-	}
-
-	/**
-	 * Returns a component of type T* from _children, or
-	 * owned by the parent of this component.
+	 * Returns a component of type T* from _parent->children(),
+	 * If not found try again with ancestors: _parent-> ... ->_parent->children().
+	 *
 	 * If none-exists, a nullptr is returned.
+	 *
+	 * Usage: auto sibling = getComponent<SiblingComponentType>();
 	 */
 	template <class T>
 	T* getComponent(Component* requester = nullptr);
-
-
-	// ============== Add/Remove components ===============
-
-	/**
-	 * adds a new child to this component, changing its parent to `this`.
-	 */
-	void addComponent(Component* child);
-
-	void addComponents(std::initializer_list<Component*> children);
-
-
-	/**
-	 * removes the component from the _children and sets its parent to nullptr.
-	 */
-	void removeComponent(Component* c);
 
 	// ============== life cycle events ===============
 
@@ -99,7 +53,7 @@ public:
 	 * Components can implement this if they need to get references to sibling
 	 * or if they need to do specific initialization.
 	 *
-	 * - Components are responsible for call init() on their children.
+	 * - Components are responsible for calling init() on their children.
 	 * - init is allowed to assume all siblings are constructed.
 	 *
 	 * E.g.
@@ -117,20 +71,43 @@ public:
 	 */
 	virtual cs_ret_code_t init() { return ERR_SUCCESS; }
 
+	// ================== Con-/destructors ==================
+
+	virtual ~Component() = default;
+
+protected:
+	// ================== Getters ==================
+
 	/**
-	 * Initializes all children in the order that they were added to this component.
-	 * Stops as soon as a child returns != ERR_SUCCESS and returns that error code.
+	 * Components with children can override this method to return
+	 * them. This is used by getComponent<> to search for available
+	 * components.
+	 */
+	virtual std::vector<Component*> getChildren() {
+		return {};
+	}
+
+	// ============== parenting ==============
+
+	/**
+	 * - parent all non-nullptr children.
+	 * - init all non-nullptr children.
 	 *
 	 * Components are not required to use this. They can call all inits of children
-	 * in custom order if they need to. (And implement elegant failure)
+	 * in custom order if they need to. (And implement elegant failure.)
+	 *
+	 * Initialisation is in order of the elements of the returnvalue of getChildren.
 	 */
 	cs_ret_code_t initChildren();
 
+ 	/**
+ 	 * Children that are instantiated later can also be added
+ 	 * individually.
+ 	 */
+	void setParent(Component* p);
+
 private:
-	/**
-	 * Removes all entries in _children equal to element.
-	 */
-	void erase(Component* element);
+	Component* _parent = nullptr;
 };
 
 // -------------------- Template implementation details -------------------
@@ -152,7 +129,7 @@ T* Component::getComponent(Component* requester) {
 	}
 
 	// traverse children
-	for (auto c : _children) {
+	for (auto c : getChildren()) {
 		if (c == requester) {
 			// skip original requester to avoid infinite recursions.
 			continue;
