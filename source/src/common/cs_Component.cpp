@@ -14,12 +14,16 @@ void Component::setParent(Component* p) {
 	_parent = p;
 }
 
-cs_ret_code_t Component::initChildren() {
+void Component::parentAllChildren() {
 	for (auto child : getChildren()) {
 		if (child != nullptr) {
 			child->setParent(this);
 		}
 	}
+}
+
+cs_ret_code_t Component::initChildren() {
+	parentAllChildren();
 
 	for (Component* child : getChildren()) {
 		if(child == nullptr) {

@@ -45,10 +45,16 @@ void SwitchAggregator::init(const boards_config_t& board) {
 
 	overrideState = smartSwitch.getIntendedState();
 	pushTestDataToHost();
+
+	initChildren();
 }
 
 void SwitchAggregator::switchPowered() {
 	smartSwitch.start();
+}
+
+std::vector<Component*> SwitchAggregator::getChildren() {
+	return { &behaviourHandler};
 }
 
 // ================================== State updaters ==================================

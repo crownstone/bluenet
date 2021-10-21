@@ -227,7 +227,17 @@ Crownstone::Crownstone(boards_config_t& board) :
 #if BUILD_GPIOTE == 1
 	_gpio = &Gpio::getInstance();
 #endif
+
+	parentAllChildren();
 };
+
+std::vector<Component*> Crownstone::getChildren() {
+	return {
+		_switchAggregator,
+		_presenceHandler,
+		// TODO: add others (when necessary for weak dependences)
+	};
+}
 
 void Crownstone::init(uint16_t step) {
 	updateHeapStats();

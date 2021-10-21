@@ -106,6 +106,12 @@ protected:
  	 */
 	void setParent(Component* p);
 
+	/**
+	 * utility that loops over all elements of getChildren() and setParent on
+	 * the non-nullptr ones.
+	 */
+	void parentAllChildren();
+
 private:
 	Component* _parent = nullptr;
 };
