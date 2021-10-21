@@ -24,7 +24,10 @@
 #define LOGBehaviourHandlerDebug LOGnone
 #define LOGBehaviourHandlerVerbose LOGnone
 
-
+cs_ret_code_t BehaviourHandler::init() {
+	_presenceHandler = getComponent<PresenceHandler>();
+	return ERR_SUCCESS;
+}
 
 void BehaviourHandler::handleEvent(event_t& evt) {
 	switch (evt.type) {
@@ -57,12 +60,12 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 }
 
 bool BehaviourHandler::update() {
-	if (!isActive) {
+	if (!isActive || _presenceHandler == nullptr) {
 		currentIntendedState = std::nullopt;
 	}
 	else {
 		Time time = SystemTime::now();
-		std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
+		std::optional<PresenceStateDescription> presence = _presenceHandler->getCurrentPresenceDescription();
 
 		if (!presence) {
 			LOGBehaviourHandlerVerbose("Not updating, because presence data is missing");
@@ -158,7 +161,8 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
 
 	Time currentTime = SystemTime::now();
-	std::optional<PresenceStateDescription> currentPresence = PresenceHandler::getCurrentPresenceDescription();
+	std::optional<PresenceStateDescription> currentPresence =
+			_presenceHandler == nullptr ? std::nullopt : _presenceHandler->getCurrentPresenceDescription();
 
 	// Set time.
 	behaviourDebug->time = currentTime.isValid() ? currentTime.timestamp() : 0;
