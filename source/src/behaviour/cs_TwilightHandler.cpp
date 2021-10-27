@@ -5,18 +5,26 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <behaviour/cs_TwilightHandler.h>
-#include <behaviour/cs_TwilightBehaviour.h>
-#include <behaviour/cs_BehaviourStore.h>
 #include <behaviour/cs_BehaviourConflictResolution.h>
-
+#include <behaviour/cs_BehaviourStore.h>
+#include <behaviour/cs_TwilightBehaviour.h>
+#include <behaviour/cs_TwilightHandler.h>
+#include <logging/cs_Logger.h>
+#include <storage/cs_State.h>
 #include <test/cs_Test.h>
 #include <time/cs_SystemTime.h>
-#include <logging/cs_Logger.h>
 
 #define LOGTwilightHandlerDebug LOGnone
 
+void TwilightHandler::init() {
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
+	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
+	isActive = settings.flags.enabled;
 
+	LOGi("Init: isActive=%u", isActive);
+
+	listen();
+}
 
 void TwilightHandler::handleEvent(event_t& evt) {
 	switch (evt.type) {

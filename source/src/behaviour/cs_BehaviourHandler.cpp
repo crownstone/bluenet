@@ -24,7 +24,15 @@
 #define LOGBehaviourHandlerDebug LOGnone
 #define LOGBehaviourHandlerVerbose LOGnone
 
+void BehaviourHandler::init() {
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
+	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
+	isActive = settings.flags.enabled;
 
+	LOGi("Init: isActive=%u", isActive);
+
+	listen();
+}
 
 void BehaviourHandler::handleEvent(event_t& evt) {
 	switch (evt.type) {
@@ -38,7 +46,7 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
-			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
+			behaviour_settings_t* settings = CS_TYPE_CAST(STATE_BEHAVIOUR_SETTINGS, evt.data);
 			isActive = settings->flags.enabled;
 			LOGi("settings isActive=%u", isActive);
 			TEST_PUSH_B(this, isActive);

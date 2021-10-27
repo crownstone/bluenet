@@ -14,6 +14,12 @@
 
 class BehaviourHandler : public EventListener {
 public:
+	/**
+	 * Initialize this class:
+	 * - Read settings from flash.
+	 * - Start listening for events.
+	 */
+	void init();
 
     /**
      * Computes the intended behaviour state of this crownstone based on
@@ -25,7 +31,7 @@ public:
      * - STATE_BEHAVIOUR_SETTINGS
      * - CMD_GET_BEHAVIOUR_DEBUG
      */
-    virtual void handleEvent(event_t& evt);
+    void handleEvent(event_t& evt);
 
     /**
      * Acquires the current time and presence information. 

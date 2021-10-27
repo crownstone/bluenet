@@ -47,6 +47,10 @@ void ServiceData::init(uint8_t deviceType) {
 
 	_extraFlags.asInt = 0;
 
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS) behaviourSettings;
+	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &behaviourSettings, sizeof(behaviourSettings));
+	_extraFlags.flags.behaviourEnabled = behaviourSettings.flags.enabled;
+
 	// Set the device type.
 	TYPIFY(STATE_HUB_MODE) hubMode;
 	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
@@ -402,7 +406,7 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
-			TYPIFY(STATE_BEHAVIOUR_SETTINGS)* behaviourSettings = (TYPIFY(STATE_BEHAVIOUR_SETTINGS)*)event.data;
+			auto behaviourSettings = CS_TYPE_CAST(STATE_BEHAVIOUR_SETTINGS, event.data);
 			_extraFlags.flags.behaviourEnabled = behaviourSettings->flags.enabled;
 			break;
 		}
