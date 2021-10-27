@@ -283,10 +283,22 @@ private:
 	 */
 	bool allocateAdvertisementDataBuffers(bool scanResponse);
 
+	/**
+	 * Gets an advertisement data buffer that's not in use.
+	 *
+	 * @param[in] scanResponse    Whether to get a scan response data buffer.
+	 * @return                    Pointer to the buffer, or a nullptr if no free buffer is found.
+	 */
 	uint8_t* getAdvertisementBuffer(bool scanResponse);
 
+	/**
+	 * Mark an advertisement buffer as in use / no longer in use.
+	 *
+	 * @param[in] buffer          Pointer to the advertisement data buffer.
+	 * @param[in] inUse           Whether to mark buffer as in use.
+	 * @param[in] scanResponse    Whether the buffer is a scan response data buffer.
+	 */
 	void markAdvertisementBuffer(const uint8_t* buffer, bool inUse, bool scanResponse);
-
 
 
 	void onConnect(const ble_connected_t& connectedData);
