@@ -126,6 +126,9 @@ private:
 	// Whether we should be advertising.
 	bool                                        _wantAdvertising = false;
 
+	// Whether to start advertising on next tick.
+	bool                                        _startOnNextTick = false;
+
 	// Advertisement handle for softdevice. Set by first call to: sd_ble_gap_adv_set_configure().
 	uint8_t                                     _advHandle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
 
@@ -288,6 +291,8 @@ private:
 	void onDisconnect();
 
 	void onConnectOutgoing();
+
+	void onTick();
 
 	void printAdvertisement();
 };

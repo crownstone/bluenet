@@ -602,12 +602,14 @@ void Advertiser::printAdvertisement() {
 
 void Advertiser::onConnect() {
 	// Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
-	// Do this after _conn_handle is set, as that's used to check if isConnected().
-	// Also after callbacks, so that in the callback, parameters can be updated.
 	_advertising = false;
 	setNonConnectableAdvParams();
 	if (_wantAdvertising) {
-		startAdvertising();
+		// See: https://devzone.nordicsemi.com/f/nordic-q-a/81020/softdevice-assertion-failed-pc-16346
+		// When the application starts a non-connectable advertiser right after a connection gets established, an assert may occur.
+		// The workaround is After pulling the event BLE_GAP_EVT_CONNECTED, pull events until sd_ble_evt_get returns NRF_ERROR_NOT_FOUND.
+		// This bug is present in all released SoftDevices since 6.0.0. Please let me know if you are satisfied with the workaround.
+		_startOnNextTick = true;
 	}
 }
 
@@ -621,6 +623,16 @@ void Advertiser::onConnectOutgoing() {
 	if (_advertising) {
 		setNonConnectableAdvParams();
 		restartAdvertising();
+	}
+}
+
+void Advertiser::onTick() {
+	if (_startOnNextTick) {
+		_startOnNextTick = false;
+
+		if (_wantAdvertising) {
+			startAdvertising();
+		}
 	}
 }
 
@@ -678,6 +690,10 @@ void Advertiser::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
 			updateAdvertisementData();
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			onTick();
 			break;
 		}
 		default: {}
