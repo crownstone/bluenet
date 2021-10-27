@@ -291,30 +291,6 @@ void Advertiser::setAdvertisementData(IBeacon& beacon, bool asScanResponse) {
 	}
 }
 
-bool Advertiser::allocateAdvertisementDataBuffers(bool scanResponse) {
-	LOGAdvertiserDebug("allocateAdvertisementDataBuffers");
-
-	uint8_t** bufferPointers = _advertisementDataBuffers;
-	if (scanResponse) {
-		bufferPointers = _scanResponseBuffers;
-	}
-
-	LOGAdvertiserDebug("&(_advertisementDataBuffers[0])=%p &(bufferPointers[0])=%p", &(_advertisementDataBuffers[0]), &(bufferPointers[0]));
-
-	for (uint8_t i = 0; i < _advertisementDataBufferCount; ++i) {
-		if (bufferPointers[i] == nullptr) {
-			bufferPointers[i] = (uint8_t*)calloc(sizeof(uint8_t), _advertisementDataBufferSize);
-			if (bufferPointers[i] == nullptr) {
-				// Out of memory, this shouldn't happen.
-				// Instead of complicated deallocating, we just return false.
-				LOGw("Could not allocate advertisement data buffer");
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
 
 
 void Advertiser::startAdvertising() {
@@ -326,6 +302,7 @@ void Advertiser::startAdvertising() {
 	}
 	if (_advertising) {
 		LOGAdvertiserDebug("Already advertising");
+		return;
 	}
 
 	uint8_t prevAdvHandle = _advHandle;
@@ -399,6 +376,9 @@ void Advertiser::startAdvertising() {
 		LOGw("Start advertising failed: nrfCode=%u", nrfCode);
 		return;
 	}
+
+	markAdvertisementBuffer(_advData.adv_data.p_data,      true, false);
+	markAdvertisementBuffer(_advData.scan_rsp_data.p_data, true, true);
 	_advertising = true;
 }
 
@@ -410,7 +390,8 @@ void Advertiser::stopAdvertising() {
 		return;
 	}
 	if (!_advertising) {
-		LOGAdvertiserDebug("Not advertising");
+		LOGAdvertiserDebug("Already stopped advertising");
+		return;
 	}
 
 	// This often fails because this function is called, while the SD is already connected, thus advertising was stopped.
@@ -430,6 +411,9 @@ void Advertiser::stopAdvertising() {
 		LOGw("Stop advertising failed: nrfCode=%u", nrfCode);
 		return;
 	}
+
+	markAdvertisementBuffer(_advData.adv_data.p_data,      false, false);
+	markAdvertisementBuffer(_advData.scan_rsp_data.p_data, false, true);
 	_advertising = false;
 }
 
@@ -500,13 +484,14 @@ void Advertiser::updateAdvertisementData() {
 	}
 	uint32_t nrfCode;
 
-	uint8_t bufIndex = (_advBufferInUse + 1) % _advertisementDataBufferCount;
-	LOGAdvertiserVerbose("updateAdvertisementData buf=%u pointer=%p", bufIndex, _advertisementDataBuffers[bufIndex]);
-	_advBufferInUse = bufIndex;
+	LOGAdvertiserVerbose("updateAdvertisementData");
+	uint8_t* prevAdvertisementBuffer = _advData.adv_data.p_data;
+	uint8_t* prevScanResponseBuffer = _advData.scan_rsp_data.p_data;
+
 	if (_includeAdvertisementData) {
 		LOGAdvertiserVerbose("include adv data");
 		_advData.adv_data.len = _advertisementDataBufferSize;
-		_advData.adv_data.p_data = _advertisementDataBuffers[bufIndex];
+		_advData.adv_data.p_data = getAdvertisementBuffer(false);
 		nrfCode = ble_advdata_encode(&_configAdvertisementData, _advData.adv_data.p_data, &_advData.adv_data.len);
 		/**
 		 * @retval NRF_SUCCESS             If the operation was successful.
@@ -524,7 +509,7 @@ void Advertiser::updateAdvertisementData() {
 	if (_includeScanResponseData) {
 		LOGAdvertiserVerbose("include scan response");
 		_advData.scan_rsp_data.len = _advertisementDataBufferSize;
-		_advData.scan_rsp_data.p_data = _scanResponseBuffers[bufIndex];
+		_advData.scan_rsp_data.p_data = getAdvertisementBuffer(true);
 		nrfCode = ble_advdata_encode(&_configScanResponse, _advData.scan_rsp_data.p_data, &_advData.scan_rsp_data.len);
 		/**
 		 * @retval NRF_SUCCESS             If the operation was successful.
@@ -572,6 +557,13 @@ void Advertiser::updateAdvertisementData() {
 			LOGw("Set advertisement data failed: nrfCode=%u", nrfCode);
 			return;
 		}
+		// First mark previous buffer as no longer in use, in case it's the same buffer as the one we use now.
+		markAdvertisementBuffer(prevAdvertisementBuffer, false, false);
+		markAdvertisementBuffer(prevScanResponseBuffer,  false, true);
+
+		markAdvertisementBuffer(_advData.adv_data.p_data,      true, false);
+		markAdvertisementBuffer(_advData.scan_rsp_data.p_data, true, true);
+
 	}
 
 	// Sometimes startAdvertising fails, so for now, just retry in here.
@@ -579,6 +571,72 @@ void Advertiser::updateAdvertisementData() {
 		startAdvertising();
 	}
 }
+
+
+
+
+bool Advertiser::allocateAdvertisementDataBuffers(bool scanResponse) {
+	LOGAdvertiserDebug("allocateAdvertisementDataBuffers scanResponse=%u", scanResponse);
+
+	uint8_t offset = scanResponse ? _advertisementDataBufferCount : 0;
+	uint8_t** bufferPointers = _advertisementDataBuffers;
+
+	LOGAdvertiserDebug("&(_advertisementDataBuffers[0])=%p &(bufferPointers[0])=%p", &(_advertisementDataBuffers[0]), &(bufferPointers[0]));
+
+	for (uint8_t i = 0; i < _advertisementDataBufferCount; ++i) {
+		if (bufferPointers[i + offset] == nullptr) {
+			bufferPointers[i + offset] = (uint8_t*)calloc(sizeof(uint8_t), _advertisementDataBufferSize);
+			LOGAdvertiserDebug("Allocated buffer %p", bufferPointers[i + offset]);
+			if (bufferPointers[i + offset] == nullptr) {
+				// Out of memory, this shouldn't happen.
+				// Instead of complicated deallocating, we just return false.
+				LOGw("Could not allocate advertisement data buffer");
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+uint8_t* Advertiser::getAdvertisementBuffer(bool scanResponse) {
+	uint8_t offset = scanResponse ? _advertisementDataBufferCount : 0;
+	for (uint8_t i = 0; i < _advertisementDataBufferCount; ++i) {
+		if (!_advertisementDataBuffersInUse[i + offset]) {
+			LOGAdvertiserDebug("getAdvertisementBuffer: buffer=%p scanResponse=%u", _advertisementDataBuffers[i + offset], scanResponse);
+			return _advertisementDataBuffers[i + offset];
+		}
+	}
+	LOGw("getAdvertisementBuffer: no free buffer");
+	return nullptr;
+}
+
+void Advertiser::markAdvertisementBuffer(const uint8_t* buffer, bool inUse, bool scanResponse) {
+	// From the SDK docs:
+	// The application must provide the buffers for advertisement. The memory shall reside in application RAM, and
+	// shall never be modified while advertising. The data shall be kept alive until either:
+	//  - @ref BLE_GAP_EVT_ADV_SET_TERMINATED is raised.
+	//  - @ref BLE_GAP_EVT_CONNECTED is raised with @ref ble_gap_evt_connected_t::adv_handle set to the corresponding
+	//    advertising handle.
+	//  - Advertising is stopped.
+	//  - Advertising data is changed.
+	// To update advertising data while advertising, provide new buffers to @ref sd_ble_gap_adv_set_configure.
+	if (buffer == nullptr) {
+		return;
+	}
+	LOGAdvertiserDebug("markAdvertisementBuffer buffer=%p inUse=%u scanResponse=%u", buffer, inUse, scanResponse);
+	uint8_t offset = scanResponse ? _advertisementDataBufferCount : 0;
+	for (uint8_t i = 0; i < _advertisementDataBufferCount; ++i) {
+		if (_advertisementDataBuffers[i + offset] == buffer) {
+			_advertisementDataBuffersInUse[i + offset] = inUse;
+			return;
+		}
+	}
+	LOGw("Buffer not found: %p", buffer);
+}
+
+
+
+
 
 void Advertiser::printAdvertisement() {
 	LOGd("_adv_handle=%u", _advHandle);
@@ -600,10 +658,18 @@ void Advertiser::printAdvertisement() {
 
 
 
-void Advertiser::onConnect() {
+void Advertiser::onConnect(const ble_connected_t& connectedData) {
+	if (connectedData.advertisementHandle != _advHandle) {
+		LOGAdvertiserDebug("Wrong handle: event=%u mine=%u", connectedData.advertisementHandle, _advHandle);
+		return;
+	}
 	// Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	_advertising = false;
 	setNonConnectableAdvParams();
+
+	markAdvertisementBuffer(connectedData.advertisementBuffer.data, false, false);
+	markAdvertisementBuffer(connectedData.scanResponseBuffer.data,  false, true);
+
 	if (_wantAdvertising) {
 		// See: https://devzone.nordicsemi.com/f/nordic-q-a/81020/softdevice-assertion-failed-pc-16346
 		// When the application starts a non-connectable advertiser right after a connection gets established, an assert may occur.
@@ -639,7 +705,8 @@ void Advertiser::onTick() {
 void Advertiser::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
-			onConnect();
+			auto connectData = CS_TYPE_CAST(EVT_BLE_CONNECT, event.data);
+			onConnect(*connectData);
 			break;
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {

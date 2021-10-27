@@ -487,7 +487,7 @@ size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::CMD_BLE_CENTRAL_WRITE:
 		return sizeof(TYPIFY(CMD_BLE_CENTRAL_WRITE));
 	case CS_TYPE::EVT_BLE_CONNECT:
-		return 0;
+		return sizeof(TYPIFY(EVT_BLE_CONNECT));
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 		return 0;
 	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST:

@@ -529,7 +529,7 @@ typedef  void TYPIFY(CMD_BLE_CENTRAL_DISCONNECT);
 typedef  ble_central_discover_t TYPIFY(CMD_BLE_CENTRAL_DISCOVER);
 typedef  ble_central_read_t TYPIFY(CMD_BLE_CENTRAL_READ);
 typedef  ble_central_write_t TYPIFY(CMD_BLE_CENTRAL_WRITE);
-typedef  void TYPIFY(EVT_BLE_CONNECT);
+typedef  ble_connected_t TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY);

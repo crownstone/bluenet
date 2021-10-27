@@ -201,17 +201,14 @@ private:
 	// Size of advertisement / scan response data buffers.
 	const static uint8_t                        _advertisementDataBufferSize = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
 
-	// Pointers to advertisement data buffers.
-	uint8_t*                                    _advertisementDataBuffers[_advertisementDataBufferCount] = { nullptr };
-
-	// Pointers to scan response data buffers.
-	uint8_t*                                    _scanResponseBuffers[_advertisementDataBufferCount] = { nullptr };
+	// Pointers to advertisement data buffers. Half of these are scan response data buffers.
+	uint8_t*                                    _advertisementDataBuffers[2 * _advertisementDataBufferCount] = { nullptr };
 
 	// Pointers to the currently advertised advertisement and scan response data buffer.
 	ble_gap_adv_data_t                          _advData;
 
-	// Which of the advertisement and scan response data buffers are currently being advertised..
-	uint8_t                                     _advBufferInUse = 1;
+	// Keep up which buffers are currently being used in an advertisement.
+	bool                                        _advertisementDataBuffersInUse[2 * _advertisementDataBufferCount] = { false };
 
 
 
@@ -237,13 +234,6 @@ private:
 	 * @param[in] asScanResponse       Whether to set the iBeacon data in the scan response.
 	 */
 	void setAdvertisementData(IBeacon& beacon, bool asScanResponse);
-
-	/**
-	 * Allocate the advertisement data buffers.
-	 *
-	 * Returns true on success.
-	 */
-	bool allocateAdvertisementDataBuffers(bool scanResponse);
 
 	/**
 	 * Sets and updates advertisement data.
@@ -286,7 +276,20 @@ private:
 	void setNonConnectableAdvParams();
 
 
-	void onConnect();
+	/**
+	 * Allocate the advertisement data buffers.
+	 *
+	 * Returns true on success.
+	 */
+	bool allocateAdvertisementDataBuffers(bool scanResponse);
+
+	uint8_t* getAdvertisementBuffer(bool scanResponse);
+
+	void markAdvertisementBuffer(const uint8_t* buffer, bool inUse, bool scanResponse);
+
+
+
+	void onConnect(const ble_connected_t& connectedData);
 
 	void onDisconnect();
 
