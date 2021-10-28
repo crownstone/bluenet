@@ -156,8 +156,9 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {
 	stone_id_t id;
 	union __attribute__((__packed__)) {
 		struct __attribute__((packed)) {
-			bool time           : 1;
-			bool trackedDevices : 1;
+			bool time              : 1;
+			bool trackedDevices    : 1;
+			bool behaviourSettings : 1;
 		} bits;
 		uint32_t bitmask;
 	};

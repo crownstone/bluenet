@@ -24,7 +24,7 @@ id | name | Payload | Result data
 8  | CS_MESH_MODEL_TYPE_STATE_0 | [cs_mesh_model_msg_state_0_t](#cs_mesh_model_msg_state_0_t)
 9  | CS_MESH_MODEL_TYPE_STATE_1 | [cs_mesh_model_msg_state_1_t](#cs_mesh_model_msg_state_1_t)
 10 | CS_MESH_MODEL_TYPE_PROFILE_LOCATION | [cs_mesh_model_msg_profile_location_t](#cs_mesh_model_msg_profile_location_t)
-11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [behaviour_settings_t](#behaviour_settings_t)
+11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [Behaviour settings](PROTOCOL.md#behaviour-settings)
 12 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER | [cs_mesh_model_msg_device_register_t](#cs_mesh_model_msg_device_register_t)
 13 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN | [cs_mesh_model_msg_device_token_t](#cs_mesh_model_msg_device_token_t)
 14 | CS_MESH_MODEL_TYPE_SYNC_REQUEST | [cs_mesh_model_msg_sync_request_t](#cs_mesh_model_msg_sync_request_t)
@@ -109,15 +109,6 @@ uint16_t | Delay | 2 |
 cmd_source_with_counter_t | Source | 3 |
 
 
-#### behaviour_settings_t
-
-![behaviour settings](../docs/diagrams/mesh_behaviour_settings.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint32_t | Flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Other bits must remain 0.
-
-
 #### cs_mesh_model_msg_device_register_t
 
 ![register device](../docs/diagrams/mesh_register_device.png)
@@ -180,7 +171,8 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Time |
 1 | Registered devices |
-2-31 | Reserved | Reserved for future use, must be 0 for now.
+2 | Behaviour settings |
+3-31 | Reserved | Reserved for future use, must be 0 for now.
 
 
 
