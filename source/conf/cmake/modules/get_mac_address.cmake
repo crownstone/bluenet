@@ -12,6 +12,10 @@ function(get_mac_address SERIAL_NUM MAC_ADDRESS)
 		OUTPUT_VARIABLE output
 		ERROR_VARIABLE error
 		)
+	if("${status}" STREQUAL "41")
+		message(WARNING "Cannot find a board attached")
+		return()
+	endif()
 
 	string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+) *([0-9a-fA-F]+)" Tmp ${output})
 	set(Address ${CMAKE_MATCH_1})
