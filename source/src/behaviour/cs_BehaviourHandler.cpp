@@ -24,7 +24,15 @@
 #define LOGBehaviourHandlerDebug LOGnone
 #define LOGBehaviourHandlerVerbose LOGnone
 
+void BehaviourHandler::init() {
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
+	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
+	_isActive = settings.flags.enabled;
 
+	LOGi("Init: isActive=%u", _isActive);
+
+	listen();
+}
 
 void BehaviourHandler::handleEvent(event_t& evt) {
 	switch (evt.type) {
@@ -37,16 +45,38 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 			update();
 			break;
 		}
-		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
-			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
-			isActive = settings->flags.enabled;
-			LOGi("settings isActive=%u", isActive);
-			TEST_PUSH_B(this, isActive);
-			update();
-			break;
-		}
 		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
 			handleGetBehaviourDebug(evt);
+			break;
+		}
+		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+			behaviour_settings_t* settings = CS_TYPE_CAST(STATE_BEHAVIOUR_SETTINGS, evt.data);
+			onBehaviourSettingsChange(*settings);
+			break;
+		}
+		case CS_TYPE::EVT_RECV_MESH_MSG: {
+			auto meshMsg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, evt.data);
+			if (meshMsg->type == CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS) {
+				auto packet = meshMsg->getPacket<CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS>();
+				onBehaviourSettingsMeshMsg(packet);
+				evt.result.returnCode = ERR_SUCCESS;
+			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
+			auto request = CS_TYPE_CAST(EVT_MESH_SYNC_REQUEST_OUTGOING, evt.data);
+			request->bits.behaviourSettings = onBehaviourSettingsOutgoingSyncRequest();
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
+			auto request = CS_TYPE_CAST(EVT_MESH_SYNC_REQUEST_INCOMING, evt.data);
+			if (request->bits.behaviourSettings) {
+				onBehaviourSettingsIncomingSyncRequest();
+			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_FAILED: {
+			onMeshSyncFailed();
 			break;
 		}
 		default: {
@@ -57,7 +87,7 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 }
 
 bool BehaviourHandler::update() {
-	if (!isActive) {
+	if (!_isActive) {
 		currentIntendedState = std::nullopt;
 	}
 	else {
@@ -89,7 +119,7 @@ SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Ti
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		Time currentTime,
 		PresenceStateDescription currentPresence) {
-	if (!isActive) {
+	if (!_isActive) {
 		LOGBehaviourHandlerDebug("Behaviour handler is inactive, computed intended state: empty");
 		return {};
 	}
@@ -170,7 +200,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->sunset  = sunTime.sunset;
 
 	// Set behaviour enabled.
-	behaviourDebug->behaviourEnabled = isActive;
+	behaviourDebug->behaviourEnabled = _isActive;
 
 	// Set presence.
 	for (uint8_t i = 0; i < 8; ++i) {
@@ -197,7 +227,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	if (!currentPresence) {
 		checkBehaviours = false;
 	}
-	if (!isActive) {
+	if (!_isActive) {
 		checkBehaviours = false;
 	}
 	if (!currentTime.isValid()) {
@@ -267,4 +297,99 @@ bool BehaviourHandler::requiresAbsence(Time t) {
 	}
 
 	return false;
+}
+
+
+void BehaviourHandler::onBehaviourSettingsChange(behaviour_settings_t settings) {
+	_isActive = settings.flags.enabled;
+	LOGi("onBehaviourSettingsChange active=%u", _isActive);
+	TEST_PUSH_B(this, _isActive);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, reinterpret_cast<uint8_t*>(&settings), sizeof(settings));
+	update();
+}
+
+void BehaviourHandler::onBehaviourSettingsMeshMsg(behaviour_settings_t settings) {
+	LOGBehaviourHandlerDebug("onBehaviourSettingsMeshMsg settings=%u", settings.asInt);
+	// When syncing, handle all responses, and merge them to a single conclusion.
+	// This handles the case that there are different opionons in the mesh.
+	// Don't update _isActive until we handled all responses.
+	if (!_behaviourSettingsSynced) {
+		if (_receivedBehaviourSettings) {
+			// Already receive behaviour settings: merge them.
+
+			// Enabled overrules disabled.
+			settings.flags.enabled = settings.flags.enabled || _receivedBehaviourSettings.value().flags.enabled;
+		}
+		_receivedBehaviourSettings = settings;
+	}
+	else {
+		TYPIFY(STATE_BEHAVIOUR_SETTINGS) stateSettings = settings;
+		State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &stateSettings, sizeof(stateSettings));
+		// State set triggers onBehaviourSettingsChange().
+	}
+}
+
+bool BehaviourHandler::onBehaviourSettingsOutgoingSyncRequest() {
+	if (_behaviourSettingsSynced) {
+		return false;
+	}
+	LOGBehaviourHandlerDebug("onBehaviourSettingsOutgoingSyncRequest");
+
+	// If we already sent a sync request, we should have received all the responses by now.
+	// So finalize the sync if we received any responses.
+	tryFinalizeBehaviourSettingsSync();
+	return !_behaviourSettingsSynced;
+}
+
+void BehaviourHandler::onMeshSyncFailed() {
+	if (_behaviourSettingsSynced) {
+		// Overall sync failed, but behaviour settings did sync.
+		return;
+	}
+	LOGBehaviourHandlerDebug("Sync failed");
+
+	// If we sent a sync request, we should have received all the responses by now.
+	// So finalize the sync if we received any responses.
+	tryFinalizeBehaviourSettingsSync();
+
+	// Consider synced anyway, so that we will respond to sync requests in the future.
+	_behaviourSettingsSynced = true;
+}
+
+void BehaviourHandler::tryFinalizeBehaviourSettingsSync() {
+	if (!_receivedBehaviourSettings) {
+		// We didn't receive any sync response.
+		return;
+	}
+	LOGBehaviourHandlerDebug("Finalize behaviour settings sync");
+
+	_behaviourSettingsSynced = true;
+
+	// After we received all the sync responses, we store the final settings.
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS) stateSettings = _receivedBehaviourSettings.value();
+	State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &stateSettings, sizeof(stateSettings));
+	// This will trigger onBehaviourSettingsChange() to be called.
+}
+
+void BehaviourHandler::onBehaviourSettingsIncomingSyncRequest() {
+	if (!_behaviourSettingsSynced) {
+		// Only send a sync response if we are in sync.
+		return;
+	}
+	LOGBehaviourHandlerDebug("Send behaviour settings response");
+
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
+	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
+
+	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
+	meshMsg.type = CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS;
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.broadcast = true;
+	meshMsg.flags.flags.noHops = false;
+	meshMsg.payload = reinterpret_cast<uint8_t*>(&settings);
+	meshMsg.size = sizeof(settings);
+
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	event.dispatch();
 }

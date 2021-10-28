@@ -178,9 +178,12 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 		case NRF_MESH_EVT_FRIENDSHIP_TERMINATED:
 			LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
 			break;
-		case NRF_MESH_EVT_DISABLED:
+		case NRF_MESH_EVT_DISABLED: {
 			LOGMeshVerbose("NRF_MESH_EVT_DISABLED");
+			event_t event(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY);
+			event.dispatch();
 			break;
+		}
 		case NRF_MESH_EVT_PROXY_STOPPED:
 			LOGMeshVerbose("NRF_MESH_EVT_PROXY_STOPPED");
 			break;

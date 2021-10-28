@@ -643,7 +643,16 @@ void Stack::onIncomingConnected(const ble_evt_t * p_ble_evt) {
 
 	startConnectionAliveTimer();
 
-	event_t event(CS_TYPE::EVT_BLE_CONNECT);
+	const ble_gap_evt_connected_t& connectedData = p_ble_evt->evt.gap_evt.params.connected;
+
+	TYPIFY(EVT_BLE_CONNECT) eventData = {
+		.connectionHandle    = p_ble_evt->evt.gap_evt.conn_handle,
+		.advertisementHandle = connectedData.adv_handle,
+		.advertisementBuffer = cs_data_t(connectedData.adv_data.adv_data.p_data, connectedData.adv_data.adv_data.len),
+		.scanResponseBuffer  = cs_data_t(connectedData.adv_data.scan_rsp_data.p_data, connectedData.adv_data.scan_rsp_data.len)
+	};
+
+	event_t event(CS_TYPE::EVT_BLE_CONNECT, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 

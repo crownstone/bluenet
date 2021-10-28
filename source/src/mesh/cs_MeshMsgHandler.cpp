@@ -115,7 +115,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS: {
-			retCode = handleSetBehaviourSettings(payload, payloadSize);
+			// Handled elsewhere.
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER: {
@@ -392,16 +392,6 @@ cs_ret_code_t MeshMsgHandler::handleProfileLocation(uint8_t* payload, size16_t p
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_PROFILE_LOCATION, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size16_t payloadSize) {
-	behaviour_settings_t* packet = (behaviour_settings_t*) payload;
-	LOGi("received behaviour settings %u", packet->asInt);
-	TYPIFY(STATE_BEHAVIOUR_SETTINGS)* eventDataPtr = packet;
-//	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, (uint8_t*)eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
-//	State::getInstance().set(stateData);
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, payload, payloadSize);
-	return State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 }
 
 cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize) {

@@ -128,6 +128,7 @@ public:
 private:
 	enum class Operation: uint8_t {
 		NONE,
+		CONNECT_CLEARANCE, // Waiting for clearance to connect.
 		CONNECT,
 		DISCONNECT,
 		DISCOVERY,
@@ -138,6 +139,10 @@ private:
 	BleCentral();
 	BleCentral(BleCentral const&);
 	void operator=(BleCentral const &);
+
+	device_address_t _address;
+
+	uint16_t _timeoutMs;
 
 	/**
 	 * Buffer used for reading and writing.
@@ -170,6 +175,10 @@ private:
 	TYPIFY(CONFIG_SCAN_INTERVAL_625US) _scanInterval;
 	TYPIFY(CONFIG_SCAN_WINDOW_625US) _scanWindow;
 
+	/**
+	 * Same as connect(), but now we have clearance.
+	 */
+	cs_ret_code_t connectWithClearance(const device_address_t& address, uint16_t timeoutMs = 3000);
 
 	/**
 	 * Writes the next chunk of a long write.
@@ -190,6 +199,7 @@ private:
 	void onGapEvent(uint16_t evtId, const ble_gap_evt_t& event);
 	void onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event);
 
+	void onConnectClearance();
 	void onConnect(uint16_t connectionHandle, const ble_gap_evt_connected_t& event);
 	void onDisconnect(const ble_gap_evt_disconnected_t& event);
 	void onGapTimeout(const ble_gap_evt_timeout_t& event);

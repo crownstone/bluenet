@@ -156,11 +156,13 @@ void Mesh::handleEvent(event_t & event) {
 #endif
 			break;
 		}
-		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_START: {
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST: {
 			// An outgoing connection is made, stop listening to mesh,
 			// so that the softdevice has time to listen for advertisements.
 			stop();
-			event.result.returnCode = ERR_SUCCESS;
+			if (event.result.returnCode == ERR_EVENT_UNHANDLED || event.result.returnCode == ERR_SUCCESS) {
+				event.result.returnCode = ERR_WAIT_FOR_SUCCESS;
+			}
 			break;
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
