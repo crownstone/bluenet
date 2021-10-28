@@ -269,7 +269,7 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 				LOGw("Missing MAC address");
 				break;
 			}
-			BLEutil::printAddress(meshMsg.macAddress, MAC_ADDRESS_LEN);
+			CsUtils::printAddress(meshMsg.macAddress, MAC_ADDRESS_LEN);
 			if (packet.connectionProtocol != CS_CONNECTION_PROTOCOL_VERSION) {
 				LOGw("Unsupported protocol %u", packet.connectionProtocol);
 				break;

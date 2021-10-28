@@ -191,13 +191,13 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 
 		// Encrypts the cleartext and puts it in ciphertext.
 //		_log(SERIAL_DEBUG, false, "key: ");
-//		BLEutil::printArray(_block.key, sizeof(_block.key), SERIAL_DEBUG);
+//		CsUtils::printArray(_block.key, sizeof(_block.key), SERIAL_DEBUG);
 //		_log(SERIAL_DEBUG, false, "cleartext: ");
-//		BLEutil::printArray(_block.cleartext, sizeof(_block.cleartext), SERIAL_DEBUG);
+//		CsUtils::printArray(_block.cleartext, sizeof(_block.cleartext), SERIAL_DEBUG);
 		errCode = sd_ecb_block_encrypt(&_block);
 		APP_ERROR_CHECK(errCode);
 //		_log(SERIAL_DEBUG, false, "cipher: ");
-//		BLEutil::printArray(_block.ciphertext, sizeof(_block.ciphertext), SERIAL_DEBUG);
+//		CsUtils::printArray(_block.ciphertext, sizeof(_block.ciphertext), SERIAL_DEBUG);
 
 		///////////////////////////////////////////////////////////////////
 		// XOR the ciphertext with the data to finish encrypting the block.

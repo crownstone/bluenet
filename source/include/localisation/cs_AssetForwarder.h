@@ -11,32 +11,129 @@
 #include <events/cs_EventListener.h>
 
 #include <localisation/cs_AssetHandler.h>
+#include <localisation/cs_AssetRecord.h>
+
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+/**
+ * AssetForwarder makes it possible for the AssetFiltering to merge mesh messages when
+ * they have very similar data.
+ *
+ * To use it, you place messages in the 'outbox' with sendAssetMacToMesh(..) or
+ * sendAssetIdToMesh(..). These functions merge the message with a similar one depending
+ * on the respective type.
+ *
+ * After all messages have been created, call flush() to send the message, or clearOutbox() to
+ * cancel your plans.
+ *
+ * By passing an asset_record along the flush() function will update the throttling counter.
+ */
 class AssetForwarder : public EventListener, public Component {
+public:
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 1000;
 
-public:
 	cs_ret_code_t init();
 
 	/**
-	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC to the mesh
+	 * Sends the mesh messages in the outbox and clears it.
+	 * Updates the records throttling counters.
 	 *
-	 * returns desired minimal time to next advertisement.
+	 * Messages are sent over both Uart and Mesh
 	 */
-	uint16_t sendAssetMacToMesh(const scanned_device_t& asset);
+	void flush();
 
 	/**
-	 * Forward asset as CS_MESH_MODEL_TYPE_ASSET_INFO to the mesh
-	 *
-	 * returns desired minimal time to next advertisement.
+	 * Removes all messages currently queued for sending.
 	 */
-	uint16_t sendAssetIdToMesh(const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
+	void clearOutbox();
 
-	virtual void handleEvent(event_t & event);
+
+	/**
+	 * Prepare a CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC message and put it
+	 * on the outbox. If an identical message is already contained in
+	 * the outbox, nothing happens.
+	 *
+	 * Record is required for throttling. If not available, throttling will not be updated.
+	 *
+	 * Returns true if there was enough space in the outbox to place the message. Else, false.
+	 */
+	bool sendAssetMacToMesh(asset_record_t* record, const scanned_device_t& asset);
+
+	/**
+	 * Prepare a CS_MESH_MODEL_TYPE_ASSET_INFO message and put it
+	 * on the outbox. If an identical message is already contained in
+	 * the outbox, nothing happens.
+	 *
+	 * Returns true if there was enough space in the outbox to place the message. Else, false.
+	 */
+	bool sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
+
+	/**
+	 * sets how many ticks will be added to records upon sending a message.
+	 */
+	void setThrottleCountdownBumpTicks(uint8_t ticks);
 
 private:
 	stone_id_t _myStoneId;
+
+	uint8_t _throttleCountdownBumpTicks = 0;
+
+	struct outbox_msg_t {
+		asset_record_t* record;
+		cs_mesh_model_msg_type_t msgType;
+		union {
+			cs_mesh_model_msg_asset_report_id_t idMsg;
+			cs_mesh_model_msg_asset_report_mac_t macMsg;
+			uint8_t rawMsg[MAX_MESH_MSG_PAYLOAD_SIZE];
+		};
+
+		// util funcs
+		outbox_msg_t();
+
+		/**
+		 * returns true if msgType is one of:
+		 *   CS_MESH_MODEL_TYPE_ASSET_INFO_MAC
+		 *   CS_MESH_MODEL_TYPE_ASSET_INFO_ID
+		 */
+		bool isValid();
+
+		/**
+		 * returns true if they have the same msgType and the addresses are the same.
+		 */
+		bool isSimilar(const outbox_msg_t& other);
+	};
+
+	outbox_msg_t _outbox[8] = {};
+
+	/**
+	 * validates the message, then
+	 * update throttle
+	 * send over uart
+	 * send over mesh
+	 *
+	 * returns true if message was valid
+	 */
+	bool dispatchOutboxMessage(outbox_msg_t& outMsg);
+
+
+	/**
+	 * Returns an empty slot in the outbox.
+	 * Returns null pointer when there is no empty slot.
+	 */
+	outbox_msg_t* getEmptyOutboxSlot();
+
+	/**
+	 * Returns a similar message in the outbox.
+	 * Returns null pointer when not found.
+	 */
+	outbox_msg_t* findSimilar(outbox_msg_t& outMsg);
+
+	/**
+	 * Adds a message to the outbox.
+	 * Merges wit message in outbox if possible.
+	 * Returns true on success.
+	 */
+	bool addToOutbox(outbox_msg_t& outMsg);
 
 	/**
 	 * Forward an asset mesh message to UART.
@@ -46,4 +143,11 @@ private:
 	 */
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId);
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId);
+
+public:
+
+	/**
+	 * Forwards relevant incoming mesh messages to UART.
+	 */
+	virtual void handleEvent(event_t & event);
 };

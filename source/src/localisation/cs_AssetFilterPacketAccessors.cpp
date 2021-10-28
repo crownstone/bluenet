@@ -68,21 +68,40 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 	return AssetFilterInput(_data + sizeof(AssetFilterOutputFormat));
 }
 
+
+bool AssetFilterOutput::hasInFormat() {
+	auto outform = *outFormat();
+
+	if (outform == AssetFilterOutputFormat::AssetId) {
+		return true;
+	}
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+	if (outform == AssetFilterOutputFormat::AssetIdNearest) {
+		return true;
+	}
+#endif
+
+	return false;
+}
+
 bool AssetFilterOutput::isValid() {
-	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac: {
-			return true;
+	if (hasInFormat()) {
+		if (inFormat().isValid() == false) {
+			LogAssetFilterPacketAccessorsWarn("Invalid informat in filter output.");
+			return false;
 		}
+		return true;
+	}
+
+	switch (*outFormat()) {
+		case AssetFilterOutputFormat::Mac:
+		case AssetFilterOutputFormat::AssetId:
+		case AssetFilterOutputFormat::None:
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 		case AssetFilterOutputFormat::AssetIdNearest:
 #endif
-		case AssetFilterOutputFormat::AssetId: {
-			if (inFormat().isValid() == false) {
-				LogAssetFilterPacketAccessorsWarn("Invalid informat for filter output.");
-				return false;
-			}
-			return true;
-		}
+
+		return true;
 	}
 
 	LogAssetFilterPacketAccessorsWarn("Unknown outFormat: %u", *outFormat());
@@ -91,18 +110,11 @@ bool AssetFilterOutput::isValid() {
 
 size_t AssetFilterOutput::length() {
 	size_t len = sizeof(AssetFilterOutputFormat);
-	switch (*outFormat()) {
-		case AssetFilterOutputFormat::Mac: {
-			break;
-		}
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-		case AssetFilterOutputFormat::AssetIdNearest:
-#endif
-		case AssetFilterOutputFormat::AssetId: {
-			len += inFormat().length();
-			break;
-		}
+
+	if(hasInFormat()) {
+		len += inFormat().length();
 	}
+
 	return len;
 }
 
@@ -188,14 +200,3 @@ size_t AssetFilterData::length() {
 	return len;
 }
 
-asset_filter_runtime_data_t* AssetFilter::runtimedata() {
-	return reinterpret_cast<asset_filter_runtime_data_t*>(_data + 0);
-}
-
-AssetFilterData AssetFilter::filterdata() {
-	return AssetFilterData(_data + sizeof(asset_filter_runtime_data_t));
-}
-
-size_t AssetFilter::length() {
-	return sizeof(asset_filter_runtime_data_t) + filterdata().length();
-}

@@ -154,7 +154,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
 40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
 40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
-40111 | Mesh set behaviour settings   | Yes       | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Received command to set behaviour settings from the mesh.
+40111 | Mesh set behaviour settings   | Yes       | [Behaviour settings](PROTOCOL.md#behaviour-settings) | Received command to set behaviour settings from the mesh.
 40112 | Mesh tracked device register  | Yes       | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Received command to register a tracked device from the mesh.
 40113 | Mesh tracked device token     | Yes       | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Received command to set the token of a tracked device from the mesh.
 40114 | Mesh sync request             | Yes       | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Received a sync request from the mesh.
@@ -285,15 +285,15 @@ Type | Name | Length | Description
 uint8[] | MAC | 6 | Mac address of the observed asset (in reverse byte order compared to string representation).
 uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
 int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
-uint8 | Channel | 1 | Channel of the observed advertisement.
+uint8 | Channel | 1 | BLE channel of the observed advertisement.
 
 ### Asset ID report
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
-[Asset ID](ASSET_FILTER_STORE.md#asset-id) | Asset ID | 3 | The asset ID.
+[Asset ID](ASSET_FILTERING.md#asset-id) | Asset ID | 3 | The asset ID.
 uint8 | Stone ID | 1 | ID of the Crownstone that observed the asset.
-uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed filter with ID = N, and lead to this asset ID.
+uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed [filter ID](ASSET_FILTERING.md#filter-id) = N, and lead to this asset ID.
 int8 | RSSI | 1 | RSSI between the observed asset and the observing Crownstone.
 uint8 | Channel | 1 | BLE channel of the observed advertisement.
 

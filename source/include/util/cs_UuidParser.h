@@ -9,7 +9,7 @@
 
 #define CS_UUID_STR_LEN 36
 
-namespace BLEutil {
+namespace CsUtils {
 
 
 /**

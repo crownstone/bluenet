@@ -354,7 +354,7 @@ void AssetFilterSyncer::onWriteResult(cs_central_write_result_t& result) {
 	}
 
 	// Initial checks, the order matters.
-	LOGAssetFilterSyncerDebug("onWriteResult writeRetCode=%u step=%u", _step);
+	LOGAssetFilterSyncerDebug("onWriteResult writeRetCode=%u step=%u", result.writeRetCode, _step);
 	if (result.writeRetCode != ERR_SUCCESS || !result.result.isInitialized()) {
 		reset();
 		return;

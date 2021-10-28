@@ -23,37 +23,37 @@ bool TrackedDevice::allFieldsSet() {
 
 void TrackedDevice::setAccessLevel(uint8_t accessLevel) {
 	data.accessLevel = accessLevel;
-	BLEutil::setBit(fieldsSet, BIT_POS_ACCESS_LEVEL);
+	CsUtils::setBit(fieldsSet, BIT_POS_ACCESS_LEVEL);
 }
 
 void TrackedDevice::setLocation(uint8_t locationId, uint8_t timeoutMinutes) {
 	data.data.locationId = locationId;
-	BLEutil::setBit(fieldsSet, BIT_POS_LOCATION);
+	CsUtils::setBit(fieldsSet, BIT_POS_LOCATION);
 	locationIdTTLMinutes = timeoutMinutes;
 }
 
 void TrackedDevice::setProfile(uint8_t profileId) {
 	data.data.profileId = profileId;
-	BLEutil::setBit(fieldsSet, BIT_POS_PROFILE);
+	CsUtils::setBit(fieldsSet, BIT_POS_PROFILE);
 }
 
 void TrackedDevice::setRssiOffset(int8_t rssiOffset) {
 	data.data.rssiOffset = rssiOffset;
-	BLEutil::setBit(fieldsSet, BIT_POS_RSSI_OFFSET);
+	CsUtils::setBit(fieldsSet, BIT_POS_RSSI_OFFSET);
 }
 
 void TrackedDevice::setFlags(uint8_t flags) {
 	data.data.flags.asInt = flags;
-	BLEutil::setBit(fieldsSet, BIT_POS_FLAGS);
+	CsUtils::setBit(fieldsSet, BIT_POS_FLAGS);
 }
 
 void TrackedDevice::setDevicetoken(uint8_t* deviceToken, uint8_t size) {
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
 	memcpy(data.data.deviceToken, deviceToken, sizeof(data.data.deviceToken));
-	BLEutil::setBit(fieldsSet, BIT_POS_DEVICE_TOKEN);
+	CsUtils::setBit(fieldsSet, BIT_POS_DEVICE_TOKEN);
 }
 
 void TrackedDevice::setTTL(uint16_t ttlMinutes) {
 	data.data.timeToLiveMinutes = ttlMinutes;
-	BLEutil::setBit(fieldsSet, BIT_POS_TTL);
+	CsUtils::setBit(fieldsSet, BIT_POS_TTL);
 }

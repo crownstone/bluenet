@@ -32,7 +32,7 @@ public:
 	void setLocation(uint8_t locationId) {
 		// TODO: is this if even needed?
 		if (locationId < sizeof(_bitmask) * 8) {
-			BLEutil::setBit(_bitmask, locationId);
+			CsUtils::setBit(_bitmask, locationId);
 		}
 	}
 

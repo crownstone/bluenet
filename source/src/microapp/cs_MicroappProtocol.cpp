@@ -55,7 +55,7 @@ void handleSwitchCommand(pin_cmd_t* pin_cmd) {
 			break;
 		}
 		default:
-			LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode2);
+			LOGw("Unknown pin mode / opcode: %u", pin_cmd->opcode2);
 	}
 }
 
@@ -253,7 +253,7 @@ void handleTwiCommand(twi_cmd_t* twi_cmd) {
 }
 
 int handleCommand(uint8_t* payload, uint16_t length) {
-	//LOGd("Incoming message: [%i, %i, %i, ...]", payload[0], payload[1], payload[2]);
+	_logArray(SERIAL_DEBUG, true, payload, length);
 	uint8_t command = payload[0];
 	switch(command) {
 		case CS_MICROAPP_COMMAND_LOG: {
@@ -343,24 +343,14 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 			eventData.appUuid = (payload[3] << 8) + payload[4];
 			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
 			eventData.data.data = &(payload[5]);
-			//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
+			//			CsUtils::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
 			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 			event.dispatch();
 			break;
 		}
 		default:
-			_log(SERIAL_INFO, false, "Unknown command %i of length %i: [", command, length);
-			// print first few bytes
-			int maxl = length;
-			if (length > 4) maxl = 4;
-			for (int i = 0; i < maxl; i++) {
-				_log(SERIAL_INFO, false, "0x%i ", payload[i]);
-			}
-			if (length > 4) {
-				_log(SERIAL_INFO, true, "...,...]");
-			} else {
-				_log(SERIAL_INFO, true, "]");
-			}
+			_log(SERIAL_INFO, true, "Unknown command %u of length %u:", command, length);
+			_logArray(SERIAL_INFO, true, payload, length);
 	}
 
 	return ERR_SUCCESS;
@@ -418,8 +408,8 @@ void MicroappProtocol::setIpcRam() {
 		len = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
 	}
 
-	// set buffer in RAM
-	setRamData(IPC_INDEX_CROWNSTONE_APP, buf, len);
+	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, buf, len);
+	LOGi("retCode=%u", retCode);
 }
 
 /**
@@ -472,7 +462,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 			return ERR_SUCCESS;
 		}
 	} else {
-		LOGi("Nothing found in RAM");
+		LOGi("Nothing found in RAM ret_code=%u", ret_code);
 		return ERR_NOT_FOUND;
 	}
 	return ERR_UNSPECIFIED;
@@ -535,7 +525,7 @@ void MicroappProtocol::callSetupAndLoop(uint8_t appIndex) {
 				LOGi("Set loaded to true");
 				_loaded = true;
 			} else {
-				LOGw("Disable microapp. After boot not the right info available");
+				LOGw("Disable microapp. After boot not the right info available. ret_code=%u", ret_code);
 				// Apparently, something went wrong?
 				_booted = false;
 			}

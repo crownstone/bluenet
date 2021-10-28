@@ -20,7 +20,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 
 	switch (data.type) {
 	case CS_TYPE::CONFIG_NAME: {
-		data.size = MIN(data.size, sizeof(STRINGIFY(BLUETOOTH_NAME)));
+		uint16_t nameSize = CsUtils::stringLen(STRINGIFY(BLUETOOTH_NAME), sizeof(STRINGIFY(BLUETOOTH_NAME)));
+		data.size = MIN(data.size, nameSize);
 		memcpy(data.value, STRINGIFY(BLUETOOTH_NAME), data.size);
 		return ERR_SUCCESS;
 	}
@@ -62,7 +63,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_UUID: {
 		std::string uuidString = g_BEACON_UUID;
-		if (BLEutil::parseUuid(uuidString.c_str(), uuidString.size(), data.value, data.size)) {
+		if (CsUtils::parseUuid(uuidString.c_str(), uuidString.size(), data.value, data.size)) {
 			return ERR_SUCCESS;
 		}
 		return ERR_WRONG_PAYLOAD_LENGTH;
@@ -282,7 +283,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_BLE_CENTRAL_WRITE:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
-	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_START:
+	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST:
+	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY:
 	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT:
 	case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED:
 	case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY:
@@ -527,7 +529,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_BLE_CENTRAL_WRITE:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
-	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_START:
+	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST:
+	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY:
 	case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT:
 	case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED:
 	case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY:

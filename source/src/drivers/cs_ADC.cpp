@@ -761,12 +761,16 @@ void ADC::_handleAdcInterrupt() {
 		_bufferQueue.pushUnique(bufIndex);
 
 		// Decouple handling of buffer from adc interrupt handler, copy buffer index.
-		uint32_t errorCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
-		// Don't stop application when it failed to put the buffer on the scheduler.
-		// Simply don't put it on the scheduler and continue sampling.
-//		APP_ERROR_CHECK(errorCode);
-		if (errorCode != NRF_SUCCESS) {
-			LOGAdcInterruptWarn("Failed to schedule");
+		uint16_t schedulerSpace = app_sched_queue_space_get();
+		if (schedulerSpace > SCHED_QUEUE_SIZE - SCHEDULER_QUEUE_ALMOST_FULL) {
+			uint32_t errorCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
+
+			// Don't stop application when it failed to put the buffer on the scheduler.
+			// Simply don't put it on the scheduler and continue sampling.
+//			APP_ERROR_CHECK(errorCode);
+			if (errorCode != NRF_SUCCESS) {
+				LOGAdcInterruptWarn("Failed to schedule");
+			}
 		}
 
 		LOGAdcInterruptDebug("Done bufIndex=%u queueSize=%u nextBuf=%u", bufIndex, _saadcBufferQueue.size(), _saadcBufferQueue.peek());

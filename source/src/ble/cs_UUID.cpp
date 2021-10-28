@@ -20,7 +20,7 @@ UUID::UUID(ble_uuid_t uuid):
 
 UUID::UUID(const char* fullUuid) {
 	ble_uuid128_t uuid;
-	bool success = BLEutil::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
+	bool success = CsUtils::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
 	if (!success) {
 		APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
 	}
@@ -43,7 +43,7 @@ UUID::UUID(const UUID& baseUuid, uint16_t shortUuid) {
 
 cs_ret_code_t UUID::fromFullUuid(const char* fullUuid) {
 	ble_uuid128_t uuid;
-	bool success = BLEutil::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
+	bool success = CsUtils::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
 	if (!success) {
 		return ERR_WRONG_PARAMETER;
 	}

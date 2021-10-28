@@ -439,7 +439,7 @@ void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 ////		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
 //		LOGi("Stack scan: address=%02X:%02X:%02X:%02X:%02X:%02X addrType=%u type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], advReport->peer_addr.addr_type, type, scan.rssi, scan.channel);
 //		LOGi("  adv_type=%u len=%u data=", type, scan.dataSize);
-//		BLEutil::printArray(scan.data, scan.dataSize);
+//		CsUtils::printArray(scan.data, scan.dataSize);
 //	}
 	event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 	EventDispatcher::getInstance().dispatch(event);
@@ -643,7 +643,16 @@ void Stack::onIncomingConnected(const ble_evt_t * p_ble_evt) {
 
 	startConnectionAliveTimer();
 
-	event_t event(CS_TYPE::EVT_BLE_CONNECT);
+	const ble_gap_evt_connected_t& connectedData = p_ble_evt->evt.gap_evt.params.connected;
+
+	TYPIFY(EVT_BLE_CONNECT) eventData = {
+		.connectionHandle    = p_ble_evt->evt.gap_evt.conn_handle,
+		.advertisementHandle = connectedData.adv_handle,
+		.advertisementBuffer = cs_data_t(connectedData.adv_data.adv_data.p_data, connectedData.adv_data.adv_data.len),
+		.scanResponseBuffer  = cs_data_t(connectedData.adv_data.scan_rsp_data.p_data, connectedData.adv_data.scan_rsp_data.len)
+	};
+
+	event_t event(CS_TYPE::EVT_BLE_CONNECT, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 

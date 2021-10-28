@@ -50,7 +50,7 @@ void CommandAdvHandler::init() {
 void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 //	_log(SERIAL_DEBUG, "adv: ");
 //	_log(SERIAL_DEBUG, "rssi=%i addressType=%u MAC=", scannedDevice->rssi, scannedDevice->addressType);
-//	BLEutil::printAddress((uint8_t*)(scannedDevice->address), MAC_ADDRESS_LEN);
+//	CsUtils::printAddress((uint8_t*)(scannedDevice->address), MAC_ADDRESS_LEN);
 // addressType:
 //#define BLE_GAP_ADDR_TYPE_PUBLIC                        0x00 /**< Public address. */
 //#define BLE_GAP_ADDR_TYPE_RANDOM_STATIC                 0x01 /**< Random Static address. */
@@ -70,12 +70,12 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 
 	uint32_t errCode;
 	cs_data_t services16bit;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE, scannedDevice->data, scannedDevice->dataSize, &services16bit);
+	errCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE, scannedDevice->data, scannedDevice->dataSize, &services16bit);
 	if (errCode != ERR_SUCCESS) {
 		return;
 	}
 	cs_data_t services128bit;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE, scannedDevice->data, scannedDevice->dataSize, &services128bit);
+	errCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE, scannedDevice->data, scannedDevice->dataSize, &services128bit);
 	if (errCode != ERR_SUCCESS) {
 		return;
 	}
@@ -341,7 +341,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			flags = commandData[0];
 
 			// Set time, if valid.
-			if (BLEutil::isBitSet(flags, 0)) {
+			if (CsUtils::isBitSet(flags, 0)) {
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
 				controlCmd.size = setTimeSize;
@@ -351,7 +351,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			}
 
 			// Set sun time, if valid.
-			if (BLEutil::isBitSet(flags, 1)) {
+			if (CsUtils::isBitSet(flags, 1)) {
 				sun_time_t sunTime;
 				sunTime.sunrise = (commandData[flagsSize + setTimeSize + 0] << 0) + (commandData[flagsSize + setTimeSize + 1] << 8) + (commandData[flagsSize + setTimeSize + 2] << 16);
 				sunTime.sunset  = (commandData[flagsSize + setTimeSize + 3] << 0) + (commandData[flagsSize + setTimeSize + 4] << 8) + (commandData[flagsSize + setTimeSize + 5] << 16);

@@ -1,6 +1,8 @@
 # Hardware version
 
-See also the [naming](https://github.com/crownstone/bluenet/blob/master/docs/NAMING.md) document.
+The hardware version string can be read from the device information service, after connecting to a Crownstone.
+
+See also the [product naming](https://github.com/crownstone/bluenet/blob/master/docs/PRODUCT_NAMING.md) document.
 
 
 ```

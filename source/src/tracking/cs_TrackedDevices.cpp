@@ -244,7 +244,7 @@ TrackedDevice* TrackedDevices::add() {
 }
 
 bool TrackedDevices::hasAccess(TrackedDevice& device, uint8_t accessLevel) {
-	if (BLEutil::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL) &&
+	if (CsUtils::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL) &&
 			(!KeysAndAccess::getInstance().allowAccess((EncryptionAccessLevel)device.data.accessLevel, (EncryptionAccessLevel)accessLevel))) {
 		return false;
 	}

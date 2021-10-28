@@ -38,10 +38,10 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	// Allocate buffer.
 	_switchHistory.init();
 
-	listen();
+	listen(); // TODO: move to end of init.
 
-	twilightHandler.listen();
-	behaviourHandler.listen();
+	twilightHandler.init();
+	behaviourHandler.init();
 
 	overrideState = smartSwitch.getIntendedState();
 	pushTestDataToHost();
@@ -270,7 +270,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 				event.result.returnCode = ERR_NO_ACCESS;
 				return false;
 			}
-			LOGd("packet intensity: %d, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
+			LOGd("packet intensity: %u, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
 			executeStateIntentionUpdate(packet->switchCmd, event.source);
 
 			break;
@@ -393,7 +393,22 @@ uint8_t SwitchAggregator::resolveOverrideState() {
 	}
 
 	LOGSwitchAggregatorDebug("Override is smart on");
-	return aggregatedBehaviourIntensity();
+	std::optional<uint8_t> opt0 = {0}; // to simplify following expressions.
+
+	// Only use behaviour and twilight state only when it has a value and when that value is not 0.
+	if (behaviourState > opt0 && twilightState > opt0) {
+		return CsMath::min(*behaviourState, *twilightState);
+	}
+
+	if (behaviourState > opt0) {
+		return *behaviourState;
+	}
+
+	if (twilightState > opt0) {
+		return *twilightState;
+	}
+
+	return 100;
 }
 
 bool SwitchAggregator::checkAndSetOwner(const cmd_source_with_counter_t& source) {
@@ -415,7 +430,7 @@ bool SwitchAggregator::checkAndSetOwner(const cmd_source_with_counter_t& source)
 		return false;
 	}
 
-	if (!BLEutil::isNewer(_source.count, source.count)) {
+	if (!CsUtils::isNewer(_source.count, source.count)) {
 		// A command with newer counter has been received already.
 		LOGSwitchAggregatorDebug("Old command count: %u, already got: %u", source.count, _source.count);
 		return false;

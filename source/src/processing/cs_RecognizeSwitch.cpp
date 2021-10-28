@@ -328,7 +328,7 @@ void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer
 	AdcBuffer & ib = AdcBuffer::getInstance();
 	adc_buffer_id_t bufIndices[_numStoredBuffers];
 	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
-		bufIndices[i] = bufQueue[bufQueue.size() - 4 + i]; // Last buffer is the unfiltered version.
+		bufIndices[i] = bufQueue[bufQueue.size() - (1 + _numBuffersRequired) + i]; // Last buffer is the unfiltered version.
 	}
 
 	uint16_t numSamples = ib.getChannelLength();

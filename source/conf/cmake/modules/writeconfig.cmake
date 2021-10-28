@@ -90,6 +90,7 @@ if(NOT MAC_ADDRESS)
 endif()
 
 if(NOT CONFIG_FIELD)
+	message(STATUS "Write all fields")
 	get_mac_address("${SERIAL_NUM}" MAC_ADDRESS)
 	write_field("MAC_ADDRESS" ${MAC_ADDRESS})
 	write_field("BEACON_MAJOR" ${BEACON_MAJOR})
@@ -108,7 +109,7 @@ endif()
 
 if(CONFIG_FIELD STREQUAL "MAC_ADDRESS")
 	message(STATUS "Get mac address")
-	get_mac_address(${SERIAL_NUM} MAC_ADDRESS)
+	get_mac_address("${SERIAL_NUM}" MAC_ADDRESS)
 	write_field("MAC_ADDRESS" ${MAC_ADDRESS})
 
 elseif(CONFIG_FIELD STREQUAL "BEACON_MAJOR")

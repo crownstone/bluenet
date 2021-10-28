@@ -41,7 +41,7 @@ BackgroundAdvertisementHandler::BackgroundAdvertisementHandler() {
 void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceUuids;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, scannedDevice->data, scannedDevice->dataSize, &serviceUuids);
+	errCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, scannedDevice->data, scannedDevice->dataSize, &serviceUuids);
 	if (errCode != ERR_SUCCESS) {
 		return;
 	}
@@ -72,7 +72,7 @@ void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t
 void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t manufacturerData;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, scannedDevice->data, scannedDevice->dataSize, &manufacturerData);
+	errCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA, scannedDevice->data, scannedDevice->dataSize, &manufacturerData);
 	if (errCode != ERR_SUCCESS) {
 		return;
 	}
@@ -229,7 +229,7 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 	_log(SERIAL_DEBUG, false, "bg adv: ");
 	_log(SERIAL_DEBUG, false, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
 	_log(SERIAL_DEBUG, false, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
-	BLEutil::printAddress(backgroundAdvertisement->macAddress, BLE_GAP_ADDR_LEN);
+	CsUtils::printAddress(backgroundAdvertisement->macAddress, BLE_GAP_ADDR_LEN);
 #endif
 
 

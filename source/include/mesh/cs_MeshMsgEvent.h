@@ -58,6 +58,13 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI> {
 	using type = cs_mesh_model_msg_neighbour_rssi_t;
 };
 
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS> {
+	using type = behaviour_settings_t;
+};
+
+
+
 class MeshMsgEvent {
 public:
 	cs_mesh_model_msg_type_t type;     // Type of message

@@ -72,14 +72,20 @@ public:
 	/**
 	 * Get the input format.
 	 *
-	 * Currently only valid if type is assetId.
+	 * Currently only valid if type is assetId. Do not use for other output types!
 	 */
 	AssetFilterInput         inFormat();
+
+	/**
+	 * Returns true if inFormat() is safe to use.
+	 */
+	bool hasInFormat();
 
 	/**
 	 * Checks if the data has valid values.
 	 */
 	bool isValid();
+
 
 	/**
 	 * Get the expected length of this class, depends on type.
@@ -176,28 +182,3 @@ public:
 	size_t length();
 };
 
-/**
- * Class that contains all data required for an asset filter:
- * - Runtime data.
- * - persisted data (filterdata).
- */
-class AssetFilter {
-public:
-	uint8_t* _data;  // byte representation of this object.
-	AssetFilter(uint8_t* data) : _data(data) {}
-
-	/**
-	 * Get the runtime data.
-	 */
-	asset_filter_runtime_data_t* runtimedata();
-
-	/**
-	 * Get the filter data.
-	 */
-	AssetFilterData filterdata();
-
-	/**
-	 * Get the expected length of this class.
-	 */
-	size_t length();
-};

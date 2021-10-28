@@ -68,10 +68,11 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	Mac             = 0,
-	AssetId         = 1,
+	Mac            = 0,
+	AssetId        = 1,
+	None           = 2,
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	AssetIdNearest  = 2,
+	AssetIdNearest = 100,
 #endif
 };
 

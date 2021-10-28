@@ -32,7 +32,7 @@ void TestCentral::connect() {
 			.timeoutMs = 3000
 	};
 	_log(SERIAL_INFO, false, "Address: ");
-	BLEutil::printAddress((uint8_t*)cmdPacket.address.address, BLE_GAP_ADDR_LEN, SERIAL_INFO);
+	CsUtils::printAddress((uint8_t*)cmdPacket.address.address, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 
 	event_t cmdEvent(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &cmdPacket, sizeof(cmdPacket));
 	cmdEvent.dispatch();

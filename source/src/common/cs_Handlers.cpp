@@ -48,7 +48,7 @@ extern "C" {
  * The decoupled SOC event handler, should run in thread mode.
  */
 void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("soc evt decoupled int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("soc evt decoupled int=%u", CsUtils::getInterruptLevel());
 	uint32_t evt_id = *(uint32_t*)p_event_data;
 	switch (evt_id) {
 		case NRF_EVT_POWER_FAILURE_WARNING: {
@@ -71,7 +71,7 @@ void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_si
 }
 
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
-	LOGInterruptLevel("soc evt int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("soc evt int=%u", CsUtils::getInterruptLevel());
 
 	switch (evt_id) {
 		case NRF_EVT_POWER_FAILURE_WARNING:
@@ -115,7 +115,7 @@ NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, cr
  * Decoupled BLE event handler, should run in thread mode.
  */
 void crownstone_sdh_ble_evt_handler_decoupled(const void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("sdh ble evt decoupled int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("sdh ble evt decoupled int=%u", CsUtils::getInterruptLevel());
 	ble_evt_t* p_ble_evt = (ble_evt_t*) p_event_data;
 	Stack::getInstance().onBleEvent(p_ble_evt);
 }
@@ -129,7 +129,7 @@ void crownstone_sdh_ble_evt_handler_sched(void * p_event_data, uint16_t event_si
 void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_context) {
 
 
-	LOGInterruptLevel("sdh ble evt int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("sdh ble evt int=%u", CsUtils::getInterruptLevel());
 	switch (p_ble_evt->header.evt_id) {
 		case BLE_GAP_EVT_ADV_REPORT: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
@@ -197,7 +197,7 @@ NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_e
 
 
 static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context) {
-	LOGInterruptLevel("sdh state evt int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("sdh state evt int=%u", CsUtils::getInterruptLevel());
 	switch (state) {
 		case NRF_SDH_EVT_STATE_ENABLE_PREPARE:
 			LOGd("Softdevice is about to be enabled");
@@ -224,13 +224,13 @@ NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRI
 #if BUILD_MESHING == 1
 // From: ble_softdevice_support.c
 void mesh_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("mesh soc evt decoupled int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("mesh soc evt decoupled int=%u", CsUtils::getInterruptLevel());
 	uint32_t evt_id = *(uint32_t*)p_event_data;
 	nrf_mesh_on_sd_evt(evt_id);
 }
 
 static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
-	LOGInterruptLevel("mesh soc evt int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("mesh soc evt int=%u", CsUtils::getInterruptLevel());
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
 	APP_ERROR_CHECK(retVal);
@@ -245,7 +245,7 @@ NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_h
  * The decoupled FDS event handler, should run in thread mode.
  */
 void fds_evt_handler_decoupled(const void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("fds evt decoupled int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("fds evt decoupled int=%u", CsUtils::getInterruptLevel());
 	fds_evt_t* p_fds_evt = (fds_evt_t*) p_event_data;
 	Storage::getInstance().handleFileStorageEvent(p_fds_evt);
 }
@@ -257,7 +257,7 @@ void fds_evt_handler_sched(void * p_event_data, uint16_t event_size) {
  * The FDS event handler is registered in the cs_Storage class.
  */
 void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
-	LOGInterruptLevel("fds evt int=%u", BLEutil::getInterruptLevel());
+	LOGInterruptLevel("fds evt int=%u", CsUtils::getInterruptLevel());
 	// For some reason, we already got fds event init, before app_sched_execute() was called.
 	// So for now, just always put fds events on the app scheduler.
 //#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT

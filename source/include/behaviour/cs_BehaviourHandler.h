@@ -14,6 +14,12 @@
 
 class BehaviourHandler : public EventListener {
 public:
+	/**
+	 * Initialize this class:
+	 * - Read settings from flash.
+	 * - Start listening for events.
+	 */
+	void init();
 
     /**
      * Computes the intended behaviour state of this crownstone based on
@@ -25,7 +31,7 @@ public:
      * - STATE_BEHAVIOUR_SETTINGS
      * - CMD_GET_BEHAVIOUR_DEBUG
      */
-    virtual void handleEvent(event_t& evt);
+    void handleEvent(event_t& evt);
 
     /**
      * Acquires the current time and presence information. 
@@ -82,9 +88,50 @@ private:
      */ 
     std::optional<uint8_t> currentIntendedState = {};
 
-    /******
+    /**
      * setting this to false will result in a BehaviourHandler that will
      * not have an opinion about the state anymore (getValue returns std::nullopt).
      */
-    bool isActive = true;
+    bool _isActive = true;
+
+    /**
+     * Whether the behaviour settings are synced.
+     */
+    bool _behaviourSettingsSynced = false;
+
+    /**
+     * Cache the received behaviour settings during syncing.
+     */
+    std::optional<behaviour_settings_t> _receivedBehaviourSettings = {};
+
+
+    void onBehaviourSettingsMeshMsg(behaviour_settings_t settings);
+
+    /**
+     * To be called when the behaviour settings were changed, and on sync response.
+     */
+    void onBehaviourSettingsChange(behaviour_settings_t settings);
+
+    /**
+     * Returns true when the behaviour settings should be synced.
+     * To be called when a sync request will be sent out.
+     */
+    bool onBehaviourSettingsOutgoingSyncRequest();
+
+    /**
+     * Finalizes the behaviour settings sync.
+     * To be called when the overall sync failed.
+     */
+    void onMeshSyncFailed();
+
+    /**
+     * If there was any behaviour settings sync response, the behaviour settings sync will be finalized.
+     */
+    void tryFinalizeBehaviourSettingsSync();
+
+    /**
+     * Sends a sync response.
+     * To be called on a behaviour settings sync request
+     */
+    void onBehaviourSettingsIncomingSyncRequest();
 };

@@ -24,7 +24,7 @@ id | name | Payload | Result data
 8  | CS_MESH_MODEL_TYPE_STATE_0 | [cs_mesh_model_msg_state_0_t](#cs_mesh_model_msg_state_0_t)
 9  | CS_MESH_MODEL_TYPE_STATE_1 | [cs_mesh_model_msg_state_1_t](#cs_mesh_model_msg_state_1_t)
 10 | CS_MESH_MODEL_TYPE_PROFILE_LOCATION | [cs_mesh_model_msg_profile_location_t](#cs_mesh_model_msg_profile_location_t)
-11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [behaviour_settings_t](#behaviour_settings_t)
+11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [Behaviour settings](PROTOCOL.md#behaviour-settings)
 12 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER | [cs_mesh_model_msg_device_register_t](#cs_mesh_model_msg_device_register_t)
 13 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN | [cs_mesh_model_msg_device_token_t](#cs_mesh_model_msg_device_token_t)
 14 | CS_MESH_MODEL_TYPE_SYNC_REQUEST | [cs_mesh_model_msg_sync_request_t](#cs_mesh_model_msg_sync_request_t)
@@ -36,9 +36,10 @@ id | name | Payload | Result data
 22 | CS_MESH_MODEL_TYPE_TIME_SYNC | [cs_mesh_model_msg_time_sync_message_t](#cs_mesh_model_msg_time_sync_message_t)
 25 | CS_MESH_MODEL_TYPE_STONE_MAC | [cs_mesh_model_msg_stone_mac_t](#cs_mesh_model_msg_stone_mac_t)
 26 | CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION | [cs_mesh_model_msg_asset_filter_version_t](#cs_mesh_model_msg_asset_filter_version_t)
-27 | CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC | [cs_mesh_model_msg_asset_rssi_mac_t](#cs_mesh_model_msg_asset_rssi_mac_t)
+27 | CS_MESH_MODEL_TYPE_ASSET_INFO_MAC | [Asset MAC report](#asset-mac-report)
 28 | CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI | [cs_mesh_model_msg_neighbour_rssi_t](#cs_mesh_model_msg_neighbour_rssi_t)
 29 | CS_MESH_MODEL_TYPE_CTRL_CMD | [cs_mesh_model_msg_ctrl_cmd_t](#cs_mesh_model_msg_ctrl_cmd_t) | [cs_mesh_model_msg_ctrl_cmd_header_t](#cs_mesh_model_msg_ctrl_cmd_header_t)
+30 | CS_MESH_MODEL_TYPE_ASSET_INFO_ID | [Asset ID report](#asset-id-report)
 
 ## Packet descriptors
 
@@ -108,15 +109,6 @@ uint16_t | Delay | 2 |
 cmd_source_with_counter_t | Source | 3 |
 
 
-#### behaviour_settings_t
-
-![behaviour settings](../docs/diagrams/mesh_behaviour_settings.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint32_t | Flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Other bits must remain 0.
-
-
 #### cs_mesh_model_msg_device_register_t
 
 ![register device](../docs/diagrams/mesh_register_device.png)
@@ -179,7 +171,8 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Time |
 1 | Registered devices |
-2-31 | Reserved | Reserved for future use, must be 0 for now.
+2 | Behaviour settings |
+3-31 | Reserved | Reserved for future use, must be 0 for now.
 
 
 
@@ -269,23 +262,47 @@ uint8_t[] | MAC address | 6 | Mac address of the replier, ignored for request.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Protocol | 1 | Supported protocol.
-uint16_t | Master version | 2 | Master version.
-uint32_t | Master CRC | 4 | Master CRC.
+uint8_t | Protocol | 1 | Supported [protocol](ASSET_FILTERING.md#protocol-version).
+uint16_t | Master version | 2 | [Master version](ASSET_FILTERING.md#master-version).
+uint32_t | Master CRC | 4 | [Master CRC](ASSET_FILTERING.md#master-crc).
 
-#### cs_mesh_model_msg_asset_rssi_mac_t
+### Asset MAC report
+
+![asset MAC report](../docs/diagrams/mesh_asset_report_mac.png)
 
 Type | Name | Length | Description
---- | --- | --- | ---
-[compressed_rssi_data_t](#compressed_rssi_data_t) | Compressed RSSI data | 1 |
-uint8_t[] | MAC address | 6 | Mac address of the asset.
+---- | ---- | ------ | -----------
+uint8[] | MAC | 6    | The MAC address of the asset.
+[rssi](#rssi-and-channel) | Rssi | 1 | Signal strength of the asset advertisement.
 
-#### compressed_rssi_data_t
+### RSSI and channel
+
+![RSSI and channel packet](../docs/diagrams/rssi_and_channel_packet.png)
 
 Type | Name | Length in bits | Description
---- | --- | --- | ---
-uint8_t | Channel | 2 | 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39.
-uint8_t | Rssi halved | 6 | Falf of the absolute value of the original RSSI.
+---- | ---- | -------------- | -----------
+uint8 | Channel | 2          | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
+uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
+
+### Asset ID report
+
+![Asset ID report](../docs/diagrams/mesh_asset_report_id.png)
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Asset ID](ASSET_FILTERING.md#asset-id) | Asset ID | 3 | The asset ID.
+uint8 | Filter bitmask | 1 | Bitmask of filters that the asset advertisement passed and lead to this asset ID. Nth bit set, means the asset passed [filter ID](ASSET_FILTERING.md#filter-id) = N, and lead to this asset ID.
+int8 | RSSI | 1 | Signal strength of the asset advertisement.
+[channel](#asset-id-report-channel) | Channel | 1 |
+uint8 | Reserved | 1 | Reserved for future use, 0 for now.
+
+### Asset ID report channel
+
+Type  | Name | Length in bits | Description
+----- | ---- | -------------- | -----------
+uint8 | Channel | 2 | The BLE channel: 0 = unknown, 1 = 37, 2 = 38, 3 = 39.
+uint8 | Reserved | 6 | Reserved for future use, 0 for now.
+
 
 #### cs_mesh_model_msg_neighbour_rssi_t
 
@@ -317,6 +334,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8_t | [Type](#message-types) | 1 | The type of mesh msg this is the result of.
 uint8_t | [Result code](PROTOCOL.md#result-codes) | 1 | Shortened version of result code.
+
 
 
 

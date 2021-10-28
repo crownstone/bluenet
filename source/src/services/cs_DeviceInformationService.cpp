@@ -37,7 +37,7 @@ inline std::string get_hardware_revision(void) {
 
 	// AAB0 is stored as 0x41414230
 	cs_variant_t variant;
-	variant.u32 = BLEutil::convertEndian32(NRF_FICR->INFO.VARIANT);
+	variant.u32 = CsUtils::convertEndian32(NRF_FICR->INFO.VARIANT);
 
 	// get nordic chip version
 	char nordic_chip_version[6];

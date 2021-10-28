@@ -58,7 +58,7 @@ static CS_TYPE cs_mesh_get_type_from_handle(uint16_t handle) {
 }
 
 static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
-	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
+	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	cs_ret_code_t retCode = State::getInstance().set(type, data_ptr, data_size);
 	LOGi("cs_mesh_write_cb handle=%u retCode=%u", handle, retCode);
@@ -72,18 +72,18 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 }
 
 static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
-	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
+	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().get(type, data_ptr, data_size);
 	_log(SERIAL_INFO, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
-//	BLEutil::printArray(data_ptr, data_size, SERIAL_INFO);
+//	CsUtils::printArray(data_ptr, data_size, SERIAL_INFO);
 	_logArray(SERIAL_INFO, true, (uint8_t*)data_ptr, data_size);
 	return NRF_SUCCESS;
 }
 
 static uint32_t cs_mesh_erase_cb(uint16_t handle) {
 	LOGi("cs_mesh_erase_cb handle=%u", handle);
-	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
+	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().remove(type, 0);
 	return NRF_SUCCESS;
@@ -97,7 +97,7 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 			LOGMeshVerbose("NRF_MESH_EVT_MESSAGE_RECEIVED");
 //			LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
 //			LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
-//			BLEutil::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
+//			CsUtils::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
 			break;
 		case NRF_MESH_EVT_TX_COMPLETE:
 			LOGMeshVerbose("NRF_MESH_EVT_TX_COMPLETE");
@@ -178,9 +178,12 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 		case NRF_MESH_EVT_FRIENDSHIP_TERMINATED:
 			LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
 			break;
-		case NRF_MESH_EVT_DISABLED:
+		case NRF_MESH_EVT_DISABLED: {
 			LOGMeshVerbose("NRF_MESH_EVT_DISABLED");
+			event_t event(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY);
+			event.dispatch();
 			break;
+		}
 		case NRF_MESH_EVT_PROXY_STOPPED:
 			LOGMeshVerbose("NRF_MESH_EVT_PROXY_STOPPED");
 			break;
@@ -369,7 +372,7 @@ void MeshCore::provisionSelf(uint16_t id) {
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
-	//BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
+	//CsUtils::printArray(key, NRF_MESH_KEY_SIZE);
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 
@@ -413,7 +416,7 @@ void MeshCore::provisionLoad() {
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
-//	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
+//	CsUtils::printArray(key, NRF_MESH_KEY_SIZE);
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
@@ -440,7 +443,7 @@ void MeshCore::start() {
 	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
 	_log(SERIAL_DEBUG, false, "Device UUID: ");
-//	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
+//	CsUtils::printArray(uuid, NRF_MESH_UUID_SIZE);
 //	_logArray(SERIAL_DEBUG, true, uuid, NRF_MESH_UUID_SIZE, "%02X");
 	_logArray(SERIAL_DEBUG, true, nrf_mesh_configure_device_uuid_get(), NRF_MESH_UUID_SIZE);
 

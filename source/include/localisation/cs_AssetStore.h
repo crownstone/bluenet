@@ -69,6 +69,7 @@ public:
 	 * for (at least) timeToNextThrottleOpenMs.
 	 */
 	void addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs);
+	uint16_t throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs);
 
 
 private:

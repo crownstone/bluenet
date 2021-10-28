@@ -35,14 +35,16 @@ enum cs_mesh_model_opcode_t {
  * See https://devzone.nordicsemi.com/f/nordic-q-a/32854/max-size-of-data-to-send-from-one-node-to-other-ble-mesh
  * The minimum advertising interval that mesh are using now is 20ms, so each advertisement / segment, takes 20ms.
  */
-#define MAX_MESH_MSG_SIZE (3 * 12 - 4 - 3)
-#define MAX_MESH_MSG_NON_SEGMENTED_SIZE (15 - 4 - 3)
+static constexpr uint8_t MAX_MESH_MSG_SIZE = 3 * 12 - 4 - 3;
+static constexpr uint8_t MAX_MESH_MSG_NON_SEGMENTED_SIZE = 15 - 4 - 3;
 
 /**
  * Size of the header of each mesh model message.
  * 1B for the message type.
  */
-#define MESH_HEADER_SIZE 1
+static constexpr uint8_t MESH_HEADER_SIZE = 1;
+
+static constexpr uint8_t MAX_MESH_MSG_PAYLOAD_SIZE = MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE;
 
 enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TEST                      = 0,  // Payload: cs_mesh_model_msg_test_t
@@ -71,10 +73,10 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_RSSI_DATA                 = 24, // Payload: rssi_data_message_t                             Only used in MeshTopologyResearch
 	CS_MESH_MODEL_TYPE_STONE_MAC                 = 25, // Payload: cs_mesh_model_msg_stone_mac_t
 	CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION      = 26, // Payload: cs_mesh_model_msg_asset_filter_version_t
-	CS_MESH_MODEL_TYPE_ASSET_INFO_MAC            = 27, // Payload: cs_mesh_model_msg_asset_rssi_mac_t
+	CS_MESH_MODEL_TYPE_ASSET_INFO_MAC            = 27, // Payload: cs_mesh_model_msg_asset_report_mac_t
 	CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI            = 28, // Payload: cs_mesh_model_msg_neighbour_rssi_t
 	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
-	CS_MESH_MODEL_TYPE_ASSET_INFO_ID             = 30, // Payload: cs_mesh_model_msg_asset_info_id_t
+	CS_MESH_MODEL_TYPE_ASSET_INFO_ID             = 30, // Payload: cs_mesh_model_msg_asset_report_id_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -154,8 +156,9 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {
 	stone_id_t id;
 	union __attribute__((__packed__)) {
 		struct __attribute__((packed)) {
-			bool time           : 1;
-			bool trackedDevices : 1;
+			bool time              : 1;
+			bool trackedDevices    : 1;
+			bool behaviourSettings : 1;
 		} bits;
 		uint32_t bitmask;
 	};
@@ -202,7 +205,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_mac_t {
-	uint8_t mac[MAC_ADDRESS_LEN];
+	mac_address_t mac;
 	rssi_and_channel_t rssiData;
 };
 

@@ -251,7 +251,7 @@ private:
 	 * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
 	 * It is loaded from memory or from the default and written to the Stack.
 	 */
-	void setName(bool firstTime);
+	void setName();
 
 	/**
 	 * Create a particular service. Depending on the mode we can choose to create a set of services that we would need.

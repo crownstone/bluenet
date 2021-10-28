@@ -43,7 +43,7 @@ static inline const char* get_hardware_version() {
 
 	// Can't use LOGe here, as the bootloader also uses this file.
 //	LOGi("UICR");
-//	BLEutil::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
+//	CsUtils::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
 
 	// CROWNSTONE BUILTINS
 	if (hardwareBoard == ACR01B1A)  return "10103000100";

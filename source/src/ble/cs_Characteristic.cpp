@@ -353,7 +353,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		}
 
 //		LOGi("dataLen: %d ", dataLen);
-//		BLEutil::printArray(valueGattAddress, valueLength);
+//		CsUtils::printArray(valueGattAddress, valueLength);
 
 		memcpy(&notification.data, valueGattAddress + offset, dataLen);
 
@@ -362,8 +362,8 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 
 //		LOGi("address: %p", valueGattAddress + offset);
 //		LOGi("offset: %d", offset);
-//		BLEutil::printArray((uint8_t*)valueGattAddress + offset, dataLen);
-//		BLEutil::printArray((uint8_t*)&notification, packageLen);
+//		CsUtils::printArray((uint8_t*)valueGattAddress + offset, dataLen);
+//		CsUtils::printArray((uint8_t*)&notification, packageLen);
 
 		memcpy(oldVal, valueGattAddress + offset, packageLen);
 
