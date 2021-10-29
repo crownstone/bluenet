@@ -715,7 +715,9 @@ void Crownstone::startUp() {
 	_state->startWritesToFlash();
 
 #if BUILD_MESHING == 1
-	_mesh->startSync();
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		_mesh->startSync();
+	}
 #endif
 
 #if BUILD_MEM_USAGE_TEST == 1
