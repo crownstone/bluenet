@@ -23,6 +23,8 @@ cs_ret_code_t TwilightHandler::init() {
 
 	LOGi("Init: isActive=%u", isActive);
 
+	_behaviourStore = getComponent<BehaviourStore>();
+
 	listen();
 
 	return ERR_SUCCESS;
@@ -65,11 +67,7 @@ bool TwilightHandler::update() {
 }
 
 std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currentTime) {
-	if (!isActive) {
-		return {};
-	}
-
-	if (!currentTime.isValid()) {
+	if (!isActive || !currentTime.isValid() || _behaviourStore == nullptr) {
 		return {};
 	}
 
@@ -79,7 +77,7 @@ std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currentTime) {
 	uint8_t winningValue = 0xFF;
 
 	// loop through all twilight behaviours searching for valid ones.
-	for (auto& b : BehaviourStore::getActiveBehaviours()) {
+	for (auto& b : _behaviourStore->getActiveBehaviours()) {
 		if (TwilightBehaviour * behaviour = dynamic_cast<TwilightBehaviour*>(b)) {
 			// cast to twilight behaviour succesful.
 			if (behaviour->isValid(currentTime)) {
