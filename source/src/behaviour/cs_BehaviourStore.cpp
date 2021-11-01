@@ -19,8 +19,6 @@
 #define LOGBehaviourStoreInfo LOGi
 #define LOGBehaviourStoreDebug LOGd
 
-// allocate space for the behaviours.
-std::array<Behaviour*, BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
 
 void BehaviourStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
@@ -458,11 +456,13 @@ void BehaviourStore::LoadBehavioursFromMemory(CS_TYPE BehaviourCsType) {
 	}
 }
 
-void BehaviourStore::init() {
+cs_ret_code_t BehaviourStore::init() {
 	// load rules from flash
 	LoadBehavioursFromMemory<SwitchBehaviour>(CS_TYPE::STATE_BEHAVIOUR_RULE);
 	LoadBehavioursFromMemory<TwilightBehaviour>(CS_TYPE::STATE_TWILIGHT_RULE);
 	LoadBehavioursFromMemory<ExtendedSwitchBehaviour>(CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE);
+
+	return ERR_SUCCESS;
 }
 
 void BehaviourStore::clearActiveBehavioursArray() {

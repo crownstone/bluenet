@@ -28,8 +28,8 @@ AssetStore::AssetStore()
 {}
 
 cs_ret_code_t AssetStore::init() {
-	LOGAssetStoreInfo("Init: using buffer of %u B", sizeof(_assetRecords));
-	resetRecords();
+	LOGAssetStoreInfo("Init: using buffer of %u B", sizeof(_store));
+	_store.clear();
 	listen();
 
 	return ERR_SUCCESS;
@@ -41,7 +41,8 @@ void AssetStore::handleEvent(event_t& event) {
 
 	switch (event.type) {
 		case CS_TYPE::EVT_FILTERS_UPDATED: {
-			resetRecords();
+			LOGAssetStoreDebug("resetRecords");
+			_store.clear();
 			break;
 		}
 		default: {
@@ -63,71 +64,37 @@ asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, c
 	return record;
 }
 
-void AssetStore::resetRecords() {
-	LOGAssetStoreDebug("resetRecords");
-	for (auto& record : _assetRecords){
-		record.invalidate();
-	}
-}
-
 asset_record_t* AssetStore::getRecord(const asset_id_t& id) {
-	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
-		auto& record = _assetRecords[i];
-		if (record.isValid() && record.assetId == id) {
-			return &record;
-		}
-	}
-	return nullptr;
+	return _store.get(id);
 }
 
 asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	LOGAssetStoreVerbose("getOrCreateRecord id=%02X:%02X:%02X", id.data[0], id.data[1], id.data[2]);
-	uint8_t emptyIndex = 0xFF;
-	uint8_t oldestIndex = 0;
-	uint8_t highestCounter = 0;
-	for (uint8_t i = 0; i < _assetRecordCount; ++i) {
-		auto& record = _assetRecords[i];
-		if (!record.isValid()) {
-			emptyIndex = i;
-			LOGAssetStoreVerbose("Found empty spot at index=%u", i);
-		}
-		else if (record.assetId == id) {
-			LOGAssetStoreVerbose("Found asset at index=%u", i);
-			return &record;
-		}
-		else if (record.lastReceivedCounter > highestCounter) {
-			highestCounter = record.lastReceivedCounter;
-			oldestIndex = i;
-		}
-	}
-	// Record with given asset ID does not exist yet, create a new one.
 
-	// First option, use empty spot.
-	if (emptyIndex != 0xFF) {
-		LOGAssetStoreVerbose("Creating new report record on empty spot, index=%u", emptyIndex);
-		auto& record =_assetRecords[emptyIndex];
-		record.empty();
-		record.assetId = id;
-		return &record;
-	}
-
-	// Second option, increase number of records.
-	if (_assetRecordCount < MAX_RECORDS) {
-		LOGAssetStoreVerbose("Add new report record, index=%u", _assetRecordCount);
-		auto& record = _assetRecords[_assetRecordCount];
-		record.empty();
-		record.assetId = id;
-		_assetRecordCount++;
-		return &record;
+	if(asset_record_t* rec = _store.getOrAdd(id)) {
+		// record found, or empty space was newly occupied.
+		rec->empty();
+		rec->assetId = id;
+		return rec;
 	}
 
 	// Last option, overwrite oldest record.
-	LOGAssetStoreVerbose("Overwriting oldest record asset id=%02X:%02X:%02X, index=%u",
-			_assetRecords[oldestIndex].assetId.data[0], _assetRecords[oldestIndex].assetId.data[1], _assetRecords[oldestIndex].assetId.data[2], oldestIndex);
-	auto& record =_assetRecords[oldestIndex];
-	record.empty();
-	record.assetId = id;
-	return &record;
+	asset_record_t* oldestRecord = _store.begin();
+	for (asset_record_t* record = _store.begin(); record != _store.end(); record++) {
+		if (record->lastReceivedCounter > oldestRecord->lastReceivedCounter) {
+			oldestRecord = record;
+		}
+	}
+
+	LOGAssetStoreVerbose(
+			"Overwriting oldest record asset id=%02X:%02X:%02X",
+			oldestRecord->assetId.data[0],
+			oldestRecord->assetId.data[1],
+			oldestRecord->assetId.data[2]);
+
+	oldestRecord->empty();
+	oldestRecord->assetId = id;
+	return oldestRecord;
 }
 
 void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
@@ -147,7 +114,7 @@ uint16_t AssetStore::throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs) 
 
 
 void AssetStore::incrementLastReceivedCounters() {
-	for (auto& record: _assetRecords) {
+	for (auto& record: _store) {
 		if (!record.isValid()) {
 			// skip invalid records
 			continue;
@@ -166,7 +133,7 @@ void AssetStore::incrementLastReceivedCounters() {
 }
 
 void AssetStore::decrementThrottlingCounters() {
-	for (auto& record: _assetRecords) {
+	for (auto& record: _store) {
 		if (!record.isValid()) {
 			// skip invalid records
 			continue;

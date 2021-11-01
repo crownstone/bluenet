@@ -6,9 +6,12 @@
  */
 #pragma once
 
+#include <cstdint>
+
 #include <events/cs_EventListener.h>
 #include <tracking/cs_TrackedDevice.h>
-#include <cstdint>
+#include <util/cs_Store.h>
+
 
 /**
  * Class that keeps up devices to be tracked.
@@ -67,12 +70,7 @@ private:
 	 *
 	 * Device ID should be unique.
 	 */
-	TrackedDevice _devices[MAX_TRACKED_DEVICES];
-
-	/**
-	 * Current max size of the devices list: all other entries are invalid.
-	 */
-	uint8_t _deviceListSize = 0;
+	Store<TrackedDevice, MAX_TRACKED_DEVICES> _store;
 
 	/**
 	 * Whether there has been a successful sync of tracked devices.
