@@ -10,7 +10,6 @@
 #pragma once
 
 #include <cstdint>
-
 #include <ble/cs_Nordic.h>
 
 #ifdef __cplusplus
@@ -31,11 +30,9 @@ extern "C" {
  *
  * @param sys_evt                      System event.
  */
-//void sys_evt_dispatch(uint32_t sys_evt);
-void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context);
+//void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context);
 
-//void fds_evt_handler(fds_evt_t const * p_fds_evt);
-void fds_evt_handler(fds_evt_t const * const p_fds_evt);
+void fds_evt_handler(const fds_evt_t * p_fds_evt);
 
 
 #ifdef __cplusplus
@@ -43,3 +40,47 @@ void fds_evt_handler(fds_evt_t const * const p_fds_evt);
 #endif
 
 
+class SocHandler {
+public:
+	/**
+	 * Handle SOC events.
+	 * Can be called from interrupt.
+	 */
+	static void handleEvent(uint32_t event);
+
+	/**
+	 * Handle SOC events.
+	 * Must be called from main thread.
+	 */
+	static void handleEventDecoupled(uint32_t event);
+};
+
+class BleHandler {
+public:
+
+	/**
+	 * Handle BLE events.
+	 * Can be called from interrupt.
+	 */
+	static void handleEvent(const ble_evt_t* event);
+
+	/**
+	 * Handle BLE events.
+	 * Must be called from main thread.
+	 */
+	static void handleEventDecoupled(const ble_evt_t* event);
+
+	static void handlePhyRequest(uint16_t connectionHandle, const ble_gap_evt_phy_update_request_t& request);
+	static void handleDataLengthRequest(uint16_t connectionHandle, const ble_gap_evt_data_length_update_request_t& request);
+	static void handleMtuRequest(uint16_t connectionHandle, const ble_gatts_evt_exchange_mtu_request_t& request);
+	static void disconnect(uint16_t connectionHandle, uint8_t reason);
+};
+
+class SdhStateHandler {
+public:
+	/**
+	 * Handle SDH state events.
+	 * Can be called from interrupt.
+	 */
+	static void handleEvent(const nrf_sdh_state_evt_t& event);
+};
