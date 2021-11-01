@@ -6,10 +6,12 @@
  */
 #pragma once
 
-#include <behaviour/cs_SwitchBehaviour.h>
-#include <events/cs_EventListener.h>
-#include <presence/cs_PresenceHandler.h>
 #include <common/cs_Component.h>
+#include <events/cs_EventListener.h>
+
+#include <behaviour/cs_SwitchBehaviour.h>
+#include <presence/cs_PresenceHandler.h>
+#include <behaviour/cs_BehaviourStore.h>
 
 #include <optional>
 
@@ -61,10 +63,14 @@ public:
 
 private:
     /**
-     * A reference to the current presenceHandler of the firmware.
-     * (Obtained at init)
-     */
+	 * Cached reference to the presence handler. (obtained at init)
+	 */
     PresenceHandler* _presenceHandler = nullptr;
+
+    /**
+	 * cached reference to the behaviour store. (obtained at init)
+	 */
+    BehaviourStore* _behaviourStore = nullptr;
 
     /**
      * The last value returned by getValue.

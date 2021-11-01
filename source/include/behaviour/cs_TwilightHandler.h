@@ -71,7 +71,7 @@ private:
 	bool isActive = true;
 
 	/**
-	 * cached reference to the store.
+	 * cached reference to the behaviour store. (obtained at init)
 	 */
 	BehaviourStore* _behaviourStore = nullptr;
 };

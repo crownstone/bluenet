@@ -32,6 +32,7 @@ cs_ret_code_t BehaviourHandler::init() {
 
 	LOGi("Init: _isActive=%u", _isActive);
 	_presenceHandler = getComponent<PresenceHandler>();
+	_behaviourStore = getComponent<BehaviourStore>();
 
 	listen();
 
@@ -131,12 +132,16 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		LOGBehaviourHandlerDebug("Current time invalid, computed intended state: empty");
 		return {};
 	}
+	if(_behaviourStore == nullptr) {
+		LOGBehaviourHandlerDebug("BehaviourStore is nullptr, computed intended state: empty");
+		return {};
+	}
 
 	LOGBehaviourHandlerDebug("BehaviourHandler computeIntendedState resolves");
 
 	// 'best' meaning most relevant considering from/until time window.
 	SwitchBehaviour* currentBestSwitchBehaviour = nullptr;
-	for (auto candidateBehaviour : BehaviourStore::getActiveBehaviours()) {
+	for (auto candidateBehaviour : _behaviourStore->getActiveBehaviours()) {
 		SwitchBehaviour* candidateSwitchBehaviour = ValidateSwitchBehaviour(
 				candidateBehaviour, currentTime, currentPresence);
 
@@ -219,7 +224,14 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->extensionActive = 0;
 	behaviourDebug->activeTimeoutPeriod = 0;
 
-	auto behaviours = BehaviourStore::getActiveBehaviours();
+	if(_behaviourStore == nullptr) {
+		LOGMeshWarning("BehaviourStore is nullptr, no info available.");
+		evt.result.dataSize = sizeof(behaviour_debug_t);
+		evt.result.returnCode = ERR_SUCCESS;
+		return;
+	}
+
+	auto behaviours = _behaviourStore->getActiveBehaviours();
 
 	for (uint8_t index = 0; index < behaviours.size(); ++index) {
 		if (behaviours[index] != nullptr) {
@@ -275,8 +287,12 @@ std::optional<uint8_t> BehaviourHandler::getValue() {
 }
 
 bool BehaviourHandler::requiresPresence(Time t) {
+	if(_behaviourStore == nullptr) {
+		return false;
+	}
+
 	uint8_t i = 0;
-	for (auto& behaviourPtr : BehaviourStore::getActiveBehaviours()) {
+	for (auto& behaviourPtr : _behaviourStore->getActiveBehaviours()) {
 		i += 1;
 		if (behaviourPtr != nullptr) {
 			if (behaviourPtr->requiresPresence()) {
@@ -293,7 +309,11 @@ bool BehaviourHandler::requiresPresence(Time t) {
 }
 
 bool BehaviourHandler::requiresAbsence(Time t) {
-	for (auto& behaviourPtr : BehaviourStore::getActiveBehaviours()) {
+	if(_behaviourStore == nullptr) {
+		return false;
+	}
+
+	for (auto& behaviourPtr : _behaviourStore->getActiveBehaviours()) {
 		if (behaviourPtr != nullptr) {
 			if (behaviourPtr->isValid(t) && behaviourPtr->requiresAbsence()) {
 				return true;
