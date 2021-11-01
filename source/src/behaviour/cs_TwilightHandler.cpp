@@ -19,9 +19,9 @@
 cs_ret_code_t TwilightHandler::init() {
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
 	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
-	isActive = settings.flags.enabled;
+	_isActive = settings.flags.enabled;
 
-	LOGi("Init: isActive=%u", isActive);
+	LOGi("Init: _isActive=%u", _isActive);
 
 	_behaviourStore = getComponent<BehaviourStore>();
 
@@ -42,9 +42,9 @@ void TwilightHandler::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
 			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
-			isActive = settings->flags.enabled;
-			LOGTwilightHandlerDebug("TwilightHandler.isActive=%u", isActive);
-			TEST_PUSH_B(this, isActive);
+			_isActive = settings->flags.enabled;
+			LOGTwilightHandlerDebug("TwilightHandler._isActive=%u", _isActive);
+			TEST_PUSH_B(this, _isActive);
 			update();
 			break;
 		}
@@ -59,15 +59,15 @@ bool TwilightHandler::update() {
 	Time time = SystemTime::now();
 	auto nextIntendedState = computeIntendedState(time);
 
-	bool valuechanged = currentIntendedState != nextIntendedState;
-	currentIntendedState = nextIntendedState;
+	bool valuechanged = _currentIntendedState != nextIntendedState;
+	_currentIntendedState = nextIntendedState;
 
-	TEST_PUSH_EXPR_D(this, "currentIntendedState", (currentIntendedState ? (int)currentIntendedState.value() : -1));
+	TEST_PUSH_EXPR_D(this, "_currentIntendedState", (_currentIntendedState ? (int)_currentIntendedState.value() : -1));
 	return valuechanged;
 }
 
 std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currentTime) {
-	if (!isActive || !currentTime.isValid() || _behaviourStore == nullptr) {
+	if (!_isActive || !currentTime.isValid() || _behaviourStore == nullptr) {
 		return {};
 	}
 
@@ -123,5 +123,5 @@ std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currentTime) {
 }
 
 std::optional<uint8_t> TwilightHandler::getValue() {
-	return currentIntendedState;
+	return _currentIntendedState;
 }

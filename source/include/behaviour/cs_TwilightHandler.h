@@ -63,12 +63,12 @@ private:
 	 */
 	std::optional<uint8_t> computeIntendedState(Time currentTime);
 
-	std::optional<uint8_t> currentIntendedState = 100;
+	std::optional<uint8_t> _currentIntendedState = 100;
 
 	/**
 	 * Is this handler active?
 	 */
-	bool isActive = true;
+	bool _isActive = true;
 
 	/**
 	 * cached reference to the behaviour store. (obtained at init)
