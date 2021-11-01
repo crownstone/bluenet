@@ -11,15 +11,37 @@
 #include <tracking/cs_TrackedDevices.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
+#include <util/cs_Math.h>
+
 
 #define LOGTrackedDevicesDebug LOGvv
 #define LOGTrackedDevicesVerbose LOGvv
+
+
+void TrackedDevices::print(TrackedDevice& device) {
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
+	LOGTrackedDevicesDebug("id=%u fieldsSet=%u accessLvl=%u profile=%u location=%u rssiOffset=%i flags=%u TTL=%u token=%02X:%02X:%02X",
+			device.data.data.deviceId,
+			device.fieldsSet,
+			device.data.accessLevel,
+			device.data.data.profileId,
+			device.data.data.locationId,
+			device.data.data.rssiOffset,
+			device.data.data.flags.asInt,
+			device.data.data.timeToLiveMinutes,
+			device.data.data.deviceToken[0],
+			device.data.data.deviceToken[1],
+			device.data.data.deviceToken[2]
+	);
+#endif
+}
+
 
 TrackedDevices::TrackedDevices() {
 }
 
 void TrackedDevices::init() {
-	LOGi("Init. Using %u bytes of RAM.", sizeof(_devices));
+	LOGi("Init. Using %u bytes of RAM.", sizeof(_store));
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -174,23 +196,17 @@ TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 }
 
 TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
-	LOGTrackedDevicesVerbose("find id=%u listSize=%u", deviceId, _deviceListSize);
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (_devices[i].isValid() && _devices[i].data.data.deviceId == deviceId) {
-			LOGTrackedDevicesVerbose("found device at index=%u", i);
-			return &(_devices[i]);
-		}
-	}
-	return nullptr;
+	return _store.get(deviceId);
 }
 
 TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
-	LOGTrackedDevicesVerbose("find token=%02X:%02X:%02X listSize=%u", deviceToken[0], deviceToken[1], deviceToken[2], _deviceListSize);
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (_devices[i].isValid() && memcmp(_devices[i].data.data.deviceToken, deviceToken, size) == 0) {
-			LOGTrackedDevicesVerbose("found token at index=%u id=%u", i, _devices[i].data.data.deviceId);
-			return &(_devices[i]);
+	LOGTrackedDevicesVerbose("find token=%02X:%02X:%02X listSize=%u", deviceToken[0], deviceToken[1], deviceToken[2], _store.size());
+
+	for (auto& device : _store) {
+		if (device.isValid() && memcmp(device.data.data.deviceToken, deviceToken, size) == 0) {
+			LOGTrackedDevicesVerbose("found token id=%u", device.data.data.deviceId);
+			return &device;
 		}
 	}
 	return nullptr;
@@ -199,43 +215,28 @@ TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 TrackedDevice* TrackedDevices::add() {
 	LOGTrackedDevicesDebug("add");
 
-	// Use empty spot.
-	uint8_t incompleteIndex = 0xFF;
-	uint16_t lowestTtl = 0xFFFF;
-	uint8_t lowestTtlIndex = 0xFF;
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (!_devices[i].isValid()) {
-			LOGTrackedDevicesDebug("Use empty spot: index=%u", i);
-			return &(_devices[i]);
-		}
-		if (!_devices[i].allFieldsSet()) {
-			incompleteIndex = i;
-		}
-		if (_devices[i].data.data.timeToLiveMinutes < lowestTtl) {
-			lowestTtlIndex = i;
-		}
+	// use invalid spot in current range if possible
+	if(auto emptyspot = _store.get([](auto device) { return !device.isValid();})) {
+		LOGTrackedDevicesDebug("Use empty spot");
+		return emptyspot;
 	}
 
-	// Increase list size.
-	if (_deviceListSize < MAX_TRACKED_DEVICES) {
-		uint8_t index = _deviceListSize++;
-		LOGTrackedDevicesDebug("Increase list size: index=%u listSize=%u", index, _deviceListSize);
-		_devices[index].invalidate();
-		return &(_devices[index]);
+	// Increase store size if possible.
+	if(auto newSpot = _store.addAtEnd()) {
+		LOGTrackedDevicesDebug("Create new spot");
+		return newSpot;
 	}
 
-	// Use spot with incomplete data.
-	if (incompleteIndex != 0xFF) {
-		LOGTrackedDevicesDebug("Use spot with incomplete data: index=%u", incompleteIndex);
-		_devices[incompleteIndex].invalidate();
-		return &(_devices[incompleteIndex]);
+	if(auto incomplete = _store.get([](auto device) { return !device.allFieldsSet();})) {
+		LOGTrackedDevicesDebug("Use spot of incomplete tracked device record");
+		incomplete->invalidate();
+		return incomplete;
 	}
 
-	// Use spot with lowest TTL.
-	if (lowestTtlIndex != 0xFF) {
-		LOGTrackedDevicesDebug("Use spot with lowest TTL: index=%u", lowestTtlIndex);
-		_devices[lowestTtlIndex].invalidate();
-		return &(_devices[lowestTtlIndex]);
+	if(auto lowestTtlRecord = _store.getMin([](auto device) { return device.data.data.timeToLiveMinutes; })){
+		LOGTrackedDevicesDebug("Use spot of lowest ttl record");
+		lowestTtlRecord->invalidate();
+		return lowestTtlRecord;
 	}
 
 	// Shouldn't happen.
@@ -267,81 +268,52 @@ void TrackedDevices::checkSynced() {
 	if (_deviceListIsSynced) {
 		return;
 	}
-	if (_deviceListSize < _expectedDeviceListSize) {
-		LOGTrackedDevicesDebug("Expecting more devices, current=%u expected=%u", _deviceListSize, _expectedDeviceListSize);
+
+	uint16_t currentValidCompleteDevices =
+			_store.countIf([](auto& device) { return device.isValid() && device.allFieldsSet(); });
+
+	if (currentValidCompleteDevices < _expectedDeviceListSize) {
+		LOGTrackedDevicesDebug("Expecting more devices, current=%u expected=%u", currentValidCompleteDevices, _expectedDeviceListSize);
 		return;
 	}
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (!_devices[i].allFieldsSet()) {
-			LOGTrackedDevicesDebug("Not all fields set for id=%u", _devices[i].data.data.deviceId);
-			return;
-		}
+
+	if(_store.get([](auto device){ return !device.allFieldsSet(); })) {
+		LOGTrackedDevicesDebug("Found device for which not all fields are set");
+		return;
 	}
+
 	LOGi("Synced");
 	_deviceListIsSynced = true;
 }
 
-
-
-
-
-void TrackedDevices::print(TrackedDevice& device) {
-#if CS_SERIAL_NRF_LOG_ENABLED == 0
-	LOGTrackedDevicesDebug("id=%u fieldsSet=%u accessLvl=%u profile=%u location=%u rssiOffset=%i flags=%u TTL=%u token=%02X:%02X:%02X",
-			device.data.data.deviceId,
-			device.fieldsSet,
-			device.data.accessLevel,
-			device.data.data.profileId,
-			device.data.data.locationId,
-			device.data.data.rssiOffset,
-			device.data.data.flags.asInt,
-			device.data.data.timeToLiveMinutes,
-			device.data.data.deviceToken[0],
-			device.data.data.deviceToken[1],
-			device.data.data.deviceToken[2]
-	);
-#endif
-}
-
 void TrackedDevices::tickMinute() {
 	LOGTrackedDevicesDebug("tickMinute");
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (!_devices[i].isValid()) {
+	for (auto& device: _store) {
+		if (!device.isValid()) {
 			continue;
 		}
-		if (_devices[i].locationIdTTLMinutes != 0) {
-			_devices[i].locationIdTTLMinutes--;
-			if (_devices[i].locationIdTTLMinutes == 0) {
-				// Location timed out.
-				_devices[i].data.data.locationId = 0;
-			}
+
+		if(CsMath::Decrease(device.locationIdTTLMinutes) == 0) {
+			// Location timed out.
+			device.data.data.locationId = 0;
 		}
-		if (_devices[i].data.data.timeToLiveMinutes != 0) {
-			_devices[i].data.data.timeToLiveMinutes--;
-		}
-		if (_devices[i].data.data.timeToLiveMinutes == 0) {
+
+		if (*CsMath::DecreaseByPointer(&device.data.data.timeToLiveMinutes) == 0) {
 			// Always check if device is timed out, as it might be that the TTL was never set.
-			LOGTrackedDevicesDebug("Timed out id=%u", _devices[i].data.data.deviceId);
-			_devices[i].invalidate();
+			LOGTrackedDevicesDebug("Timed out id=%u", device.data.data.deviceId);
+			device.invalidate();
 		}
 
-		if (_devices[i].heartbeatTTLMinutes != 0) {
-			_devices[i].heartbeatTTLMinutes--;
-		}
-		print(_devices[i]);
-	}
+		CsMath::Decrease(device.heartbeatTTLMinutes);
 
-	// Remove trailing invalid devices.
-	while (_deviceListSize > 0 && !_devices[_deviceListSize - 1].isValid()) {
-		_deviceListSize--;
-		LOGTrackedDevicesDebug("Shrinking list size to %u", _deviceListSize);
+		print(device);
 	}
 }
 
 void TrackedDevices::tickSecond() {
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (_devices[i].isValid() && _devices[i].allFieldsSet() && _devices[i].heartbeatTTLMinutes != 0) {
-			sendHeartbeatLocation(_devices[i], false, true);
+	for (auto& device : _store) {
+		if (device.isValid() && device.allFieldsSet() && device.heartbeatTTLMinutes != 0) {
+			sendHeartbeatLocation(device, false, true);
 		}
 	}
 }
@@ -422,10 +394,10 @@ void TrackedDevices::sendListSizeToMesh(uint8_t deviceCount) {
 void TrackedDevices::sendDeviceList() {
 	LOGTrackedDevicesDebug("sendDeviceList");
 	uint8_t sentDevicesCount = 0;
-	for (uint8_t i = 0; i < _deviceListSize; ++i) {
-		if (_devices[i].isValid() && _devices[i].allFieldsSet()) {
-			sendRegisterToMesh(_devices[i]);
-			sendTokenToMesh(_devices[i]);
+	for (auto& device : _store ) {
+		if (device.isValid() && device.allFieldsSet()) {
+			sendRegisterToMesh(device);
+			sendTokenToMesh(device);
 			++sentDevicesCount;
 		}
 	}

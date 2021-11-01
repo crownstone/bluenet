@@ -48,15 +48,7 @@ struct __attribute__((__packed__)) asset_record_t {
 	int8_t nearestRssi;
 #endif
 
-	// ------------- utility functions -------------
-
-	void empty() {
-		lastReceivedCounter = 0;
-		throttlingCountdown = 0;
-#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-		nearestStoneId = 0;
-#endif
-	}
+	// ------------- record functions -------------
 
 	/**
 	 * Invalidate this record.
@@ -71,6 +63,21 @@ struct __attribute__((__packed__)) asset_record_t {
 	bool isValid() {
 		return lastReceivedCounter != 0xFF;
 	}
+
+	asset_id_t id() {
+		return assetId;
+	}
+
+	// ------------- utility functions -------------
+
+	void empty() {
+		lastReceivedCounter = 0;
+		throttlingCountdown = 0;
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+		nearestStoneId = 0;
+#endif
+	}
+
 
 	bool isThrottled() {
 		return throttlingCountdown != 0;

@@ -42,6 +42,8 @@ inline uint32_t convertEndian32(uint32_t val) {
 		 | ((val & 0xFF) << 24);
 }
 
+
+
 /**
  * Macro that rounds up to the next multiple of given number
  *
@@ -133,7 +135,6 @@ inline constexpr T lowestBitSet(T value) {
 	}
 	return numBits;
 }
-
 
 
 /**

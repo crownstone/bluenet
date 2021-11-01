@@ -30,7 +30,6 @@
  *
  *********************************************************************************************************************/
 
-#include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
@@ -228,7 +227,18 @@ Crownstone::Crownstone(boards_config_t& board) :
 #if BUILD_GPIOTE == 1
 	_gpio = &Gpio::getInstance();
 #endif
+
+	parentAllChildren();
 };
+
+std::vector<Component*> Crownstone::getChildren() {
+	return {
+		&_switchAggregator,
+		&_presenceHandler,
+		&_behaviourStore,
+		// TODO: add others (when necessary for weak dependences)
+	};
+}
 
 void Crownstone::init(uint16_t step) {
 	updateHeapStats();
