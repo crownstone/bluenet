@@ -18,6 +18,7 @@
 #include <ble/cs_iBeacon.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
+#include <dfu/cs_FirmwareReader.h>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFiltering.h>
 #include <localisation/cs_MeshTopology.h>
@@ -313,7 +314,10 @@ private:
 	 */
 	void increaseResetCounter();
 
-	boards_config_t _boardsConfig;
+
+	// --------------------------------------------------------
+	// ------------------ firmware components -----------------
+	// --------------------------------------------------------
 
 	// drivers
 	Stack* _stack;
@@ -347,8 +351,10 @@ private:
 	SystemTime _systemTime;
 
 	SwitchAggregator _switchAggregator;
+	FirmwareReader _firmwareReader;
 
-	// TODO: allocate and init only in normal mode.
+	// ------------------ normal mode components ------------------
+
 	TrackedDevices _trackedDevices;
 	MeshTopology _meshTopology;
 	AssetFiltering _assetFiltering;
@@ -372,11 +378,18 @@ private:
 	Gpio* _gpio = nullptr;
 #endif
 
-	app_timer_t              _mainTimerData;
-	app_timer_id_t           _mainTimerId;
+
+	// --------------------------------------------------------
+	// ------------------ run time variables ------------------
+	// --------------------------------------------------------
+
+	boards_config_t _boardsConfig;
+
+	app_timer_t              _mainTimerData = { {0} };
+	app_timer_id_t           _mainTimerId = nullptr;
 	TYPIFY(EVT_TICK) _tickCount = 0;
 
-	OperationMode _operationMode;
+	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	//! Store gpregret as it was on boot.

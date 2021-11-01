@@ -182,21 +182,18 @@ void handleZeroCrossing() {
 /************************************************* cs_Crownstone impl *************************************************/
 
 Crownstone::Crownstone(boards_config_t& board) :
-	_boardsConfig(board),
+	_boardsConfig(board)
 #if BUILD_MEM_USAGE_TEST == 1
-	_memTest(board),
+	, _memTest(board)
 #endif
-	_mainTimerId(NULL),
-	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
 {
 	// TODO: can be replaced by: APP_TIMER_DEF(_mainTimerId); Though that makes _mainTimerId a static variable.
-	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
 
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 
-	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
-	this->listen();
+	listen();
+
 	_stack = &Stack::getInstance();
 	_bleCentral = &BleCentral::getInstance();
 	_crownstoneCentral = new CrownstoneCentral();
@@ -206,8 +203,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_state = &State::getInstance();
 	_commandHandler = &CommandHandler::getInstance();
 	_factoryReset = &FactoryReset::getInstance();
-
 	_scanner = &Scanner::getInstance();
+
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
@@ -236,7 +233,7 @@ std::vector<Component*> Crownstone::getChildren() {
 		&_switchAggregator,
 		&_presenceHandler,
 		&_behaviourStore,
-		// TODO: add others (when necessary for weak dependences)
+		// (add others when necessary for weak dependences)
 	};
 }
 
