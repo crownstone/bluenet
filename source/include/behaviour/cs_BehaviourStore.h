@@ -13,6 +13,7 @@
 
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <common/cs_Component.h>
 
 #include <array>
 #include <optional>
@@ -21,7 +22,7 @@
 /**
  * Keeps track of the behaviours that are active on this crownstone.
  */
-class BehaviourStore : public EventListener {
+class BehaviourStore : public EventListener, public Component {
 public:
 	static constexpr size_t MaxBehaviours = 50;
 private:
@@ -33,7 +34,6 @@ public:
 	 */
 	virtual void handleEvent(event_t& evt);
 
-	//
 	/*****************************
 	 * NOTE: to loop over a specific type of behaviours simply do:
 	 *
@@ -50,7 +50,7 @@ public:
 	/**
 	 * Initialize store from flash.
 	 */
-	void init();
+	cs_ret_code_t init() override;
 	
 	virtual ~BehaviourStore();
 

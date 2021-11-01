@@ -9,18 +9,19 @@
 #include <events/cs_EventListener.h>
 #include <presence/cs_PresenceDescription.h>
 #include <time/cs_Time.h>
+#include <common/cs_Component.h>
 
 #include <optional>
 
 
-class TwilightHandler : public EventListener {
+class TwilightHandler : public EventListener , public Component {
 public:
 	/**
 	 * Initialize this class:
 	 * - Read settings from flash.
 	 * - Start listening for events.
 	 */
-	void init();
+	cs_ret_code_t init() override;
 
     /**
      * Computes the twilight state of this crownstone based on

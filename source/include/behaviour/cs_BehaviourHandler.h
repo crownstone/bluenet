@@ -49,7 +49,14 @@ public:
      */
     std::optional<uint8_t> getValue();
 
+    /**
+     * Returns true if a behaviour at given time requires presence
+     */
     bool requiresPresence(Time t);
+
+    /**
+	 * Returns true if a behaviour at given time requires absence
+	 */
     bool requiresAbsence(Time t);
 
 private:
@@ -58,6 +65,36 @@ private:
      * (Obtained at init)
      */
     PresenceHandler* _presenceHandler = nullptr;
+
+    /**
+     * The last value returned by getValue.
+     */
+    std::optional<uint8_t> previousIntendedState = {};
+
+    /**
+     *  The last value that was updated by the update method.
+     */
+    std::optional<uint8_t> currentIntendedState = {};
+
+    /**
+     * setting this to false will result in a BehaviourHandler that will
+     * not have an opinion about the state anymore (getValue returns std::nullopt).
+     */
+    bool _isActive = true;
+
+    /**
+     * Whether the behaviour settings are synced.
+     */
+    bool _behaviourSettingsSynced = false;
+
+    /**
+     * Cache the received behaviour settings during syncing.
+     */
+    std::optional<behaviour_settings_t> _receivedBehaviourSettings = {};
+
+    // -----------------------------------------------------------------------
+    // --------------------------- private methods ---------------------------
+    // -----------------------------------------------------------------------
 
     /**
      * Given current time/presence, query the behaviourstore and check
@@ -88,32 +125,9 @@ private:
     SwitchBehaviour* ValidateSwitchBehaviour(Behaviour* behave, Time currentTime,
        PresenceStateDescription currentPresence);
 
-    /**
-     * The last value returned by getValue.
-     */
-    std::optional<uint8_t> previousIntendedState = {};
-
-    /**
-     *  The last value that was updated by the update method.
-     */ 
-    std::optional<uint8_t> currentIntendedState = {};
-
-    /**
-     * setting this to false will result in a BehaviourHandler that will
-     * not have an opinion about the state anymore (getValue returns std::nullopt).
-     */
-    bool _isActive = true;
-
-    /**
-     * Whether the behaviour settings are synced.
-     */
-    bool _behaviourSettingsSynced = false;
-
-    /**
-     * Cache the received behaviour settings during syncing.
-     */
-    std::optional<behaviour_settings_t> _receivedBehaviourSettings = {};
-
+    // -----------------------------------------------------------------------
+    // --------------------------- synchronization ---------------------------
+    // -----------------------------------------------------------------------
 
     void onBehaviourSettingsMeshMsg(behaviour_settings_t settings);
 

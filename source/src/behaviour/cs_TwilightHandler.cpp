@@ -16,7 +16,7 @@
 
 #define LOGTwilightHandlerDebug LOGnone
 
-void TwilightHandler::init() {
+cs_ret_code_t TwilightHandler::init() {
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
 	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
 	isActive = settings.flags.enabled;
@@ -24,6 +24,8 @@ void TwilightHandler::init() {
 	LOGi("Init: isActive=%u", isActive);
 
 	listen();
+
+	return ERR_SUCCESS;
 }
 
 void TwilightHandler::handleEvent(event_t& evt) {

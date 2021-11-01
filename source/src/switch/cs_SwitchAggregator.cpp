@@ -54,7 +54,7 @@ void SwitchAggregator::switchPowered() {
 }
 
 std::vector<Component*> SwitchAggregator::getChildren() {
-	return { &behaviourHandler};
+	return { &behaviourHandler, &twilightHandler};
 }
 
 // ================================== State updaters ==================================
