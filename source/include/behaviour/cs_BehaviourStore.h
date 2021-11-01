@@ -26,7 +26,7 @@ class BehaviourStore : public EventListener, public Component {
 public:
 	static constexpr size_t MaxBehaviours = 50;
 private:
-	static std::array<Behaviour*, MaxBehaviours> activeBehaviours;
+	std::array<Behaviour*, MaxBehaviours> activeBehaviours = {};
 
 public:
 	/**
@@ -43,7 +43,7 @@ public:
 	 *   }
 	 * }
 	 */
-	static inline std::array<Behaviour*, MaxBehaviours>& getActiveBehaviours() {
+	inline std::array<Behaviour*, MaxBehaviours>& getActiveBehaviours() {
 		return activeBehaviours;
 	}
 
@@ -83,7 +83,7 @@ private:
 	/**
 	 * Calculate the hash over all behaviours.
 	 */
-	static uint32_t calculateMasterHash();
+	uint32_t calculateMasterHash();
 
 	/**
 	 * Calculate master hash and store it in State.

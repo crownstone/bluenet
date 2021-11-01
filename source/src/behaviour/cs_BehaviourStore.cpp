@@ -19,8 +19,6 @@
 #define LOGBehaviourStoreInfo LOGi
 #define LOGBehaviourStoreDebug LOGd
 
-// allocate space for the behaviours.
-std::array<Behaviour*, BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
 
 void BehaviourStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
