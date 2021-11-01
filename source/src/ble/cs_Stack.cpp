@@ -9,16 +9,16 @@
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
-#include <cfg/cs_Config.h>
 #include <cfg/cs_AutoConfig.h>
+#include <cfg/cs_Config.h>
 #include <cfg/cs_UuidConfig.h>
 #include <common/cs_Handlers.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_Scanner.h>
 #include <storage/cs_State.h>
-#include "structs/buffer/cs_CharacteristicReadBuffer.h"
-#include "structs/buffer/cs_CharacteristicWriteBuffer.h"
+#include <structs/buffer/cs_CharacteristicReadBuffer.h>
+#include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <util/cs_Utils.h>
 
 #define LOGStackDebug LOGnone

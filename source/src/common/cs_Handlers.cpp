@@ -3,12 +3,12 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <common/cs_Handlers.h>
+#include "common/cs_Handlers.h"
+#include <ble/cs_Stack.h>
 #include <drivers/cs_GpRegRet.h>
 #include <drivers/cs_RTC.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
-#include <ble/cs_Stack.h>
 #include <third/nrf/sdk_config.h>
 
 #ifdef __cplusplus
@@ -44,13 +44,143 @@ extern "C" {
 #define LOGInterruptLevel LOGnone
 
 
+
 /**
- * The decoupled SOC event handler, should run in thread mode.
+ * Scheduled SOC event handler callback.
  */
 void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("soc evt decoupled int=%u", CsUtils::getInterruptLevel());
+	SocHandler::handleEventDecoupled(*reinterpret_cast<uint32_t*>(p_event_data));
+}
+
+void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
+	SocHandler::handleEvent(evt_id);
+}
+
+NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
+
+
+
+/**
+ * Scheduled BLE event handler callback.
+ */
+void crownstone_sdh_ble_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+	BleHandler::handleEventDecoupled(reinterpret_cast<const ble_evt_t*>(p_event_data));
+}
+
+void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_context) {
+	BleHandler::handleEvent(p_ble_evt);
+}
+
+NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_evt_handler, NULL);
+
+
+
+static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context) {
+	SdhStateHandler::handleEvent(state);
+}
+
+NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
+{
+	.handler   = crownstone_sdh_state_evt_handler,
+	.p_context = NULL
+};
+
+
+
+#if BUILD_MESHING == 1
+// From: ble_softdevice_support.c
+void mesh_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+	LOGInterruptLevel("mesh_soc_evt_handler_decoupled int=%u", CsUtils::getInterruptLevel());
 	uint32_t evt_id = *(uint32_t*)p_event_data;
-	switch (evt_id) {
+	nrf_mesh_on_sd_evt(evt_id);
+}
+
+static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
+	LOGInterruptLevel("mesh_soc_evt_handler int=%u", CsUtils::getInterruptLevel());
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
+	APP_ERROR_CHECK(retVal);
+#else
+	nrf_mesh_on_sd_evt(evt_id);
+#endif
+}
+
+NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_handler, NULL);
+#endif // BUILD_MESHING == 1
+
+
+
+/**
+ * Scheduled FDS event handler callback.
+ */
+void fds_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+	LOGInterruptLevel("fds_evt_handler_decoupled int=%u", CsUtils::getInterruptLevel());
+	Storage::getInstance().handleFileStorageEvent(reinterpret_cast<const fds_evt_t*>(p_event_data));
+}
+
+/**
+ * The FDS event handler is registered in the cs_Storage class.
+ */
+void fds_evt_handler(const fds_evt_t * p_fds_evt) {
+	LOGInterruptLevel("fds_evt_handler int=%u", CsUtils::getInterruptLevel());
+	// For some reason, we already got fds event init, before app_sched_execute() was called.
+	// So for now, just always put fds events on the app scheduler.
+//#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+	uint32_t retVal = app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_handler_decoupled);
+	APP_ERROR_CHECK(retVal);
+//#else
+//	fds_evt_handler_decoupled(p_fds_evt, sizeof(*p_fds_evt));
+//#endif
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
+void SocHandler::handleEvent(uint32_t event) {
+	LOGInterruptLevel("handleEvent int=%u", CsUtils::getInterruptLevel());
+	switch (event) {
+		case NRF_EVT_POWER_FAILURE_WARNING:
+			// Set brownout flag, so next boot we know the cause.
+			// Only works when we reset as well?
+			// Only works when softdevice handler dispatch model is interrupt?
+			GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
+			// Fall through
+		case NRF_EVT_FLASH_OPERATION_SUCCESS:
+		case NRF_EVT_FLASH_OPERATION_ERROR: {
+//			uint32_t gpregret_id = 0;
+//			uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
+//			// NOTE: do not clear the gpregret register, this way
+//			//   we can count the number of brownouts in the bootloader.
+//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
+//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+//			sd_nvic_SystemReset();
+
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+			uint32_t retVal = app_sched_event_put(&event, sizeof(event), crownstone_soc_evt_handler_decoupled);
+			APP_ERROR_CHECK(retVal);
+#else
+			handleEventDecoupled(event);
+#endif
+			break;
+		}
+		case NRF_EVT_RADIO_BLOCKED:
+		case NRF_EVT_RADIO_CANCELED:
+		case NRF_EVT_RADIO_SESSION_IDLE:
+		case NRF_EVT_RADIO_SESSION_CLOSED:
+			break;
+		default: {
+			LOGd("Unhandled event: %u", event);
+		}
+	}
+}
+
+
+void SocHandler::handleEventDecoupled(uint32_t event) {
+	LOGInterruptLevel("handleEventDecoupled int=%u", CsUtils::getInterruptLevel());
+	switch (event) {
 		case NRF_EVT_POWER_FAILURE_WARNING: {
 			event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING);
 			EventDispatcher::getInstance().dispatch(event);
@@ -70,104 +200,39 @@ void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_si
 	}
 }
 
-void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
-	LOGInterruptLevel("soc evt int=%u", CsUtils::getInterruptLevel());
-
-	switch (evt_id) {
-		case NRF_EVT_POWER_FAILURE_WARNING:
-			// Set brownout flag, so next boot we know the cause.
-			// Only works when we reset as well?
-			// Only works when softdevice handler dispatch model is interrupt?
-			GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
-			// Fall through
-		case NRF_EVT_FLASH_OPERATION_SUCCESS:
-		case NRF_EVT_FLASH_OPERATION_ERROR: {
-//			uint32_t gpregret_id = 0;
-//			uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
-//			// NOTE: do not clear the gpregret register, this way
-//			//   we can count the number of brownouts in the bootloader.
-//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
-//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
-//			sd_nvic_SystemReset();
-
-#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-			uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
-			APP_ERROR_CHECK(retVal);
-#else
-			crownstone_soc_evt_handler_decoupled(&evt_id, sizeof(evt_id));
-#endif
-			break;
-		}
-		case NRF_EVT_RADIO_BLOCKED:
-		case NRF_EVT_RADIO_CANCELED:
-		case NRF_EVT_RADIO_SESSION_IDLE:
-		case NRF_EVT_RADIO_SESSION_CLOSED:
-			break;
-		default: {
-			LOGd("Unhandled event: %i", evt_id);
-		}
-	}
-}
-NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
 
 
-/**
- * Decoupled BLE event handler, should run in thread mode.
- */
-void crownstone_sdh_ble_evt_handler_decoupled(const void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("sdh ble evt decoupled int=%u", CsUtils::getInterruptLevel());
-	ble_evt_t* p_ble_evt = (ble_evt_t*) p_event_data;
-	Stack::getInstance().onBleEvent(p_ble_evt);
-}
-void crownstone_sdh_ble_evt_handler_sched(void * p_event_data, uint16_t event_size) {
-	crownstone_sdh_ble_evt_handler_decoupled(p_event_data, event_size);
-}
-/**
- * Called by the SoftDevice on any BLE event.
- * Some event should be handled on interrupt level, while most are decouple via app scheduler.
- */
-void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_context) {
-
-
-	LOGInterruptLevel("sdh ble evt int=%u", CsUtils::getInterruptLevel());
-	switch (p_ble_evt->header.evt_id) {
+void BleHandler::handleEvent(const ble_evt_t* event) {
+	LOGInterruptLevel("handleEvent int=%u", CsUtils::getInterruptLevel());
+	switch (event->header.evt_id) {
 		case BLE_GAP_EVT_ADV_REPORT: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-			Stack::getInstance().onBleEventInterrupt(p_ble_evt, true);
+			Stack::getInstance().onBleEventInterrupt(event, true);
 #else
-			Stack::getInstance().onBleEventInterrupt(p_ble_evt, false);
+			Stack::getInstance().onBleEventInterrupt(event, false);
 #endif
 			break;
 		}
 		case BLE_GAP_EVT_PHY_UPDATE_REQUEST: {
-			ble_gap_phys_t phys;
-			phys.rx_phys = BLE_GAP_PHY_AUTO;
-			phys.tx_phys = BLE_GAP_PHY_AUTO;
-			uint32_t retVal = sd_ble_gap_phy_update(p_ble_evt->evt.gap_evt.conn_handle, &phys);
-			APP_ERROR_CHECK(retVal);
+			BleHandler::handlePhyRequest(event->evt.gap_evt.conn_handle, event->evt.gap_evt.params.phy_update_request);
+			break;
+		}
+		case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
+			BleHandler::handleDataLengthRequest(event->evt.gap_evt.conn_handle, event->evt.gap_evt.params.data_length_update_request);
 			break;
 		}
 		case BLE_GATTC_EVT_TIMEOUT: {
 			// Disconnect on GATT Client timeout event.
-			uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-			APP_ERROR_CHECK(retVal);
+			BleHandler::disconnect(event->evt.gatts_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 			break;
 		}
 		case BLE_GATTS_EVT_TIMEOUT: {
 			// Disconnect on GATT Server timeout event.
-			uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-			APP_ERROR_CHECK(retVal);
-			break;
-		}
-		case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
-			uint32_t retVal = sd_ble_gap_data_length_update(p_ble_evt->evt.gatts_evt.conn_handle, NULL, NULL);
-			APP_ERROR_CHECK(retVal);
+			BleHandler::disconnect(event->evt.gatts_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 			break;
 		}
 		case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
-//			uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, BLE_GATT_ATT_MTU_DEFAULT);
-			uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
-			APP_ERROR_CHECK(retVal);
+			BleHandler::handleMtuRequest(event->evt.gatts_evt.conn_handle, event->evt.gatts_evt.params.exchange_mtu_request);
 			break;
 		}
 		case BLE_GAP_EVT_RSSI_CHANGED:
@@ -183,22 +248,150 @@ void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_contex
 		case BLE_GATTS_EVT_SYS_ATTR_MISSING:
 		default: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-			uint32_t retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_sched);
+			uint32_t retVal = app_sched_event_put(event, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_decoupled);
+			// We don't want to miss any event.
 			APP_ERROR_CHECK(retVal);
 #else
-			crownstone_sdh_ble_evt_handler_decoupled(p_ble_evt, sizeof(ble_evt_t));
+			BleHandler::handleEventDecoupled(event);
 #endif
 			break;
 		}
 	}
 }
-NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_evt_handler, NULL);
+
+void BleHandler::handleEventDecoupled(const ble_evt_t* event) {
+	LOGInterruptLevel("handleEventDecoupled int=%u", CsUtils::getInterruptLevel());
+	Stack::getInstance().onBleEvent(event);
+}
+
+void BleHandler::handlePhyRequest(uint16_t connectionHandle, const ble_gap_evt_phy_update_request_t& request) {
+	ble_gap_phys_t phys;
+	phys.rx_phys = BLE_GAP_PHY_AUTO;
+	phys.tx_phys = BLE_GAP_PHY_AUTO;
+	uint32_t nrfCode = sd_ble_gap_phy_update(connectionHandle, &phys);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE No link has been established.
+			// This can happen, when a phone connect, and disconnect quickly after.
+			// This event is queued, but by the time we process it, the device already disconnected.
+			break;
+		case NRF_ERROR_BUSY:
+			// * @retval ::NRF_ERROR_BUSY Procedure is already in progress or not allowed at this time. Process pending events and wait for the pending procedure to complete and retry.
+			// This can happen: when a request is done, the event is queued, but we haven't processed the event yet.
+			// The device does another request, so another event is queued.
+			// Then, when the second event is being handled, we just replied to the first event.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_NOT_SUPPORTED:
+			// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
+			// This shouldn't happen: crash.
+		default:
+			APP_ERROR_HANDLER(nrfCode);
+	}
+}
+
+void BleHandler::handleDataLengthRequest(uint16_t connectionHandle, const ble_gap_evt_data_length_update_request_t& request) {
+	uint32_t nrfCode = sd_ble_gap_data_length_update(connectionHandle, NULL, NULL);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE No link has been established.
+			// This can happen, when a phone connect, and disconnect quickly after.
+			// This event is queued, but by the time we process it, the device already disconnected.
+			break;
+		case NRF_ERROR_BUSY:
+			// * @retval ::NRF_ERROR_BUSY Peer has already initiated a Data Length Update Procedure. Process the
+			// *                          pending @ref BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST event to respond.
+			// This can happen: when a request is done, the event is queued, but we haven't processed the event yet.
+			// The device does another request, so another event is queued.
+			// Then, when the second event is being handled, we just replied to the first event.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle parameter supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameters supplied.
+			// This shouldn't happen: crash
+		case NRF_ERROR_NOT_SUPPORTED:
+			// * @retval ::NRF_ERROR_NOT_SUPPORTED The requested parameters are not supported by the SoftDevice. Inspect
+			// *                                   p_dl_limitation to see which parameter is not supported.
+			// This shouldn't happen: crash
+		case NRF_ERROR_RESOURCES:
+			// * @retval ::NRF_ERROR_RESOURCES The connection event length configured for this link is not sufficient for the requested parameters.
+			// *                               Use @ref sd_ble_cfg_set with @ref BLE_CONN_CFG_GAP to increase the connection event length.
+			// *                               Inspect p_dl_limitation to see where the limitation is.
+			// This shouldn't happen: crash
+		default:
+			APP_ERROR_HANDLER(nrfCode);
+	}
+}
+
+void BleHandler::handleMtuRequest(uint16_t connectionHandle, const ble_gatts_evt_exchange_mtu_request_t& request) {
+//	uint32_t nrfCode = sd_ble_gatts_exchange_mtu_reply(connectionHandle, BLE_GATT_ATT_MTU_DEFAULT);
+	uint32_t nrfCode = sd_ble_gatts_exchange_mtu_reply(connectionHandle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection State or no ATT_MTU exchange request pending.
+			// This can happen, when a phone connect, and disconnect quickly after.
+			// This event is queued, but by the time we process it, the device already disconnected.
+			break;
+		case NRF_ERROR_TIMEOUT:
+			// * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
+			// This doesn't look like an error we should crash at.
+			break;
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
+			// This shouldn't happen, crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid Server RX MTU size supplied.
+			// This shouldn't happen, crash.
+		default:
+			APP_ERROR_HANDLER(nrfCode);
+	}
+}
+
+void BleHandler::disconnect(uint16_t connectionHandle, uint8_t reason) {
+	uint32_t nrfCode = sd_ble_gap_disconnect(connectionHandle, reason);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE Disconnection in progress or link has not been established.
+			// This can happen, when a phone connect, and disconnect quickly after.
+			// This event is queued, but by the time we process it, the device already disconnected.
+			break;
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+			// This shouldn't happen: crash.
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+			// This shouldn't happen: crash.
+		default:
+			APP_ERROR_HANDLER(nrfCode);
+	}
+}
 
 
 
-static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context) {
-	LOGInterruptLevel("sdh state evt int=%u", CsUtils::getInterruptLevel());
-	switch (state) {
+void SdhStateHandler::handleEvent(const nrf_sdh_state_evt_t& event) {
+	LOGInterruptLevel("handleEvent int=%u", CsUtils::getInterruptLevel());
+	switch (event) {
 		case NRF_SDH_EVT_STATE_ENABLE_PREPARE:
 			LOGd("Softdevice is about to be enabled");
 			break;
@@ -212,63 +405,7 @@ static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p
 			LOGd("Softdevice is now disabled");
 			break;
 		default:
-			LOGd("Unknown state change");
+			LOGd("Unknown state: %u", event);
 	}
 }
-NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
-{
-	.handler   = crownstone_sdh_state_evt_handler,
-	.p_context = NULL
-};
-
-#if BUILD_MESHING == 1
-// From: ble_softdevice_support.c
-void mesh_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("mesh soc evt decoupled int=%u", CsUtils::getInterruptLevel());
-	uint32_t evt_id = *(uint32_t*)p_event_data;
-	nrf_mesh_on_sd_evt(evt_id);
-}
-
-static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
-	LOGInterruptLevel("mesh soc evt int=%u", CsUtils::getInterruptLevel());
-#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
-	APP_ERROR_CHECK(retVal);
-#else
-	nrf_mesh_on_sd_evt(evt_id);
-#endif
-}
-NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_handler, NULL);
-#endif
-
-/**
- * The decoupled FDS event handler, should run in thread mode.
- */
-void fds_evt_handler_decoupled(const void * p_event_data, uint16_t event_size) {
-	LOGInterruptLevel("fds evt decoupled int=%u", CsUtils::getInterruptLevel());
-	fds_evt_t* p_fds_evt = (fds_evt_t*) p_event_data;
-	Storage::getInstance().handleFileStorageEvent(p_fds_evt);
-}
-void fds_evt_handler_sched(void * p_event_data, uint16_t event_size) {
-	fds_evt_handler_decoupled(p_event_data, event_size);
-}
-
-/**
- * The FDS event handler is registered in the cs_Storage class.
- */
-void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
-	LOGInterruptLevel("fds evt int=%u", CsUtils::getInterruptLevel());
-	// For some reason, we already got fds event init, before app_sched_execute() was called.
-	// So for now, just always put fds events on the app scheduler.
-//#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-	uint32_t retVal = app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_handler_sched);
-	APP_ERROR_CHECK(retVal);
-//#else
-//	fds_evt_handler_decoupled(p_fds_evt, sizeof(*p_fds_evt));
-//#endif
-}
-
-#ifdef __cplusplus
-}
-#endif
 
