@@ -129,10 +129,31 @@ void CharacteristicBase::init(Service* svc) {
 	}
 
 	//! add all
-	uint32_t err_code = sd_ble_gatts_characteristic_add(svc->getHandle(), &ci.char_md, &ci.attr_char_value, &_handles);
-	if (err_code != NRF_SUCCESS) {
-		LOGe(MSG_BLE_CHAR_CREATION_ERROR);
-		APP_ERROR_CHECK(err_code);
+	uint32_t nrfCode = sd_ble_gatts_characteristic_add(svc->getHandle(), &ci.char_md, &ci.attr_char_value, &_handles);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied, service handle, Vendor Specific UUIDs, lengths, and permissions need to adhere to the constraints.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation, a service context is required.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_FORBIDDEN:
+			// * @retval ::NRF_ERROR_FORBIDDEN Forbidden value supplied, certain UUIDs are reserved for the stack.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_NO_MEM:
+			// * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_DATA_SIZE:
+			// * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, attribute lengths are restricted by @ref BLE_GATTS_ATTR_LENS_MAX.
+			// This shouldn't happen: crash.
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
 	}
 
 	//! set initial value (default value)
@@ -223,7 +244,8 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 
 		// on success, set the readable buffer length to the encryption package.
 		setGattValueLength(encryptionBufferLength);
-	} else {
+	}
+	else {
 		//! set the data length of the gatt value (when not using encryption)
 		setGattValueLength(valueLength);
 	}
@@ -237,18 +259,43 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 	gatts_value.offset = 0;
 	gatts_value.p_value = valueGattAddress;
 	
-	uint32_t err_code;
-	err_code = sd_ble_gatts_value_set(
+	uint32_t nrfCode = sd_ble_gatts_value_set(
 			_service->getStack()->getConnectionHandle(),
 			_handles.value_handle,
 			&gatts_value
 	);
-	APP_ERROR_CHECK(err_code);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
 
-	//! stop here if we are not in notifying state
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_NOT_FOUND:
+			// * @retval ::NRF_ERROR_NOT_FOUND Attribute not found.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_FORBIDDEN:
+			// * @retval ::NRF_ERROR_FORBIDDEN Forbidden handle supplied, certain attributes are not modifiable by the application.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_DATA_SIZE:
+			// * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, attribute lengths are restricted by @ref BLE_GATTS_ATTR_LENS_MAX.
+			// This shouldn't happen: crash.
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
+			// This shouldn't happen: crash.
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
+	}
+
+	// Stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->isConnectedPeripheral()) || !_status.notifyingEnabled) {
 		return ERR_SUCCESS;
-	} else {
+	}
+	else {
 		return notify();
 	}
 }
@@ -260,9 +307,9 @@ uint32_t CharacteristicBase::notify() {
 		return NRF_ERROR_INVALID_STATE;
 	}
 
-	uint32_t err_code;
+	uint32_t nrfCode;
 
-	//! get the data length of the value (encrypted)
+	// Get the data length of the value (encrypted)
 	uint16_t valueLength = getGattValueLength();
 
 	ble_gatts_hvx_params_t hvx_params;
@@ -273,38 +320,45 @@ uint32_t CharacteristicBase::notify() {
 	hvx_params.p_len = &valueLength;
 	hvx_params.p_data = NULL;
 
-	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+	nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 
-	switch (err_code) {
+	switch (nrfCode) {
 		case NRF_SUCCESS:
 			break;
 		case NRF_ERROR_RESOURCES:
-			// Dominik: this happens if several characteristics want to send a notification,
-			//   but the system only has a limited number of tx buffers available. so queueing up
-			//   notifications faster than being able to send them out from the stack results
-			//   in this error.
+			// * @retval ::NRF_ERROR_RESOURCES Too many notifications queued.
+			// *                               Wait for a @ref BLE_GATTS_EVT_HVN_TX_COMPLETE event and retry.
+			// Mark that there is a pending notification, we can retry later.
 			onNotifyTxError();
 			break;
-		case NRF_ERROR_INVALID_STATE:
-			// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-			//   it can happen that it tries to update it's value although notification was disabled in
-			//   in the meantime, in which case an invalid state error is returned. but this case we can
-			//   ignore
+		case NRF_ERROR_TIMEOUT:
+			// * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
+			// It can happen there was a timeout in the meantime.
+		case NRF_ERROR_INVALID_STATE: {
+			// * @retval ::NRF_ERROR_INVALID_STATE One or more of the following is true:
+			// *                                   - Invalid Connection State
+			// *                                   - Notifications and/or indications not enabled in the CCCD
+			// *                                   - An ATT_MTU exchange is ongoing
+			// It can happen that the phone disconnected or disabled notification in the meantime.
+			LOGw("nrfCode=%u (0x%X)", nrfCode, nrfCode);
 
-			// this is not a serious error, but better to at least write it to the log
-			LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
-
-			// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
+			// Reset the notification state, we can't retry later.
 			_status.notificationPending = false;
 			break;
-		case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+		}
+		case BLE_ERROR_GATTS_SYS_ATTR_MISSING: {
+			// * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref sd_ble_gatts_sys_attr_set to set them to a known value.
 			// TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
+			LOGe("nrfCode=%u (0x%X)", nrfCode, nrfCode);
 			break;
+		}
 		default:
-			APP_ERROR_CHECK(err_code);
+			// Other return codes, see Characteristic<buffer_ptr_t>::notify().
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
 	}
 
-	return err_code;
+	return nrfCode;
 }
 
 
@@ -321,7 +375,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		return NRF_ERROR_INVALID_STATE;
 	}
 
-	uint32_t err_code = NRF_SUCCESS;
+	uint32_t nrfCode = NRF_SUCCESS;
 
 	// get the data length of the value (encrypted)
 	uint16_t valueLength = getGattValueLength();
@@ -332,15 +386,14 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 	uint16_t offset;
 	if (_status.notificationPending) {
 		offset = _notificationPendingOffset;
-	} else {
+	}
+	else {
 		offset = 0;
 	}
 
 	while (offset < valueLength) {
+		uint16_t dataLen = MIN(valueLength - offset, MAX_NOTIFICATION_LEN);
 
-		uint16_t dataLen;
-		dataLen = MIN(valueLength - offset, MAX_NOTIFICATION_LEN);
-//
 		notification_t notification = {};
 
 		// TODO: [Alex 22.08] verify if the oldVal is required. I do not think we use this.
@@ -348,7 +401,8 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 
 		if (valueLength - offset > MAX_NOTIFICATION_LEN) {
 			notification.partNr = offset / MAX_NOTIFICATION_LEN;
-		} else {
+		}
+		else {
 			notification.partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
 		}
 
@@ -367,55 +421,87 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 
 		memcpy(oldVal, valueGattAddress + offset, packageLen);
 
-//		packageLen = 1;
-
 		hvx_params.handle = _handles.value_handle;
 		hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
 		hvx_params.offset = 0;
 		hvx_params.p_len = &packageLen;
 		hvx_params.p_data = p_data;
 
-		//	BLE_CALL(sd_ble_gatts_hvx, (_service->getStack()->getConnectionHandle(), &hvx_params));
-		err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+		nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+		switch (nrfCode) {
+			case NRF_SUCCESS: {
+				memcpy(valueGattAddress + offset, oldVal, packageLen);
+				offset += dataLen;
+				break;
+			}
 
-		if (err_code != NRF_SUCCESS) {
-
-			if (err_code == NRF_ERROR_RESOURCES) {
-				// Dominik: this happens if several characteristics want to send a notification,
-				//   but the system only has a limited number of tx buffers available. so queueing up
-				//   notifications faster than being able to send them out from the stack results
-				//   in this error.
+			case NRF_ERROR_RESOURCES: {
+				// * @retval ::NRF_ERROR_RESOURCES Too many notifications queued.
+				// *                               Wait for a @ref BLE_GATTS_EVT_HVN_TX_COMPLETE event and retry.
+				// Mark that there is a pending notification, we can continue later.
 				onNotifyTxError();
 				_notificationPendingOffset = offset;
-				return err_code;
-//				return NRF_SUCCESS;
-			} else if (err_code == NRF_ERROR_INVALID_STATE) {
-				// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-				//   it can happen that it tries to update it's value although notification was disabled in
-				//   in the meantime, in which case an invalid state error is returned. but this case we can
-				//   ignore
+				return nrfCode;
+			}
 
-				// this is not a serious error, but better to at least write it to the log
-				LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
+			case NRF_ERROR_TIMEOUT:
+				// * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be performed without reestablishing the connection.
+				// It can happen there was a timeout in the meantime.
+			case NRF_ERROR_INVALID_STATE: {
+				// * @retval ::NRF_ERROR_INVALID_STATE One or more of the following is true:
+				// *                                   - Invalid Connection State
+				// *                                   - Notifications and/or indications not enabled in the CCCD
+				// *                                   - An ATT_MTU exchange is ongoing
+				// It can happen that the phone disconnected or disabled notification in the meantime.
+				LOGw("nrfCode=%u (0x%X)", nrfCode, nrfCode);
 
-				// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
+				// Reset the notification state, we can't continue later.
 				_notificationPendingOffset = 0;
 				_status.notificationPending = false;
-				return err_code;
-			} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-				// Anne: do not complain for now... (meshing)
-			} else {
-				APP_ERROR_CHECK(err_code);
+				return nrfCode;
 			}
+
+			case BLE_ERROR_GATTS_SYS_ATTR_MISSING: {
+				// * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref sd_ble_gatts_sys_attr_set to set them to a known value.
+				// Anne: do not complain for now... (meshing)
+				LOGe("nrfCode=%u (0x%X)", nrfCode, nrfCode);
+				break;
+			}
+
+			case NRF_ERROR_BUSY:
+				// * @retval ::NRF_ERROR_BUSY For @ref BLE_GATT_HVX_INDICATION Procedure already in progress. Wait for a @ref BLE_GATTS_EVT_HVC event and retry.
+				// This shouldn't happen, as we don't use INDICATION, but NOTIFICATION.
+
+			case BLE_ERROR_INVALID_CONN_HANDLE:
+				// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
+				// This shouldn't happen: crash.
+			case NRF_ERROR_INVALID_ADDR:
+				// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+				// This shouldn't happen: crash.
+			case NRF_ERROR_INVALID_PARAM:
+				// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+				// This shouldn't happen: crash.
+			case BLE_ERROR_INVALID_ATTR_HANDLE:
+				// * @retval ::BLE_ERROR_INVALID_ATTR_HANDLE Invalid attribute handle(s) supplied. Only attributes added directly by the application are available to notify and indicate.
+				// This shouldn't happen: crash.
+			case BLE_ERROR_GATTS_INVALID_ATTR_TYPE:
+				// * @retval ::BLE_ERROR_GATTS_INVALID_ATTR_TYPE Invalid attribute type(s) supplied, only characteristic values may be notified and indicated.
+				// This shouldn't happen: crash.
+			case NRF_ERROR_NOT_FOUND:
+				// * @retval ::NRF_ERROR_NOT_FOUND Attribute not found.
+				// This shouldn't happen: crash.
+			case NRF_ERROR_FORBIDDEN:
+				// * @retval ::NRF_ERROR_FORBIDDEN The connection's current security level is lower than the one required by the write permissions of the CCCD associated with this characteristic.
+				// This shouldn't happen: crash.
+			case NRF_ERROR_DATA_SIZE:
+				// * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied.
+				// This shouldn't happen: crash.
+			default:
+				// Crash
+				APP_ERROR_HANDLER(nrfCode);
 		}
-
-		memcpy(valueGattAddress + offset, oldVal, packageLen);
-
-		offset += dataLen;
-
 	}
-
-	return err_code;
+	return nrfCode;
 }
 
 /** When a previous transmission is successful send the next.
