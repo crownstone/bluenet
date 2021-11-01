@@ -23,10 +23,11 @@ PresenceHandler::PresenceHandler() {
 	_store.clear();
 }
 
-void PresenceHandler::init() {
+cs_ret_code_t PresenceHandler::init() {
 	LOGi("init");
 
 	listen();
+	return ERR_SUCCESS;
 }
 
 void PresenceHandler::handleEvent(event_t& event) {

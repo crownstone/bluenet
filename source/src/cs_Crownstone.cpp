@@ -233,8 +233,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 
 std::vector<Component*> Crownstone::getChildren() {
 	return {
-		_switchAggregator,
-		_presenceHandler,
+		&_switchAggregator,
+		&_presenceHandler,
 		// TODO: add others (when necessary for weak dependences)
 	};
 }

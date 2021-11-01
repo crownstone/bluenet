@@ -11,17 +11,21 @@
 #include <presence/cs_PresenceDescription.h>
 #include <time/cs_SystemTime.h>
 #include <util/cs_Store.h>
+#include <common/cs_Component.h>
 
 /**
  * Keeps up all the locations each profile is present in.
  * Sends out event when this changes.
  * Sends out throttled mesh messages when the location of a profile is received.
  */
-class PresenceHandler: public EventListener {
+class PresenceHandler: public EventListener, public Component {
 public:
 	PresenceHandler();
 
-    void init();
+	/**
+	 * calls listen();
+	 */
+    virtual cs_ret_code_t init() override;
 
     /**
      * Returns a simplified description of the current presence knowledge,
