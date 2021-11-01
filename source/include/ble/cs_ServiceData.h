@@ -141,9 +141,6 @@ private:
 	//! Cache the operation mode.
 	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
-	//! Cache whether a device is connected or not.
-	bool _connected = false;
-
 	//! Counter that keeps up the number of times that the advertisement has been updated.
 	uint32_t _updateCount = 0;
 

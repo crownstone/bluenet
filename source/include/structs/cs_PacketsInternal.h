@@ -199,6 +199,14 @@ struct state_external_stone_t {
 	service_data_encrypted_t data;
 };
 
+
+struct ble_connected_t {
+	uint16_t  connectionHandle;
+	uint8_t   advertisementHandle; // Advertisement handle that stopped advertising.
+	cs_data_t advertisementBuffer; // Buffer that's no longer in use.
+	cs_data_t scanResponseBuffer;  // Buffer that's no longer in use.
+};
+
 /**
  * Unparsed background advertisement.
  */

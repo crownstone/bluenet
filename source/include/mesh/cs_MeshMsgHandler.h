@@ -31,7 +31,6 @@ protected:
 	cs_ret_code_t handleState0(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
 	cs_ret_code_t handleState1(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
 	cs_ret_code_t handleProfileLocation(         uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleSetBehaviourSettings(    uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceRegister(   uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceToken(      uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceHeartbeat(  uint8_t* payload, size16_t payloadSize);

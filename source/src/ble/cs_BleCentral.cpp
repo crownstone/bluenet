@@ -58,15 +58,31 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 	}
 
 	// In order to connect, other modules need to change their operation.
-	event_t connectEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_START);
+	event_t connectEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST);
 	connectEvent.dispatch();
-	if (connectEvent.result.returnCode != ERR_SUCCESS) {
-		LOGe("Unable to start connecting: err=%u", connectEvent.result.returnCode);
-		// Let modules know they can resume their normal operation.
-		event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
-		disconnectEvent.dispatch();
-		return connectEvent.result.returnCode;
+
+	switch (connectEvent.result.returnCode) {
+		case ERR_SUCCESS: {
+			return connectWithClearance(_address, _timeoutMs);
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			memcpy(&_address, &address, sizeof(address));
+			_timeoutMs = timeoutMs;
+			_currentOperation = Operation::CONNECT_CLEARANCE;
+			return ERR_WAIT_FOR_SUCCESS;
+		}
+		default: {
+			LOGe("Unable to start connecting: err=%u", connectEvent.result.returnCode);
+			// Let modules know they can resume their normal operation.
+			event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
+			disconnectEvent.dispatch();
+			return connectEvent.result.returnCode;
+		}
 	}
+}
+
+cs_ret_code_t BleCentral::connectWithClearance(const device_address_t& address, uint16_t timeoutMs) {
+
 
 	ble_gap_addr_t gapAddress;
 	memcpy(gapAddress.addr, address.address, sizeof(address.address));
@@ -102,6 +118,7 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 	uint32_t nrfCode = sd_ble_gap_connect(&gapAddress, &scanParams, &connectionParams, APP_BLE_CONN_CFG_TAG);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Connect err=%u", nrfCode);
+		finalizeOperation(Operation::CONNECT, ERR_UNSPECIFIED);
 		return ERR_UNSPECIFIED;
 	}
 
@@ -406,6 +423,7 @@ cs_ret_code_t BleCentral::writeNotificationConfig(uint16_t cccdHandle, bool enab
 void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 	switch (operation) {
 		case Operation::NONE:
+		case Operation::CONNECT_CLEARANCE:
 		case Operation::CONNECT:
 		case Operation::DISCONNECT:
 		case Operation::DISCOVERY:
@@ -433,6 +451,12 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 		switch (_currentOperation) {
 			case Operation::NONE: {
 				break;
+			}
+			case Operation::CONNECT_CLEARANCE: {
+				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				sendOperationResult(errEvent);
+				return;
 			}
 			case Operation::CONNECT: {
 				// Ignore data, finalize with error instead.
@@ -479,6 +503,10 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 			LOGBleCentralDebug("No operation was in progress");
 			break;
 		}
+		case Operation::CONNECT_CLEARANCE: {
+			LOGBleCentralDebug("Clearance to connect.");
+			break;
+		}
 		case Operation::CONNECT: {
 			event.type = CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT;
 			break;
@@ -523,6 +551,21 @@ void BleCentral::sendOperationResult(event_t& event) {
 
 
 
+void BleCentral::onConnectClearance() {
+	if (_currentOperation != Operation::CONNECT_CLEARANCE) {
+		return;
+	}
+	finalizeOperation(Operation::CONNECT_CLEARANCE, ERR_SUCCESS);
+	cs_ret_code_t retCode = connectWithClearance(_address, _timeoutMs);
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_WAIT_FOR_SUCCESS:
+			break;
+		default:
+			// No need to do anything, connectWithClearance() already sent EVT_BLE_CENTRAL_CONNECT_RESULT.
+			break;
+	}
+}
 
 void BleCentral::onConnect(uint16_t connectionHandle, const ble_gap_evt_connected_t& event) {
 	if (event.role != BLE_GAP_ROLE_CENTRAL) {
@@ -757,6 +800,10 @@ void BleCentral::handleEvent(event_t& event) {
 		case CS_TYPE::CMD_BLE_CENTRAL_WRITE: {
 			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_WRITE, event.data);
 			event.result.returnCode = write(packet->handle, packet->data.data, packet->data.len);
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY: {
+			onConnectClearance();
 			break;
 		}
 		default: {

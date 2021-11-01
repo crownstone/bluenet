@@ -126,6 +126,9 @@ private:
 	// Whether we should be advertising.
 	bool                                        _wantAdvertising = false;
 
+	// Whether to start advertising on next tick.
+	bool                                        _startOnNextTick = false;
+
 	// Advertisement handle for softdevice. Set by first call to: sd_ble_gap_adv_set_configure().
 	uint8_t                                     _advHandle = BLE_GAP_ADV_SET_HANDLE_NOT_SET;
 
@@ -198,17 +201,14 @@ private:
 	// Size of advertisement / scan response data buffers.
 	const static uint8_t                        _advertisementDataBufferSize = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
 
-	// Pointers to advertisement data buffers.
-	uint8_t*                                    _advertisementDataBuffers[_advertisementDataBufferCount] = { nullptr };
-
-	// Pointers to scan response data buffers.
-	uint8_t*                                    _scanResponseBuffers[_advertisementDataBufferCount] = { nullptr };
+	// Pointers to advertisement data buffers. Half of these are scan response data buffers.
+	uint8_t*                                    _advertisementDataBuffers[2 * _advertisementDataBufferCount] = { nullptr };
 
 	// Pointers to the currently advertised advertisement and scan response data buffer.
 	ble_gap_adv_data_t                          _advData;
 
-	// Which of the advertisement and scan response data buffers are currently being advertised..
-	uint8_t                                     _advBufferInUse = 1;
+	// Keep up which buffers are currently being used in an advertisement.
+	bool                                        _advertisementDataBuffersInUse[2 * _advertisementDataBufferCount] = { false };
 
 
 
@@ -234,13 +234,6 @@ private:
 	 * @param[in] asScanResponse       Whether to set the iBeacon data in the scan response.
 	 */
 	void setAdvertisementData(IBeacon& beacon, bool asScanResponse);
-
-	/**
-	 * Allocate the advertisement data buffers.
-	 *
-	 * Returns true on success.
-	 */
-	bool allocateAdvertisementDataBuffers(bool scanResponse);
 
 	/**
 	 * Sets and updates advertisement data.
@@ -283,11 +276,38 @@ private:
 	void setNonConnectableAdvParams();
 
 
-	void onConnect();
+	/**
+	 * Allocate the advertisement data buffers.
+	 *
+	 * Returns true on success.
+	 */
+	bool allocateAdvertisementDataBuffers(bool scanResponse);
+
+	/**
+	 * Gets an advertisement data buffer that's not in use.
+	 *
+	 * @param[in] scanResponse    Whether to get a scan response data buffer.
+	 * @return                    Pointer to the buffer, or a nullptr if no free buffer is found.
+	 */
+	uint8_t* getAdvertisementBuffer(bool scanResponse);
+
+	/**
+	 * Mark an advertisement buffer as in use / no longer in use.
+	 *
+	 * @param[in] buffer          Pointer to the advertisement data buffer.
+	 * @param[in] inUse           Whether to mark buffer as in use.
+	 * @param[in] scanResponse    Whether the buffer is a scan response data buffer.
+	 */
+	void markAdvertisementBuffer(const uint8_t* buffer, bool inUse, bool scanResponse);
+
+
+	void onConnect(const ble_connected_t& connectedData);
 
 	void onDisconnect();
 
 	void onConnectOutgoing();
+
+	void onTick();
 
 	void printAdvertisement();
 };

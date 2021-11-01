@@ -38,10 +38,10 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	// Allocate buffer.
 	_switchHistory.init();
 
-	listen();
+	listen(); // TODO: move to end of init.
 
-	twilightHandler.listen();
-	behaviourHandler.listen();
+	twilightHandler.init();
+	behaviourHandler.init();
 
 	overrideState = smartSwitch.getIntendedState();
 	pushTestDataToHost();

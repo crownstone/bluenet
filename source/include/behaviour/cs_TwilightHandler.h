@@ -14,7 +14,14 @@
 
 
 class TwilightHandler : public EventListener {
-    public:
+public:
+	/**
+	 * Initialize this class:
+	 * - Read settings from flash.
+	 * - Start listening for events.
+	 */
+	void init();
+
     /**
      * Computes the twilight state of this crownstone based on
      * the stored behaviours, and then dispatches an event.
@@ -24,7 +31,7 @@ class TwilightHandler : public EventListener {
      * - EVT_BEHAVIOURSTORE_MUTATION
      * - STATE_BEHAVIOUR_SETTINGS
      */
-    virtual void handleEvent(event_t& evt) override;
+    void handleEvent(event_t& evt) override;
 
     /**
      * Acquires the current time and presence information. 
