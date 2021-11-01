@@ -17,8 +17,6 @@
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
-Store<PresenceHandler::PresenceRecord, PresenceHandler::MAX_RECORDS> PresenceHandler::_store;
-
 PresenceHandler::PresenceHandler() {
 	_store.clear();
 }

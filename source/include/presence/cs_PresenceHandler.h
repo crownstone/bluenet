@@ -32,7 +32,7 @@ public:
      * each bit in the description indicates if a person is in that room
      * or not.
      */
-    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
+    std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
 
 private:
@@ -108,7 +108,7 @@ private:
     /**
      * Stores presence records.
      */
-    static Store<PresenceRecord, MAX_RECORDS> _store;
+    Store<PresenceRecord, MAX_RECORDS> _store;
 
 	/**
 	 * finds oldest record and default constructs its present record,
@@ -140,7 +140,7 @@ private:
     /**
      * Resolves the type of mutation from previous and next descriptions.
      */
-    static PresenceMutation getMutationType(
+    PresenceMutation getMutationType(
         std::optional<PresenceStateDescription> prevDescription, 
         std::optional<PresenceStateDescription> nextDescription);
 
