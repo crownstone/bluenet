@@ -593,7 +593,7 @@ void Crownstone::setName() {
 	_advertiser->setDeviceName(name);
 }
 
-void Crownstone::startOperationMode(const OperationMode & mode) {
+void Crownstone::startOperationMode(const OperationMode& mode) {
 	// TODO: should only be needed in normal mode.
 	_behaviourStore.listen();
 	_presenceHandler.init();
@@ -608,6 +608,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				_mesh->init(_boardsConfig);
 			}
 #endif
+
 			RC5::getInstance().init();
 
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
@@ -621,6 +622,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_meshTopology.init();
 
 			_assetFiltering.init();
+
+			_firmwareReader.init();
 
 			break;
 		}
