@@ -18,14 +18,14 @@
 class FirmwareReader : public EventListener {
 public:
 
-
+	uint16_t dataoffSet = 0;
 
 	FirmwareReader();
 
 	/**
 	 *
 	 */
-	void read(FirmwareSection sect, uint16_t startIndex, uint16_t size, const void* data_out);
+	void read(FirmwareSection sect, uint16_t startIndex, uint16_t size, void* data_out);
 
 
 	cs_ret_code_t init();
