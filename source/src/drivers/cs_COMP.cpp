@@ -31,7 +31,7 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	// thresholdDown has to be lower than thresholdUp, else the comp shows weird behaviour (main thread hangs)
 
 	if (thresholdDown >= thresholdUp) {
-		APP_ERROR_CHECK(ERR_WRONG_PARAMETER);
+		APP_ERROR_HANDLER(NRF_ERROR_INVALID_PARAM);
 	}
 
 	LOGd("init pin=%u down=%i up=%i", ainPin, NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
@@ -55,9 +55,6 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	config.isource = NRF_COMP_ISOURCE_Off; // Should be off in our case and due to PAN 84
 	config.interrupt_priority = APP_IRQ_PRIORITY_LOW;
 
-	if (ainPin > 7) {
-		APP_ERROR_CHECK(ERR_WRONG_PARAMETER);
-	}
 	switch (ainPin) {
 		case 0:
 			config.input = NRF_COMP_INPUT_0; // AIN0, gpio 2
@@ -83,10 +80,25 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 		case 7:
 			config.input = NRF_COMP_INPUT_7; // AIN7
 			break;
+		default:
+			APP_ERROR_HANDLER(NRF_ERROR_INVALID_PARAM);
 	}
 
-	ret_code_t err_code = nrfx_comp_init(&config, comp_callback);
-	APP_ERROR_CHECK(err_code);
+	ret_code_t nrfCode = nrfx_comp_init(&config, comp_callback);
+	switch (nrfCode) {
+		case NRFX_SUCCESS:
+			// * @retval NRFX_SUCCESS             If initialization was successful.
+			break;
+		case NRFX_ERROR_INVALID_STATE:
+			// * @retval NRFX_ERROR_INVALID_STATE If the driver has already been initialized.
+		case NRFX_ERROR_BUSY:
+			// * @retval NRFX_ERROR_BUSY          If the LPCOMP peripheral is already in use.
+			// *                                  This is possible only if @ref nrfx_prs module
+			// *                                  is enabled.
+		default:
+			// Crash.
+			APP_ERROR_HANDLER(nrfCode);
+	}
 }
 
 void COMP::start(CompEvent_t event) {
