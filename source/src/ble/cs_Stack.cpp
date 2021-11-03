@@ -61,16 +61,6 @@ void Stack::init() {
 		APP_ERROR_CHECK(nrfCode);
 	}
 
-	// Enable power fail detection:
-	// If the supply voltage drops below threshold, an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
-	// TODO: move the power fail code to main cpp.
-	nrfCode = sd_power_pof_enable(true);
-	// Only return code is NRF_SUCCESS.
-	APP_ERROR_CHECK(nrfCode);
-
-	nrfCode = sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
-	APP_ERROR_CHECK(nrfCode);
-
 	setInitialized(C_STACK_INITIALIZED);
 }
 
@@ -110,6 +100,16 @@ void Stack::initSoftdevice() {
 		// The status change has been deferred.
 		app_sched_execute();
 	}
+
+	// Enable power fail detection:
+	// If the supply voltage drops below threshold, an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
+	// TODO: move the power fail code to main cpp.
+	nrfCode = sd_power_pof_enable(true);
+	// Only return code is NRF_SUCCESS.
+	APP_ERROR_CHECK(nrfCode);
+
+	nrfCode = sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
+	APP_ERROR_CHECK(nrfCode);
 }
 
 /** Initialize or configure the BLE radio.
@@ -173,6 +173,7 @@ void Stack::initRadio() {
 			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
 			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
 		default:
+			// Crash.
 			APP_ERROR_HANDLER(nrfCode);
 	}
 
@@ -265,8 +266,21 @@ void Stack::updateConnParams() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
 		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
 	}
-	ret_code_t nrfCode = sd_ble_gap_ppcp_set(&_connectionParams);
-	APP_ERROR_CHECK(nrfCode);
+	uint32_t nrfCode = sd_ble_gap_ppcp_set(&_connectionParams);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval ::NRF_SUCCESS Peripheral Preferred Connection Parameters set successfully.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+			// This shouldn't happen: crash.
+		default:
+			// Crash.
+			APP_ERROR_HANDLER(nrfCode);
+	}
 }
 
 
