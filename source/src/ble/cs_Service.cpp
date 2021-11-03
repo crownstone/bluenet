@@ -34,13 +34,30 @@ void Service::init(Stack* stack) {
 
 	_stack = stack;
 
-	uint32_t err_code;
-
 	const ble_uuid_t& uuid = _uuid.getUuid();
 
 	_service_handle = BLE_CONN_HANDLE_INVALID;
-	err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &uuid, (uint16_t*) &_service_handle);
-	APP_ERROR_CHECK(err_code);
+	uint32_t nrfCode = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &uuid, (uint16_t*) &_service_handle);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval ::NRF_SUCCESS Successfully added a service declaration.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied, Vendor Specific UUIDs need to be present in the table.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_FORBIDDEN:
+			// * @retval ::NRF_ERROR_FORBIDDEN Forbidden value supplied, certain UUIDs are reserved for the stack.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_NO_MEM:
+			// * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
+			// This shouldn't happen: crash.
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
+	}
 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->init(this);
@@ -152,13 +169,34 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 				gatts_value.offset = 0;
 				gatts_value.p_value = NULL;
 				
-				uint32_t err_code;
-				err_code = sd_ble_gatts_value_get(
+				uint32_t nrfCode = sd_ble_gatts_value_get(
 						getStack()->getConnectionHandle(),
 						characteristic->getValueHandle(),
 						&gatts_value
 				);
-				APP_ERROR_CHECK(err_code);
+				switch (nrfCode) {
+					case NRF_SUCCESS:
+						// * @retval ::NRF_SUCCESS Successfully retrieved the value of the attribute.
+						break;
+					case NRF_ERROR_INVALID_ADDR:
+						// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+						// This shouldn't happen: crash.
+					case NRF_ERROR_NOT_FOUND:
+						// * @retval ::NRF_ERROR_NOT_FOUND Attribute not found.
+						// This shouldn't happen: crash.
+					case NRF_ERROR_INVALID_PARAM:
+						// * @retval ::NRF_ERROR_INVALID_PARAM Invalid attribute offset supplied.
+						// This shouldn't happen: crash.
+					case BLE_ERROR_INVALID_CONN_HANDLE:
+						// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
+						// This shouldn't happen: crash.
+					case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+						// * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref sd_ble_gatts_sys_attr_set to set them to a known value.
+						// This shouldn't happen: crash.
+					default:
+						// Crash
+						APP_ERROR_HANDLER(nrfCode);
+				}
 
 				characteristic->written(gatts_value.len);
 
