@@ -44,11 +44,11 @@ void EventDispatcher::dispatch(event_t& event) {
 
 bool EventDispatcher::addListener(EventListener* listener) {
 	if (_listenerCount >= MAX_EVENT_LISTENERS - 1) {
-		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
+		APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
 		return false;
 	}
 	if (listener == nullptr) {
-		APP_ERROR_CHECK(NRF_ERROR_NULL);
+		APP_ERROR_HANDLER(NRF_ERROR_NULL);
 		return false;
 	}
 

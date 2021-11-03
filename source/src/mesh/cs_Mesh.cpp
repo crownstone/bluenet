@@ -33,7 +33,7 @@ bool Mesh::checkFlashValid() {
 	if (!valid) {
 		if (_core->eraseAllPages() != ERR_SUCCESS) {
 			// Only option left is to reboot and see if things work out next time.
-			APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+			APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
 		}
 	}
 	return valid;
