@@ -267,7 +267,11 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			break;
-
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
+			// This shouldn't happen, as the connection handle is only set in the main thread.
+			LOGe("Invalid handle");
+			break;
 		case NRF_ERROR_INVALID_ADDR:
 			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
@@ -282,9 +286,6 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 			// This shouldn't happen: crash.
 		case NRF_ERROR_DATA_SIZE:
 			// * @retval ::NRF_ERROR_DATA_SIZE Invalid data size(s) supplied, attribute lengths are restricted by @ref BLE_GATTS_ATTR_LENS_MAX.
-			// This shouldn't happen: crash.
-		case BLE_ERROR_INVALID_CONN_HANDLE:
-			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
 			// This shouldn't happen: crash.
 		default:
 			// Crash
@@ -468,13 +469,16 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 				break;
 			}
 
+			case BLE_ERROR_INVALID_CONN_HANDLE: {
+				// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
+				// This shouldn't happen, as the connection handle is only set in the main thread.
+				LOGe("Invalid handle");
+				break;
+			}
+
 			case NRF_ERROR_BUSY:
 				// * @retval ::NRF_ERROR_BUSY For @ref BLE_GATT_HVX_INDICATION Procedure already in progress. Wait for a @ref BLE_GATTS_EVT_HVC event and retry.
 				// This shouldn't happen, as we don't use INDICATION, but NOTIFICATION.
-
-			case BLE_ERROR_INVALID_CONN_HANDLE:
-				// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
-				// This shouldn't happen: crash.
 			case NRF_ERROR_INVALID_ADDR:
 				// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 				// This shouldn't happen: crash.

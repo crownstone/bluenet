@@ -283,11 +283,12 @@ void BleHandler::handlePhyRequest(uint16_t connectionHandle, const ble_gap_evt_p
 			// The device does another request, so another event is queued.
 			// Then, when the second event is being handled, we just replied to the first event.
 			break;
-		case NRF_ERROR_INVALID_ADDR:
-			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
-			// This shouldn't happen: crash.
 		case BLE_ERROR_INVALID_CONN_HANDLE:
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+			// This shouldn't happen, but can maybe happen if the device already disconnected.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
@@ -317,11 +318,12 @@ void BleHandler::handleDataLengthRequest(uint16_t connectionHandle, const ble_ga
 			// The device does another request, so another event is queued.
 			// Then, when the second event is being handled, we just replied to the first event.
 			break;
-		case NRF_ERROR_INVALID_ADDR:
-			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
-			// This shouldn't happen: crash.
 		case BLE_ERROR_INVALID_CONN_HANDLE:
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle parameter supplied.
+			// This shouldn't happen, but can maybe happen if the device already disconnected.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameters supplied.
@@ -357,7 +359,8 @@ void BleHandler::handleMtuRequest(uint16_t connectionHandle, const ble_gatts_evt
 			break;
 		case BLE_ERROR_INVALID_CONN_HANDLE:
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
-			// This shouldn't happen, crash.
+			// This shouldn't happen, but can maybe happen if the device already disconnected.
+			break;
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid Server RX MTU size supplied.
 			// This shouldn't happen, crash.
@@ -376,11 +379,12 @@ void BleHandler::disconnect(uint16_t connectionHandle, uint8_t reason) {
 			// This can happen, when a phone connect, and disconnect quickly after.
 			// This event is queued, but by the time we process it, the device already disconnected.
 			break;
-		case NRF_ERROR_INVALID_PARAM:
-			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
-			// This shouldn't happen: crash.
 		case BLE_ERROR_INVALID_CONN_HANDLE:
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+			// This shouldn't happen, but can maybe happen if the device already disconnected.
+			break;
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
 			// This shouldn't happen: crash.
 		default:
 			APP_ERROR_HANDLER(nrfCode);

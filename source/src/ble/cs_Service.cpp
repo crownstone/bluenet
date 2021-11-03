@@ -178,6 +178,11 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 					case NRF_SUCCESS:
 						// * @retval ::NRF_SUCCESS Successfully retrieved the value of the attribute.
 						break;
+					case BLE_ERROR_INVALID_CONN_HANDLE:
+						// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
+						// This shouldn't happen, as the connection handle is only set in the main thread.
+						LOGe("Invalid handle");
+						break;
 					case NRF_ERROR_INVALID_ADDR:
 						// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 						// This shouldn't happen: crash.
@@ -186,9 +191,6 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 						// This shouldn't happen: crash.
 					case NRF_ERROR_INVALID_PARAM:
 						// * @retval ::NRF_ERROR_INVALID_PARAM Invalid attribute offset supplied.
-						// This shouldn't happen: crash.
-					case BLE_ERROR_INVALID_CONN_HANDLE:
-						// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system attribute.
 						// This shouldn't happen: crash.
 					case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
 						// * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref sd_ble_gatts_sys_attr_set to set them to a known value.
