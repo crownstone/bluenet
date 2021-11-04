@@ -339,11 +339,11 @@ if(FACTORY_IMAGE)
 	ENDIF()
 endif()
 
-# For now only cross-compilation
-list(APPEND CMAKE_BLUENET_CROSS_COMPILATION_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
-
 # Setting INSTALL_DIR is not sufficient, also CMAKE_INSTALL_PREFIX is required
 list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_DIR}/bin/${BOARD_TARGET}")
+
+# Add cross-compilation flags
+list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 
 if(VERBOSITY GREATER 5)
 	message(STATUS "list: ${CMAKE_BLUENET_ARGS}")
@@ -384,31 +384,10 @@ if(NOT FACTORY_IMAGE)
 		INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
 		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp
 		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp
-		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS} ${CMAKE_BLUENET_CROSS_COMPILATION_ARGS}"
-		CMAKE_ARGS "${CMAKE_BLUENET_ARGS} ${CMAKE_BLUENET_CROSS_COMPILATION_ARGS}"
+		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS}"
+		CMAKE_ARGS "${CMAKE_BLUENET_ARGS}"
 		BUILD_ALWAYS 1
 		DEPENDS micro_eec target_depend
-		)
-endif()
-
-#######################################################################################################################
-# Build/compile for host
-#######################################################################################################################
-
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_TARGET:OPTION=ON")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_DIR:STRING=${HOST_NRF5_DIR}")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
-
-if(COMPILE_FOR_HOST)
-	ExternalProject_Add(bluenet-host
-		SOURCE_DIR ${WORKSPACE_DIR}/host
-		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}
-		INSTALL_DIR ${WORKSPACE_DIR}/bin/host/${BOARD_TARGET}
-		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/stamp
-		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/tmp
-		CMAKE_ARGS "${CMAKE_BLUENET_HOST_ARGS}"
-		BUILD_ALWAYS 1
 		)
 endif()
 
@@ -672,4 +651,28 @@ if(FACTORY_IMAGE)
 endif()
 
 
+
+#######################################################################################################################
+# Build/compile for host
+#######################################################################################################################
+
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_TARGET:OPTION=ON")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_DIR:STRING=${HOST_NRF5_DIR}")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
+
+list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
+
+if(COMPILE_FOR_HOST)
+	ExternalProject_Add(bluenet-host
+		SOURCE_DIR ${WORKSPACE_DIR}/host
+		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}
+		INSTALL_DIR ${WORKSPACE_DIR}/bin/host/${BOARD_TARGET}
+		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/stamp
+		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/tmp
+		CMAKE_ARGS "${CMAKE_BLUENET_HOST_ARGS}"
+		BUILD_ALWAYS 1
+		DEPENDS nordic_host_sdk
+		)
+endif()
 
