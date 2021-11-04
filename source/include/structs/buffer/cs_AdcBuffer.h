@@ -89,7 +89,6 @@ public:
 	}
 
 #ifdef HOST_TARGET
-#warning "Only enabling this for testing"
 	/**
 	 * Set the buffer at the particular buffer_id by just writing a pointer to it. The code calling
 	 * this function is responsible for setting the right pointer. No checks w.r.t. this pointer are
