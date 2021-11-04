@@ -68,19 +68,25 @@ include(nordic.src)
 include_directories(${CMAKE_BLUENET_SOURCE_DIR}/include/third)
 include_directories(${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf)
 
-set(TEST test_InterleavedBuffer)
-
-set(TEST_SOURCE_DIR "test")
-
-list(APPEND TEST_SOURCE_FILES "src/nrf_stubs.c")
-list(APPEND TEST_SOURCE_FILES "test/${TEST}.cpp")
-
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
-
-add_executable(${TEST} ${TEST_SOURCE_FILES})
 
 enable_testing()
 
-add_test(NAME ${TEST} COMMAND ${TEST})
+set(TEST_SOURCE_DIR "test")
 
+# Extra source files
+list(APPEND TEST_SOURCE_FILES "src/nrf_stubs.c")
+
+set(TEST test_InterleavedBuffer)
+add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
+add_test(NAME ${TEST} COMMAND ${TEST})
 install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+
+list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
+
+set(TEST test_BitmaskVarSize)
+add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
+add_test(NAME ${TEST} COMMAND ${TEST})
+install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+
+

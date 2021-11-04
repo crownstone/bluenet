@@ -28,7 +28,7 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
 set(NRF5_DIR                                     ${WORKSPACE_DIR}/tools/nrf5_sdk)
-set(HOST_NRF5_DIR                                ${WORKSPACE_DIR}/tools/nrf5_sdk)
+set(HOST_NRF5_DIR                                ${WORKSPACE_DIR}/tools/nrf5_host_sdk)
 
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
@@ -195,14 +195,23 @@ else()
 		)
 endif()
 
+if(COMPILE_FOR_HOST)
+	ExternalProject_Add(nordic_host_sdk
+		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
+		GIT_SHALLOW 1
+		GIT_TAG host
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_host_sdk
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
+endif()
+
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 ExternalProject_Add(nordic_mesh_sdk
-	#DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 	GIT_REPOSITORY https://github.com/crownstone/nRF5-SDK-for-Mesh
 	SOURCE_DIR ${WORKSPACE_DIR}/tools/mesh_sdk
-	#URL ${NORDIC_MESH_SDK_DOWNLOAD_URL}
-	#URL_MD5 ${NORDIC_MESH_SDK_MD5}
 	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
@@ -331,7 +340,7 @@ if(FACTORY_IMAGE)
 endif()
 
 # For now only cross-compilation
-list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
+list(APPEND CMAKE_BLUENET_CROSS_COMPILATION_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 
 # Setting INSTALL_DIR is not sufficient, also CMAKE_INSTALL_PREFIX is required
 list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_DIR}/bin/${BOARD_TARGET}")
@@ -375,8 +384,8 @@ if(NOT FACTORY_IMAGE)
 		INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
 		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp
 		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp
-		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS}"
-		CMAKE_ARGS "${CMAKE_BLUENET_ARGS}"
+		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS} ${CMAKE_BLUENET_CROSS_COMPILATION_ARGS}"
+		CMAKE_ARGS "${CMAKE_BLUENET_ARGS} ${CMAKE_BLUENET_CROSS_COMPILATION_ARGS}"
 		BUILD_ALWAYS 1
 		DEPENDS micro_eec target_depend
 		)
