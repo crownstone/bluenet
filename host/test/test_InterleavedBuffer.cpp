@@ -42,47 +42,31 @@ int main() {
 		buffer.setBuffer(i, buf[i]);
 	}
 
-	cout << "Retrieve values from buffers" << endl;
+	cout << "Create circular buffer" << endl;
 
-	int cb_size = 10;
-	CircularBuffer<adc_sample_value_t> *circBuffer = new CircularBuffer<adc_sample_value_t>(cb_size);
-	circBuffer->init();
+	CircularBuffer<adc_buffer_id_t> _bufferQueue(NUM_BUFFERS);
+	
+	cout << "Buffer created of capacity " << _bufferQueue.capacity() << endl;
 
-	int channel = 100;
-	int32_t vdifftot0 = 0, vdifftot1 = 0;
-	adc_sample_value_t value0, value1, value2, vdiff0, vdiff1, last;
-	adc_buffer_id_t buffer_id = 0;
-
-	bool full = false;
-	adc_channel_id_t channel_id = 0;
-//	value0 = buffer.getValue(buffer_id, channel_id, 200);
-	for (int i = -channel + 1; i < 0; ++i) {
-		value0 = buffer.getValue(buffer_id, channel_id, i);
-		value1 = buffer.getValue(buffer_id, channel_id, i + channel);
-		value2 = buffer.getValue(buffer_id, channel_id, i + 2 * channel);
-
-		vdiff0 = abs(value0 - value1);
-		vdiff1 = abs(value0 - value2);
-
-		/*
-		if (circBuffer->full()) {
-			full = true;
-		}
-		if (full) {
-			last = circBuffer->pop();
-			vdifftot0 -= last;
-		}*/
-		//cout << "Add to circular buffer: " << vdiff << endl;
-//		circBuffer->push(vdiff);
-
-		vdifftot0 += vdiff0;
-		vdifftot1 += vdiff1;
-
+	if (!_bufferQueue.init()) {
+		return ERR_NO_SPACE;
 	}
-	cout << "Differences (total sum): " << vdifftot0 << endl;
-	cout << "Differences (total sum): " << vdifftot1 << endl;
+	
+	cout << "Buffer contents size is " << _bufferQueue.size() << endl;
 
-	delete circBuffer;
+	//adc_buffer_id_t bufCount = AdcBuffer::getInstance().getBufferCount();
+	adc_buffer_id_t bufCount = NUM_BUFFERS;
+	for (adc_buffer_id_t id = 0; id < bufCount; ++id) {
+		_bufferQueue.push(id);
+	}
+	
+	cout << "Buffer contents size is " << _bufferQueue.size() << endl;
 
-	return EXIT_SUCCESS; 
+	// Removed the rest about handling the buffers
+	// Next development step is to create one large intermediate buffer with floats
+	// This is nice to test on the host here
+	// Create separate buffers with interleaved sine wave data from current and voltage
+	// Then check if the overall buffer is properly glued together
+
+	return EXIT_SUCCESS;
 }
