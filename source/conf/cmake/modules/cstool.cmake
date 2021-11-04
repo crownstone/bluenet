@@ -14,8 +14,31 @@ include(${DEFAULT_MODULES_PATH}/get_mac_address.cmake)
 #   cmake ... RESET [SERIAL_NUM]
 #   cmake ... ERASE [SERIAL_NUM]
 
+# Load default config
+if(DEFINED DEFAULT_CONFIG_FILE)
+	if(EXISTS "${DEFAULT_CONFIG_FILE}")
+		load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_DUMMY_LIST)
+	endif()
+endif()
+
 # Overwrite with runtime config
-load_configuration(${CONFIG_FILE} CONFIG_DUMMY_LIST)
+if(DEFINED CONFIG_FILE)
+	if(EXISTS "${CONFIG_FILE}")
+		load_configuration(${CONFIG_FILE} CONFIG_DUMMY_LIST)
+	endif()
+endif()
+
+if(DEFINED TARGET_CONFIG_FILE)
+	if(EXISTS "${TARGET_CONFIG_FILE}")
+		load_configuration(${TARGET_CONFIG_FILE} CONFIG_DUMMY_LIST)
+	endif()
+endif()
+
+if(DEFINED TARGET_CONFIG_OVERWRITE_FILE)
+	if(EXISTS ${TARGET_CONFIG_OVERWRITE_FILE})
+		load_configuration(${TARGET_CONFIG_OVERWRITE_FILE} CONFIG_DUMMY_LIST)
+	endif()
+endif()
 
 # Get MAC address etc.
 set(setupConfigFile "CMakeBuild.dynamic.config")
@@ -42,6 +65,14 @@ if(INSTRUCTION STREQUAL "SETUP")
 	file(APPEND ${setupConfigJsonFile} "  \"ibeaconMinor\": ${BEACON_MINOR}\n")
 	file(APPEND ${setupConfigJsonFile} "}\n")
 	file(READ ${setupConfigJsonFile} FILE_CONTENTS)
+	if(CROWNSTONE_ID STREQUAL "0")
+		message(WARNING "Incorrect stone id, adjust values in ${setupConfigFile}")
+		return()
+	endif()
+	if(SPHERE_ID STREQUAL "0")
+		message(WARNING "Incorrect sphere id, adjust values in ${setupConfigFile}")
+		return()
+	endif()
 	message(STATUS "csutil \"${KEYS_JSON_FILE}\" \"setup\" \"${MAC_ADDRESS}\" \"${setupConfigJsonFile}\"")
 	execute_process(
 		COMMAND ${DEFAULT_MODULES_PATH}/../../../../tools/csutil/csutil "${KEYS_JSON_FILE}" "setup" "${MAC_ADDRESS}" "${setupConfigJsonFile}"
