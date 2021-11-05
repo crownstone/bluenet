@@ -24,14 +24,19 @@
 #define LOGBehaviourHandlerDebug LOGnone
 #define LOGBehaviourHandlerVerbose LOGnone
 
-void BehaviourHandler::init() {
+cs_ret_code_t BehaviourHandler::init() {
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
+
 	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
 	_isActive = settings.flags.enabled;
 
-	LOGi("Init: isActive=%u", _isActive);
+	LOGi("Init: _isActive=%u", _isActive);
+	_presenceHandler = getComponent<PresenceHandler>();
+	_behaviourStore = getComponent<BehaviourStore>();
 
 	listen();
+
+	return ERR_SUCCESS;
 }
 
 void BehaviourHandler::handleEvent(event_t& evt) {
@@ -87,12 +92,12 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 }
 
 bool BehaviourHandler::update() {
-	if (!_isActive) {
+	if (!_isActive || _presenceHandler == nullptr) {
 		currentIntendedState = std::nullopt;
 	}
 	else {
 		Time time = SystemTime::now();
-		std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
+		std::optional<PresenceStateDescription> presence = _presenceHandler->getCurrentPresenceDescription();
 
 		if (!presence) {
 			LOGBehaviourHandlerVerbose("Not updating, because presence data is missing");
@@ -127,12 +132,16 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		LOGBehaviourHandlerDebug("Current time invalid, computed intended state: empty");
 		return {};
 	}
+	if(_behaviourStore == nullptr) {
+		LOGBehaviourHandlerDebug("BehaviourStore is nullptr, computed intended state: empty");
+		return {};
+	}
 
 	LOGBehaviourHandlerDebug("BehaviourHandler computeIntendedState resolves");
 
 	// 'best' meaning most relevant considering from/until time window.
 	SwitchBehaviour* currentBestSwitchBehaviour = nullptr;
-	for (auto candidateBehaviour : BehaviourStore::getActiveBehaviours()) {
+	for (auto candidateBehaviour : _behaviourStore->getActiveBehaviours()) {
 		SwitchBehaviour* candidateSwitchBehaviour = ValidateSwitchBehaviour(
 				candidateBehaviour, currentTime, currentPresence);
 
@@ -188,7 +197,8 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
 
 	Time currentTime = SystemTime::now();
-	std::optional<PresenceStateDescription> currentPresence = PresenceHandler::getCurrentPresenceDescription();
+	std::optional<PresenceStateDescription> currentPresence =
+			_presenceHandler == nullptr ? std::nullopt : _presenceHandler->getCurrentPresenceDescription();
 
 	// Set time.
 	behaviourDebug->time = currentTime.isValid() ? currentTime.timestamp() : 0;
@@ -214,7 +224,14 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->extensionActive = 0;
 	behaviourDebug->activeTimeoutPeriod = 0;
 
-	auto behaviours = BehaviourStore::getActiveBehaviours();
+	if(_behaviourStore == nullptr) {
+		LOGMeshWarning("BehaviourStore is nullptr, no info available.");
+		evt.result.dataSize = sizeof(behaviour_debug_t);
+		evt.result.returnCode = ERR_SUCCESS;
+		return;
+	}
+
+	auto behaviours = _behaviourStore->getActiveBehaviours();
 
 	for (uint8_t index = 0; index < behaviours.size(); ++index) {
 		if (behaviours[index] != nullptr) {
@@ -270,8 +287,12 @@ std::optional<uint8_t> BehaviourHandler::getValue() {
 }
 
 bool BehaviourHandler::requiresPresence(Time t) {
+	if(_behaviourStore == nullptr) {
+		return false;
+	}
+
 	uint8_t i = 0;
-	for (auto& behaviourPtr : BehaviourStore::getActiveBehaviours()) {
+	for (auto& behaviourPtr : _behaviourStore->getActiveBehaviours()) {
 		i += 1;
 		if (behaviourPtr != nullptr) {
 			if (behaviourPtr->requiresPresence()) {
@@ -288,7 +309,11 @@ bool BehaviourHandler::requiresPresence(Time t) {
 }
 
 bool BehaviourHandler::requiresAbsence(Time t) {
-	for (auto& behaviourPtr : BehaviourStore::getActiveBehaviours()) {
+	if(_behaviourStore == nullptr) {
+		return false;
+	}
+
+	for (auto& behaviourPtr : _behaviourStore->getActiveBehaviours()) {
 		if (behaviourPtr != nullptr) {
 			if (behaviourPtr->isValid(t) && behaviourPtr->requiresAbsence()) {
 				return true;
@@ -299,6 +324,7 @@ bool BehaviourHandler::requiresAbsence(Time t) {
 	return false;
 }
 
+// --------------------------- synchronization ---------------------------
 
 void BehaviourHandler::onBehaviourSettingsChange(behaviour_settings_t settings) {
 	_isActive = settings.flags.enabled;

@@ -41,6 +41,11 @@ void fs_evt_handler_sched(void *data, uint16_t size) {
 // Event handler of our nrf_fstorage instance.
 static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
 	// TODO: do we need to schedule these events? They might already be called from app scheduler, depending on sdk_config.
+#ifdef DEBUG
+	if (CsUtils::getInterruptLevel() == 0) {
+		LOGw("No need to schedule event");
+	}
+#endif
 	uint32_t retVal = app_sched_event_put(p_evt, sizeof(*p_evt), fs_evt_handler_sched);
 	APP_ERROR_CHECK(retVal);
 }
@@ -60,15 +65,17 @@ cs_ret_code_t MicroappStorage::init() {
 	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, nullptr);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
-			LOGMicroappInfo("Sucessfully initialized from 0x%08X to 0x%08X", nrf_microapp_storage.start_addr, nrf_microapp_storage.end_addr);
+			// * @retval  NRF_SUCCESS         If initialization was successful.
+			LOGMicroappInfo("Successfully initialized from 0x%08X to 0x%08X", nrf_microapp_storage.start_addr, nrf_microapp_storage.end_addr);
 			break;
+		case NRF_ERROR_NULL:
+			// * @retval  NRF_ERROR_NULL      If @p p_fs or @p p_api field in @p p_fs is NULL.
+		case NRF_ERROR_INTERNAL:
+			// * @retval  NRF_ERROR_INTERNAL  If another error occurred.
 		default:
-			LOGw("NRF error code %u", nrfCode);
-			return ERR_NOT_INITIALIZED;
-			break;
+			// Crash.
+			APP_ERROR_HANDLER(nrfCode);
 	}
-
-
 	return ERR_SUCCESS;
 }
 

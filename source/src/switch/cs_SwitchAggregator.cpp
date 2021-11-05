@@ -30,6 +30,7 @@ SwitchAggregator::SwitchAggregator():
 }
 
 void SwitchAggregator::init(const boards_config_t& board) {
+	LOGi("init");
 	smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
 		handleSwitchStateChange(newState);
 	});
@@ -40,15 +41,22 @@ void SwitchAggregator::init(const boards_config_t& board) {
 
 	listen(); // TODO: move to end of init.
 
+	// TODO: only init twilightHandler and behaviourHandler in normal mode.
 	twilightHandler.init();
 	behaviourHandler.init();
 
 	overrideState = smartSwitch.getIntendedState();
 	pushTestDataToHost();
+
+	initChildren();
 }
 
 void SwitchAggregator::switchPowered() {
 	smartSwitch.start();
+}
+
+std::vector<Component*> SwitchAggregator::getChildren() {
+	return { &behaviourHandler, &twilightHandler};
 }
 
 // ================================== State updaters ==================================

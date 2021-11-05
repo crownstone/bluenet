@@ -78,7 +78,6 @@ ADC::ADC() :
  * @caller src/processing/cs_PowerSampling.cpp
  */
 cs_ret_code_t ADC::init(const adc_config_t & config) {
-	ret_code_t err_code;
 	_config = config;
 //	memcpy(&_config, &config, sizeof(adc_config_t));
 	LOGi("init: period=%uus", _config.samplingIntervalUs);
@@ -151,8 +150,10 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	);
 
 	// Config adc
-	err_code = initSaadc(config);
-	APP_ERROR_CHECK(err_code);
+	cs_ret_code_t retCode = initSaadc(config);
+	if (retCode != ERR_SUCCESS) {
+		APP_ERROR_HANDLER(NRF_ERROR_INTERNAL);
+	}
 
 	for (int i=0; i<_config.channelCount; ++i) {
 //		_channelResultConfigs[i].samplingPeriodUs = nrf_timer_ticks_to_us(ticks);
@@ -310,10 +311,6 @@ cs_ret_code_t ADC::initChannel(adc_channel_id_t channel, adc_channel_config_t& c
 	channelConfig.pin_p = getAdcPin(config.pin);
 
 
-
-
-//	ret_code_t err_code = nrf_drv_saadc_channel_init(channel, &channelConfig);
-//	APP_ERROR_CHECK(err_code);
 
 //	ASSERT(m_cb.state != NRF_DRV_STATE_UNINITIALIZED);
 //	ASSERT(channel < NRF_SAADC_CHANNEL_COUNT);
@@ -743,8 +740,8 @@ void ADC::_handleAdcInterrupt() {
 
 			// Let's restart.
 			_saadcState = ADC_SAADC_STATE_STOPPING;
-			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
-			APP_ERROR_CHECK(errorCode);
+			uint32_t nrfCode = app_sched_event_put(NULL, 0, adc_restart);
+			APP_ERROR_CHECK(nrfCode);
 			return;
 		}
 
@@ -761,14 +758,13 @@ void ADC::_handleAdcInterrupt() {
 		_bufferQueue.pushUnique(bufIndex);
 
 		// Decouple handling of buffer from adc interrupt handler, copy buffer index.
+		// But only handle it when there is plenty of space on the scheduler.
 		uint16_t schedulerSpace = app_sched_queue_space_get();
 		if (schedulerSpace > SCHED_QUEUE_SIZE - SCHEDULER_QUEUE_ALMOST_FULL) {
-			uint32_t errorCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
-
-			// Don't stop application when it failed to put the buffer on the scheduler.
-			// Simply don't put it on the scheduler and continue sampling.
-//			APP_ERROR_CHECK(errorCode);
-			if (errorCode != NRF_SUCCESS) {
+			uint32_t nrfCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
+			if (nrfCode != NRF_SUCCESS) {
+				// Don't crash when it failed to put the buffer on the scheduler.
+				// Simply don't put it on the scheduler and continue sampling.
 				LOGAdcInterruptWarn("Failed to schedule");
 			}
 		}
@@ -788,8 +784,8 @@ void ADC::_handleAdcInterrupt() {
 
 			// Let's restart.
 			_saadcState = ADC_SAADC_STATE_STOPPING;
-			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
-			APP_ERROR_CHECK(errorCode);
+			uint32_t nrfCode = app_sched_event_put(NULL, 0, adc_restart);
+			APP_ERROR_CHECK(nrfCode);
 			return;
 		}
 

@@ -31,6 +31,17 @@ public:
 	 */
 	bool isInitialized();
 
+protected:
+	/**
+	 * returns the following child-components in a vector of pointers:
+	 *   _filterStore,
+	 *   _filterSyncer,
+	 *   _assetForwarder,
+	 *   _assetStore
+	 *   _nearestCrownstoneTracker (if included in build)
+	 */
+	virtual std::vector<Component*> getChildren() override;
+
 private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;

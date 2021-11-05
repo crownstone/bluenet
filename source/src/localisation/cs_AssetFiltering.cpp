@@ -86,11 +86,7 @@ cs_ret_code_t AssetFiltering::initInternal() {
 	if (_nearestCrownstoneTracker == nullptr) {
 		return ERR_NO_SPACE;
 	}
-
-	addComponent(_nearestCrownstoneTracker);
 #endif
-
-	addComponents({_filterStore, _filterSyncer, _assetForwarder, _assetStore});
 
 	// Init components
 	if (cs_ret_code_t retCode = initChildren() != ERR_SUCCESS) {
@@ -106,6 +102,18 @@ cs_ret_code_t AssetFiltering::initInternal() {
 
 	listen();
 	return ERR_SUCCESS;
+}
+
+std::vector<Component*> AssetFiltering::getChildren() {
+	return {
+		_filterStore,
+		_filterSyncer,
+		_assetForwarder,
+		_assetStore,
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
+		_nearestCrownstoneTracker,
+#endif
+	};
 }
 
 
