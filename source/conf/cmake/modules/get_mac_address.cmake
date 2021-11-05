@@ -42,7 +42,7 @@ function(get_mac_address SERIAL_NUM MAC_ADDRESS)
 	#   We only do this for the last two bits (w.r.t. endianness in flash) of the total of 48 bits.
 	#   These are the first two bits over the air.
 	from_hex("0xC0" Mask)
-	from_hex("${Byte6}" Byte6Dec)
+	from_hex("0x${Byte6}" Byte6Dec)
 	bitwise_or(${Byte6Dec} "${Mask}" Byte6StaticAddress)
 	to_hex("${Byte6StaticAddress}" Byte6StaticAddressHex "")
 
