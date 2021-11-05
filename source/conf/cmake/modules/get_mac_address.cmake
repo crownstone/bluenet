@@ -42,7 +42,8 @@ function(get_mac_address SERIAL_NUM MAC_ADDRESS)
 	#   We only do this for the last two bits (w.r.t. endianness in flash) of the total of 48 bits.
 	#   These are the first two bits over the air.
 	from_hex("0xC0" Mask)
-	bitwise_or(${Byte6} "${Mask}" Byte6StaticAddress)
+	from_hex("${Byte6}" Byte6Dec)
+	bitwise_or(${Byte6Dec} "${Mask}" Byte6StaticAddress)
 	to_hex("${Byte6StaticAddress}" Byte6StaticAddressHex "")
 
 	# On the nRF52840 a byte like 0x21 becomes 0xF3. Thus 0010 0001b becomes 1111 0011b.
