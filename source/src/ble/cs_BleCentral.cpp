@@ -42,12 +42,10 @@ BleCentral::BleCentral() {
 
 void BleCentral::init() {
 	_discoveryModule.discovery_in_progress = false;
+	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
 #if NORDIC_SDK_VERSION == 15
 	// assuming this is zero-initialized to start with...
 	_discoveryModule.discovery_pending = false;
-#endif
-	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
-#if NORDIC_SDK_VERSION == 15
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
 #else
 	memset(&_discoveryInit, 0, sizeof(ble_db_discovery_init_t));
@@ -55,7 +53,15 @@ void BleCentral::init() {
 	_discoveryInit.p_gatt_queue = _queue;
 	ret_code_t nrfCode = ble_db_discovery_init(&_discoveryInit);
 #endif
-	APP_ERROR_CHECK(nrfCode);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_NULL:
+			// * @retval NRF_ERROR_NULL If the handler was NULL.
+			// This shouldn't happen: crash.
+		default:
+			APP_ERROR_HANDLER(nrfCode);
+	}
 
 	// Use the encryption buffer, as that contains the encrypted data, which is what we usually write or read.
 	EncryptionBuffer::getInstance().getBuffer(_buf.data, _buf.len);

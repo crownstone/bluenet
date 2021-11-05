@@ -15,7 +15,6 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <util/cs_BleError.h>
-//#include <algorithm>
 
 #define LOGStorageInit LOGi
 #define LOGStorageInfo LOGi
@@ -917,7 +916,7 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 			else {
 				LOGe("Failed to init storage: %u", p_fds_evt->result);
 				// Only option left is to reboot and see if things work out next time.
-				APP_ERROR_CHECK(p_fds_evt->result);
+				APP_ERROR_HANDLER(p_fds_evt->result);
 			}
 			break;
 		}
@@ -946,6 +945,6 @@ void Storage::handleFlashOperationError() {
 		LOGw("Flash operation error");
 		// Only option left is to reboot and see if things work out next time.
 		// Not sure this is the correct error to throw.
-		APP_ERROR_CHECK(NRF_ERROR_TIMEOUT);
+		APP_ERROR_HANDLER(NRF_ERROR_TIMEOUT);
 	}
 }

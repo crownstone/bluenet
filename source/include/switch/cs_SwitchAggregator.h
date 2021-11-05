@@ -13,13 +13,14 @@
 #include <optional>
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <switch/cs_SmartSwitch.h>
+#include <common/cs_Component.h>
 
 /**
  * Handler that aggregates events related to switching such as SwitchCraft,
  * Behaviours, Twilight and App/User side actions. Based on the incoming data
  * this object decides what state to set the SmartSwitch to.
  */
-class SwitchAggregator : public EventListener {
+class SwitchAggregator : public EventListener, public Component {
 public:
 	SwitchAggregator();
 
@@ -36,6 +37,9 @@ public:
 	 * To be called when there is enough power to use the switch.
 	 */
 	void switchPowered();
+
+protected:
+	std::vector<Component*> getChildren() override;
 
 private:
 	TwilightHandler twilightHandler;

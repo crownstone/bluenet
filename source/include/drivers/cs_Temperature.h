@@ -19,15 +19,10 @@
  */
 inline int32_t getTemperature() {
 	int32_t temperature;
-	uint32_t err_code;
-
-	err_code = sd_temp_get(&temperature);
-	APP_ERROR_CHECK(err_code);
-
-//	LOGd("raw temp: %d", temperature);
-//	LOGi("temp: %d", temperature / 4);
+	uint32_t nrfCode = sd_temp_get(&temperature);
+	// This function only has success as return code.
+	APP_ERROR_CHECK(nrfCode);
 
 	temperature = (temperature / 4);
-
 	return temperature;
 }

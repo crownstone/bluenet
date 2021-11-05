@@ -10,27 +10,30 @@
 #include <optional>
 #include <presence/cs_PresenceDescription.h>
 #include <time/cs_SystemTime.h>
+#include <util/cs_Store.h>
+#include <common/cs_Component.h>
 
 /**
  * Keeps up all the locations each profile is present in.
  * Sends out event when this changes.
  * Sends out throttled mesh messages when the location of a profile is received.
  */
-class PresenceHandler: public EventListener {
+class PresenceHandler: public EventListener, public Component {
 public:
 	PresenceHandler();
 
-    void init();
+	/**
+	 * calls listen();
+	 */
+    virtual cs_ret_code_t init() override;
 
     /**
      * Returns a simplified description of the current presence knowledge,
      * each bit in the description indicates if a person is in that room
      * or not.
      */
-    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
+    std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
-    static const constexpr uint8_t MAX_LOCATION_ID = 63;
-    static const constexpr uint8_t MAX_PROFILE_ID = 7;
 
 private:
     /** Number of seconds before presence times out. */
@@ -52,9 +55,24 @@ private:
      */
     static const constexpr uint8_t MAX_RECORDS = 20;
 
+    struct __attribute__((__packed__)) profile_location_t {
+		static const constexpr uint8_t MAX_LOCATION_ID = 63;
+		static const constexpr uint8_t MAX_PROFILE_ID = 7;
+
+    	uint8_t profile;
+		uint8_t location;
+
+		bool operator==(const profile_location_t& other) {
+			return memcmp(this, &other, sizeof(*this)) == 0;
+		}
+
+		bool isValid() {
+			return profile <= MAX_PROFILE_ID && location <= MAX_LOCATION_ID;
+		}
+    };
+
     struct PresenceRecord {
-        uint8_t profile;
-        uint8_t location;
+    	profile_location_t profileLocation;
         /**
          * Used to determine when a record is timed out.
          * Decreases every seconds.
@@ -68,52 +86,35 @@ private:
     	 */
     	uint8_t meshSendCountdownSeconds;
 
-    	PresenceRecord() : timeoutCountdownSeconds(0) {}
+		PresenceRecord(
+						profile_location_t profileLocation = {},
+						uint8_t timeoutSeconds      = PRESENCE_TIMEOUT_SECONDS,
+						uint8_t meshThrottleSeconds = 0)
+					: profileLocation(profileLocation)
+					, timeoutCountdownSeconds(timeoutSeconds)
+					, meshSendCountdownSeconds(meshThrottleSeconds) {}
 
-    	PresenceRecord(
-    			uint8_t profileId,
-    			uint8_t roomId,
-    			uint8_t timeoutSeconds = PRESENCE_TIMEOUT_SECONDS,
-    			uint8_t meshThrottleSeconds = 0):
-    				profile(profileId),
-    				location(roomId),
-    				timeoutCountdownSeconds(timeoutSeconds),
-    				meshSendCountdownSeconds(meshThrottleSeconds)
-    	{}
-
-        void invalidate() {
+		void invalidate() {
         	timeoutCountdownSeconds = 0;
         }
 
         bool isValid() {
         	return timeoutCountdownSeconds != 0;
         }
+
+        profile_location_t id() { return profileLocation; }
     };
 
     /**
      * Stores presence records.
      */
-    static PresenceRecord _presenceRecords[MAX_RECORDS];
+    Store<PresenceRecord, MAX_RECORDS> _store;
 
-    /**
-     * Invalidate all presence records.
-     */
-    void resetRecords();
-
-    /**
-     * Finds a record with given profile and location.
-     * Returns a null pointer if not found.
-     */
-    PresenceRecord* findRecord(uint8_t profile, uint8_t location);
-
-    /**
-	 * Adds a record with given profile and location.
-	 * Does not check if it already exists!
-	 * Replaces oldest entry if there are no invalid record places to use.
-	 *
-	 * Returns a null pointer if there is no space for a new record.
+	/**
+	 * finds oldest record and default constructs its present record,
+	 * then returns the pointer to it.
 	 */
-	PresenceRecord* addRecord(uint8_t profile, uint8_t location);
+	PresenceRecord* clearOldestRecord(profile_location_t profileLocation);
 
     /**
      * Handle an incoming profile-location combination.
@@ -121,7 +122,7 @@ private:
      * - Calls handleProfileLocation().
      * - Dispatches events based on the returned mutation type.
      */
-	void handlePresenceEvent(uint8_t profile, uint8_t location, bool forwardToMesh);
+	void handlePresenceEvent(profile_location_t profileLocation, bool forwardToMesh);
 
 	/**
      * Handle an incoming profile-location combination.
@@ -134,28 +135,27 @@ private:
      * @param[in] forwardToMesh   If true, the update will be pushed into the mesh (throttled).
      * @return                    Mutation type.
      */
-    PresenceMutation handleProfileLocation(uint8_t profile, uint8_t location, bool forwardToMesh);
+    PresenceMutation handleProfileLocation(profile_location_t profileLocation, bool forwardToMesh);
 
     /**
      * Resolves the type of mutation from previous and next descriptions.
      */
-    static PresenceMutation getMutationType(
+    PresenceMutation getMutationType(
         std::optional<PresenceStateDescription> prevDescription, 
         std::optional<PresenceStateDescription> nextDescription);
 
     /**
      * Send a mesh message with profile and location.
      */
-    void sendMeshMessage(uint8_t profile, uint8_t location);
+    void sendMeshMessage(profile_location_t profileLocation);
 
     /**
      * Sends presence change event.
      *
      * @param[in] type                 Type of change.
-     * @param[in] profileId            The profile ID that entered/left a location.
-     * @param[in] locationId           The location ID that was entered/left.
+     * @param[in] profileLocation      The relevant profile ID and location.
      */
-    void dispatchPresenceChangeEvent(PresenceChange type, uint8_t profileId = 0, uint8_t locationId = 0);
+    void dispatchPresenceChangeEvent(PresenceChange type, profile_location_t profileLocation = {});
 
     /**
      * Sends presence mutation event.
@@ -164,7 +164,8 @@ private:
     void dispatchPresenceMutationEvent(PresenceMutation mutation);
 
     /**
-     * To be called every second.
+     * To be called every second. Decreases timeoutCountdownSeconds of the records
+     * and dispatches exit-events when necessary.
      */
     void tickSecond();
 

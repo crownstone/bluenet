@@ -64,7 +64,7 @@
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.
  */
-class Crownstone : EventListener {
+class Crownstone : public EventListener, public Component {
 public:
 
 	enum ServiceEvent {
@@ -179,6 +179,9 @@ public:
 	static void staticTick(Crownstone *ptr) {
 		ptr->tick();
 	}
+
+protected:
+	std::vector<Component*> getChildren() override;
 
 private:
 

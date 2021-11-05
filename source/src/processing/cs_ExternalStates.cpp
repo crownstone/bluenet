@@ -34,8 +34,8 @@
 
 void ExternalStates::init() {
 	_states = (cs_external_state_item_t*) calloc(EXTERNAL_STATE_LIST_COUNT, sizeof(cs_external_state_item_t));
-	if (_states == NULL) {
-		APP_ERROR_CHECK(ERR_NO_SPACE);
+	if (_states == nullptr) {
+		APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
 	}
 }
 

@@ -28,6 +28,8 @@ struct __attribute__((packed)) TrackedDevice {
 	uint8_t heartbeatTTLMinutes;
 	internal_register_tracked_device_packet_t data;
 
+	device_id_t id();
+
 	bool isValid();
 
 	void invalidate();

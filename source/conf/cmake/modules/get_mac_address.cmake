@@ -17,7 +17,7 @@ function(get_mac_address SERIAL_NUM MAC_ADDRESS)
 		return()
 	endif()
 
-	#message(STATUS "Parse mac address output \"${output}\"")
+	message(DEBUG "Parse mac address output \"${output}\"")
 	string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+) *([0-9a-fA-F]+) *([0-9a-fA-F]+) *([0-9a-fA-F]+) *([0-9a-fA-F]+) *([0-9a-fA-F]+)" Tmp ${output})
 	set(Byte1 ${CMAKE_MATCH_2})
 	set(Byte2 ${CMAKE_MATCH_3})
@@ -37,7 +37,7 @@ function(get_mac_address SERIAL_NUM MAC_ADDRESS)
 	# The hardware has a randomly generated address. However, some bits will be overwritten
 	# so that it conforms to the Bluetooth spec.
 
-	# The address will be a: Random Static Address
+	# The address will be a "Random Static Address"
 	#   This is denoted by the last bits being 11, hence, the OR with 0xC0
 	#   We only do this for the last two bits (w.r.t. endianness in flash) of the total of 48 bits.
 	#   These are the first two bits over the air.
@@ -52,16 +52,16 @@ function(get_mac_address SERIAL_NUM MAC_ADDRESS)
 	# - We OR with 0x10 (TODO: what does this signify?)
 	# Total OR becomes 0x13
 	if("${NRF_DEVICE}" STREQUAL "NRF52840_XXAA")
-		message(STATUS "Apply extra mask for ${NRF_DEVICE} device")
+		message(VERBOSE "Apply extra mask for ${NRF_DEVICE} device")
 		from_hex("0x13" Mask)
 		bitwise_or(${Byte6StaticAddress} "${Mask}" Byte6StaticAddress)
 		to_hex("${Byte6StaticAddress}" Byte6StaticAddressHex "")
 	else()
-		message(STATUS "No extra mask applied for ${NRF_DEVICE} device")
+		message(VERBOSE "No extra mask applied for ${NRF_DEVICE} device")
 	endif()
 
 	set(Address "${Byte6StaticAddressHex}:${Byte5}:${Byte4}:${Byte3}:${Byte2}:${Byte1}")
-	message(STATUS "Address: ${Address}")
+	message(STATUS "Bluetooth address: ${Address}")
 
 	set(${MAC_ADDRESS} "${Address}" PARENT_SCOPE)
 endfunction()
