@@ -201,7 +201,7 @@ if(PYTHON_SETUP_VENV)
 	set(PYTHON_CROWNSTONE_VENV_PATH ${WORKSPACE_DIR}/tools/python/crownstone_env)
 
 	set(PYTHON_SETUP_TARGET python_setup_venv)
-	ADD_CUSTOM_TARGET(${PYTHON_SETUP_TARGET}
+	ADD_CUSTOM_TARGET(python_setup_venv
 		COMMAND ${CMAKE_COMMAND} -E echo "Install python3-venv"
 		COMMAND ${CMAKE_COMMAND} -E echo ${SUPERUSER_SWITCH} apt-get install -y python3-venv
 		COMMAND ${SUPERUSER_SWITCH} apt-get install -y python3-venv
@@ -216,7 +216,7 @@ if(PYTHON_SETUP_VENV)
 
 	# Use a cmake -P structure to check actual ENV variables
 	set(PYTHON_TEST_VENV_TARGET python_test_venv)
-	ADD_CUSTOM_TARGET(${PYTHON_TEST_ENV_TARGET}
+	ADD_CUSTOM_TARGET(python_test_venv
 		COMMAND ${CMAKE_COMMAND} -E echo "Test for venv"
 		COMMAND ${CMAKE_COMMAND} -DPYTHON_CROWNSTONE_VENV_PATH=${PYTHON_CROWNSTONE_VENV_PATH} -P ${DEFAULT_MODULES_PATH}/test_python_venv.cmake
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
