@@ -18,8 +18,8 @@
 #define FIRMWAREREADER_LOG_LVL SERIAL_DEBUG
 
 
-//static FirmwareSectionInfo firmwareSectionInfo = getFirmwareSectionInfo<FirmwareSection::Mbr>(); // Mbr address is 0x00, which fds asserts on.
-static FirmwareSectionInfo firmwareSectionInfo;
+
+static FirmwareSectionInfo firmwareSectionInfo = getFirmwareSectionInfo<FirmwareSection::Mbr>();
 
 // --------------------------------------------------------------------------------
 
@@ -31,17 +31,16 @@ FirmwareReader::FirmwareReader() :
 }
 
 cs_ret_code_t FirmwareReader::init() {
-//	uint32_t nrfCode = nrf_fstorage_init(&firmwareReaderFsInstance, &nrf_fstorage_sd, nullptr);
-	firmwareSectionInfo = getFirmwareSectionInfo<FirmwareSection::Bluenet>();
-	LOGFirmwareReaderInfo("0x%X", firmwareSectionInfo._fStoragePtr);
+	LOGFirmwareReaderInfo("fstorage pointer: 0x%X, section: [0x%08X - 0x%08X]",
+			firmwareSectionInfo._fStoragePtr,
+			firmwareSectionInfo._addr._start,
+			firmwareSectionInfo._addr._end);
+
 	uint32_t nrfCode = nrf_fstorage_init(firmwareSectionInfo._fStoragePtr, &nrf_fstorage_sd, nullptr);
 
 	switch (nrfCode) {
 		case NRF_SUCCESS:
-			LOGFirmwareReaderInfo(
-					"Sucessfully initialized firmwareReader 0x%08X - 0x%08X",
-					firmwareSectionInfo._addr._start,
-					firmwareSectionInfo._addr._end);
+			LOGFirmwareReaderInfo("Sucessfully initialized firmwareReader");
 			break;
 		default:
 			LOGw("Failed to initialize firmwareReader. NRF error code %u", nrfCode);
@@ -54,12 +53,9 @@ cs_ret_code_t FirmwareReader::init() {
 }
 
 void FirmwareReader::read([[maybe_unused]] FirmwareSection section, uint16_t startIndex, uint16_t size, void* data_out) {
-	// can check with this for equality:
-	// nrfjprog --memrd 0x00026000 --w 8 --n 50
-	//	uint32_t nrfCode = nrf_fstorage_read(&firmwareReaderFsInstance, g_APPLICATION_START_ADDRESS, data_out, size);
+	// can verify the output with nrfjprog. E.g.: `nrfjprog --memrd 0x00026000 --w 8 --n 50`
 
 	uint32_t readAddress = firmwareSectionInfo._addr._start + startIndex;
-
 
 	uint32_t nrfCode = nrf_fstorage_read(
 			firmwareSectionInfo._fStoragePtr,
@@ -68,8 +64,6 @@ void FirmwareReader::read([[maybe_unused]] FirmwareSection section, uint16_t sta
 			size);
 
 	LOGFirmwareReaderDebug("reading %d bytes from address: 0x%x", size, readAddress);
-//	uint32_t nrfCode = nrf_fstorage_read(&firmwareReaderFsInstance, readAddress + startIndex, data_out, size);
-
 
 	if(nrfCode != NRF_SUCCESS) {
 		LOGFirmwareReaderInfo("failed read");
@@ -91,5 +85,4 @@ uint32_t FirmwareReader::printRoutine() {
 
 void FirmwareReader::handleEvent(event_t& evt) {
 	firmwarePrinter.handleEvent(evt);
-
 }

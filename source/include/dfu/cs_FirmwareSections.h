@@ -20,7 +20,7 @@ enum class FirmwareSection : uint8_t {
 	Mbr = 0,
 	SoftDevice,
 	Bluenet,
-	Microapp,
+	MicroApp,
 	Ipc,
 	Fds,
 	Bootloader,
@@ -29,10 +29,29 @@ enum class FirmwareSection : uint8_t {
 	Unknown = 0xff
 };
 
+
+// ----------------------- location object -----------------------
+
 struct FirmwareSectionLocation {
 	uint32_t _start;
 	uint32_t _end;
 };
+
+template<FirmwareSection Sect>
+const FirmwareSectionLocation getFirmwareSectionLocation() {
+	LOGd("Location for FirmwareSection %d Unknown", static_cast<uint8_t>(Sect));
+	return {0, 0};
+}
+
+// explicit specializations for implemented sections
+template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bluenet>();
+template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::MicroApp>();
+template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bootloader>();
+template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>();
+
+
+
+// ----------------------- Info object -----------------------
 
 struct FirmwareSectionInfo {
 	nrf_fstorage_t* _fStoragePtr;
@@ -41,9 +60,6 @@ struct FirmwareSectionInfo {
 	FirmwareSectionInfo(nrf_fstorage_t* fStoragePtr = nullptr, FirmwareSectionLocation addr = {0,0})
 		: _fStoragePtr(fStoragePtr), _addr(addr) {}
 };
-
-
-// ---------------------- getter methods ------------------
 
 /**
  * Returns a firmwareSectionInfo containing the pointer to FStorage config struct,
@@ -54,14 +70,13 @@ struct FirmwareSectionInfo {
  */
 template<FirmwareSection Sect>
 const FirmwareSectionInfo getFirmwareSectionInfo() {
-	LOGd("Section Type Unknown");
+	LOGd("Info for FirmwareSection %d Unknown", static_cast<uint8_t>(Sect));
 	return FirmwareSectionInfo(nullptr, {0, 0});
 }
 
-// ------------------------------- section addresses ---------------------
-
-template<FirmwareSection Sect>
-const FirmwareSectionLocation getFirmwareSectionLocation() {
-	return {0, 0};
-}
+// explicit specializations for implemented sections
+template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bluenet>();
+template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::MicroApp>();
+template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bootloader>();
+template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>();
 
