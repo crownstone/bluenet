@@ -36,12 +36,10 @@ struct FirmwareSectionLocation {
 
 struct FirmwareSectionInfo {
 	nrf_fstorage_t* _fStoragePtr;
-	const FirmwareSectionLocation _addr;
+	FirmwareSectionLocation _addr;
 
 	FirmwareSectionInfo(nrf_fstorage_t* fStoragePtr = nullptr, FirmwareSectionLocation addr = {0,0})
 		: _fStoragePtr(fStoragePtr), _addr(addr) {}
-
-	FirmwareSectionInfo(const FirmwareSectionInfo& other): FirmwareSectionInfo(other._fStoragePtr, other._addr) {};
 };
 
 
