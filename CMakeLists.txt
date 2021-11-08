@@ -12,6 +12,7 @@ option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer
 option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
 option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary logging"       OFF)
 option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
+option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -38,12 +39,17 @@ endif()
 # Overwrite the typical install prefix
 set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 
+set(PYTHON_REQUIRED OFF)
+if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS)
+	message(STATUS "One of the download options requires python")
+	set(PYTHON_REQUIRED ON)
+else()
+	message(STATUS "No download option which requires python is enabled")
+endif()
+
 # With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
 # With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
 set(SUPERUSER_SWITCH                             sudo    CACHE STRING "Switch to superuser")
-
-# We are using python 3 by default, it's not a hard requirement though
-set(PYTHON_EXECUTABLE                            python3 CACHE STRING "The python executable")
 
 project(${BOARD_TARGET} NONE)
 
@@ -80,6 +86,27 @@ message(STATUS "bin dir: ${CMAKE_BINARY_DIR}")
 message(STATUS "install dir: ${CMAKE_INSTALL_PREFIX}")
 
 find_package(Git REQUIRED)
+
+if(PYTHON_REQUIRED)
+	# This utility is able to find either python2 or python3
+	find_package(Python COMPONENTS Interpreter REQUIRED)
+	if(NOT Python_FOUND)
+		message(FATAL_ERROR "No python interpreter found. First install python")
+	else()
+		message(STATUS "Use python interpreter: ${Python_EXECUTABLE}")
+	endif()
+	if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
+		message(STATUS "Virtual environment detected")
+	else()
+		if(PYTHON_SETUP_VENV)
+			message(STATUS "No virtual environment detected, will configure it.")
+			message(STATUS "Then call `make python_setup_venv` to set it up")
+			message(STATUS "Also activate the environment")
+		else()
+			message(WARNING "Virtual environment not detected! Set it up or use -DPYTHON_SETUP_VENV=ON.")
+		endif()
+	endif()
+endif()
 
 include(ExternalProject)
 
@@ -170,7 +197,34 @@ list(APPEND CMAKE_BLUENET_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FI
 # Download dependencies
 #######################################################################################################################
 
-if (NORDIC_SDK_VERSION EQUAL 15)
+if(PYTHON_SETUP_VENV)
+	set(PYTHON_CROWNSTONE_VENV_PATH ${WORKSPACE_DIR}/tools/python/crownstone_env)
+
+	set(PYTHON_SETUP_TARGET python_setup_venv)
+	ADD_CUSTOM_TARGET(${PYTHON_SETUP_TARGET}
+		COMMAND ${CMAKE_COMMAND} -E echo "Install python3-venv"
+		COMMAND ${CMAKE_COMMAND} -E echo ${SUPERUSER_SWITCH} apt-get install -y python3-venv
+		COMMAND ${SUPERUSER_SWITCH} apt-get install -y python3-venv
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_CROWNSTONE_VENV_PATH}
+		COMMAND ${Python_EXECUTABLE} -m venv ${PYTHON_CROWNSTONE_VENV_PATH}
+		COMMAND ${CMAKE_COMMAND} -E echo "Make sure to run the following command:"
+		COMMAND ${CMAKE_COMMAND} -E echo "  source ${PYTHON_CROWNSTONE_VENV_PATH}/bin/activate"
+		COMMAND ${CMAKE_COMMAND} -E echo "You can deactivate by calling 'deactivate' on the command line"
+		WORKING_DIRECTORY ${WORKSPACE_DIR}
+		COMMENT "Run python venv setup"
+		)
+
+	# Use a cmake -P structure to check actual ENV variables
+	set(PYTHON_TEST_VENV_TARGET python_test_venv)
+	ADD_CUSTOM_TARGET(${PYTHON_TEST_ENV_TARGET}
+		COMMAND ${CMAKE_COMMAND} -E echo "Test for venv"
+		COMMAND ${CMAKE_COMMAND} -DPYTHON_CROWNSTONE_VENV_PATH=${PYTHON_CROWNSTONE_VENV_PATH} -P ${DEFAULT_MODULES_PATH}/test_python_venv.cmake
+		WORKING_DIRECTORY ${WORKSPACE_DIR}
+		COMMENT "Run python venv test"
+		)
+endif()
+
+if(NORDIC_SDK_VERSION EQUAL 15)
 	ExternalProject_Add(nordic_sdk
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
@@ -263,7 +317,7 @@ endif()
 
 if(DOWNLOAD_NRFUTIL)
 	ExternalProject_Add(nrfutil
-		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install nrfutil
+		DOWNLOAD_COMMAND ${Python_EXECUTABLE} -m pip install nrfutil
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
@@ -303,18 +357,21 @@ if(DOWNLOAD_CSUTIL)
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
 
 if(DOWNLOAD_BLUENET_LIB_LOGS)
+	message(STATUS "Depends on target ${PYTHON_TEST_VENV_TARGET}")
 	ExternalProject_Add(bluenet_logs
-		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install bluenet-logs
+		DOWNLOAD_COMMAND ${Python_EXECUTABLE} -m pip install bluenet-logs
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/bluenet_logs
-		UPDATE_COMMAND ${PYTHON_EXECUTABLE} -m pip install --upgrade bluenet-logs
+		UPDATE_COMMAND ${Python_EXECUTABLE} -m pip install --upgrade bluenet-logs
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
 
