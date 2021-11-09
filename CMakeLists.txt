@@ -205,7 +205,7 @@ if(PYTHON_SETUP_VENV)
 	# We first use `apt-cache` so that we only run `apt install` when there is actually a candidate
 	# that is different from what is installed.
 	set(PYTHON_SETUP_TARGET python_setup_venv)
-	ADD_CUSTOM_TARGET(python_setup_venv
+	add_custom_target(python_setup_venv
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Install python3-venv"
 		COMMAND apt-cache policy python3-venv > ${CMAKE_BINARY_DIR}/.apt-cache
 		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Installed:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.installed
@@ -223,7 +223,7 @@ if(PYTHON_SETUP_VENV)
 
 	# Use a cmake -P structure to check actual ENV variables
 	set(PYTHON_TEST_VENV_TARGET python_test_venv)
-	ADD_CUSTOM_TARGET(python_test_venv
+	add_custom_target(python_test_venv
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Test for venv"
 		COMMAND ${CMAKE_COMMAND} -DPYTHON_CROWNSTONE_VENV_PATH=${PYTHON_CROWNSTONE_VENV_PATH} -P ${DEFAULT_MODULES_PATH}/test_python_venv.cmake
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
@@ -283,6 +283,7 @@ set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK)
+	set(JLINK_TARGET jlink)
 	ExternalProject_Add(jlink
 		DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
@@ -323,17 +324,18 @@ if(DOWNLOAD_NRFJPROG)
 endif()
 
 if(DOWNLOAD_NRFUTIL)
-	ExternalProject_Add(nrfutil
-		DOWNLOAD_COMMAND ${Python_EXECUTABLE} -m pip install nrfutil
-		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	set(NRFUTIL_TARGET nrfutil)
+	add_custom_target(nrfutil
+		COMMAND ${CMAKE_COMMAND} -E echo "-- Add nrfutil through pip"
+		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel nrfutil
+		WORKING_DIRECTORY ${WORKSPACE_DIR}
+		COMMENT "Install nrfutil"
+		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
 
 if(DOWNLOAD_NRFCONNECT)
+	set(NRFCONNECT_CORE_TARGET git_nrfconnect_core)
 	ExternalProject_Add(git_nrfconnect_core
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
@@ -346,7 +348,8 @@ if(DOWNLOAD_NRFCONNECT)
 endif()
 
 if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
-	ExternalProject_Add(git_nrfconnect_apps
+	set(NRFCONNECT_PROGRAMMER_TARGET git_nrfconnect_programmer)
+	ExternalProject_Add(git_nrfconnect_programmer
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
@@ -357,6 +360,7 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 endif()
 
 if(DOWNLOAD_CSUTIL)
+	message(STATUS "The csutil utility will in the end be replaced by tools in crownstone ble lib")
 	ExternalProject_Add(csutil
 		GIT_REPOSITORY https://github.com/mrquincle/csutil
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
@@ -369,14 +373,24 @@ if(DOWNLOAD_CSUTIL)
 endif()
 
 if(DOWNLOAD_BLUENET_LIB_LOGS)
-	ADD_CUSTOM_TARGET(bluenet_logs
+	set(BLUENET_LIB_LOGS_TARGET bluenet_logs)
+	add_custom_target(bluenet_logs
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add bluenet-logs through pip"
-		COMMAND ${Python_EXECUTABLE} -m pip -q install bluenet-logs
+		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel bluenet-logs
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
 		COMMENT "Install bluenet binary logging"
 		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
+
+# Dummy target to install all tools that are not required for building and are also not installed
+# automatically through ExternalProject_Add such as bluenet_logs.
+add_custom_target(tools
+	COMMAND ${CMAKE_COMMAND} -E echo "-- Install supporting tools"
+	WORKING_DIRECTORY ${WORKSPACE_DIR}
+	COMMENT "Install supporting tools"
+	DEPENDS ${BLUENET_LIB_LOGS_TARGET} ${NRFUTIL_TARGET}
+	)
 
 if(FACTORY_IMAGE)
 	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
@@ -418,7 +432,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 
 # We have added some commands to remove windows line endings and to set the exec bit
 # Reported at https://devzone.nordicsemi.com/f/nordic-q-a/47429/bug-windows-line-ending-characters
-ADD_CUSTOM_TARGET(micro_eec
+add_custom_target(micro_eec
 	COMMAND sed -i 's/\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
@@ -428,7 +442,7 @@ ADD_CUSTOM_TARGET(micro_eec
 	gcc_arm_none_eabi
 	)
 
-ADD_CUSTOM_TARGET(target_depend
+add_custom_target(target_depend
 	COMMAND cd ${BOARD_TARGET} && test -f "Makefile" && make depend || echo "-- First install"
 	COMMENT "Run make depend in target directory"
 	)
@@ -479,28 +493,28 @@ SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
 	-DUART_BAUDRATE:STRING=${UART_BAUDRATE}\
 	-DRTT_PORT:STRING=${RTT_PORT}")
 
-ADD_CUSTOM_TARGET(write_softdevice
+add_custom_target(write_softdevice
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	#DEPENDS bluenet
 	COMMENT "Flashes softdevice to remote target board"
 	)
 
-ADD_CUSTOM_TARGET(write_mbr_param_address
+add_custom_target(write_mbr_param_address
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE" "-DADDRESS=0x10001018" "-DVALUE=0x0007E000" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Writes MBR param page address to UICR"
 	)
 
-ADD_CUSTOM_TARGET(read_softdevice_version
+add_custom_target(read_softdevice_version
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x000300C" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Reads version of softdevice"
 	)
 
-ADD_CUSTOM_TARGET(erase
+add_custom_target(erase
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=ERASE" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Erase everything on target board"
 	)
 
-ADD_CUSTOM_TARGET(reset
+add_custom_target(reset
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=RESET" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Reset target board"
 	)
@@ -510,7 +524,7 @@ ADD_CUSTOM_TARGET(reset
 #######################################################################################################################
 
 # Will not be called automatically (this is done through the external project bluenet)
-ADD_CUSTOM_TARGET(${BOARD_TARGET}
+add_custom_target(${BOARD_TARGET}
 	COMMAND make
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
@@ -518,7 +532,7 @@ ADD_CUSTOM_TARGET(${BOARD_TARGET}
 	COMMENT "Build application"
 	)
 
-ADD_CUSTOM_TARGET(debug_application
+add_custom_target(debug_application
 	COMMAND make debug_application
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
@@ -526,7 +540,7 @@ ADD_CUSTOM_TARGET(debug_application
 	COMMENT "Debug application"
 	)
 
-ADD_CUSTOM_TARGET(write_board_version
+add_custom_target(write_board_version
 	COMMAND make write_board_version
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
@@ -535,7 +549,7 @@ ADD_CUSTOM_TARGET(write_board_version
 	COMMENT "Write board version"
 	)
 
-ADD_CUSTOM_TARGET(write_application
+add_custom_target(write_application
 	COMMAND make write_application
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
@@ -544,7 +558,7 @@ ADD_CUSTOM_TARGET(write_application
 	COMMENT "Write application"
 	)
 
-ADD_CUSTOM_TARGET(write_bootloader
+add_custom_target(write_bootloader
 	COMMAND make write_bootloader
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
@@ -564,12 +578,12 @@ ADD_CUSTOM_TARGET(write_bootloader
 # Check if we have non-committed changes
 # Check if git version does not exist
 # Create git commit with this release version
-ADD_CUSTOM_TARGET(create_git_release
+add_custom_target(create_git_release
 	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
 	COMMENT "Create git release"
 	)
 
-ADD_CUSTOM_TARGET(create_git_release_bootloader
+add_custom_target(create_git_release_bootloader
 	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release_bootloader.cmake
 	COMMENT "Create git release for bootloader"
 	)
@@ -579,34 +593,33 @@ ADD_CUSTOM_TARGET(create_git_release_bootloader
 # Some more utility functions
 #######################################################################################################################
 
-ADD_CUSTOM_TARGET(list_jlinks
+add_custom_target(list_jlinks
 	COMMAND JLinkExe -commanderscript list.jlink
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
-	DEPENDS
-	jlink
+	DEPENDS ${JLINK_TARGET}
 	COMMENT "List JLink devices"
 	)
 
-ADD_CUSTOM_TARGET(nrfconnect_core_setup
+add_custom_target(nrfconnect_core_setup
 	COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
 	COMMAND npm run dev
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-	#DEPENDS git_nrfconnect_core
-	COMMENT "Run nrf connect core"
+	DEPENDS ${NRFCONNECT_CORE_TARGET}
+	COMMENT "Run nrf connect core development"
 	)
 
-ADD_CUSTOM_TARGET(nrfconnect_core
+add_custom_target(nrfconnect_core
 	COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
 	COMMAND npm run app
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-	#DEPENDS git_nrfconnect_core
+	DEPENDS ${NRFCONNECT_CORE_TARGET}
 	COMMENT "Run nrf connect core"
 	)
 
-ADD_CUSTOM_TARGET(nrfconnect_programmer
+add_custom_target(nrfconnect_programmer
 	COMMAND npm run app
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-	#DEPENDS git_nrfconnect_programmer
+	DEPENDS ${NRFCONNECT_PROGRAMMER_TARGET}
 	COMMENT "Run nrf connect core"
 	)
 
@@ -678,7 +691,7 @@ if(FACTORY_IMAGE)
 	set(FACTORY_IMAGE_PATH_NAME factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
 
 	# Add this target by default to make all when in factory image creation mode
-	ADD_CUSTOM_TARGET(generate_factory_image ALL
+	add_custom_target(generate_factory_image ALL
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
 		COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"

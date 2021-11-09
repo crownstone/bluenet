@@ -28,8 +28,8 @@ is required. This is:
 * GNU cross-compiler
 * JLink tools
 
-The Softdevice is part of the Nordic SDK and does not need to be downloaded separately. The Jenkins continuous 
-integration system does not need to download JLink and the nrfutil software henceforth they can be excluded from the
+The Softdevice is part of the Nordic SDK and does not need to be downloaded separately. The continuous 
+integration system (Github Actions) does not need to download JLink and the nrfutil software henceforth they can be excluded from the
 build by
 
     cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
@@ -61,7 +61,18 @@ version conflicts. You can run these by:
 
 These run in separate shells. The `_setup` you at least have to run once. After that it can do continuous rebuilds.
 You can select the tool to use from the list of apps. By default there are now quite a few apps there. The 
-programmer can also be downloaded separately by setting the `-DDOWNLOAD_NRFCONNECT_PROGRAMMER` flag at `CMake`.
+programmer can also be downloaded separately by setting the `-DDOWNLOAD_NRFCONNECT_PROGRAMMER=ON` flag at `CMake`.
+
+For some of the tools, even if you configure them to be downloaded, we do not update them each time. This is the case for the binary logger and the nrfutil utility. Install them at once with:
+
+    make tools
+
+Or separately:
+
+    make bluenet_logs
+    make nrfutil
+
+Due to the fact that `bluenet` itself is build through a target created by `ExternalProject_Add`, it's not trivial to have targets like `make uart_binary_client` depend on `make bluenet_logs`. Hence, you will need to remember to run `make tools` regularly.
 
 ## Patches
 
