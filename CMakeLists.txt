@@ -88,7 +88,8 @@ message(STATUS "install dir: ${CMAKE_INSTALL_PREFIX}")
 find_package(Git REQUIRED)
 
 if(PYTHON_REQUIRED)
-	# This utility is able to find either python2 or python3
+	# This utility is able to find either python2 or python3. Set virtual env variant to be used first.
+	set(Python_FIND_VIRTUALENV FIRST)
 	find_package(Python COMPONENTS Interpreter REQUIRED)
 	if(NOT Python_FOUND)
 		message(FATAL_ERROR "No python interpreter found. First install python")
@@ -200,16 +201,22 @@ list(APPEND CMAKE_BLUENET_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FI
 if(PYTHON_SETUP_VENV)
 	set(PYTHON_CROWNSTONE_VENV_PATH ${WORKSPACE_DIR}/tools/python/crownstone_env)
 
+	# Add python virtual env setup on Ubuntu systems
+	# We first use `apt-cache` so that we only run `apt install` when there is actually a candidate
+	# that is different from what is installed.
 	set(PYTHON_SETUP_TARGET python_setup_venv)
 	ADD_CUSTOM_TARGET(python_setup_venv
-		COMMAND ${CMAKE_COMMAND} -E echo "Install python3-venv"
-		COMMAND ${CMAKE_COMMAND} -E echo ${SUPERUSER_SWITCH} apt-get install -y python3-venv
-		COMMAND ${SUPERUSER_SWITCH} apt-get install -y python3-venv
+		COMMAND ${CMAKE_COMMAND} -E echo "-- Install python3-venv"
+		COMMAND apt-cache policy python3-venv > ${CMAKE_BINARY_DIR}/.apt-cache
+		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Installed:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.installed
+		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Candidate:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.candidate
+		COMMAND diff ${CMAKE_BINARY_DIR}/.apt-cache.candidate ${CMAKE_BINARY_DIR}/.apt-cache.installed 1>/dev/null 2>&1 && echo '-- Already uptodate' || ${SUPERUSER_SWITCH} apt-get install -y python3-venv
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_CROWNSTONE_VENV_PATH}
 		COMMAND ${Python_EXECUTABLE} -m venv ${PYTHON_CROWNSTONE_VENV_PATH}
-		COMMAND ${CMAKE_COMMAND} -E echo "Make sure to run the following command:"
-		COMMAND ${CMAKE_COMMAND} -E echo "  source ${PYTHON_CROWNSTONE_VENV_PATH}/bin/activate"
-		COMMAND ${CMAKE_COMMAND} -E echo "You can deactivate by calling 'deactivate' on the command line"
+		COMMAND ${CMAKE_COMMAND} -E echo "-- Make sure to run the following command:"
+		COMMAND ${CMAKE_COMMAND} -E echo "--  source ${PYTHON_CROWNSTONE_VENV_PATH}/bin/activate"
+		COMMAND ${CMAKE_COMMAND} -E echo "-- You can deactivate on the command line:"
+		COMMAND ${CMAKE_COMMAND} -E echo "--  deactivate"
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
 		COMMENT "Run python venv setup"
 		)
@@ -217,7 +224,7 @@ if(PYTHON_SETUP_VENV)
 	# Use a cmake -P structure to check actual ENV variables
 	set(PYTHON_TEST_VENV_TARGET python_test_venv)
 	ADD_CUSTOM_TARGET(python_test_venv
-		COMMAND ${CMAKE_COMMAND} -E echo "Test for venv"
+		COMMAND ${CMAKE_COMMAND} -E echo "-- Test for venv"
 		COMMAND ${CMAKE_COMMAND} -DPYTHON_CROWNSTONE_VENV_PATH=${PYTHON_CROWNSTONE_VENV_PATH} -P ${DEFAULT_MODULES_PATH}/test_python_venv.cmake
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
 		COMMENT "Run python venv test"
@@ -362,15 +369,11 @@ if(DOWNLOAD_CSUTIL)
 endif()
 
 if(DOWNLOAD_BLUENET_LIB_LOGS)
-	message(STATUS "Depends on target ${PYTHON_TEST_VENV_TARGET}")
-	ExternalProject_Add(bluenet_logs
-		DOWNLOAD_COMMAND ${Python_EXECUTABLE} -m pip install bluenet-logs
-		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/bluenet_logs
-		UPDATE_COMMAND ${Python_EXECUTABLE} -m pip install --upgrade bluenet-logs
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	ADD_CUSTOM_TARGET(bluenet_logs
+		COMMAND ${CMAKE_COMMAND} -E echo "-- Add bluenet-logs through pip"
+		COMMAND ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -DPIP_PACKAGE=bluenet-logs -P ${DEFAULT_MODULES_PATH}/install_through_pip.cmake
+		WORKING_DIRECTORY ${WORKSPACE_DIR}
+		COMMENT "Install bluenet binary logging"
 		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
@@ -418,7 +421,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 ADD_CUSTOM_TARGET(micro_eec
 	COMMAND sed -i 's/\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
-	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMENT "Build micro-eec"
 	DEPENDS
 	nordic_sdk
