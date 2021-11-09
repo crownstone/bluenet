@@ -63,7 +63,7 @@ These run in separate shells. The `_setup` you at least have to run once. After 
 You can select the tool to use from the list of apps. By default there are now quite a few apps there. The 
 programmer can also be downloaded separately by setting the `-DDOWNLOAD_NRFCONNECT_PROGRAMMER=ON` flag at `CMake`.
 
-For some of the tools, even if you configure them to be downloaded, we do not update them each time. This is the case for the binary logger and the nrfutil utility. Install them at once with:
+For some of the tools, even if you configure them to be downloaded, we do update them each time `bluenet` is build. This is for example the case for the binary logger and the nrfutil utility. This functionality can be disabled by `-DAUTO_UPDATE_TOOLS=OFF`. In that case you will have to do this yourself for which there is:
 
     make tools
 
@@ -71,8 +71,6 @@ Or separately:
 
     make bluenet_logs
     make nrfutil
-
-Due to the fact that `bluenet` itself is build through a target created by `ExternalProject_Add`, it's not trivial to have targets like `make uart_binary_client` depend on `make bluenet_logs`. Hence, you will need to remember to run `make tools` regularly.
 
 ## Patches
 
