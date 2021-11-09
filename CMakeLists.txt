@@ -474,6 +474,13 @@ if(NOT FACTORY_IMAGE)
 	add_dependencies(bluenet gcc_arm_none_eabi)
 	add_dependencies(bluenet nordic_sdk)
 	add_dependencies(bluenet nordic_mesh_sdk)
+
+	if(DOWNLOAD_BLUENET_LIB_LOGS)
+		add_dependencies(bluenet ${BLUENET_LIB_LOGS_TARGET})
+	endif()
+	if(DOWNLOAD_NRFUTIL)
+		add_dependencies(bluenet ${NRFUTIL_TARGET})
+	endif()
 endif()
 
 #######################################################################################################################
