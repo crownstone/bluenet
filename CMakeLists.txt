@@ -371,7 +371,7 @@ endif()
 if(DOWNLOAD_BLUENET_LIB_LOGS)
 	ADD_CUSTOM_TARGET(bluenet_logs
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add bluenet-logs through pip"
-		COMMAND ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -DPIP_PACKAGE=bluenet-logs -P ${DEFAULT_MODULES_PATH}/install_through_pip.cmake
+		COMMAND ${Python_EXECUTABLE} -m pip -q install bluenet-logs
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
 		COMMENT "Install bluenet binary logging"
 		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
