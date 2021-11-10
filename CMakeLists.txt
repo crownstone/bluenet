@@ -27,8 +27,6 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
-set(NRF5_DIR                                     ${WORKSPACE_DIR}/tools/nrf5_sdk)
-set(HOST_NRF5_DIR                                ${WORKSPACE_DIR}/tools/nrf5_host_sdk)
 
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
@@ -99,8 +97,29 @@ load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 
+# From now on you can use information from the config files, not above!
+
 #######################################################################################################################
-# Some important configuration values that have been loaded above
+# Create some convenience variables that use configuration values
+#######################################################################################################################
+
+# Create full semver string to be used to store patches and patched files
+set(NORDIC_SDK_VERSION_FULL "${NORDIC_SDK_VERSION_MAJOR}.${NORDIC_SDK_VERSION_MINOR}.${NORDIC_SDK_VERSION_PATCH}")
+
+# Create full semver string for mesh
+set(MESH_SDK_VERSION_FULL "${MESH_SDK_VERSION_MAJOR}.${MESH_SDK_VERSION_MINOR}.${MESH_SDK_VERSION_PATCH}")
+
+# Location of the SDK to be used
+set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
+
+# Location of adjusted version of the SDK that can be used on a host system
+set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
+
+# Location of mesh SDK
+set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
+
+#######################################################################################################################
+# Print some important configuration values that have been loaded above
 #######################################################################################################################
 
 message(STATUS "Board target: ${BOARD_TARGET}")
@@ -114,29 +133,32 @@ endif()
 # Download urls and hashes
 #######################################################################################################################
 
-# If you update the version of a file, also update the md5 hash, e.g. through `md5sum downloads/*`
+# If you update the version of a .zip file, also update the md5 hash.
+# Get the hashes through `md5sum downloads/*`
+
+set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
 
 set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
 
 # The Nordic SDK
-if (NORDIC_SDK_VERSION EQUAL 15)
-	set(NORDIC_SDK_URL_FILE "SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip")
-	set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
-elseif (NORDIC_SDK_VERSION EQUAL 16)
-	set(NORDIC_SDK_URL_FILE "SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip")
-	set(NORDIC_NRF5_SDK_MD5 cc2ccb57d2c7159fd37f9e04fca6cc64)
-elseif (NORDIC_SDK_VERSION EQUAL 17)
-	set(NORDIC_SDK_URL_FILE "SDKs/nRF5/Binaries/nRF5_SDK_17.1.0_ddde560.zip")
-	set(NORDIC_NRF5_SDK_MD5 024efaa45cf2294a60f6308caba28e6e)
+if (NORDIC_SDK_VERSION EQUAL 15 AND NORDIC_SDK_VERSION_MINOR EQUAL 3 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
+	message(STATUS "Will use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
+elseif (NORDIC_SDK_VERSION EQUAL 17 AND NORDIC_SDK_VERSION_MINOR EQUAL 1 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
+	message(STATUS "Will use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 else()
-	message(FATAL_ERROR "Unkown SDK version: ${NORDIC_SDK_VERSION}")
+	message(FATAL_ERROR "Unknown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
 
 set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/${NORDIC_SDK_URL_FILE})
 
+set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+
 # The mesh
-set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
-set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
+if (MESH_SDK_VERSION_MAJOR EQUAL 3 AND MESH_SDK_VERSION_MINOR EQUAL 2 AND MESH_SDK_VERSION_PATCH EQUAL 0)
+	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
+else()
+	message(FATAL_ERROR "Unknown Mesh version: ${MESH_SDK_VERSION_FULL}")
+endif()
 
 # The nrfjprog
 set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-14-0/nRF-Command-Line-Tools_10_14_0_Linux64.zip)
@@ -170,37 +192,22 @@ list(APPEND CMAKE_BLUENET_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FI
 # Download dependencies
 #######################################################################################################################
 
-if (NORDIC_SDK_VERSION EQUAL 15)
-	ExternalProject_Add(nordic_sdk
-		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
-		URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
-		URL_MD5 ${NORDIC_NRF5_SDK_MD5}
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-		PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
-			COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch
-			COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/03nrf5.patch
-		)
-else()
-	ExternalProject_Add(nordic_sdk
-		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
-		URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
-		URL_MD5 ${NORDIC_NRF5_SDK_MD5}
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-		)
-endif()
+ExternalProject_Add(nordic_sdk
+	GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
+	GIT_SHALLOW 1
+	GIT_TAG origin/${NORDIC_SDK_VERSION_FULL}
+	SOURCE_DIR ${NRF5_DIR}
+	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	)
 
 if(COMPILE_FOR_HOST)
 	ExternalProject_Add(nordic_host_sdk
 		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
 		GIT_SHALLOW 1
 		GIT_TAG host
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_host_sdk
+		SOURCE_DIR ${HOST_NRF5_DIR}
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
@@ -210,15 +217,15 @@ endif()
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 ExternalProject_Add(nordic_mesh_sdk
-	GIT_REPOSITORY https://github.com/crownstone/nRF5-SDK-for-Mesh
-	SOURCE_DIR ${WORKSPACE_DIR}/tools/mesh_sdk
+	GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
+	GIT_SHALLOW 1
+	GIT_TAG origin/${MESH_SDK_VERSION_FULL}
+	SOURCE_DIR ${MESH_SDK_DIR}
 	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-	#PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/00mesh.patch
 	)
 
-set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK)

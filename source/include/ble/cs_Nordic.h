@@ -12,7 +12,6 @@ extern "C"
 #endif
 
 #ifndef DISABLE_NRF_HEADERS
-#include <cmsis_compiler.h>
 #include <app_util_platform.h>
 typedef uint32_t ret_code_t;
 
@@ -28,6 +27,9 @@ typedef uint32_t ret_code_t;
 #include <ble_gattc.h>
 #include <ble_hci.h>
 #include <ble_srv_common.h>
+#if NORDIC_SDK_VERSION > 15
+#include <cmsis_compiler.h>
+#endif
 #include <fds.h>
 #include <nrf.h>
 #include <nrf_delay.h>
