@@ -16,7 +16,7 @@ extern "C"
 typedef uint32_t ret_code_t;
 
 // The header files in the Nordic SDK. Keep all the includes here, not dispersed over all the header files.
-#include <nrf/sdk_config.h>
+#include <sdk_config.h>
 #include <app_scheduler.h>
 #include <app_util.h>
 #include <ble.h>

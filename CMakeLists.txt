@@ -118,6 +118,10 @@ set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FUL
 # Location of mesh SDK
 set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
 
+# Make some more variables available to the bluenet build
+list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
+list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
+
 #######################################################################################################################
 # Print some important configuration values that have been loaded above
 #######################################################################################################################
