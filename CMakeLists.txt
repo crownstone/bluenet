@@ -142,9 +142,9 @@ set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-do
 
 # The Nordic SDK
 if (NORDIC_SDK_VERSION EQUAL 15 AND NORDIC_SDK_VERSION_MINOR EQUAL 3 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Will use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
+	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 elseif (NORDIC_SDK_VERSION EQUAL 17 AND NORDIC_SDK_VERSION_MINOR EQUAL 1 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Will use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
+	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 else()
 	message(FATAL_ERROR "Unknown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
@@ -192,10 +192,12 @@ list(APPEND CMAKE_BLUENET_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FI
 # Download dependencies
 #######################################################################################################################
 
-ExternalProject_Add(nordic_sdk
+set(NORDIC_SDK_TARGET nordic_sdk${NORDIC_SDK_VERSION_FULL})
+ExternalProject_Add(${NORDIC_SDK_TARGET}
 	GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
 	GIT_SHALLOW 1
 	GIT_TAG origin/${NORDIC_SDK_VERSION_FULL}
+	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${NRF5_DIR}
 	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
@@ -207,6 +209,7 @@ if(COMPILE_FOR_HOST)
 		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
 		GIT_SHALLOW 1
 		GIT_TAG host
+		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${HOST_NRF5_DIR}
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
@@ -216,10 +219,12 @@ endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
-ExternalProject_Add(nordic_mesh_sdk
+set(MESH_SDK_TARGET nordic_mesh_sdk${MESH_SDK_VERSION_FULL})
+ExternalProject_Add(${MESH_SDK_TARGET}
 	GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
 	GIT_SHALLOW 1
 	GIT_TAG origin/${MESH_SDK_VERSION_FULL}
+	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${MESH_SDK_DIR}
 	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
@@ -282,6 +287,7 @@ endif()
 if(DOWNLOAD_NRFCONNECT)
 	ExternalProject_Add(git_nrfconnect_core
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
+		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
 		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
@@ -294,6 +300,7 @@ endif()
 if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 	ExternalProject_Add(git_nrfconnect_apps
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
+		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
 		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
@@ -305,6 +312,7 @@ endif()
 if(DOWNLOAD_CSUTIL)
 	ExternalProject_Add(csutil
 		GIT_REPOSITORY https://github.com/mrquincle/csutil
+		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
 		BINARY_DIR ${WORKSPACE_DIR}/tools/csutil
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
@@ -371,7 +379,7 @@ ADD_CUSTOM_TARGET(micro_eec
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMENT "Build micro-eec"
 	DEPENDS
-	nordic_sdk
+	${NORDIC_SDK_TARGET}
 	gcc_arm_none_eabi
 	)
 
@@ -405,8 +413,8 @@ endif()
 
 if(NOT FACTORY_IMAGE)
 	add_dependencies(bluenet gcc_arm_none_eabi)
-	add_dependencies(bluenet nordic_sdk)
-	add_dependencies(bluenet nordic_mesh_sdk)
+	add_dependencies(bluenet ${NORDIC_SDK_TARGET})
+	add_dependencies(bluenet ${MESH_SDK_TARGET})
 endif()
 
 #######################################################################################################################
