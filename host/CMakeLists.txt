@@ -65,8 +65,17 @@ include_directories( "../source/include" "include" "${CMAKE_BLUENET_BINARY_DIR}/
 # Get all includes from nordic
 include(nordic.src)
 
-include_directories(${CMAKE_BLUENET_SOURCE_DIR}/include/third)
-include_directories(${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf)
+set(THIRD_PARTY_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third")
+set(THIRD_PARTY_NRF_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf")
+set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
+
+message(STATUS "Include path: ${THIRD_PARTY_INCLUDE_PATH}")
+message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
+message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
+
+include_directories(${THIRD_PARTY_INCLUDE_PATH})
+include_directories(${THIRD_PARTY_NRF_INCLUDE_PATH})
+include_directories(${THIRD_PARTY_NRF_SDK_INCLUDE_PATH})
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
