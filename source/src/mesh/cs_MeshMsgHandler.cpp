@@ -177,9 +177,6 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
-			break;
-		}
-		case CS_MESH_MODEL_TYPE_UNKNOWN: {
 			retCode = ERR_INVALID_MESSAGE;
 			break;
 		}
