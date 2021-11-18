@@ -12,16 +12,17 @@
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
-#include <cs_MicroappStructs.h>
-#include <cfg/cs_Config.h>
 #include <cfg/cs_AutoConfig.h>
+#include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
-#include <logging/cs_Logger.h>
+#include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
+#include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappProtocol.h>
+#include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
@@ -29,7 +30,6 @@
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
-#include <microapp/cs_MicroappStorage.h>
 
 void handleSwitchCommand(pin_cmd_t* pin_cmd) {
 	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
@@ -252,6 +252,108 @@ void handleTwiCommand(twi_cmd_t* twi_cmd) {
 	}
 }
 
+
+
+
+
+void MicroappProtocol::handleMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize) {
+	switch (meshCommand->opcode) {
+		case CS_MICROAPP_COMMAND_MESH_SEND: {
+			if (payloadSize < sizeof(microapp_mesh_send_header_t)) {
+				LOGi("Payload too small");
+				return;
+			}
+			auto commandData = reinterpret_cast<microapp_mesh_send_header_t*>(payload);
+
+			TYPIFY(CMD_SEND_MESH_MSG) eventData;
+			if (commandData->stoneId == 0) {
+				// Broadcast message.
+				eventData.flags.flags.broadcast = true;
+				eventData.flags.flags.noHops = false;
+				eventData.flags.flags.reliable = false;
+				eventData.flags.flags.useKnownIds = false;
+			}
+			else {
+				// Targeted message.
+				eventData.flags.flags.broadcast = true;
+				eventData.flags.flags.noHops = false;
+				eventData.flags.flags.reliable = true;
+				eventData.flags.flags.useKnownIds = false;
+				eventData.idCount = 1;
+				eventData.targetIds = &(commandData->stoneId);
+			}
+			eventData.type = CS_MESH_MODEL_TYPE_MICROAPP;
+			eventData.payload = payload + sizeof(commandData);
+			eventData.size = payloadSize - sizeof(commandData);
+			if (eventData.size == 0) {
+				LOGi("No message.");
+				return;
+			}
+
+			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
+			event.dispatch();
+			if (event.result.returnCode != ERR_SUCCESS) {
+				LOGi("Failed to send message, return code: %u", event.result.returnCode);
+				return;
+			}
+			break;
+		}
+		case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
+			if (payloadSize < sizeof(microapp_mesh_read_available_t)) {
+				LOGi("Payload too small");
+				return;
+			}
+			auto commandData = reinterpret_cast<microapp_mesh_read_available_t*>(payload);
+			commandData->available = !_meshMessageBuffer.empty();
+			break;
+		}
+		case CS_MICROAPP_COMMAND_MESH_READ: {
+			if (payloadSize < sizeof(microapp_mesh_read_t)) {
+				LOGi("Payload too small");
+				return;
+			}
+			auto commandData = reinterpret_cast<microapp_mesh_read_t*>(payload);
+			if (_meshMessageBuffer.empty()) {
+				LOGi("No message in buffer");
+				return;
+			}
+			auto message = _meshMessageBuffer.pop();
+			commandData->stoneId = message.stoneId;
+			commandData->messageSize = message.messageSize;
+			memcpy(commandData->message, message.message, message.messageSize);
+			break;
+		}
+
+		default: {
+			LOGi("Unknown opcode: %u", meshCommand->opcode);
+			break;
+		}
+	}
+}
+
+void MicroappProtocol::onMeshMessage(MeshMsgEvent event) {
+	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
+		return;
+	}
+
+	if (_meshMessageBuffer.full()) {
+		LOGi("Dropping message, buffer is full");
+		return;
+	}
+
+	if (event.msg.len > MAX_MESH_MESSAGE_SIZE) {
+		LOGi("Message is too large: %u", event.msg.len);
+		return;
+	}
+
+	microapp_buffered_mesh_message_t bufferedMessage;
+	bufferedMessage.stoneId = event.srcAddress;
+	bufferedMessage.messageSize = event.msg.len;
+	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
+	_meshMessageBuffer.push(bufferedMessage);
+}
+
+
 int handleCommand(uint8_t* payload, uint16_t length) {
 	_logArray(SERIAL_DEBUG, true, payload, length);
 	uint8_t command = payload[0];
@@ -348,6 +450,60 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 			event.dispatch();
 			break;
 		}
+		case CS_MICROAPP_COMMAND_POWER_USAGE: {
+			LOGd("power usage");
+
+			if (length < sizeof(command) + sizeof(microapp_power_usage_t)) {
+				LOGi("payload too small");
+				break;
+			}
+			microapp_power_usage_t* commandPayload = reinterpret_cast<microapp_power_usage_t*>(&(payload[1]));
+
+			TYPIFY(STATE_POWER_USAGE) powerUsage;
+			State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
+
+			commandPayload->powerUsage = powerUsage;
+
+			break;
+		}
+		case CS_MICROAPP_COMMAND_PRESENCE: {
+			LOGd("presence");
+			if (length < sizeof(command) + sizeof(microapp_presence_t)) {
+				LOGi("payload too small");
+				break;
+			}
+			microapp_presence_t* commandPayload = reinterpret_cast<microapp_presence_t*>(&(payload[1]));
+
+			presence_t resultBuf;
+			event_t event(CS_TYPE::CMD_GET_PRESENCE);
+			event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resultBuf), sizeof(resultBuf));
+			event.dispatch();
+			if (event.result.returnCode != ERR_SUCCESS) {
+				LOGi("No success, result code: %u", event.result.returnCode);
+				break;
+			}
+			if (event.result.dataSize != sizeof(presence_t)) {
+				LOGi("Result is of size %u expected size %u", event.result.dataSize,sizeof(presence_t));
+				break;
+			}
+
+			commandPayload->presenceBitmask = resultBuf.presence[commandPayload->profileId];
+			break;
+		}
+		case CS_MICROAPP_COMMAND_MESH: {
+			LOGd("mesh");
+			if (length < sizeof(command) + sizeof(microapp_mesh_header_t)) {
+				LOGi("payload too small");
+				break;
+			}
+			microapp_mesh_header_t* meshCommand = reinterpret_cast<microapp_mesh_header_t*>(&(payload[1]));
+
+			size_t headerSize = sizeof(command) + sizeof(microapp_mesh_header_t);
+			uint8_t* meshPayload = payload + headerSize;
+			size_t meshPayloadLength = length - headerSize;
+			MicroappProtocol::getInstance().handleMeshCommand(meshCommand, meshPayload, meshPayloadLength);
+			break;
+		}
 		default:
 			_log(SERIAL_INFO, true, "Unknown command %u of length %u:", command, length);
 			_logArray(SERIAL_INFO, true, payload, length);
@@ -367,7 +523,10 @@ extern "C" {
 
 } // extern C
 
-MicroappProtocol::MicroappProtocol(): EventListener() {
+MicroappProtocol::MicroappProtocol():
+		EventListener(),
+		_meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED)
+{
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -381,6 +540,8 @@ MicroappProtocol::MicroappProtocol(): EventListener() {
 	}
 
 	_callbackData = NULL;
+
+	_meshMessageBuffer.init();
 }
 
 /*
@@ -636,6 +797,13 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			callback_func();
 			break;
 		}
+
+		case CS_TYPE::EVT_RECV_MESH_MSG: {
+			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
+			onMeshMessage(*msg);
+			break;
+		}
+
 		default:
 			break;
 	}

@@ -78,6 +78,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_CTRL_CMD                  = 29, // Payload: cs_mesh_model_msg_ctrl_cmd_header_ext_t + payload
 	CS_MESH_MODEL_TYPE_ASSET_INFO_ID             = 30, // Payload: cs_mesh_model_msg_asset_report_id_t
 
+	CS_MESH_MODEL_TYPE_MICROAPP                  = 200, // Payload: anything.
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
 
