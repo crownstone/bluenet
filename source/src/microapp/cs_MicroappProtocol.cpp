@@ -252,6 +252,28 @@ void handleTwiCommand(twi_cmd_t* twi_cmd) {
 	}
 }
 
+/*
+ * Handle BLE commands
+ */
+void handleBleCommand(ble_cmd_t* ble_cmd) {
+	CommandMicroappBleOpcode opcode = (CommandMicroappBleOpcode)ble_cmd->opcode;
+	switch(opcode) {
+		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
+			TYPIFY(CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR) ble_scan = ble_cmd->callback; // uintptr_t
+			event_t event(CS_TYPE::CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR, &ble_scan, sizeof(ble_scan));
+			EventDispatcher::getInstance().dispatch(event);
+			LOGi("Dispatched CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR event");
+			break;
+		}
+		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
+			break;
+		}
+		default: {
+			LOGw("Unknown BLE opcode: %i", ble_cmd->opcode);
+		}
+	}
+}
+
 int handleCommand(uint8_t* payload, uint16_t length) {
 	_logArray(SERIAL_DEBUG, true, payload, length);
 	uint8_t command = payload[0];
@@ -346,6 +368,12 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 			//			CsUtils::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
 			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 			event.dispatch();
+			break;
+		}
+		case CS_MICROAPP_COMMAND_BLE: {
+			LOGi("CS_MICROAPP_COMMAND_BLE");
+			ble_cmd_t *ble_cmd = (ble_cmd_t*)payload;
+			handleBleCommand(ble_cmd);
 			break;
 		}
 		default:

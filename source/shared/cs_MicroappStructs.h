@@ -14,7 +14,7 @@
 #include <stdint.h>
 #endif
 
-const uint8_t MAX_PAYLOAD = 32;
+const uint8_t MAX_PAYLOAD = 42; // currently the largest payload size (ble_adv_t)
 
 enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_SWITCH        = 0x00,
@@ -44,6 +44,7 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_PIN               = 0x03,
 	CS_MICROAPP_COMMAND_SERVICE_DATA      = 0x04,
 	CS_MICROAPP_COMMAND_TWI               = 0x05,
+	CS_MICROAPP_COMMAND_BLE 			  = 0x06,
 };
 
 enum CommandMicroappLogOption {
@@ -74,6 +75,14 @@ enum CommandMicroappPinOpcode2 {
 	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP  = 0x04,
 };
 
+enum CommandMicroappPinValue {
+	CS_MICROAPP_COMMAND_VALUE_OFF         = 0x00,
+	CS_MICROAPP_COMMAND_VALUE_ON          = 0x01,
+	CS_MICROAPP_COMMAND_VALUE_CHANGE      = 0x02,
+	CS_MICROAPP_COMMAND_VALUE_RISING      = 0x03,
+	CS_MICROAPP_COMMAND_VALUE_FALLING     = 0x04,
+};
+
 enum CommandMicroappTwiOpcode {
 	CS_MICROAPP_COMMAND_TWI_READ          = 0x01,
 	CS_MICROAPP_COMMAND_TWI_WRITE         = 0x02,
@@ -82,12 +91,9 @@ enum CommandMicroappTwiOpcode {
 	CS_MICROAPP_COMMAND_TWI_DISABLE       = 0x05,
 };
 
-enum CommandMicroappPinValue {
-	CS_MICROAPP_COMMAND_VALUE_OFF         = 0x00,
-	CS_MICROAPP_COMMAND_VALUE_ON          = 0x01,
-	CS_MICROAPP_COMMAND_VALUE_CHANGE      = 0x02,
-	CS_MICROAPP_COMMAND_VALUE_RISING      = 0x03,
-	CS_MICROAPP_COMMAND_VALUE_FALLING     = 0x04,
+enum CommandMicroappBleOpcode {
+	CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER	= 0x01,
+	CS_MICROAPP_COMMAND_BLE_SCAN_START			= 0x02,
 };
 
 /*
@@ -139,3 +145,26 @@ typedef struct {
 	uint8_t buf[MAX_TWI_PAYLOAD];
 } twi_cmd_t;
 
+/*
+ * Struct for ble commands for scanning, advertising, connecting
+ */
+typedef struct {
+	uint8_t cmd;
+	uint8_t opcode;
+	uint32_t callback;
+} ble_cmd_t;
+
+const uint8_t BLE_ADV_ADDR_LENGTH = 6;
+const uint8_t BLE_ADV_DATA_LENGTH = 31;
+/*
+ * Struct for ble advertisements
+ */
+typedef struct {
+	uint8_t addr_type;
+	uint8_t addr[BLE_ADV_ADDR_LENGTH];
+	int8_t rssi;
+	uint8_t scan_rsp;
+	uint8_t type;
+	uint8_t dlen;
+	uint8_t data[BLE_ADV_DATA_LENGTH];
+} ble_adv_t;
