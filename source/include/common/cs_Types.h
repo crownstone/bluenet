@@ -399,7 +399,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_GPIO_READ,                                    // GPIO, read value (directly)
 	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
 
-	CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR,		  // Request for a device scanned ISR to be set up for the microapp 
+	CMD_BLE_SET_MICROAPP_ISR,		  				  // Request for a ISR to be set up for the microapp 
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 
@@ -698,7 +698,7 @@ typedef cs_gpio_write_t TYPIFY(EVT_GPIO_WRITE);
 typedef cs_gpio_read_t TYPIFY(EVT_GPIO_READ);
 typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 
-typedef uintptr_t TYPIFY(CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR);
+typedef microapp_ble_isr_init_t TYPIFY(CMD_BLE_SET_MICROAPP_ISR);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

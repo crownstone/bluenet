@@ -18,13 +18,19 @@ typedef struct {
 
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
-// The number of 8 interrupt service routines should be sufficient.
-#define MAX_ISR_COUNT 8
+// The number of 8 interrupt service routines per type should be sufficient.
+#define MAX_PIN_ISR_COUNT 8
+#define MAX_BLE_ISR_COUNT 8
 
 typedef struct pin_isr_t {
 	uint8_t pin;
 	uintptr_t callback;
 } pin_isr_t;
+
+typedef struct ble_isr_t {
+	uint16_t type;
+	uintptr_t callback;
+} ble_isr_t;
 
 /**
  * The class MicroappProtocol has functionality to store a second app (and perhaps in the future even more apps) on another
@@ -72,9 +78,14 @@ class MicroappProtocol: public EventListener {
 		uintptr_t _loop;
 
 		/**
-		 * Addressees of interrupt service routines.
+		 * Addressees of pin interrupt service routines.
 		 */
-		pin_isr_t _isr[MAX_ISR_COUNT];
+		pin_isr_t _pin_isr[MAX_PIN_ISR_COUNT];
+
+		/**
+		 * Addressees of ble interrupt service routines.
+		 */
+		ble_isr_t _ble_isr[MAX_BLE_ISR_COUNT];
 
 		/**
 		 * Coroutine for microapp.

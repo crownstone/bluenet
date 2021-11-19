@@ -259,10 +259,13 @@ void handleBleCommand(ble_cmd_t* ble_cmd) {
 	CommandMicroappBleOpcode opcode = (CommandMicroappBleOpcode)ble_cmd->opcode;
 	switch(opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			TYPIFY(CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR) ble_scan = ble_cmd->callback; // uintptr_t
-			event_t event(CS_TYPE::CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR, &ble_scan, sizeof(ble_scan));
+			TYPIFY(CMD_BLE_SET_MICROAPP_ISR) ble_evt;
+			ble_evt.type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
+			//0x01; //Todo: define this protocol better. for now, 0x01 = EVT_DEVICE_SCANNED
+			ble_evt.callback = ble_cmd->callback;
+			event_t event(CS_TYPE::CMD_BLE_SET_MICROAPP_ISR, &ble_evt, sizeof(ble_evt));
 			EventDispatcher::getInstance().dispatch(event);
-			LOGi("Dispatched CMD_BLE_SET_MICROAPP_DEVICE_SCANNED_ISR event");
+			LOGi("Dispatched CMD_BLE_SET_MICROAPP_ISR event");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
@@ -403,9 +406,13 @@ MicroappProtocol::MicroappProtocol(): EventListener() {
 	_loop = 0;
 	_booted = false;
 
-	for (int i = 0; i < MAX_ISR_COUNT; ++i) {
-		_isr[i].pin = 0;
-		_isr[i].callback = 0;
+	for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+		_pin_isr[i].pin = 0;
+		_pin_isr[i].callback = 0;
+	}
+	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
+		_ble_isr[i].type = 0;
+		_ble_isr[i].callback = 0;
 	}
 
 	_callbackData = NULL;
@@ -629,11 +636,11 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
 			
 			// we will register the handler in the class for first empty slot
-			for (int i = 0; i < MAX_ISR_COUNT; ++i) {
-				if (_isr[i].callback == 0) {
+			for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+				if (_pin_isr[i].callback == 0) {
 					LOGi("Register callback %x or %i for pin %i", gpio.callback, gpio.callback, gpio.pin_index);
-					_isr[i].callback = gpio.callback;
-					_isr[i].pin = gpio.pin_index;
+					_pin_isr[i].callback = gpio.callback;
+					_pin_isr[i].pin = gpio.pin_index;
 					break;
 				}
 			}
@@ -645,9 +652,51 @@ void MicroappProtocol::handleEvent(event_t & event) {
 	
 			uintptr_t callback = 0;
 			// get callback and call
-			for (int i = 0; i < MAX_ISR_COUNT; ++i) {
-				if (_isr[i].pin == gpio.pin_index) {
-					callback = _isr[i].callback;
+			for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+				if (_pin_isr[i].pin == gpio.pin_index) {
+					callback = _pin_isr[i].callback;
+					break;
+				}
+			}
+			LOGi("Call %x", callback);
+
+			if (callback == 0) {
+				LOGi("Callback not yet registered");
+				break;
+			}
+			// we have to do this through another coroutine perhaps (not the same one as loop!), for
+			// now stay on this stack
+			void (*callback_func)() = (void (*)()) callback;
+			LOGi("Call callback at 0x%x", callback);
+			callback_func();
+			break;
+		}
+		case CS_TYPE::CMD_BLE_SET_MICROAPP_ISR: {
+			LOGi("MicroappProtocol: Reacting to CMD_BLE_SET_MICROAPP_ISR event");
+			TYPIFY(CMD_BLE_SET_MICROAPP_ISR) ble_cmd = *(TYPIFY(CMD_BLE_SET_MICROAPP_ISR)*)event.data;
+			
+			//CS_TYPE type = (CS_TYPE)ble_cmd->type;
+			// we will register the handler in the class for first empty slot
+			for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
+				if (_ble_isr[i].callback == 0) {
+					LOGi("Register callback %x", ble_cmd.callback);
+					_ble_isr[i].callback = ble_cmd.callback;
+					_ble_isr[i].type = ble_cmd.type;
+					break;
+				}
+			}
+			break;
+		}
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			//TYPIFY(EVT_DEVICE_SCANNED) ble_dev = *(TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
+			LOGi("MicroappProtocol: Reacting to EVT_DEVICE_SCANNED");
+			// TODO: convert scanned_device_t to ble_adv_t (?) and add as argument in callback
+			uint16_t type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
+			uintptr_t callback = 0;
+			// get callback and call
+			for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+				if (_ble_isr[i].type == type) {
+					callback = _ble_isr[i].callback;
 					break;
 				}
 			}
