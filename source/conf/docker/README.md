@@ -25,6 +25,41 @@ A Raspberry PI 4, for example, has an ARMv8 processor. You might be running Rasp
 docker buildx build --platform linux/arm/v7 -t crownstone .
 ```
 
+# Local changes
+
+If you have local changes to your code, you might want to create a docker image with those rather than cloning <https://github.com/crownstone/bluenet>.
+
+In the Dockerfile change:
+
+```
+RUN git clone https://github.com/crownstone/bluenet
+```
+
+into (watch the trailing backslash!):
+
+```
+RUN git clone git://localhost/ bluenet
+```
+
+Navigate to your local bluenet repository and serve it locally:
+
+```
+git daemon --verbose --export-all --base-path=.git --reuseaddr --strict-paths .git/
+```
+
+We need a slightly more privileged builder for this:
+
+```
+docker buildx create --name image-builder-network-host-user --driver-opt network=host
+docker buildx use image-builder-network-host-user
+```
+
+And then build (for example for the linux/arm/v7 platform):
+
+```
+docker buildx build --platform linux/arm/v7 -t crownstone .
+```
+
 # State
 
 If there's a simple way to host the built docker online, feel free to suggest so. Know that when you run from a docker,
