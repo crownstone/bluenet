@@ -9,7 +9,6 @@
 #include <drivers/cs_RTC.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
-#include <third/nrf/sdk_config.h>
 
 #ifdef __cplusplus
 extern "C" {

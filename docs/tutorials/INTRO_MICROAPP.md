@@ -24,12 +24,12 @@ make setup
 
 Alternatively, set up the hardware through the Crownstone app. 
 
-## Download an example
+## Compile an example project
 
 Clone an example project:
 
 ```
-git clone https://github.com/mrquincle/crownstone-bluenet-module
+git clone https://github.com/crownstone/crownstone-microapp
 ```
 
 In this repository you will see the code itself. First, adjust the location to the cross-compiler tool chain if necessary in the `config.mk` file:
@@ -51,16 +51,16 @@ Then compile in the usual sense with:
 make
 ```
 
-This will generate a `build/example.hex` file. 
+This will generate a `build/example.hex` file.
 
-In the `/scripts` directory you will find a `microapp.py` file which uses Bluetooth LE to upload the application the Crownstone running this bluenet version.
+In the `/scripts` directory you will find a `upload_microapp.py` file which uses Bluetooth LE to upload the application the Crownstone running this bluenet version.
 The syntax is something like:
 
 ```
-./microapp.py ~/.secret_path/secret_keys.json C2:81:75:46:D8:F1 ../build/example.bin upload
+./upload_microapp.py --keyFile ~/.secret_path/secret_keys.json -a C2:81:75:46:D8:F1 -f ../build/example.bin upload
 ```
 
-However, there's also just a possibility to upload over UART. First write the MAC address to `private.mk` in the root.
+You can also just use the Makefile, however in that case you will have to configure the above information in a file. Write the key file and the mac address to `private.mk` in the root of the microapp repository.
 
 ```
 KEYS_JSON=~/.secret_path/secret_keys.json
@@ -73,21 +73,21 @@ And upload through:
 make flash
 ```
 
-You will have to enable the microapp as well:
+Or, alternatively, over the air:
 
 ```
-make ota-enable
+make ota-upload
 ```
 
-Check for details the <https://github.com/mrquincle/crownstone-microapp> README as well!
+Check for details the <https://github.com/crownstone/crownstone-microapp> README as well!
 
-Alternatively, if you do **not** want to be dependent on Bluetooth, there is an option you can set in your `CMakeBuild.overwrite.config` file:
+Important, when you upload a microapp it is not automatically enabled! This is a command that is executed automatically by the `upload_microapp.py` script. If you do **not** want to be dependent on Bluetooth, there is an option you can set in your `CMakeBuild.overwrite.config` file:
 
 ```
 AUTO_ENABLE_MICROAPP_ON_BOOT=1
 ```
 
-This removes the need of enabling the microapp over the air. Of course, in production we will always demand an enabling step and thus the default is off. 
+This removes the need of enabling the microapp over the air. Of course, in production we will always demand an enabling step and thus the default is off.
 
 # What does not work yet?
 

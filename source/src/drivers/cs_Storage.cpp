@@ -562,6 +562,7 @@ cs_ret_code_t Storage::eraseAllPages() {
 	if (_initialized || isErasingPages()) {
 		return ERR_NOT_AVAILABLE;
 	}
+	// The function fds_flash_end_addr() is available in patched SDKs
 	uint32_t endAddr = fds_flash_end_addr();
 	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
 	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
