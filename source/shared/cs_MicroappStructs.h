@@ -17,7 +17,7 @@
 const uint8_t MAX_PAYLOAD = 32;
 
 enum CommandMicroappPin {
-	CS_MICROAPP_COMMAND_PIN_SWITCH        = 0x00,
+	CS_MICROAPP_COMMAND_PIN_SWITCH        = 0x00, // Virtual pin
 	CS_MICROAPP_COMMAND_PIN_DIMMER        = 0x00, // same one
 	CS_MICROAPP_COMMAND_PIN_GPIO1         = 0x01, // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO2         = 0x02, // GPIO pin on connector
@@ -41,9 +41,12 @@ enum ErrorCodesMicroapp {
 enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_LOG               = 0x01,
 	CS_MICROAPP_COMMAND_DELAY             = 0x02,
-	CS_MICROAPP_COMMAND_PIN               = 0x03,
+	CS_MICROAPP_COMMAND_PIN               = 0x03, // Payload is pin_cmd_t.
 	CS_MICROAPP_COMMAND_SERVICE_DATA      = 0x04,
 	CS_MICROAPP_COMMAND_TWI               = 0x05,
+	CS_MICROAPP_COMMAND_POWER_USAGE       = 0x06,
+	CS_MICROAPP_COMMAND_PRESENCE          = 0x07,
+	CS_MICROAPP_COMMAND_MESH              = 0x08,
 };
 
 enum CommandMicroappLogOption {
@@ -106,11 +109,11 @@ typedef struct {
  * The value field is large enough to store a function pointer.
  */
 typedef struct {
-	uint8_t cmd;
-	uint8_t pin;
-	uint8_t opcode1;
-	uint8_t opcode2;
-	uint8_t value;
+	uint8_t cmd;     // CommandMicroapp == CS_MICROAPP_COMMAND_PIN
+	uint8_t pin;     // CommandMicroappPin
+	uint8_t opcode1; // CommandMicroappPinOpcode1
+	uint8_t opcode2; // CommandMicroappPinOpcode2
+	uint8_t value;   // CommandMicroappPinValue
 	uint8_t ack;
 	uint32_t callback;
 } pin_cmd_t;
@@ -139,3 +142,39 @@ typedef struct {
 	uint8_t buf[MAX_TWI_PAYLOAD];
 } twi_cmd_t;
 
+struct __attribute__((packed)) microapp_power_usage_t {
+	int32_t powerUsage;
+};
+
+struct __attribute__((packed)) microapp_presence_t {
+	uint8_t profileId;
+	uint64_t presenceBitmask;
+};
+
+
+const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
+
+enum CommandMicroappMeshOpcode {
+	CS_MICROAPP_COMMAND_MESH_SEND           = 0x00,
+	CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE = 0x01,
+	CS_MICROAPP_COMMAND_MESH_READ           = 0x02,
+};
+
+struct __attribute__((packed)) microapp_mesh_header_t {
+	uint8_t opcode;  // CommandMicroappMeshOpcode
+};
+
+struct __attribute__((packed)) microapp_mesh_send_header_t {
+	uint8_t stoneId; // Target stone ID, or 0 for broadcast.
+	// Followed by message.
+};
+
+struct __attribute__((packed)) microapp_mesh_read_available_t {
+	bool available;
+};
+
+struct __attribute__((packed)) microapp_mesh_read_t {
+	uint8_t stoneId; // Target stone ID, or 0 for broadcast.
+	uint8_t messageSize; // Actual message size.
+	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE]; // Message buffer.
+};

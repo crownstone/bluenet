@@ -96,7 +96,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result.returnCode = ERR_BUFFER_LOCKED;
 		}
 
-		_log(SERIAL_DEBUG, false, "addControlCharacteristic returnCode=%u dataSize=%u ", result.returnCode, result.dataSize);
+		_log(SERIAL_DEBUG, false, "controlcharacteristic onWrite returnCode=0x%x dataSize=%u ", result.returnCode, result.dataSize);
 		_logArray(SERIAL_DEBUG, true, _resultPacketAccessor->getSerializedBuffer().data, _resultPacketAccessor->getSerializedBuffer().len);
 
 		writeResult(protocol, type, result);

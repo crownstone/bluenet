@@ -16,7 +16,7 @@ if(NOT DEFINED CONFIG_NAME)
 	message(FATAL_ERROR "Need the name, \${CONFIG_NAME}, of the config value to get")
 endif()
 
-# Overwrite with runtime config
+# Load default config
 if(DEFINED DEFAULT_CONFIG_FILE)
 	if(EXISTS "${DEFAULT_CONFIG_FILE}")
 		load_configuration_value(${DEFAULT_CONFIG_FILE} ${CONFIG_NAME} CONFIG_VALUE)

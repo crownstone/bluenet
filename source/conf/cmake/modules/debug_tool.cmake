@@ -1,16 +1,30 @@
 include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
 
 if(EXISTS "${DEFAULT_CONFIG_FILE}")
+	message(STATUS "Load from default config file: ${DEFAULT_CONFIG_FILE}")
 	load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
+endif()
+
+if(EXISTS "${TARGET_CONFIG_FILE}")
+	message(STATUS "Load from default config file: ${TARGET_CONFIG_FILE}")
+	load_configuration(${TARGET_CONFIG_FILE} CONFIG_LIST)
+endif()
+
+if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
+	message(STATUS "Load from default config file: ${TARGET_CONFIG_OVERWRITE_FILE}")
+	load_configuration(${TARGET_CONFIG_OVERWRITE_FILE} CONFIG_LIST)
 endif()
 
 # Overwrite with runtime config
 if(EXISTS "${CONFIG_FILE}")
+	message(STATUS "Load from config file: ${CONFIG_FILE}")
 	load_configuration(${CONFIG_FILE} CONFIG_LIST)
 endif()
 
 message(STATUS "Device: ${DEVICE}")
-message(STATUS "Serial number: ${SERIAL_NUM}")
+if(DEFINED SERIAL_NUM)
+	message(STATUS "Serial number: ${SERIAL_NUM}")
+endif()
 message(STATUS "GDB port: ${GDB_PORT}")
 
 if (SERIAL_NUM)

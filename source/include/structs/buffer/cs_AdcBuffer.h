@@ -88,6 +88,17 @@ public:
 		return _buf[buffer_id];
 	}
 
+#ifdef HOST_TARGET
+	/**
+	 * Set the buffer at the particular buffer_id by just writing a pointer to it. The code calling
+	 * this function is responsible for setting the right pointer. No checks w.r.t. this pointer are
+	 * performed.
+	 */
+	void setBuffer(adc_buffer_id_t buffer_id, adc_buffer_t* ptr) {
+		_buf[buffer_id] = ptr;
+	}
+#endif
+
 	/**
 	 * Get total number of samples in a buffer.
 	 */
