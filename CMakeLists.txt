@@ -164,7 +164,8 @@ else()
 	message(FATAL_ERROR "Unknown Mesh version: ${MESH_SDK_VERSION_FULL}")
 endif()
 
-# The nrfjprog
+# The nrfjprog utility
+message(STATUS "Host system processor ${CMAKE_HOST_SYSTEM_PROCESSOR}")
 set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-14-0/nRF-Command-Line-Tools_10_14_0_Linux64.zip)
 set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.14.0_amd64.deb)
 set(NRFJPROG_MD5 8a049bacc67519561b77e014b652d5df)
