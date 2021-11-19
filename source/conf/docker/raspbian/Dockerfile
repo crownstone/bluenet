@@ -12,4 +12,4 @@ RUN git clone https://github.com/crownstone/bluenet
 
 RUN mkdir -p bluenet/build
 
-RUN cd bluenet/build && cmake .. -DSUPERUSER_SWITCH="" && make
+RUN cd bluenet/build && cmake .. -DSUPERUSER_SWITCH="" -DOVERWRITE_COMPILER_VERSION=10.3-2021.10 && make
