@@ -15,6 +15,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install cmake
+          sudo apt-get install gcc g++
           cmake --version
       - name: Create build dir
         run: |
@@ -22,11 +23,15 @@ jobs:
       - name: Run cmake
         working-directory: ./build
         run: |
-          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
+          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
       - name: Run make
         working-directory: ./build
         run: |
           make
+      - name: Run tests
+        working-directory: ./build/host/default
+        run: |
+          ctest
       - name: Finish up
         run: |
           echo "🍏 This job's status is ${{ job.status }}."

@@ -1,4 +1,4 @@
-#define SERIAL_VERBOSITY SERIAL_DEBUG
+//#define SERIAL_VERBOSITY SERIAL_DEBUG
 
 #include <util/cs_BitmaskVarSize.h>
 
