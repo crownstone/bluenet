@@ -195,10 +195,16 @@ else()
 	message(FATAL_ERROR "Unknown Mesh version: ${MESH_SDK_VERSION_FULL}")
 endif()
 
-# The nrfjprog
-set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-14-0/nRF-Command-Line-Tools_10_14_0_Linux64.zip)
-set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.14.0_amd64.deb)
-set(NRFJPROG_MD5 8a049bacc67519561b77e014b652d5df)
+# The nrfjprog utility
+if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*")
+	set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-15-0/nrf-command-line-tools-10.15.0_arm.zip)
+	set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.15.0_armhf.deb)
+	set(NRFJPROG_MD5 49d0a47dc197f943502b164460bdd3e1)
+else()
+	set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-14-0/nRF-Command-Line-Tools_10_14_0_Linux64.zip)
+	set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.14.0_amd64.deb)
+	set(NRFJPROG_MD5 8a049bacc67519561b77e014b652d5df)
+endif()
 
 # The cross-compiler
 set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
