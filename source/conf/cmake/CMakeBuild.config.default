@@ -55,6 +55,8 @@ UART_BAUDRATE=230400
 # ## Nordic boards
 # PCA10036             40
 # PCA10040             41
+# PCA10100             42
+# PCA10056             43
 # ## Guidestone
 # GUIDESTONE           100
 # ## Crownstone USB dongle
@@ -79,10 +81,7 @@ UART_BAUDRATE=230400
 HARDWARE_BOARD=PCA10040
 
 # The default pin layout as defined by Nordic and used by the bootloader.
-# Use PCA10040 for the nRF52832, and PCA10100 for the nRF52833.
-NORDIC_HARDWARE_BOARD=PCA10040
-
-# The default pin layout as defined by Nordic and used by the bootloader
+# Use PCA10040 for the nRF52832, PCA10100 for the nRF52833, PCA10056 for the nRF52840.
 NORDIC_HARDWARE_BOARD=PCA10040
 
 # The default hardware board, in case no board is written in UICR.
@@ -228,9 +227,18 @@ NRF_DEVICE_SERIES=NRF52_SERIES
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF5_DIR=
 
-# The nordic sdk version
+# The Nordic SDK version
 NORDIC_SDK_VERSION=15
-#NORDIC_SDK_VERSION=16
+
+# Specify the Nordic SDK version in more detail
+NORDIC_SDK_VERSION_MAJOR=15
+NORDIC_SDK_VERSION_MINOR=3
+NORDIC_SDK_VERSION_PATCH=0
+
+# Specify the Mesh SDK version
+MESH_SDK_VERSION_MAJOR=3
+MESH_SDK_VERSION_MINOR=2
+MESH_SDK_VERSION_PATCH=0
 
 # Starting with SoftDevice S110 v7 there is no separate UICR section
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
@@ -395,6 +403,66 @@ RAM_BOOTLOADER_START_OFFSET=0x718
 # 0x20020000 - RAM_R1_BASE = 0x1DC40
 #RAM_APPLICATION_AMOUNT=0x1DC40
 
+#######################################################################################################################
+# S132 7.2.0 (comes with SDK 17)
+#######################################################################################################################
+#SOFTDEVICE_MAJOR=7
+#SOFTDEVICE_MINOR=2
+#SOFTDEVICE_SERIES=132
+#SOFTDEVICE=s132_nrf52_7.2.0
+
+# Check ../tools/nrf5_sdk/components/softdevice/s132/doc/s132_nrf52_7.2.0_release-notes.pdf:
+# FLASH: 152 kB (0x26000 bytes)
+# RAM: 5.6 kB (0x1668 bytes)
+# Call stack: 1.75 kB (0x700 bytes)
+# Firmware id: 0x0101
+
+# We might get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
+#   FLASH (rx) : ORIGIN = 0x30000, LENGTH = 0x50000
+# However, this is MORE than above... Hence, we set it to 0x26000
+#APPLICATION_START_ADDRESS=0x00026000
+
+# Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
+#APPLICATION_LENGTH=0x50000
+
+# Start of RAM for the application (from 0x20000000 and up to RAM_R1_BASE it is reserved for the softdevice)
+# Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
+# TODO
+#RAM_R1_BASE=0x200023C0
+
+# On the nRF52833 we have 128kB of RAM, end is at 0x20020000, so the amount of RAM for the application becomes
+# 0x20020000 - RAM_R1_BASE = 0x1DC40
+# TODO
+#RAM_APPLICATION_AMOUNT=0x1DC40
+
+# TODO:
+# - Move the defaults of the different hardware to the /config directories.
+# - Create easier defaults that reflect the actual hardware and derive the others. For example, a default like RAM_TOTAL_AMOUNT for a particular hardware series. Then calculate RAM_APPLICATION_AMOUNT where neessary (for example in the linker files).
+# - Have some way to select a softdevice. This file can then select a softdevice while details on the softdevice are then set where needed. This makes it easier to switch between softdevices when e.g. working on branches.
+
+# If you just run the firmware with the wrong RAM_R1_BASE setting, it will end up in an error handler.
+# When running debug output it will tell you exactly which RAM_R1_BASE setting it expects. If you are
+# really lazy, set it like that for new hardware.
+#RAM_R1_BASE=0x20002a48
+
+# For the nRF52832 we have either 32kB or 64kB of RAM. This version has 64kB. Note that if you set
+# RAM_APPLICATION_AMOUNT too large, you will hardfaults. In gdb, if you use python, you'll not be
+# able to see a very obvious reason (imprecise data bus error). However, you will see something about
+# the stack. Because the stack grows down, this gives away that your RAM_APPLICATION_AMOUNT is likely
+# having the wrong value.
+#
+# (gdb) svd SCB CFSR_UFSR_BFSR_MMFSR
+#   Fields in SCB CFSR_UFSR_BFSR_MMFSR:
+#     ...
+#     IMPRECISERR:  1  Imprecise data bus error
+#     UNSTKERR:     0  Bus fault on unstacking for a return from exception
+#     STKERR:       1  Bus fault on stacking for exception entry
+#     ...
+#RAM_APPLICATION_AMOUNT=0xd5b8
+
+
+
+
 
 ## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you
@@ -427,3 +495,5 @@ FLASH_MICROAPP_PAGES=2
 # The amount of RAM it is allowed to use (microapp is placed before IPC ram, and grows down).
 RAM_MICROAPP_AMOUNT=0x800
 
+# Default location of file with keys to setup Crownstone
+KEYS_JSON_FILE=~/.keys/crownstone.json

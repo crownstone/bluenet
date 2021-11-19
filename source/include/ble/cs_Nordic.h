@@ -11,12 +11,12 @@ extern "C"
 {
 #endif
 
-#ifndef HOST_TARGET
+#ifndef DISABLE_NRF_HEADERS
 #include <app_util_platform.h>
 typedef uint32_t ret_code_t;
 
 // The header files in the Nordic SDK. Keep all the includes here, not dispersed over all the header files.
-#include <nrf/sdk_config.h>
+#include <sdk_config.h>
 #include <app_scheduler.h>
 #include <app_util.h>
 #include <ble.h>
@@ -27,6 +27,9 @@ typedef uint32_t ret_code_t;
 #include <ble_gattc.h>
 #include <ble_hci.h>
 #include <ble_srv_common.h>
+#if NORDIC_SDK_VERSION > 15
+#include <cmsis_compiler.h>
+#endif
 #include <fds.h>
 #include <nrf.h>
 #include <nrf_delay.h>
@@ -83,11 +86,13 @@ typedef uint32_t ret_code_t;
 #undef APP_ERROR_HANDLER
 #endif
 
-#else // HOST_TARGET defined
+#else // DISABLE_NRF_HEADERS
 
 #ifndef __ALIGN
 #define __ALIGN(n) __attribute__((aligned(n)))
 #endif
+
+#include <nrf_stubs.h>
 
 #define BLE_GAP_PASSKEY_LEN 6
 
