@@ -79,6 +79,8 @@ message(STATUS "  python executable: \"${PYTHON_EXECUTABLE}\"")
 message(STATUS "  pip will be used as: \"${PYTHON_EXECUTABLE} -m pip install package\"")
 message(STATUS "  if installation fails (of e.g. nrfutil), run \"python3 -m pip install -U pip [--user]\"")
 
+message(STATUS "CPU CMake is running on: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+
 # The source dir is the parent directory, the binary directory is the build/ directory (out of build)
 message(STATUS "source dir: ${CMAKE_SOURCE_DIR}")
 message(STATUS "bin dir: ${CMAKE_BINARY_DIR}")
