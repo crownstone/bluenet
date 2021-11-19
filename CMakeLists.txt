@@ -30,6 +30,8 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
 
+set(OVERWRITE_COMPILER_VERSION                   "" CACHE STRING "Overwrite compiler version")
+
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE                         Debug)
@@ -131,6 +133,17 @@ load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_
 # From now on you can use information from the config files, not above!
 
 #######################################################################################################################
+# Overwrite configuration values for just a few options
+#######################################################################################################################
+
+if(OVERWRITE_COMPILER_VERSION)
+	message(STATUS "Overwrite compiler version with ${OVERWRITE_COMPILER_VERSION}")
+	set(COMPILER_VERSION "${OVERWRITE_COMPILER_VERSION}")
+else()
+	message(STATUS "Compiler version to use: ${COMPILER_VERSION}")
+endif()
+
+#######################################################################################################################
 # Create some convenience variables that use configuration values
 #######################################################################################################################
 
@@ -208,11 +221,22 @@ endif()
 
 # The cross-compiler
 if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*")
-	set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2)
-	set(GCC_ARM_NONE_EABI_MD5 3fe3d8bb693bd0a6e4615b6569443d0d)
+	if("${COMPILER_VERSION}" STREQUAL "10.3-2021.10")
+		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2)
+		set(GCC_ARM_NONE_EABI_MD5 3fe3d8bb693bd0a6e4615b6569443d0d)
+	else()
+		message(FATAL_ERROR "Unknown compiler version: ${COMPILER_VERSION} for ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+	endif()
 else()
-	set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
-	set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
+	if("${COMPILER_VERSION}" STREQUAL "8-2019-q3-update")
+		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
+		set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
+	elseif("${COMPILER_VERSION}" STREQUAL "10.3-2021.10")
+		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2)
+		set(GCC_ARM_NONE_EABI_MD5 2383e4eb4ea23f248d33adc70dc3227e)
+	else()
+		message(FATAL_ERROR "Unknown compiler version: ${COMPILER_VERSION}")
+	endif()
 endif()
 
 # The JLink tool
@@ -469,7 +493,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 add_custom_target(micro_eec
 	COMMAND sed -i 's/\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
-	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${COMPILER_PATH}/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMENT "Build micro-eec"
 	DEPENDS
 	${NORDIC_SDK_TARGET}

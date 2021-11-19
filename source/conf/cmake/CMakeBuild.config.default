@@ -200,6 +200,9 @@ COMPILER_PATH=
 # The compiler type
 COMPILER_TYPE=arm-none-eabi-
 
+# The compiler version
+COMPILER_VERSION=8-2019-q3-update
+
 # The JLink utility (when using the Segger to flash the nRF)
 JLINK=/usr/bin/JLinkExe
 
