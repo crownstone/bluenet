@@ -25,6 +25,14 @@ A Raspberry PI 4, for example, has an ARMv8 processor. You might be running Rasp
 docker buildx build --platform linux/arm/v7 -t crownstone .
 ```
 
+For Raspberry PI 4 in particular, there is another Dockerfile:
+
+```
+cd raspbian
+```
+
+And now run the `docker buildx build` command. It's gonna take a while!
+
 # Local changes
 
 If you have local changes to your code, you might want to create a docker image with those rather than cloning <https://github.com/crownstone/bluenet>.
@@ -59,6 +67,21 @@ And then build (for example for the linux/arm/v7 platform):
 ```
 docker buildx build --platform linux/arm/v7 -t crownstone .
 ```
+
+Docker will at times cache a particular step, you can bust the cache for a particular step by doing something like this:
+
+```
+ARG CACHEBUST=1
+RUN git clone -b some-branch git://localhost/ bluenet
+```
+
+And if you want to bust the cache just use a different number than 1 for `CACHEBUST`.
+
+```
+docker buildx build --platform linux/arm/v7 -t crownstone . --build-arg CACHEBUST=2
+```
+
+Change this again if you want to bust the cache again.
 
 # State
 
