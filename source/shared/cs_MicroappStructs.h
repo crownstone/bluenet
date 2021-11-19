@@ -152,7 +152,7 @@ struct __attribute__((packed)) microapp_presence_t {
 };
 
 
-const uint8_t MAX_MESH_MESSAGE_SIZE = 7;
+const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
 
 enum CommandMicroappMeshOpcode {
 	CS_MICROAPP_COMMAND_MESH_SEND           = 0x00,
@@ -176,5 +176,5 @@ struct __attribute__((packed)) microapp_mesh_read_available_t {
 struct __attribute__((packed)) microapp_mesh_read_t {
 	uint8_t stoneId; // Target stone ID, or 0 for broadcast.
 	uint8_t messageSize; // Actual message size.
-	uint8_t message[MAX_MESH_MESSAGE_SIZE]; // Message buffer.
+	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE]; // Message buffer.
 };

@@ -289,6 +289,10 @@ void MicroappProtocol::handleMeshCommand(microapp_mesh_header_t* meshCommand, ui
 				LOGi("No message.");
 				return;
 			}
+			if (eventData.size > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
+				LOGi("Message too large: %u > %u", eventData.size, MICROAPP_MAX_MESH_MESSAGE_SIZE);
+				return;
+			}
 
 			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
 			event.dispatch();
@@ -303,6 +307,10 @@ void MicroappProtocol::handleMeshCommand(microapp_mesh_header_t* meshCommand, ui
 				LOGi("Payload too small");
 				return;
 			}
+			if (!_meshMessageBuffer.isInitialized()) {
+				_meshMessageBuffer.init();
+			}
+
 			auto commandData = reinterpret_cast<microapp_mesh_read_available_t*>(payload);
 			commandData->available = !_meshMessageBuffer.empty();
 			break;
@@ -312,11 +320,15 @@ void MicroappProtocol::handleMeshCommand(microapp_mesh_header_t* meshCommand, ui
 				LOGi("Payload too small");
 				return;
 			}
-			auto commandData = reinterpret_cast<microapp_mesh_read_t*>(payload);
+			if (!_meshMessageBuffer.isInitialized()) {
+				_meshMessageBuffer.init();
+			}
 			if (_meshMessageBuffer.empty()) {
 				LOGi("No message in buffer");
 				return;
 			}
+
+			auto commandData = reinterpret_cast<microapp_mesh_read_t*>(payload);
 			auto message = _meshMessageBuffer.pop();
 			commandData->stoneId = message.stoneId;
 			commandData->messageSize = message.messageSize;
@@ -341,7 +353,7 @@ void MicroappProtocol::onMeshMessage(MeshMsgEvent event) {
 		return;
 	}
 
-	if (event.msg.len > MAX_MESH_MESSAGE_SIZE) {
+	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
 		LOGi("Message is too large: %u", event.msg.len);
 		return;
 	}
@@ -540,8 +552,6 @@ MicroappProtocol::MicroappProtocol():
 	}
 
 	_callbackData = NULL;
-
-	_meshMessageBuffer.init();
 }
 
 /*

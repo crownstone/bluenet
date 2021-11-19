@@ -30,7 +30,7 @@ typedef struct pin_isr_t {
 struct __attribute__((packed)) microapp_buffered_mesh_message_t {
 	stone_id_t stoneId; // Stone ID of the sender.
 	uint8_t messageSize;
-	uint8_t message[MAX_MESH_MESSAGE_SIZE];
+	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];
 };
 
 
