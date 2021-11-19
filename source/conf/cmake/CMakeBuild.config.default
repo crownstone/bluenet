@@ -227,10 +227,18 @@ NRF_DEVICE_SERIES=NRF52_SERIES
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF5_DIR=
 
-# The nordic sdk version
-#NORDIC_SDK_VERSION=15
-#NORDIC_SDK_VERSION=16
-NORDIC_SDK_VERSION=17
+# The Nordic SDK version
+NORDIC_SDK_VERSION=15
+
+# Specify the Nordic SDK version in more detail
+NORDIC_SDK_VERSION_MAJOR=15
+NORDIC_SDK_VERSION_MINOR=3
+NORDIC_SDK_VERSION_PATCH=0
+
+# Specify the Mesh SDK version
+MESH_SDK_VERSION_MAJOR=3
+MESH_SDK_VERSION_MINOR=2
+MESH_SDK_VERSION_PATCH=0
 
 # Starting with SoftDevice S110 v7 there is no separate UICR section
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
@@ -398,10 +406,10 @@ RAM_BOOTLOADER_START_OFFSET=0x718
 #######################################################################################################################
 # S132 7.2.0 (comes with SDK 17)
 #######################################################################################################################
-SOFTDEVICE_MAJOR=7
-SOFTDEVICE_MINOR=2
-SOFTDEVICE_SERIES=132
-SOFTDEVICE=s132_nrf52_7.2.0
+#SOFTDEVICE_MAJOR=7
+#SOFTDEVICE_MINOR=2
+#SOFTDEVICE_SERIES=132
+#SOFTDEVICE=s132_nrf52_7.2.0
 
 # Check ../tools/nrf5_sdk/components/softdevice/s132/doc/s132_nrf52_7.2.0_release-notes.pdf:
 # FLASH: 152 kB (0x26000 bytes)
@@ -412,10 +420,10 @@ SOFTDEVICE=s132_nrf52_7.2.0
 # We might get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
 #   FLASH (rx) : ORIGIN = 0x30000, LENGTH = 0x50000
 # However, this is MORE than above... Hence, we set it to 0x26000
-APPLICATION_START_ADDRESS=0x00026000
+#APPLICATION_START_ADDRESS=0x00026000
 
 # Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
-APPLICATION_LENGTH=0x50000
+#APPLICATION_LENGTH=0x50000
 
 # Start of RAM for the application (from 0x20000000 and up to RAM_R1_BASE it is reserved for the softdevice)
 # Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
@@ -435,7 +443,7 @@ APPLICATION_LENGTH=0x50000
 # If you just run the firmware with the wrong RAM_R1_BASE setting, it will end up in an error handler.
 # When running debug output it will tell you exactly which RAM_R1_BASE setting it expects. If you are
 # really lazy, set it like that for new hardware.
-RAM_R1_BASE=0x20002a48
+#RAM_R1_BASE=0x20002a48
 
 # For the nRF52832 we have either 32kB or 64kB of RAM. This version has 64kB. Note that if you set
 # RAM_APPLICATION_AMOUNT too large, you will hardfaults. In gdb, if you use python, you'll not be
@@ -450,7 +458,7 @@ RAM_R1_BASE=0x20002a48
 #     UNSTKERR:     0  Bus fault on unstacking for a return from exception
 #     STKERR:       1  Bus fault on stacking for exception entry
 #     ...
-RAM_APPLICATION_AMOUNT=0xd5b8
+#RAM_APPLICATION_AMOUNT=0xd5b8
 
 
 
