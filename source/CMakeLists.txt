@@ -47,6 +47,8 @@ string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
+message(STATUS "Git branch ${GIT_REFSPEC} at hash ${GIT_SHA1}")
+
 #######################################################################################################################
 
 if(NOT CONFIG_DIR)
