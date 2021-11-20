@@ -83,6 +83,16 @@ docker buildx build --platform linux/arm/v7 -t crownstone . --build-arg CACHEBUS
 
 Change this again if you want to bust the cache again.
 
+The Dockerfile in `raspbian/` has some other arguments that can be used. Check its contents, e.g.
+
+```
+docker buildx build --platform linux/arm/v7 -t crownstone . --build-arg BLUENET_BRANCH=some-dev-branch --build-arg GITHUB_REPOS='git://localhost/'
+```
+
+All this puts the result in the cache, with `--output` you can decide how to use the result. The option `--progress plain` just more plainly shows the building progress.
+
+To remove all caching, etc. use `docker buildx prune`.
+
 # State
 
 If there's a simple way to host the built docker online, feel free to suggest so. Know that when you run from a docker,
