@@ -90,6 +90,12 @@ message(STATUS "install dir: ${CMAKE_INSTALL_PREFIX}")
 
 find_package(Git REQUIRED)
 
+set(COMPILE_ON_ARM 0)
+if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*" OR "${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "aarch64")
+	message(STATUS "Host is an ARM processor")
+	set(COMPILE_ON_ARM 1)
+endif()
+
 if(PYTHON_REQUIRED)
 	# This utility is able to find either python2 or python3. Set virtual env variant to be used first.
 	set(Python_FIND_VIRTUALENV FIRST)
@@ -209,7 +215,7 @@ else()
 endif()
 
 # The nrfjprog utility
-if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*")
+if(COMPILE_ON_ARM)
 	set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-15-0/nrf-command-line-tools-10.15.0_arm.zip)
 	set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.15.0_armhf.deb)
 	set(NRFJPROG_MD5 49d0a47dc197f943502b164460bdd3e1)
@@ -220,7 +226,7 @@ else()
 endif()
 
 # The cross-compiler
-if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*")
+if(COMPILE_ON_ARM)
 	if("${COMPILER_VERSION}" STREQUAL "10.3-2021.10")
 		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2)
 		set(GCC_ARM_NONE_EABI_MD5 3fe3d8bb693bd0a6e4615b6569443d0d)
@@ -241,7 +247,7 @@ endif()
 
 # The JLink tool
 set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*")
+if(COMPILE_ON_ARM)
 	message(STATUS "Get ARM (64-bit) version of JLink tool")
 	set(JLINK_DEB_FILE JLink_Linux_V758_arm64.deb)
 	set(JLINK_MD5 f6a74b6a134fed8036238b107504369b)
