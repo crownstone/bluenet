@@ -92,7 +92,7 @@ find_package(Git REQUIRED)
 
 set(COMPILE_ON_ARM 0)
 if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*" OR "${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "aarch64")
-	message(STATUS "Host is an ARM processor")
+	message(STATUS "Host has an ARM processor")
 	set(COMPILE_ON_ARM 1)
 endif()
 
