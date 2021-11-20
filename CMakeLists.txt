@@ -241,9 +241,14 @@ endif()
 
 # The JLink tool
 set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-set(JLINK_DEB_FILE JLink_Linux_V754b_x86_64.deb)
-set(JLINK_MD5 999c69c040168cffb272850fc62a3708)
-
+if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*")
+	message(STATUS "Get ARM (64-bit) version of JLink tool")
+	set(JLINK_DEB_FILE JLink_Linux_V758_arm64.deb)
+	set(JLINK_MD5 f6a74b6a134fed8036238b107504369b)
+else()
+	set(JLINK_DEB_FILE JLink_Linux_V754b_x86_64.deb)
+	set(JLINK_MD5 999c69c040168cffb272850fc62a3708)
+endif()
 set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
 
 #######################################################################################################################
