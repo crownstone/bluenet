@@ -8,6 +8,10 @@
 
 #include <algorithm>
 
+#ifdef HOST_TARGET
+#include <limits>
+#endif
+
 namespace CsMath{
 
 /**
