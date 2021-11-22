@@ -66,6 +66,19 @@ private:
 	uint16_t ticksLeftMinute = TICKS_PER_MINUTES;
 
 	/**
+	 * Assert that TrackedDevice has standard layout (being laid out in memory exactly like it
+	 * would be in C).
+	 */
+	static_assert(std::is_standard_layout<TrackedDevice>::value,
+			"TrackedDevice has to provide standard layout");
+
+	/**
+	 * Assert that TrackedDevice is trivially copyable (basically, memcpy works).
+	 */
+	static_assert(std::is_trivially_copyable<TrackedDevice>::value,
+			"TrackedDevice has to be trivially copyable");
+
+	/**
 	 * List of all tracked devices.
 	 *
 	 * Device ID should be unique.
