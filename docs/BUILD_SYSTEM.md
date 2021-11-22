@@ -24,11 +24,11 @@ is required. This is:
 
 * Nordic SDK
 * Nordic Mesh
-* Nordic nrfutil software
 * GNU cross-compiler
-* JLink tools
+* Nordic nrfutil software (semi-optional)
+* JLink tools (semi-optional)
 
-The Softdevice is part of the Nordic SDK and does not need to be downloaded separately. The continuous 
+The Softdevice is part of the Nordic SDK and does not need to be downloaded separately. The continuous
 integration system (Github Actions) does not need to download JLink and the nrfutil software henceforth they can be excluded from the
 build by
 
@@ -43,8 +43,21 @@ If you update the version of one of the supporting tools, you will also need to 
 If you upgrade to a new file, download it, and run `md5sum *` on the command line. Then update both name and hash in
 the `CMakeLists.txt` file.
 
-There are some other tools from Nordic that are convenient to use. They are optional, however, they are quite 
-convenient. For example, reading out the memory layout is implemented very nicely (see Figure).
+The semi-optional tools can be downloaded using flags (see below). They are not necessary to build bluenet, hence
+they are semi-optional. If you want to flash the `bluenet` binaries to hardware they are required. You can download
+them also on yourself. This is not recommended because we know which versions work / have no bugs.
+
+# Downloads of optional tools
+
+There are also a bundle of more or less optional tools.
+
+* Nordic nrfconnect software
+* The bluenet binary logger
+* The Crownstone Python libs
+* The `csutil` tool for microapps
+
+One of the convenient optional tools from Nordic is the Nordic nrf connect tool.
+It reads out how the memory layout is implemented and displays this in a very nice way (see Figure).
 
 ![Nordic Tools](images/pc_nordic_tools.png)
 
@@ -53,17 +66,32 @@ You can enable the download of `nrfconnect` by:
     cmake .. -DDOWNLOAD_NRFCONNECT=ON
     make
 
-This particular tool requires `npm`. Install it through something like `sudo apt install npm`. Subsequently, it downloads a lot of stuff, amongst which also `nrfjprog` it it cannot find it. Make sure it does not lead to 
-version conflicts. You can run these by:
+This particular tool requires `npm`. Install it through something like `sudo apt install npm`.
+Subsequently, it downloads a lot of stuff, amongst which also `nrfjprog` it it cannot find it.
+Make sure it does not lead to version conflicts. You can run these by:
 
     make nrfconnect_core_setup
     make nrfconnect_core
 
 These run in separate shells. The `_setup` you at least have to run once. After that it can do continuous rebuilds.
-You can select the tool to use from the list of apps. By default there are now quite a few apps there. The 
+You can select the tool to use from the list of apps. By default there are now quite a few apps there. The
 programmer can also be downloaded separately by setting the `-DDOWNLOAD_NRFCONNECT_PROGRAMMER=ON` flag at `CMake`.
 
-For some of the tools, even if you configure them to be downloaded, we do update them each time `bluenet` is build. This is for example the case for the binary logger and the nrfutil utility. This functionality can be disabled by `-DAUTO_UPDATE_TOOLS=OFF`. In that case you will have to do this yourself for which there is:
+There might be more download options in the future. Check the `cmake` options by running in the build directory
+(after `sudo apt-get install -y cmake-gui`):
+
+    cmake-gui .
+
+Then you will see their (cached) values. Some examples of other options are `-DDOWNLOAD_BLUENET_LIB_LOGS=ON` which
+will download the binary logging tool for you and `-DDOWNLOAD_CSUTIL=ON` which will download a utility for uploading
+microapps. Just the targets are also listed through:
+
+    make help
+
+For some of the tools, even if you configure them to be downloaded, we do update them each time `bluenet` is build.
+This is for example the case for the binary logger and the nrfutil utility.
+This functionality can be disabled by `-DAUTO_UPDATE_TOOLS=OFF`.
+In that case you will have to do this yourself for which there is:
 
     make tools
 
@@ -71,6 +99,40 @@ Or separately:
 
     make bluenet_logs
     make nrfutil
+
+If Crownstone Python libs are configured through `-DDOWNLOAD_CROWNSTONE_PYTHON_LIBS`, they can be installed through:
+
+    make crownstone_python_libs
+
+Check the result through something like `python -m pip list`.
+
+# Python virtual environment
+
+Although it is possible to use bluenet without a Python virtual environment, it is discouraged. There's now an option
+which helps the user in this: `-DPYTHON_SETUP_ENV=ON`. When running `cmake` with this option enabled, it will create
+an extra `make` target that can be called afterwards:
+
+    make python_setup_venv
+
+This will also automatically be called (is a dependency for):
+
+    make bluenet_logs
+    make nrfutil
+    make csutil
+
+Just like always, running `cmake` only configures, only on running `make` it will be installed. After installation
+you will need to activate the environment. The exact command will be given when you do the build and you will be driven
+to set it like this:
+
+```
+  Not running in a virtual environment (while configured with
+  -DPYTHON_SETUP_VENV=ON).
+  Did you call:
+
+    source <...>/bluenet/tools/python/crownstone_env/bin/activate
+```
+
+This `source` command you will need to execute before any call to `make`.
 
 ## Patches
 
@@ -80,7 +142,8 @@ general patches are generated through something like (take the mesh SDK as examp
 
     diff -ruN tools/mesh_sdk tools/mesh_sdk_patched > patch/00mesh.patch
 
-A patch is applied in the workspace directory.
+A patch is applied in the workspace directory. On the moment there are no patches applied because the code is
+maintained in patched form in dedicated github repositories (for the nRF5 SDK and the Mesh SDK).
 
 # Configuration
 

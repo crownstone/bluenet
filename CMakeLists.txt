@@ -11,6 +11,7 @@ option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"          
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
 option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary logging"       OFF)
+option(DOWNLOAD_CROWNSTONE_PYTHON_LIBS           "Download Crownstone Python libs"       OFF)
 option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
 option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
 option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" ON)
@@ -41,7 +42,7 @@ endif()
 set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 
 set(PYTHON_REQUIRED OFF)
-if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS)
+if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
 	message(STATUS "One of the download options requires python")
 	set(PYTHON_REQUIRED ON)
 else()
@@ -280,7 +281,8 @@ if(PYTHON_SETUP_VENV)
 	# We first use `apt-cache` so that we only run `apt install` when there is actually a candidate
 	# that is different from what is installed.
 	set(PYTHON_SETUP_TARGET python_setup_venv)
-	add_custom_target(python_setup_venv
+	message(STATUS "Configure ${PYTHON_SETUP_TARGET} target")
+	add_custom_target(${PYTHON_SETUP_TARGET}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Install python3-venv"
 		COMMAND apt-cache policy python3-venv > ${CMAKE_BINARY_DIR}/.apt-cache
 		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Installed:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.installed
@@ -298,7 +300,8 @@ if(PYTHON_SETUP_VENV)
 
 	# Use a cmake -P structure to check actual ENV variables
 	set(PYTHON_TEST_VENV_TARGET python_test_venv)
-	add_custom_target(python_test_venv
+	message(STATUS "Configure ${PYTHON_TEST_VENV_TARGET} target")
+	add_custom_target(${PYTHON_TEST_VENV_TARGET}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Test for venv"
 		COMMAND ${CMAKE_COMMAND} -DPYTHON_CROWNSTONE_VENV_PATH=${PYTHON_CROWNSTONE_VENV_PATH} -P ${DEFAULT_MODULES_PATH}/test_python_venv.cmake
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
@@ -307,6 +310,7 @@ if(PYTHON_SETUP_VENV)
 endif()
 
 set(NORDIC_SDK_TARGET nordic_sdk${NORDIC_SDK_VERSION_FULL})
+message(STATUS "Configure ${NORDIC_SDK_TARGET} target")
 ExternalProject_Add(${NORDIC_SDK_TARGET}
 	GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
 	GIT_SHALLOW 1
@@ -320,6 +324,7 @@ ExternalProject_Add(${NORDIC_SDK_TARGET}
 
 if(COMPILE_FOR_HOST)
 	set(NORDIC_HOST_SDK_TARGET nordic_host_sdk${NORDIC_SDK_VERSION_FULL})
+	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
 	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
 		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
 		GIT_SHALLOW 1
@@ -335,6 +340,7 @@ endif()
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 set(MESH_SDK_TARGET nordic_mesh_sdk${MESH_SDK_VERSION_FULL})
+message(STATUS "Configure ${MESH_SDK_TARGET} target")
 ExternalProject_Add(${MESH_SDK_TARGET}
 	GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
 	GIT_SHALLOW 1
@@ -350,7 +356,8 @@ list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK)
 	set(JLINK_TARGET jlink)
-	ExternalProject_Add(jlink
+	message(STATUS "Configure ${JLINK_TARGET} target")
+	ExternalProject_Add(${JLINK_TARGET}
 		DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 		URL ${JLINK_LINUX_DOWNLOAD_URL}
@@ -378,7 +385,9 @@ set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_BLUENET_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
 
 if(DOWNLOAD_NRFJPROG)
-	ExternalProject_Add(nrfjprog
+	set(NRFJPROG_TARGET nrfjprog)
+	message(STATUS "Configure ${NRFJPROG_TARGET} target")
+	ExternalProject_Add(${NRFJPROG_TARGET}
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 		URL ${NRFJPROG_DOWNLOAD_URL}
 		URL_MD5 ${NRFJPROG_MD5}
@@ -391,7 +400,8 @@ endif()
 
 if(DOWNLOAD_NRFUTIL)
 	set(NRFUTIL_TARGET nrfutil)
-	add_custom_target(nrfutil
+	message(STATUS "Configure ${NRFUTIL_TARGET} target")
+	add_custom_target(${NRFUTIL_TARGET}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add nrfutil through pip"
 		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel nrfutil
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
@@ -402,7 +412,8 @@ endif()
 
 if(DOWNLOAD_NRFCONNECT)
 	set(NRFCONNECT_CORE_TARGET git_nrfconnect_core)
-	ExternalProject_Add(git_nrfconnect_core
+	message(STATUS "Configure ${NRFCONNECT_CORE_TARGET} target")
+	ExternalProject_Add(${NRFCONNECT_CORE_TARGET}
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
@@ -416,6 +427,7 @@ endif()
 
 if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 	set(NRFCONNECT_PROGRAMMER_TARGET git_nrfconnect_programmer)
+	message(STATUS "Configure ${NRFCONNECT_PROGRAMMER_TARGET} target")
 	ExternalProject_Add(git_nrfconnect_programmer
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
 		GIT_CONFIG advice.detachedHead=false
@@ -428,7 +440,8 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 endif()
 
 if(DOWNLOAD_CSUTIL)
-	message(STATUS "The csutil utility will in the end be replaced by tools in crownstone ble lib")
+	message(STATUS "Configure csutil target")
+	message(STATUS "Note, the `csutil` utility will be replaced by tools in Crownstone BLE lib")
 	ExternalProject_Add(csutil
 		GIT_REPOSITORY https://github.com/mrquincle/csutil
 		GIT_CONFIG advice.detachedHead=false
@@ -443,6 +456,7 @@ endif()
 
 if(DOWNLOAD_BLUENET_LIB_LOGS)
 	set(BLUENET_LIB_LOGS_TARGET bluenet_logs)
+	message(STATUS "Configure ${BLUENET_LIB_LOGS_TARGET} target")
 	add_custom_target(bluenet_logs
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add bluenet-logs through pip"
 		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel bluenet-logs
@@ -452,9 +466,27 @@ if(DOWNLOAD_BLUENET_LIB_LOGS)
 		)
 endif()
 
-# Dummy target to install all tools that are not required for building and are also not installed
+# Downloads the Crownstone Python libs
+# https://github.com/crownstone/crownstone-lib-python-ble
+# https://github.com/crownstone/crownstone-lib-python-uart
+# https://github.com/crownstone/crownstone-lib-python-cloud
+if(DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
+	set(CROWNSTONE_PYTHON_LIBS_TARGET crownstone_python_libs)
+	message(STATUS "Configure ${CROWNSTONE_PYTHON_LIBS_TARGET} target")
+	add_custom_target(${CROWNSTONE_PYTHON_LIBS_TARGET}
+		COMMAND ${CMAKE_COMMAND} -E echo "-- Add Crownstone Python libs through pip"
+		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel crownstone-ble crownstone-uart crownstone-cloud
+		WORKING_DIRECTORY ${WORKSPACE_DIR}
+		COMMENT "Install Crownstone Python libs"
+		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
+		)
+endif()
+
+# Target to install all tools that are not required for building and are also not installed
 # automatically through ExternalProject_Add such as bluenet_logs.
-add_custom_target(tools
+set(TOOLS_TARGET tools)
+message(STATUS "Configure ${TOOLS_TARGET} target")
+add_custom_target(${TOOLS_TARGET}
 	COMMAND ${CMAKE_COMMAND} -E echo "-- Install supporting tools"
 	WORKING_DIRECTORY ${WORKSPACE_DIR}
 	COMMENT "Install supporting tools"
@@ -534,9 +566,10 @@ if(NOT FACTORY_IMAGE)
 		)
 endif()
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
-if(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+set(BOARD_CONFIG_DIR_FULL "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.config)
+if(EXISTS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.overwrite.config)
+	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.overwrite.config)
 endif()
 
 if(NOT FACTORY_IMAGE)
@@ -546,11 +579,22 @@ if(NOT FACTORY_IMAGE)
 
 	if(AUTO_UPDATE_TOOLS)
 		if(DOWNLOAD_BLUENET_LIB_LOGS)
+			message(STATUS "Make bluenet depending on ${BLUENET_LIB_LOGS_TARGET}")
 			add_dependencies(bluenet ${BLUENET_LIB_LOGS_TARGET})
 		endif()
 		if(DOWNLOAD_NRFUTIL)
+			message(STATUS "Make bluenet depending on ${NRFUTIL_TARGET}")
 			add_dependencies(bluenet ${NRFUTIL_TARGET})
 		endif()
+		if(DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
+			message(STATUS "Make bluenet depending on ${CROWNSTONE_PYTHON_LIBS_TARGET}")
+			add_dependencies(bluenet ${CROWNSTONE_PYTHON_LIBS_TARGET})
+		endif()
+	else()
+		message(STATUS "Auto-update tools is set to OFF.")
+		message(STATUS "This means no download/update of binary logging, nrfutil, etc. on `make bluenet`.")
+		message(STATUS "Download/update can still be done manually (if they are configured).")
+		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make ${NRFUTIL_TARGET}` subsequently.")
 	endif()
 endif()
 
@@ -571,30 +615,44 @@ SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
 	-DUART_BAUDRATE:STRING=${UART_BAUDRATE}\
 	-DRTT_PORT:STRING=${RTT_PORT}")
 
-add_custom_target(write_softdevice
+set(WRITE_SOFTDEVICE_TARGET write_softdevice)
+message(STATUS "Configure ${WRITE_SOFTDEVICE_TARGET} target")
+add_custom_target(${WRITE_SOFTDEVICE_TARGET}
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-	#DEPENDS bluenet
 	COMMENT "Flashes softdevice to remote target board"
+	DEPENDS ${NRFJPROG_TARGET}
 	)
 
-add_custom_target(write_mbr_param_address
+set(WRITE_MBR_PARAM_ADDRESS_TARGET write_mbr_param_address)
+message(STATUS "Configure ${WRITE_MBR_PARAM_ADDRESS_TARGET} target")
+add_custom_target(${WRITE_MBR_PARAM_ADDRESS_TARGET}
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE" "-DADDRESS=0x10001018" "-DVALUE=0x0007E000" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-	COMMENT "Writes MBR param page address to UICR"
+	COMMENT "Writes MBR param page address to UICR using nrfjprog"
+	DEPENDS ${NRFJPROG_TARGET}
 	)
 
-add_custom_target(read_softdevice_version
+set(READ_SOFTDEVICE_VERSION_TARGET read_softdevice_version)
+message(STATUS "Configure ${READ_SOFTDEVICE_VERSION_TARGET} target")
+add_custom_target(${READ_SOFTDEVICE_VERSION_TARGET}
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x000300C" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-	COMMENT "Reads version of softdevice"
+	COMMENT "Reads version of softdevice from the hardware itself through nrfjprog"
+	DEPENDS ${NRFJPROG_TARGET}
 	)
 
-add_custom_target(erase
+set(ERASE_TARGET erase)
+message(STATUS "Configure ${ERASE_TARGET} target")
+add_custom_target(${ERASE_TARGET}
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=ERASE" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Erase everything on target board"
+	DEPENDS ${NRFJPROG_TARGET}
 	)
 
-add_custom_target(reset
+set(RESET_TARGET reset)
+message(STATUS "Configure ${RESET_TARGET} target")
+add_custom_target(${RESET_TARGET}
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=RESET" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Reset target board"
+	DEPENDS ${NRFJPROG_TARGET}
 	)
 
 #######################################################################################################################
@@ -602,6 +660,7 @@ add_custom_target(reset
 #######################################################################################################################
 
 # Will not be called automatically (this is done through the external project bluenet)
+message(STATUS "Configure ${BOARD_TARGET} target")
 add_custom_target(${BOARD_TARGET}
 	COMMAND make
 	WORKING_DIRECTORY ${BOARD_TARGET}
@@ -610,38 +669,46 @@ add_custom_target(${BOARD_TARGET}
 	COMMENT "Build application"
 	)
 
-add_custom_target(debug_application
+set(DEBUG_APPLICATION_TARGET debug_application)
+message(STATUS "Configure ${DEBUG_APPLICATION_TARGET} target")
+add_custom_target(${DEBUG_APPLICATION_TARGET}
 	COMMAND make debug_application
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
 	bluenet
-	COMMENT "Debug application"
+	COMMENT "Debug application ${BOARD_TARGET}"
 	)
 
-add_custom_target(write_board_version
+set(WRITE_BOARD_VERSION_TARGET write_board_version)
+message(STATUS "Configure ${WRITE_BOARD_VERSION_TARGET} target")
+add_custom_target(${WRITE_BOARD_VERSION_TARGET}
 	COMMAND make write_board_version
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
-	nrfjprog
+	${NRFJPROG_TARGET}
 	bluenet
-	COMMENT "Write board version"
+	COMMENT "Write board version for ${BOARD_TARGET}"
 	)
 
-add_custom_target(write_application
+set(WRITE_APPLICATION_TARGET write_application)
+message(STATUS "Configure ${WRITE_APPLICATION_TARGET} target")
+add_custom_target(${WRITE_APPLICATION_TARGET}
 	COMMAND make write_application
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
-	nrfjprog
+	${NRFJPROG_TARGET}
 	bluenet
-	COMMENT "Write application"
+	COMMENT "Write application to ${BOARD_TARGET}"
 	)
 
-add_custom_target(write_bootloader
+set(WRITE_BOOTLOADER_TARGET write_bootloader)
+message(STATUS "Configure ${WRITE_BOOTLOADER_TARGET} target")
+add_custom_target(${WRITE_BOOTLOADER_TARGET}
 	COMMAND make write_bootloader
 	WORKING_DIRECTORY ${BOARD_TARGET}
 	DEPENDS
 	bluenet
-	COMMENT "Write bootloader"
+	COMMENT "Write bootloader to ${BOARD_TARGET}"
 	)
 
 #######################################################################################################################
@@ -656,12 +723,16 @@ add_custom_target(write_bootloader
 # Check if we have non-committed changes
 # Check if git version does not exist
 # Create git commit with this release version
-add_custom_target(create_git_release
+set(CREATE_GIT_RELEASE_TARGET create_git_release)
+message(STATUS "Configure ${CREATE_GIT_RELEASE_TARGET} target")
+add_custom_target(${CREATE_GIT_RELEASE_TARGET}
 	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
 	COMMENT "Create git release"
 	)
 
-add_custom_target(create_git_release_bootloader
+set(CREATE_GIT_RELEASE_BOOTLOADER_TARGET create_git_release_bootloader)
+message(STATUS "Configure ${CREATE_GIT_RELEASE_BOOTLOADER_TARGET} target")
+add_custom_target(${CREATE_GIT_RELEASE_BOOTLOADER_TARGET}
 	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release_bootloader.cmake
 	COMMENT "Create git release for bootloader"
 	)
@@ -769,7 +840,9 @@ if(FACTORY_IMAGE)
 	set(FACTORY_IMAGE_PATH_NAME factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
 
 	# Add this target by default to make all when in factory image creation mode
-	add_custom_target(generate_factory_image ALL
+	set(GENERATE_FACTORY_IMAGE_TARGET generate_factory_image)
+	message(STATUS "Configure ${GENERATE_FACTORY_IMAGE_TARGET} target")
+	add_custom_target(${GENERATE_FACTORY_IMAGE_TARGET} ALL
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
 		COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"
@@ -801,8 +874,6 @@ if(FACTORY_IMAGE)
 	INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME}/" DESTINATION "${FACTORY_IMAGE_PATH_NAME}" FILES_MATCHING PATTERN "*")
 endif()
 
-
-
 #######################################################################################################################
 # Build/compile for host
 #######################################################################################################################
@@ -816,7 +887,9 @@ list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_S
 list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 
 if(COMPILE_FOR_HOST)
-	ExternalProject_Add(bluenet-host
+	set(BLUENET_HOST_TARGET bluenet_host)
+	message(STATUS "Configure ${BLUENET_HOST_TARGET} target")
+	ExternalProject_Add(${BLUENET_HOST_TARGET}
 		SOURCE_DIR ${WORKSPACE_DIR}/host
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}
 		INSTALL_DIR ${WORKSPACE_DIR}/bin/host/${BOARD_TARGET}
