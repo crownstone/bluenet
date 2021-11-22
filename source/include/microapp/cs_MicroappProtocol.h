@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 
@@ -25,6 +26,13 @@ typedef struct pin_isr_t {
 	uint8_t pin;
 	uintptr_t callback;
 } pin_isr_t;
+
+struct __attribute__((packed)) microapp_buffered_mesh_message_t {
+	stone_id_t stoneId; // Stone ID of the sender.
+	uint8_t messageSize;
+	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];
+};
+
 
 /**
  * The class MicroappProtocol has functionality to store a second app (and perhaps in the future even more apps) on another
@@ -101,6 +109,18 @@ class MicroappProtocol: public EventListener {
 		 */
 		CircularBuffer<uint8_t>* _callbackData;
 
+		/**
+		 * Max number of mesh messages that will be queued.
+		 */
+		const uint8_t MAX_MESH_MESSAGES_BUFFERED = 3;
+
+		/**
+		 * Buffer received mesh messages.
+		 *
+		 * Starts with microapp_buffered_mesh_message_header_t, followed by the message.
+		 */
+		CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
+
 	protected:
 
 		/**
@@ -117,6 +137,11 @@ class MicroappProtocol: public EventListener {
 		 * Load ram information, set by microapp.
 		 */
 		uint16_t interpretRamdata();
+
+		/**
+		 * Handle a received mesh message.
+		 */
+		void onMeshMessage(MeshMsgEvent event);
 
 	public:
 		static MicroappProtocol& getInstance() {
@@ -143,4 +168,9 @@ class MicroappProtocol: public EventListener {
 		 * Receive events (for example for i2c)
 		 */
 		void handleEvent(event_t & event);
+
+		/**
+		 * Handle mesh command.
+		 */
+		void handleMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize);
 };
