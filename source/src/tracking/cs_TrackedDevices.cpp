@@ -298,23 +298,7 @@ void TrackedDevices::tickMinute() {
 			device.data.data.locationId = 0;
 		}
 		
-		// TODO @ArrowAcrobatics, misalignment issue
-		// Lost art of structure packing: http://www.catb.org/esr/structure-packing/
-		// https://developer.arm.com/documentation/100748/0616/Writing-Optimized-Code/Packing-data-structures
-		// If a member of a structure or union is packed and therefore does not have its natural alignment, then to access this member, you must use the structure or union that contains this member. You must not take the address of such a packed member to use as a pointer, because the pointer might be unaligned. Dereferencing such a pointer can be unsafe even when unaligned accesses are supported by the target, because certain instructions always require word-aligned addresses.
-
-		// This is what's done here:
-		//bool timedOut = (*CsMath::DecreaseByPointer(&device.data.data.timeToLiveMinutes) == 0);
-
-		// Either do this
-		//uint16_t timeToLiveMinutes = device.data.data.timeToLiveMinutes;
-		//bool timedOut = (CsMath::Decrease(timeToLiveMinutes) == 0);
-		//device.data.data.timeToLiveMinutes = timeToLiveMinutes;
-
-		// Or just
-		bool timedOut = device.data.data.timeToLiveMinutes > 0 &&
-			device.data.data.timeToLiveMinutes-- == 0;
-		if (timedOut) {
+		if (CsMath::DecreaseMember(device.data.data, &register_tracked_device_packet_t::timeToLiveMinutes) == 0) {
 			// Always check if device is timed out, as it might be that the TTL was never set.
 			LOGTrackedDevicesDebug("Timed out id=%u", device.data.data.deviceId);
 			device.invalidate();

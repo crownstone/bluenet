@@ -54,12 +54,24 @@ constexpr inline T& Decrease(T& obj, U diff=1) {
  * Identical to the other decrease function.
  *
  * Use this pointer based variation if you get
- * 'cannot bind packed field to ...&` errors.
+ * 'cannot bind packed field to ...&' errors.
  */
 template<class T, class U=int>
 constexpr inline T* DecreaseByPointer(T* obj, U diff=1) {
 	Decrease(*obj, diff);
 	return obj;
+}
+
+/**
+ * Identical to the other decrease function.
+ *
+ * Use this pointer based variation if you get
+ * 'taking address of packed member ... may result in an unaligned pointer value' errors.
+ */
+template<class T, class M, class U=int>
+constexpr inline decltype(auto) DecreaseMember(T& obj, M member, U diff=1) {
+	obj.*member = SafeAdd(obj.*member, -diff);
+	return obj.*member;
 }
 
 /**
