@@ -112,8 +112,7 @@ bool BehaviourHandler::update() {
 
 SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) {
 	if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
-		if (switchbehave->isValid(currentTime) &&
-				switchbehave->isValid(currentTime, currentPresence)) {
+		if (switchbehave->isValid(currentTime, currentPresence)) {
 			return switchbehave;
 		}
 	}
