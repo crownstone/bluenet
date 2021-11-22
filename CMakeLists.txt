@@ -68,28 +68,47 @@ list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 # Load modules
 #######################################################################################################################
 
-message(STATUS "Assumed to be installed:")
-message(STATUS "  git        - sudo apt-get install git")
-message(STATUS "  python/pip - sudo apt-get install python python-pip")
-message(STATUS "  wget       - sudo apt-get install wget")
+message(STATUS "Assumed to be installed for normal development: git, wget, make")
+message(STATUS "Assumed to be installed for tools around development: python")
+message(STATUS "Assumed to be installed to generate releases: pass, srec_cat")
 
-message(STATUS "Optionally (for firmware):")
-message(STATUS "  pass        - sudo apt-get install pass")
-message(STATUS "  srec_cat    - sudo apt-get install srecord")
-
-message(STATUS "Python set-up")
-message(STATUS "  python executable: \"${PYTHON_EXECUTABLE}\"")
-message(STATUS "  pip will be used as: \"${PYTHON_EXECUTABLE} -m pip install package\"")
-message(STATUS "  if installation fails (of e.g. nrfutil), run \"python3 -m pip install -U pip [--user]\"")
-
-message(STATUS "CPU CMake is running on: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+message(STATUS "The CPU on which CMake is running, arch=${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
 # The source dir is the parent directory, the binary directory is the build/ directory (out of build)
-message(STATUS "source dir: ${CMAKE_SOURCE_DIR}")
-message(STATUS "bin dir: ${CMAKE_BINARY_DIR}")
-message(STATUS "install dir: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "Source dir ${CMAKE_SOURCE_DIR}")
+message(STATUS "Build dir ${CMAKE_BINARY_DIR}")
+message(STATUS "Installation dir with binaries ${CMAKE_INSTALL_PREFIX}")
 
 find_package(Git REQUIRED)
+if(NOT Git_FOUND)
+	message(FATAL_ERROR "Installation requires git, install with something like `sudo apt install git`")
+endif()
+
+find_package(Wget REQUIRED)
+if(NOT WGET_FOUND)
+	message(FATAL_ERROR "Installation requires wget, install with something like `sudo apt install wget`")
+endif()
+
+set(BLUENET_CMAKE_MODULES_PATH "${CMAKE_SOURCE_DIR}/source/conf/cmake/modules/")
+message(STATUS "Search for CMake modules in ${BLUENET_CMAKE_MODULES_PATH}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BLUENET_CMAKE_MODULES_PATH}")
+
+if(FACTORY_IMAGE)
+	find_package(pass REQUIRED)
+	if(NOT PASS_FOUND)
+		message(STATUS "You should install pass, e.g. by sudo apt install pass.")
+		message(FATAL_ERROR "The utility pass is required to sign release firmware.")
+	else()
+		message(STATUS "Found pass utility ${PASS_EXECUTABLE}")
+	endif()
+	find_package(srecord REQUIRED)
+	if(NOT SRECORD_FOUND)
+		message(STATUS "You should install srecord, e.g. by sudo apt install srecord.")
+		message(FATAL_ERROR "The tool srecord (srec_cat) is required to build release firmware.")
+	else()
+		message(STATUS "Found srecord ${SRECORD_EXECUTABLE}")
+	endif()
+endif()
 
 set(COMPILE_ON_ARM 0)
 if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*" OR "${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "aarch64")
@@ -494,16 +513,30 @@ add_custom_target(${TOOLS_TARGET}
 	)
 
 if(FACTORY_IMAGE)
-	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
+	message(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
 		"They will be overwritten by the CMakeFactoryImage.config files. "
 		"Make sure that you set -DFACTORY_IMAGE=0 when you continue normal development. ")
+
+	if("${FACTORY_IMAGE_HARDWARE_CONFIG}" STREQUAL "")
+		message(FATAL_ERROR "It seems you forgot to set -DFACTORY_IMAGE_HARDWARE_CONFIG")
+	endif()
+	if("${FACTORY_IMAGE_SOFTWARE_CONFIG}" STREQUAL "")
+		message(FATAL_ERROR "It seems you forgot to set -DFACTORY_IMAGE_SOFTWARE_CONFIG")
+	endif()
+	if(NOT EXISTS "${RELEASE_REPOSITORY}")
+		message(FATAL_ERROR "The release repository ${RELEASE_REPOSITORY} does not exist")
+	endif()
+	if(NOT EXISTS "${RELEASE_CANDIDATE_REPOSITORY}")
+		message(FATAL_ERROR "The release candidate repository ${RELEASE_CANDIDATE_REPOSITORY} does not exist")
+	endif()
+
 	set(FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/hardware/${FACTORY_IMAGE_HARDWARE_CONFIG}/CMakeFactoryImage.config)
 	set(FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/software/${FACTORY_IMAGE_SOFTWARE_CONFIG}/CMakeFactoryImage.config)
 
-	MESSAGE(STATUS "Load hardware configuration file for factory image at ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE}")
+	message(STATUS "Load hardware configuration file for factory image at ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE}")
 	load_configuration("${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 
-	MESSAGE(STATUS "Load software configuration file for factory image at ${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}")
+	message(STATUS "Load software configuration file for factory image at ${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}")
 	load_configuration("${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 
 	IF(EXISTS ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE})
@@ -798,6 +831,7 @@ if(FACTORY_IMAGE)
 		to_hex_raw(${PRODUCT_MARKET_DEC} PRODUCT_MARKET_HEX 2 "")
 		to_hex_raw(${PRODUCT_TYPE_DEC} PRODUCT_TYPE_HEX 2 "")
 		set(PRODUCT_FAMILY_TYPE "${PRODUCT_FAMILY_HEX}${PRODUCT_MARKET_HEX}${PRODUCT_TYPE_HEX}")
+		message(STATUS "Product family type: ${PRODUCT_FAMILY_TYPE}")
 		fill(${PRODUCT_FAMILY_TYPE} PRODUCT_FAMILY_TYPE 8 "F" "0x")
 	endif()
 
@@ -823,12 +857,12 @@ if(FACTORY_IMAGE)
 		fill(${PRODUCTION_RUN_HOUSING} PRODUCTION_RUN_HOUSING 8 "F" "0x")
 	endif()
 
-	set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;-l-e-constant;${UICR_BOOTLOADER_ADDRESS};4")
-	set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;-l-e-constant;${MBR_SETTINGS};4")
-	set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;-l-e-constant;${HARDWARE_BOARD_HEX};4")
-	set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;-l-e-constant;${PRODUCT_FAMILY_TYPE};4")
-	set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;-l-e-constant;${MAJOR_MINOR_PATCH};4")
-	set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;-l-e-constant;${PRODUCTION_RUN_HOUSING};4")
+	set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;-constant-l-e;${UICR_BOOTLOADER_ADDRESS};4")
+	set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;-constant-l-e;${MBR_SETTINGS};4")
+	set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;-constant-l-e;${HARDWARE_BOARD_HEX};4")
+	set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;-constant-l-e;${PRODUCT_FAMILY_TYPE};4")
+	set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;-constant-l-e;${MAJOR_MINOR_PATCH};4")
+	set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;-constant-l-e;${PRODUCTION_RUN_HOUSING};4")
 
 	string(TIMESTAMP FACTORY_IMAGE_TIMESTAMP "%Y-%U")
 
@@ -871,7 +905,8 @@ if(FACTORY_IMAGE)
 		COMMENT "Generate a factory image"
 		)
 
-	INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME}/" DESTINATION "${FACTORY_IMAGE_PATH_NAME}" FILES_MATCHING PATTERN "*")
+	message(STATUS "Install binary into ${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME} dir")
+	install(DIRECTORY "${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME}/" DESTINATION "${FACTORY_IMAGE_PATH_NAME}" FILES_MATCHING PATTERN "*")
 endif()
 
 #######################################################################################################################
