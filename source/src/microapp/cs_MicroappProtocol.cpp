@@ -327,6 +327,21 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 					_log(SERIAL_INFO, newLine, "%s", data);
 					break;
 				}
+				case CS_MICROAPP_COMMAND_LOG_ARR: {
+					// for now, print in hex format
+					__attribute__((unused)) uint8_t *data = reinterpret_cast<uint8_t*>(&(payload[3]));
+					__attribute__((unused)) int len = length - 3;
+
+					char buf[(MAX_PAYLOAD-3)*2+1]; // does not allow variable length
+					char *dest = buf;
+					uint8_t *src = data;
+					for (uint8_t i = 0; i<len; i++)
+					{
+						sprintf((dest+2*i),"%02X",*(src+i));
+					}
+					_log(SERIAL_INFO, newLine, "0x%s", buf);
+					break;
+				}
 				default:
 					LOGi("Unsupported type (for now): %i", type);
 			}
@@ -688,29 +703,37 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
-			//TYPIFY(EVT_DEVICE_SCANNED) ble_dev = *(TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
-			LOGi("MicroappProtocol: Reacting to EVT_DEVICE_SCANNED");
-			// TODO: convert scanned_device_t to ble_adv_t (?) and add as argument in callback
+			TYPIFY(EVT_DEVICE_SCANNED) dev = *(TYPIFY(EVT_DEVICE_SCANNED)*)event.data; // scanned_device_t
+			LOGd("MicroappProtocol: Reacting to EVT_DEVICE_SCANNED");
+
+			// copy scanned device info to ble_dev_t struct
+			ble_dev_t ble_dev;
+			ble_dev.addr_type = dev.addressType;
+			memcpy(ble_dev.addr,dev.address,sizeof(ble_dev.addr));
+			ble_dev.rssi = dev.rssi;
+			ble_dev.dlen = dev.dataSize;
+			memcpy(ble_dev.data,dev.data,dev.dataSize);
+
+
 			uint16_t type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
 			uintptr_t callback = 0;
 			// get callback and call
-			for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+			for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
 				if (_ble_isr[i].type == type) {
 					callback = _ble_isr[i].callback;
 					break;
 				}
 			}
-			LOGi("Call %x", callback);
 
 			if (callback == 0) {
-				LOGi("Callback not yet registered");
+				LOGd("Callback not yet registered");
 				break;
 			}
+			LOGd("Call callback at 0x%x", callback);
 			// we have to do this through another coroutine perhaps (not the same one as loop!), for
 			// now stay on this stack
-			void (*callback_func)() = (void (*)()) callback;
-			LOGi("Call callback at 0x%x", callback);
-			callback_func();
+			void (*callback_func)(ble_dev_t) = (void (*)(ble_dev_t)) callback;
+			callback_func(ble_dev);
 			break;
 		}
 		default:

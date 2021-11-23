@@ -154,17 +154,16 @@ typedef struct {
 	uint32_t callback;
 } ble_cmd_t;
 
-const uint8_t BLE_ADV_ADDR_LENGTH = 6;
+const uint8_t MAC_ADDRESS_LENGTH = 6;
 const uint8_t BLE_ADV_DATA_LENGTH = 31;
+
 /*
- * Struct for ble advertisements
+ * Struct for scanned ble devices
  */
 typedef struct {
 	uint8_t addr_type;
-	uint8_t addr[BLE_ADV_ADDR_LENGTH];
+	uint8_t addr[MAC_ADDRESS_LENGTH];
 	int8_t rssi;
-	uint8_t scan_rsp;
-	uint8_t type;
 	uint8_t dlen;
 	uint8_t data[BLE_ADV_DATA_LENGTH];
-} ble_adv_t;
+} ble_dev_t;
