@@ -162,7 +162,7 @@ const uint8_t BLE_ADV_DATA_LENGTH = 31;
  */
 typedef struct {
 	uint8_t addr_type;
-	uint8_t addr[MAC_ADDRESS_LENGTH];
+	uint8_t addr[MAC_ADDRESS_LENGTH]; // big-endian!
 	int8_t rssi;
 	uint8_t dlen;
 	uint8_t data[BLE_ADV_DATA_LENGTH];

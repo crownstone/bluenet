@@ -709,11 +709,10 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			// copy scanned device info to ble_dev_t struct
 			ble_dev_t ble_dev;
 			ble_dev.addr_type = dev.addressType;
-			memcpy(ble_dev.addr,dev.address,sizeof(ble_dev.addr));
+			std::reverse_copy(dev.address, dev.address + MAC_ADDRESS_LENGTH, ble_dev.addr); // convert from little endian to big endian
 			ble_dev.rssi = dev.rssi;
 			ble_dev.dlen = dev.dataSize;
 			memcpy(ble_dev.data,dev.data,dev.dataSize);
-
 
 			uint16_t type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
 			uintptr_t callback = 0;
