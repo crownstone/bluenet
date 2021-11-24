@@ -88,10 +88,7 @@ microapps. Just the targets are also listed through:
 
     make help
 
-For some of the tools, even if you configure them to be downloaded, we do update them each time `bluenet` is build.
-This is for example the case for the binary logger and the nrfutil utility.
-This functionality can be disabled by `-DAUTO_UPDATE_TOOLS=OFF`.
-In that case you will have to do this yourself for which there is:
+If tools are configured to be downloaded, the download itself does not necessarily have to happen when running `make bluenet`. It is possible to do this automatically by setting `-DAUTO_UPDATE_TOOLS=ON`. You can do this manually also by:
 
     make tools
 
@@ -120,16 +117,18 @@ This will also automatically be called (is a dependency for):
     make nrfutil
     make csutil
 
-Just like always, running `cmake` only configures, only on running `make` it will be installed. After installation
-you will need to activate the environment. The exact command will be given when you do the build and you will be driven
+Running `cmake` only configures the build system. The installation happens when running `make`. After configuration you will need to activate the environment. The exact command is given when you do the build and you will be driven
 to set it like this:
 
 ```
   Not running in a virtual environment (while configured with
   -DPYTHON_SETUP_VENV=ON).
-  Did you call:
 
-    source <...>/bluenet/tools/python/crownstone_env/bin/activate
+  Make sure to call:
+
+    source /home/anne/workspace/bluenet/tools/python/crownstone_env/bin/activate
+
+  Or activate a virtual env of your own choice.
 ```
 
 This `source` command you will need to execute before any call to `make`.

@@ -14,7 +14,7 @@ option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary loggin
 option(DOWNLOAD_CROWNSTONE_PYTHON_LIBS           "Download Crownstone Python libs"       OFF)
 option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
 option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
-option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" ON)
+option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -22,6 +22,10 @@ endif()
 
 if(NOT BOARD_TARGET)
 	set(BOARD_TARGET "default")
+endif()
+
+if($ENV{VERBOSE})
+	set_property(GLOBAL PROPERTY GLOBAL_DEPENDS_DEBUG_MODE 1)
 endif()
 
 set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
@@ -40,6 +44,9 @@ endif()
 
 # Overwrite the typical install prefix
 set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
+
+# Create a more explicit name for this variable
+set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 set(PYTHON_REQUIRED OFF)
 if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
@@ -133,7 +140,7 @@ if(PYTHON_REQUIRED)
 			message(STATUS "Then call `make python_setup_venv` to set it up")
 			message(STATUS "Also activate the environment")
 		else()
-			message(WARNING "Virtual environment not detected! Set it up or use -DPYTHON_SETUP_VENV=ON.")
+			message(WARNING "Virtual environment not detected! Set it up or set PYTHON_SETUP_VENV to ON.")
 		endif()
 	endif()
 endif()
@@ -420,6 +427,9 @@ endif()
 if(DOWNLOAD_NRFUTIL)
 	set(NRFUTIL_TARGET nrfutil)
 	message(STATUS "Configure ${NRFUTIL_TARGET} target")
+	if(PYTHON_SETUP_VENV)
+		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
+	endif()
 	add_custom_target(${NRFUTIL_TARGET}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add nrfutil through pip"
 		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel nrfutil
@@ -461,6 +471,9 @@ endif()
 if(DOWNLOAD_CSUTIL)
 	message(STATUS "Configure csutil target")
 	message(STATUS "Note, the `csutil` utility will be replaced by tools in Crownstone BLE lib")
+	if(PYTHON_SETUP_VENV)
+		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
+	endif()
 	ExternalProject_Add(csutil
 		GIT_REPOSITORY https://github.com/mrquincle/csutil
 		GIT_CONFIG advice.detachedHead=false
@@ -476,6 +489,9 @@ endif()
 if(DOWNLOAD_BLUENET_LIB_LOGS)
 	set(BLUENET_LIB_LOGS_TARGET bluenet_logs)
 	message(STATUS "Configure ${BLUENET_LIB_LOGS_TARGET} target")
+	if(PYTHON_SETUP_VENV)
+		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
+	endif()
 	add_custom_target(bluenet_logs
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add bluenet-logs through pip"
 		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel bluenet-logs
@@ -492,6 +508,9 @@ endif()
 if(DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
 	set(CROWNSTONE_PYTHON_LIBS_TARGET crownstone_python_libs)
 	message(STATUS "Configure ${CROWNSTONE_PYTHON_LIBS_TARGET} target")
+	if(PYTHON_SETUP_VENV)
+		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
+	endif()
 	add_custom_target(${CROWNSTONE_PYTHON_LIBS_TARGET}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Add Crownstone Python libs through pip"
 		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel crownstone-ble crownstone-uart crownstone-cloud
@@ -505,7 +524,7 @@ endif()
 # automatically through ExternalProject_Add such as bluenet_logs.
 set(TOOLS_TARGET tools)
 message(STATUS "Configure ${TOOLS_TARGET} target")
-add_custom_target(${TOOLS_TARGET}
+add_custom_target(${TOOLS_TARGET} ${ADD_TO_DEFAULT_BUILD_TARGET}
 	COMMAND ${CMAKE_COMMAND} -E echo "-- Install supporting tools"
 	WORKING_DIRECTORY ${WORKSPACE_DIR}
 	COMMENT "Install supporting tools"
@@ -611,6 +630,9 @@ if(NOT FACTORY_IMAGE)
 	add_dependencies(bluenet ${MESH_SDK_TARGET})
 
 	if(AUTO_UPDATE_TOOLS)
+		message(STATUS "The option AUTO_UPDATE_TOOLS is set to ON.")
+		message(STATUS "Auto-update means automatic download/update of binary logging, nrfutil, etc. on `make bluenet`.")
+		message(STATUS "To skip any bluenet dependency, use `make bluenet/fast`.")
 		if(DOWNLOAD_BLUENET_LIB_LOGS)
 			message(STATUS "Make bluenet depending on ${BLUENET_LIB_LOGS_TARGET}")
 			add_dependencies(bluenet ${BLUENET_LIB_LOGS_TARGET})
@@ -624,7 +646,7 @@ if(NOT FACTORY_IMAGE)
 			add_dependencies(bluenet ${CROWNSTONE_PYTHON_LIBS_TARGET})
 		endif()
 	else()
-		message(STATUS "Auto-update tools is set to OFF.")
+		message(STATUS "The option AUTO_UPDATE_TOOLS is set to OFF.")
 		message(STATUS "This means no download/update of binary logging, nrfutil, etc. on `make bluenet`.")
 		message(STATUS "Download/update can still be done manually (if they are configured).")
 		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make ${NRFUTIL_TARGET}` subsequently.")
@@ -876,7 +898,7 @@ if(FACTORY_IMAGE)
 	# Add this target by default to make all when in factory image creation mode
 	set(GENERATE_FACTORY_IMAGE_TARGET generate_factory_image)
 	message(STATUS "Configure ${GENERATE_FACTORY_IMAGE_TARGET} target")
-	add_custom_target(${GENERATE_FACTORY_IMAGE_TARGET} ALL
+	add_custom_target(${GENERATE_FACTORY_IMAGE_TARGET} ${ADD_TO_DEFAULT_BUILD_TARGET}
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
 		COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"
