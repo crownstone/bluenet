@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake gcc g++
+          sudo apt-get install -y cmake gcc g++ wget
           cmake --version
       - name: Create build dir
         run: |
