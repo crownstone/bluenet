@@ -261,14 +261,27 @@ void handleBleCommand(ble_cmd_t* ble_cmd) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
 			TYPIFY(CMD_BLE_SET_MICROAPP_ISR) ble_evt;
 			ble_evt.type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
-			//0x01; //Todo: define this protocol better. for now, 0x01 = EVT_DEVICE_SCANNED
+			//TODO: define this protocol better. for now, cast cs_type to uint16_t
 			ble_evt.callback = ble_cmd->callback;
 			event_t event(CS_TYPE::CMD_BLE_SET_MICROAPP_ISR, &ble_evt, sizeof(ble_evt));
 			EventDispatcher::getInstance().dispatch(event);
-			LOGi("Dispatched CMD_BLE_SET_MICROAPP_ISR event");
+			LOGd("Dispatched CMD_BLE_SET_MICROAPP_ISR event");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
+			TYPIFY(CMD_BLE_SET_MICROAPP_CONF) ble_evt;
+			ble_evt.isScanning = true;
+			event_t event(CS_TYPE::CMD_BLE_SET_MICROAPP_CONF, &ble_evt, sizeof(ble_evt));
+			EventDispatcher::getInstance().dispatch(event);
+			LOGd("Dispatched CMD_BLE_SET_MICROAPP_CONF event");
+			break;
+		}
+		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
+			TYPIFY(CMD_BLE_SET_MICROAPP_CONF) ble_evt;
+			ble_evt.isScanning = false;
+			event_t event(CS_TYPE::CMD_BLE_SET_MICROAPP_CONF, &ble_evt, sizeof(ble_evt));
+			EventDispatcher::getInstance().dispatch(event);
+			LOGd("Dispatched CMD_BLE_SET_MICROAPP_CONF event");
 			break;
 		}
 		default: {
@@ -389,7 +402,7 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE: {
-			LOGi("CS_MICROAPP_COMMAND_BLE");
+			LOGd("CS_MICROAPP_COMMAND_BLE");
 			ble_cmd_t *ble_cmd = (ble_cmd_t*)payload;
 			handleBleCommand(ble_cmd);
 			break;
@@ -431,6 +444,7 @@ MicroappProtocol::MicroappProtocol(): EventListener() {
 	}
 
 	_callbackData = NULL;
+	_microappIsScanning = false;
 }
 
 /*
@@ -687,10 +701,9 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::CMD_BLE_SET_MICROAPP_ISR: {
-			LOGi("MicroappProtocol: Reacting to CMD_BLE_SET_MICROAPP_ISR event");
-			TYPIFY(CMD_BLE_SET_MICROAPP_ISR) ble_cmd = *(TYPIFY(CMD_BLE_SET_MICROAPP_ISR)*)event.data;
+			LOGd("MicroappProtocol: Reacting to CMD_BLE_SET_MICROAPP_ISR event");
+			TYPIFY(CMD_BLE_SET_MICROAPP_ISR) ble_cmd = *(TYPIFY(CMD_BLE_SET_MICROAPP_ISR)*)event.data; // microapp_ble_isr_init_t
 			
-			//CS_TYPE type = (CS_TYPE)ble_cmd->type;
 			// we will register the handler in the class for first empty slot
 			for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
 				if (_ble_isr[i].callback == 0) {
@@ -703,6 +716,11 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			if (!_microappIsScanning) 
+			{
+				LOGd("Microapp not scanning, so not forwarding scanned device");
+				break;
+			}
 			TYPIFY(EVT_DEVICE_SCANNED) dev = *(TYPIFY(EVT_DEVICE_SCANNED)*)event.data; // scanned_device_t
 			LOGd("MicroappProtocol: Reacting to EVT_DEVICE_SCANNED");
 
@@ -733,6 +751,12 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			// now stay on this stack
 			void (*callback_func)(ble_dev_t) = (void (*)(ble_dev_t)) callback;
 			callback_func(ble_dev);
+			break;
+		}
+		case CS_TYPE::CMD_BLE_SET_MICROAPP_CONF: {
+			TYPIFY(CMD_BLE_SET_MICROAPP_CONF) conf = *(TYPIFY(CMD_BLE_SET_MICROAPP_CONF)*)event.data; // microapp_ble_config_t
+			_microappIsScanning = conf.isScanning;
+			LOGd("Setting _microappIsScanning to %i",_microappIsScanning);
 			break;
 		}
 		default:

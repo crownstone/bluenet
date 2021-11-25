@@ -112,6 +112,12 @@ class MicroappProtocol: public EventListener {
 		 */
 		CircularBuffer<uint8_t>* _callbackData;
 
+		/**
+		 * Flag to indicate whether to forward scanned devices to microapp
+		 */
+		bool _microappIsScanning;
+
+
 	protected:
 
 		/**

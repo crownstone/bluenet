@@ -14,7 +14,7 @@
 #include <stdint.h>
 #endif
 
-const uint8_t MAX_PAYLOAD = 42; // currently the largest payload size (ble_adv_t)
+const uint8_t MAX_PAYLOAD = 32;
 
 enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_SWITCH        = 0x00,
@@ -94,6 +94,7 @@ enum CommandMicroappTwiOpcode {
 enum CommandMicroappBleOpcode {
 	CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER	= 0x01,
 	CS_MICROAPP_COMMAND_BLE_SCAN_START			= 0x02,
+	CS_MICROAPP_COMMAND_BLE_SCAN_STOP			= 0x03,
 };
 
 /*
