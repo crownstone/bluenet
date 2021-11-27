@@ -238,6 +238,82 @@ void asACR01B13B(boards_config_t* p_config) {
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
+/**
+ * This prototype is based on the nRF52840 (in contrast with the unit above).
+ */
+void asACR01B13B(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 35;  // GPIO P1.13
+	p_config->pinGpioEnablePwm                   = 36;  // GPIO P1.14
+	p_config->pinGpioRelayOn                     = 17;
+	p_config->pinGpioRelayOff                    = 18;
+	p_config->pinAinCurrentGainHigh              = 0;
+	p_config->pinAinCurrentGainMed               = 0;
+	p_config->pinAinCurrentGainLow               = 1;
+	p_config->pinAinVoltage                      = 7;
+
+	p_config->pinAinZeroRef                      = 2;
+	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinGpioRx                          = 10;
+	p_config->pinGpioTx                          = 9;
+	p_config->pinLedRed                          = 0;
+	p_config->pinLedGreen                        = 0;
+	
+	p_config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
+	p_config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
+	p_config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
+	p_config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = true;
+	p_config->flags.hasSerial                    = false;
+	p_config->flags.hasLed                       = false;
+	p_config->flags.ledInverted                  = false;
+	p_config->flags.hasAdcZeroRef                = true;
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
+
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 1800;
+
+	// Based on calculated value: peak voltage of 412V corresponds with +1.5V.
+	// So: 412 / (1.5 / 1.8 * 2047) = 0.2415
+	p_config->voltageMultiplier                  = -0.2415f; // For range -1800 - 1800 mV.
+
+	// Based on calculated value: 1 LSB = 12.2mA, for range -1.5 - 1.5V.
+	// So: (12.2 / 1000) * (3 / 3.6) = 0.01017
+	p_config->currentMultiplier                  = 0.01017f; // For range -1800 - 1800 mV on low gain pin.
+
+
+	//////////////////// High current gain pin ////////////////////////
+	p_config->pinAinCurrentGainLow               = 0; // Actually high gain.
+	p_config->pinAinVoltage                      = 4; // Actually for high current gain.
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 1800;
+
+	// Based on calculated value: peak voltage of 412V corresponds with +1.5V.
+	// So: 412 / (1.5 / 1.8 * 2047) = 0.2415
+	p_config->voltageMultiplier                  = -0.2415f; // For range -1800 - 1800 mV.
+
+	// Based on calculated value: 1 LSB = 244uA, for range -1.5 - 1.5V.
+	// So: (244 / 1000 / 1000) * (3 / 3.6) = 0.0002033
+	p_config->currentMultiplier                  = 0.0002033f; // For range -1800 - 1800 mV on high gain pin.
+	///////////////////////////////////////////////////////////////////
+
+	p_config->voltageZero                        = 0;
+	p_config->currentZero                        = 0;
+	p_config->powerZero                          = 0;
+
+	p_config->pwmTempVoltageThreshold            = 0.2;
+	p_config->pwmTempVoltageThresholdDown        = 0.18;
+
+	p_config->minTxPower                         = -20;
+
+	p_config->scanIntervalUs                     = 140 * 1000;
+	p_config->scanWindowUs                       = 140 * 1000;
+	p_config->tapToToggleDefaultRssiThreshold    = -35;
+}
+
 
 
 /* ********************************************************************************************************************

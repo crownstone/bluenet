@@ -62,6 +62,7 @@ extern "C" {
 #define ACR01B10D            1008 // Builtin One v25
 
 #define ACR01B13B            1009 // Builtin Two development version
+#define ACR01B15A            1010 // Builtin Two (V3-ACR01B15A-rev7)
 
 // CROWNSTONE PLUGS
 
