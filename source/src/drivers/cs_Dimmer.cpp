@@ -56,6 +56,7 @@ void Dimmer::start() {
 		case PCA10036:
 		case PCA10040:
 		case PCA10100:
+		case PCA10056:
 			// These dev boards don't have power measurement, so no zero crossing.
 			PWM::getInstance().start(false);
 			break;

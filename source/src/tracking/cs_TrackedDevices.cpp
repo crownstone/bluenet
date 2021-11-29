@@ -186,12 +186,15 @@ cs_ret_code_t TrackedDevices::handleHeartbeat(TrackedDevice& device, uint8_t loc
 
 TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	TrackedDevice* device = find(deviceId);
-	if (device == nullptr) {
-		device = add();
-		if (device != nullptr) {
-			device->data.data.deviceId = deviceId;
-		}
+	if (device != nullptr) {
+		return device;
 	}
+
+	device = add();
+	if (device == nullptr) {
+		return nullptr;
+	}
+	device->data.data.deviceId = deviceId;
 	return device;
 }
 
@@ -204,7 +207,10 @@ TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 	LOGTrackedDevicesVerbose("find token=%02X:%02X:%02X listSize=%u", deviceToken[0], deviceToken[1], deviceToken[2], _store.size());
 
 	for (auto& device : _store) {
-		if (device.isValid() && memcmp(device.data.data.deviceToken, deviceToken, size) == 0) {
+		if (!device.isValid()) {
+			continue;
+		}
+		if (memcmp(device.data.data.deviceToken, deviceToken, size) == 0) {
 			LOGTrackedDevicesVerbose("found token id=%u", device.data.data.deviceId);
 			return &device;
 		}
@@ -216,24 +222,24 @@ TrackedDevice* TrackedDevices::add() {
 	LOGTrackedDevicesDebug("add");
 
 	// use invalid spot in current range if possible
-	if(auto emptyspot = _store.get([](auto device) { return !device.isValid();})) {
+	if (auto emptyspot = _store.get([](auto device) { return !device.isValid();})) {
 		LOGTrackedDevicesDebug("Use empty spot");
 		return emptyspot;
 	}
 
 	// Increase store size if possible.
-	if(auto newSpot = _store.addAtEnd()) {
+	if (auto newSpot = _store.addAtEnd()) {
 		LOGTrackedDevicesDebug("Create new spot");
 		return newSpot;
 	}
 
-	if(auto incomplete = _store.get([](auto device) { return !device.allFieldsSet();})) {
+	if (auto incomplete = _store.get([](auto device) { return !device.allFieldsSet();})) {
 		LOGTrackedDevicesDebug("Use spot of incomplete tracked device record");
 		incomplete->invalidate();
 		return incomplete;
 	}
 
-	if(auto lowestTtlRecord = _store.getMin([](auto device) { return device.data.data.timeToLiveMinutes; })){
+	if (auto lowestTtlRecord = _store.getMin([](auto device) { return device.data.data.timeToLiveMinutes; })){
 		LOGTrackedDevicesDebug("Use spot of lowest ttl record");
 		lowestTtlRecord->invalidate();
 		return lowestTtlRecord;
@@ -277,7 +283,7 @@ void TrackedDevices::checkSynced() {
 		return;
 	}
 
-	if(_store.get([](auto device){ return !device.allFieldsSet(); })) {
+	if (_store.get([](auto device){ return !device.allFieldsSet(); })) {
 		LOGTrackedDevicesDebug("Found device for which not all fields are set");
 		return;
 	}
@@ -293,12 +299,12 @@ void TrackedDevices::tickMinute() {
 			continue;
 		}
 
-		if(CsMath::Decrease(device.locationIdTTLMinutes) == 0) {
+		if (CsMath::Decrease(device.locationIdTTLMinutes) == 0) {
 			// Location timed out.
 			device.data.data.locationId = 0;
 		}
-
-		if (*CsMath::DecreaseByPointer(&device.data.data.timeToLiveMinutes) == 0) {
+		
+		if (CsMath::DecreaseMember(device.data.data, &register_tracked_device_packet_t::timeToLiveMinutes) == 0) {
 			// Always check if device is timed out, as it might be that the TTL was never set.
 			LOGTrackedDevicesDebug("Timed out id=%u", device.data.data.deviceId);
 			device.invalidate();
@@ -312,7 +318,13 @@ void TrackedDevices::tickMinute() {
 
 void TrackedDevices::tickSecond() {
 	for (auto& device : _store) {
-		if (device.isValid() && device.allFieldsSet() && device.heartbeatTTLMinutes != 0) {
+		if (!device.isValid()) {
+			continue;
+		}
+		if (!device.allFieldsSet()) {
+			continue;
+		}
+		if (device.heartbeatTTLMinutes != 0) {
 			sendHeartbeatLocation(device, false, true);
 		}
 	}
@@ -395,11 +407,15 @@ void TrackedDevices::sendDeviceList() {
 	LOGTrackedDevicesDebug("sendDeviceList");
 	uint8_t sentDevicesCount = 0;
 	for (auto& device : _store ) {
-		if (device.isValid() && device.allFieldsSet()) {
-			sendRegisterToMesh(device);
-			sendTokenToMesh(device);
-			++sentDevicesCount;
+		if (!device.isValid()) {
+			continue;
 		}
+		if (!device.allFieldsSet()) {
+			continue;
+		}
+		sendRegisterToMesh(device);
+		sendTokenToMesh(device);
+		++sentDevicesCount;
 	}
 
 	sendListSizeToMesh(sentDevicesCount);

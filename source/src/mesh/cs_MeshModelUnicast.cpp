@@ -236,7 +236,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, ui
 
 void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 	if (_queueIndexInProgress == queue_index_none) {
-		LOGe("No index in progress");
+		LOGe("No index in progress. status=%u", status);
 		return;
 	}
 

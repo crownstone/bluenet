@@ -1,7 +1,7 @@
-name: Bluenet continuous integration
+name: Bluenet
 on: [push, pull_request, release]
 jobs:
-  Explore-GitHub-Actions:
+  Build:
     runs-on: ubuntu-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install cmake
+          sudo apt-get install -y cmake gcc g++ wget
           cmake --version
       - name: Create build dir
         run: |
@@ -22,11 +22,48 @@ jobs:
       - name: Run cmake
         working-directory: ./build
         run: |
-          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
+          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
       - name: Run make
         working-directory: ./build
         run: |
           make
+      - name: Run tests
+        working-directory: ./build/host/default
+        run: |
+          ctest
+      - name: Finish up
+        run: |
+          echo "🍏 This job's status is ${{ job.status }}."
+  Test:
+    runs-on: [self-hosted, Linux, X64]
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake gcc g++ git make python3 python3-pip wget unzip
+          cmake --version
+      - name: Create build dir
+        run: |
+          mkdir build
+      - name: Run cmake
+        working-directory: ./build
+        run: |
+          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
+      - name: Run make
+        working-directory: ./build
+        run: |
+          make
+      - name: Run tests
+        working-directory: ./build/host/default
+        run: |
+          ctest
       - name: Finish up
         run: |
           echo "🍏 This job's status is ${{ job.status }}."

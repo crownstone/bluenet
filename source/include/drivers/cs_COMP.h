@@ -12,48 +12,33 @@
 #include "ble/cs_Nordic.h"
 
 /**
- * Compare events indicate if the sampled values (be it current, voltage, or temperature) go through a predefined threshold from
- * below, from above, or both.
+ * Compare events, also used for configuration.
  */
 enum CompEvent_t {
-	//! No event observed
-	COMP_EVENT_NONE,
-	//! The sampled value is beyond the predefined threshold, on VIN+ > VIN-
+	// The sampled value went above the upper threshold.
 	COMP_EVENT_UP,
-	//! The sampled value drops below the predefined threshold, on VIN+ < VIN-
+	// The sampled value went below the lower threshold.
 	COMP_EVENT_DOWN,
-	//! TODO: what is this? why is it different from COMP_EVENT_CROSS and why is that insufficient?
-	COMP_EVENT_BOTH,
-	//! The sampled value crosses the threshold, either from below or above, after VIN+ == VIN-
+	// The sampled value went above the upper threshold, or below the lower threshold.
 	COMP_EVENT_CROSS,
+	// Only used for configuration: When you want to get both UP, and DOWN events.
+	COMP_EVENT_BOTH,
 };
 
 /**
- * Define comp_event_cb_t to be a void function with a CompEvent_t parameter as single argument. This function can be used as
- * callback after an event occurred.
+ * Define comp_event_cb_t to be a void function with a CompEvent_t parameter as single argument.
+ * This function can be used as callback after an event occurred.
  */
 typedef void (*comp_event_cb_t) (CompEvent_t event);
 
 /**
- * The comp_event_cb_data_t struct defines an event and a callback function.
- */
-struct comp_event_cb_data_t {
-	//! A function of type comp_event_cb_t to be used as callback
-	comp_event_cb_t callback;
-	//! An argument for the above callback
-	CompEvent_t event;
-};
-
-/**
- * The comparator is a hardware peripheral on the nRF52. It is addressed through the COMP HAL which is addressed through the COMP
- * driver.
- * Requires a real-time clock, the RTC to attach timestamps to the events.
+ * Class that enables you to get events when a the voltage on an AIN pin goes over or below a given threshold.
  *
- * TODO: Use VOLTAGE_THRESHOLD_TO_INT
+ * There are 2 thresholds, as this class supports hysteresis.
  */
 class COMP {
 public:
-	//! Use static variant of singleton, no dynamic memory allocation
+	// Use static variant of singleton, no dynamic memory allocation
 	static COMP& getInstance() {
 		static COMP instance;
 		return instance;
@@ -64,51 +49,49 @@ public:
 	 * TODO: use const where appropriate
 	 * TODO: use nrf_drv_comp_ain_to_gpio in implementation
 	 *
-	 * @param[in] ainPin           An input pin, TODO: use pin_id_t or nrf_comp_input_t, not uint8_t
-	 * @param[in] thresholdDown    Threshold to be triggered when input drops below a certain value. TODO: check.
-	 * @param[in] thresholdUp      Threshold to be triggered when input goes beyond a certain value. TODO: check.
+	 * @param[in] ainPin           An analog input pin: so for pin AIN6 the value should be 6.
+	 * @param[in] thresholdDown    Threshold to be triggered when input drops below a certain value.
+	 * @param[in] thresholdUp      Threshold to be triggered when input goes beyond a certain value.
+	 * @param[in] callback         The function to be called when the value goes over/under the threshold. Use null pointer for none.
 	 */
-	void init(uint8_t ainPin, float thresholdDown, float thresholdUp);
+	void init(uint8_t ainPin, float thresholdDown, float thresholdUp, comp_event_cb_t callback);
 
 	/**
-	 * The hardware peripheral is started. First, init() has to be called.
+	 * Start the comparator.
 	 *
-	 * @param[in] event            Start the comparator with "event" as additional configuration option.
+	 * @param[in] event            Selects which events to get.
 	 */
 	void start(CompEvent_t event);
 
 	/**
-	 * Return a single sample which uses 1 bit of the 32 available bits. This is:
-	 *   0 if VIN+ < VIN-
-         *   1 if VIN+ > VIN-
+	 * Sample the comparator.
 	 *
-	 * @return                     A sample from the comparator indicating relation between VIN+ and VIN-.
+	 * @return                     True when the value is above the threshold, false when below.
 	 */
-	uint32_t sample();
+	bool sample();
 
 	/**
-	 * Set the callback which is called on an event. This callback is put in the scheduler and not executed directly.
+	 * Internal usage.
 	 *
-	 * @param[in] callback         A struct with a function and parameter for that function.
+	 * Handle a comparator event, on main thread.
 	 */
-	void setEventCallback(comp_event_cb_t callback);
+	void handleEventDecoupled(nrf_comp_event_t event);
 
 	/**
-	 * Handle a comparator event. This is automatically called on each event. In this function the event is copied and if
-	 * there is an event handler set, it will be called indirectly by adding the event callback to the app scheduler.
+	 * Internal usage.
 	 *
-	 * @param[in] event            Handle a particular event.
+	 * Handle a comparator event, in interrupt.
 	 */
-	void handleEvent(nrf_comp_event_t & nrf_comp_event);
+	void handleEvent(nrf_comp_event_t event);
 
 private:
-	//! This class is singleton, constructor is private
+	// This class is singleton, constructor is private
 	COMP();
 
-	//! This class is singleton, deny implementation
+	// This class is singleton, deny implementation
 	COMP(COMP const&);
 
-	//! This class is singleton, deny implementation
+	// This class is singleton, deny implementation
 	void operator=(COMP const &);
 
 	/**
@@ -121,11 +104,6 @@ private:
 #endif
 	}
 
-	//! Particular callback to be used, set by setEventCallback().
-	comp_event_cb_data_t _eventCallbackData;
-
-	//! Timestamp of the last event, this uses the RTC
-	uint32_t _lastEventTimestamp;
-
+	comp_event_cb_t _callback = nullptr;
 };
 

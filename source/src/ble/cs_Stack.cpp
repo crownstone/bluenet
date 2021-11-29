@@ -47,31 +47,20 @@ Stack::~Stack() {
  */
 void Stack::init() {
 	if (checkCondition(C_STACK_INITIALIZED, false)) return;
-	LOGi(FMT_INIT, "stack");
-
-	ret_code_t ret_code;
+	LOGi("Init");
 
 	// Check if SoftDevice is already running and disable it in that case (to restart later)
 	uint8_t enabled;
-	ret_code = sd_softdevice_is_enabled(&enabled);
-	APP_ERROR_CHECK(ret_code);
+	uint32_t nrfCode = sd_softdevice_is_enabled(&enabled);
+	// Only return code is NRF_SUCCESS.
+	APP_ERROR_CHECK(nrfCode);
 	if (enabled) {
-		LOGw(MSG_BLE_SOFTDEVICE_RUNNING);
-		ret_code = sd_softdevice_disable();
-		APP_ERROR_CHECK(ret_code);
+		LOGw("Softdevice already enabled");
+		nrfCode = sd_softdevice_disable();
+		// Only return code is NRF_SUCCESS.
+		APP_ERROR_CHECK(nrfCode);
 	}
 
-	// now done through NRF_SDH_BLE_OBSERV
-	//softdevice_ble_evt_handler_set(ble_evt_dispatch);
-	//LOGd("Address of sdh_ble_observers", &sdh_ble_observers);
-
-	// Enable power-fail comparator
-	sd_power_pof_enable(true);
-	// set threshold value, if power falls below threshold,
-	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
-	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
-
-	LOGd("Stack initialized");
 	setInitialized(C_STACK_INITIALIZED);
 }
 
@@ -82,34 +71,45 @@ void Stack::init() {
  */
 void Stack::initSoftdevice() {
 
+	// TODO: why is there app_sched_execute here?
 	app_sched_execute();
 
-	ret_code_t ret_code;
-	LOGi(FMT_INIT, "softdevice");
-	if (nrf_sdh_is_enabled()) {
-		LOGd("Softdevice is enabled");
-	} else {
-		LOGd("Softdevice is currently not enabled");
-	}
-	if (nrf_sdh_is_suspended()) {
-		LOGd("Softdevice is suspended");
-	} else {
-		LOGd("Softdevice is currently not suspended");
-	}
-	LOGd("nrf_sdh_enable_request");
-	ret_code = nrf_sdh_enable_request();
-	if (ret_code == NRF_ERROR_INVALID_STATE) {
-		LOGw("Softdevice, already initialized");
-		return;
-	}
-	LOGd("Error: %i", ret_code);
-	APP_ERROR_CHECK(ret_code);
+	ret_code_t nrfCode;
+	LOGi("Init softdevice");
+	LOGd("Softdevice enabled=%u suspended=%u", nrf_sdh_is_enabled(), nrf_sdh_is_suspended());
 
+	LOGd("nrf_sdh_enable_request");
+	nrfCode = nrf_sdh_enable_request();
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval  NRF_SUCCESS                 The process is started.
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval  NRF_ERROR_INVALID_STATE     The SoftDevice is already enabled.
+			LOGw("Softdevice already enabled");
+			return;
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
+	}
+
+	// TODO: remove this loop:
+	// This is an asynchronous process, and should just return ERR_WAIT_FOR_SUCCESS, and wait for an event.
 	while (!nrf_sdh_is_enabled()) {
-		LOGe("Softdevice, not enabled");
+		LOGe("Softdevice not enabled");
 		// The status change has been deferred.
 		app_sched_execute();
 	}
+
+	// Enable power fail detection:
+	// If the supply voltage drops below threshold, an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
+	// TODO: move the power fail code to main cpp.
+	nrfCode = sd_power_pof_enable(true);
+	// Only return code is NRF_SUCCESS.
+	APP_ERROR_CHECK(nrfCode);
+
+	nrfCode = sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
+	APP_ERROR_CHECK(nrfCode);
 }
 
 /** Initialize or configure the BLE radio.
@@ -130,10 +130,11 @@ void Stack::initSoftdevice() {
  *   NRF_SDH_BLE_CENTRAL_LINK_COUNT = 0
  */
 void Stack::initRadio() {
-	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
-	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
+	if (checkCondition(C_RADIO_INITIALIZED, false) || !checkCondition(C_STACK_INITIALIZED, true)) {
+		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
+	}
 
-	ret_code_t ret_code;
+	ret_code_t nrfCode;
 
 	LOGi(FMT_INIT, "radio");
 	// Enable BLE stack
@@ -142,45 +143,48 @@ void Stack::initRadio() {
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
 	// TODO: make a separate function, that tells you what to set RAM_R1_BASE to.
 	// TODO: make a unit test for that.
-	ret_code = nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start);
-	switch (ret_code) {
+	nrfCode = nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps. RAM_R1_BASE should be: %p", ram_start);
-			break;
 		case NRF_ERROR_INVALID_LENGTH:
 			LOGe("RAM, invalid length");
-			break;
+		default:
+			APP_ERROR_HANDLER(nrfCode);
 	}
-	APP_ERROR_CHECK(ret_code);
+
 	if (ram_start != g_RAM_R1_BASE) {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 
 	LOGd("nrf_sdh_ble_enable ram_start=%p", ram_start);
-	ret_code = nrf_sdh_ble_enable(&ram_start);
-	switch (ret_code) {
-		case NRF_ERROR_INVALID_STATE:
-			LOGe("BLE: invalid radio state");
-			break;
-		case NRF_ERROR_INVALID_ADDR:
-			LOGe("BLE: invalid memory address");
-			break;
-		case NRF_ERROR_NO_MEM:
-			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
-			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
-			break;
+	nrfCode = nrf_sdh_ble_enable(&ram_start);
+	switch (nrfCode) {
 		case NRF_SUCCESS:
 			LOGi("Softdevice enabled");
 			break;
+		case NRF_ERROR_INVALID_STATE:
+			LOGe("BLE: invalid radio state");
+		case NRF_ERROR_INVALID_ADDR:
+			LOGe("BLE: invalid memory address");
+		case NRF_ERROR_NO_MEM:
+			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
+			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
+		default:
+			// Crash.
+			APP_ERROR_HANDLER(nrfCode);
 	}
-	LOG_FLUSH();
-	APP_ERROR_CHECK(ret_code);
 
+#ifdef DEBUG
 	// Version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
-	ret_code = sd_ble_version_get(&version);
-	APP_ERROR_CHECK(ret_code);
+	nrfCode = sd_ble_version_get(&version);
+	APP_ERROR_CHECK(nrfCode);
+	LOGd("BLE version: company=%u version=%u.%u", version.company_id, version.version_number, version.subversion_number);
+#endif
 
 	setInitialized(C_RADIO_INITIALIZED);
 
@@ -192,7 +196,9 @@ void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
 }
 
 void Stack::createCharacteristics() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
+		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
+	}
 	LOGd("Create characteristics");
 
 	// Init buffers.
@@ -205,8 +211,9 @@ void Stack::createCharacteristics() {
 }
 
 void Stack::initServices() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	if (checkCondition(C_SERVICES_INITIALIZED, false)) return;
+	if (!checkCondition(C_RADIO_INITIALIZED, true) || checkCondition(C_SERVICES_INITIALIZED, false)) {
+		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
+	}
 	LOGd("Init services");
 
 	for (Service* svc : _services) {
@@ -218,6 +225,7 @@ void Stack::initServices() {
 
 void Stack::shutdown() {
 	// 16-sep-2019 TODO: stop advertising
+	// 02-11-2021 TODO: we don't support shutdown.
 	setUninitialized(C_STACK_INITIALIZED);
 }
 
@@ -255,9 +263,24 @@ void Stack::updateConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
 }
 
 void Stack::updateConnParams() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	ret_code_t ret_code = sd_ble_gap_ppcp_set(&_connectionParams);
-	APP_ERROR_CHECK(ret_code);
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
+		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
+	}
+	uint32_t nrfCode = sd_ble_gap_ppcp_set(&_connectionParams);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval ::NRF_SUCCESS Peripheral Preferred Connection Parameters set successfully.
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+			// This shouldn't happen: crash.
+		default:
+			// Crash.
+			APP_ERROR_HANDLER(nrfCode);
+	}
 }
 
 
@@ -271,19 +294,19 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 		case C_STACK_INITIALIZED:
 			field = isInitialized(C_STACK_INITIALIZED);
 			if (expectation != field) {
-				LOGw("Stack init %s", field ? "true" : "false");
+				LOGw("Stack init=%u", field);
 			}
 			break;
 		case C_RADIO_INITIALIZED:
 			field = isInitialized(C_RADIO_INITIALIZED);
 			if (expectation != field) {
-				LOGw("Radio init %s", field ? "true" : "false");
+				LOGw("Radio init=%u", field);
 			}
 			break;
 		case C_SERVICES_INITIALIZED:
 			field = isInitialized(C_SERVICES_INITIALIZED);
 			if (expectation != field) {
-				LOGw("Services init %s", field ? "true" : "false");
+				LOGw("Services init=%u", field);
 			}
 			break;
 	}
@@ -315,9 +338,42 @@ void Stack::startScanning() {
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &scanParams.interval, sizeof(scanParams.interval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &scanParams.window, sizeof(scanParams.window));
 
-	uint32_t retVal = sd_ble_gap_scan_start(&scanParams, &_scanBufferStruct);
-	APP_ERROR_CHECK(retVal);
-	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params), (&scan_buffer_struct));
+	uint32_t nrfCode = sd_ble_gap_scan_start(&scanParams, &_scanBufferStruct);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval ::NRF_SUCCESS Successfully initiated scanning procedure.
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation. Either:
+			// *                                   - Scanning is already ongoing and p_scan_params was not NULL
+			// *                                   - Scanning is not running and p_scan_params was NULL.
+			// *                                   - The scanner has timed out when this function is called to continue scanning.
+			// Since scan params is not NULL, we must already be scanning, so just update the cached state.
+			_scanning = true;
+			return;
+		case NRF_ERROR_RESOURCES:
+			// * @retval ::NRF_ERROR_RESOURCES Not enough BLE role slots available.
+			// *                               Stop one or more currently active roles (Central, Peripheral or Broadcaster) and try again
+			// Can happen? Let's not crash.
+			return;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_PARAM:
+			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied. See @ref ble_gap_scan_params_t.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_NOT_SUPPORTED:
+			// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported parameters supplied. See @ref ble_gap_scan_params_t.
+			// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_LENGTH:
+			// * @retval ::NRF_ERROR_INVALID_LENGTH The provided buffer length is invalid. See @ref BLE_GAP_SCAN_BUFFER_MIN.
+			// This shouldn't happen: crash.
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
+	}
+
 	_scanning = true;
 
 	event_t event(CS_TYPE::EVT_SCAN_STARTED, NULL, 0);
@@ -333,8 +389,20 @@ void Stack::stopScanning() {
 		return;
 	}
 
-//	LOGi(FMT_STOP, "scanning");
-	BLE_CALL(sd_ble_gap_scan_stop, ());
+	uint32_t nrfCode = sd_ble_gap_scan_stop();
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval ::NRF_SUCCESS Successfully stopped scanning procedure.
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE Not in the scanning state.
+			// Already stopped, so just update the cached state.
+			_scanning = false;
+			return;
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
+	}
 	_scanning = false;
 
 	event_t event(CS_TYPE::EVT_SCAN_STOPPED, NULL, 0);
@@ -398,8 +466,39 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			break;
 		}
 		case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
-			BLE_CALL(sd_ble_gatts_sys_attr_set, (_connectionHandle, NULL, 0,
-					BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
+			// TODO: move to interrupt?
+			LOGd("Set system attributes.");
+			uint32_t nrfCode = sd_ble_gatts_sys_attr_set(_connectionHandle, NULL, 0, BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS);
+			switch (nrfCode) {
+				case NRF_SUCCESS:
+					// * @retval ::NRF_SUCCESS Successfully set the system attribute information.
+					break;
+				case BLE_ERROR_INVALID_CONN_HANDLE:
+					// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
+					// This shouldn't happen, as the connection handle is only set in the main thread.
+					// But we can safely ignore this case.
+					LOGe("Invalid handle");
+					break;
+				case NRF_ERROR_INVALID_STATE:
+					// * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection State.
+					// Can happen that we disconnected before we handle this event.
+					break;
+				case NRF_ERROR_INVALID_ADDR:
+					// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+					// This shouldn't happen: crash.
+				case NRF_ERROR_INVALID_PARAM:
+					// * @retval ::NRF_ERROR_INVALID_PARAM Invalid flags supplied.
+					// This shouldn't happen: crash.
+				case NRF_ERROR_INVALID_DATA:
+					// * @retval ::NRF_ERROR_INVALID_DATA Invalid data supplied, the data should be exactly the same as retrieved with @ref sd_ble_gatts_sys_attr_get.
+					// This shouldn't happen: crash.
+				case NRF_ERROR_NO_MEM:
+					// * @retval ::NRF_ERROR_NO_MEM Not enough memory to complete operation.
+					// This shouldn't happen: crash.
+				default:
+					// Crash
+					APP_ERROR_HANDLER(nrfCode);
+			}
 			break;
 		}
 		case BLE_GATTS_EVT_HVN_TX_COMPLETE: {
@@ -473,8 +572,11 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 				memcpy(scan.data, p_ble_evt->evt.gap_evt.params.adv_report.data.p_data, scan.dataSize);
 				scan.advReport.data.p_data = NULL; // This pointer can't be set now, as the data is copied by scheduler.
 
-				uint32_t retVal = app_sched_event_put(&scan, sizeof(scan), csStackOnScan);
-				APP_ERROR_CHECK(retVal);
+				uint16_t schedulerSpace = app_sched_queue_space_get();
+				if (schedulerSpace > SCHED_QUEUE_SIZE - SCHEDULER_QUEUE_ALMOST_FULL) {
+					uint32_t nrfCode = app_sched_event_put(&scan, sizeof(scan), csStackOnScan);
+					APP_ERROR_CHECK(nrfCode);
+				}
 			}
 			else {
 				// Handle scan immediately, since we're already on thread level.
@@ -486,12 +588,40 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 			// Else, scanning will be paused. To continue scanning, call sd_ble_gap_scan_start.
 
 			// Resume scanning: ignore _scanning state as this is executed in an interrupt. Rely on return value instead.
-			uint32_t retVal = sd_ble_gap_scan_start(NULL, &_scanBufferStruct);
-			switch (retVal) {
-				case NRF_ERROR_INVALID_STATE:
+			uint32_t nrfCode = sd_ble_gap_scan_start(NULL, &_scanBufferStruct);
+			switch (nrfCode) {
+				case NRF_SUCCESS:
+					// * @retval ::NRF_SUCCESS Successfully initiated scanning procedure.
 					break;
+				case NRF_ERROR_INVALID_STATE:
+					// * @retval ::NRF_ERROR_INVALID_STATE Invalid state to perform operation. Either:
+					// *                                   - Scanning is already ongoing and p_scan_params was not NULL
+					// *                                   - Scanning is not running and p_scan_params was NULL.
+					// *                                   - The scanner has timed out when this function is called to continue scanning.
+					// Since scan params is NULL, we must not be scanning.
+					break;
+				case NRF_ERROR_RESOURCES:
+					// * @retval ::NRF_ERROR_RESOURCES Not enough BLE role slots available.
+					// *                               Stop one or more currently active roles (Central, Peripheral or Broadcaster) and try again
+					// Can happen? Let's not crash.
+					LOGw("No resources to continue scanning");
+					break;
+				case NRF_ERROR_INVALID_ADDR:
+					// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+					// This shouldn't happen: crash.
+				case NRF_ERROR_INVALID_PARAM:
+					// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied. See @ref ble_gap_scan_params_t.
+					// This shouldn't happen: crash.
+				case NRF_ERROR_NOT_SUPPORTED:
+					// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported parameters supplied. See @ref ble_gap_scan_params_t.
+					// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
+					// This shouldn't happen: crash.
+				case NRF_ERROR_INVALID_LENGTH:
+					// * @retval ::NRF_ERROR_INVALID_LENGTH The provided buffer length is invalid. See @ref BLE_GAP_SCAN_BUFFER_MIN.
+					// This shouldn't happen: crash.
 				default:
-					APP_ERROR_CHECK(retVal);
+					// Crash
+					APP_ERROR_HANDLER(nrfCode);
 			}
 			break;
 		}
@@ -530,7 +660,35 @@ void Stack::onMemoryRequest(uint16_t connectionHandle) {
 	cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
 	memBlock.p_mem = writeBuffer.data;
 	memBlock.len = writeBuffer.len;
-	BLE_CALL(sd_ble_user_mem_reply, (connectionHandle, &memBlock));
+	uint32_t nrfCode = sd_ble_user_mem_reply(connectionHandle, &memBlock);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			// * @retval ::NRF_SUCCESS Successfully queued a response to the peer.
+			break;
+		case NRF_ERROR_BUSY:
+			// * @retval ::NRF_ERROR_BUSY The stack is busy, process pending events and retry.
+			LOGw("Can't reply to mem request: busy");
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection state or no user memory request pending.
+			// This can happen: the phone disconnected before we handle this event.
+			break;
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
+			// This shouldn't happen, as the connection handle is only set in the main thread.
+			// But we can safely ignore this case.
+			LOGe("Invalid handle");
+			break;
+		case NRF_ERROR_INVALID_ADDR:
+			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+			// This shouldn't happen: crash.
+		case NRF_ERROR_INVALID_LENGTH:
+			// * @retval ::NRF_ERROR_INVALID_LENGTH Invalid user memory block length supplied.
+			// This shouldn't happen: crash.
+		default:
+			// Crash
+			APP_ERROR_HANDLER(nrfCode);
+	}
 }
 
 void Stack::onMemoryRelease(uint16_t connectionHandle) {
@@ -571,7 +729,25 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 	_disconnectingInProgress = false;
 
 		if (g_ENABLE_RSSI_FOR_CONNECTION) {
-			sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
+			uint32_t nrfCode = sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
+			switch (nrfCode) {
+				case NRF_SUCCESS:
+					// * @retval ::NRF_SUCCESS                   Successfully activated RSSI reporting.
+					break;
+				case NRF_ERROR_INVALID_STATE:
+					// * @retval ::NRF_ERROR_INVALID_STATE       RSSI reporting is already ongoing.
+					// Ignore this error.
+					break;
+				case BLE_ERROR_INVALID_CONN_HANDLE:
+					// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+					// This shouldn't happen, as the connection handle is only set in the main thread.
+					// But we can safely ignore this case.
+					LOGe("Invalid handle: %u", _connectionHandle);
+					break;
+				default:
+					// Crash
+					APP_ERROR_HANDLER(nrfCode);
+			}
 		}
 
 		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
@@ -678,14 +854,27 @@ void Stack::disconnect() {
 		// This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
 		// NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
 		// BLE_ERROR_INVALID_CONN_HANDLE can safely be ignored, see: https://devzone.nordicsemi.com/f/nordic-q-a/34353/error-0x3002/132078#132078
-		uint32_t errorCode = sd_ble_gap_disconnect(_connectionHandle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-		switch (errorCode) {
-		case BLE_ERROR_INVALID_CONN_HANDLE:
-		case NRF_ERROR_INVALID_STATE:
-			break;
-		default:
-			APP_ERROR_CHECK(errorCode);
-			break;
+		uint32_t nrfCode = sd_ble_gap_disconnect(_connectionHandle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+		switch (nrfCode) {
+			case NRF_SUCCESS:
+				// * @retval ::NRF_SUCCESS The disconnection procedure has been started successfully.
+				break;
+			case NRF_ERROR_INVALID_STATE:
+				// * @retval ::NRF_ERROR_INVALID_STATE Disconnection in progress or link has not been established.
+				// This can happen, when we disconnected in the meantime.
+				break;
+			case BLE_ERROR_INVALID_CONN_HANDLE:
+				// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
+				// This shouldn't happen, as the connection handle is only set in the main thread.
+				// But it was ignored before.
+				LOGe("Invalid handle");
+				break;
+			case NRF_ERROR_INVALID_PARAM:
+				// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
+				// This shouldn't happen: crash.
+			default:
+				// Crash
+				APP_ERROR_HANDLER(nrfCode);
 		}
 	}
 }

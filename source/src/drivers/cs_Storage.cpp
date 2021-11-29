@@ -15,7 +15,6 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <util/cs_BleError.h>
-//#include <algorithm>
 
 #define LOGStorageInit LOGi
 #define LOGStorageInfo LOGi
@@ -563,6 +562,7 @@ cs_ret_code_t Storage::eraseAllPages() {
 	if (_initialized || isErasingPages()) {
 		return ERR_NOT_AVAILABLE;
 	}
+	// The function fds_flash_end_addr() is available in patched SDKs
 	uint32_t endAddr = fds_flash_end_addr();
 	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
 	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
@@ -898,7 +898,7 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 			else {
 				LOGe("Failed to init storage: %u", p_fds_evt->result);
 				// Only option left is to reboot and see if things work out next time.
-				APP_ERROR_CHECK(p_fds_evt->result);
+				APP_ERROR_HANDLER(p_fds_evt->result);
 			}
 			break;
 		}
@@ -927,6 +927,6 @@ void Storage::handleFlashOperationError() {
 		LOGw("Flash operation error");
 		// Only option left is to reboot and see if things work out next time.
 		// Not sure this is the correct error to throw.
-		APP_ERROR_CHECK(NRF_ERROR_TIMEOUT);
+		APP_ERROR_HANDLER(NRF_ERROR_TIMEOUT);
 	}
 }

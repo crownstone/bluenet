@@ -34,11 +34,11 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 
 	// Validate settings
 	if (setupData->stoneId == 0) {
-		LOGw("stoneId=0");
+		LOGw("Invalid stoneId=0");
 		return ERR_WRONG_PARAMETER;
 	}
 	if (setupData->sphereId == 0) {
-		LOGw("sphereId=0");
+		LOGw("Invalid sphereId=0");
 		return ERR_WRONG_PARAMETER;
 	}
 

@@ -18,17 +18,24 @@ include(${DEFAULT_MODULES_PATH}/get_mac_address.cmake)
 message(STATUS "Default config file: " ${DEFAULT_CONFIG_FILE})
 load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
 
+if(EXISTS ${TARGET_CONFIG_FILE})
+	load_configuration(${TARGET_CONFIG_FILE} CONFIG_LIST)
+endif()
+
+if(EXISTS ${TARGET_CONFIG_OVERWRITE_FILE})
+	load_configuration(${TARGET_CONFIG_OVERWRITE_FILE} CONFIG_LIST)
+endif()
+
 # Overwrite with runtime config
-load_configuration(${CONFIG_FILE} CONFIG_LIST)
+if(EXISTS ${CONFIG_FILE})
+	load_configuration(${CONFIG_FILE} CONFIG_LIST)
+else()
+	message(STATUS "Note, there is no runtime config file (convenient for these after-build tools)")
+endif()
 
 string(REGEX REPLACE "~" "$ENV{HOME}" KEYS_JSON_FILE "${KEYS_JSON_FILE}")
 
 set(CONFIG_FIELD "$ENV{BLUENET_CONFIG}")
-
-#if(NOT CONFIG_FIELD)
-#	message(WARNING "Call with parameter, such as\n BLUENET_CONFIG=MAC_ADDRESS make write_config")
-#	return()
-#endif()
 
 function(write_field FIELD_NAME FIELD_VALUE)
 
@@ -81,9 +88,17 @@ function(write_field FIELD_NAME FIELD_VALUE)
 
 endfunction()
 
+if(NOT SERIAL_NUM)
+	set(SERIAL_NUM "")
+endif()
+
+if(NOT MAC_ADDRESS)
+	set(MAC_ADDRESS "")
+endif()
+
 if(NOT CONFIG_FIELD)
 	message(STATUS "Write all fields")
-	get_mac_address(${SERIAL_NUM} MAC_ADDRESS)
+	get_mac_address("${SERIAL_NUM}" MAC_ADDRESS)
 	write_field("MAC_ADDRESS" ${MAC_ADDRESS})
 	write_field("BEACON_MAJOR" ${BEACON_MAJOR})
 	write_field("BEACON_MINOR" ${BEACON_MINOR})
@@ -101,7 +116,7 @@ endif()
 
 if(CONFIG_FIELD STREQUAL "MAC_ADDRESS")
 	message(STATUS "Get mac address")
-	get_mac_address(${SERIAL_NUM} MAC_ADDRESS)
+	get_mac_address("${SERIAL_NUM}" MAC_ADDRESS)
 	write_field("MAC_ADDRESS" ${MAC_ADDRESS})
 
 elseif(CONFIG_FIELD STREQUAL "BEACON_MAJOR")

@@ -27,15 +27,53 @@ void handle_discovery(ble_db_discovery_evt_t* event) {
 	BleCentral::getInstance().onDiscoveryEvent(*event);
 }
 
-BleCentral::BleCentral() {
+#if NORDIC_SDK_VERSION == 15
+BleCentral::BleCentral():
+	_discoveryModule {
+		.discovery_in_progress = false,
+		.discovery_pending = false,
+		.conn_handle = BLE_CONN_HANDLE_INVALID
+	}
+{
 }
+#else
+
+// TODO: Get rid of this macro and only create data structure if class instance is used...
+NRF_BLE_GQ_DEF(m_ble_gatt_queue,
+		NRF_SDH_BLE_PERIPHERAL_LINK_COUNT,
+		NRF_BLE_GQ_QUEUE_SIZE);
+
+BleCentral::BleCentral():
+	_discoveryModule {
+		.discovery_in_progress = false,
+		.conn_handle = BLE_CONN_HANDLE_INVALID
+	},
+	_discoveryInit {
+		.evt_handler = NULL,
+		.p_gatt_queue = NULL
+	}
+{
+	_queue = &m_ble_gatt_queue;
+}
+#endif
 
 void BleCentral::init() {
-	_discoveryModule.discovery_in_progress = false;
-	_discoveryModule.discovery_pending = false;
-	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
+#if NORDIC_SDK_VERSION == 15
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
-	APP_ERROR_CHECK(nrfCode);
+#else
+	_discoveryInit.evt_handler = handle_discovery;
+	_discoveryInit.p_gatt_queue = _queue;
+	ret_code_t nrfCode = ble_db_discovery_init(&_discoveryInit);
+#endif
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_NULL:
+			// * @retval NRF_ERROR_NULL If the handler was NULL.
+			// This shouldn't happen: crash.
+		default:
+			APP_ERROR_HANDLER(nrfCode);
+	}
 
 	// Use the encryption buffer, as that contains the encrypted data, which is what we usually write or read.
 	EncryptionBuffer::getInstance().getBuffer(_buf.data, _buf.len);

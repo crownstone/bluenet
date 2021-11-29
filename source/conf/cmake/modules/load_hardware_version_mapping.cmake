@@ -4,7 +4,7 @@ function(load_hardware_version BOARD_HEADER_FILE BOARD_NAME BOARD_VERSION)
     file(STRINGS ${BOARD_HEADER_FILE} ConfigContents)
     foreach(Line ${ConfigContents})
       string(REGEX MATCH "^#define.*" NameAndValue ${Line})
-        
+
       if(NOT NameAndValue STREQUAL "")
         string(REGEX MATCH "^#define +([0-9a-zA-Z_]+) +([0-9]+)" Tmp ${NameAndValue})
         set(Name ${CMAKE_MATCH_1})
@@ -27,7 +27,7 @@ function(load_board_name BOARD_HEADER_FILE BOARD_NAME BOARD_VERSION)
     file(STRINGS ${BOARD_HEADER_FILE} ConfigContents)
     foreach(Line ${ConfigContents})
       string(REGEX MATCH "^#define.*" NameAndValue ${Line})
-        
+
       if(NOT NameAndValue STREQUAL "")
         string(REGEX MATCH "^#define +([0-9a-zA-Z_]+) +([0-9]+)" Tmp ${NameAndValue})
         set(Name ${CMAKE_MATCH_1})

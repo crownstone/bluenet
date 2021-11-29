@@ -24,7 +24,7 @@ void MeshAdvertiser::init() {
 	_advertiser = &advertiser;
 	_buffer = (uint8_t*)malloc(MESH_ADVERTISER_BUF_SIZE);
 	if (_buffer == NULL) {
-		APP_ERROR_CHECK(ERR_NO_SPACE);
+		APP_ERROR_HANDLER(ERR_NO_SPACE);
 	}
 	advertiser_instance_init(_advertiser, NULL, _buffer, MESH_ADVERTISER_BUF_SIZE);
 //	advertiser_instance_init(_advertiser, txComplete, _buffer, MESH_ADVERTISER_BUF_SIZE);

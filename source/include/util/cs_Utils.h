@@ -10,6 +10,7 @@
 #include <logging/cs_Logger.h>
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
+#include <ble/cs_Nordic.h> // required for __get_IPSR()
 
 /** @namespace CsUtils
  *
