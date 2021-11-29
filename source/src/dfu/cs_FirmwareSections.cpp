@@ -48,8 +48,8 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>()
 
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>() {
-	return {0x0007F000,
-			0x0007F000 + CODE_PAGE_SIZE};
+	return {BOOTLOADER_SETTINGS_ADDRESS,
+			BOOTLOADER_SETTINGS_ADDRESS + CODE_PAGE_SIZE};
 }
 
 // --------------------------------------------------------------------------------
