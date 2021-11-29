@@ -580,15 +580,6 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t *buf;
 };
 
-struct __attribute__((packed)) microapp_ble_isr_init_t {
-	uint16_t type; // type of event to react to
-	uintptr_t callback;
-};
-
-struct __attribute__((packed)) microapp_ble_config_t {
-	bool isScanning; // whether or not to forward scanned devices to microapp
-};
-
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
 
 /**
