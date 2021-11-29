@@ -48,11 +48,16 @@ template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSect
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::MicroApp>();
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bootloader>();
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>();
+template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>();
 
 
 
 // ----------------------- Info object -----------------------
 
+/**
+ * Describes a firmware sections start/end adresses and contains a pointer to an
+ * fstorage object that is configured to read from this particular section.
+ */
 struct FirmwareSectionInfo {
 	nrf_fstorage_t* _fStoragePtr;
 	FirmwareSectionLocation _addr;
@@ -79,4 +84,5 @@ template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Blu
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::MicroApp>();
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bootloader>();
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>();
+template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>();
 

@@ -18,8 +18,10 @@
 #define FIRMWAREREADER_LOG_LVL SERIAL_DEBUG
 
 
-
-static FirmwareSectionInfo firmwareSectionInfo = getFirmwareSectionInfo<FirmwareSection::Mbr>();
+/**
+ * current section to be printed (in parts) for debugging purposes.
+ */
+static FirmwareSectionInfo firmwareSectionInfo = getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>();
 
 // --------------------------------------------------------------------------------
 
@@ -52,7 +54,7 @@ cs_ret_code_t FirmwareReader::init() {
 	return ERR_SUCCESS;
 }
 
-void FirmwareReader::read([[maybe_unused]] FirmwareSection section, uint16_t startIndex, uint16_t size, void* data_out) {
+void FirmwareReader::read(uint16_t startIndex, uint16_t size, void* data_out) {
 	// can verify the output with nrfjprog. E.g.: `nrfjprog --memrd 0x00026000 --w 8 --n 50`
 
 	uint32_t readAddress = firmwareSectionInfo._addr._start + startIndex;
@@ -71,12 +73,18 @@ void FirmwareReader::read([[maybe_unused]] FirmwareSection section, uint16_t sta
 }
 
 uint32_t FirmwareReader::printRoutine() {
-	constexpr size_t readSize = 100;
+	constexpr size_t readSize = 128;
 
 	__attribute__((aligned(4))) uint8_t buff[readSize] = {};
 
-	dataoffSet += 100;
-	read(FirmwareSection::Bluenet, dataoffSet, readSize, buff);
+	dataoffSet += readSize;
+
+	if(dataoffSet > firmwareSectionInfo._addr._end - firmwareSectionInfo._addr._start) {
+		LOGFirmwareReaderDebug("--- section end reached, rolling back to offset = 0 ---");
+		dataoffSet = 0;
+	}
+
+	read(dataoffSet, readSize, buff);
 
 	_logArray(FIRMWAREREADER_LOG_LVL, true, buff, readSize);
 

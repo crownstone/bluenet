@@ -7,6 +7,7 @@
 
 #include <dfu/cs_FirmwareSections.h>
 #include <logging/cs_Logger.h>
+#include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
 
 // -------------- callback for F Storage --------------
 
@@ -29,10 +30,11 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::MicroA
 			g_FLASH_MICROAPP_BASE + static_cast<uint32_t>((CS_FLASH_PAGE_SIZE * g_FLASH_MICROAPP_PAGES) - 1)};
 }
 
+// TODO(Arend): is this correct?
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bootloader>() {
 	return {0x00071000,
-			0x00071000 + 0x0000D000};
+			0x00071000 + CODE_PAGE_SIZE};
 }
 
 template<>
@@ -42,6 +44,12 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>()
 //static const uint32_t stop_mbr_params_page = static_cast<uint32_t>(__stop_mbr_params_page);
 	return {0x00000000,
 			0x00001000};
+}
+
+template<>
+const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>() {
+	return {0x0007F000,
+			0x0007F000 + CODE_PAGE_SIZE};
 }
 
 // --------------------------------------------------------------------------------
@@ -78,6 +86,15 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
 };
 
 
+// ------- BootloaderSettings -------
+
+NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBootloaderSettings) = {
+		.evt_handler = firmwareReaderFsEventHandler,
+		.start_addr  = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()._start,
+		.end_addr    = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()._end,
+};
+
+
 // specializations that implement getFirmwareSectionInfo
 
 template<>
@@ -103,4 +120,10 @@ template<>
 const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>() {
 	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceMbr,
 			._addr        = getFirmwareSectionLocation<FirmwareSection::Mbr>()};
+}
+
+template<>
+const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>() {
+	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceBootloaderSettings,
+			._addr        = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()};
 }
