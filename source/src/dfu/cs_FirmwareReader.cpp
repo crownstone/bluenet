@@ -80,7 +80,7 @@ uint32_t FirmwareReader::printRoutine() {
 	dataoffSet += readSize;
 
 	if(dataoffSet > firmwareSectionInfo._addr._end - firmwareSectionInfo._addr._start) {
-		LOGFirmwareReaderDebug("--- section end reached, rolling back to offset = 0 ---");
+		LOGFirmwareReaderDebug("--- section end reached: rolling back to offset = 0 ---");
 		dataoffSet = 0;
 	}
 
