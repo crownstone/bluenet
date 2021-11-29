@@ -158,6 +158,12 @@ private:
 
 	ble_db_discovery_t _discoveryModule;
 
+#if NORDIC_SDK_VERSION > 15
+	ble_db_discovery_init_t _discoveryInit;
+
+	nrf_ble_gq_t *_queue;
+#endif
+
 	/**
 	 * Current MTU.
 	 */

@@ -232,7 +232,8 @@ private:
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
 	cuckoo_fingerprint_t& lookupFingerprint(cuckoo_index_t bucketIndex, cuckoo_index_t fingerIndex) {
-		return _data->bucketArray[(bucketIndex * _data->nestsPerBucket) + fingerIndex];
+		// TODO @ArrowAcrobatics: Please, check if there's no alignment bug here
+		return (cuckoo_fingerprint_t&)_data->bucketArray[(bucketIndex * _data->nestsPerBucket) + fingerIndex];
 	}
 
 	/**

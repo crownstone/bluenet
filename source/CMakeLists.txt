@@ -47,6 +47,8 @@ string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
+message(STATUS "Git branch ${GIT_REFSPEC} at hash ${GIT_SHA1}")
+
 #######################################################################################################################
 
 if(NOT CONFIG_DIR)
@@ -62,7 +64,6 @@ if(NOT BOARD_TARGET)
 endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
-SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
@@ -78,6 +79,8 @@ MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 #######################################################################################################################
 # Show variables
 #######################################################################################################################
+
+message(STATUS "Hardware board: ${HARDWARE_BOARD}")
 
 MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
@@ -118,25 +121,8 @@ ENDIF()
 # Source directory
 SET(SOURCE_DIR "src")
 
-SET(CMAKE_INCLUDE_SYSTEM_FLAG_C "-isystem ")
-SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
-
-# Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
-# We have removed include/third/nrf from here. This needs to be specified separately for the firmware versus the
-# bootloader. Both need namely a different sdk_config.h file...
-INCLUDE_DIRECTORIES("include")
-INCLUDE_DIRECTORIES("include/ble")
-INCLUDE_DIRECTORIES("include/third")
-INCLUDE_DIRECTORIES("shared")
-
-# TODO: Just only include th NRF5 directory and refer to the header files using that relative path in the source files
-# Then we do not need to update the CMakeLists.txt file all the time
-INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}")
-INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/cmsis/include")
-INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/config")
-INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/fstorage")
-INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_section_vars")
-INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/ble_db_discovery")
+# Get all includes from nordic
+INCLUDE(nordic.src)
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -166,6 +152,9 @@ ELSE()
 	ELSEIF (DEVICE STREQUAL "nRF52833")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
 		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S" PROPERTY LANGUAGE C)
+	ELSEIF (DEVICE STREQUAL "nRF52840_xxAA")
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52840.S")
+		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52840.S" PROPERTY LANGUAGE C)
 	ELSE()
 		MESSAGE(FATAL_ERROR "Unkown device: ${DEVICE}")
 	ENDIF()
@@ -194,7 +183,9 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_handler_gcc.c")
 #	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_weak.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
+
+
+#	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/nrf_assert.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_ble.c")
@@ -205,7 +196,12 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
 	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
-	
+
+	IF(NORDIC_SDK_VERSION GREATER 15)
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/nrf_ble_gq/nrf_ble_gq.c")
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/queue/nrf_queue.c")
+	ENDIF()
+
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
 		MESSAGE(STATUS "SERIAL from NORDIC enabled")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
@@ -228,6 +224,11 @@ ELSE()
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
 		ENDIF()
 	ELSE()
+		IF(NORDIC_SDK_VERSION GREATER 15)
+			# Required now for gatt queue
+			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
+			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
+		ENDIF()
 		MESSAGE(STATUS "SERIAL from NORDIC disabled")
 	ENDIF()
 
@@ -397,80 +398,6 @@ ELSE()
 	SOURCE_GROUP("Source files" FILES ${FOLDER_SOURCE})
 	SOURCE_GROUP("Header files" FILES ${FOLDER_HEADER})
 
-	#INCLUDE_DIRECTORIES(${INCLUDE_DIR})
-
-	# Add to the -I flags
-	# This is required for the Nordic files internally. They refer only to header files without component paths.
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/ble_services")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/common")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/device/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/drivers_nrf/common/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/drivers_nrf/comp/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/atomic/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/atomic_fifo/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/balloc/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/crc16/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/crc32/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/delay/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_log/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_log/src/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_memobj/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_section_vars/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/fds/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/fstorage/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/hardfault/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/log/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/log/src/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/memobj/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/ringbuf/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/scheduler/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/strerror/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/timer/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/trace/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/util/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/softdevice/common/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/softdevice/common/softdevice_handler/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/headers")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/cmsis/include")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/gcc/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/external/fprintf/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/integration/nrfx/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/modules/nrfx/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/modules/nrfx/drivers/include/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/modules/nrfx/hal/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/modules/nrfx/mdk/")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/external/segger_rtt")
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/integration/nrfx/legacy/")
-
-	INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/softdevice/s132/headers/nrf52")
-
-	IF (BUILD_MESHING)
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/stack/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/prov/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/prov/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/access/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/access/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/dfu/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/dfu/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/core/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/core/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/bearer/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/bearer/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/gatt/api")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/gatt/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/models/foundation/config/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/models/foundation/health/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/models/model_spec/common/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/models/model_spec/generic_onoff/include")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/external/micro-ecc")
-		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/examples/common/include")
-		IF (MESH_MEM_BACKEND STREQUAL "mem_manager")
-			INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/mem_manager")
-		ENDIF()
-		
-	ENDIF()
-
 	IF(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
 		INCLUDE_DIRECTORIES(SYSTEM "${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
 	ENDIF()
@@ -539,7 +466,9 @@ ELSE()
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
 
-		#set(DEFAULT_CONFIG_FILE "${DEFAULT_CONFIGURATION_FILE}")
+		#message(STATUS "Descend into test directory and compile if needed")
+		#add_subdirectory(test)
+
 		set(DEFAULT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
 		set(TARGET_CONFIG_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config")
 		set(TARGET_CONFIG_OVERWRITE_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config")
@@ -578,7 +507,9 @@ ELSE()
 		message(STATUS "Configure nrf_symbols.ld file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
+
 		link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf)
+		link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL})
 	
 		message(STATUS "Application start address: ${APPLICATION_START_ADDRESS}")
 		message(STATUS "Application length: ${APPLICATION_LENGTH}")
@@ -596,7 +527,11 @@ ELSE()
 		# Add path with files like sdk_config.h to include directories
 		# The include/third/nrf file dir is required for files in the sdk (e.g. link "sdk_config.h" without path prefix)
 		# The ${CMAKE_CURRENT_BINARY_DIR}/include dir is required for files generated through configure_file
-		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
+		set(THIRD_PARTY_NRF_INCLUDE_PATH "include/third/nrf")
+		message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
+		set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
+		message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
+		target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
@@ -683,10 +618,14 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
 			)
-		
+	
+		# TODO: Rename CONFIG_FILE here to TARGET_RUNTIME_CONFIG_FILE
 		SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
 			-DDEFAULT_CONFIG_FILE:STRING=${DEFAULT_CONFIG_FILE}\
+			-DTARGET_CONFIG_FILE:STRING=${TARGET_CONFIG_FILE}\
+			-DTARGET_CONFIG_OVERWRITE_FILE:STRING=${TARGET_CONFIG_OVERWRITE_FILE}\
 			-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config\
+			-DKEYS_JSON_FILE:STRING=${KEYS_JSON_FILE}\
 			-DDEVICE:STRING=${DEVICE}\
 			-DNRF_DEVICE_FAMILY:STRING=${NRF_DEVICE_FAMILY}\
 			-DSERIAL_NUM:STRING=${SERIAL_NUM}\
@@ -727,9 +666,17 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
+			)
+		
+		ADD_CUSTOM_TARGET(debug_bootloader
+			COMMAND ${CMAKE_COMMAND} -E echo "** Debug bootloader"
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=bootloader.elf bootloader.elf
+			WORKING_DIRECTORY bootloader
+			DEPENDS bootloader
+			COMMENT "Debug bootloader.elf"
 			)
 
 		ADD_CUSTOM_TARGET(write_application
@@ -796,6 +743,11 @@ ELSE()
 		ADD_CUSTOM_TARGET(read_bootloader_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001014" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader address"
+			)
+		
+		ADD_CUSTOM_TARGET(read_mbr_parameter_page_address
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001018" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read MBR parameter page address"
 			)
 	
 		# Actually piping over the command line might fail in another OS, this might be replaced by a particular

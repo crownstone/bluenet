@@ -26,7 +26,7 @@ class CircularBuffer {
 public:
 	/** Default constructor
 	 */
-	CircularBuffer(uint16_t capacity): _array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0), _allocatedSelf(false)
+	CircularBuffer(uint16_t capacity): _array(nullptr), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0), _allocatedSelf(false)
 	{
 	}
 
@@ -47,13 +47,13 @@ public:
 	 * @return true if memory allocation was successful, false otherwise
 	 */
 	bool init() {
-		if (_array != NULL) {
+		if (_array != nullptr) {
 			return false;
 		}
 		// Allocate memory
 		LOGCircularBufferDebug(FMT_ALLOCATE_MEMORY, _array);
 		_array = (T*)calloc(_capacity, sizeof(T));
-		if (_array == NULL) {
+		if (_array == nullptr) {
 			LOGw(STR_ERR_ALLOCATE_MEMORY);
 			return false;
 		}
@@ -68,11 +68,11 @@ public:
 	 *
 	 */
 	bool deinit() {
-		if (_array != NULL && _allocatedSelf) {
+		if (_array != nullptr && _allocatedSelf) {
 			free(_array);
 		}
 		_allocatedSelf = false;
-		_array = NULL;
+		_array = nullptr;
 		return true;
 	}
 
@@ -103,8 +103,15 @@ public:
 		if (_allocatedSelf) {
 			return false;
 		}
-		_array = NULL;
+		_array = nullptr;
 		return true;
+	}
+
+	/**
+	 * Returns true when the buffer has been allocated, either via init() or via assign().
+	 */
+	bool isInitialized() {
+		return _array != nullptr;
 	}
 
 	T* getBuffer() {
