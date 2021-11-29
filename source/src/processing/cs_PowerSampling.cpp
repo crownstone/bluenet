@@ -160,10 +160,11 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	LOGd(FMT_INIT, "ADC");
 	adc_config_t adcConfig;
 	adcConfig.channelCount = 2;
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage;
+	// TODO: there are now multiple voltage pins
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage[GAIN_SINGLE];
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig.voltageRange;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainLow;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrent[GAIN_LOW];
 	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.samplingIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
@@ -174,10 +175,13 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	// init the adc config
 	_adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX] = boardConfig.voltageRange;
 	_adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX] = boardConfig.currentRange;
-	_adcConfig.currentPinGainHigh = boardConfig.pinAinCurrentGainHigh;
-	_adcConfig.currentPinGainMed  = boardConfig.pinAinCurrentGainMed;
-	_adcConfig.currentPinGainLow  = boardConfig.pinAinCurrentGainLow;
-	_adcConfig.voltagePin = boardConfig.pinAinVoltage;
+	_adcConfig.currentPinGainHigh = boardConfig.pinAinCurrent[GAIN_HIGH];
+	_adcConfig.currentPinGainMed  = boardConfig.pinAinCurrent[GAIN_MIDDLE];
+	_adcConfig.currentPinGainLow  = boardConfig.pinAinCurrent[GAIN_LOW];
+
+	// TODO: there are now multiple voltage pins
+	_adcConfig.voltagePin = boardConfig.pinAinVoltage[GAIN_SINGLE];
+	
 	_adcConfig.zeroReferencePin = adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin;
 	_adcConfig.voltageChannelPin = _adcConfig.voltagePin;
 	_adcConfig.voltageChannelUsedAs = 0;

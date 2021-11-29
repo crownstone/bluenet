@@ -80,9 +80,80 @@ extern "C" {
 #define ACR01B2E             1503
 // Schematic change. Change power measurement resistor values.
 #define ACR01B2G             1504
-	
+
 // Crownstone Plug One (first prototype of second edition of the plug)
 #define ACR01B11A            1505
+
+
+#define PIN_UNUSED 0xFF
+
+enum GainIndex {
+	GAIN_UNUSED = PIN_UNUSED,
+	GAIN_HIGH = 0,
+	GAIN_MIDDLE = 1,
+	GAIN_LOW = 2,
+	GAIN_SINGLE = 0, // if there is only a single gain
+	GAIN_COUNT = 3,
+};
+
+enum ButtonIndex {
+	BUTTON_UNUSED = PIN_UNUSED,
+	BUTTON0 = 0,
+	BUTTON1 = 1,
+	BUTTON2 = 2,
+	BUTTON3 = 3,
+	BUTTON_COUNT = 4,
+};
+
+enum GpioIndex {
+	GPIO_UNUSED = PIN_UNUSED,
+	GPIO_INDEX0 = 0,
+	GPIO_INDEX1 = 1,
+	GPIO_INDEX2 = 2,
+	GPIO_INDEX3 = 3,
+	GPIO_INDEX4 = 4,
+	GPIO_INDEX5 = 5,
+	GPIO_INDEX6 = 6,
+	GPIO_INDEX7 = 7,
+	GPIO_INDEX8 = 8,
+	GPIO_INDEX9 = 9,
+	GPIO_INDEX_COUNT = 10,
+};
+
+enum Chipset {
+	CHIPSET_NRF52832 = 0,
+	CHIPSET_NRF52833 = 1,
+	CHIPSET_NRF52840 = 2,
+};
+
+/**
+ * Maps GPIO pins to AIN pins.
+ *
+ * nRF52832
+ *  - https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fpin.html&anchor=pin_assign
+ *  - same pin layout for the QFN48 and WLCSP package (in the respect of this mapping)
+ * nRF52833
+ *  - https://infocenter.nordicsemi.com/topic/ps_nrf52833/pin.html?cp=4_1_0_6_0
+ *  - same pin layout as nRF52832 (in this respect)
+ * nRF52840
+ *  - https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52840%2Fpin.html&cp=4_0_0_6_0
+ *  - same pin layout as nRF52832 (in this respect)
+ */
+uint8_t GpioToAinOnChipset(uint8_t gpio, uint8_t chipset);
+
+// For now mapping is always the same, so this simplified function can be used.
+uint8_t GpioToAin(uint8_t gpio);
+
+enum LedIndex {
+	LED_UNUSED = PIN_UNUSED,
+	LED0 = 0,
+	LED1 = 1,
+	LED2 = 2,
+	LED3 = 3,
+	LED_RED = 0,
+	LED_GREEN = 1,
+	LED_COUNT = 4,
+};
 
 /** Board configuration
  *
@@ -104,26 +175,23 @@ typedef struct  {
 	//! GPIO pin to switch the relay off.
 	uint8_t pinGpioRelayOff;
 
-	//! Analog input pin to read the current with high gain.
-	uint8_t pinAinCurrentGainHigh;
+	//! Analog input pins to read the current with different gains (if present).
+	uint8_t pinAinCurrent[GAIN_COUNT];
 
-	//! Analog input pin to read the current with medium gain.
-	uint8_t pinAinCurrentGainMed;
+	//! Analog input pins to read the voltage with different gains (if present).
+	uint8_t pinAinVoltage[GAIN_COUNT];
 
-	//! Analog input pin to read the current with low gain.
-	uint8_t pinAinCurrentGainLow;
+	//! Analog input pins to read the voltage after the load with different gains (if present).
+	uint8_t pinAinVoltageAfterLoad[GAIN_COUNT];
 
-	//! Analog input pin to read the voltage.
-	uint8_t pinAinVoltage;
-
-//	//! Analog input pin to read the voltage.
-//	uint8_t pinAinVoltageGainHigh;
-
-//	//! Analog input pin to read the voltage.
-//	uint8_t pinAinVoltageGainLow;
-
-	//! Analog input pin to read 'zero' line for current and voltage measurement (optional).
+	//! Analog input pin to read 'zero' / offset (to be used for both current and voltage measurements).
 	uint8_t pinAinZeroRef;
+
+	//! Analog input pin to get zero-crossing information for current
+	uint8_t pinAinCurrentZeroCrossing;
+	
+	//! Analog input pin to get zero-crossing information for voltage
+	uint8_t pinAinVoltageZeroCrossing;
 
 	//! Analog input pin to read the pwm temperature.
 	uint8_t pinAinPwmTemp;
@@ -134,20 +202,17 @@ typedef struct  {
 	//! GPIO pin to send uart.
 	uint8_t pinGpioTx;
 	
-	//! GPIO custom pins (only four)
-	uint8_t pinGpio[4];
+	//! GPIO custom pins
+	uint8_t pinGpio[GPIO_INDEX_COUNT];
 
-	//! Buttons (four on dev. kit)
-	uint8_t pinButton[4];
-
-	//! GPIO pin to control the "red" led.
-	uint8_t pinLedRed;
-
-	//! GPIO pin to control the "green" led.
-	uint8_t pinLedGreen;
+	//! Buttons (on dev. kit)
+	uint8_t pinButton[BUTTON_COUNT];
 
 	//! Leds as array
-	uint8_t pinLed[4];
+	uint8_t pinLed[LED_COUNT];
+
+	//! Unused pin
+	uint8_t pinUnused;
 
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {
@@ -179,17 +244,23 @@ typedef struct  {
 	 */
 	uint8_t deviceType;
 
-	//! Multiplication factor for current measurement.
-	float currentMultiplier;
-
 	//! Multiplication factor for voltage measurement.
-	float voltageMultiplier;
+	float voltageMultiplier[GAIN_COUNT];
 
-	//! Offset for voltage measurement.
-	int32_t voltageZero;
+	//! Multiplication factor for voltage measurement after the load.
+	float voltageAfterLoadMultiplier[GAIN_COUNT];
 
-	//! Offset for current measurement.
-	int32_t currentZero;
+	//! Multiplication factor for current measurement.
+	float currentMultiplier[GAIN_COUNT];
+
+	//! Offset for voltage measurement (in ADC values).
+	int32_t voltageZero[GAIN_COUNT];
+
+	//! Offset for voltage measurement after the load (in ADC values)
+	int32_t voltageAfterLoadZero[GAIN_COUNT];
+
+	//! Offset for current measurement (in ADC values).
+	int32_t currentZero[GAIN_COUNT];
 
 	//! Measured power when there is no load (mW).
 	int32_t powerZero;

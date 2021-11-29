@@ -123,17 +123,17 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CONFIG_LOW_TX_POWER:
 		*(TYPIFY(CONFIG_LOW_TX_POWER)*)data.value = boardsConfig.minTxPower;
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
-		*(TYPIFY(CONFIG_VOLTAGE_MULTIPLIER)*)data.value = boardsConfig.voltageMultiplier;
+	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER: // TODO: There are now multiple voltage multipliers
+		*(TYPIFY(CONFIG_VOLTAGE_MULTIPLIER)*)data.value = boardsConfig.voltageMultiplier[GAIN_SINGLE];
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
-		*(TYPIFY(CONFIG_CURRENT_MULTIPLIER)*)data.value = boardsConfig.currentMultiplier;
+	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER: // TODO: There are multiple current multipliers
+		*(TYPIFY(CONFIG_CURRENT_MULTIPLIER)*)data.value = boardsConfig.currentMultiplier[GAIN_SINGLE];
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
-		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = boardsConfig.voltageZero;
+	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO: // TODO: There is now for each voltage a possible offset
+		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = boardsConfig.voltageZero[GAIN_SINGLE];
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
-		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = boardsConfig.currentZero;
+	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO: // TODO: There is now for each current a possible offset
+		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = boardsConfig.currentZero[GAIN_SINGLE];
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_POWER_ZERO:
 		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_INVALID;

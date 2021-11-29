@@ -411,17 +411,17 @@ void Crownstone::initDrivers1() {
 	// init GPIOs
 	if (_boardsConfig.flags.hasLed) {
 		LOGi("Configure LEDs");
-		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING
-		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
-		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
-		// Turn the leds off
-		if (_boardsConfig.flags.ledInverted) {
-			nrf_gpio_pin_set(_boardsConfig.pinLedRed);
-			nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
-		}
-		else {
-			nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
-			nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
+
+		// Note: DO NOT USE LEDS WHILE SCANNING OR MESHING
+		for (int i = 0; i < LED_COUNT; ++i) {
+			if (_boardsConfig.pinLed[i] == LED_UNUSED) {
+				continue;
+			}
+			nrf_gpio_cfg_output(_boardsConfig.pinLed[i]);
+
+			// Turn the leds off
+			uint32_t value = _boardsConfig.flags.ledInverted ? 1 : 0;
+			nrf_gpio_pin_write(_boardsConfig.pinLed[i], value);
 		}
 	}
 
