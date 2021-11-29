@@ -44,13 +44,10 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_PIN               = 0x03, // Payload is pin_cmd_t.
 	CS_MICROAPP_COMMAND_SERVICE_DATA      = 0x04,
 	CS_MICROAPP_COMMAND_TWI               = 0x05,
-<<<<<<< HEAD
 	CS_MICROAPP_COMMAND_BLE 			  = 0x06,
-=======
-	CS_MICROAPP_COMMAND_POWER_USAGE       = 0x06,
-	CS_MICROAPP_COMMAND_PRESENCE          = 0x07,
-	CS_MICROAPP_COMMAND_MESH              = 0x08,
->>>>>>> ff867e62e49659c3675c72dd96611eb8219429bd
+	CS_MICROAPP_COMMAND_POWER_USAGE       = 0x07,
+	CS_MICROAPP_COMMAND_PRESENCE          = 0x08,
+	CS_MICROAPP_COMMAND_MESH              = 0x09,
 };
 
 enum CommandMicroappLogOption {
