@@ -388,7 +388,7 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	ble_dev.dlen = dev->dataSize;
 	memcpy(ble_dev.data, dev->data, dev->dataSize);
 
-	uint16_t type      = reinterpret_cast<uint16_t>(CS_TYPE::EVT_DEVICE_SCANNED);
+	uint16_t type      = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
 	uintptr_t callback = 0;
 	// get callback
 	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
