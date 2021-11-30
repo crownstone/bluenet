@@ -160,7 +160,7 @@ typedef struct {
 } microapp_ble_cmd_t;
 
 const uint8_t MAC_ADDRESS_LENGTH  = 6;
-const uint8_t BLE_ADV_DATA_LENGTH = 31;
+const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
 
 /*
  * Struct for scanned ble devices
@@ -170,7 +170,7 @@ typedef struct {
 	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
 	int8_t rssi;
 	uint8_t dlen;
-	uint8_t data[BLE_ADV_DATA_LENGTH];
+	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
 } microapp_ble_dev_t;
 
 struct __attribute__((packed)) microapp_power_usage_t {

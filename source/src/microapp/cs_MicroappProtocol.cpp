@@ -380,10 +380,15 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	std::reverse_copy(
 			dev->address, dev->address + MAC_ADDRESS_LENGTH, ble_dev.addr);  // convert from little endian to big endian
 	ble_dev.rssi = dev->rssi;
+
+	if (dev->dataSize > sizeof(ble_dev.data)) {
+		LOGw("BLE advertisement data too large");
+		return;
+	}
 	ble_dev.dlen = dev->dataSize;
 	memcpy(ble_dev.data, dev->data, dev->dataSize);
 
-	uint16_t type      = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
+	uint16_t type      = reinterpret_cast<uint16_t>(CS_TYPE::EVT_DEVICE_SCANNED);
 	uintptr_t callback = 0;
 	// get callback
 	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
