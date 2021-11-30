@@ -365,6 +365,9 @@ void MicroappProtocol::onMeshMessage(MeshMsgEvent event) {
 	_meshMessageBuffer.push(bufferedMessage);
 }
 
+/*
+ * Called upon receiving scanned BLE device, calls microapp callback if registered
+ */
 void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	if (!_microappIsScanning) {
 		LOGd("Microapp not scanning, so not forwarding scanned device");

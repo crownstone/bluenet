@@ -157,22 +157,69 @@ protected:
 	 */
 	void onMeshMessage(MeshMsgEvent event);
 
+	/**
+	 * Handle a scanned BLE device.
+	 */
 	void onDeviceScanned(scanned_device_t* dev);
 
 	/**
-	 * Handle microapp commands.
+	 * Handle microapp log commands.
 	 */
 	int handleMicroappLogCommand(uint8_t* payload, uint16_t length);
+
+	/**
+	 * Handle microapp delay commands.
+	 */
 	int handleMicroappDelayCommand(uint8_t* payload, uint16_t length);
+
+	/**
+	 * Handle microapp pin commands.
+	 */
 	int handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd);
+
+	/**
+	 * Handle microapp pin switching commands.
+	 */
 	int handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd);
+
+	/**
+	 * Handle microapp pin commands for setting pin modes.
+	 */
 	int handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd);
+
+	/**
+	 * Handle microapp pin commands for reading and writing pins.
+	 */
 	int handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd);
+
+	/**
+	 * Handle microapp commands for advertising microapp state in service data.
+	 */
 	int handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length);
+
+	/**
+	 * Handle microapp TWI commands.
+	 */
 	int handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd);
+
+	/**
+	 * Handle microapp BLE commands.
+	 */
 	int handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd);
+
+	/**
+	 * Handle microapp commands for power usage requests.
+	 */
 	int handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length);
+
+	/**
+	 * Handle microapp commands for presence requests.
+	 */
 	int handleMicroappPresenceCommand(uint8_t* payload, uint16_t length);
+
+	/**
+	 * Handle microapp commands for sending and reading mesh messages.
+	 */
 	int handleMicroappMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize);
 
 public:
