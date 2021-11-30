@@ -127,13 +127,13 @@ typedef struct {
 } microapp_pin_cmd_t;
 
 /*
- * Struct with data to implement sleep command through coroutines.
+ * Struct with data to implement delay command through coroutines.
  */
 typedef struct {
 	uint8_t cmd;
 	uint16_t period;
 	uintptr_t coargs;
-} microapp_sleep_cmd_t;
+} microapp_delay_cmd_t;
 
 const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
 

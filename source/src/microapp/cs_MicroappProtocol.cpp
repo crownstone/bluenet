@@ -423,7 +423,12 @@ int MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
 		}
 		case CS_MICROAPP_COMMAND_DELAY: {
 			LOGd("Microapp delay command");
-			return handleMicroappDelayCommand(payload, length);
+			if (length != sizeof(microapp_delay_cmd_t)) {
+				LOGi("Wrong payload length");
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			microapp_delay_cmd_t* delay_cmd = reinterpret_cast<microapp_delay_cmd_t*>(payload);
+			return handleMicroappDelayCommand(delay_cmd);
 		}
 		case CS_MICROAPP_COMMAND_PIN: {
 			LOGd("Microapp pin command");
@@ -547,10 +552,10 @@ int MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappDelayCommand(uint8_t* payload, uint16_t length) {
-	int delay = (payload[1] << 8) + payload[2];
+int MicroappProtocol::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd) {
+	int delay = delay_cmd->period;
 	LOGd("Microapp delay of %i", delay);
-	uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
+	uintptr_t coargs_ptr = delay_cmd->coargs;
 	// cast to coroutine args struct
 	coargs* args = (coargs*)coargs_ptr;
 	args->cntr++;

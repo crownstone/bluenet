@@ -170,7 +170,7 @@ protected:
 	/**
 	 * Handle microapp delay commands.
 	 */
-	int handleMicroappDelayCommand(uint8_t* payload, uint16_t length);
+	int handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd);
 
 	/**
 	 * Handle microapp pin commands.
