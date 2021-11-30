@@ -433,6 +433,10 @@ int MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
 		}
 		case CS_MICROAPP_COMMAND_BLE: {
 			LOGd("Microapp BLE command");
+			if (length != sizeof(microapp_ble_cmd_t)) {
+				LOGi("Wrong payload length");
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
 			microapp_ble_cmd_t* ble_cmd = reinterpret_cast<microapp_ble_cmd_t*>(payload);
 			return handleMicroappBleCommand(ble_cmd);
 		}
@@ -513,16 +517,17 @@ int MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_ARR: {
-			// for now, print in hex format
-			__attribute__((unused)) uint8_t* data = reinterpret_cast<uint8_t*>(&(payload[3]));
-			__attribute__((unused)) int len       = length - 3;
-
+			// for now, print uint8_t array in hex format
+			uint8_t* data = reinterpret_cast<uint8_t*>(&(payload[3]));
+			int len       = length - 3;
+			// convert to hex string using sprintf
 			char buf[(MAX_PAYLOAD - 3) * 2 + 1];  // does not allow variable length
 			char* dest   = buf;
 			uint8_t* src = data;
 			for (uint8_t i = 0; i < len; i++) {
 				sprintf((dest + 2 * i), "%02X", *(src + i));
 			}
+			// print as a string
 			_log(SERIAL_INFO, newLine, "0x%s", buf);
 			break;
 		}
