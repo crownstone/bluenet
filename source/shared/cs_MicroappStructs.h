@@ -33,11 +33,6 @@ enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_LED4    = 0x0c,  // LED4
 };
 
-enum ErrorCodesMicroapp {
-	ERR_NO_PAYLOAD = 0x01,  // need at least an opcode in the payload
-	ERR_TOO_LARGE  = 0x02,
-};
-
 enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_LOG          = 0x01,
 	CS_MICROAPP_COMMAND_DELAY        = 0x02,

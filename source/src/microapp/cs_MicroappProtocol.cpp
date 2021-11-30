@@ -41,8 +41,8 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 extern "C" {
 
 int microapp_callback(uint8_t* payload, uint16_t length) {
-	if (length == 0) return ERR_NO_PAYLOAD;
-	if (length > 255) return ERR_TOO_LARGE;
+	if (length == 0) return ERR_WRONG_PAYLOAD_LENGTH;
+	if (length > MAX_PAYLOAD) return ERR_WRONG_PAYLOAD_LENGTH;
 
 	return handleCommand(payload, length);
 }
