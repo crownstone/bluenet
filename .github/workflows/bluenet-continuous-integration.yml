@@ -47,7 +47,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo DEBIAN_FRONTEND=noninteractive apt-get update -y --fix-missing
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -f
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -f -y
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ git make python3 python3-pip wget unzip apt
           sudo DEBIAN_FRONTEND=noninteractive apt-get install -y libusb-1.0-0 libsm6
           cmake --version
