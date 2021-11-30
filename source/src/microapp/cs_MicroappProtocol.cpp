@@ -371,8 +371,8 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 		return;
 	}
 
-	// copy scanned device info to ble_dev_t struct
-	ble_dev_t ble_dev;
+	// copy scanned device info to microapp_ble_dev_t struct
+	microapp_ble_dev_t ble_dev;
 	ble_dev.addr_type = dev->addressType;
 	std::reverse_copy(
 			dev->address, dev->address + MAC_ADDRESS_LENGTH, ble_dev.addr);  // convert from little endian to big endian
@@ -398,7 +398,7 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	LOGd("Call callback at 0x%x", callback);
 	// we have to do this through another coroutine perhaps (not the same one as loop!), for
 	// now stay on this stack
-	void (*callback_func)(ble_dev_t) = (void (*)(ble_dev_t))callback;
+	void (*callback_func)(microapp_ble_dev_t) = (void (*)(microapp_ble_dev_t))callback;
 	callback_func(ble_dev);
 }
 
@@ -419,7 +419,7 @@ int MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
 		}
 		case CS_MICROAPP_COMMAND_PIN: {
 			LOGd("Microapp pin command");
-			pin_cmd_t* pin_cmd = reinterpret_cast<pin_cmd_t*>(payload);
+			microapp_pin_cmd_t* pin_cmd = reinterpret_cast<microapp_pin_cmd_t*>(payload);
 			return handleMicroappPinCommand(pin_cmd);
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
@@ -428,12 +428,12 @@ int MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
 		}
 		case CS_MICROAPP_COMMAND_TWI: {
 			LOGd("Microapp TWI command");
-			twi_cmd_t* twi_cmd = reinterpret_cast<twi_cmd_t*>(payload);
+			microapp_twi_cmd_t* twi_cmd = reinterpret_cast<microapp_twi_cmd_t*>(payload);
 			return handleMicroappTwiCommand(twi_cmd);
 		}
 		case CS_MICROAPP_COMMAND_BLE: {
 			LOGd("Microapp BLE command");
-			ble_cmd_t* ble_cmd = reinterpret_cast<ble_cmd_t*>(payload);
+			microapp_ble_cmd_t* ble_cmd = reinterpret_cast<microapp_ble_cmd_t*>(payload);
 			return handleMicroappBleCommand(ble_cmd);
 		}
 		case CS_MICROAPP_COMMAND_POWER_USAGE: {
@@ -547,7 +547,7 @@ int MicroappProtocol::handleMicroappDelayCommand(uint8_t* payload, uint16_t leng
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPinCommand(pin_cmd_t* pin_cmd) {
+int MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	switch (pin) {
 		case CS_MICROAPP_COMMAND_PIN_SWITCH: {  // same as DIMMER
@@ -583,7 +583,7 @@ int MicroappProtocol::handleMicroappPinCommand(pin_cmd_t* pin_cmd) {
 	}
 }
 
-int MicroappProtocol::handleMicroappPinSwitchCommand(pin_cmd_t* pin_cmd) {
+int MicroappProtocol::handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	switch (mode) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
@@ -613,7 +613,7 @@ int MicroappProtocol::handleMicroappPinSwitchCommand(pin_cmd_t* pin_cmd) {
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPinSetModeCommand(pin_cmd_t* pin_cmd) {
+int MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	TYPIFY(EVT_GPIO_INIT) gpio;
 	gpio.pin_index                    = pin;
@@ -661,7 +661,7 @@ int MicroappProtocol::handleMicroappPinSetModeCommand(pin_cmd_t* pin_cmd) {
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPinActionCommand(pin_cmd_t* pin_cmd) {
+int MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	LOGd("Clear, set or configure pin %i", pin);
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
@@ -725,7 +725,7 @@ int MicroappProtocol::handleMicroappServiceDataCommand(uint8_t* payload, uint16_
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappTwiCommand(twi_cmd_t* twi_cmd) {
+int MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd) {
 	CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
 	switch (opcode) {
 		case CS_MICROAPP_COMMAND_TWI_INIT: {
@@ -771,7 +771,7 @@ int MicroappProtocol::handleMicroappTwiCommand(twi_cmd_t* twi_cmd) {
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappBleCommand(ble_cmd_t* ble_cmd) {
+int MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
 			uint16_t type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;

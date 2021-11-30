@@ -164,13 +164,13 @@ protected:
 	 */
 	int handleMicroappLogCommand(uint8_t* payload, uint16_t length);
 	int handleMicroappDelayCommand(uint8_t* payload, uint16_t length);
-	int handleMicroappPinCommand(pin_cmd_t* pin_cmd);
-	int handleMicroappPinSwitchCommand(pin_cmd_t* pin_cmd);
-	int handleMicroappPinSetModeCommand(pin_cmd_t* pin_cmd);
-	int handleMicroappPinActionCommand(pin_cmd_t* pin_cmd);
+	int handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd);
+	int handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd);
+	int handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd);
+	int handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd);
 	int handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length);
-	int handleMicroappTwiCommand(twi_cmd_t* twi_cmd);
-	int handleMicroappBleCommand(ble_cmd_t* ble_cmd);
+	int handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd);
+	int handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd);
 	int handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length);
 	int handleMicroappPresenceCommand(uint8_t* payload, uint16_t length);
 	int handleMicroappMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize);

@@ -17,87 +17,93 @@
 const uint8_t MAX_PAYLOAD = 32;
 
 enum CommandMicroappPin {
-	CS_MICROAPP_COMMAND_PIN_SWITCH        = 0x00, // Virtual pin
-	CS_MICROAPP_COMMAND_PIN_DIMMER        = 0x00, // same one
-	CS_MICROAPP_COMMAND_PIN_GPIO1         = 0x01, // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_GPIO2         = 0x02, // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_GPIO3         = 0x03, // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_GPIO4         = 0x04, // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_BUTTON1       = 0x05, // BUTTON1
-	CS_MICROAPP_COMMAND_PIN_BUTTON2       = 0x06, // BUTTON2
-	CS_MICROAPP_COMMAND_PIN_BUTTON3       = 0x07, // BUTTON3
-	CS_MICROAPP_COMMAND_PIN_BUTTON4       = 0x08, // BUTTON4
-	CS_MICROAPP_COMMAND_PIN_LED1          = 0x09, // LED1
-	CS_MICROAPP_COMMAND_PIN_LED2          = 0x0a, // LED2
-	CS_MICROAPP_COMMAND_PIN_LED3          = 0x0b, // LED3
-	CS_MICROAPP_COMMAND_PIN_LED4          = 0x0c, // LED4
+	CS_MICROAPP_COMMAND_PIN_SWITCH  = 0x00,  // Virtual pin
+	CS_MICROAPP_COMMAND_PIN_DIMMER  = 0x00,  // same one
+	CS_MICROAPP_COMMAND_PIN_GPIO1   = 0x01,  // GPIO pin on connector
+	CS_MICROAPP_COMMAND_PIN_GPIO2   = 0x02,  // GPIO pin on connector
+	CS_MICROAPP_COMMAND_PIN_GPIO3   = 0x03,  // GPIO pin on connector
+	CS_MICROAPP_COMMAND_PIN_GPIO4   = 0x04,  // GPIO pin on connector
+	CS_MICROAPP_COMMAND_PIN_BUTTON1 = 0x05,  // BUTTON1
+	CS_MICROAPP_COMMAND_PIN_BUTTON2 = 0x06,  // BUTTON2
+	CS_MICROAPP_COMMAND_PIN_BUTTON3 = 0x07,  // BUTTON3
+	CS_MICROAPP_COMMAND_PIN_BUTTON4 = 0x08,  // BUTTON4
+	CS_MICROAPP_COMMAND_PIN_LED1    = 0x09,  // LED1
+	CS_MICROAPP_COMMAND_PIN_LED2    = 0x0a,  // LED2
+	CS_MICROAPP_COMMAND_PIN_LED3    = 0x0b,  // LED3
+	CS_MICROAPP_COMMAND_PIN_LED4    = 0x0c,  // LED4
 };
 
 enum ErrorCodesMicroapp {
-	ERR_NO_PAYLOAD                        = 0x01,    // need at least an opcode in the payload
-	ERR_TOO_LARGE                         = 0x02,
+	ERR_NO_PAYLOAD = 0x01,  // need at least an opcode in the payload
+	ERR_TOO_LARGE  = 0x02,
 };
 
 enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_LOG               = 0x01,
-	CS_MICROAPP_COMMAND_DELAY             = 0x02,
-	CS_MICROAPP_COMMAND_PIN               = 0x03, // Payload is pin_cmd_t.
-	CS_MICROAPP_COMMAND_SERVICE_DATA      = 0x04,
-	CS_MICROAPP_COMMAND_TWI               = 0x05,
-	CS_MICROAPP_COMMAND_BLE 			  = 0x06,
-	CS_MICROAPP_COMMAND_POWER_USAGE       = 0x07,
-	CS_MICROAPP_COMMAND_PRESENCE          = 0x08,
-	CS_MICROAPP_COMMAND_MESH              = 0x09,
+	CS_MICROAPP_COMMAND_LOG          = 0x01,
+	CS_MICROAPP_COMMAND_DELAY        = 0x02,
+	CS_MICROAPP_COMMAND_PIN          = 0x03,  // Payload is pin_cmd_t.
+	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
+	CS_MICROAPP_COMMAND_TWI          = 0x05,
+	CS_MICROAPP_COMMAND_BLE          = 0x06,
+	CS_MICROAPP_COMMAND_POWER_USAGE  = 0x07,
+	CS_MICROAPP_COMMAND_PRESENCE     = 0x08,
+	CS_MICROAPP_COMMAND_MESH         = 0x09,
 };
 
 enum CommandMicroappLogOption {
-	CS_MICROAPP_COMMAND_LOG_NEWLINE       = 0x00,
-	CS_MICROAPP_COMMAND_LOG_NO_NEWLINE    = 0x01,
+	CS_MICROAPP_COMMAND_LOG_NEWLINE    = 0x00,
+	CS_MICROAPP_COMMAND_LOG_NO_NEWLINE = 0x01,
 };
 
 enum CommandMicroappLog {
-	CS_MICROAPP_COMMAND_LOG_CHAR          = 0x00,
-	CS_MICROAPP_COMMAND_LOG_INT           = 0x01,
-	CS_MICROAPP_COMMAND_LOG_STR           = 0x02,
-	CS_MICROAPP_COMMAND_LOG_ARR           = 0x03,
-	CS_MICROAPP_COMMAND_LOG_FLOAT         = 0x04,
-	CS_MICROAPP_COMMAND_LOG_DOUBLE        = 0x05,
-	CS_MICROAPP_COMMAND_LOG_UINT          = 0x06,
-	CS_MICROAPP_COMMAND_LOG_SHORT         = 0x07,
+	CS_MICROAPP_COMMAND_LOG_CHAR   = 0x00,
+	CS_MICROAPP_COMMAND_LOG_INT    = 0x01,
+	CS_MICROAPP_COMMAND_LOG_STR    = 0x02,
+	CS_MICROAPP_COMMAND_LOG_ARR    = 0x03,
+	CS_MICROAPP_COMMAND_LOG_FLOAT  = 0x04,
+	CS_MICROAPP_COMMAND_LOG_DOUBLE = 0x05,
+	CS_MICROAPP_COMMAND_LOG_UINT   = 0x06,
+	CS_MICROAPP_COMMAND_LOG_SHORT  = 0x07,
 };
 
 enum CommandMicroappPinOpcode1 {
-	CS_MICROAPP_COMMAND_PIN_MODE          = 0x00,
-	CS_MICROAPP_COMMAND_PIN_ACTION        = 0x01,
+	CS_MICROAPP_COMMAND_PIN_MODE   = 0x00,
+	CS_MICROAPP_COMMAND_PIN_ACTION = 0x01,
 };
 
 enum CommandMicroappPinOpcode2 {
-	CS_MICROAPP_COMMAND_PIN_READ          = 0x01,
-	CS_MICROAPP_COMMAND_PIN_WRITE         = 0x02,
-	CS_MICROAPP_COMMAND_PIN_TOGGLE        = 0x03,
-	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP  = 0x04,
+	CS_MICROAPP_COMMAND_PIN_READ         = 0x01,
+	CS_MICROAPP_COMMAND_PIN_WRITE        = 0x02,
+	CS_MICROAPP_COMMAND_PIN_TOGGLE       = 0x03,
+	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP = 0x04,
 };
 
 enum CommandMicroappPinValue {
-	CS_MICROAPP_COMMAND_VALUE_OFF         = 0x00,
-	CS_MICROAPP_COMMAND_VALUE_ON          = 0x01,
-	CS_MICROAPP_COMMAND_VALUE_CHANGE      = 0x02,
-	CS_MICROAPP_COMMAND_VALUE_RISING      = 0x03,
-	CS_MICROAPP_COMMAND_VALUE_FALLING     = 0x04,
+	CS_MICROAPP_COMMAND_VALUE_OFF     = 0x00,
+	CS_MICROAPP_COMMAND_VALUE_ON      = 0x01,
+	CS_MICROAPP_COMMAND_VALUE_CHANGE  = 0x02,
+	CS_MICROAPP_COMMAND_VALUE_RISING  = 0x03,
+	CS_MICROAPP_COMMAND_VALUE_FALLING = 0x04,
 };
 
 enum CommandMicroappTwiOpcode {
-	CS_MICROAPP_COMMAND_TWI_READ          = 0x01,
-	CS_MICROAPP_COMMAND_TWI_WRITE         = 0x02,
-	CS_MICROAPP_COMMAND_TWI_INIT          = 0x03,
-	CS_MICROAPP_COMMAND_TWI_ENABLE        = 0x04,
-	CS_MICROAPP_COMMAND_TWI_DISABLE       = 0x05,
+	CS_MICROAPP_COMMAND_TWI_READ    = 0x01,
+	CS_MICROAPP_COMMAND_TWI_WRITE   = 0x02,
+	CS_MICROAPP_COMMAND_TWI_INIT    = 0x03,
+	CS_MICROAPP_COMMAND_TWI_ENABLE  = 0x04,
+	CS_MICROAPP_COMMAND_TWI_DISABLE = 0x05,
 };
 
 enum CommandMicroappBleOpcode {
-	CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER	= 0x01,
-	CS_MICROAPP_COMMAND_BLE_SCAN_START			= 0x02,
-	CS_MICROAPP_COMMAND_BLE_SCAN_STOP			= 0x03,
+	CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER = 0x01,
+	CS_MICROAPP_COMMAND_BLE_SCAN_START       = 0x02,
+	CS_MICROAPP_COMMAND_BLE_SCAN_STOP        = 0x03,
+};
+
+enum CommandMicroappMeshOpcode {
+	CS_MICROAPP_COMMAND_MESH_SEND           = 0x00,
+	CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE = 0x01,
+	CS_MICROAPP_COMMAND_MESH_READ           = 0x02,
 };
 
 /*
@@ -106,7 +112,7 @@ enum CommandMicroappBleOpcode {
 typedef struct {
 	uint8_t payload[MAX_PAYLOAD];
 	uint8_t length;
-} message_t;
+} microapp_message_t;
 
 /*
  * Struct to set and read pins. This can be used for analog and digital writes and reads. For digital writes it is
@@ -116,14 +122,14 @@ typedef struct {
  * The value field is large enough to store a function pointer.
  */
 typedef struct {
-	uint8_t cmd;     // CommandMicroapp == CS_MICROAPP_COMMAND_PIN
-	uint8_t pin;     // CommandMicroappPin
-	uint8_t opcode1; // CommandMicroappPinOpcode1
-	uint8_t opcode2; // CommandMicroappPinOpcode2
-	uint8_t value;   // CommandMicroappPinValue
+	uint8_t cmd;      // CommandMicroapp == CS_MICROAPP_COMMAND_PIN
+	uint8_t pin;      // CommandMicroappPin
+	uint8_t opcode1;  // CommandMicroappPinOpcode1
+	uint8_t opcode2;  // CommandMicroappPinOpcode2
+	uint8_t value;    // CommandMicroappPinValue
 	uint8_t ack;
 	uint32_t callback;
-} pin_cmd_t;
+} microapp_pin_cmd_t;
 
 /*
  * Struct with data to implement sleep command through coroutines.
@@ -132,7 +138,7 @@ typedef struct {
 	uint8_t cmd;
 	uint16_t period;
 	uintptr_t coargs;
-} sleep_cmd_t;
+} microapp_sleep_cmd_t;
 
 const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
 
@@ -147,18 +153,18 @@ typedef struct {
 	uint8_t ack;
 	uint8_t stop;
 	uint8_t buf[MAX_TWI_PAYLOAD];
-} twi_cmd_t;
+} microapp_twi_cmd_t;
 
 /*
- * Struct for ble commands for scanning, advertising, connecting
+ * Struct for microapp ble commands
  */
 typedef struct {
 	uint8_t cmd;
 	uint8_t opcode;
-	uint32_t callback;
-} ble_cmd_t;
+	uintptr_t callback;
+} microapp_ble_cmd_t;
 
-const uint8_t MAC_ADDRESS_LENGTH = 6;
+const uint8_t MAC_ADDRESS_LENGTH  = 6;
 const uint8_t BLE_ADV_DATA_LENGTH = 31;
 
 /*
@@ -166,12 +172,11 @@ const uint8_t BLE_ADV_DATA_LENGTH = 31;
  */
 typedef struct {
 	uint8_t addr_type;
-	uint8_t addr[MAC_ADDRESS_LENGTH]; // big-endian!
+	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
 	int8_t rssi;
 	uint8_t dlen;
 	uint8_t data[BLE_ADV_DATA_LENGTH];
-} ble_dev_t;
-
+} microapp_ble_dev_t;
 
 struct __attribute__((packed)) microapp_power_usage_t {
 	int32_t powerUsage;
@@ -182,22 +187,15 @@ struct __attribute__((packed)) microapp_presence_t {
 	uint64_t presenceBitmask;
 };
 
-
 const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
-
-enum CommandMicroappMeshOpcode {
-	CS_MICROAPP_COMMAND_MESH_SEND           = 0x00,
-	CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE = 0x01,
-	CS_MICROAPP_COMMAND_MESH_READ           = 0x02,
-};
 
 struct __attribute__((packed)) microapp_mesh_header_t {
 	uint8_t opcode;  // CommandMicroappMeshOpcode
 };
 
 struct __attribute__((packed)) microapp_mesh_send_header_t {
-	uint8_t stoneId; // Target stone ID, or 0 for broadcast.
-	// Followed by message.
+	uint8_t stoneId;  // Target stone ID, or 0 for broadcast.
+					  // Followed by message.
 };
 
 struct __attribute__((packed)) microapp_mesh_read_available_t {
@@ -205,7 +203,7 @@ struct __attribute__((packed)) microapp_mesh_read_available_t {
 };
 
 struct __attribute__((packed)) microapp_mesh_read_t {
-	uint8_t stoneId; // Target stone ID, or 0 for broadcast.
-	uint8_t messageSize; // Actual message size.
-	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE]; // Message buffer.
+	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
+	uint8_t messageSize;                              // Actual message size.
+	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];  // Message buffer.
 };
