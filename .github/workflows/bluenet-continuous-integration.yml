@@ -46,11 +46,12 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake gcc g++ git make python3 python3-pip wget unzip apt
           sudo apt --fix-broken install
-          sudo apt-get update
-          sudo apt install -y libusb-1.0-0 libsm6
+          sudo apt-get update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ git make python3 python3-pip wget unzip apt
+          sudo apt --fix-broken install
+          sudo apt-get update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y libusb-1.0-0 libsm6
           cmake --version
       - name: Create build dir
         run: |
