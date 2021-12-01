@@ -186,18 +186,8 @@ set(NORDIC_SDK_VERSION_FULL "${NORDIC_SDK_VERSION_MAJOR}.${NORDIC_SDK_VERSION_MI
 # Create full semver string for mesh
 set(MESH_SDK_VERSION_FULL "${MESH_SDK_VERSION_MAJOR}.${MESH_SDK_VERSION_MINOR}.${MESH_SDK_VERSION_PATCH}")
 
-# Location of the SDK to be used
-set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
-
 # Location of adjusted version of the SDK that can be used on a host system
 set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
-
-# Location of mesh SDK
-set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
-
-# Make some more variables available to the bluenet build
-list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
-list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
 #######################################################################################################################
 # Print some important configuration values that have been loaded above
@@ -219,29 +209,57 @@ endif()
 
 set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
 
+set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+
 set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
+
+#######################################################################################################################
+# Get proper git tags / hashes
+#######################################################################################################################
 
 # The Nordic SDK
 if (NORDIC_SDK_VERSION EQUAL 15 AND NORDIC_SDK_VERSION_MINOR EQUAL 3 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 elseif (NORDIC_SDK_VERSION EQUAL 17 AND NORDIC_SDK_VERSION_MINOR EQUAL 1 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 else()
 	message(FATAL_ERROR "Unknown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
 
-set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/${NORDIC_SDK_URL_FILE})
+if(NORDIC_SDK_GIT_HASH)
+	message(STATUS "Will use git hash ${NORDIC_SDK_GIT_HASH} of repos ${NORDIC_SDK_REPOSITORY}")
+	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_GIT_HASH})
+	set(NORDIC_SDK_GIT_TAG "${NORDIC_SDK_GIT_HASH}")
+	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_GIT_HASH}")
+else()
+	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
+	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_VERSION_FULL})
+	set(NORDIC_SDK_GIT_TAG "origin/${NORDIC_SDK_VERSION_FULL}")
+	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
+endif()
 
-set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+# Make some more variables available to the bluenet build
+list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
 # The mesh
-if (MESH_SDK_VERSION_MAJOR EQUAL 3 AND MESH_SDK_VERSION_MINOR EQUAL 2 AND MESH_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
-elseif (MESH_SDK_VERSION_MAJOR EQUAL 5 AND MESH_SDK_VERSION_MINOR EQUAL 0 AND MESH_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
+if(MESH_SDK_VERSION_MAJOR EQUAL 3 AND MESH_SDK_VERSION_MINOR EQUAL 2 AND MESH_SDK_VERSION_PATCH EQUAL 0)
+elseif(MESH_SDK_VERSION_MAJOR EQUAL 5 AND MESH_SDK_VERSION_MINOR EQUAL 0 AND MESH_SDK_VERSION_PATCH EQUAL 0)
 else()
 	message(FATAL_ERROR "Unknown Mesh version: ${MESH_SDK_VERSION_FULL}")
 endif()
+
+if(MESH_SDK_GIT_HASH)
+	message(STATUS "Will use git hash ${MESH_SDK_GIT_HASH} of repos ${MESH_SDK_REPOSITORY}")
+	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_GIT_HASH})
+	set(MESH_SDK_GIT_TAG "${MESH_SDK_GIT_HASH}")
+	set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_GIT_HASH}")
+else()
+	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
+	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_VERSION_FULL})
+	set(MESH_SDK_GIT_TAG "origin/${MESH_SDK_VERSION_FULL}")
+	set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
+endif()
+
+# Make some more variables available to the bluenet build
+list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
 # The nrfjprog utility
 if(COMPILE_ON_ARM)
@@ -337,12 +355,10 @@ if(PYTHON_SETUP_VENV)
 		)
 endif()
 
-set(NORDIC_SDK_TARGET nordic_sdk${NORDIC_SDK_VERSION_FULL})
 message(STATUS "Configure ${NORDIC_SDK_TARGET} target")
 ExternalProject_Add(${NORDIC_SDK_TARGET}
 	GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
-	GIT_SHALLOW 1
-	GIT_TAG origin/${NORDIC_SDK_VERSION_FULL}
+	GIT_TAG ${NORDIC_SDK_GIT_TAG}
 	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${NRF5_DIR}
 	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
@@ -355,7 +371,6 @@ if(COMPILE_FOR_HOST)
 	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
 	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
 		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
-		GIT_SHALLOW 1
 		GIT_TAG host
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${HOST_NRF5_DIR}
@@ -367,17 +382,16 @@ endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
-set(MESH_SDK_TARGET nordic_mesh_sdk${MESH_SDK_VERSION_FULL})
 message(STATUS "Configure ${MESH_SDK_TARGET} target")
 ExternalProject_Add(${MESH_SDK_TARGET}
 	GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
-	GIT_SHALLOW 1
-	GIT_TAG origin/${MESH_SDK_VERSION_FULL}
+	GIT_TAG ${MESH_SDK_GIT_TAG}
 	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${MESH_SDK_DIR}
 	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	PATCH_COMMAND ${CMAKE_COMMAND} -E echo "Skipping patch step."
 	)
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
@@ -607,6 +621,7 @@ add_custom_target(target_depend
 #######################################################################################################################
 
 if(NOT FACTORY_IMAGE)
+	# Note that some more dependencies might be added later on by add_dependencies()
 	ExternalProject_Add(bluenet
 		SOURCE_DIR ${WORKSPACE_DIR}/source
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
@@ -616,7 +631,9 @@ if(NOT FACTORY_IMAGE)
 		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS}"
 		CMAKE_ARGS "${CMAKE_BLUENET_ARGS}"
 		BUILD_ALWAYS 1
-		DEPENDS micro_eec target_depend
+		DEPENDS
+			micro_eec
+			target_depend
 		)
 endif()
 
@@ -651,7 +668,7 @@ if(NOT FACTORY_IMAGE)
 		message(STATUS "The option AUTO_UPDATE_TOOLS is set to OFF.")
 		message(STATUS "This means no download/update of binary logging, nrfutil, etc. on `make bluenet`.")
 		message(STATUS "Download/update can still be done manually (if they are configured).")
-		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make ${NRFUTIL_TARGET}` subsequently.")
+		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make tools` subsequently.")
 	endif()
 endif()
 
