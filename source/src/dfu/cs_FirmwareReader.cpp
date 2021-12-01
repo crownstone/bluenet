@@ -26,9 +26,8 @@ static FirmwareSectionInfo firmwareSectionInfo = getFirmwareSectionInfo<Firmware
 // --------------------------------------------------------------------------------
 
 FirmwareReader::FirmwareReader() :
-	firmwarePrinter([this]() {
-		return this->printRoutine();
-}) {
+	firmwarePrinter([this]() {	return this->printRoutine();}),
+	firmwareHashPrinter([this]() { return this->printHashRoutine(); }) {
 
 }
 
@@ -90,6 +89,19 @@ uint32_t FirmwareReader::printRoutine() {
 
 	return Coroutine::delayMs(1000);
 }
+
+uint32_t FirmwareReader::printHashRoutine(){
+	if(!printedFirmwareHash){
+		LOGFirmwareReaderInfo("computing firmware hash");
+
+
+		LOGFirmwareReaderInfo("result of computation:");
+		printedFirmwareHash = true;
+	}
+	return Coroutine::delayMs(10*1000);
+}
+
+
 
 void FirmwareReader::handleEvent(event_t& evt) {
 	firmwarePrinter.handleEvent(evt);

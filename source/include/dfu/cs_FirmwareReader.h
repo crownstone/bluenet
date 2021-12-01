@@ -18,10 +18,6 @@
 class FirmwareReader : public EventListener {
 public:
 
-	/**
-	 * current offset in section (for printing purposes)
-	 */
-	uint16_t dataoffSet = 0;
 
 	FirmwareReader();
 
@@ -35,12 +31,25 @@ public:
 
 protected:
 private:
-public:
-	virtual void handleEvent(event_t& evt) override;
+	/**
+	 * current offset in section (for printing purposes)
+	 */
+	uint16_t dataoffSet = 0;
 
 	/**
 	 * routine for printing small chunks of the configured flash section.
 	 */
 	Coroutine firmwarePrinter;
 	uint32_t printRoutine();
+
+
+	/**
+	 * only print it once.
+	 */
+	bool printedFirmwareHash = false;
+	Coroutine firmwareHashPrinter;
+	uint32_t printHashRoutine();
+
+public:
+	virtual void handleEvent(event_t& evt) override;
 };
