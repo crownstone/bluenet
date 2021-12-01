@@ -104,10 +104,10 @@ enum CommandMicroappMeshOpcode {
 /*
  * The structure used for communication between microapp and bluenet.
  */
-typedef struct {
+struct __attribute__((packed)) microapp_message_t {
 	uint8_t payload[MAX_PAYLOAD];
 	uint8_t length;
-} microapp_message_t;
+};
 
 /*
  * Struct to set and read pins. This can be used for analog and digital writes and reads. For digital writes it is
@@ -116,7 +116,7 @@ typedef struct {
  *
  * The value field is large enough to store a function pointer.
  */
-typedef struct {
+struct __attribute__((packed)) microapp_pin_cmd_t {
 	uint8_t cmd;      // CommandMicroapp == CS_MICROAPP_COMMAND_PIN
 	uint8_t pin;      // CommandMicroappPin
 	uint8_t opcode1;  // CommandMicroappPinOpcode1
@@ -124,23 +124,23 @@ typedef struct {
 	uint8_t value;    // CommandMicroappPinValue
 	uint8_t ack;
 	uint32_t callback;
-} microapp_pin_cmd_t;
+};
 
 /*
  * Struct with data to implement delay command through coroutines.
  */
-typedef struct {
+struct __attribute__((packed)) microapp_delay_cmd_t {
 	uint8_t cmd;
 	uint16_t period;
 	uintptr_t coargs;
-} microapp_delay_cmd_t;
+};
 
 const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
 
 /*
  * Struct for i2c initialization, writes, and reads.
  */
-typedef struct {
+struct __attribute__((packed)) microapp_twi_cmd_t {
 	uint8_t cmd;
 	uint8_t address;
 	uint8_t opcode;
@@ -148,35 +148,41 @@ typedef struct {
 	uint8_t ack;
 	uint8_t stop;
 	uint8_t buf[MAX_TWI_PAYLOAD];
-} microapp_twi_cmd_t;
+};
 
 /*
  * Struct for microapp ble commands
  */
-typedef struct {
+struct __attribute__((packed)) microapp_ble_cmd_t {
 	uint8_t cmd;
 	uint8_t opcode;
 	uintptr_t callback;
-} microapp_ble_cmd_t;
+};
 
-const uint8_t MAC_ADDRESS_LENGTH  = 6;
+const uint8_t MAC_ADDRESS_LENGTH      = 6;
 const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
 
 /*
- * Struct for scanned ble devices
+ * Struct for scanned ble devices sent to the microapp
  */
-typedef struct {
+struct __attribute__((packed)) microapp_ble_dev_t {
 	uint8_t addr_type;
 	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
 	int8_t rssi;
 	uint8_t dlen;
 	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
-} microapp_ble_dev_t;
+};
 
+/*
+ * Struct for microapp power usage requests
+ */
 struct __attribute__((packed)) microapp_power_usage_t {
 	int32_t powerUsage;
 };
 
+/*
+ * Struct for microapp presence requests
+ */
 struct __attribute__((packed)) microapp_presence_t {
 	uint8_t profileId;
 	uint64_t presenceBitmask;
@@ -184,19 +190,30 @@ struct __attribute__((packed)) microapp_presence_t {
 
 const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
 
+/*
+ * Struct for header of microapp mesh commands
+ */
 struct __attribute__((packed)) microapp_mesh_header_t {
 	uint8_t opcode;  // CommandMicroappMeshOpcode
 };
 
+/*
+ * Struct for header of microapp mesh send commands
+ */
 struct __attribute__((packed)) microapp_mesh_send_header_t {
 	uint8_t stoneId;  // Target stone ID, or 0 for broadcast.
-					  // Followed by message.
 };
 
+/*
+ * Struct for microapp mesh read available commands
+ */
 struct __attribute__((packed)) microapp_mesh_read_available_t {
 	bool available;
 };
 
+/*
+ * Struct for microapp mesh read commands
+ */
 struct __attribute__((packed)) microapp_mesh_read_t {
 	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
 	uint8_t messageSize;                              // Actual message size.
