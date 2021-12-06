@@ -1,3 +1,5 @@
+message(STATUS "Version of cmake: ${CMAKE_VERSION}")
+
 cmake_minimum_required(VERSION 3.10)
 
 #######################################################################################################################
@@ -49,7 +51,7 @@ set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 set(PYTHON_REQUIRED OFF)
-if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
+if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS OR DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
 	message(STATUS "One of the download options requires python")
 	set(PYTHON_REQUIRED ON)
 else()
@@ -143,6 +145,12 @@ if(PYTHON_REQUIRED)
 			message(WARNING "Virtual environment not detected! Set it up or set PYTHON_SETUP_VENV to ON.")
 		endif()
 	endif()
+endif()
+
+if(DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
+	message(STATUS "Assumed to be installed for nrfconnect: libudev, npm, make, gcc")
+	find_package(udev REQUIRED)
+	message(STATUS "Found library at: ${UDEV_LIBRARIES}")
 endif()
 
 include(ExternalProject)
@@ -361,9 +369,9 @@ ExternalProject_Add(${NORDIC_SDK_TARGET}
 	GIT_TAG ${NORDIC_SDK_GIT_TAG}
 	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${NRF5_DIR}
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
 	)
 
 if(COMPILE_FOR_HOST)
@@ -374,9 +382,10 @@ if(COMPILE_FOR_HOST)
 		GIT_TAG host
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${HOST_NRF5_DIR}
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ""
+		PATCH_COMMAND ""
 		)
 endif()
 
@@ -388,10 +397,10 @@ ExternalProject_Add(${MESH_SDK_TARGET}
 	GIT_TAG ${MESH_SDK_GIT_TAG}
 	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${MESH_SDK_DIR}
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-	PATCH_COMMAND ${CMAKE_COMMAND} -E echo "Skipping patch step."
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
+	PATCH_COMMAND ""
 	)
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
@@ -406,10 +415,14 @@ if(DOWNLOAD_JLINK)
 		URL_MD5 ${JLINK_MD5}
 		DOWNLOAD_NO_EXTRACT 1
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE}
-		# USES_TERMINAL_INSTALL 1 # Does not actually work
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		PATCH_COMMAND ""
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Target jlink has user interaction for installation"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
+			COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE}
+		USES_TERMINAL_INSTALL ON
 		)
 endif()
 
@@ -418,9 +431,9 @@ ExternalProject_Add(gcc_arm_none_eabi
 	URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
 	URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
 	SOURCE_DIR ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
 	)
 
 set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
@@ -434,10 +447,16 @@ if(DOWNLOAD_NRFJPROG)
 		URL ${NRFJPROG_DOWNLOAD_URL}
 		URL_MD5 ${NRFJPROG_MD5}
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE}
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Target nrfjprog has user interaction for installation"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
+			COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE}
 		)
+	if(JLINK_TARGET)
+		add_dependencies(${NRFJPROG_TARGET} ${JLINK_TARGET})
+	endif()
 endif()
 
 if(DOWNLOAD_NRFUTIL)
@@ -463,10 +482,13 @@ if(DOWNLOAD_NRFCONNECT)
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "-- Target git_nrf_connect_core has user interaction for installation"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
+			COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
 		BUILD_COMMAND npm install
 		INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps
-		COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
 		)
 endif()
 
@@ -480,7 +502,7 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
 		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
 		BUILD_COMMAND npm install
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		INSTALL_COMMAND ""
 		)
 endif()
 
@@ -495,9 +517,9 @@ if(DOWNLOAD_CSUTIL)
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
 		BINARY_DIR ${WORKSPACE_DIR}/tools/csutil
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ""
 		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
@@ -544,7 +566,9 @@ add_custom_target(${TOOLS_TARGET} ${ADD_TO_DEFAULT_BUILD_TARGET}
 	COMMAND ${CMAKE_COMMAND} -E echo "-- Install supporting tools"
 	WORKING_DIRECTORY ${WORKSPACE_DIR}
 	COMMENT "Install supporting tools"
-	DEPENDS ${BLUENET_LIB_LOGS_TARGET} ${NRFUTIL_TARGET}
+	DEPENDS
+		${BLUENET_LIB_LOGS_TARGET}
+		${NRFUTIL_TARGET}
 	)
 
 if(FACTORY_IMAGE)
@@ -614,6 +638,12 @@ add_custom_target(micro_eec
 add_custom_target(target_depend
 	COMMAND cd ${BOARD_TARGET} && test -f "Makefile" && make depend || echo "-- First install"
 	COMMENT "Run make depend in target directory"
+	DEPENDS
+	${NORDIC_SDK_TARGET}
+	${MESH_SDK_TARGET}
+	${JLINK_TARGET}
+	${NRFUTIL_TARGET}
+	${BLUENET_LIB_LOGS_TARGET}
 	)
 
 #######################################################################################################################
@@ -644,9 +674,7 @@ if(EXISTS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.overwrite.config)
 endif()
 
 if(NOT FACTORY_IMAGE)
-	add_dependencies(bluenet gcc_arm_none_eabi)
-	add_dependencies(bluenet ${NORDIC_SDK_TARGET})
-	add_dependencies(bluenet ${MESH_SDK_TARGET})
+	# No extra dependencies, already included through micro-eec target and target_depend targets
 
 	if(AUTO_UPDATE_TOOLS)
 		message(STATUS "The option AUTO_UPDATE_TOOLS is set to ON.")

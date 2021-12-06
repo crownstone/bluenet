@@ -8,7 +8,7 @@
 # Copyright © 2013 Crownstone
 #######################################################################################################################
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 if(COMMAND cmake_policy)
 	# only interpret arguments as variables when unquoted
