@@ -7,8 +7,7 @@
 
 # Check if udev has already been found before and is present in the cache
 # (We assume that it has not been removed since then.)
-if(UDEV_LIBRARY)
-	set(UDEV_FOUND TRUE)
+if(UDEV_FOUND)
 	return()
 endif()
 
@@ -30,5 +29,13 @@ find_library(UDEV_LIBRARY NAMES udev
 	${PKG_LIBUDEV_LIBRARY_DIRS}
 	)
 
+# If both XXX_LIBRARY AND XXX_INCLUDE_DIR are found set e.g. XXX_FOUND
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(udev DEFAULT_MSG
+	UDEV_LIBRARY UDEV_INCLUDE_DIR)
+
 set(UDEV_INCLUDE_DIRS ${UDEV_INCLUDE_DIR})
 set(UDEV_LIBRARIES ${UDEV_LIBRARY})
+
+# Only show as advanced options in cmake gui or other editors
+mark_as_advanced(UDEV_LIBRARY UDEV_INCLUDE_DIR)

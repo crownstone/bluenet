@@ -89,6 +89,8 @@ message(STATUS "Source dir ${CMAKE_SOURCE_DIR}")
 message(STATUS "Build dir ${CMAKE_BINARY_DIR}")
 message(STATUS "Installation dir with binaries ${CMAKE_INSTALL_PREFIX}")
 
+# FindGit and FindWget are standard cmake modules, see
+# https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
 find_package(Git REQUIRED)
 if(NOT Git_FOUND)
 	message(FATAL_ERROR "Installation requires git, install with something like `sudo apt install git`")
@@ -151,6 +153,9 @@ endif()
 if(DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
 	message(STATUS "Assumed to be installed for nrfconnect: libudev, npm, make, gcc")
 	find_package(udev REQUIRED)
+	if(NOT UDEV_FOUND)
+		message(FATAL_ERROR "The nrfconnect tools require libudev")
+	endif()
 	message(STATUS "Found library at: ${UDEV_LIBRARIES}")
 endif()
 
