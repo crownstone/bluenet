@@ -17,6 +17,7 @@ option(DOWNLOAD_CROWNSTONE_PYTHON_LIBS           "Download Crownstone Python lib
 option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
 option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
 option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" OFF)
+option(FACTORY_IMAGE                             "Create factory image"                  OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -926,12 +927,17 @@ if(FACTORY_IMAGE)
 		fill(${PRODUCTION_RUN_HOUSING} PRODUCTION_RUN_HOUSING 8 "F" "0x")
 	endif()
 
-	set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;-constant-l-e;${UICR_BOOTLOADER_ADDRESS};4")
-	set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;-constant-l-e;${MBR_SETTINGS};4")
-	set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;-constant-l-e;${HARDWARE_BOARD_HEX};4")
-	set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;-constant-l-e;${PRODUCT_FAMILY_TYPE};4")
-	set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;-constant-l-e;${MAJOR_MINOR_PATCH};4")
-	set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;-constant-l-e;${PRODUCTION_RUN_HOUSING};4")
+	set(CONSTANT_STRING "-l-e-constant")
+	if(SRECORD_NEW_VERSION)
+		set(CONSTANT_STRING "-constant-l-e")
+	endif()
+
+	set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;${CONSTANT_STRING};${UICR_BOOTLOADER_ADDRESS};4")
+	set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;${CONSTANT_STRING};${MBR_SETTINGS};4")
+	set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;${CONSTANT_STRING};${HARDWARE_BOARD_HEX};4")
+	set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;${CONSTANT_STRING};${PRODUCT_FAMILY_TYPE};4")
+	set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;${CONSTANT_STRING};${MAJOR_MINOR_PATCH};4")
+	set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;${CONSTANT_STRING};${PRODUCTION_RUN_HOUSING};4")
 
 	string(TIMESTAMP FACTORY_IMAGE_TIMESTAMP "%Y-%U")
 
