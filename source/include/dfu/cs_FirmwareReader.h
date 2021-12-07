@@ -46,7 +46,7 @@ private:
 	/**
 	 * only print it once.
 	 */
-	bool printedFirmwareHash = false;
+	uint8_t printFirmwareHashCountDown = 10;
 	Coroutine firmwareHashPrinter;
 	uint32_t printHashRoutine();
 
