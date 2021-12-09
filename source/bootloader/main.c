@@ -70,6 +70,8 @@
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 
+#include "nrf_dfu_settings.h"
+
 
 static void on_error(void)
 {
@@ -106,27 +108,73 @@ void app_error_handler_bare(uint32_t error_code)
     on_error();
 }
 
+
+static bool micro_app_page_cleared = false;
+
+static void clear_micro_app_page() {
+	const uint32_t microapp_page_start = 0x69000;
+	ret_code_t err_code = nrf_dfu_flash_erase(microapp_page_start, 1, NULL);
+
+	micro_app_page_cleared = err_code == NRF_SUCCESS;
+}
+
+static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
+	if(!micro_app_page_cleared) {
+		return;
+	}
+
+	const uint32_t microapp_page_start = 0x69000;
+	const uint32_t init_packet_offset_size = 0x1000;
+
+	// get init packet. (s_dfu_settings is defined external in nrf_dfu_settings.h)
+	uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE];
+	memcpy(&init_cmd_buffer, &s_dfu_settings.init_command, INIT_COMMAND_MAX_SIZE);
+
+	// write init packet
+	// err_code =
+    nrf_dfu_flash_store(microapp_page_start + offset_index * init_packet_offset_size,
+                                   init_cmd_buffer,
+                                   INIT_COMMAND_MAX_SIZE,
+                                   NULL);
+}
+
 /**
  * @brief Function notifies certain events in DFU process.
  */
 static void dfu_observer(nrf_dfu_evt_type_t evt_type)
 {
-    switch (evt_type)
-    {
-        case NRF_DFU_EVT_DFU_FAILED:
-        case NRF_DFU_EVT_DFU_ABORTED:
-        case NRF_DFU_EVT_DFU_INITIALIZED:
+	// TODO: print nrf_dfu_validation_init_cmd_present() in the various events
 //            bsp_board_init(BSP_INIT_LEDS);
 //            bsp_board_led_on(BSP_BOARD_LED_0);
 //            bsp_board_led_on(BSP_BOARD_LED_1);
 //            bsp_board_led_off(BSP_BOARD_LED_2);
-            break;
-        case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
 //            bsp_board_led_off(BSP_BOARD_LED_1);
 //            bsp_board_led_on(BSP_BOARD_LED_2);
+
+    switch (evt_type)
+    {
+        case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
+        case NRF_DFU_EVT_TRANSPORT_DEACTIVATED:
+        case NRF_DFU_EVT_DFU_FAILED:
+        case NRF_DFU_EVT_DFU_ABORTED:
             break;
-        case NRF_DFU_EVT_DFU_STARTED:
-            break;
+		// ---------------------------------------
+        case NRF_DFU_EVT_DFU_INITIALIZED: {
+        	clear_micro_app_page();
+        	break;
+        }
+        case NRF_DFU_EVT_DFU_STARTED: {
+        	write_init_packet_to_micro_app_page(0);
+        	break;
+        }
+        case NRF_DFU_EVT_OBJECT_RECEIVED: {
+        	write_init_packet_to_micro_app_page(1);
+        	break;
+        }
+        case NRF_DFU_EVT_DFU_COMPLETED: {
+        	write_init_packet_to_micro_app_page(2);
+        	break;
+        }
         default:
             break;
     }
