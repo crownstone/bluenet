@@ -20,18 +20,18 @@ typedef struct {
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
 // The number of 8 interrupt service routines per type should be sufficient.
-#define MAX_PIN_ISR_COUNT 8
-#define MAX_BLE_ISR_COUNT 8
+const uint8_t MAX_PIN_ISR_COUNT = 8;
+const uint8_t MAX_BLE_ISR_COUNT = 8;
 
-typedef struct pin_isr_t {
+struct pin_isr_t {
 	uint8_t pin;
 	uintptr_t callback;
-} pin_isr_t;
+};
 
-typedef struct ble_isr_t {
+struct ble_isr_t {
 	uint16_t type;
 	uintptr_t callback;
-} ble_isr_t;
+};
 
 struct __attribute__((packed)) microapp_buffered_mesh_message_t {
 	stone_id_t stoneId;  // Stone ID of the sender.
@@ -87,12 +87,12 @@ private:
 	/**
 	 * Addressees of pin interrupt service routines.
 	 */
-	pin_isr_t _pin_isr[MAX_PIN_ISR_COUNT];
+	pin_isr_t _pinIsr[MAX_PIN_ISR_COUNT];
 
 	/**
 	 * Addressees of ble interrupt service routines.
 	 */
-	ble_isr_t _ble_isr[MAX_BLE_ISR_COUNT];
+	ble_isr_t _bleIsr[MAX_BLE_ISR_COUNT];
 
 	/**
 	 * Coroutine for microapp.
@@ -165,62 +165,62 @@ protected:
 	/**
 	 * Handle microapp log commands.
 	 */
-	int handleMicroappLogCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappLogCommand(uint8_t* payload, uint16_t length);
 
 	/**
 	 * Handle microapp delay commands.
 	 */
-	int handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd);
+	cs_ret_code_t handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd);
 
 	/**
 	 * Handle microapp pin commands.
 	 */
-	int handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd);
 
 	/**
 	 * Handle microapp pin switching commands.
 	 */
-	int handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd);
 
 	/**
 	 * Handle microapp pin commands for setting pin modes.
 	 */
-	int handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd);
 
 	/**
 	 * Handle microapp pin commands for reading and writing pins.
 	 */
-	int handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd);
 
 	/**
 	 * Handle microapp commands for advertising microapp state in service data.
 	 */
-	int handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length);
 
 	/**
 	 * Handle microapp TWI commands.
 	 */
-	int handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd);
+	cs_ret_code_t handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd);
 
 	/**
 	 * Handle microapp BLE commands.
 	 */
-	int handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd);
+	cs_ret_code_t handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd);
 
 	/**
 	 * Handle microapp commands for power usage requests.
 	 */
-	int handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length);
 
 	/**
 	 * Handle microapp commands for presence requests.
 	 */
-	int handleMicroappPresenceCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappPresenceCommand(uint8_t* payload, uint16_t length);
 
 	/**
 	 * Handle microapp commands for sending and reading mesh messages.
 	 */
-	int handleMicroappMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize);
+	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize);
 
 public:
 	static MicroappProtocol& getInstance() {
@@ -251,5 +251,5 @@ public:
 	/**
 	 * Handle commands from the microapp
 	 */
-	int handleMicroappCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappCommand(uint8_t* payload, uint16_t length);
 };

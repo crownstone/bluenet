@@ -34,16 +34,16 @@
 /*
  * Wrapper to switch from C to C++
  */
-int handleCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t handleCommand(uint8_t* payload, uint16_t length) {
 	return MicroappProtocol::getInstance().handleMicroappCommand(payload, length);
 }
 
 extern "C" {
 
-int microapp_callback(uint8_t* payload, uint16_t length) {
-	if (length == 0) return ERR_WRONG_PAYLOAD_LENGTH;
-	if (length > MAX_PAYLOAD) return ERR_WRONG_PAYLOAD_LENGTH;
-
+cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
+	if (length == 0 || length > MAX_PAYLOAD) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
 	return handleCommand(payload, length);
 }
 
@@ -58,15 +58,15 @@ MicroappProtocol::MicroappProtocol() : EventListener(), _meshMessageBuffer(MAX_M
 	_booted = false;
 
 	for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
-		_pin_isr[i].pin      = 0;
-		_pin_isr[i].callback = 0;
+		_pinIsr[i].pin      = 0;
+		_pinIsr[i].callback = 0;
 	}
 	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
-		_ble_isr[i].type     = 0;
-		_ble_isr[i].callback = 0;
+		_bleIsr[i].type     = 0;
+		_bleIsr[i].callback = 0;
 	}
 
-	_callbackData       = NULL;
+	_callbackData       = nullptr;
 	_microappIsScanning = false;
 }
 
@@ -108,23 +108,23 @@ uint16_t MicroappProtocol::interpretRamdata() {
 	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
 		buf[i] = 0;
 	}
-	uint8_t rd_size  = 0;
-	uint8_t ret_code = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &rd_size);
+	uint8_t readSize  = 0;
+	uint8_t retCode = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
 
 	bluenet_ipc_ram_data_item_t* ramStr = getRamStruct(IPC_INDEX_MICROAPP);
-	if (ramStr != NULL) {
+	if (ramStr != nullptr) {
 		LOGi("Get microapp info from address: %p", ramStr);
 	}
 
 	if (_debug) {
-		LOGi("Return code: %i", ret_code);
-		LOGi("Return length: %i", rd_size);
+		LOGi("Return code: %i", retCode);
+		LOGi("Return length: %i", readSize);
 		LOGi("  protocol: %02x", buf[0]);
 		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
 		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
 	}
 
-	if (ret_code == IPC_RET_SUCCESS) {
+	if (retCode == IPC_RET_SUCCESS) {
 		LOGi("Found RAM for Microapp");
 		LOGi("  protocol: %02x", buf[0]);
 		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
@@ -150,7 +150,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 		}
 	}
 	else {
-		LOGi("Nothing found in RAM ret_code=%u", ret_code);
+		LOGi("Nothing found in RAM ret_code=%u", retCode);
 		return ERR_NOT_FOUND;
 	}
 	return ERR_UNSPECIFIED;
@@ -292,10 +292,10 @@ void MicroappProtocol::handleEvent(event_t& event) {
 
 			// we will register the handler in the class for first empty slot
 			for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
-				if (_pin_isr[i].callback == 0) {
+				if (_pinIsr[i].callback == 0) {
 					LOGi("Register callback %x or %i for pin %i", gpio.callback, gpio.callback, gpio.pin_index);
-					_pin_isr[i].callback = gpio.callback;
-					_pin_isr[i].pin      = gpio.pin_index;
+					_pinIsr[i].callback = gpio.callback;
+					_pinIsr[i].pin      = gpio.pin_index;
 					break;
 				}
 			}
@@ -308,8 +308,8 @@ void MicroappProtocol::handleEvent(event_t& event) {
 			uintptr_t callback = 0;
 			// get callback and call
 			for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
-				if (_pin_isr[i].pin == gpio.pin_index) {
-					callback = _pin_isr[i].callback;
+				if (_pinIsr[i].pin == gpio.pin_index) {
+					callback = _pinIsr[i].callback;
 					break;
 				}
 			}
@@ -374,8 +374,8 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 		return;
 	}
 
-	// copy scanned device info to microapp_ble_dev_t struct
-	microapp_ble_dev_t ble_dev;
+	// copy scanned device info to microapp_ble_device_t struct
+	microapp_ble_device_t ble_dev;
 	ble_dev.addr_type = dev->addressType;
 	std::reverse_copy(
 			dev->address, dev->address + MAC_ADDRESS_LENGTH, ble_dev.addr);  // convert from little endian to big endian
@@ -392,8 +392,8 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	uintptr_t callback = 0;
 	// get callback
 	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
-		if (_ble_isr[i].type == type) {
-			callback = _ble_isr[i].callback;
+		if (_bleIsr[i].type == type) {
+			callback = _bleIsr[i].callback;
 			break;
 		}
 	}
@@ -406,14 +406,14 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	LOGd("Call callback at 0x%x", callback);
 	// we have to do this through another coroutine perhaps (not the same one as loop!), for
 	// now stay on this stack
-	void (*callback_func)(microapp_ble_dev_t) = (void (*)(microapp_ble_dev_t))callback;
+	void (*callback_func)(microapp_ble_device_t) = (void (*)(microapp_ble_device_t))callback;
 	callback_func(ble_dev);
 }
 
 /*
  * Forwards commands from the microapp to the relevant handler
  */
-int MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
 	_logArray(SERIAL_DEBUG, true, payload, length);
 	uint8_t command = payload[0];
 	switch (command) {
@@ -483,7 +483,7 @@ int MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
 	}
 }
 
-int MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length) {
 	char type                            = payload[1];
 	char option                          = payload[2];
 	__attribute__((unused)) bool newLine = false;
@@ -552,7 +552,7 @@ int MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd) {
 	int delay = delay_cmd->period;
 	LOGd("Microapp delay of %i", delay);
 	uintptr_t coargs_ptr = delay_cmd->coargs;
@@ -565,7 +565,7 @@ int MicroappProtocol::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	switch (pin) {
 		case CS_MICROAPP_COMMAND_PIN_SWITCH: {  // same as DIMMER
@@ -601,7 +601,7 @@ int MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
 	}
 }
 
-int MicroappProtocol::handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	switch (mode) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
@@ -631,7 +631,7 @@ int MicroappProtocol::handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	TYPIFY(EVT_GPIO_INIT) gpio;
 	gpio.pin_index                    = pin;
@@ -679,7 +679,7 @@ int MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cm
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	LOGd("Clear, set or configure pin %i", pin);
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
@@ -723,7 +723,7 @@ int MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length) {
 
 	_logArray(SERIAL_DEBUG, true, payload, length);
 
@@ -743,7 +743,7 @@ int MicroappProtocol::handleMicroappServiceDataCommand(uint8_t* payload, uint16_
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd) {
 	CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
 	switch (opcode) {
 		case CS_MICROAPP_COMMAND_TWI_INIT: {
@@ -789,16 +789,16 @@ int MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd) {
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			uint16_t type = (uint16_t)CS_TYPE::EVT_DEVICE_SCANNED;
+			uint16_t type = static_cast<uint16_t>(CS_TYPE::EVT_DEVICE_SCANNED);
 			// we will register the handler in the class for first empty slot
 			for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
-				if (_ble_isr[i].callback == 0) {
+				if (_bleIsr[i].callback == 0) {
 					LOGi("Register callback %x", ble_cmd->callback);
-					_ble_isr[i].callback = ble_cmd->callback;
-					_ble_isr[i].type     = type;
+					_bleIsr[i].callback = ble_cmd->callback;
+					_bleIsr[i].type     = type;
 					return ERR_SUCCESS;
 				}
 			}
@@ -821,7 +821,7 @@ int MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length) {
 	if (length < sizeof(payload[0]) + sizeof(microapp_power_usage_t)) {
 		LOGi("Payload too small");
 		return ERR_WRONG_PAYLOAD_LENGTH;
@@ -836,7 +836,7 @@ int MicroappProtocol::handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappPresenceCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(uint8_t* payload, uint16_t length) {
 	if (length < sizeof(payload[0]) + sizeof(microapp_presence_t)) {
 		LOGi("Payload too small");
 		return ERR_WRONG_PAYLOAD_LENGTH;
@@ -860,7 +860,7 @@ int MicroappProtocol::handleMicroappPresenceCommand(uint8_t* payload, uint16_t l
 	return ERR_SUCCESS;
 }
 
-int MicroappProtocol::handleMicroappMeshCommand(
+cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(
 		microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize) {
 	switch (meshCommand->opcode) {
 		case CS_MICROAPP_COMMAND_MESH_SEND: {

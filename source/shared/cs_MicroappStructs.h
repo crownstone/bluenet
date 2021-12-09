@@ -165,7 +165,7 @@ const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
 /*
  * Struct for scanned ble devices sent to the microapp
  */
-struct __attribute__((packed)) microapp_ble_dev_t {
+struct __attribute__((packed)) microapp_ble_device_t {
 	uint8_t addr_type;
 	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
 	int8_t rssi;
