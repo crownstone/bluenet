@@ -98,7 +98,7 @@ uint32_t FirmwareReader::printHashRoutine(){
 	if(CsMath::Decrease(printFirmwareHashCountDown) == 1){
 		LOGFirmwareReaderInfo("computing firmware hash");
 
-		computeHash();
+//		computeHash();
 
 		LOGFirmwareReaderInfo("result of computation:");
 	} else {
@@ -108,7 +108,7 @@ uint32_t FirmwareReader::printHashRoutine(){
 }
 
 
-void FirmwareReader::computeHash() {
+//void FirmwareReader::computeHash() {
 //	LOGFirmwareReaderDebug("Start computing hash.");
 //
 //	nrf_crypto_hash_sha256_digest_t     m_digest;
@@ -179,7 +179,7 @@ void FirmwareReader::computeHash() {
 //	#ifndef NRF_CRYPTO_BACKEND_OBERON_HASH_SHA256_ENABLED
 //	#define NRF_CRYPTO_BACKEND_OBERON_HASH_SHA256_ENABLED 1
 //	#endif
-}
+//}
 
 
 
