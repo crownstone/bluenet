@@ -80,7 +80,7 @@ list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Assumed to be installed for normal development: git, wget, make")
 message(STATUS "Assumed to be installed for tools around development: python")
-message(STATUS "Assumed to be installed to generate releases: pass, srec_cat")
+message(STATUS "Assumed to be installed to generate factory images: pass, srec_cat, libarchive-zip-perl")
 
 message(STATUS "The CPU on which CMake is running, arch=${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
@@ -347,7 +347,7 @@ if(PYTHON_SETUP_VENV)
 		COMMAND apt-cache policy python3-venv > ${CMAKE_BINARY_DIR}/.apt-cache
 		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Installed:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.installed
 		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Candidate:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.candidate
-		COMMAND diff ${CMAKE_BINARY_DIR}/.apt-cache.candidate ${CMAKE_BINARY_DIR}/.apt-cache.installed 1>/dev/null 2>&1 && echo '-- Already uptodate' || ${SUPERUSER_SWITCH} apt-get install -y python3-venv
+		COMMAND diff ${CMAKE_BINARY_DIR}/.apt-cache.candidate ${CMAKE_BINARY_DIR}/.apt-cache.installed 1>/dev/null 2>&1 && echo '-- Package python3-venv already installed' || ${SUPERUSER_SWITCH} apt-get install -y python3-venv
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_CROWNSTONE_VENV_PATH}
 		COMMAND ${Python_EXECUTABLE} -m venv ${PYTHON_CROWNSTONE_VENV_PATH}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Make sure to run the following command:"
@@ -948,9 +948,21 @@ if(FACTORY_IMAGE)
 
 	fill(${FACTORY_IMAGE_SOFTWARE_VERSION} FACTORY_IMAGE_SOFTWARE_VERSION 4 "0" "")
 
-	#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
+	# Check some stuff on the previously generated binaries that go into the factory image
+	set(CHECK_FACTORY_IMAGE_CONDITIONS check_factory_image_conditions)
+	message(STATUS "Check factory image conditions before generating it")
+	message(STATUS "This requires crc32 on the command line (e.g. apt install libarchive-zip-perl")
+	string(REGEX REPLACE "[.]hex$" ".bin" FACTORY_IMAGE_APPLICATION_BIN_FILE "${FACTORY_IMAGE_APPLICATION_HEX_FILE}")
+	message(STATUS "We will compare the crc32 of ${FACTORY_IMAGE_APPLICATION_BIN_FILE} with the checksum in ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}")
+	add_custom_target(${CHECK_FACTORY_IMAGE_CONDITIONS}
+		COMMAND test -f "${FACTORY_IMAGE_APPLICATION_BIN_FILE}" && exit 0 || echo "Application missing. No such file: ${FACTORY_IMAGE_APPLICATION_BIN_FILE}" && echo && exit 1
+		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && exit 0 || echo "Bootloader settings missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && echo && exit 1
+		COMMAND nrfutil settings display "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" | grep 'Application CRC' | cut -f2 -d':' | tr -d ' ' | tr '[:upper:]' '[:lower:]' | sed 's/0x//g' > "${CMAKE_BINARY_DIR}/.nrfutil_app_crc"
+		COMMAND crc32 "${FACTORY_IMAGE_APPLICATION_BIN_FILE}" > "${CMAKE_BINARY_DIR}/.cli_app_crc"
+		COMMAND diff ${CMAKE_BINARY_DIR}/.nrfutil_app_crc ${CMAKE_BINARY_DIR}/.cli_app_crc 1>/dev/null 2>&1 && echo '-- Application checksum matches' && exit 0 || echo "Application CRC does not match!" && exit 1
+	)
+
 	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}/factory-image.hex")
-	#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "factory-image.hex")
 	set(FACTORY_IMAGE_PATH_NAME factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
 
 	# Add this target by default to make all when in factory image creation mode
@@ -983,6 +995,7 @@ if(FACTORY_IMAGE)
 		COMMAND echo 'srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel'
 		COMMAND srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel
 		COMMENT "Generate a factory image"
+		DEPENDS ${CHECK_FACTORY_IMAGE_CONDITIONS}
 		)
 
 	message(STATUS "Install binary into ${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME} dir")
