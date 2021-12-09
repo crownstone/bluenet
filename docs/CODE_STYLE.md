@@ -92,14 +92,33 @@ Notes:
 
 ### POD types
 
-All data types that are used for communication over hardware protocols will be **Plain Old Data** types (PODs). All PODs will be declared as structs with the modifier `__attribute__((__packed__))`. Adding methods to datatypes that cross hardware boundaries is possible as long as these definitions do not interfere with the POD property of said type.
+Datastructures that cross the boundaries of the application memory (ram) are tied to strict lay-out rules to ensure correct interoperability. In particular this applies to all data types that are used for communication over hardware protocols (bluetooth, flash, uart, etc.).
+
+ All such structures must:
+
+* be defined in `./source/include/protocol/`
+* be **Plain Old Data** types (PODs).
+* be packed `struct __attribute__((__packed__)) struct_name_t { /* ... */ };`
+* as much as possible ensure that members are aligned on 4 bytes boundaries. E.g.:
 
 ```
-struct __attribute__((__packed__)) a_packed_packet_t {
-	uint8_t shortWord;
-	uint32_t longWord;
+struct __attribute__((__packed__)) bad_t { 
+	uint16_t _memberX;  
+	uint32_t _memberY; // Bad: member pointer straddles 4 byte
+	uint16_t _memberZ; 
 };
 ```
+
+```
+struct __attribute__((__packed__)) good_t { 
+	uint16_t _memberX; 
+	uint16_t _memberZ;  // Good: placing the two uint16_t's side by side correctly aligns _memberY
+	uint32_t _memberY;
+};
+```
+
+Adding methods to datatypes that cross hardware boundaries is possible as long as these definitions do not interfere with the POD property of said type.
+
 
 ### Constants
 There is a strong preference to use typed `constexpr` values over macros. The use of `auto` is permitted if the codebase would emit warnings when replacing a macro with a constexprs of particular type.
@@ -121,7 +140,7 @@ int b;
 
 ### Use nullptr instead of NULL
 
-The preprocessor symbol `NULL` is usually defined as `(void*)0)`, but it is implementation defined. There are subtle differences between `NULL` and `nullptr` due to freedom of implementation. Hence `nullptr` is preferred or possibly an explicit alternative if `nullptr` doesn't lead to intended behaviour.
+The preprocessor symbol `NULL` is usually defined as `((void*)0)`, but it is implementation defined. There are subtle differences between `NULL` and `nullptr` due to freedom of implementation. Hence `nullptr` is preferred or possibly an explicit alternative if `nullptr` doesn't lead to intended behaviour.
 
 ### If statement block must always be in brackets.
 
