@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 # Set application shorthand
 SET(APPLICATION_SHORTHAND "bootloader")
@@ -7,17 +7,9 @@ SET(APPLICATION_SHORTHAND "bootloader")
 SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Start a project
-PROJECT(${PROJECT_NAME}) 
-
-# Enabling C and CXX might lead to problems because we are cross-compiling, check in later CMake versions of this is
-# still the case
-#enable_language(CXX)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED on)
-#set(CMAKE_CXX_EXTENSIONS OFF)
+PROJECT(${PROJECT_NAME})
 
 # The directory with some of the FindXXX modules
-#SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEFAULT_MODULES_PATH}")
 MESSAGE(STATUS "bootloader: Search for FindX files in ${CMAKE_MODULE_PATH}")
 

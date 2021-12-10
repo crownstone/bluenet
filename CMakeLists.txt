@@ -1,3 +1,5 @@
+message(STATUS "Version of cmake: ${CMAKE_VERSION}")
+
 cmake_minimum_required(VERSION 3.10)
 
 #######################################################################################################################
@@ -15,6 +17,7 @@ option(DOWNLOAD_CROWNSTONE_PYTHON_LIBS           "Download Crownstone Python lib
 option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
 option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
 option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" OFF)
+option(FACTORY_IMAGE                             "Create factory image"                  OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -49,7 +52,7 @@ set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 set(PYTHON_REQUIRED OFF)
-if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
+if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS OR DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
 	message(STATUS "One of the download options requires python")
 	set(PYTHON_REQUIRED ON)
 else()
@@ -77,7 +80,7 @@ list(APPEND CMAKE_BLUENET_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Assumed to be installed for normal development: git, wget, make")
 message(STATUS "Assumed to be installed for tools around development: python")
-message(STATUS "Assumed to be installed to generate releases: pass, srec_cat")
+message(STATUS "Assumed to be installed to generate factory images: pass, srec_cat, libarchive-zip-perl")
 
 message(STATUS "The CPU on which CMake is running, arch=${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
@@ -86,6 +89,8 @@ message(STATUS "Source dir ${CMAKE_SOURCE_DIR}")
 message(STATUS "Build dir ${CMAKE_BINARY_DIR}")
 message(STATUS "Installation dir with binaries ${CMAKE_INSTALL_PREFIX}")
 
+# FindGit and FindWget are standard cmake modules, see
+# https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
 find_package(Git REQUIRED)
 if(NOT Git_FOUND)
 	message(FATAL_ERROR "Installation requires git, install with something like `sudo apt install git`")
@@ -145,6 +150,15 @@ if(PYTHON_REQUIRED)
 	endif()
 endif()
 
+if(DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
+	message(STATUS "Assumed to be installed for nrfconnect: libudev, npm, make, gcc")
+	find_package(udev REQUIRED)
+	if(NOT UDEV_FOUND)
+		message(FATAL_ERROR "The nrfconnect tools require libudev")
+	endif()
+	message(STATUS "Found library at: ${UDEV_LIBRARIES}")
+endif()
+
 include(ExternalProject)
 
 include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
@@ -186,18 +200,8 @@ set(NORDIC_SDK_VERSION_FULL "${NORDIC_SDK_VERSION_MAJOR}.${NORDIC_SDK_VERSION_MI
 # Create full semver string for mesh
 set(MESH_SDK_VERSION_FULL "${MESH_SDK_VERSION_MAJOR}.${MESH_SDK_VERSION_MINOR}.${MESH_SDK_VERSION_PATCH}")
 
-# Location of the SDK to be used
-set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
-
 # Location of adjusted version of the SDK that can be used on a host system
 set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
-
-# Location of mesh SDK
-set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
-
-# Make some more variables available to the bluenet build
-list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
-list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
 #######################################################################################################################
 # Print some important configuration values that have been loaded above
@@ -219,27 +223,57 @@ endif()
 
 set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
 
+set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+
 set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
+
+#######################################################################################################################
+# Get proper git tags / hashes
+#######################################################################################################################
 
 # The Nordic SDK
 if (NORDIC_SDK_VERSION EQUAL 15 AND NORDIC_SDK_VERSION_MINOR EQUAL 3 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 elseif (NORDIC_SDK_VERSION EQUAL 17 AND NORDIC_SDK_VERSION_MINOR EQUAL 1 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
 else()
 	message(FATAL_ERROR "Unknown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
 
-set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/${NORDIC_SDK_URL_FILE})
+if(NORDIC_SDK_GIT_HASH)
+	message(STATUS "Will use git hash ${NORDIC_SDK_GIT_HASH} of repos ${NORDIC_SDK_REPOSITORY}")
+	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_GIT_HASH})
+	set(NORDIC_SDK_GIT_TAG "${NORDIC_SDK_GIT_HASH}")
+	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_GIT_HASH}")
+else()
+	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
+	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_VERSION_FULL})
+	set(NORDIC_SDK_GIT_TAG "origin/${NORDIC_SDK_VERSION_FULL}")
+	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
+endif()
 
-set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+# Make some more variables available to the bluenet build
+list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
 # The mesh
-if (MESH_SDK_VERSION_MAJOR EQUAL 3 AND MESH_SDK_VERSION_MINOR EQUAL 2 AND MESH_SDK_VERSION_PATCH EQUAL 0)
-	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
+if(MESH_SDK_VERSION_MAJOR EQUAL 3 AND MESH_SDK_VERSION_MINOR EQUAL 2 AND MESH_SDK_VERSION_PATCH EQUAL 0)
+elseif(MESH_SDK_VERSION_MAJOR EQUAL 5 AND MESH_SDK_VERSION_MINOR EQUAL 0 AND MESH_SDK_VERSION_PATCH EQUAL 0)
 else()
 	message(FATAL_ERROR "Unknown Mesh version: ${MESH_SDK_VERSION_FULL}")
 endif()
+
+if(MESH_SDK_GIT_HASH)
+	message(STATUS "Will use git hash ${MESH_SDK_GIT_HASH} of repos ${MESH_SDK_REPOSITORY}")
+	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_GIT_HASH})
+	set(MESH_SDK_GIT_TAG "${MESH_SDK_GIT_HASH}")
+	set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_GIT_HASH}")
+else()
+	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
+	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_VERSION_FULL})
+	set(MESH_SDK_GIT_TAG "origin/${MESH_SDK_VERSION_FULL}")
+	set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
+endif()
+
+# Make some more variables available to the bluenet build
+list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
 # The nrfjprog utility
 if(COMPILE_ON_ARM)
@@ -313,7 +347,7 @@ if(PYTHON_SETUP_VENV)
 		COMMAND apt-cache policy python3-venv > ${CMAKE_BINARY_DIR}/.apt-cache
 		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Installed:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.installed
 		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Candidate:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.candidate
-		COMMAND diff ${CMAKE_BINARY_DIR}/.apt-cache.candidate ${CMAKE_BINARY_DIR}/.apt-cache.installed 1>/dev/null 2>&1 && echo '-- Already uptodate' || ${SUPERUSER_SWITCH} apt-get install -y python3-venv
+		COMMAND diff ${CMAKE_BINARY_DIR}/.apt-cache.candidate ${CMAKE_BINARY_DIR}/.apt-cache.installed 1>/dev/null 2>&1 && echo '-- Package python3-venv already installed' || ${SUPERUSER_SWITCH} apt-get install -y python3-venv
 		COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_CROWNSTONE_VENV_PATH}
 		COMMAND ${Python_EXECUTABLE} -m venv ${PYTHON_CROWNSTONE_VENV_PATH}
 		COMMAND ${CMAKE_COMMAND} -E echo "-- Make sure to run the following command:"
@@ -335,17 +369,15 @@ if(PYTHON_SETUP_VENV)
 		)
 endif()
 
-set(NORDIC_SDK_TARGET nordic_sdk${NORDIC_SDK_VERSION_FULL})
 message(STATUS "Configure ${NORDIC_SDK_TARGET} target")
 ExternalProject_Add(${NORDIC_SDK_TARGET}
 	GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
-	GIT_SHALLOW 1
-	GIT_TAG origin/${NORDIC_SDK_VERSION_FULL}
+	GIT_TAG ${NORDIC_SDK_GIT_TAG}
 	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${NRF5_DIR}
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
 	)
 
 if(COMPILE_FOR_HOST)
@@ -353,29 +385,28 @@ if(COMPILE_FOR_HOST)
 	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
 	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
 		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
-		GIT_SHALLOW 1
 		GIT_TAG host
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${HOST_NRF5_DIR}
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ""
+		PATCH_COMMAND ""
 		)
 endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
-set(MESH_SDK_TARGET nordic_mesh_sdk${MESH_SDK_VERSION_FULL})
 message(STATUS "Configure ${MESH_SDK_TARGET} target")
 ExternalProject_Add(${MESH_SDK_TARGET}
 	GIT_REPOSITORY ${MESH_SDK_REPOSITORY}
-	GIT_SHALLOW 1
-	GIT_TAG origin/${MESH_SDK_VERSION_FULL}
+	GIT_TAG ${MESH_SDK_GIT_TAG}
 	GIT_CONFIG advice.detachedHead=false
 	SOURCE_DIR ${MESH_SDK_DIR}
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
+	PATCH_COMMAND ""
 	)
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
@@ -390,10 +421,14 @@ if(DOWNLOAD_JLINK)
 		URL_MD5 ${JLINK_MD5}
 		DOWNLOAD_NO_EXTRACT 1
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE}
-		# USES_TERMINAL_INSTALL 1 # Does not actually work
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		PATCH_COMMAND ""
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Target jlink has user interaction for installation"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
+			COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE}
+		USES_TERMINAL_INSTALL ON
 		)
 endif()
 
@@ -402,9 +437,9 @@ ExternalProject_Add(gcc_arm_none_eabi
 	URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
 	URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
 	SOURCE_DIR ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi
-	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	CONFIGURE_COMMAND ""
+	BUILD_COMMAND ""
+	INSTALL_COMMAND ""
 	)
 
 set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
@@ -418,10 +453,16 @@ if(DOWNLOAD_NRFJPROG)
 		URL ${NRFJPROG_DOWNLOAD_URL}
 		URL_MD5 ${NRFJPROG_MD5}
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE}
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Target nrfjprog has user interaction for installation"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
+			COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE}
 		)
+	if(JLINK_TARGET)
+		add_dependencies(${NRFJPROG_TARGET} ${JLINK_TARGET})
+	endif()
 endif()
 
 if(DOWNLOAD_NRFUTIL)
@@ -447,10 +488,13 @@ if(DOWNLOAD_NRFCONNECT)
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "-- Target git_nrf_connect_core has user interaction for installation"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
+			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
+			COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
 		BUILD_COMMAND npm install
 		INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps
-		COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
+			COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
 		)
 endif()
 
@@ -464,7 +508,7 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
 		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
 		BUILD_COMMAND npm install
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		INSTALL_COMMAND ""
 		)
 endif()
 
@@ -479,9 +523,9 @@ if(DOWNLOAD_CSUTIL)
 		GIT_CONFIG advice.detachedHead=false
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
 		BINARY_DIR ${WORKSPACE_DIR}/tools/csutil
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ""
 		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
 		)
 endif()
@@ -528,7 +572,9 @@ add_custom_target(${TOOLS_TARGET} ${ADD_TO_DEFAULT_BUILD_TARGET}
 	COMMAND ${CMAKE_COMMAND} -E echo "-- Install supporting tools"
 	WORKING_DIRECTORY ${WORKSPACE_DIR}
 	COMMENT "Install supporting tools"
-	DEPENDS ${BLUENET_LIB_LOGS_TARGET} ${NRFUTIL_TARGET}
+	DEPENDS
+		${BLUENET_LIB_LOGS_TARGET}
+		${NRFUTIL_TARGET}
 	)
 
 if(FACTORY_IMAGE)
@@ -598,6 +644,12 @@ add_custom_target(micro_eec
 add_custom_target(target_depend
 	COMMAND cd ${BOARD_TARGET} && test -f "Makefile" && make depend || echo "-- First install"
 	COMMENT "Run make depend in target directory"
+	DEPENDS
+	${NORDIC_SDK_TARGET}
+	${MESH_SDK_TARGET}
+	${JLINK_TARGET}
+	${NRFUTIL_TARGET}
+	${BLUENET_LIB_LOGS_TARGET}
 	)
 
 #######################################################################################################################
@@ -605,6 +657,7 @@ add_custom_target(target_depend
 #######################################################################################################################
 
 if(NOT FACTORY_IMAGE)
+	# Note that some more dependencies might be added later on by add_dependencies()
 	ExternalProject_Add(bluenet
 		SOURCE_DIR ${WORKSPACE_DIR}/source
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
@@ -614,7 +667,9 @@ if(NOT FACTORY_IMAGE)
 		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_ARGS}"
 		CMAKE_ARGS "${CMAKE_BLUENET_ARGS}"
 		BUILD_ALWAYS 1
-		DEPENDS micro_eec target_depend
+		DEPENDS
+			micro_eec
+			target_depend
 		)
 endif()
 
@@ -625,9 +680,7 @@ if(EXISTS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.overwrite.config)
 endif()
 
 if(NOT FACTORY_IMAGE)
-	add_dependencies(bluenet gcc_arm_none_eabi)
-	add_dependencies(bluenet ${NORDIC_SDK_TARGET})
-	add_dependencies(bluenet ${MESH_SDK_TARGET})
+	# No extra dependencies, already included through micro-eec target and target_depend targets
 
 	if(AUTO_UPDATE_TOOLS)
 		message(STATUS "The option AUTO_UPDATE_TOOLS is set to ON.")
@@ -649,7 +702,7 @@ if(NOT FACTORY_IMAGE)
 		message(STATUS "The option AUTO_UPDATE_TOOLS is set to OFF.")
 		message(STATUS "This means no download/update of binary logging, nrfutil, etc. on `make bluenet`.")
 		message(STATUS "Download/update can still be done manually (if they are configured).")
-		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make ${NRFUTIL_TARGET}` subsequently.")
+		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make tools` subsequently.")
 	endif()
 endif()
 
@@ -879,20 +932,37 @@ if(FACTORY_IMAGE)
 		fill(${PRODUCTION_RUN_HOUSING} PRODUCTION_RUN_HOUSING 8 "F" "0x")
 	endif()
 
-	set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;-constant-l-e;${UICR_BOOTLOADER_ADDRESS};4")
-	set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;-constant-l-e;${MBR_SETTINGS};4")
-	set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;-constant-l-e;${HARDWARE_BOARD_HEX};4")
-	set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;-constant-l-e;${PRODUCT_FAMILY_TYPE};4")
-	set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;-constant-l-e;${MAJOR_MINOR_PATCH};4")
-	set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;-constant-l-e;${PRODUCTION_RUN_HOUSING};4")
+	set(CONSTANT_STRING "-l-e-constant")
+	if(SRECORD_NEW_VERSION)
+		set(CONSTANT_STRING "-constant-l-e")
+	endif()
+
+	set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;${CONSTANT_STRING};${UICR_BOOTLOADER_ADDRESS};4")
+	set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;${CONSTANT_STRING};${MBR_SETTINGS};4")
+	set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;${CONSTANT_STRING};${HARDWARE_BOARD_HEX};4")
+	set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;${CONSTANT_STRING};${PRODUCT_FAMILY_TYPE};4")
+	set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;${CONSTANT_STRING};${MAJOR_MINOR_PATCH};4")
+	set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;${CONSTANT_STRING};${PRODUCTION_RUN_HOUSING};4")
 
 	string(TIMESTAMP FACTORY_IMAGE_TIMESTAMP "%Y-%U")
 
 	fill(${FACTORY_IMAGE_SOFTWARE_VERSION} FACTORY_IMAGE_SOFTWARE_VERSION 4 "0" "")
 
-	#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
+	# Check some stuff on the previously generated binaries that go into the factory image
+	set(CHECK_FACTORY_IMAGE_CONDITIONS check_factory_image_conditions)
+	message(STATUS "Check factory image conditions before generating it")
+	message(STATUS "This requires crc32 on the command line (e.g. apt install libarchive-zip-perl")
+	string(REGEX REPLACE "[.]hex$" ".bin" FACTORY_IMAGE_APPLICATION_BIN_FILE "${FACTORY_IMAGE_APPLICATION_HEX_FILE}")
+	message(STATUS "We will compare the crc32 of ${FACTORY_IMAGE_APPLICATION_BIN_FILE} with the checksum in ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}")
+	add_custom_target(${CHECK_FACTORY_IMAGE_CONDITIONS}
+		COMMAND test -f "${FACTORY_IMAGE_APPLICATION_BIN_FILE}" && exit 0 || echo "Application missing. No such file: ${FACTORY_IMAGE_APPLICATION_BIN_FILE}" && echo && exit 1
+		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && exit 0 || echo "Bootloader settings missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && echo && exit 1
+		COMMAND nrfutil settings display "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" | grep 'Application CRC' | cut -f2 -d':' | tr -d ' ' | tr '[:upper:]' '[:lower:]' | sed 's/0x//g' > "${CMAKE_BINARY_DIR}/.nrfutil_app_crc"
+		COMMAND crc32 "${FACTORY_IMAGE_APPLICATION_BIN_FILE}" > "${CMAKE_BINARY_DIR}/.cli_app_crc"
+		COMMAND diff ${CMAKE_BINARY_DIR}/.nrfutil_app_crc ${CMAKE_BINARY_DIR}/.cli_app_crc 1>/dev/null 2>&1 && echo '-- Application checksum matches' && exit 0 || echo "Application CRC does not match!" && exit 1
+	)
+
 	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}/factory-image.hex")
-	#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "factory-image.hex")
 	set(FACTORY_IMAGE_PATH_NAME factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
 
 	# Add this target by default to make all when in factory image creation mode
@@ -925,6 +995,7 @@ if(FACTORY_IMAGE)
 		COMMAND echo 'srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel'
 		COMMAND srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel
 		COMMENT "Generate a factory image"
+		DEPENDS ${CHECK_FACTORY_IMAGE_CONDITIONS}
 		)
 
 	message(STATUS "Install binary into ${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME} dir")

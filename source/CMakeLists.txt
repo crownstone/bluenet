@@ -1,14 +1,14 @@
-######################################################################################################################
-# The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License
-# (LGPL GNU v3), the Apache License, or the MIT license, your choice.
+#######################################################################################################################
+# The bluenet build systems uses CMake.
 #
-# Author:	 Anne C. van Rossum (Distributed Organisms B.V.)
-# Date: 	 Oct 28, 2013
+# Author:    Anne C. van Rossum
+# Date:      Oct 28, 2013
+# License:   Lesser General Public License (LGPL GNU v3), the Apache License, or the MIT license.
 #
-# Copyright © 2013 Anne C. van Rossum <anne@dobots.nl>
+# Copyright © 2013 Crownstone
 #######################################################################################################################
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 if(COMMAND cmake_policy)
 	# only interpret arguments as variables when unquoted
@@ -16,22 +16,22 @@ if(COMMAND cmake_policy)
 endif()
 
 # Set application shorthand
-SET(APPLICATION_SHORTHAND "crownstone")
+set(APPLICATION_SHORTHAND "crownstone")
 
 # Set name of project
-SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
+set(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Set the main file to use for this application
-SET(MAIN_FILE "cs_Crownstone.cpp")
+set(MAIN_FILE "cs_Crownstone.cpp")
 
 # The directory with additional CMake files
 set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
 
-SET(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
-SET(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
 
 # Start a project
-PROJECT(${PROJECT_NAME})
+project(${PROJECT_NAME})
 
 # Other search directories for cmake
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
@@ -63,18 +63,18 @@ if(NOT BOARD_TARGET)
 	set(BOARD_TARGET "default")
 endif()
 
-SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
-SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
-SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
-SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
-SET(PASS_FILE                                "crownstone/firmware/dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
-SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
-SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
+set(VERBOSITY                                "4"           CACHE STRING "Verbosity")
+set(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
+set(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
+set(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
+set(PASS_FILE                                "crownstone/firmware/dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
+set(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
+set(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
 # Actually the deployment should not contain this information
-MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
-MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
-MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
+math(EXPR SWO_PORT       "${GDB_PORT}+1")
+math(EXPR TELNET_PORT    "${GDB_PORT}+2")
+math(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
 #######################################################################################################################
 # Show variables
@@ -82,19 +82,8 @@ MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
 message(STATUS "Hardware board: ${HARDWARE_BOARD}")
 
-MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
-MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
-
-#IF(SERIAL_NUM STREQUAL "")
-#  MESSAGE(STATUS "Default JLink device (serial number not specified)")
-#ELSE()
-#  MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
-#ENDIF()
-
-#IF(GDB_PORT STREQUAL "2331")
-#	MESSAGE(STATUS "Default GDB port (2331)")
-#ENDIF()
-#MESSAGE(STATUS "GDB port to use ${GDB_PORT}")
+message(STATUS "Set verbosity to level: ${VERBOSITY}")
+message(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -102,62 +91,62 @@ MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 
-MESSAGE(STATUS "Do not set application start address")
-#MESSAGE(STATUS "Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
+message(STATUS "Do not set application start address")
+#message(STATUS "Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
 #CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF-softdevice.ld)
 
 # Libraries (math, stdc++ libraries, etc.) 
 # Note! We CANNOT use the size-constrained *_s versions! anymore
 # We don't seem to use any libraries anymore... except for including everything that comes with -std=c+11
-#SET(LIBS "-lc ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lstdc++")
-SET(LIBS "")
+#set(LIBS "-lc ${LIBRARY_RUNTIME} ${LIBRARY_MATH} -lstdc++")
+set(LIBS "")
 
 # Some debug information
-IF(VERBOSITY GREATER 4)
-	MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
-	MESSAGE(STATUS "Linked libraries: ${LIBS}")
-ENDIF()
+if(VERBOSITY GREATER 4)
+	message(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
+	message(STATUS "Linked libraries: ${LIBS}")
+endif()
 
 # Source directory
-SET(SOURCE_DIR "src")
+set(SOURCE_DIR "src")
 
 # Get all includes from nordic
-INCLUDE(nordic.src)
+include(nordic.src)
 
-SET(BOOTLOADER "_bootloader_.hex")
+set(BOOTLOADER "_bootloader_.hex")
 
-IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
-	MESSAGE(STATUS "Run test target. This will include source files as necessary")
-ELSE()
-	INCLUDE(crownstone.src)
+if((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
+	message(STATUS "Run test target. This will include source files as necessary")
+else()
+	include(crownstone.src)
 
-	IF (NOT BUILD_MESHING)
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer.c")
-	ENDIF()
+	if(NOT BUILD_MESHING)
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer.c")
+	endif()
 
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
+	list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
-	IF(VERBOSITY GREATER 4)
-		FOREACH(crownstone_file ${FOLDER_SOURCE})
-			MESSAGE(STATUS "Include Crownstone file: " ${crownstone_file})
-		ENDFOREACH()
-	ENDIF()
+	if(VERBOSITY GREATER 4)
+		foreach(crownstone_file ${FOLDER_SOURCE})
+			message(STATUS "Include Crownstone file: " ${crownstone_file})
+		endforeach()
+	endif()
 
 	# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 	# consider the size of the final binary. Do not include things, if not necessary!
 
-	IF (DEVICE STREQUAL "nRF52832_xxAA")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
+	if(DEVICE STREQUAL "nRF52832_xxAA")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
-	ELSEIF (DEVICE STREQUAL "nRF52833")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
+	elseif(DEVICE STREQUAL "nRF52833")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
 		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S" PROPERTY LANGUAGE C)
-	ELSEIF (DEVICE STREQUAL "nRF52840_xxAA")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52840.S")
+	elseif(DEVICE STREQUAL "nRF52840_xxAA")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52840.S")
 		set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52840.S" PROPERTY LANGUAGE C)
-	ELSE()
-		MESSAGE(FATAL_ERROR "Unkown device: ${DEVICE}")
-	ENDIF()
+	else()
+		message(FATAL_ERROR "Unkown device: ${DEVICE}")
+	endif()
 
 
 
@@ -165,270 +154,270 @@ ELSE()
 	# save space in production. It should then be enclosed within a macro.
 	# Those files are: nrf_strerror.c
 
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/ble_db_discovery/ble_db_discovery.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_advdata.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_srv_common.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic/nrf_atomic.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic_fifo/nrf_atfifo.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc16/crc16.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc32/crc32.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/experimental_section_vars/nrf_section_iter.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fds/fds.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/hardfault/hardfault_implementation.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/hardfault/nrf52/handler/hardfault_handler_gcc.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/scheduler/app_scheduler.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/strerror/nrf_strerror.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_handler_gcc.c")
-#	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_weak.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/ble_db_discovery/ble_db_discovery.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_advdata.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_srv_common.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic/nrf_atomic.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic_fifo/nrf_atfifo.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc16/crc16.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc32/crc32.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/experimental_section_vars/nrf_section_iter.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fds/fds.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/hardfault/hardfault_implementation.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/hardfault/nrf52/handler/hardfault_handler_gcc.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/scheduler/app_scheduler.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/strerror/nrf_strerror.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_handler_gcc.c")
+#	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_weak.c")
 
 
-#	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/nrf_assert.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_ble.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_soc.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_wdt.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/prs/nrfx_prs.c")
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
+#	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/nrf_assert.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_ble.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_soc.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_wdt.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/prs/nrfx_prs.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
 	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
+	list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
 
-	IF(NORDIC_SDK_VERSION GREATER 15)
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/nrf_ble_gq/nrf_ble_gq.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/queue/nrf_queue.c")
-	ENDIF()
+	if(NORDIC_SDK_VERSION GREATER 15)
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/nrf_ble_gq/nrf_ble_gq.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/queue/nrf_queue.c")
+	endif()
 
-	IF (CS_SERIAL_NRF_LOG_ENABLED)
-		MESSAGE(STATUS "SERIAL from NORDIC enabled")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_frontend.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_str_formatter.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/ringbuf/nrf_ringbuf.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/fprintf/nrf_fprintf.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/fprintf/nrf_fprintf_format.c")
-		IF (CS_SERIAL_NRF_LOG_ENABLED STREQUAL 1)
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_rtt.c")
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/segger_rtt/SEGGER_RTT.c")
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/segger_rtt/SEGGER_RTT_printf.c")
-		ENDIF()
-		IF (CS_SERIAL_NRF_LOG_ENABLED STREQUAL 2)
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_uart.c")
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
-		ENDIF()
-	ELSE()
-		IF(NORDIC_SDK_VERSION GREATER 15)
+	if(CS_SERIAL_NRF_LOG_ENABLED)
+		message(STATUS "SERIAL from NORDIC enabled")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_frontend.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_str_formatter.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/ringbuf/nrf_ringbuf.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/fprintf/nrf_fprintf.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/fprintf/nrf_fprintf_format.c")
+		if(CS_SERIAL_NRF_LOG_ENABLED STREQUAL 1)
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_rtt.c")
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/segger_rtt/SEGGER_RTT.c")
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/segger_rtt/SEGGER_RTT_printf.c")
+		endif()
+		if(CS_SERIAL_NRF_LOG_ENABLED STREQUAL 2)
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_uart.c")
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
+		endif()
+	else()
+		if(NORDIC_SDK_VERSION GREATER 15)
 			# Required now for gatt queue
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
-		ENDIF()
-		MESSAGE(STATUS "SERIAL from NORDIC disabled")
-	ENDIF()
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
+		endif()
+		message(STATUS "SERIAL from NORDIC disabled")
+	endif()
 
-	IF (BUILD_MICROAPP_SUPPORT)
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
-	ELSE()
-		MESSAGE(STATUS "Microapp support disabled, no fstorage module required")
-	ENDIF()
+	if(BUILD_MICROAPP_SUPPORT)
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
+	else()
+		message(STATUS "Microapp support disabled, no fstorage module required")
+	endif()
 
-	IF (BUILD_TWI)
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_twi.c")
-	ELSE()
-		MESSAGE(STATUS "Module for twi disabled")
-	ENDIF()
+	if(BUILD_TWI)
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_twi.c")
+	else()
+		message(STATUS "Module for twi disabled")
+	endif()
 	
-	IF (BUILD_GPIOTE)
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_gpiote.c")
-	ELSE()
-		MESSAGE(STATUS "Module for gpio tasks and events disabled")
-	ENDIF()
+	if(BUILD_GPIOTE)
+		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_gpiote.c")
+	else()
+		message(STATUS "Module for gpio tasks and events disabled")
+	endif()
 
-	IF (BUILD_MESHING)
+	if(BUILD_MESHING)
 		# All C files in mesh/core/src
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_utils.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_configure.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/queue.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/ccm_soft.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/flash_manager_defrag.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/rand.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/uri.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timeslot.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_opt.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_keygen.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/bearer_event.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/enc.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/list.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timer.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_config_flashman_glue.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/msg_cache.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/net_beacon.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/cache.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/flash_manager_internal.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/network.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_lpn.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/net_state.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/fifo.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/heartbeat.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/beacon.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_config.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/packet_buffer.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_config_backend.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_flash.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/transport.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_flash.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/msqueue.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/lpn.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/net_packet.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_opt.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_lpn_subman.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/event.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/toolchain.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/hal.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/flash_manager.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timer_scheduler.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/aes.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/replay_cache.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/internal_event.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/fsm.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timeslot_timer.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/aes_cmac.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/log.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_local.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_utils.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_configure.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/queue.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/ccm_soft.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/flash_manager_defrag.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/rand.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/uri.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timeslot.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_opt.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_keygen.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/bearer_event.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/enc.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/list.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timer.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_config_flashman_glue.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/msg_cache.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/net_beacon.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/cache.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/flash_manager_internal.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/network.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_lpn.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/net_state.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/fifo.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/heartbeat.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/beacon.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_config.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/packet_buffer.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_config_backend.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_flash.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/transport.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_flash.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/msqueue.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/lpn.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/net_packet.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_opt.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_lpn_subman.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/event.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/toolchain.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/hal.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/flash_manager.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timer_scheduler.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/aes.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/replay_cache.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/internal_event.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/fsm.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timeslot_timer.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/aes_cmac.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/log.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_local.c")
 
 		# All C files in mesh/bearer/src
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/bearer_handler.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/ad_type_filter.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/rssi_filter.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/mesh_pa_lna.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/adv_packet_filter.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/scanner.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/gap_address_filter.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/radio_config.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/ad_listener.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/filter_engine.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/advertiser.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/broadcast.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/bearer_handler.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/ad_type_filter.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/rssi_filter.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/mesh_pa_lna.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/adv_packet_filter.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/scanner.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/gap_address_filter.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/radio_config.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/ad_listener.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/filter_engine.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/advertiser.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/broadcast.c")
 
 		# All C files in mesh/prov/src except nrf_mesh_prov_bearer_gatt.c
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/provisioning.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_provisionee.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_beacon.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_utils.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_bearer_adv.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/nrf_mesh_prov.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_provisioner.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/provisioning.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_provisionee.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_beacon.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_utils.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_bearer_adv.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/nrf_mesh_prov.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_provisioner.c")
 
 		# All C files in mesh/access/src
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish_retransmission.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_reliable.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/device_state_manager.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish_retransmission.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_reliable.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/device_state_manager.c")
 
 		# All C files in mesh/dfu/src
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/dfu/src/nrf_mesh_dfu.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/dfu/src/nrf_mesh_dfu.c")
 
 		# All C files in mesh/stack/src
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/stack/src/mesh_stack.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/stack/src/mesh_stack.c")
 
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/config_server.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/composition_data.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/packed_index_list.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/health/src/health_server.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/config_server.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/composition_data.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/packed_index_list.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/health/src/health_server.c")
 
 		# Any other mesh models that are used in your application
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/common/src/model_common.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/generic_onoff/src/generic_onoff_client.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/generic_onoff/src/generic_onoff_server.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/app_onoff.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/common/src/model_common.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/generic_onoff/src/generic_onoff_client.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/generic_onoff/src/generic_onoff_server.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/app_onoff.c")
 
 		# external/micro-ecc/uECC.c
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/micro-ecc/uECC.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/micro-ecc/uECC.c")
 
 		# TODO: Do not use example files
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/mesh_provisionee.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/assertion_handler_weak.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/mesh_provisionee.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/assertion_handler_weak.c")
 
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/app_timer/app_timer_mesh.c")
+		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/app_timer/app_timer_mesh.c")
 		
-		IF (MESH_MEM_BACKEND STREQUAL "stdlib")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_stdlib.c")
-		ELSEIF (MESH_MEM_BACKEND STREQUAL "packet_mgr")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_packet_mgr.c")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/packet_mgr.c")
-		ELSEIF (MESH_MEM_BACKEND STREQUAL "mem_manager")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_mem_manager.c")
-			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/mem_manager/mem_manager.c")
-		ELSE ()
-			MESSAGE(FATAL_ERROR "Unknown mesh_mem_backend \"${MESH_MEM_BACKEND}\"")
-		ENDIF()
+		if(MESH_MEM_BACKEND STREQUAL "stdlib")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_stdlib.c")
+		elseif(MESH_MEM_BACKEND STREQUAL "packet_mgr")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_packet_mgr.c")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/packet_mgr.c")
+		elseif(MESH_MEM_BACKEND STREQUAL "mem_manager")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_mem_manager.c")
+			list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/mem_manager/mem_manager.c")
+		else()
+			message(FATAL_ERROR "Unknown mesh_mem_backend \"${MESH_MEM_BACKEND}\"")
+		endif()
 		
-		IF (EXPERIMENTAL_INSTABURST_ENABLED)
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_instaburst.c")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/adv_ext_packet.c")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/adv_ext_tx.c")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/instaburst.c")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/instaburst_rx.c")
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/instaburst_tx.c")
-		ELSE()
-			LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_adv.c")
-		ENDIF()
-	ENDIF()
+		if(EXPERIMENTAL_INSTABURST_ENABLED)
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_instaburst.c")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/adv_ext_packet.c")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/adv_ext_tx.c")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/instaburst.c")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/instaburst_rx.c")
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/instaburst_tx.c")
+		else()
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_adv.c")
+		endif()
+	endif()
 
-	IF(VERBOSITY GREATER 4)
-		FOREACH(nordic_file ${NORDIC_SOURCE})
-			MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
-		ENDFOREACH()
-	ENDIF()
+	if(VERBOSITY GREATER 4)
+		foreach(nordic_file ${NORDIC_SOURCE})
+			message(STATUS "Include Nordic file: " ${nordic_file})
+		endforeach()
+	endif()
 
 	# We now have a variable FOLDER_SOURCE with all source files
-	LIST(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
+	list(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
 
 	# For Visual Studio group the files
-	SOURCE_GROUP("Source files" FILES ${FOLDER_SOURCE})
-	SOURCE_GROUP("Header files" FILES ${FOLDER_HEADER})
+	source_group("Source files" FILES ${FOLDER_SOURCE})
+	source_group("Header files" FILES ${FOLDER_HEADER})
 
-	IF(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
-		INCLUDE_DIRECTORIES(SYSTEM "${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
-	ENDIF()
+	if(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
+		include_directories(SYSTEM "${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
+	endif()
 
-ENDIF()
+endif()
 
 # Show which directories are actually included to the user
-GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
-IF(VERBOSITY GREATER 4)
-	FOREACH(dir ${dirs})
-		MESSAGE(STATUS "Add to the include directories: '${dir}'")
-	ENDFOREACH()
-ENDIF()
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY include_directories)
+if(VERBOSITY GREATER 4)
+	foreach(dir ${dirs})
+		message(STATUS "Add to the include directories: '${dir}'")
+	endforeach()
+endif()
 
-IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
-	SET(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
-	SET(${SOFTDEVICE_DIR_HEX}, "hex")
-ENDIF()
+if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
+	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
+	set(${SOFTDEVICE_DIR_HEX}, "hex")
+endif()
 
-IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
-	MESSAGE(STATUS "Add testing files")
+if((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
+	message(STATUS "Add testing files")
 
-	ENABLE_TESTING()
+	enable_testing()
 
-	INCLUDE(test/nrf5/CMakeLists.txt)
-ELSE()
+	include(test/nrf5/CMakeLists.txt)
+else()
 
 	# Set up our main executable.
-	IF(FOLDER_SOURCE STREQUAL "")
-		MESSAGE(FATAL_ERROR "No source code files found. Please add something")
-	ELSE()
+	if(FOLDER_SOURCE STREQUAL "")
+		message(FATAL_ERROR "No source code files found. Please add something")
+	else()
 
 		# Get firmware and bootloader version
 		include(${DEFAULT_MODULES_PATH}/get_versions.cmake)
@@ -448,7 +437,7 @@ ELSE()
 			"${BOOTLOADER_VERSION_MINOR}."
 			"${BOOTLOADER_VERSION_PATCH}"
 			)
-		if (BOOTLOADER_RC_VERSION)
+		if(BOOTLOADER_RC_VERSION)
 			string(REGEX MATCHALL "[0-9]+" BOOTLOADER_VERSION_PRERELEASE "${BOOTLOADER_RC_VERSION}")
 			string(CONCAT PRINT_BOOTLOADER_VERSION "${BOOTLOADER_RC_VERSION}-" "${BOOTLOADER_VERSION_PRERELEASE}")
 		else()
@@ -457,13 +446,13 @@ ELSE()
 		message(STATUS "Bootloader version: ${PRINT_BOOTLOADER_VERSION}")
 
 		# TODO: can be removed
-		IF(SERIAL_NUM)
-			SET(SERIAL_NUM_SWITCH "--snr")
-			SET(SERIAL_NUM_GDB_SELECT "-select")
-			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
-		ENDIF()
+		if(SERIAL_NUM)
+			set(SERIAL_NUM_SWITCH "--snr")
+			set(SERIAL_NUM_GDB_SELECT "-select")
+			set(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
+		endif()
 
-		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
+		message(STATUS "Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
 
 		#message(STATUS "Descend into test directory and compile if needed")
@@ -473,22 +462,22 @@ ELSE()
 		set(TARGET_CONFIG_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config")
 		set(TARGET_CONFIG_OVERWRITE_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config")
 
-		IF(NOT EXISTS "${TARGET_CONFIG_FILE}")
-			MESSAGE(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
-		ENDIF()
+		if(NOT EXISTS "${TARGET_CONFIG_FILE}")
+			message(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
+		endif()
 		
-		SET_SOURCE_FILES_PROPERTIES(${NORDIC_SOURCE}
+		set_source_files_properties(${NORDIC_SOURCE}
 			PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
 		)
 
-		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
+		set_source_files_properties(${FOLDER_SOURCE}
 			PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_FILE}
 		)
-		IF(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
-			SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
+		if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
+			set_source_files_properties(${FOLDER_SOURCE}
 				PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE}
 			)
-		ENDIF()
+		endif()
 
 		message(STATUS "Configure cs_Git.cpp file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
@@ -517,12 +506,12 @@ ELSE()
 		message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
 		message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
+		add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
 		
 		# Be more strict about our own files (then about Nordic's files)
-		#SET(CROWNSTONE_ONLY_FLAGS "-W")
-		SET(CROWNSTONE_ONLY_FLAGS "")
-		SET_PROPERTY(SOURCE ${FOLDER_SOURCE} APPEND PROPERTY COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS})
+		#set(CROWNSTONE_ONLY_FLAGS "-W")
+		set(CROWNSTONE_ONLY_FLAGS "")
+		set_property(SOURCE ${FOLDER_SOURCE} APPEND PROPERTY COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS})
 
 		# Add path with files like sdk_config.h to include directories
 		# The include/third/nrf file dir is required for files in the sdk (e.g. link "sdk_config.h" without path prefix)
@@ -536,9 +525,9 @@ ELSE()
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_FILE})
-		IF(EXISTS ${TARGET_CONFIG_OVERWRITE_FILE})
+		if(EXISTS ${TARGET_CONFIG_OVERWRITE_FILE})
 			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE})
-		ENDIF()
+		endif()
 		
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/VERSION)
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/bootloader/VERSION)
@@ -550,16 +539,10 @@ ELSE()
 		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.defs.cmake")
 		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.src.cmake")
 
-		SET(INCLUDE_ONLY_SECTIONS "")
-
-		#		ADD_CUSTOM_TARGET(get_git_info
-		#	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/git_info.cmake
-		#	COMMAND 
-		#	COMMENT "Get git info for new build"
-		#	)
+		set(INCLUDE_ONLY_SECTIONS "")
 
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
-		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.bin
+		add_custom_command(OUTPUT ${PROJECT_NAME}.bin
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
 			COMMAND stat -t ${PROJECT_NAME}.bin | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
 			COMMAND ${CMAKE_COMMAND} -E echo ""
@@ -569,13 +552,13 @@ ELSE()
 				${PROJECT_NAME}
 			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 		
-		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.hex
+		add_custom_command(OUTPUT ${PROJECT_NAME}.hex
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
 			DEPENDS
 				${PROJECT_NAME}
 			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.hex")
 		
-		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.elf
+		add_custom_command(OUTPUT ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DCMAKE_SIZE=${CMAKE_SIZE} -DBINARY=${PROJECT_NAME}.elf -DOFFSET=${APPLICATION_START_ADDRESS} -DMAX_SIZE=${FLASH_MICROAPP_BASE} -P ${DEFAULT_MODULES_PATH}/check_sizes.cmake
@@ -583,7 +566,7 @@ ELSE()
 				${PROJECT_NAME}
 			COMMENT "Copy ${PROJECT_NAME} to ${PROJECT_NAME}.elf")
 
-		ADD_CUSTOM_TARGET(generate_dat
+		add_custom_target(generate_dat
 			COMMAND echo
 			COMMAND echo "** Use srec_cat to create the INIT .dat file for the DFU"
 			COMMAND echo
@@ -593,7 +576,7 @@ ELSE()
 			COMMENT "Generate the INIT .dat file for the DFU"
 			)
 
-		ADD_CUSTOM_TARGET(merge_all
+		add_custom_target(merge_all
 			COMMAND echo
 			COMMAND echo "** Use srec_cat to create one merged file"
 			COMMAND echo "** Includes softdevice, bootloader, firmware, bootloader settings, and all UICR fields, except board version."
@@ -604,7 +587,7 @@ ELSE()
 			COMMENT "Merge all but board version into one hex"
 			)
 
-		ADD_CUSTOM_TARGET(analyze
+		add_custom_target(analyze
 			COMMAND echo
 			COMMAND echo "** Show headers"
 			COMMAND ${CMAKE_READELF} --headers ${PROJECT_NAME}.elf
@@ -620,7 +603,7 @@ ELSE()
 			)
 	
 		# TODO: Rename CONFIG_FILE here to TARGET_RUNTIME_CONFIG_FILE
-		SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
+		set(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
 			-DDEFAULT_CONFIG_FILE:STRING=${DEFAULT_CONFIG_FILE}\
 			-DTARGET_CONFIG_FILE:STRING=${TARGET_CONFIG_FILE}\
 			-DTARGET_CONFIG_OVERWRITE_FILE:STRING=${TARGET_CONFIG_OVERWRITE_FILE}\
@@ -637,41 +620,41 @@ ELSE()
 			-DRTT_PORT:STRING=${RTT_PORT}")
 		
 		# The gdb server can be started with configuration specific information
-		ADD_CUSTOM_TARGET(debug_server
+		add_custom_target(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_GDB_SERVER" -P ${DEFAULT_MODULES_PATH}/debug_tool.cmake
 			COMMENT "Debug server, runs in background"
 			)
 
-		ADD_CUSTOM_TARGET(uart_client
+		add_custom_target(uart_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_MINICOM" -P ${DEFAULT_MODULES_PATH}/uart_tool.cmake
 			COMMENT "UART client, runs in background"
 			)
 		
-		SET(UART_CONFIG_PARAM "-DCONFIG_NAME:STRING=UART_DEVICE")
+		set(UART_CONFIG_PARAM "-DCONFIG_NAME:STRING=UART_DEVICE")
 
-		ADD_CUSTOM_TARGET(uart_binary_client
+		add_custom_target(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
 			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart"
 			COMMENT "UART client, runs in background"
 			VERBATIM
 			)
 		
-		ADD_CUSTOM_TARGET(rtt_client
+		add_custom_target(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
 			COMMAND JLinkRTTClient -RTTTelnetPort ${RTT_PORT}
 			COMMENT "RTT client, runs in background"
 			)
 		
-		ADD_CUSTOM_TARGET(debug_application
+		add_custom_target(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
 			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
 		
-		ADD_CUSTOM_TARGET(debug_bootloader
+		add_custom_target(debug_bootloader
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug bootloader"
 			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=bootloader.elf bootloader.elf
 			WORKING_DIRECTORY bootloader
@@ -679,102 +662,102 @@ ELSE()
 			COMMENT "Debug bootloader.elf"
 			)
 
-		ADD_CUSTOM_TARGET(write_application
+		add_custom_target(write_application
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${PROJECT_NAME}.hex" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			DEPENDS ${PROJECT_NAME}.hex
 			COMMENT "Flashes application to remote target board (takes a while)"
 			)
 
-		ADD_CUSTOM_TARGET(setup
+		add_custom_target(setup
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=SETUP" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
 			COMMENT "Setup Crownstone via csutil"
 			)
 
-		ADD_CUSTOM_TARGET(factory_reset
+		add_custom_target(factory_reset
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=FACTORY_RESET" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
 			COMMENT "Perform a factory reset of a Crownstone via csutil"
 			)
 
-		ADD_CUSTOM_TARGET(memory_usage_test_client
+		add_custom_target(memory_usage_test_client
 			COMMAND ${WORKSPACE_DIR}/scripts/mem-usage-test.py
 			COMMENT "Run memory usage test client, which communicates with a Crownstone."
 			)
 
-		ADD_CUSTOM_TARGET(check
+		add_custom_target(check
 			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 
 			COMMENT "Check for style or worse types of errors (linter)"
 			)
 		
-		ADD_CUSTOM_TARGET(lint
+		add_custom_target(lint
 			COMMAND cpplint --filter=-whitespace/tab --linelength=120 --recursive ${CMAKE_SOURCE_DIR} 
 			COMMENT "Check for style according to Google C++ style guide"
 			)
 		
-		ADD_CUSTOM_TARGET(generate_documentation
+		add_custom_target(generate_documentation
 			COMMAND ${CMAKE_COMMAND} -E echo "Run doxygen from ${CMAKE_SOURCE_DIR}"
 			COMMAND cd ${WORKSPACE_DIR} && doxygen source/doxygen.config
 			COMMENT "Run documentation generator"
 			)
 		
-		ADD_CUSTOM_TARGET(view_documentation
+		add_custom_target(view_documentation
 			COMMAND ${CMAKE_COMMAND} -E echo "Open an .html viewer through xdg-open"
 			COMMAND xdg-open ${WORKSPACE_DIR}/docs/html/index.html
 			COMMENT "View documentation"
 			DEPENDS generate_documentation
 			)
 		
-		ADD_CUSTOM_TARGET(list_debuggers
+		add_custom_target(list_debuggers
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=LIST" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "List debuggers"
 			)
 
-		ADD_CUSTOM_TARGET(erase
+		add_custom_target(erase
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=ERASE" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Erase everything on target board"
 			)
 
-		ADD_CUSTOM_TARGET(reset
+		add_custom_target(reset
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=RESET" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Reset target board"
 			)
 			
-		MESSAGE(STATUS "Persistent flags disabled: ${PERSISTENT_FLAGS_DISABLED}")
+		message(STATUS "Persistent flags disabled: ${PERSISTENT_FLAGS_DISABLED}")
 		
-		ADD_CUSTOM_TARGET(read_bootloader_address
+		add_custom_target(read_bootloader_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001014" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader address"
 			)
 		
-		ADD_CUSTOM_TARGET(read_mbr_parameter_page_address
+		add_custom_target(read_mbr_parameter_page_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001018" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read MBR parameter page address"
 			)
 	
 		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
 		# cmake utility function
-		ADD_CUSTOM_TARGET(read_nrf_chip_version
+		add_custom_target(read_nrf_chip_version
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10000100" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10000104" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read nRF chip version"
 			)
 		
-		ADD_CUSTOM_TARGET(read_board_version
+		add_custom_target(read_board_version
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS:STRING=${HARDWARE_BOARD_ADDRESS}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read board version"
 			)
 
-		ADD_CUSTOM_TARGET(read_mac_address
+		add_custom_target(read_mac_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x100000A4" "-DCOUNT=8" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read MAC address"
 			)
 
-		ADD_CUSTOM_TARGET(write_config
+		add_custom_target(write_config
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writeconfig.cmake
 			COMMMENT "Write config"
 			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
-		#IF(NOT CONFIG_DIR STREQUAL "release")
+		#if(NOT CONFIG_DIR STREQUAL "release")
 
 		set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
@@ -784,48 +767,49 @@ ELSE()
 		include(${DEFAULT_MODULES_PATH}/hex.cmake)
 		to_hex_raw(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX 8 "0x")
 		message(STATUS "Hexadecimal ${HARDWARE_BOARD_HEX}")
-		#ENDIF()
+		#endif()
 
-		ADD_CUSTOM_TARGET(write_board_version
+		add_custom_target(write_board_version
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE" "-DADDRESS=${HARDWARE_BOARD_ADDRESS}" "-DVALUE=${LOAD_BOARD_HARDWARE_VERSION}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Flashes board version to remote target board"
 			)
 	
-		ADD_CUSTOM_TARGET(increment_application_version
+		add_custom_target(increment_application_version
 			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
 			COMMENT "Increment application version (in VERSION file)"
 			)
 			
-		SET(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
-		SET(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
+		set(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
+		set(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
-		ADD_CUSTOM_TARGET(build_bootloader_settings
+		add_custom_target(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
+			COMMAND ${CMAKE_COMMAND} -E echo "nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 ${BOOTLOADER_HEX_FILE}"
 			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}" 
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 			COMMENT "Create bootloader settings"
 			)
 		
-		ADD_CUSTOM_TARGET(write_bootloader_settings
+		add_custom_target(write_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${BOOTLOADER_HEX_FILE}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Flashes bootloader settings to remote target board"
 			DEPENDS build_bootloader_settings
 			)
 		
-		ADD_CUSTOM_TARGET(read_bootloader_settings
+		add_custom_target(read_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x7F00" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader settings from remote target board"
 			)
 		
-		ADD_CUSTOM_TARGET(read_bootloader_settings_backup
+		add_custom_target(read_bootloader_settings_backup
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x7E00" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader settings from remote target board"
 			)
 	
-		ADD_CUSTOM_TARGET(merge_bootloader_settings
+		add_custom_target(merge_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use mergehex to combine bootloader with bootloader settings"
 			COMMAND ${CMAKE_COMMAND} -E echo "      Note that the settings can only be build with info from the application"
@@ -834,11 +818,11 @@ ELSE()
 			COMMENT "Merges bootloader with bootloader settings"
 			)
 
-		SET(FIRMWARE_DFU_ZIP     crownstone_all_${FIRMWARE_VERSION}.zip)
-		SET(APPLICATION_DFU_ZIP  crownstone_${FIRMWARE_VERSION}.zip)
-		SET(BOOTLOADER_DFU_ZIP   bootloader_${BOOTLOADER_VERSION}.zip)
+		set(FIRMWARE_DFU_ZIP     crownstone_all_${FIRMWARE_VERSION}.zip)
+		set(APPLICATION_DFU_ZIP  crownstone_${FIRMWARE_VERSION}.zip)
+		set(BOOTLOADER_DFU_ZIP   bootloader_${BOOTLOADER_VERSION}.zip)
 
-		ADD_CUSTOM_TARGET(extract_sd_id
+		add_custom_target(extract_sd_id
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Extract id from softdevice file: ${SOFTDEVICE_HEX_FILE}"
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -O binary check.bin
@@ -847,7 +831,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 		)
 
-		ADD_CUSTOM_TARGET(generate_dfu_package_all
+		add_custom_target(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Application: ${PROJECT_NAME}.hex"
@@ -871,7 +855,7 @@ ELSE()
 			DEPENDS extract_sd_id
 			)
 		
-		ADD_CUSTOM_TARGET(generate_dfu_package_application
+		add_custom_target(generate_dfu_package_application
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Application: ${PROJECT_NAME}.hex"
@@ -893,7 +877,7 @@ ELSE()
 			DEPENDS extract_sd_id
 			)
 
-		ADD_CUSTOM_TARGET(generate_dfu_package_bootloader
+		add_custom_target(generate_dfu_package_bootloader
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader:  bootloader.hex"
@@ -917,18 +901,18 @@ ELSE()
 	
 
 
-		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "")
-			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
-		ELSE()
-			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_CANDIDATE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
-		ENDIF()
+		if(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "")
+			set(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
+		else()
+			set(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_CANDIDATE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
+		endif()
 
 
-		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY} )
-			MESSAGE(STATUS "Already released... No create_release_in_repository target available")
-		ELSE()
+		if(EXISTS ${RELEASE_REPOSITORY_DIRECTORY} )
+			message(STATUS "Already released... No create_release_in_repository target available")
+		else()
 
-			ADD_CUSTOM_TARGET(create_release_in_repository
+			add_custom_target(create_release_in_repository
 					COMMAND ${CMAKE_COMMAND} -E echo
 					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY}\""
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/bin
@@ -945,20 +929,20 @@ ELSE()
 					COMMAND ${CMAKE_COMMAND} -E copy ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config ${RELEASE_REPOSITORY_DIRECTORY}/config
 					COMMENT "Copy all generated files to release repository"
 					)
-		ENDIF()
+		endif()
 
-		IF(NOT DEFINED BOOTLOADER_RC_VERSION OR "${BOOTLOADER_RC_VERSION}" STREQUAL "")
-			SET(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_REPOSITORY}/bootloaders/bootloader_${BOOTLOADER_VERSION}")
-		ELSE()
-			SET(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_CANDIDATE_REPOSITORY}/bootloaders/bootloader_${BOOTLOADER_VERSION}")
-		ENDIF()
+		if(NOT DEFINED BOOTLOADER_RC_VERSION OR "${BOOTLOADER_RC_VERSION}" STREQUAL "")
+			set(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_REPOSITORY}/bootloaders/bootloader_${BOOTLOADER_VERSION}")
+		else()
+			set(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_CANDIDATE_REPOSITORY}/bootloaders/bootloader_${BOOTLOADER_VERSION}")
+		endif()
 
 
-		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER} )
-			MESSAGE(STATUS "Already released... No create_bootloader_release_in_repository target available")
-		ELSE()
+		if(EXISTS ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER} )
+			message(STATUS "Already released... No create_bootloader_release_in_repository target available")
+		else()
 
-			ADD_CUSTOM_TARGET(create_bootloader_release_in_repository
+			add_custom_target(create_bootloader_release_in_repository
 					COMMAND ${CMAKE_COMMAND} -E echo
 					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}\""
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
@@ -973,42 +957,41 @@ ELSE()
 					COMMAND ${CMAKE_COMMAND} -E copy ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config
 					COMMENT "Copy all generated files to release repository"
 					)
-		ENDIF()
+		endif()
 
-		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
-		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
+		set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
+		set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
 	
-		SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
-		SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
-		SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
-		SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
-	
-		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
+		set(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
+		set(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
+		set(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
+		set(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
+		target_link_libraries(${PROJECT_NAME} ${LIBS})
 
 		# We actually do not need the file without extension
-		#INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+		#install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
 
 		# TARGETS are not accepted from other directoreis
-		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
-		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
-		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
-		INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
-		INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
-		IF(EXISTS "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
-			INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
-		ENDIF()
-		INSTALL(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
-		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
-	ENDIF()
+		install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
+		install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
+		install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
+		install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
+		install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
+		if(EXISTS "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
+			install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
+		endif()
+		install(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
+		install(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
+	endif()
 	
 	set(FILE_LIST_VARIABLES "${CMAKE_BINARY_DIR}/list_variables.txt")
 	file(WRITE ${FILE_LIST_VARIABLES} "")
 	message(STATUS "Write variables to ${FILE_LIST_VARIABLES}")
 	get_cmake_property(_variableNames VARIABLES)
-	list (SORT _variableNames)
-	foreach (_variableName ${_variableNames})
+	list(SORT _variableNames)
+	foreach(_variableName ${_variableNames})
 		file(APPEND "${FILE_LIST_VARIABLES}" "${_variableName}=${${_variableName}}\n")
 	endforeach()
 
 
-ENDIF()
+endif()

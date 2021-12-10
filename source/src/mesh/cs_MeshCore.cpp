@@ -190,6 +190,14 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 		case NRF_MESH_EVT_FRIEND_REQUEST:
 			LOGMeshVerbose("NRF_MESH_EVT_FRIEND_REQUEST");
 			break;
+#if MESH_SDK_VERSION_MAJOR > 4
+		case NRF_MESH_EVT_ENABLED:
+			LOGMeshVerbose("NRF_MESH_EVT_ENABLED");
+			break;
+		case NRF_MESH_EVT_READY_TO_POWER_OFF:
+			LOGMeshVerbose("NRF_MESH_EVT_READY_TO_POWER_OFF");
+			break;
+#endif
 	}
 }
 static nrf_mesh_evt_handler_t meshEventHandlerStruct = {

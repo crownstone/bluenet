@@ -33,7 +33,7 @@ Guidelines:
 
 ## Libraries
 
-Normally you have the C++ standard libraries to work with `std::vector`, `std::map`, etc. Very, very, carefully consider if you actually need this. A lot of functionality has been disabled by using compiler flags such as `-no-exceptions` (remove exception handling), `-no-unwind-tables`(also remove those), etc.
+Normally you have the C++ standard libraries to work with `std::vector`, `std::map`, etc. Consider if you need this very, very carefully. A lot of functionality has been disabled by using compiler flags such as `-no-exceptions` (remove exception handling), `-no-unwind-tables`(also remove those), etc.
 
 The nanolib standard libs can contain code that is not required on an embedded system. For example, for a multi-threading context (you can recognize reentrant functions by a `_r` suffix).
 
