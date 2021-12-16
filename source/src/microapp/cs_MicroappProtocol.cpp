@@ -370,7 +370,7 @@ void MicroappProtocol::onMeshMessage(MeshMsgEvent event) {
  */
 void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	if (!_microappIsScanning) {
-		LOGd("Microapp not scanning, so not forwarding scanned device");
+		LOGv("Microapp not scanning, so not forwarding scanned device");
 		return;
 	}
 
