@@ -115,9 +115,9 @@ void on_clear_micro_app_page_complete(void* p_buf) {
 }
 
 static void clear_micro_app_page() {
-//	const uint32_t microapp_page_start = 0x69000;
+	const uint32_t microapp_page_start = 0x69000;
 ////	ret_code_t err_code                =
-//	nrf_dfu_flash_erase(microapp_page_start, 1, on_clear_micro_app_page_complete);
+	nrf_dfu_flash_erase(microapp_page_start, 1, on_clear_micro_app_page_complete);
 }
 
 uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE];
