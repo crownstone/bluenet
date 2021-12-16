@@ -100,8 +100,11 @@ public:
 	 * @param[in] throttled       When true, a new suntime won't be allowed to be set for a while.
 	 *                            Unless it's set with throttled false.
 	 * @param[in] sendToMesh      Setting this to false will prevent updating other mesh nodes
+	 * @return ERR_SUCCESS             When time is set successfully.
+	 * @return ERR_BUSY                When set time is throttled, try again later.
+	 * @return ERR_WRONG_PARAMETER     When trying to set time to 0.
 	 */
-	static void setTime(uint32_t time, bool throttled, bool sendToMesh);
+	static cs_ret_code_t setTime(uint32_t time, bool throttled, bool sendToMesh);
 
 	/**
 	 * Set the sunrise and sunset times.
