@@ -15,8 +15,8 @@ The global layout of the the flash is shown below:
 | ------------- |:-------------:| -----:|
 | 0x00000000 | MBR | 1
 | 0x00001000 | SD | 37
-| 0x00026000 | App / Bluenet | 53
-| 0x00051000 | Free | 14
+| 0x00026000 | App / Bluenet | 54
+| 0x0005C000 | Free | 13
 | 0x00069000 | Microapp | 4
 | 0x0006D000 | IPC page | 1
 | 0x0006E000 | Reserved for FDS expansion | 4
