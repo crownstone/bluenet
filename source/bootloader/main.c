@@ -108,34 +108,43 @@ void app_error_handler_bare(uint32_t error_code)
     on_error();
 }
 
-
 static bool micro_app_page_cleared = false;
 
-static void clear_micro_app_page() {
-	const uint32_t microapp_page_start = 0x69000;
-	ret_code_t err_code = nrf_dfu_flash_erase(microapp_page_start, 1, NULL);
-
-	micro_app_page_cleared = err_code == NRF_SUCCESS;
+void on_clear_micro_app_page_complete(void* p_buf) {
+	micro_app_page_cleared = true;
 }
 
-static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
-	if(!micro_app_page_cleared) {
-		return;
-	}
+static void clear_micro_app_page() {
+//	const uint32_t microapp_page_start = 0x69000;
+////	ret_code_t err_code                =
+//	nrf_dfu_flash_erase(microapp_page_start, 1, on_clear_micro_app_page_complete);
+}
 
-	const uint32_t microapp_page_start = 0x69000;
-	const uint32_t init_packet_offset_size = 0x1000;
+uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE];
+uint8_t validationbytes[3][16] = {{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70},
+							   {70, 69, 68, 67, 66, 65, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48},
+							   {48, 70, 49, 69, 50, 68, 51, 67, 52, 66, 53, 65, 54, 57, 55, 56}};
+static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
+//	if (!micro_app_page_cleared) {
+//		NRF_LOG_INFO("failz");
+//		return;
+//	}
+
+	NRF_LOG_HEXDUMP_INFO(s_dfu_settings.init_command, 128);
+
+	const uint32_t microapp_page_start     = 0x69000;
+	const uint32_t init_packet_offset_size = 0x200;
+	const uint32_t validationlen = sizeof(validationbytes[0]); /// used to write some valdidation
+	const uint32_t init_packet_size = INIT_COMMAND_MAX_SIZE - validationlen;
 
 	// get init packet. (s_dfu_settings is defined external in nrf_dfu_settings.h)
-	uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE];
-	memcpy(&init_cmd_buffer, &s_dfu_settings.init_command, INIT_COMMAND_MAX_SIZE);
+	memcpy(&init_cmd_buffer, validationbytes[offset_index], init_packet_size);
+	memcpy(&init_cmd_buffer[validationlen], &s_dfu_settings.init_command, init_packet_size);
 
-	// write init packet
+//	// write init packet
 	// err_code =
-    nrf_dfu_flash_store(microapp_page_start + offset_index * init_packet_offset_size,
-                                   init_cmd_buffer,
-                                   INIT_COMMAND_MAX_SIZE,
-                                   NULL);
+	nrf_dfu_flash_store(
+			microapp_page_start + offset_index * init_packet_offset_size , init_cmd_buffer, INIT_COMMAND_MAX_SIZE, NULL);
 }
 
 /**
@@ -160,18 +169,22 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
             break;
 		// ---------------------------------------
         case NRF_DFU_EVT_DFU_INITIALIZED: {
+        	NRF_LOG_INFO("@DFU_INITIALIZED");
         	clear_micro_app_page();
         	break;
         }
         case NRF_DFU_EVT_DFU_STARTED: {
+        	NRF_LOG_INFO("@DFU_STARTED");
         	write_init_packet_to_micro_app_page(0);
         	break;
         }
         case NRF_DFU_EVT_OBJECT_RECEIVED: {
+        	NRF_LOG_INFO("@OBJECT_RECEIVED");
         	write_init_packet_to_micro_app_page(1);
         	break;
         }
         case NRF_DFU_EVT_DFU_COMPLETED: {
+        	NRF_LOG_INFO("@DFU_COMPLETED");
         	write_init_packet_to_micro_app_page(2);
         	break;
         }
