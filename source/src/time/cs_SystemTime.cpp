@@ -187,15 +187,15 @@ void SystemTime::tick(void*) {
 
 // ======================== Setters ========================
 
-void SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh) {
+cs_ret_code_t SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh) {
 	LOGSystemTimeInfo("setTime posix=%u throttled=%d sendToMesh=%d", time, throttled, sendToMesh);
 	if (time == 0) {
-		return;
+		return ERR_WRONG_PARAMETER;
 	}
 
 	if (throttled && throttleSetTimeCountdownTicks) {
 		LOGSystemTimeDebug("setTime throttled");
-		return;
+		return ERR_BUSY;
 	}
 	throttleSetTimeCountdownTicks = THROTTLE_SET_TIME_TICKS;
 
@@ -233,6 +233,7 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh) {
 			sizeof(prevtime));
 
 	event.dispatch();
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled) {
@@ -273,7 +274,7 @@ void SystemTime::handleEvent(event_t & event) {
 			LOGSystemTimeInfo("set time from command source: type=%u id=%u", event.source.source.type, event.source.source.id);
 			uint32_t time = *((TYPIFY(CMD_SET_TIME)*)event.data);
 			bool sendToMesh = isOnlyReceiveByThisDevice(event.source);
-			setTime(time, true, sendToMesh);
+			event.result.returnCode = setTime(time, true, sendToMesh);
 			break;
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
@@ -282,6 +283,7 @@ void SystemTime::handleEvent(event_t & event) {
 			uint32_t posixtime = *((TYPIFY(CMD_SET_TIME)*)event.data);
 			LOGSystemTimeInfo("set test time %u", posixtime);
 			setTime(posixtime, false, false);
+			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
 		case CS_TYPE::STATE_SUN_TIME: {
