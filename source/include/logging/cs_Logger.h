@@ -72,7 +72,7 @@
 
 		#define _log(level, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_log_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, ##__VA_ARGS__); \
+					cs_log_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, fmt, ##__VA_ARGS__); \
 				}
 
 		#define _logArray0(level, addNewLine, pointer, size) \
@@ -224,6 +224,14 @@
 
 		// Finalize the uart msg.
 		cs_log_end();
+	}
+
+	// This function takes an unused argument "fmt".
+	// This fmt ends up in the .ii file (preprocessed .cpp file), and is then used to gather all log strings.
+	// To make it easier for the compiler to optimize out the fmt string, we only call cs_log_args without the fmt arg here.
+	template<class... Args>
+	void cs_log_args(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const char* fmt, const Args&... args) {
+		cs_log_args(fileNameHash, lineNumber, logLevel, addNewLine, args...);
 	}
 
 	// Write logs as plain text.

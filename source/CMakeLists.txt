@@ -522,6 +522,9 @@ else()
 		message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
 		target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
+		# Save intermediate files, these are used for binary logging.
+		target_compile_options(${PROJECT_NAME} PRIVATE -save-temps=obj)
+
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_FILE})
