@@ -204,7 +204,7 @@
 
 	// Uses the fold expression, a handy way to replace a recursive call.
 	template<class... Args>
-	void cs_log_args(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const Args&... args) {
+	void cs_log_args_no_fmt(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const Args&... args) {
 		uart_msg_log_header_t header;
 		header.header.fileNameHash = fileNameHash;
 		header.header.lineNumber = lineNumber;
@@ -231,7 +231,7 @@
 	// To make it easier for the compiler to optimize out the fmt string, we only call cs_log_args without the fmt arg here.
 	template<class... Args>
 	void cs_log_args(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const char* fmt, const Args&... args) {
-		cs_log_args(fileNameHash, lineNumber, logLevel, addNewLine, args...);
+		cs_log_args_no_fmt(fileNameHash, lineNumber, logLevel, addNewLine, args...);
 	}
 
 	// Write logs as plain text.
