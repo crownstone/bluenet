@@ -6,54 +6,60 @@
 
 enum { WORKING=1, DONE };
 
-void yield(coroutine* c) {
-	if(!setjmp(c->callee_context)) {
-		longjmp(c->caller_context, WORKING);
-	}
-}
-
-int next(coroutine* c) {
-	int ret = setjmp(c->caller_context);
-	if(!ret) {
-		longjmp(c->callee_context, 1);
-	}
-	else {
-		return ret == WORKING;
-	}
-}
-
 typedef struct {
-	coroutine* c;
-	coroutine_func f;
+	coroutine_t* coroutine;
+	coroutineFunc coroutineFunction;
 	void* arg;
-	void* old_sp;
-} start_params;
+	void* oldStackPointer;
+} stack_params_t;
 
+// Get stack pointer
 #define get_sp(p) asm volatile("mov %0, sp" : "=r"(p) : : )
+
+// Set stack pointer
 #define set_sp(p) asm volatile("mov sp, %0" : : "r"(p))
 
 // We hardcode the stack at the end of the RAM dedicated to the microapp
-start_params *const params = (start_params *)(uintptr_t)(g_RAM_MICROAPP_END);
+stack_params_t *const stack_params = (stack_params_t *)(uintptr_t)(g_RAM_MICROAPP_END);
 
-void start(coroutine* c, coroutine_func f, void* arg) {
-	//save parameters before stack switching
-	params->c = c;
-	params->f = f;
-	params->arg = arg;
-	get_sp(params->old_sp);
+/*
+ * Starts a new coroutine. We store the parameters that we need when we switch back again to the current stack.
+ */
+void start(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg) {
+	// Save parameters before the coroutine stack (in hardcoded area, see above)
+	stack_params->coroutine = coroutine;
+	stack_params->coroutineFunction = coroutineFunction;
+	stack_params->arg = arg;
+	get_sp(stack_params->oldStackPointer);
 	
-	// set stack pointer for the coroutine (starts with start_params and goes down)
-	size_t move_down = sizeof(start_params);
-	set_sp(params - move_down);
+	// Set stack pointer for the coroutine (just after that struct, growing downward)
+	size_t move_down = sizeof(stack_params_t);
+	set_sp(stack_params - move_down);
 
-	if(!setjmp(params->c->callee_context)) {
-		set_sp(params->old_sp);
+	if(!setjmp(stack_params->coroutine->calleeContext)) {
+		set_sp(stack_params->oldStackPointer);
 		return;
 	}
 		
 	// call the function that will - in the end - yield
-	(*params->f)(params->arg);
+	(*stack_params->coroutineFunction)(stack_params->arg);
 
 	// jump to caller
-	longjmp(params->c->caller_context, DONE);
+	longjmp(stack_params->coroutine->callerContext, DONE);
+}
+
+void yield(coroutine_t* coroutine) {
+	if(!setjmp(coroutine->calleeContext)) {
+		longjmp(coroutine->callerContext, WORKING);
+	}
+}
+
+int next(coroutine_t* coroutine) {
+	int ret = setjmp(coroutine->callerContext);
+	if(!ret) {
+		longjmp(coroutine->calleeContext, WORKING);
+	}
+	else {
+		return ret == WORKING;
+	}
 }

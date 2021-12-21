@@ -13,8 +13,11 @@ extern "C" {
 
 #include <stdint.h>
 
-#define BLUENET_IPC_RAM_DATA_ITEM_SIZE                  24
+// The number of slots for interprocess communication
 #define BLUENET_IPC_RAM_DATA_ITEMS                      5
+
+// The size of each slot for interprocess communication
+#define BLUENET_IPC_RAM_DATA_ITEM_SIZE                  24
 
 enum IpcIndex {
 	IPC_INDEX_RESERVED = 0,

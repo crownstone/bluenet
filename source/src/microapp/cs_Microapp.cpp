@@ -199,7 +199,7 @@ void Microapp::tick() {
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	for (uint8_t i = 0; i < MAX_MICROAPPS; ++i) {
 		if (canRunApp(i)) {
-			protocol.callSetupAndLoop(i);
+			protocol.tickMicroapp(i);
 		}
 	}
 }

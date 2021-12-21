@@ -102,11 +102,11 @@ enum CommandMicroappMeshOpcode {
 };
 
 /*
- * The structure used for communication between microapp and bluenet.
+ * The command that gives back control from the microapp towards the bluenet.
  */
-struct __attribute__((packed)) microapp_message_t {
-	uint8_t payload[MAX_PAYLOAD];
-	uint8_t length;
+struct __attribute__((packed)) microapp_cmd_t {
+	uintptr_t coargs;
+	uint8_t cmd;
 };
 
 /*

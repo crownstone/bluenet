@@ -9,10 +9,9 @@ extern "C" {
 }
 
 typedef struct {
-	coroutine* c;
-	int cntr;
-	int delay;
-} coargs;
+	coroutine_t* coroutine;
+	uintptr_t entry;
+} coargs_t;
 
 // Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
 #define MICROAPP_LOOP_FREQUENCY 10
@@ -70,21 +69,6 @@ private:
 	bool _loaded;
 
 	/**
-	 * Debug mode
-	 */
-	bool _debug;
-
-	/**
-	 * Address to setup() function.
-	 */
-	uintptr_t _setup;
-
-	/**
-	 * Address to loop() function.
-	 */
-	uintptr_t _loop;
-
-	/**
 	 * Addressees of pin interrupt service routines.
 	 */
 	pin_isr_t _pinIsr[MAX_PIN_ISR_COUNT];
@@ -97,12 +81,12 @@ private:
 	/**
 	 * Coroutine for microapp.
 	 */
-	coroutine _coroutine;
+	coroutine_t _coroutine;
 
 	/**
 	 * Arguments to the coroutine.
 	 */
-	coargs _coargs;
+	coargs_t* _coargs;
 
 	/**
 	 * A counter used for the coroutine (to e.g. set the number of ticks for "delay" functionality).
@@ -140,7 +124,12 @@ protected:
 	/**
 	 * Call the loop function (internally).
 	 */
-	void callLoop(int& cntr, int& skip);
+	void callMicroapp();
+
+	/**
+	 * Get the command from the microapp.
+	 */
+	void retrieveCommand();
 
 	/**
 	 * Initialize memory for the microapp.
@@ -239,9 +228,9 @@ public:
 	void callApp(uint8_t appIndex);
 
 	/**
-	 * Call setup and loop functions.
+	 * Tick microapp
 	 */
-	void callSetupAndLoop(uint8_t appIndex);
+	void tickMicroapp(uint8_t appIndex);
 
 	/**
 	 * Receive events (for example for i2c)

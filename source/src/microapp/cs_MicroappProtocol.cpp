@@ -31,30 +31,79 @@
 #include <util/cs_Utils.h>
 #include <algorithm>
 
-/*
- * Wrapper to switch from C to C++
- */
-cs_ret_code_t handleCommand(uint8_t* payload, uint16_t length) {
-	return MicroappProtocol::getInstance().handleMicroappCommand(payload, length);
-}
-
 extern "C" {
 
+/*
+ * This function is called by the microapp in the context of its stack. Even though it is possible to call a log or
+ * other bluenet function, this is strongly discouraged. In contrast, yield control towards bluenet explicitly by
+ * calling yield() and continue in `MicroappProtocol::callMicroapp()` retrieving the command sent by the microapp.
+ *
+ * @param[in] payload                            pointer to buffer with command for bluenet
+ * @param[in] length                             length of command (not total buffer size)
+ */
 cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 	if (length == 0 || length > MAX_PAYLOAD) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	return handleCommand(payload, length);
+
+	microapp_cmd_t *cmd = (microapp_cmd_t*) payload;
+	uintptr_t coargs_ptr = cmd->coargs;
+	coargs_t* args = (coargs_t*)coargs_ptr;
+	yield(args->coroutine);
+
+	return ERR_SUCCESS;
 }
 
-}  // extern C
+/*
+ * Jump into the microapp (this function should be called as a coroutine). It obtains the very first instruction from
+ * the coroutine arguments. It then considers that instruction to be a method without arguments and calls it. An
+ * incorrectly written microapp might crash the firmware here. Henceforth, before this moment it must be written to
+ * flash that we try to start the microapp. If we get a reboot and see the "try to start" state, we can disable the
+ * microapp forever. Alternatively, if the function never yields, it will trip the watchdog. If the watchdog is
+ * triggered, we might presume that a microapp was the reason for it and disable it.
+ *
+ * @param[in] void *p                            pointer to a coargs_t struct
+ */
+void goIntoMicroapp(void *p) {
+	coargs_t *coargs = (coargs_t*)p;
+	void (*microappMain)() = (void(*)())coargs->entry;
+	(*microappMain)();
+}
 
-MicroappProtocol::MicroappProtocol() : EventListener(), _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
+
+} // extern C
+
+/*
+ * Helper functions.
+ *
+ * TODO: Move to appropriate files.
+ */
+
+cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
+	if (address < g_FLASH_MICROAPP_BASE) {
+		return ERR_UNSAFE;
+	}
+	if (address > (g_FLASH_MICROAPP_BASE + g_FLASH_MICROAPP_BASE * 0x1000)) {
+		return ERR_UNSAFE;
+	}
+	return ERR_SUCCESS;
+}
+
+/*
+ * We write the address to the buffer. Yes, memcpy could be used, but we don't know the implementation that will be
+ * used at the microapp side. It is too important to have the byte order correct to leave it to chance.
+ */
+void writeToBuffer(uintptr_t address, uint8_t* buf) {
+	for (uint8_t i = 0; i < sizeof(uintptr_t); ++i) {
+		buf[i] = (uint8_t)(0xFF & (address >> (i << 3)));
+	}
+}
+
+MicroappProtocol::MicroappProtocol() : EventListener(),
+		_meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
 
 	EventDispatcher::getInstance().addListener(this);
 
-	_setup  = 0;
-	_loop   = 0;
 	_booted = false;
 
 	for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
@@ -68,39 +117,45 @@ MicroappProtocol::MicroappProtocol() : EventListener(), _meshMessageBuffer(MAX_M
 
 	_callbackData       = nullptr;
 	_microappIsScanning = false;
+
+	_coargs = new coargs_t();
 }
 
 /*
- * Set the microapp_callback in the IPC ram data bank. It can later on be used by the microapp to find the address
- * of that function to call back into the bluenet code.
+ * Set the microapp_callback in the IPC ram data bank. At a later time it can be used by the microapp to find the
+ * address of microapp_callback to call back into the bluenet code.
  */
 void MicroappProtocol::setIpcRam() {
 	LOGi("Set IPC info for microapp");
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 
-	// protocol version
-	const char protocol_version = 0;
-	buf[0]                      = protocol_version;
-	uint8_t len                 = 1;
+	// Protocol version
+	const uint8_t protocol_version = 1;
+	buf[0] = protocol_version;
+	uint8_t offset = sizeof(uint8_t);
 
-	// address of callback() function (is a C function)
+	// Set the address of microapp_callback function. It is a C function. Make sure it does not get mangled.
 	uintptr_t address = (uintptr_t)&microapp_callback;
-	for (uint16_t i = 0; i < sizeof(uintptr_t); ++i) {
-		buf[i + len] = (uint8_t)(0xFF & (address >> (i * 8)));
-	}
-	len += sizeof(uintptr_t);
+	writeToBuffer(address, &buf[offset]);
+	offset += sizeof(uintptr_t);
 
-	// truncate (rather than assert)
-	if (len > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
-		len = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
+	// Set the pointer to the coargs struct
+	uintptr_t coargs_ptr = (uintptr_t)&_coargs;
+	writeToBuffer(coargs_ptr, &buf[offset]);
+	offset += sizeof(uintptr_t);
+
+	// Truncate the buffer. We do not want to use asserts for microapps.
+	if (offset > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		offset = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
 	}
 
-	[[maybe_unused]] uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, buf, len);
+	[[maybe_unused]] uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, buf, offset);
 	LOGi("retCode=%u", retCode);
 }
 
 /**
- * Get the ram structure in which loop and setup of the microapp are stored.
+ * Get the ram structure in which the microapp has registered some of its data. We only check if they expect the same
+ * protocol version as we do.
  */
 uint16_t MicroappProtocol::interpretRamdata() {
 	LOGi("Get IPC info for microapp");
@@ -108,7 +163,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
 		buf[i] = 0;
 	}
-	uint8_t readSize  = 0;
+	uint8_t readSize = 0;
 	uint8_t retCode = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
 
 	bluenet_ipc_ram_data_item_t* ramStr = getRamStruct(IPC_INDEX_MICROAPP);
@@ -116,52 +171,30 @@ uint16_t MicroappProtocol::interpretRamdata() {
 		LOGi("Get microapp info from address: %p", ramStr);
 	}
 
-	if (_debug) {
-		LOGi("Return code: %i", retCode);
-		LOGi("Return length: %i", readSize);
-		LOGi("  protocol: %02x", buf[0]);
-		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
-		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
-	}
-
-	if (retCode == IPC_RET_SUCCESS) {
-		LOGi("Found RAM for Microapp");
-		LOGi("  protocol: %02x", buf[0]);
-		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
-		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
-
-		uint8_t protocol = buf[0];
-		if (protocol == 0) {
-			_setup = 0, _loop = 0;
-			uint8_t offset = 1;
-			for (int i = 0; i < 4; ++i) {
-				_setup = _setup | ((uintptr_t)(buf[i + offset]) << (i * 8));
-			}
-			offset = 5;
-			for (int i = 0; i < 4; ++i) {
-				_loop = _loop | ((uintptr_t)(buf[i + offset]) << (i * 8));
-			}
-		}
-
-		LOGi("Found setup at %p", _setup);
-		LOGi("Found loop at %p", _loop);
-		if (_loop && _setup) {
-			return ERR_SUCCESS;
-		}
-	}
-	else {
+	if (retCode != IPC_RET_SUCCESS) {
 		LOGi("Nothing found in RAM ret_code=%u", retCode);
 		return ERR_NOT_FOUND;
 	}
-	return ERR_UNSPECIFIED;
+	LOGi("Found RAM for Microapp");
+	
+	uint8_t protocol = buf[0];
+	LOGi("  protocol: %02x", protocol);
+
+	const int accepted_protocol_version = 1;
+	if (protocol != accepted_protocol_version) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+	return ERR_SUCCESS;
 }
 
-/**
- * Call the app, boot it.
+/*
+ * Gets the first instruction for the microapp (this is written in its header). We correct for thumb and check its
+ * boundaries. Then we call it from a coroutine context and expect it to yield.
  *
- * TODO: Return setup and loop addresses
+ * @param[in]                                    appIndex (currently ignored)
  */
 void MicroappProtocol::callApp(uint8_t appIndex) {
+	// Make thumb mode explicit: will always be true
 	static bool thumbMode = true;
 
 	initMemory();
@@ -171,22 +204,29 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 
 	if (thumbMode) {
 		address += 1;
+		LOGi("Set address to 0x%08X (thumb mode)", address);
 	}
-	LOGi("Check main code at 0x%08X", address);
-	char* arr = (char*)address;
-	if (arr[0] != 0xFF) {
-		void (*microappMain)() = (void (*)())address;
-		LOGi("Call function in module: 0x%p", microappMain);
-		(*microappMain)();
-		LOGi("Module did run.");
+
+	if (checkFlashBoundaries(address) != ERR_SUCCESS) {
+		LOGe("Address not within microapp flash boundaries");
+		return;
 	}
-	_booted = true;
-	LOGi("Booted is at address: 0x%p", &_booted);
+
+	_coargs->entry = address;
+
+	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
+	_coargs->coroutine = &_coroutine;
+	start(&_coroutine, goIntoMicroapp, &_coargs);
 }
 
+/*
+ * This should not be done. Call the microapp before main where all copying towards the right sections takes place.
+ * That will be fine for both .bss (uninitialized) and .data (initialized) data. If this is done before the very
+ * first call to the microapp, it won't hurt though.
+ *
+ * TODO: Check and remove this function.
+ */
 uint16_t MicroappProtocol::initMemory() {
-	// We have a reserved area of RAM. For now let us clear it to 0
-	// This is actually incorrect (we should skip) and it probably can be done at once as well
 	LOGi("Init memory: clear 0x%p to 0x%p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
 	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
 		uint32_t* const val = (uint32_t*)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
@@ -199,85 +239,55 @@ uint16_t MicroappProtocol::initMemory() {
 }
 
 /*
- * Called from cs_Microapp every time tick. Only when _booted gets up will this function become active.
- */
-void MicroappProtocol::callSetupAndLoop(uint8_t appIndex) {
-
-	static uint16_t counter = 0;
-	if (_booted) {
-
-		if (!_loaded) {
-			LOGi("Start loading");
-			uint16_t ret_code = interpretRamdata();
-			if (ret_code == ERR_SUCCESS) {
-				LOGi("Set loaded to true");
-				_loaded = true;
-			}
-			else {
-				LOGw("Disable microapp. After boot not the right info available. ret_code=%u", ret_code);
-				// Apparently, something went wrong?
-				_booted = false;
-			}
-		}
-
-		if (_loaded) {
-			if (counter == 0) {
-				// TODO: we cannot call delay in setup in this way...
-				void (*setup_func)() = (void (*)())_setup;
-				LOGi("Call setup at 0x%x", _setup);
-				setup_func();
-				LOGi("Setup done");
-				_cocounter = 0;
-				_coskip    = 0;
-			}
-			counter++;
-			if (counter % MICROAPP_LOOP_FREQUENCY == 0) {
-				if (_coskip > 0) {
-					// Skip (due to by the microapp communicated delay)
-					_coskip--;
-				}
-				else {
-					// LOGd("Call loop");
-					callLoop(_cocounter, _coskip);
-					if (_cocounter == -1) {
-						// Done, reset flags
-						_cocounter = 0;
-						_coskip    = 0;
-					}
-				}
-			}
-			// Loop around, but do not hit 0 again
-			if (counter == 0) {
-				counter = 1;
-			}
-		}
-	}
-}
-
-/**
- * Call loop (internally).
+ * Called from cs_Microapp every time tick. Only when _booted flag is set, will we actually call the microapp.
+ * The _booted flag is reset when the microapp data can not be interpreted right.
  *
- * This function can be improved in clearity for the developer. It now works as follows:
- *   - when cntr = 0 we start a new loop
- *   - we call next and set skip if we actually were "yielded"
+ * TODO: _booted etc are only for single microapp
  */
-void MicroappProtocol::callLoop(int& cntr, int& skip) {
-	if (cntr == 0) {
-		// start a new loop
-		_coargs                  = {&_coroutine, 1, 0};
-		void (*loop_func)(void*) = (void (*)(void*))_loop;
-		start(&_coroutine, loop_func, &_coargs);
-	}
+void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
 
-	if (next(&_coroutine)) {
-		// here we come only on yield
-		cntr = _coargs.cntr;
-		skip = _coargs.delay / MICROAPP_LOOP_INTERVAL_MS;
+	if (!_booted) {
 		return;
 	}
 
-	// indicate that we are done
-	cntr = -1;
+	if (!_loaded) {
+		LOGi("Start loading");
+		uint16_t ret_code = interpretRamdata();
+		if (ret_code != ERR_SUCCESS) {
+			LOGw("Disable microapp. After boot not the right info available. ret_code=%u", ret_code);
+			_booted = false;
+			return;
+		}
+
+		LOGi("Set loaded to true");
+		_loaded = true;
+	}
+
+	if (_loaded) {
+		callMicroapp();
+		retrieveCommand();
+	}
+}
+
+/*
+ * Retrieve command from the microapp.
+ */
+void MicroappProtocol::retrieveCommand() {
+}
+
+/*
+ * We resume the previously started coroutine.
+ */
+void MicroappProtocol::callMicroapp() {
+	if (!_loaded) {
+		LOGi("Not loaded");
+		return;
+	}
+	if (next(&_coroutine)) {
+		return;
+	}
+	// Should only happen if microapp actually ends (and does not yield anymore).
+	LOGi("End of coroutine. Should not happen.")
 }
 
 /**
@@ -553,15 +563,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint1
 }
 
 cs_ret_code_t MicroappProtocol::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd) {
-	int delay = delay_cmd->period;
-	LOGd("Microapp delay of %i", delay);
-	uintptr_t coargs_ptr = delay_cmd->coargs;
-	// cast to coroutine args struct
-	coargs* args = (coargs*)coargs_ptr;
-	args->cntr++;
-	args->delay = delay;
-	yield(args->c);
-
+	// don't do anything
 	return ERR_SUCCESS;
 }
 

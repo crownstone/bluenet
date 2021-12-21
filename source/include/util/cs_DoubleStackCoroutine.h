@@ -9,7 +9,7 @@
 #include <setjmp.h>
 
 /**
- * We introduce here the DoubleStackCoroutine because the term Coroutine already has been taken in cs_Coroutine.h. 
+ * We introduce here the DoubleStackCoroutine because the term Coroutine already has been taken in cs_Coroutine.h.
  * The coroutine implementation:
  *   - is used to switch back and forth from microapp code and bluenet code
  *   - is especially used because a delay(..) function from microapp code should not be blocking
@@ -27,7 +27,7 @@
  * // For example in delay code we call a function that ends up in bluenet and which calls yield 
  * void microapp_code(void *p) {
  *   coargs *args = (coargs*) p;
- *   ... 
+ *   ...
  *   yield(args->c);
  * }
  *
@@ -51,17 +51,24 @@
  * envisioned.
  */
 typedef struct {
-	jmp_buf callee_context;
-	jmp_buf caller_context;
-} coroutine;
+	jmp_buf calleeContext;
+	jmp_buf callerContext;
+} coroutine_t;
 
-typedef void (*coroutine_func)(void*);
+typedef void (*coroutineFunc)(void*);
 
 /**
  * Start the coroutine.
  */
-void start(coroutine* c, coroutine_func f, void* arg);
+void start(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg);
 
-void yield(coroutine* c);
+/**
+ * Yield the coroutine.
+ */
+void yield(coroutine_t* coroutine);
 
-int next(coroutine* c);
+/**
+ * Resume
+ */
+int next(coroutine_t* coroutine);
+
