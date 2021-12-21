@@ -13,6 +13,24 @@
  * Generally, you want to use: LOGnone, LOGv, LOGd, LOGi, LOGw, LOGe, or LOGf.
  * These can be used like printf(), except that they will always add a newline.
  *
+ * To log an array of data, use one of:
+ * _logArray(level, addNewLine, pointer, size)
+ * _logArray(level, addNewLine, pointer, size, elementFmt)
+ * _logArray(level, addNewLine, pointer, size, startFmt, endFmt)
+ * _logArray(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt)
+ * _logArray(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt, seperationFmt)
+ * With:
+ * - level:         The log level, for example SERIAL_INFO.
+ * - addNewLine     Whether to add a new line after this log.
+ * - pointer        Pointer to the array.
+ * - size           Size of the array.
+ * - startFmt       Optional string to start the log. Default: "[".
+ * - endFmt         Optional string to end the log.   Default: "]".
+ * - elementFmt     Optional string to format an element value. Default depends on the element type. Example: "%u" for an unsigned integer.
+ * - seperationFmt  Optional string to separate element values. Default: ", ".
+ *
+ * The log functions have to be macros, so they can add the filename and line number to the logs.
+ *
  * With binary logging, the arguments are not first converted into plain text before sending them over the UART.
  * This is why templated and specialized functions are required for the implementation.
  * This saves a lot of bytes to be sent, and saves binary size, as the strings do not end up in the firmware.
@@ -75,21 +93,40 @@
 					cs_log_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, fmt, ##__VA_ARGS__); \
 				}
 
+		// No manual formatting: uses default format based on element type.
 		#define _logArray0(level, addNewLine, pointer, size) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size); \
+					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size, "[", "]", ", "); \
 				}
 
+		// Manual element format, but default start and end format.
 		#define _logArray1(level, addNewLine, pointer, size, elementFmt) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size, elementFmt); \
+					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size, "[", "]", ", ", elementFmt); \
 				}
 
-		// Helper function that returns argument 2 (which is one of the logArray definitions).
-		#define _logArrayGetArg2(arg0, arg1, arg2, ...) arg2
+		// Manual start and end format. Default element format, based on element type.
+		#define _logArray2(level, addNewLine, pointer, size, startFmt, endFmt) \
+				if (level <= SERIAL_VERBOSITY) { \
+					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size, startFmt, endFmt, ", "); \
+				}
 
-		#define _logArray(level, addNewLine, pointer, ...) _logArrayGetArg2(__VA_ARGS__, _logArray1, _logArray0)(level, addNewLine, pointer, __VA_ARGS__)
-//		#define _logArray(level, addNewLine, pointer, size, ...) _logArray0(level, addNewLine, pointer, size, ##__VA_ARGS__)
+		// Manual start and end format. Default element separation format.
+		#define _logArray3(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt) \
+				if (level <= SERIAL_VERBOSITY) { \
+					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size, startFmt, endFmt, ", ", elementFmt); \
+				}
+
+		// Manual format.
+		#define _logArray4(level, addNewLine, pointer, size, startFmt, endFmt, elementFmt, seperationFmt) \
+			if (level <= SERIAL_VERBOSITY) { \
+				cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size, startFmt, endFmt, seperationFmt, elementFmt); \
+			}
+
+		// Helper function that returns argument 4 (which is one of the _logArrayX definitions).
+		#define _logArrayGetArg4(arg0, arg1, arg2, arg3, arg4, arg5, ...) arg5
+
+		#define _logArray(level, addNewLine, pointer, ...) _logArrayGetArg4(__VA_ARGS__, _logArray4, _logArray3, _logArray2, _logArray1, _logArray0)(level, addNewLine, pointer, __VA_ARGS__)
 
 	#else
 		#define _log(level, addNewLine, fmt, ...)
@@ -108,8 +145,6 @@
 
 	/**
 	 * Returns the 32 bits DJB2 hash of the reversed file name, up to the first '/'.
-	 *
-	 * TODO: For some reason, if this returns a uint16_t, it increased the size by 3k?
 	 */
 	constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
 		uint32_t hash = 5381;
@@ -123,51 +158,57 @@
 	}
 
 
-
 	void cs_log_start(size_t msgSize, uart_msg_log_header_t &header);
 	void cs_log_arg(const uint8_t* const valPtr, size_t valSize);
 	void cs_log_end();
 
-	void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize, const char* fmt);
+	void cs_log_array_no_fmt(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize);
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, const char* fmt = "%3u, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, ptr, size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	// This function takes unused format arguments.
+	// These formats ends up in the .ii file (preprocessed .cpp file), and is then used to gather all log formats.
+	// To make it easier for the compiler to optimize out the format strings, we only call cs_log_array_no_fmt without the format args here.
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat) {
+		cs_log_array_no_fmt(fileNameHash, lineNumber, logLevel, addNewLine, ptr, size, elementType, elementSize);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint16_t* const ptr, size_t size, const char* fmt = "%5u, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%3u") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, ptr, size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint32_t* const ptr, size_t size, const char* fmt = "%10u, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint16_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%5u") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint64_t* const ptr, size_t size, const char* fmt = "%20u, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint32_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%10u") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int8_t* const ptr, size_t size, const char* fmt = "%3i, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint64_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%20u") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int16_t* const ptr, size_t size, const char* fmt = "%5i, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int8_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%3i") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int32_t* const ptr, size_t size, const char* fmt = "%10i, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int16_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%5i") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int64_t* const ptr, size_t size, const char* fmt = "%20i, ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int32_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%10i") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const float* const ptr, size_t size, const char* fmt = "%f., ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int64_t* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%20i") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
-	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const double* const ptr, size_t size, const char* fmt = "%f., ") {
-		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]), fmt);
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const float* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%f.") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
+	}
+
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const double* const ptr, size_t size, const char* startFormat, const char* endFormat, const char* seperationFormat, const char* elementFormat = "%f.") {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]), startFormat, endFormat, seperationFormat, elementFormat);
 	}
 
 
