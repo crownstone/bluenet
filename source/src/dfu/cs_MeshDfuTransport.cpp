@@ -6,5 +6,4 @@
  */
 
 
-
-#include <dfu/cs_MeshDfuHost.h>
+#include <dfu/cs_MeshDfuTransport.h>
