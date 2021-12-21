@@ -1,6 +1,6 @@
 # Formatter
 
-Bluenet style is defined in source/.clang-format. Support for autoformatting in IDEs is widespread.
+You can use auto formatting by using `source/.clang-format`. Auto formatted code is not always the best though, so use it as a tool rather than the truth. Support for autoformatting in IDEs is widespread.
 E.g.: 
 - This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
 - Commandline tools such as `python3 -m pip install clang-format` are also available.
