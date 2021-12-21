@@ -5,6 +5,12 @@ E.g.:
 - This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
 - Commandline tools such as `python3 -m pip install clang-format` are also available.
 
+Investigate the `source/.clang-format` file for more formatting details, a few:
+
+- align subsequent assignments on the `=` token
+- column limit at 120
+- brace wrapping before else
+
 # Etiquette
 
 - use typify
