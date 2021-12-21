@@ -13,6 +13,7 @@
 
 /**
  * This bluenet component manages the progress and protocol of a crownstone-to-crownstone firmware update.
+ * I.e. application layer dfu implementation.
  *
  * Usage:
  * To start an update, send a A CMD_MESH_DFU event with parameers:
@@ -29,6 +30,7 @@ private:
 		Idle = 0,
 		HostInitializing,     // writing target settings to flash
 		TargetTriggerDfuMode, // sending dfu command and waiting for reset
+		TargetPreparing,      // send PRN command
 		TargetInitializing,   // sending init packets
 		TargetUpdating,       // sending firmware packets
 		TargetVerifying,
@@ -85,9 +87,22 @@ private:
 	 */
 	bool ableToHostDfu();
 
+	/**
+	 * Is the dfu packet written to ICP flash page?
+	 */
 	bool haveInitPacket();
+
+	/**
+	 * No current dfu operations running or planned?
+	 */
 	bool dfuProcessIdle();
 
 public:
+	/**
+	 * Events to handle:
+	 * - flash write finished
+	 * - startup complete
+	 * - connection established/lost
+	 */
 	virtual void handleEvent(event_t & event) override;
 };
