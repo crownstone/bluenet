@@ -23,6 +23,8 @@
  *  - busy     already updating another stone
  *  - fail     starting did not succeed somehow, reverts state to idle.
  *  - success  process will be started, subsequent calls will return busy until process terminates.
+ *
+ *  NOTE: corresponds roughly to dfu_Write_application.py
  */
 class MeshDfuHost : public EventListener {
 private:

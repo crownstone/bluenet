@@ -11,6 +11,8 @@
 
 /**
  * namespace to keep track of the constants related to Mesh DFU.
+ *
+ * NOTE: corresponds roughly to ble_constans.py and incorporates ble_uuid.py
  */
 namespace MeshDfuConstants {
 namespace DFUAdapter {

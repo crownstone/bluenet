@@ -11,6 +11,8 @@
 
 /**
  * The class that handles transport layer communication.
+ *
+ * NOTE: corresponds to dfu_transport_ble.py
  */
 class MeshDfuTransport {
 private:
