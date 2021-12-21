@@ -8,10 +8,15 @@ extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
-typedef struct {
+static_assert (sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+static_assert (sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+
+struct coargs_t {
 	coroutine_t* coroutine;
 	uintptr_t entry;
-} coargs_t;
+	uint8_t *payload;
+	uint16_t payloadSize;
+};
 
 // Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
 #define MICROAPP_LOOP_FREQUENCY 10

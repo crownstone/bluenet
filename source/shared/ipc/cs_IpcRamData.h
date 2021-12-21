@@ -92,18 +92,21 @@ typedef struct {
  * @param[in] data           Data pointer.
  * @param[in] dataSize       Size of the data.
  */
-enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize);
+enum IpcRetCode setRamData(uint8_t index, uint8_t* data, const uint8_t dataSize);
 
 /**
  * Get data from IPC ram.
  *
  * @param[in] index          Index of item.
- * @param[out] data          Buffer to copy the data to.
+ * @param[out] buf           Buffer to copy the data to.
  * @param[in] length         Size of the buffer.
  * @param[out] dataSize      Size of the data.
  */
 enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t* dataSize);
 
+/**
+ * Get the underlying complete data struct. Do not use if not truly necessary. Its implementation might change.
+ */
 bluenet_ipc_ram_data_item_t *getRamStruct(uint8_t index);
 
 #ifdef __cplusplus

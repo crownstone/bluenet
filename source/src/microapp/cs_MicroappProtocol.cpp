@@ -46,9 +46,11 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	microapp_cmd_t *cmd = (microapp_cmd_t*) payload;
+	microapp_cmd_t* cmd  = (microapp_cmd_t*)payload;
 	uintptr_t coargs_ptr = cmd->coargs;
-	coargs_t* args = (coargs_t*)coargs_ptr;
+	coargs_t* args       = (coargs_t*)coargs_ptr;
+	args->payload        = payload;
+	args->payloadSize    = length;
 	yield(args->coroutine);
 
 	return ERR_SUCCESS;
@@ -64,14 +66,13 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
  *
  * @param[in] void *p                            pointer to a coargs_t struct
  */
-void goIntoMicroapp(void *p) {
-	coargs_t *coargs = (coargs_t*)p;
-	void (*microappMain)() = (void(*)())coargs->entry;
+void goIntoMicroapp(void* p) {
+	coargs_t* coargs       = (coargs_t*)p;
+	void (*microappMain)() = (void (*)())coargs->entry;
 	(*microappMain)();
 }
 
-
-} // extern C
+}  // extern C
 
 /*
  * Helper functions.
@@ -79,6 +80,9 @@ void goIntoMicroapp(void *p) {
  * TODO: Move to appropriate files.
  */
 
+/*
+ * Checks flash boundaries (for single microapp).
+ */
 cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
 	if (address < g_FLASH_MICROAPP_BASE) {
 		return ERR_UNSAFE;
@@ -89,18 +93,7 @@ cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
 	return ERR_SUCCESS;
 }
 
-/*
- * We write the address to the buffer. Yes, memcpy could be used, but we don't know the implementation that will be
- * used at the microapp side. It is too important to have the byte order correct to leave it to chance.
- */
-void writeToBuffer(uintptr_t address, uint8_t* buf) {
-	for (uint8_t i = 0; i < sizeof(uintptr_t); ++i) {
-		buf[i] = (uint8_t)(0xFF & (address >> (i << 3)));
-	}
-}
-
-MicroappProtocol::MicroappProtocol() : EventListener(),
-		_meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
+MicroappProtocol::MicroappProtocol() : EventListener(), _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -127,61 +120,38 @@ MicroappProtocol::MicroappProtocol() : EventListener(),
  */
 void MicroappProtocol::setIpcRam() {
 	LOGi("Set IPC info for microapp");
-	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+	bluenet2microapp_ipcdata_t data;
+	data.protocol          = 1;
+	data.length            = sizeof(bluenet2microapp_ipcdata_t);
+	data.microapp_callback = (uintptr_t)&microapp_callback;
+	data.coargs_ptr        = (uintptr_t)&_coargs;
 
-	// Protocol version
-	const uint8_t protocol_version = 1;
-	buf[0] = protocol_version;
-	uint8_t offset = sizeof(uint8_t);
-
-	// Set the address of microapp_callback function. It is a C function. Make sure it does not get mangled.
-	uintptr_t address = (uintptr_t)&microapp_callback;
-	writeToBuffer(address, &buf[offset]);
-	offset += sizeof(uintptr_t);
-
-	// Set the pointer to the coargs struct
-	uintptr_t coargs_ptr = (uintptr_t)&_coargs;
-	writeToBuffer(coargs_ptr, &buf[offset]);
-	offset += sizeof(uintptr_t);
-
-	// Truncate the buffer. We do not want to use asserts for microapps.
-	if (offset > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
-		offset = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
-	}
-
-	[[maybe_unused]] uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, buf, offset);
+	[[maybe_unused]] uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&data, data.length);
 	LOGi("retCode=%u", retCode);
 }
 
-/**
+/*
  * Get the ram structure in which the microapp has registered some of its data. We only check if they expect the same
  * protocol version as we do.
  */
 uint16_t MicroappProtocol::interpretRamdata() {
 	LOGi("Get IPC info for microapp");
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
-	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
-		buf[i] = 0;
-	}
 	uint8_t readSize = 0;
-	uint8_t retCode = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
-
-	bluenet_ipc_ram_data_item_t* ramStr = getRamStruct(IPC_INDEX_MICROAPP);
-	if (ramStr != nullptr) {
-		LOGi("Get microapp info from address: %p", ramStr);
-	}
+	uint8_t retCode  = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
 
 	if (retCode != IPC_RET_SUCCESS) {
 		LOGi("Nothing found in RAM ret_code=%u", retCode);
 		return ERR_NOT_FOUND;
 	}
 	LOGi("Found RAM for Microapp");
-	
-	uint8_t protocol = buf[0];
-	LOGi("  protocol: %02x", protocol);
+
+	microapp2bluenet_ipcdata_t& data = *(microapp2bluenet_ipcdata_t*)buf;
+
+	LOGi("  protocol: %02x", data.protocol);
 
 	const int accepted_protocol_version = 1;
-	if (protocol != accepted_protocol_version) {
+	if (data.protocol != accepted_protocol_version) {
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 	return ERR_SUCCESS;
@@ -273,6 +243,10 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
  * Retrieve command from the microapp.
  */
 void MicroappProtocol::retrieveCommand() {
+	// get payload from data
+	uint8_t* payload = _coargs->payload;
+	uint16_t length  = _coargs->payloadSize;
+	handleMicroappCommand(payload, length);
 }
 
 /*
@@ -387,8 +361,8 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	// copy scanned device info to microapp_ble_device_t struct
 	microapp_ble_device_t ble_dev;
 	ble_dev.addr_type = dev->addressType;
-	std::reverse_copy(
-			dev->address, dev->address + MAC_ADDRESS_LENGTH, ble_dev.addr);  // convert from little endian to big endian
+	// convert from little endian to big endian
+	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, ble_dev.addr);
 	ble_dev.rssi = dev->rssi;
 
 	if (dev->dataSize > sizeof(ble_dev.data)) {

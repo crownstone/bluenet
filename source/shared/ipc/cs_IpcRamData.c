@@ -38,7 +38,10 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t * item) {
 	return ~sum;
 }
 
-enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
+/*
+ * We will do a memcpy with zero padding. This data has to be absolutely valid in all circumstances.
+ */
+enum IpcRetCode setRamData(uint8_t index, uint8_t* data, const uint8_t dataSize) {
 	if (data == NULL) {
 		return IPC_RET_NULL_POINTER;
 	}

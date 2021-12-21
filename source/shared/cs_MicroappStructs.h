@@ -102,6 +102,27 @@ enum CommandMicroappMeshOpcode {
 };
 
 /*
+ * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
+ * compatible. The length parameter functions as a extra possible check. The callback can be used by the microapp to
+ * call back into bluenet. The pointer to the coargs struct can be used to switch back from the used coroutine and
+ * needs to stored somewhere accessible.
+ */
+struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
+	uint8_t protocol;
+	uint8_t length;
+	uintptr_t microapp_callback;
+	uintptr_t coargs_ptr;
+};
+
+/*
+ * The layout of the struct in ramdata from microapp to bluenet.
+ */
+struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
+	uint8_t protocol;
+	uint8_t length;
+};
+
+/*
  * The command that gives back control from the microapp towards the bluenet.
  */
 struct __attribute__((packed)) microapp_cmd_t {
