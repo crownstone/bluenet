@@ -21,6 +21,41 @@ private:
 
 	device_address_t _targetDevice;
 
+	// ----- the adapter layer for crownstone_ble -----
+	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len);
+	void writeCharacteristicForResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len);
+
+	void receiveRawNotification();
+
+	// ----- utility forwardering methods -----
+	void write_control_point(uint8_t* data, uint8_t len);
+	void write_data_point(uint8_t* data, uint8_t len);
+
+
+	// ------------ recovery methods -----------
+
+	void try_to_recover_before_send_init();
+	void try_to_recover_before_send_firmware();
+
+	void validateCrcCommandResponse();
+
+	// -------------- nordic protocol commands -----------
+	void __create_command();
+	void __create_data();
+	void __create_object();
+	void __set_prn();
+	void __calculate_checksum();
+	void __execute();
+
+	void __select_command();
+	void __select_data();
+	void __select_object();
+
+	// ------------ raw data communication ------------
+	void __stream_data();
+	void __parse_response();
+	void __parse_checksum_response();
+
 public:
 	void init(device_address_t target);
 	void deinit();
@@ -32,6 +67,7 @@ public:
 	void waitForDisconnect();
 	void isTargetInDfuMode();
 
+	// -------- main protocol methods -----------
 	void open();
 	void close();
 
