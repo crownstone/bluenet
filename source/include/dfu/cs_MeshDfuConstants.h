@@ -23,6 +23,8 @@ namespace DFUAdapter {
 //    CP_UUID     = BLEUUID(0x0001, BASE_UUID) // service_primary = 0x2800
 //    DP_UUID     = BLEUUID(0x0002, BASE_UUID) // service_secondary = 0x2801
 
+// ble_uuid128_t or UUID?
+
 
 constexpr uint8_t CONNECTION_ATTEMPTS = 3;
 constexpr uint8_t ERROR_CODE_POS      = 2;

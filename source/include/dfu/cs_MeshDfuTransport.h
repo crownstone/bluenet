@@ -16,8 +16,25 @@
  */
 class MeshDfuTransport {
 private:
+	uint16_t _ControlPointHandle = 0x0;
+	uint16_t _DataPointHandle = 0x0;
 
+	device_address_t _targetDevice;
 
 public:
+	void init(device_address_t target);
+	void deinit();
 
+	void connect();
+	void disconnect();
+
+	void putTargetInDfuMode();
+	void waitForDisconnect();
+	void isTargetInDfuMode();
+
+	void open();
+	void close();
+
+	void programInitPacket();
+	void programFirmware();
 };
