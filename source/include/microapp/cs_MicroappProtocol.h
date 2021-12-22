@@ -11,11 +11,16 @@ extern "C" {
 static_assert (sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 static_assert (sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 
+struct coargs_payload_t {
+	uint8_t *data;
+	uint16_t size;
+};
+
 struct coargs_t {
 	coroutine_t* coroutine;
 	uintptr_t entry;
-	uint8_t *payload;
-	uint16_t payloadSize;
+	coargs_payload_t microapp2bluenet;
+	coargs_payload_t bluenet2microapp;
 };
 
 // Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
@@ -134,7 +139,12 @@ protected:
 	/**
 	 * Get the command from the microapp.
 	 */
-	void retrieveCommand();
+	bool retrieveCommand();
+
+	/**
+	 * Write the callback.
+	 */
+	void writeCallback();
 
 	/**
 	 * Initialize memory for the microapp.

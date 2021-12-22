@@ -38,6 +38,10 @@ extern "C" {
  * other bluenet function, this is strongly discouraged. In contrast, yield control towards bluenet explicitly by
  * calling yield() and continue in `MicroappProtocol::callMicroapp()` retrieving the command sent by the microapp.
  *
+ * Rather than expecting code within the microapp to call getRamData and set the coargs arguments as parameter or write
+ * it to the buffer, we do this here. We can optimize this later (as long as we actually store this in an area that
+ * is accessible by the microapp).
+ *
  * @param[in] payload                            pointer to buffer with command for bluenet
  * @param[in] length                             length of command (not total buffer size)
  */
@@ -46,11 +50,21 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	microapp_cmd_t* cmd  = (microapp_cmd_t*)payload;
-	uintptr_t coargs_ptr = cmd->coargs;
-	coargs_t* args       = (coargs_t*)coargs_ptr;
-	args->payload        = payload;
-	args->payloadSize    = length;
+	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+	uint8_t readSize = 0;
+	uint8_t retCode  = getRamData(IPC_INDEX_CROWNSTONE_APP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
+
+	if (retCode != IPC_RET_SUCCESS) {
+		LOGi("Nothing found in RAM ret_code=%u", retCode);
+		return ERR_NOT_FOUND;
+	}
+
+	// We obtain coargs from bluenet2microapp upon which we set microapp2bluenet, this is no error.
+	bluenet2microapp_ipcdata_t& data = *(bluenet2microapp_ipcdata_t*)buf;
+	uintptr_t coargs_ptr             = data.coargs_ptr;
+	coargs_t* args                   = (coargs_t*)coargs_ptr;
+	args->microapp2bluenet.data      = payload;
+	args->microapp2bluenet.size      = length;
 	yield(args->coroutine);
 
 	return ERR_SUCCESS;
@@ -93,11 +107,18 @@ cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
 	return ERR_SUCCESS;
 }
 
-MicroappProtocol::MicroappProtocol() : EventListener(), _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
+/*
+ * MicroappProtocol constructor zero-initializes most fields and makes sure the instance can receive messages through
+ * deriving from EventListener and adding itself to the EventDispatcher as listener.
+ */
+MicroappProtocol::MicroappProtocol()
+		: EventListener()
+		, _booted(false)
+		, _callbackData(nullptr)
+		, _microappIsScanning(false)
+		, _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
 
 	EventDispatcher::getInstance().addListener(this);
-
-	_booted = false;
 
 	for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
 		_pinIsr[i].pin      = 0;
@@ -107,9 +128,6 @@ MicroappProtocol::MicroappProtocol() : EventListener(), _meshMessageBuffer(MAX_M
 		_bleIsr[i].type     = 0;
 		_bleIsr[i].callback = 0;
 	}
-
-	_callbackData       = nullptr;
-	_microappIsScanning = false;
 
 	_coargs = new coargs_t();
 }
@@ -234,19 +252,46 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
 	}
 
 	if (_loaded) {
-		callMicroapp();
-		retrieveCommand();
+		bool call_again = false;
+		do {
+			callMicroapp();
+			call_again = retrieveCommand();
+		} while (call_again);
 	}
 }
 
 /*
  * Retrieve command from the microapp.
  */
-void MicroappProtocol::retrieveCommand() {
+bool MicroappProtocol::retrieveCommand() {
 	// get payload from data
-	uint8_t* payload = _coargs->payload;
-	uint16_t length  = _coargs->payloadSize;
+	uint8_t* payload = _coargs->microapp2bluenet.data;
+	uint16_t length  = _coargs->microapp2bluenet.size;
 	handleMicroappCommand(payload, length);
+	bool call_again = false;
+	return call_again;
+}
+
+void MicroappProtocol::writeCallback() {
+	// prepare ...
+
+	// TODO: This needs better ack system that pulls it out individual commands and is required for all commands that
+	// need to be acked. In that sense we can see if there's still an old command that has not been acked before.
+
+	// example for now, if callback from gpio
+	microapp_pin_cmd_t* cmd = (microapp_pin_cmd_t*)_coargs->bluenet2microapp.data;
+	cmd->pin = 1;
+	cmd->value = CS_MICROAPP_COMMAND_VALUE_CHANGE;
+	cmd->ack = false;
+
+	// and call the microapp
+	callMicroapp();
+
+	// check if callback has been executed, otherwise call again(?)
+	
+	if (!cmd->ack) {
+		LOGi("Command not acked");
+	}
 }
 
 /*

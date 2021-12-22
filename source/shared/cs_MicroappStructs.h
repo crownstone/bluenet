@@ -16,6 +16,21 @@
 
 const uint8_t MAX_PAYLOAD = 32;
 
+/**
+ * The main opcodes for microapp commands.
+ */
+enum CommandMicroapp {
+	CS_MICROAPP_COMMAND_LOG          = 0x01,
+	CS_MICROAPP_COMMAND_DELAY        = 0x02,
+	CS_MICROAPP_COMMAND_PIN          = 0x03,  // Payload is pin_cmd_t.
+	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
+	CS_MICROAPP_COMMAND_TWI          = 0x05,
+	CS_MICROAPP_COMMAND_BLE          = 0x06,
+	CS_MICROAPP_COMMAND_POWER_USAGE  = 0x07,
+	CS_MICROAPP_COMMAND_PRESENCE     = 0x08,
+	CS_MICROAPP_COMMAND_MESH         = 0x09,
+};
+
 enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_SWITCH  = 0x00,  // Virtual pin
 	CS_MICROAPP_COMMAND_PIN_DIMMER  = 0x00,  // same one
@@ -31,34 +46,6 @@ enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_LED2    = 0x0a,  // LED2
 	CS_MICROAPP_COMMAND_PIN_LED3    = 0x0b,  // LED3
 	CS_MICROAPP_COMMAND_PIN_LED4    = 0x0c,  // LED4
-};
-
-enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_LOG          = 0x01,
-	CS_MICROAPP_COMMAND_DELAY        = 0x02,
-	CS_MICROAPP_COMMAND_PIN          = 0x03,  // Payload is pin_cmd_t.
-	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
-	CS_MICROAPP_COMMAND_TWI          = 0x05,
-	CS_MICROAPP_COMMAND_BLE          = 0x06,
-	CS_MICROAPP_COMMAND_POWER_USAGE  = 0x07,
-	CS_MICROAPP_COMMAND_PRESENCE     = 0x08,
-	CS_MICROAPP_COMMAND_MESH         = 0x09,
-};
-
-enum CommandMicroappLogOption {
-	CS_MICROAPP_COMMAND_LOG_NEWLINE    = 0x00,
-	CS_MICROAPP_COMMAND_LOG_NO_NEWLINE = 0x01,
-};
-
-enum CommandMicroappLog {
-	CS_MICROAPP_COMMAND_LOG_CHAR   = 0x00,
-	CS_MICROAPP_COMMAND_LOG_INT    = 0x01,
-	CS_MICROAPP_COMMAND_LOG_STR    = 0x02,
-	CS_MICROAPP_COMMAND_LOG_ARR    = 0x03,
-	CS_MICROAPP_COMMAND_LOG_FLOAT  = 0x04,
-	CS_MICROAPP_COMMAND_LOG_DOUBLE = 0x05,
-	CS_MICROAPP_COMMAND_LOG_UINT   = 0x06,
-	CS_MICROAPP_COMMAND_LOG_SHORT  = 0x07,
 };
 
 enum CommandMicroappPinOpcode1 {
@@ -79,6 +66,22 @@ enum CommandMicroappPinValue {
 	CS_MICROAPP_COMMAND_VALUE_CHANGE  = 0x02,
 	CS_MICROAPP_COMMAND_VALUE_RISING  = 0x03,
 	CS_MICROAPP_COMMAND_VALUE_FALLING = 0x04,
+};
+
+enum CommandMicroappLog {
+	CS_MICROAPP_COMMAND_LOG_CHAR   = 0x00,
+	CS_MICROAPP_COMMAND_LOG_INT    = 0x01,
+	CS_MICROAPP_COMMAND_LOG_STR    = 0x02,
+	CS_MICROAPP_COMMAND_LOG_ARR    = 0x03,
+	CS_MICROAPP_COMMAND_LOG_FLOAT  = 0x04,
+	CS_MICROAPP_COMMAND_LOG_DOUBLE = 0x05,
+	CS_MICROAPP_COMMAND_LOG_UINT   = 0x06,
+	CS_MICROAPP_COMMAND_LOG_SHORT  = 0x07,
+};
+
+enum CommandMicroappLogOption {
+	CS_MICROAPP_COMMAND_LOG_NEWLINE    = 0x00,
+	CS_MICROAPP_COMMAND_LOG_NO_NEWLINE = 0x01,
 };
 
 enum CommandMicroappTwiOpcode {
@@ -123,14 +126,6 @@ struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
 };
 
 /*
- * The command that gives back control from the microapp towards the bluenet.
- */
-struct __attribute__((packed)) microapp_cmd_t {
-	uintptr_t coargs;
-	uint8_t cmd;
-};
-
-/*
  * Struct to set and read pins. This can be used for analog and digital writes and reads. For digital writes it is
  * just zeros or ones. For analog writes it is an uint8_t. For reads the value field is the one that is being returned.
  * There is just one struct to keep binary small.
@@ -138,7 +133,7 @@ struct __attribute__((packed)) microapp_cmd_t {
  * The value field is large enough to store a function pointer.
  */
 struct __attribute__((packed)) microapp_pin_cmd_t {
-	uint8_t cmd;      // CommandMicroapp == CS_MICROAPP_COMMAND_PIN
+	uint8_t cmd = CS_MICROAPP_COMMAND_PIN;
 	uint8_t pin;      // CommandMicroappPin
 	uint8_t opcode1;  // CommandMicroappPinOpcode1
 	uint8_t opcode2;  // CommandMicroappPinOpcode2
