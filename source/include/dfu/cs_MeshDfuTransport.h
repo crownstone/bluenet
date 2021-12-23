@@ -11,15 +11,27 @@
 
 /**
  * The class that handles transport layer communication.
+ * It does not persist any progress statistics across reboots.
+ * It assumes that its owner takes care of the connection management
+ * (to prevent unnecessary disconnect-connect between different operations.)
  *
  * NOTE: corresponds to dfu_transport_ble.py
  */
 class MeshDfuTransport {
 private:
-	uint16_t _ControlPointHandle = 0x0;
-	uint16_t _DataPointHandle = 0x0;
+	UUID _controlPointUuid;
+	UUID _dataPointUuid;
 
-	device_address_t _targetDevice;
+	uint16_t _controlPointHandle = 0x0;
+	uint16_t _dataPointHandle = 0x0;
+
+	bool _firstInit = true;
+	bool _ready = false;
+
+	/**
+	 * Load UUIDs and sets this class as listener.
+	 */
+	cs_ret_code_t init();
 
 	// ----- the adapter layer for crownstone_ble -----
 	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len);
@@ -57,12 +69,6 @@ private:
 	void __parse_checksum_response();
 
 public:
-	void init(device_address_t target);
-	void deinit();
-
-	void connect();
-	void disconnect();
-
 	void putTargetInDfuMode();
 	void waitForDisconnect();
 	void isTargetInDfuMode();

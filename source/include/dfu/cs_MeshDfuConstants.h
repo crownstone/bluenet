@@ -16,15 +16,9 @@
  */
 namespace MeshDfuConstants {
 namespace DFUAdapter {
-//    BASE_UUID = BLEUUIDBase([0x8E, 0xC9, 0x00, 0x00, 0xF3, 0x15, 0x4F, 0x60,
-//                                 0x9F, 0xB8, 0x83, 0x88, 0x30, 0xDA, 0xEA, 0x50])
 
-//    # Bootloader characteristics
-//    CP_UUID     = BLEUUID(0x0001, BASE_UUID) // service_primary = 0x2800
-//    DP_UUID     = BLEUUID(0x0002, BASE_UUID) // service_secondary = 0x2801
-
-// ble_uuid128_t or UUID?
-
+constexpr char controlPointString[] = "8ec90001-f315-4f60-9fb8-838830daea50";
+constexpr char dataPointString[]    = "8ec90002-f315-4f60-9fb8-838830daea50";
 
 constexpr uint8_t CONNECTION_ATTEMPTS = 3;
 constexpr uint8_t ERROR_CODE_POS      = 2;
