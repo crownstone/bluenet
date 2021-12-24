@@ -30,24 +30,32 @@
 #include <util/cs_Utils.h>
 
 #define LOGMicroappInfo LOGi
-#define LOGMicroappDebug LOGnone
-#define LOGMicroappVerboseLevel SERIAL_VERBOSE
+#define LOGMicroappDebug LOGvv
+#define LOGMicroappVerboseLevel SERIAL_VERY_VERBOSE
 
 void fs_evt_handler_sched(void *data, uint16_t size) {
-	nrf_fstorage_evt_t * evt = (nrf_fstorage_evt_t*) data;
-	MicroappStorage::getInstance().handleFileStorageEvent(evt);
+	nrf_fstorage_evt_t* event = reinterpret_cast<nrf_fstorage_evt_t*>(data);
+	MicroappStorage::getInstance().handleFileStorageEvent(event);
 }
 
 // Event handler of our nrf_fstorage instance.
-static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
-	// TODO: do we need to schedule these events? They might already be called from app scheduler, depending on sdk_config.
-#ifdef DEBUG
+static void fs_evt_handler(nrf_fstorage_evt_t* event) {
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+	#ifdef DEBUG
 	if (CsUtils::getInterruptLevel() == 0) {
 		LOGw("No need to schedule event");
 	}
-#endif
-	uint32_t retVal = app_sched_event_put(p_evt, sizeof(*p_evt), fs_evt_handler_sched);
+	#endif
+	uint32_t retVal = app_sched_event_put(event, sizeof(*event), fs_evt_handler_sched);
 	APP_ERROR_CHECK(retVal);
+#else
+	#ifdef DEBUG
+	if (CsUtils::getInterruptLevel() != 0) {
+		LOGw("Need to schedule event");
+	}
+	#endif
+	fs_evt_handler_sched(event, sizeof(*event));
+#endif
 }
 
 NRF_FSTORAGE_DEF(nrf_fstorage_t nrf_microapp_storage) =
