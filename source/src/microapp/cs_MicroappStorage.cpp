@@ -258,7 +258,7 @@ bool MicroappStorage::isErased(uint32_t flashAddress, uint16_t size) {
 			LOGw("Error reading fstorage: %u. flashAddress=0x%08X buf=0x%X readSize=%u", nrfCode, flashAddress, readBuf, readSize);
 			return false;
 		}
-		if (memcmp(readBuf, emptyBuf, bufSize) != 0) {
+		if (memcmp(readBuf, emptyBuf, readSize) != 0) {
 			return false;
 		}
 	}
