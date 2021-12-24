@@ -8,8 +8,9 @@
 
 #pragma once
 
+#include <ble/cs_BleCentral.h>
+#include <ble/cs_CrownstoneCentral.h>
 #include <events/cs_EventListener.h>
-#include <optional>
 
 /**
  * This bluenet component manages the progress and protocol of a crownstone-to-crownstone firmware update.
@@ -35,14 +36,12 @@ class MeshDfuHost : public EventListener {
 private:
 	enum class Phase {
 		Idle = 0,
-		HostInitializing,     // writing target settings to flash
 		TargetTriggerDfuMode, // sending dfu command and waiting for reset
 		TargetPreparing,      // send PRN command
 		TargetInitializing,   // sending init packets
 		TargetUpdating,       // sending firmware packets
 		TargetVerifying,
 		Aborting,            // might leave the target in an ugly state but at least saves our ass.
-		Booting,			// during boot up, storage isn't available yet so we don't know if we need to continue a previous dfu progress.
 		None = 0xFF
 	};
 
@@ -57,35 +56,76 @@ private:
 	Phase _phaseNextOverride = Phase::None;
 
 	/**
-	 * the device to be dfu-d. must be persisted during HostInitialization
+	 * the device to be dfu-d.
 	 */
 	device_address_t _targetDevice;
-
 
 	/**
 	 * Administration variables for the method waiteForEvent(..);
 	 *
-	 * _expectedEvent is only valid if a callback is set.
+	 * _expectedEvent is only valid if _expectedEventCallback is set.
+	 * _expectedEventCallback is a pointer to member function taking an event_t&.
 	 */
 	CS_TYPE _expectedEvent;
-	typedef void(*PhaseCallback)(event_t&);
+	typedef void(MeshDfuHost::*PhaseCallback)(event_t&);
 	PhaseCallback _expectedEventCallback = nullptr;
 
+	/**
+	 * determines how many times a reconnect will be attempted until dfu is stopped.
+	 */
+	uint8_t _reconnectionAttemptsLeft = 0;
+	constexpr const uint8_t _reconnectionAttemptsDefault = 5;
+
+	CrowntoneCentral* _crownstoneCentral = nullptr;
+	BleCentral* _bleCentral = nullptr;
+
+
+	void stopDfu();
+
+	/**
+	 * current status of the connection.
+	 */
+	bool _isCrownstoneCentralConnected = false;
+	bool _isBleCentralConnected = false;
 
 	// -------------------------------------------------------------------------------------
 	// ---------------------------------- phase callbacks ----------------------------------
 	// -------------------------------------------------------------------------------------
 
 	/**
-	 *  start functions
+	 * Connect through CrownstoneBle and wait for result.
 	 *
-	 *  only intended to be called by startPhase(Phase phase)
-	 *  these don't set the _phaseCurrent value.
+	 * Resets _reconnectionAttemptsLeft.
+	 * Continue with sendDfuCommand.
 	 */
+	void triggerTargetDfuMode();
 
-	void startPhaseIdle();
-	void startPhaseHostInitializing();
-	void startPhaseTargetTriggerDfuMode();
+	/**
+	 * Possibly retry connection if not _isCrownstoneCentralConnected yet.
+	 * When connection is established, send dfu command and wait for disconnect.
+	 * If max retries is reached, stopDfu().
+	 *
+	 * Resets _reconnectionAttemptsLeft.
+	 * Continue with reconnectAfterDfuCommand.
+	 */
+	void sendDfuCommand(event_t& event);
+
+	/**
+	 * Connect through the BleCentral and wait for result.
+	 * If connection was still active, wait for next connect result.
+	 *
+	 * Continue with verifyDfuMode on success.
+	 */
+	void reconnectAfterDfuCommand(event_t& event);
+
+	/**
+	 * checks if the required characteristics are available and obtains handles
+	 * for them.
+	 */
+	void verifyDfuMode(event_t& event);
+
+
+	// ....
 	void startPhaseTargetPreparing();
 	void startPhaseTargetInitializing();
 	void startPhaseTargetUpdating();
@@ -107,6 +147,9 @@ private:
 	void finalizePhaseTargetVerifying(event_t& event);
 	void finalizePhaseAborting(event_t& event);
 	void finalizePhaseBooting(event_t& event);
+
+	void connectToTarget();
+	void onDisconnect(event_t& event);
 
 	// ------------------------------------------------------------------------------------
 	// ------------------------------- phase administration -------------------------------
@@ -136,26 +179,6 @@ private:
 	 */
 	void completePhaseAndGoto(Phase phaseNext);
 
-	// ------------------------------------------------------------------------------------
-	// ---------------------------- progress related callbacks ----------------------------
-	// ------------------------------------------------------------------------------------
-
-	/**
-	 * Clears all fields and data related to the Mesh DFU progress.
-	 */
-	void resetProgress();
-
-	/**
-	 * Sets progress from Started to Initialized or resetProgress() on failure.
-	 */
-	void onFlashWriteComplete();
-
-	/**
-	 * Checks if any progress was persisted and try to recover.
-	 */
-	void onBoot();
-
-	bool storeDfuTarget(device_address_t macaddr);
 	bool startDfu(device_address_t macaddr);
 
 
@@ -172,6 +195,7 @@ private:
 //	void onReadDuringConnect(ble_central_read_result_t& result);
 //	void onWrite(cs_ret_code_t result);
 //	void onNotification(ble_central_notification_t& result);
+
 
 	// -------------------------------------------------------------------------------------
 	// --------------------------------------- utils ---------------------------------------

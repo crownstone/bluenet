@@ -54,7 +54,7 @@ enum class RES_CODE : uint8_t {
 };
 
 constexpr auto EXT_ERROR_CODE(uint8_t errorcode) {
-	auto codes = {
+	const char* codes[] = {
 			"No extended error code has been set. This error indicates an implementation problem.",
 			"Invalid error code. This error code should never be used outside of development.",
 			"The format of the command was incorrect. This error code is not used in the current implementation, "
@@ -77,7 +77,7 @@ constexpr auto EXT_ERROR_CODE(uint8_t errorcode) {
 			"The available space on the device is insufficient to hold the firmware.",
 			"The requested firmware to update was already present on the system."};
 
-	if (errorcode < ArraySize(codes)) {
+	if (errorcode < CsUtils::ArraySize(codes)) {
 		return codes[errorcode];
 	}
 

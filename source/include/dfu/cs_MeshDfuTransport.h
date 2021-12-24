@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <ble/cs_UUID.h>
+#include <events/cs_EventListener.h>
 
 /**
  * The class that handles transport layer communication.
@@ -17,7 +19,7 @@
  *
  * NOTE: corresponds to dfu_transport_ble.py
  */
-class MeshDfuTransport {
+class MeshDfuTransport : EventListener {
 private:
 	UUID _controlPointUuid;
 	UUID _dataPointUuid;
