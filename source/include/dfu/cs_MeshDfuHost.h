@@ -30,8 +30,10 @@
 class MeshDfuHost : public EventListener {
 	/**
 	 * return true if dfu process sucessfully started.
+	 *
+	 * Initializes this component if necessary.
 	 */
-	bool copyTo(device_address_t target);
+	bool copyFirmwareTo(device_address_t target);
 
 private:
 	enum class Phase {
@@ -45,6 +47,7 @@ private:
 		None = 0xFF
 	};
 
+	// ----------------------- runtime phase variables -----------------------
 	/**
 	 * state describing what the device is currently doing/waiting for
 	 */
@@ -56,11 +59,6 @@ private:
 	Phase _phaseNextOverride = Phase::None;
 
 	/**
-	 * the device to be dfu-d.
-	 */
-	device_address_t _targetDevice;
-
-	/**
 	 * Administration variables for the method waiteForEvent(..);
 	 *
 	 * _expectedEvent is only valid if _expectedEventCallback is set.
@@ -70,23 +68,30 @@ private:
 	typedef void(MeshDfuHost::*PhaseCallback)(event_t&);
 	PhaseCallback _expectedEventCallback = nullptr;
 
+	// ----------------------- ble related variables -----------------------
+
 	/**
-	 * determines how many times a reconnect will be attempted until dfu is stopped.
+	 * cached ble component pointers
 	 */
-	uint8_t _reconnectionAttemptsLeft = 0;
-	constexpr const uint8_t _reconnectionAttemptsDefault = 5;
-
-	CrowntoneCentral* _crownstoneCentral = nullptr;
+	CrownstoneCentral* _crownstoneCentral = nullptr;
 	BleCentral* _bleCentral = nullptr;
-
-
-	void stopDfu();
 
 	/**
 	 * current status of the connection.
 	 */
 	bool _isCrownstoneCentralConnected = false;
 	bool _isBleCentralConnected = false;
+
+	/**
+	 * determines how many times a reconnect will be attempted until dfu is stopped.
+	 * See MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts
+	 */
+	uint8_t _reconnectionAttemptsLeft = 0;
+
+	/**
+	 * the device to be dfu-d.
+	 */
+	device_address_t _targetDevice;
 
 	// -------------------------------------------------------------------------------------
 	// ---------------------------------- phase callbacks ----------------------------------
@@ -124,41 +129,24 @@ private:
 	 */
 	void verifyDfuMode(event_t& event);
 
-
-	// ....
-	void startPhaseTargetPreparing();
-	void startPhaseTargetInitializing();
-	void startPhaseTargetUpdating();
-	void startPhaseTargetVerifying();
-	void startPhaseAborting();
-	void startPhaseBooting();
-
-	/**
-	 * finalize methods
-	 *
-	 * TODO: rename these to what they actually do?
-	 */
-
-	void finalizePhaseHostInitializing(event_t& event);
-	void finalizePhaseTargetTriggerDfuMode(event_t& event);
-	void finalizePhaseTargetPreparing(event_t& event);
-	void finalizePhaseTargetInitializing(event_t& event);
-	void finalizePhaseTargetUpdating(event_t& event);
-	void finalizePhaseTargetVerifying(event_t& event);
-	void finalizePhaseAborting(event_t& event);
-	void finalizePhaseBooting(event_t& event);
-
-	void connectToTarget();
 	void onDisconnect(event_t& event);
+
 
 	// ------------------------------------------------------------------------------------
 	// ------------------------------- phase administration -------------------------------
 	// ------------------------------------------------------------------------------------
 
 	/**
-	 * starts given phase and set _phaseCurrent (without additional checks).
+	 * Starts given phase on the next tick event by setting _phaseCurrent to `phase`
+	 * and setting waitForEvent(CS_TICK, startPhase) without additional checks.
 	 */
 	void startPhase(Phase phase);
+
+	/**
+	 * Calls the startPhaseX function for the _phaseCurrent.
+	 * (Used by startPhase to get into async 'processing mode'.)
+	 */
+	void startPhase(event_t& event);
 
 	/**
 	 * sets a callback to be called when the given event type is received.
@@ -167,19 +155,50 @@ private:
 	 * Returns true if the callback was succesfully set.
 	 * Returns false if another event is already awaited.
 	 */
-	bool WaitForEvent(CS_TYPE evttype, PhaseCallback callback);
+	bool waitForEvent(CS_TYPE evttype, PhaseCallback callback);
 
 	/**
-	 * This method is called on successful finalizePhaseXYZ();
-	 * The passed parameter is the intended next phase of the finalize method,
-	 * which may be overriden by a user set phase (likely abort).
+	 * Call this method in the last phase event handler. It will:
+	 *  - call completePhase(); and check intended next phase
+	 *  - check the user set _phaseNext,
+	 *  - call startPhase(nextPhase) depending on both these phase values.
 	 *
-	 * _phaseNextOverride has priority over phaseNext.
+	 * if phase status is reported by return value of completePhaseX methods.
+	 * Return Phase::Aborting if unsuccesful to clean up as much as possible.
 	 *
+	 * completePhaseX methods must be synchronous.
 	 */
-	void completePhaseAndGoto(Phase phaseNext);
+	void completePhase();
 
-	bool startDfu(device_address_t macaddr);
+	// ---------- phase start callbacks ----------
+	/**
+	 * startPhaseX methods start administration for a phase and return
+	 * true if the phase was successfully scheduled to start. They must
+	 * call waitForEvent to start the first asynchronous event of the phase.
+	 */
+	bool startPhaseTargetPreparing();
+	bool startPhaseTargetInitializing();
+	bool startPhaseTargetUpdating();
+	bool startPhaseTargetVerifying();
+	bool startPhaseAborting();
+	bool startPhaseBooting();
+
+	// ---------- phase complete callbacks ----------
+	/**
+	 * completePhaseX methods finish administration for a phase and return
+	 * what is the next intended phase. They must be synchronous.
+	 *
+	 * Called by completePhase.
+	 */
+
+	Phase completePhaseHostInitializing();
+	Phase completePhaseTargetTriggerDfuMode();
+	Phase completePhaseTargetPreparing();
+	Phase completePhaseTargetInitializing();
+	Phase completePhaseTargetUpdating();
+	Phase completePhaseTargetVerifying();
+	Phase completePhaseAborting();
+	Phase completePhaseBooting();
 
 
 //	// -----------------------------------------------------------------------------------
@@ -202,6 +221,11 @@ private:
 	// -------------------------------------------------------------------------------------
 
 	/**
+	 * ble component pointers non-nullptr?
+	 */
+	bool isInitialized();
+
+	/**
 	 * returns true if this device has an init packet and no already running dfu process.
 	 */
 	bool ableToLaunchDfu();
@@ -215,6 +239,10 @@ private:
 	 * No current dfu operations running or planned?
 	 */
 	bool dfuProcessIdle();
+
+	void connectToTarget();
+	void stopDfu();
+	bool startDfu(device_address_t macaddr);
 
 public:
 	/**

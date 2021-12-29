@@ -6,28 +6,35 @@
  */
 
 #include <dfu/cs_MeshDfuHost.h>
+#include <dfu/cs_MeshDfuConstants.h>
 #include <logging/cs_Logger.h>
 
 #define LogMeshDfuHostDebug LOGd
+#define LogMeshDfuHostInfo LOGi
 
-bool MeshDfuHost::copyTo(device_address_t target) {
-	if (!ableToHostDfu()) {
+bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
+	if(!isInitialized()) {
+		// TODO: get pointers to crownstoneCentral and bleCentral.
+		listen();
+	}
+
+	if (!ableToLaunchDfu()) {
 		return false;
 	}
 
 	_targetDevice = target;
 
-	startPhase(Phase::HostInitializing);
+	startPhase(Phase::TargetTriggerDfuMode);
 	return true;
 }
 
 // ------------------------------- phase administration -------------------------------
 
 void MeshDfuHost::triggerTargetDfuMode() {
-	_reconnectionAttemptsLeft = _reconnectionAttemptsDefault;
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 
-	_crownstoneCentral.connect(_targetDevice);
-	waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, sendDfuCommand);
+	_crownstoneCentral->connect(_targetDevice);
+	waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
 	LogMeshDfuHostDebug("waiting for cs central connect result");
 }
@@ -38,8 +45,8 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 			LogMeshDfuHostDebug("connection failed, retrying");
 			_reconnectionAttemptsLeft -= 1;
 
-			_crownstoneCentral.connect(_targetDevice);
-			waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, sendDfuCommand);
+			_crownstoneCentral->connect(_targetDevice);
+			waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
 			LogMeshDfuHostDebug("waiting for cs central connect result");
 		} else {
@@ -47,9 +54,9 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 		}
 	}
 
-	_reconnectionAttemptsLeft = _reconnectionAttemptsDefault;
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	_crownstoneCentral->write(CommandHandlerTypes::CTRL_CMD_GOTO_DFU, nullptr, 0);
-	waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, reconnectAfterDfuCommand);
+	waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::reconnectAfterDfuCommand);
 
 	LogMeshDfuHostDebug("waiting for disconnect after command goto dfu");
 }
@@ -57,7 +64,7 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 void MeshDfuHost::reconnectAfterDfuCommand(event_t& event) {
 	if (_isCrownstoneCentralConnected) {
 		LogMeshDfuHostDebug("incorrect state, device is still connected after dfu command.");
-		waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, reconnectAfterDfuCommand);
+		waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::reconnectAfterDfuCommand);
 		LogMeshDfuHostDebug("waiting for disconnect after command goto dfu");
 		return;
 	}
@@ -66,8 +73,8 @@ void MeshDfuHost::reconnectAfterDfuCommand(event_t& event) {
 		if(_reconnectionAttemptsLeft > 0) {
 			_reconnectionAttemptsLeft -= 1;
 
-			_bleCentral.connect(_targetDevice);
-			waitForEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reconnectAfterDfuCommand);
+			_bleCentral->connect(_targetDevice);
+			waitForEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, &MeshDfuHost::reconnectAfterDfuCommand);
 		} else {
 			stopDfu();
 		}
@@ -156,16 +163,30 @@ void MeshDfuHost::verifyDfuMode(event_t& event) {
 //	startPhase(_phaseCurrent);
 //}
 //
-//void MeshDfuHost::completePhaseAndGoto(Phase phaseNext) {
-//	if (_phaseNextOverride != Phase::None) {
-//		// LOG...
-//		startPhase(_phaseNextOverride);
-//	}
-//
-//	startPhase(phaseNext);
-//}
 
-bool MeshDfuHost::WaitForEvent(CS_TYPE evtToWaitOn, PhaseCallback callback) {
+void MeshDfuHost::completePhase() {
+	Phase phaseNext = Phase::None;
+
+	switch(_phaseCurrent) {
+		case Phase::Idle: break;
+		case Phase::TargetTriggerDfuMode: break;
+		case Phase::TargetPreparing: break;
+		case Phase::TargetInitializing: break;
+		case Phase::TargetUpdating: break;
+		case Phase::TargetVerifying: break;
+		case Phase::Aborting: break;
+		case Phase::None: break;
+	}
+
+	if (_phaseNextOverride != Phase::None) {
+		LogMeshDfuHostInfo("DFU phase next progress was overriden by user");
+		startPhase(_phaseNextOverride);
+	}
+
+	startPhase(phaseNext);
+}
+
+bool MeshDfuHost::waitForEvent(CS_TYPE evtToWaitOn, PhaseCallback callback) {
 	if (_expectedEventCallback != nullptr) {
 		return false;
 	}
@@ -224,6 +245,6 @@ void MeshDfuHost::handleEvent(event_t& event) {
 
 		// clear expected event
 		_expectedEventCallback = nullptr;
-		this->*eventCallback(event);
+		(this->*eventCallback)(event);
 	}
 }

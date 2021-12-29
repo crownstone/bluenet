@@ -15,6 +15,12 @@
  * NOTE: corresponds roughly to ble_constans.py and incorporates ble_uuid.py
  */
 namespace MeshDfuConstants {
+
+namespace DfuHostSettings {
+constexpr uint8_t MaxReconnectionAttempts = 5;
+
+}
+
 namespace DFUAdapter {
 
 constexpr char controlPointString[] = "8ec90001-f315-4f60-9fb8-838830daea50";
