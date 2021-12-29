@@ -28,7 +28,67 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 	return true;
 }
 
-// ------------------------------- phase administration -------------------------------
+// -------------------------------------------------------------------------------------
+// ------------------------------- phase implementations -------------------------------
+// -------------------------------------------------------------------------------------
+
+// ###### TargetTriggerDfuMode ######
+
+bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
+	return Phase::None;
+}
+
+// ###### TargetPreparing ######
+
+bool startPhaseTargetPreparing() {
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
+	return Phase::None;
+}
+// ###### TargetInitializing ######
+
+bool startPhaseTargetInitializing() {
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
+	return Phase::None;
+}
+// ###### TargetUpdating ######
+
+bool startPhaseTargetUpdating() {
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
+	return Phase::None;
+}
+// ###### TargetVerifying ######
+
+bool startPhaseTargetVerifying() {
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
+	return Phase::None;
+}
+// ###### TargetTriggerDfuMode ######
+
+bool startPhaseAborting() {
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
+	return Phase::None;
+}
+
+// ----------------------
 
 void MeshDfuHost::triggerTargetDfuMode() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
@@ -118,54 +178,56 @@ void MeshDfuHost::verifyDfuMode(event_t& event) {
 
 // ---------------------------- progress related callbacks ----------------------------
 
-//void MeshDfuHost::startPhase(Phase phase) {
-//	_phaseCurrent = phase;
-//
-//	switch (phase) {
-//		case Phase::Idle: {
-//			break;
-//		}
-//		case Phase::HostInitializing: {
-//			startPhaseHostInitializing();
-//			break;
-//		}
-//		case Phase::TargetTriggerDfuMode: {
-//			startPhaseTargetTriggerDfuMode();
-//			break;
-//		}
-//		case Phase::TargetPreparing: {
-//			startPhaseTargetPreparing();
-//			break;
-//		}
-//		case Phase::TargetInitializing: {
-//			startPhaseTargetInitializing();
-//			break;
-//		}
-//		case Phase::TargetUpdating: {
-//			startPhaseTargetUpdating();
-//			break;
-//		}
-//		case Phase::TargetVerifying: {
-//			startPhaseTargetVerifying();
-//			break;
-//		}
-//		case Phase::Aborting: {
-//			startPhaseAborting();
-//			break;
-//		}
-//		case Phase::None: {
-//			break;
-//		}
-//	}
-//}
-//
-//void MeshDfuHost::restartPhase() {
-//	startPhase(_phaseCurrent);
-//}
-//
+bool MeshDfuHost::startPhase(Phase phase) {
+	bool success = false;
+
+	switch (phase) {
+		case Phase::Idle: {
+			success = true;
+			break;
+		}
+		case Phase::TargetTriggerDfuMode: {
+			success = startPhaseTargetTriggerDfuMode();
+			break;
+		}
+		case Phase::TargetPreparing: {
+			success = startPhaseTargetPreparing();
+			break;
+		}
+		case Phase::TargetInitializing: {
+			success = startPhaseTargetInitializing();
+			break;
+		}
+		case Phase::TargetUpdating: {
+			success = startPhaseTargetUpdating();
+			break;
+		}
+		case Phase::TargetVerifying: {
+			success = startPhaseTargetVerifying();
+			break;
+		}
+		case Phase::Aborting: {
+			success = startPhaseAborting();
+			break;
+		}
+		case Phase::None: {
+			success = false; // None cannot be entered. It indicates reboot.
+			break;
+		}
+	}
+
+	if(success) {
+		_phaseCurrent = phase;
+		_phaseNextOverride = Phase::None;
+	}
+
+	return success;
+}
 
 void MeshDfuHost::completePhase() {
 	Phase phaseNext = Phase::None;
+
+	// TODO: add callbacks for completePhaseX
 
 	switch(_phaseCurrent) {
 		case Phase::Idle: break;
@@ -196,10 +258,6 @@ bool MeshDfuHost::waitForEvent(CS_TYPE evtToWaitOn, PhaseCallback callback) {
 
 	return true;
 }
-
-//bool MeshDfuHost::waitForReconnect() {
-//
-//}
 
 // --------------------------------------- utils ---------------------------------------
 

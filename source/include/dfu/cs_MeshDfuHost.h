@@ -28,6 +28,7 @@
  *  NOTE: corresponds roughly to dfu_Write_application.py
  */
 class MeshDfuHost : public EventListener {
+public:
 	/**
 	 * return true if dfu process sucessfully started.
 	 *
@@ -35,7 +36,6 @@ class MeshDfuHost : public EventListener {
 	 */
 	bool copyFirmwareTo(device_address_t target);
 
-private:
 	enum class Phase {
 		Idle = 0,
 		TargetTriggerDfuMode, // sending dfu command and waiting for reset
@@ -47,11 +47,12 @@ private:
 		None = 0xFF
 	};
 
+private:
 	// ----------------------- runtime phase variables -----------------------
 	/**
 	 * state describing what the device is currently doing/waiting for
 	 */
-	Phase _phaseCurrent= Phase::None;
+	Phase _phaseCurrent = Phase::None;
 	/**
 	 * upon phase complete, this phase will be checked for a subsequent action.
 	 * (this can be user overridden to stop a dfu flood.)
@@ -137,10 +138,17 @@ private:
 	// ------------------------------------------------------------------------------------
 
 	/**
-	 * Starts given phase on the next tick event by setting _phaseCurrent to `phase`
-	 * and setting waitForEvent(CS_TICK, startPhase) without additional checks.
+	 * Calls startPhaseX where X is determined by the `phase` variable.
+	 *
+	 * Returns the return value of the called method.
+	 * If returnvalue is true:
+	 *  - _phaseCurrent is set to `phase`
+	 *  - _phaseNext is set to None
+	 *  - the start method was successful and has called waitForEvent.
+	 * Else:
+	 *  - nothing changed
 	 */
-	void startPhase(Phase phase);
+	bool startPhase(Phase phase);
 
 	/**
 	 * Calls the startPhaseX function for the _phaseCurrent.
@@ -172,10 +180,16 @@ private:
 
 	// ---------- phase start callbacks ----------
 	/**
-	 * startPhaseX methods start administration for a phase and return
-	 * true if the phase was successfully scheduled to start. They must
-	 * call waitForEvent to start the first asynchronous event of the phase.
+	 * startPhaseX methods start administration for a phase.
+	 *
+	 * If this method returns true:
+	 *  - Any required administration variables have been set up.
+	 *  - Phase was successfully scheduled to start using waitForEvent(...).
+	 * If this method returns false:
+	 *  - No changes happened.
 	 */
+	bool startPhaseHostInitializing();
+	bool startPhaseTargetTriggerDfuMode();
 	bool startPhaseTargetPreparing();
 	bool startPhaseTargetInitializing();
 	bool startPhaseTargetUpdating();
