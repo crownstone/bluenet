@@ -67,8 +67,8 @@ private:
 	 * _expectedEventCallback is a pointer to member function taking an event_t&.
 	 */
 	CS_TYPE _expectedEvent;
-	typedef void(MeshDfuHost::*PhaseCallback)(event_t&);
-	PhaseCallback _expectedEventCallback = nullptr;
+	typedef void(MeshDfuHost::*EventCallback)(event_t&);
+	EventCallback _expectedEventCallback = nullptr;
 
 	// ----------------------- ble related variables -----------------------
 
@@ -100,10 +100,26 @@ private:
 	 */
 	device_address_t _targetDevice;
 
+	// TODO: DEBUG
+	device_address_t _debugTarget = {.address     = {0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35},
+									  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
+	uint8_t ticks_until_start = 100;
+	// END DEBUG
+
+
 	// -------------------------------------------------------------------------------------
 	// ---------------------------------- phase callbacks ----------------------------------
 	// -------------------------------------------------------------------------------------
 
+	// ###### TargetTriggerDfuMode ######
+
+	/**
+	 * Connect through CrownstoneBle and wait for result.
+	 *
+	 * Resets _reconnectionAttemptsLeft.
+	 * Continue with sendDfuCommand.
+	 */
+	bool startPhaseTargetTriggerDfuMode();
 
 	/**
 	 * Possibly retry connection if not _isCrownstoneCentralConnected yet.
@@ -124,12 +140,16 @@ private:
 	void reconnectAfterDfuCommand(event_t& event);
 
 	/**
-	 * checks if the required characteristics are available and obtains handles
-	 * for them.
+	 * checks if the required dfu characteristics are available on the connected
+	 * device.
+	 * Next phase:
+	 * - Phase::Abort if not successful, else
+	 * - Phase::TargetPreparing
 	 */
-	void verifyDfuMode(event_t& event);
+	Phase completePhaseTargetTriggerDfuMode();
 
-	void onDisconnect(event_t& event);
+
+
 
 
 	// ------------------------------------------------------------------------------------
@@ -159,10 +179,16 @@ private:
 	 * sets a callback to be called when the given event type is received.
 	 * The event is passed into the callback for further inspection.
 	 *
-	 * Returns true if the callback was succesfully set.
-	 * Returns false if another event is already awaited.
+	 * Returns true if a previous callback was overriden by this call.
+	 *
+	 * Note: be sure to set the callback before the event is triggered.
 	 */
-	bool waitForEvent(CS_TYPE evttype, PhaseCallback callback);
+	bool setEventCallback(CS_TYPE evttype, EventCallback callback);
+
+	/**
+	 * sets the phase callback to nullptr.
+	 */
+	void clearEventCallback();
 
 	/**
 	 * Call this method in the last phase event handler. It will:
@@ -179,13 +205,6 @@ private:
 
 	// ---------- phase start callbacks ----------
 
-	/**
-	 * Connect through CrownstoneBle and wait for result.
-	 *
-	 * Resets _reconnectionAttemptsLeft.
-	 * Continue with sendDfuCommand.
-	 */
-	bool startPhaseTargetTriggerDfuMode();
 
 	bool startPhaseTargetPreparing();
 	bool startPhaseTargetInitializing();
@@ -202,7 +221,7 @@ private:
 	 * Called by completePhase.
 	 */
 
-	Phase completePhaseTargetTriggerDfuMode();
+
 	Phase completePhaseTargetPreparing();
 	Phase completePhaseTargetInitializing();
 	Phase completePhaseTargetUpdating();
@@ -224,7 +243,6 @@ private:
 //	void onReadDuringConnect(ble_central_read_result_t& result);
 //	void onWrite(cs_ret_code_t result);
 //	void onNotification(ble_central_notification_t& result);
-
 
 	// -------------------------------------------------------------------------------------
 	// --------------------------------------- utils ---------------------------------------
