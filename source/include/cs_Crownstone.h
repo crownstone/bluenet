@@ -19,6 +19,7 @@
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
 #include <dfu/cs_FirmwareReader.h>
+#include <dfu/cs_MeshDfuHost.h>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFiltering.h>
 #include <localisation/cs_MeshTopology.h>
@@ -351,7 +352,6 @@ private:
 	SystemTime _systemTime;
 
 	SwitchAggregator _switchAggregator;
-	FirmwareReader _firmwareReader;
 
 	// ------------------ normal mode components ------------------
 
@@ -360,6 +360,10 @@ private:
 	AssetFiltering _assetFiltering;
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
+
+	// dfu
+	FirmwareReader _firmwareReader;
+	MeshDfuHost _meshDfuHost;
 
 
 #if BUILD_MICROAPP_SUPPORT == 1

@@ -233,6 +233,7 @@ std::vector<Component*> Crownstone::getChildren() {
 		&_switchAggregator,
 		&_presenceHandler,
 		&_behaviourStore,
+		_crownstoneCentral,
 		// (add others when necessary for weak dependences)
 	};
 }

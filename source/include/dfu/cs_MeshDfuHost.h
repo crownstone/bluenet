@@ -11,6 +11,7 @@
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_CrownstoneCentral.h>
 #include <events/cs_EventListener.h>
+#include <common/cs_Component.h>
 
 /**
  * This bluenet component manages the progress and protocol of a crownstone-to-crownstone firmware update.
@@ -27,7 +28,7 @@
  *
  *  NOTE: corresponds roughly to dfu_Write_application.py
  */
-class MeshDfuHost : public EventListener {
+class MeshDfuHost : public EventListener, public Component {
 public:
 	/**
 	 * return true if dfu process sucessfully started.
@@ -78,6 +79,11 @@ private:
 	BleCentral* _bleCentral = nullptr;
 
 	/**
+	 * is listen() called?
+	 */
+	bool _listening = false;
+
+	/**
 	 * current status of the connection.
 	 */
 	bool _isCrownstoneCentralConnected = false;
@@ -98,13 +104,6 @@ private:
 	// ---------------------------------- phase callbacks ----------------------------------
 	// -------------------------------------------------------------------------------------
 
-	/**
-	 * Connect through CrownstoneBle and wait for result.
-	 *
-	 * Resets _reconnectionAttemptsLeft.
-	 * Continue with sendDfuCommand.
-	 */
-	void triggerTargetDfuMode();
 
 	/**
 	 * Possibly retry connection if not _isCrownstoneCentralConnected yet.
@@ -179,17 +178,15 @@ private:
 	void completePhase();
 
 	// ---------- phase start callbacks ----------
+
 	/**
-	 * startPhaseX methods start administration for a phase.
+	 * Connect through CrownstoneBle and wait for result.
 	 *
-	 * If this method returns true:
-	 *  - Any required administration variables have been set up.
-	 *  - Phase was successfully scheduled to start using waitForEvent(...).
-	 * If this method returns false:
-	 *  - No changes happened.
+	 * Resets _reconnectionAttemptsLeft.
+	 * Continue with sendDfuCommand.
 	 */
-	bool startPhaseHostInitializing();
 	bool startPhaseTargetTriggerDfuMode();
+
 	bool startPhaseTargetPreparing();
 	bool startPhaseTargetInitializing();
 	bool startPhaseTargetUpdating();
@@ -205,7 +202,6 @@ private:
 	 * Called by completePhase.
 	 */
 
-	Phase completePhaseHostInitializing();
 	Phase completePhaseTargetTriggerDfuMode();
 	Phase completePhaseTargetPreparing();
 	Phase completePhaseTargetInitializing();
@@ -235,9 +231,14 @@ private:
 	// -------------------------------------------------------------------------------------
 
 	/**
-	 * ble component pointers non-nullptr?
+	 * check if ble component pointers are non-nullptr.
 	 */
 	bool isInitialized();
+
+	/**
+	 * obtain pointers to ble components and listen();
+	 */
+	cs_ret_code_t init() override;
 
 	/**
 	 * returns true if this device has an init packet and no already running dfu process.

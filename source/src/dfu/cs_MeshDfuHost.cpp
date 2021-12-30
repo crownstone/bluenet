@@ -14,8 +14,7 @@
 
 bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 	if(!isInitialized()) {
-		// TODO: get pointers to crownstoneCentral and bleCentral.
-		listen();
+		return init() == ERR_SUCCESS;
 	}
 
 	if (!ableToLaunchDfu()) {
@@ -24,8 +23,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 	_targetDevice = target;
 
-	startPhase(Phase::TargetTriggerDfuMode);
-	return true;
+	return startPhase(Phase::TargetTriggerDfuMode);
 }
 
 // -------------------------------------------------------------------------------------
@@ -36,79 +34,12 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 	LogMeshDfuHostDebug("startPhaseTargetTriggerDfuMode");
-	return false;
-}
 
-MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
-	LogMeshDfuHostDebug("completePhaseTargetTriggerDfuMode");
-	return Phase::None;
-}
-
-// ###### TargetPreparing ######
-
-bool startPhaseTargetPreparing() {
-	LogMeshDfuHostDebug("startPhaseTargetPreparing");
-	return false;
-}
-
-MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
-	LogMeshDfuHostDebug("completePhaseTargetPreparing");
-	return Phase::None;
-}
-// ###### TargetInitializing ######
-
-bool startPhaseTargetInitializing() {
-	LogMeshDfuHostDebug("startPhaseTargetInitializing");
-	return false;
-}
-
-MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
-	LogMeshDfuHostDebug("completePhaseTargetInitializing");
-	return Phase::None;
-}
-// ###### TargetUpdating ######
-
-bool startPhaseTargetUpdating() {
-	LogMeshDfuHostDebug("startPhaseTargetUpdating");
-	return false;
-}
-
-MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
-	LogMeshDfuHostDebug("completePhaseTargetUpdating");
-	return Phase::None;
-}
-// ###### TargetVerifying ######
-
-bool startPhaseTargetVerifying() {
-	LogMeshDfuHostDebug("startPhaseTargetVerifying");
-	return false;
-}
-
-MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
-	LogMeshDfuHostDebug("completePhaseTargetVerifying");
-	return Phase::None;
-}
-// ###### TargetTriggerDfuMode ######
-
-bool startPhaseAborting() {
-	LogMeshDfuHostDebug("startPhaseAborting");
-	return false;
-}
-
-MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
-	LogMeshDfuHostDebug("completePhaseAborting");
-	return Phase::None;
-}
-
-// ----------------------
-
-void MeshDfuHost::triggerTargetDfuMode() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
-
 	_crownstoneCentral->connect(_targetDevice);
-	waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
 	LogMeshDfuHostDebug("waiting for cs central connect result");
+	return waitForEvent(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 }
 
 void MeshDfuHost::sendDfuCommand(event_t& event) {
@@ -157,7 +88,89 @@ void MeshDfuHost::reconnectAfterDfuCommand(event_t& event) {
 
 void MeshDfuHost::verifyDfuMode(event_t& event) {
 	LogMeshDfuHostDebug("verify the dfu mode (TODO)");
+	// TODO
 }
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
+	LogMeshDfuHostDebug("completePhaseTargetTriggerDfuMode");
+	// TODO
+	return Phase::None;
+}
+
+
+
+
+
+// ###### TargetPreparing ######
+
+bool startPhaseTargetPreparing() {
+	LogMeshDfuHostDebug("startPhaseTargetPreparing");
+	// TODO
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
+	LogMeshDfuHostDebug("completePhaseTargetPreparing");
+	// TODO
+	return Phase::None;
+}
+// ###### TargetInitializing ######
+
+bool startPhaseTargetInitializing() {
+	LogMeshDfuHostDebug("startPhaseTargetInitializing");
+	// TODO
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
+	LogMeshDfuHostDebug("completePhaseTargetInitializing");
+	// TODO
+	return Phase::None;
+}
+// ###### TargetUpdating ######
+
+bool startPhaseTargetUpdating() {
+	LogMeshDfuHostDebug("startPhaseTargetUpdating");
+	// TODO
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
+	LogMeshDfuHostDebug("completePhaseTargetUpdating");
+	// TODO
+	return Phase::None;
+}
+// ###### TargetVerifying ######
+
+bool startPhaseTargetVerifying() {
+	LogMeshDfuHostDebug("startPhaseTargetVerifying");
+	// TODO
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
+	LogMeshDfuHostDebug("completePhaseTargetVerifying");
+	// TODO
+	return Phase::None;
+}
+// ###### TargetTriggerDfuMode ######
+
+bool startPhaseAborting() {
+	LogMeshDfuHostDebug("startPhaseAborting");
+	// TODO
+	return false;
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
+	LogMeshDfuHostDebug("completePhaseAborting");
+	// TODO
+	return Phase::None;
+}
+
+// ----------------------
+
+
+
 
 
 // ----------------------------------------------------------------------------------
@@ -272,6 +285,32 @@ bool MeshDfuHost::waitForEvent(CS_TYPE evtToWaitOn, PhaseCallback callback) {
 }
 
 // --------------------------------------- utils ---------------------------------------
+
+bool MeshDfuHost::isInitialized() {
+	return _bleCentral != nullptr && _crownstoneCentral != nullptr;
+}
+
+cs_ret_code_t MeshDfuHost::init() {
+	_bleCentral = &BleCentral::getInstance();
+	_crownstoneCentral = getComponent<CrownstoneCentral>();
+
+	if (!_listening) {
+		listen();
+		_listening = true;
+	}
+
+	if(!isInitialized()) {
+		LogMeshDfuHostDebug("MeshDfuHost failed to initialize");
+		return ERR_NOT_INITIALIZED;
+	}
+	if(!haveInitPacket()) {
+		LogMeshDfuHostDebug("MeshDfuHost no init packet available");
+		return ERR_NOT_AVAILABLE;
+	}
+
+	LogMeshDfuHostDebug("MeshDfuHost init successful");
+	return ERR_SUCCESS;
+}
 
 bool MeshDfuHost::haveInitPacket() {
 	return true; // TODO actually check
