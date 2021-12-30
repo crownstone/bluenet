@@ -16,7 +16,7 @@
 #include <structs/buffer/cs_EncryptionBuffer.h>
 
 #define LOGBleCentralInfo LOGi
-#define LOGBleCentralDebug LOGvv
+#define LOGBleCentralDebug LOGd
 #define LogLevelBleCentralDebug SERIAL_VERY_VERBOSE
 
 const uint16_t WRITE_OVERHEAD = 3;
@@ -486,6 +486,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 
 	// Handle error first.
 	if (_currentOperation != operation) {
+		bool shouldReturn = false;
+
 		switch (_currentOperation) {
 			case Operation::NONE: {
 				break;
@@ -494,14 +496,16 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::CONNECT: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::DISCONNECT: {
 				// Keep on waiting for the disconnect event.
@@ -512,7 +516,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::READ: {
 				// Ignore data, finalize with error instead.
@@ -522,15 +527,30 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				};
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
+		}
+
+		// TODO Arend@Bart (30-12-2021): I've added this because the early returns forgot to send
+		// disconnect events. Maybe it's worth simplifying this by putting the follow-up switch statement
+		// in an else clause?
+		if(operation == Operation::DISCONNECT) {
+			LOGBleCentralDebug("Dispatch disconnect event");
+			event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
+			disconnectEvent.dispatch();
+		}
+
+		if(shouldReturn) {
+			return;
 		}
 	}
 

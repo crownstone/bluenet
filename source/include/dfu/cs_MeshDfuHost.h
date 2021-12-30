@@ -31,6 +31,11 @@
 class MeshDfuHost : public EventListener, public Component {
 public:
 	/**
+	 * obtain pointers to ble components and listen();
+	 */
+	cs_ret_code_t init() override;
+
+	/**
 	 * return true if dfu process sucessfully started.
 	 *
 	 * Initializes this component if necessary.
@@ -85,6 +90,7 @@ private:
 
 	/**
 	 * current status of the connection.
+	 * TODO: maybe it's better to merge these into 1 _isConnected.
 	 */
 	bool _isCrownstoneCentralConnected = false;
 	bool _isBleCentralConnected = false;
@@ -101,7 +107,8 @@ private:
 	device_address_t _targetDevice;
 
 	// TODO: DEBUG
-	device_address_t _debugTarget = {.address     = {0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35},
+
+	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
 									  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
 	uint8_t ticks_until_start = 100;
 	// END DEBUG
@@ -124,7 +131,7 @@ private:
 	/**
 	 * Possibly retry connection if not _isCrownstoneCentralConnected yet.
 	 * When connection is established, send dfu command and wait for disconnect.
-	 * If max retries is reached, stopDfu().
+	 * If max retries is reached, PhaseAborting will be started.
 	 *
 	 * Resets _reconnectionAttemptsLeft.
 	 * Continue with reconnectAfterDfuCommand.
@@ -182,6 +189,8 @@ private:
 	 * Returns true if a previous callback was overriden by this call.
 	 *
 	 * Note: be sure to set the callback before the event is triggered.
+	 *
+	 * TODO: add timeout
 	 */
 	bool setEventCallback(CS_TYPE evttype, EventCallback callback);
 
@@ -253,10 +262,6 @@ private:
 	 */
 	bool isInitialized();
 
-	/**
-	 * obtain pointers to ble components and listen();
-	 */
-	cs_ret_code_t init() override;
 
 	/**
 	 * returns true if this device has an init packet and no already running dfu process.
@@ -274,7 +279,6 @@ private:
 	bool dfuProcessIdle();
 
 	void connectToTarget();
-	void stopDfu();
 	bool startDfu(device_address_t macaddr);
 
 public:

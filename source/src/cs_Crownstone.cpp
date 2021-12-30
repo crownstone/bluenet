@@ -229,11 +229,13 @@ Crownstone::Crownstone(boards_config_t& board) :
 };
 
 std::vector<Component*> Crownstone::getChildren() {
+	LOGd("inspecting children of Crownstone object");
 	return {
 		&_switchAggregator,
 		&_presenceHandler,
 		&_behaviourStore,
 		_crownstoneCentral,
+		&_meshDfuHost,
 		// (add others when necessary for weak dependences)
 	};
 }
@@ -601,6 +603,7 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 
 	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
+			LOGi("Start OPERATION_MODE_NORMAL");
 			_scanner->init();
 			_scanner->setStack(_stack);
 
@@ -624,11 +627,13 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 
 			_assetFiltering.init();
 
-			_firmwareReader.init();
+//			_firmwareReader.init();
+			_meshDfuHost.init();
 
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {
+			LOGi("Start OPERATION_MODE_SETUP");
 			// In setup mode, we want to listen for incoming UART commands,
 			// so that the programmer can use UART to test it.
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
