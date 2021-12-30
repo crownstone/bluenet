@@ -35,56 +35,68 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 // ###### TargetTriggerDfuMode ######
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
+	LogMeshDfuHostDebug("startPhaseTargetTriggerDfuMode");
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
+	LogMeshDfuHostDebug("completePhaseTargetTriggerDfuMode");
 	return Phase::None;
 }
 
 // ###### TargetPreparing ######
 
 bool startPhaseTargetPreparing() {
+	LogMeshDfuHostDebug("startPhaseTargetPreparing");
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
+	LogMeshDfuHostDebug("completePhaseTargetPreparing");
 	return Phase::None;
 }
 // ###### TargetInitializing ######
 
 bool startPhaseTargetInitializing() {
+	LogMeshDfuHostDebug("startPhaseTargetInitializing");
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
+	LogMeshDfuHostDebug("completePhaseTargetInitializing");
 	return Phase::None;
 }
 // ###### TargetUpdating ######
 
 bool startPhaseTargetUpdating() {
+	LogMeshDfuHostDebug("startPhaseTargetUpdating");
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
+	LogMeshDfuHostDebug("completePhaseTargetUpdating");
 	return Phase::None;
 }
 // ###### TargetVerifying ######
 
 bool startPhaseTargetVerifying() {
+	LogMeshDfuHostDebug("startPhaseTargetVerifying");
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
+	LogMeshDfuHostDebug("completePhaseTargetVerifying");
 	return Phase::None;
 }
 // ###### TargetTriggerDfuMode ######
 
 bool startPhaseAborting() {
+	LogMeshDfuHostDebug("startPhaseAborting");
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
+	LogMeshDfuHostDebug("completePhaseAborting");
 	return Phase::None;
 }
 
