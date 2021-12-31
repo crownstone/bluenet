@@ -194,7 +194,7 @@ private:
 	 *
 	 * Note: be sure to set the callback before the event is triggered.
 	 */
-	bool setEventCallback(CS_TYPE evttype, EventCallback callback, uint32_t timeoutMs = 10000);
+	bool setEventCallback(CS_TYPE evttype, EventCallback callback, uint32_t timeoutMs = 30000);
 
 	/**
 	 * sets the phase callback to nullptr.

@@ -368,6 +368,7 @@ void MeshDfuHost::handleEvent(event_t& event) {
 			LOGMeshDfuHostDebug("tick counting: %d ", ticks_until_start);
 		}
 		if(CsMath::Decrease(ticks_until_start) == 1){
+			LOGMeshDfuHostDebug("starting dfu at ticks left : %d ", ticks_until_start);
 			copyFirmwareTo(_debugTarget);
 		}
 	}
