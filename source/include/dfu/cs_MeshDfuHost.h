@@ -12,6 +12,7 @@
 #include <ble/cs_CrownstoneCentral.h>
 #include <events/cs_EventListener.h>
 #include <common/cs_Component.h>
+#include <util/cs_Coroutine.h>
 
 /**
  * This bluenet component manages the progress and protocol of a crownstone-to-crownstone firmware update.
@@ -74,6 +75,9 @@ private:
 	CS_TYPE _expectedEvent;
 	typedef void(MeshDfuHost::*EventCallback)(event_t&);
 	EventCallback _expectedEventCallback = nullptr;
+
+	Coroutine _timeOutRoutine;
+
 
 	// ----------------------- ble related variables -----------------------
 
@@ -189,10 +193,8 @@ private:
 	 * Returns true if a previous callback was overriden by this call.
 	 *
 	 * Note: be sure to set the callback before the event is triggered.
-	 *
-	 * TODO: add timeout
 	 */
-	bool setEventCallback(CS_TYPE evttype, EventCallback callback);
+	bool setEventCallback(CS_TYPE evttype, EventCallback callback, uint32_t timeoutMs = 10000);
 
 	/**
 	 * sets the phase callback to nullptr.
@@ -253,6 +255,11 @@ private:
 //	void onWrite(cs_ret_code_t result);
 //	void onNotification(ble_central_notification_t& result);
 
+	/**
+	 * To be called by the timeoutRoutine to cancel waiting event callbacks and abort.
+	 */
+	void onEventCallbackTimeOut();
+
 	// -------------------------------------------------------------------------------------
 	// --------------------------------------- utils ---------------------------------------
 	// -------------------------------------------------------------------------------------
@@ -261,7 +268,6 @@ private:
 	 * check if ble component pointers are non-nullptr.
 	 */
 	bool isInitialized();
-
 
 	/**
 	 * returns true if this device has an init packet and no already running dfu process.

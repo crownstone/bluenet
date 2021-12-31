@@ -13,6 +13,7 @@
 #define LOGMeshDfuHostInfo LOGi
 
 bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
+	LOGMeshDfuHostDebug("Copy firmware to target");
 	if(!isInitialized()) {
 		return init() == ERR_SUCCESS;
 	}
@@ -252,11 +253,13 @@ void MeshDfuHost::completePhase() {
 	startPhase(phaseNext);
 }
 
-bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback) {
+bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback, uint32_t timeoutMs) {
 	bool overridden = _expectedEventCallback != nullptr;
 
 	_expectedEvent         = evtToWaitOn;
 	_expectedEventCallback = callback;
+
+	_timeOutRoutine.startSingleMs(timeoutMs);
 
 	return overridden;
 }
@@ -264,6 +267,10 @@ void MeshDfuHost::clearEventCallback() {
 	_expectedEventCallback = nullptr;
 }
 
+
+void MeshDfuHost::onEventCallbackTimeOut() {
+	LOGMeshDfuHostInfo("event callback timed out, now what?");
+}
 // --------------------------------------- utils ---------------------------------------
 
 bool MeshDfuHost::isInitialized() {
@@ -289,6 +296,14 @@ cs_ret_code_t MeshDfuHost::init() {
 		LOGMeshDfuHostDebug("MeshDfuHost no init packet available");
 		return ERR_NOT_AVAILABLE;
 	}
+
+	_timeOutRoutine._action =
+			[this]() {
+				onEventCallbackTimeOut();
+				// (timeoutroutine is intended as single shot but have to return a delay value)
+				return Coroutine::delayS(10);
+			};
+	_timeOutRoutine.pause();
 
 	LOGMeshDfuHostDebug("MeshDfuHost init successful");
 	return ERR_SUCCESS;
@@ -333,9 +348,11 @@ void MeshDfuHost::handleEvent(event_t& event) {
 		}
 	}
 
-
 	// if a callback is waiting on this event call it back.
 	if (_expectedEventCallback != nullptr && event.type == _expectedEvent) {
+		// cancel timeout
+		_timeOutRoutine.pause();
+
 		// create local copy
 		auto eventCallback = _expectedEventCallback;
 
@@ -343,6 +360,8 @@ void MeshDfuHost::handleEvent(event_t& event) {
 		_expectedEventCallback = nullptr;
 		(this->*eventCallback)(event);
 	}
+
+	_timeOutRoutine.handleEvent(event);
 
 	if(event.type == CS_TYPE::EVT_TICK) {
 		if (ticks_until_start % 10 == 1) {

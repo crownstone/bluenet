@@ -10,6 +10,7 @@
 
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_RTC.h>
+#include <events/cs_Event.h>
 
 // coroutines
 // note: coroutine is currently built upon the event buss tickrate
@@ -38,45 +39,77 @@
  *
  */
 class Coroutine {
-private:
-	uint32_t nextCallTickcount = 0;
-
 public:
+	enum class Mode : uint8_t {
+		Repeat,
+		Single,
+		Paused,
+		StartedSingle,
+		StartedRepeat,
+	};
+
 	typedef std::function<uint32_t(void)> Action;
 
-	// void function that returns the amount of tick events before it should be called again.
-	Action action;
-
-	Coroutine() = default;
-	Coroutine(Action a) : action(a) {}
-
 	/**
-	 * To be called on tick event.
-	 */
-	void onTick(uint32_t currentTickCount) {
-		// TODO: not doing roll-over checks here yet..
-		if (currentTickCount >= nextCallTickcount && action) {
-			auto ticksToWait = action();
-			nextCallTickcount = currentTickCount + ticksToWait;
-		}
-	}
-
-	/**
-	 * Convenience function replacing onTick().
+	 * A function takes no parameters andreturns the amount of ticks before it should be called again.
 	 *
-	 * To be called on event.
+	 * Note: You can use `return Coroutine::delayS(4);` to convert from seconds to ticks.
 	 */
-	bool handleEvent(event_t& evt) {
-		if (evt.type == CS_TYPE::EVT_TICK) {
-			this->onTick(*reinterpret_cast<TYPIFY(EVT_TICK)*>(evt.data));
-			return true;
-		}
-		return false;
-	}
+	Action _action;
 
-	uint32_t getNextCallTickCount() const {
-		return nextCallTickcount;
-	}
+	/**
+	 * By default coroutines will start repeating their action immediately.
+	 *
+	 * To setup a coroutine for single-shot, construct it with mode Paused and call startSingleS(delay).
+	 */
+	Coroutine(Action action, Mode mode = Mode::Repeat) : _action(action), _mode(mode) {}
+	Coroutine() = default;
+
+	// ---------------------------------------------------------------
+
+	/**
+	 * Handles all administration of Coroutine and calls _action at the configured time(s).
+	 *
+	 * Return true if given evt was a EVT_TICK event. False otherwise.
+	 *
+	 * Call this in your eventhandlers handleEvent method.
+	 */
+	bool handleEvent(event_t& evt);
+
+	// ---------------------------------------------------------------
+
+	/**
+	 * Schedules the coroutine action to run after given amount of miliseconds.
+	 * Sets the coroutine mode to paused afterwards.
+	 */
+	void startSingleMs(uint32_t ms = 0);
+
+	/**
+	 * Schedules the coroutine action to run after given amount of seconds.
+	 * Sets the coroutine mode to paused afterwards.
+	 */
+	void startSingleS(uint32_t s = 0);
+
+	/**
+	 * Schedules the coroutine action to start running after given amount of miliseconds.
+	 * Note: even with delay set to 0, the _action will wait for the next tick event.
+	 */
+	void startRepeatMs(uint32_t ms = 0);
+
+	/**
+	 * Schedules the coroutine action to start running after given amount of seconds.
+	 * Note: even with delay set to 0, the _action will wait for the next tick event.
+	 */
+	void startRepeatS(uint32_t s = 0);
+
+	/**
+	 * cancel pending call to action.
+	 */
+	void pause();
+
+	// ---------------------------------------------------------------
+
+	// conversion utilities.
 
 	static uint32_t delayMs(uint32_t ms) {
 		return ms / TICK_INTERVAL_MS;
@@ -85,4 +118,22 @@ public:
 	static uint32_t delayS(uint32_t s){
 		return delayMs(s * 1000);
 	}
+
+private:
+	uint32_t _nextCallTickcount = 0;
+
+	Mode _mode = Mode::Repeat;
+
+	/**
+	 * true if currentTickCount is beyond _nextCallTickcount and _action is non-empty.
+	 */
+	bool shouldRunAction(uint32_t currentTickCount);
+
+	/**
+	 * Checks the current mode of operation, call the action if necessary and update
+	 * administration variables.
+	 *
+	 * TODO: not doing roll-over checks here yet..
+	 */
+	void onTick(uint32_t currentTickCount);
 };

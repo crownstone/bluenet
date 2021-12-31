@@ -1,0 +1,86 @@
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Dec 31, 2021
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
+
+
+
+#include <util/cs_Coroutine.h>
+
+void Coroutine::startSingleMs(uint32_t ms) {
+	_nextCallTickcount = delayMs(ms);
+	_mode = Mode::StartedSingle;
+}
+
+void Coroutine::startSingleS(uint32_t s) {
+	startSingleMs(s*1000);
+}
+
+void Coroutine::startRepeatMs(uint32_t ms) {
+	_nextCallTickcount = delayMs(ms);
+	_mode = Mode::StartedRepeat;
+}
+
+void Coroutine::startRepeatS(uint32_t s) {
+	startRepeatMs(s*1000);
+}
+
+void Coroutine::pause() {
+	_mode = Mode::Paused;
+}
+
+void Coroutine::onTick(uint32_t currentTickCount) {
+	switch(_mode) {
+		case Mode::Repeat: {
+			if (shouldRunAction(currentTickCount)) {
+				auto ticksToWait = _action();
+				_nextCallTickcount = currentTickCount + ticksToWait;
+			}
+			return;
+		}
+		case Mode::Single: {
+			if (shouldRunAction(currentTickCount)) {
+				_action();
+				_mode = Mode::Paused;
+			}
+			return;
+		}
+		case Mode::Paused: {
+			return;
+		}
+		case Mode::StartedSingle: {
+			// _nextCallTickcount stored the intended delay after StartedSingle.
+			// now we know the current tick count, so update it an progress to
+			// mode single.
+			_nextCallTickcount = currentTickCount + _nextCallTickcount;
+			_mode = Mode::Single;
+			return;
+		}
+		case Mode::StartedRepeat: {
+			// _nextCallTickcount stored the intended delay after StartedSingle.
+			// now we know the current tick count, so update it an progress to
+			// mode repeat.
+			_nextCallTickcount = currentTickCount + _nextCallTickcount;
+			_mode = Mode::Repeat;
+			return;
+		}
+	}
+}
+
+
+
+bool Coroutine::handleEvent(event_t& evt) {
+	if (evt.type == CS_TYPE::EVT_TICK) {
+		this->onTick(*reinterpret_cast<TYPIFY(EVT_TICK)*>(evt.data));
+		return true;
+	}
+	return false;
+}
+
+
+bool Coroutine::shouldRunAction(uint32_t currentTickCount) {
+		return currentTickCount >= _nextCallTickcount && _action;
+	}
