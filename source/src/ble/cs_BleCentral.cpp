@@ -638,6 +638,7 @@ void BleCentral::onConnect(uint16_t connectionHandle, const ble_gap_evt_connecte
 		// Wait for MTU response.
 	}
 	else {
+		// TODO(04-01-2022): @Bart is it correct that success is returned here?
 		LOGw("Failed MTU request nrfCode=%u", nrfCode);
 		finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
 	}

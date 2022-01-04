@@ -33,6 +33,7 @@ class MeshDfuHost : public EventListener, public Component {
 public:
 	/**
 	 * obtain pointers to ble components and listen();
+	 * Resets _reconnectionAttemptsLeft.
 	 */
 	cs_ret_code_t init() override;
 
@@ -46,6 +47,7 @@ public:
 	enum class Phase {
 		Idle = 0,
 		TargetTriggerDfuMode, // sending dfu command and waiting for reset
+		ConnectTargetInDfuMode, // check if desired characteristics are available
 		TargetPreparing,      // send PRN command
 		TargetInitializing,   // sending init packets
 		TargetUpdating,       // sending firmware packets
@@ -64,7 +66,12 @@ private:
 	 * upon phase complete, this phase will be checked for a subsequent action.
 	 * (this can be user overridden to stop a dfu flood.)
 	 */
-	Phase _phaseNextOverride = Phase::None;
+	Phase _phaseOnComplete = Phase::None;
+
+	/**
+	 * upon timeout this phase will be entered.
+	 */
+	Phase _phaseOnTimeout = Phase::None;
 
 	/**
 	 * Administration variables for the method waiteForEvent(..);
@@ -76,6 +83,9 @@ private:
 	typedef void(MeshDfuHost::*EventCallback)(event_t&);
 	EventCallback _expectedEventCallback = nullptr;
 
+	/**
+	 * Utility to call onEventCallbackTimeOut at desired moments.
+	 */
 	Coroutine _timeOutRoutine;
 
 
@@ -111,7 +121,6 @@ private:
 	device_address_t _targetDevice;
 
 	// TODO: DEBUG
-
 	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
 									  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
 	uint8_t ticks_until_start = 100;
@@ -127,41 +136,65 @@ private:
 	/**
 	 * Connect through CrownstoneBle and wait for result.
 	 *
-	 * Resets _reconnectionAttemptsLeft.
 	 * Continue with sendDfuCommand.
 	 */
 	bool startPhaseTargetTriggerDfuMode();
 
 	/**
 	 * Possibly retry connection if not _isCrownstoneCentralConnected yet.
+	 *
 	 * When connection is established, send dfu command and wait for disconnect.
 	 * If max retries is reached, PhaseAborting will be started.
-	 *
-	 * Resets _reconnectionAttemptsLeft.
-	 * Continue with reconnectAfterDfuCommand.
 	 */
 	void sendDfuCommand(event_t& event);
 
 	/**
-	 * Connect through the BleCentral and wait for result.
-	 * If connection was still active, wait for next connect result.
+	 * checks if _isCrownstoneCentralConnected. If true:
+	 * - wait for EVT_CS_CENTRAL_CONNECT_RESULT and abort if that times out.
 	 *
-	 * Continue with verifyDfuMode on success.
+	 * Else, completePhase.
 	 */
-	void reconnectAfterDfuCommand(event_t& event);
+	void verifyDisconnectAfterDfu(event_t& event);
 
 	/**
-	 * checks if the required dfu characteristics are available on the connected
+	 * Next phase:
+	 * - Phase::Abort if not successful, else
+	 * - Phase::TargetPreparing
+	 *
+	 * Resets _reconnectionAttemptsLeft.
+	 */
+	Phase completePhaseTargetTriggerDfuMode();
+
+	// ###### ConnectTargetInDfuMode ######
+
+	/**
+	 * Connect to target using BLE central.
+	 *
+	 * Continue with reconnectAfterDfuCommand.
+	 */
+	bool startConnectTargetInDfuMode();
+
+	/**
+	 * Checks if the required dfu characteristics are available on the connected
 	 * device.
+	 *
+	 * Connect through the BleCentral and wait for result if not yet available.
+	 *
+	 */
+	void verifyDfuMode(event_t& event);
+
+	/**
 	 * Next phase:
 	 * - Phase::Abort if not successful, else
 	 * - Phase::TargetPreparing
 	 */
-	Phase completePhaseTargetTriggerDfuMode();
+	Phase completeConnectTargetInDfuMode();
 
+	// ###### Aborting ######
 
-
-
+	bool startPhaseAborting();
+	void aborting(event_t& event);
+	Phase completePhaseAborting();
 
 	// ------------------------------------------------------------------------------------
 	// ------------------------------- phase administration -------------------------------
@@ -194,7 +227,9 @@ private:
 	 *
 	 * Note: be sure to set the callback before the event is triggered.
 	 */
-	bool setEventCallback(CS_TYPE evttype, EventCallback callback, uint32_t timeoutMs = 30000);
+	bool setEventCallback(
+			CS_TYPE evttype, EventCallback callback,
+			uint32_t timeoutMs = 30000, Phase onTimeout = Phase::Aborting);
 
 	/**
 	 * sets the phase callback to nullptr.
@@ -214,6 +249,12 @@ private:
 	 */
 	void completePhase();
 
+	/**
+	 * To be called by the timeoutRoutine to cancel waiting event callbacks and start
+	 * the phase indicated by _phaseOnTimeout.
+	 */
+	void onEventCallbackTimeOut();
+
 	// ---------- phase start callbacks ----------
 
 
@@ -221,7 +262,6 @@ private:
 	bool startPhaseTargetInitializing();
 	bool startPhaseTargetUpdating();
 	bool startPhaseTargetVerifying();
-	bool startPhaseAborting();
 	bool startPhaseBooting();
 
 	// ---------- phase complete callbacks ----------
@@ -237,7 +277,6 @@ private:
 	Phase completePhaseTargetInitializing();
 	Phase completePhaseTargetUpdating();
 	Phase completePhaseTargetVerifying();
-	Phase completePhaseAborting();
 	Phase completePhaseBooting();
 
 
@@ -255,10 +294,6 @@ private:
 //	void onWrite(cs_ret_code_t result);
 //	void onNotification(ble_central_notification_t& result);
 
-	/**
-	 * To be called by the timeoutRoutine to cancel waiting event callbacks and abort.
-	 */
-	void onEventCallbackTimeOut();
 
 	// -------------------------------------------------------------------------------------
 	// --------------------------------------- utils ---------------------------------------

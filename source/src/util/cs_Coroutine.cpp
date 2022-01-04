@@ -6,12 +6,15 @@
  */
 
 
-
+#include <logging/cs_Logger.h>
 
 #include <util/cs_Coroutine.h>
 
+#define LOGCoroutineDebug LOGd
+
 void Coroutine::startSingleMs(uint32_t ms) {
 	_nextCallTickcount = delayMs(ms);
+	LOGCoroutineDebug("coroutine start single");
 	_mode = Mode::StartedSingle;
 }
 
@@ -21,6 +24,7 @@ void Coroutine::startSingleS(uint32_t s) {
 
 void Coroutine::startRepeatMs(uint32_t ms) {
 	_nextCallTickcount = delayMs(ms);
+	LOGCoroutineDebug("coroutine start repeat");
 	_mode = Mode::StartedRepeat;
 }
 
@@ -29,6 +33,7 @@ void Coroutine::startRepeatS(uint32_t s) {
 }
 
 void Coroutine::pause() {
+	LOGCoroutineDebug("coroutine pause");
 	_mode = Mode::Paused;
 }
 
@@ -43,8 +48,8 @@ void Coroutine::onTick(uint32_t currentTickCount) {
 		}
 		case Mode::Single: {
 			if (shouldRunAction(currentTickCount)) {
+				_mode = Mode::Paused; // must be done before action() to prevent overwriting it
 				_action();
-				_mode = Mode::Paused;
 			}
 			return;
 		}

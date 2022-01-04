@@ -13,7 +13,7 @@
 #define LOGMeshDfuHostInfo LOGi
 
 bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
-	LOGMeshDfuHostDebug("Copy firmware to target");
+	LOGMeshDfuHostDebug("+++ Copy firmware to target");
 	if(!isInitialized()) {
 		return init() == ERR_SUCCESS;
 	}
@@ -34,26 +34,26 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 // ###### TargetTriggerDfuMode ######
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
-	LOGMeshDfuHostDebug("startPhaseTargetTriggerDfuMode");
+	LOGMeshDfuHostDebug("+++ startPhaseTargetTriggerDfuMode");
 	setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
-	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	auto status = _crownstoneCentral->connect(_targetDevice);
 
-	LOGMeshDfuHostDebug("waiting for cs central connect result");
+	LOGMeshDfuHostDebug("+++ waiting for cs central connect result");
 	return status == ERR_WAIT_FOR_SUCCESS;
 }
 
 void MeshDfuHost::sendDfuCommand(event_t& event) {
+	LOGMeshDfuHostDebug("+++ sendDfuCommand");
 	if(!_isCrownstoneCentralConnected) {
 		if(_reconnectionAttemptsLeft > 0) {
-			LOGMeshDfuHostDebug("connection failed, retrying %d more times", _reconnectionAttemptsLeft);
+			LOGMeshDfuHostDebug("+++ Crownstone central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
 			setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
 			_reconnectionAttemptsLeft -= 1;
 			_crownstoneCentral->connect(_targetDevice);
 
-			LOGMeshDfuHostDebug("waiting for cs central connect result");
+			LOGMeshDfuHostDebug("+++ waiting for crownstone central connect result");
 			return;
 		} else {
 			startPhase(Phase::Aborting);
@@ -64,31 +64,65 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 	// expect a disconnection after writing the control command
 	// this needs to be the BLE_CENTRAL event because CrownstoneCentral may not have an
 	// active operation.
-	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::reconnectAfterDfuCommand);
+	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::verifyDisconnectAfterDfu);
 
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	_crownstoneCentral->write(CommandHandlerTypes::CTRL_CMD_GOTO_DFU, nullptr, 0);
 
-	LOGMeshDfuHostDebug("waiting for disconnect after command goto dfu");
+	LOGMeshDfuHostDebug("+++ waiting for disconnect after command goto dfu");
 }
 
-void MeshDfuHost::reconnectAfterDfuCommand(event_t& event) {
+void MeshDfuHost::verifyDisconnectAfterDfu(event_t& event) {
 	if (_isCrownstoneCentralConnected) {
-		LOGMeshDfuHostDebug("incorrect state, expected to be disconnected after dfu command.");
-		setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::reconnectAfterDfuCommand);
-		LOGMeshDfuHostDebug("waiting for disconnect after command goto dfu");
+		LOGMeshDfuHostDebug("+++ incorrect state, expected to be disconnected after dfu command.");
+		setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::verifyDisconnectAfterDfu);
+		LOGMeshDfuHostDebug("+++ waiting for disconnect after command goto dfu");
 		return;
 	}
 
-	if(!_isBleCentralConnected) {
+	completePhase();
+}
+
+MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
+	return Phase::ConnectTargetInDfuMode;
+}
+
+// ###### ConnectTargetInDfuMode ######
+
+bool MeshDfuHost::startConnectTargetInDfuMode() {
+	LOGMeshDfuHostDebug("+++ startConnectTargetInDfuMode");
+
+	setEventCallback(
+			CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT,
+			&MeshDfuHost::verifyDfuMode,
+			MeshDfuConstants::DfuHostSettings::ConnectionTimeoutMs,
+			Phase::ConnectTargetInDfuMode);
+
+	auto status = _bleCentral->connect(_targetDevice);
+
+	LOGMeshDfuHostDebug("+++ waiting for BLE central connect result");
+	return status == ERR_WAIT_FOR_SUCCESS;
+}
+
+void MeshDfuHost::verifyDfuMode(event_t& event) {
+	LOGMeshDfuHostDebug("+++ reconnectAfterDfuCommand");
+
+	if(!_bleCentral->isConnected()) {
 		if(_reconnectionAttemptsLeft > 0) {
-			LOGMeshDfuHostDebug("no connection, (re)trying %d more times", _reconnectionAttemptsLeft);
-			setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, &MeshDfuHost::reconnectAfterDfuCommand);
+			LOGMeshDfuHostDebug("+++ BLE central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
+			setEventCallback(
+					CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT,
+					&MeshDfuHost::verifyDfuMode,
+					MeshDfuConstants::DfuHostSettings::ConnectionTimeoutMs,
+					Phase::ConnectTargetInDfuMode);
 
 			_reconnectionAttemptsLeft -= 1;
-			_bleCentral->connect(_targetDevice);
+			cs_ret_code_t res = _bleCentral->connect(_targetDevice);
 
-			LOGMeshDfuHostDebug("waiting for cs central connect result");
+			if(res != ERR_WAIT_FOR_SUCCESS) {
+				LOGMeshDfuHostDebug("+++ BLE central connect result not OK: %d. Retry after timeout.", res);
+			}
 			return;
 		} else {
 			startPhase(Phase::Aborting);
@@ -96,87 +130,94 @@ void MeshDfuHost::reconnectAfterDfuCommand(event_t& event) {
 		}
 	}
 
+	LOGMeshDfuHostDebug("TODO: check characteristics of connected device and return abort if wrong, or Phase::TargetPreparing else.");
+
 	completePhase();
 }
 
-MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
-	LOGMeshDfuHostDebug("completePhaseTargetTriggerDfuMode");
-	// TODO: check characteristics of connected device and return abort if wrong, or Phase::TargetPreparing else.
 
-	return Phase::None;
+MeshDfuHost::Phase MeshDfuHost::completeConnectTargetInDfuMode() {
+	LOGMeshDfuHostDebug("+++ completeConnectTargetInDfuMode");
+	return Phase::TargetPreparing;
 }
 
 
 // ###### TargetPreparing ######
 
 bool MeshDfuHost::startPhaseTargetPreparing() {
-	LOGMeshDfuHostDebug("startPhaseTargetPreparing");
+	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
 	// TODO
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
-	LOGMeshDfuHostDebug("completePhaseTargetPreparing");
+	LOGMeshDfuHostDebug("+++ completePhaseTargetPreparing");
 	// TODO
 	return Phase::None;
 }
 // ###### TargetInitializing ######
 
 bool MeshDfuHost::startPhaseTargetInitializing() {
-	LOGMeshDfuHostDebug("startPhaseTargetInitializing");
+	LOGMeshDfuHostDebug("+++ startPhaseTargetInitializing");
 	// TODO
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
-	LOGMeshDfuHostDebug("completePhaseTargetInitializing");
+	LOGMeshDfuHostDebug("+++ completePhaseTargetInitializing");
 	// TODO
 	return Phase::None;
 }
 // ###### TargetUpdating ######
 
 bool MeshDfuHost::startPhaseTargetUpdating() {
-	LOGMeshDfuHostDebug("startPhaseTargetUpdating");
+	LOGMeshDfuHostDebug("+++ startPhaseTargetUpdating");
 	// TODO
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
-	LOGMeshDfuHostDebug("completePhaseTargetUpdating");
+	LOGMeshDfuHostDebug("+++ completePhaseTargetUpdating");
 	// TODO
 	return Phase::None;
 }
 // ###### TargetVerifying ######
 
 bool MeshDfuHost::startPhaseTargetVerifying() {
-	LOGMeshDfuHostDebug("startPhaseTargetVerifying");
+	LOGMeshDfuHostDebug("+++ startPhaseTargetVerifying");
 	// TODO
 	return false;
 }
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
-	LOGMeshDfuHostDebug("completePhaseTargetVerifying");
+	LOGMeshDfuHostDebug("+++ completePhaseTargetVerifying");
 	// TODO
 	return Phase::None;
 }
 // ###### TargetTriggerDfuMode ######
 
 bool MeshDfuHost::startPhaseAborting() {
-	LOGMeshDfuHostDebug("startPhaseAborting");
-	// TODO: disconnect, clearEventCallback, set phases to none etc.
+	LOGMeshDfuHostDebug("+++ startPhaseAborting");
+	setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::aborting);
+	// TODO: disconnect
 	return true;
 }
 
+void MeshDfuHost::aborting(event_t& event) {
+	completePhase();
+}
+
 MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
-	LOGMeshDfuHostDebug("completePhaseAborting");
-	// TODO
-	return Phase::None;
+	LOGMeshDfuHostDebug("+++ completePhaseAborting");
+	// TODO: clearEventCallback, set phases to none etc.
+	return Phase::Idle;
 }
 
 
 // ---------------------------- progress related callbacks ----------------------------
 
 bool MeshDfuHost::startPhase(Phase phase) {
+	LOGMeshDfuHostDebug("+++ Starting phase %d", phase);
 	bool success = false;
 
 	switch (phase) {
@@ -186,6 +227,10 @@ bool MeshDfuHost::startPhase(Phase phase) {
 		}
 		case Phase::TargetTriggerDfuMode: {
 			success = startPhaseTargetTriggerDfuMode();
+			break;
+		}
+		case Phase::ConnectTargetInDfuMode: {
+			success = startConnectTargetInDfuMode();
 			break;
 		}
 		case Phase::TargetPreparing: {
@@ -216,9 +261,9 @@ bool MeshDfuHost::startPhase(Phase phase) {
 
 	if(success) {
 		_phaseCurrent = phase;
-		_phaseNextOverride = Phase::None;
+		_phaseOnComplete = Phase::None;
 	} else {
-		LOGMeshDfuHostDebug("Failed to start phase %d, aborting", static_cast<uint8_t>(phase));
+		LOGMeshDfuHostDebug("+++ Failed to start phase %d, aborting", static_cast<uint8_t>(phase));
 		startPhase(Phase::Aborting);
 		return false;
 	}
@@ -227,6 +272,8 @@ bool MeshDfuHost::startPhase(Phase phase) {
 }
 
 void MeshDfuHost::completePhase() {
+	LOGMeshDfuHostDebug("+++ Completeing phase %d", _phaseCurrent);
+
 	Phase phaseNext = Phase::None;
 
 	// TODO: add callbacks for completePhaseX
@@ -237,6 +284,7 @@ void MeshDfuHost::completePhase() {
 			phaseNext = completePhaseTargetTriggerDfuMode();
 			break;
 		}
+		case Phase::ConnectTargetInDfuMode: break;
 		case Phase::TargetPreparing: break;
 		case Phase::TargetInitializing: break;
 		case Phase::TargetUpdating: break;
@@ -245,19 +293,20 @@ void MeshDfuHost::completePhase() {
 		case Phase::None: break;
 	}
 
-	if (_phaseNextOverride != Phase::None) {
-		LOGMeshDfuHostInfo("DFU phase next progress was overriden by user");
-		phaseNext = _phaseNextOverride;
+	if (_phaseOnComplete != Phase::None) {
+		LOGMeshDfuHostInfo("+++ DFU phase next progress was overriden by user");
+		phaseNext = _phaseOnComplete;
 	}
 
 	startPhase(phaseNext);
 }
 
-bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback, uint32_t timeoutMs) {
+bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback, uint32_t timeoutMs, Phase onTimeout) {
 	bool overridden = _expectedEventCallback != nullptr;
 
 	_expectedEvent         = evtToWaitOn;
 	_expectedEventCallback = callback;
+	_phaseOnTimeout = onTimeout;
 
 	_timeOutRoutine.startSingleMs(timeoutMs);
 
@@ -269,7 +318,8 @@ void MeshDfuHost::clearEventCallback() {
 
 
 void MeshDfuHost::onEventCallbackTimeOut() {
-	LOGMeshDfuHostInfo("event callback timed out, now what?");
+	LOGMeshDfuHostInfo("+++ event callback timed out, starting _phaseOnTimeout");
+	startPhase(_phaseOnTimeout);
 }
 // --------------------------------------- utils ---------------------------------------
 
@@ -305,6 +355,8 @@ cs_ret_code_t MeshDfuHost::init() {
 			};
 	_timeOutRoutine.pause();
 
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
+
 	LOGMeshDfuHostDebug("MeshDfuHost init successful");
 	return ERR_SUCCESS;
 }
@@ -331,15 +383,21 @@ void MeshDfuHost::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT : {
 			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_CS_CENTRAL_CONNECT_RESULT, event.data);
 			_isCrownstoneCentralConnected = *connectResult == ERR_SUCCESS;
+
+			LOGMeshDfuHostDebug("Crownstone central connect result received: result %d. Isconnected: %d",
+					*connectResult,
+					_isCrownstoneCentralConnected);
 			break;
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
 			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_BLE_CENTRAL_CONNECT_RESULT, event.data);
-			_isBleCentralConnected = *connectResult == ERR_SUCCESS;
+			LOGMeshDfuHostDebug("BLE central connect result received: result %d. Isconnected: %d",
+					*connectResult,
+					_bleCentral->isConnected());
 			break;
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
-			_isBleCentralConnected = false;
+			LOGMeshDfuHostDebug("Ble central disconnected, setting _isCrownstoneCentralConnected to false.");
 			_isCrownstoneCentralConnected = false;
 			break;
 		}
@@ -370,6 +428,18 @@ void MeshDfuHost::handleEvent(event_t& event) {
 		if(CsMath::Decrease(ticks_until_start) == 1){
 			LOGMeshDfuHostDebug("starting dfu at ticks left : %d ", ticks_until_start);
 			copyFirmwareTo(_debugTarget);
+		}
+
+		uint32_t tickCount = *reinterpret_cast<TYPIFY(EVT_TICK)*>(event.data);
+		if (tickCount % 10 == 0) {
+			LOGMeshDfuHostDebug("_phaseCurrent: %d, _phaseOnComplete %d, _phaseOnTimeout %d",
+					_phaseCurrent,
+					_phaseOnComplete,
+					_phaseOnTimeout);
+			LOGMeshDfuHostDebug("timeoutRoutine mode %d, nexttick %u, tickcount %u",
+					_timeOutRoutine.getMode(),
+					_timeOutRoutine.getNextTick(),
+					tickCount);
 		}
 	}
 }

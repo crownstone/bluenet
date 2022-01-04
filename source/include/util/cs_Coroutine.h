@@ -107,6 +107,9 @@ public:
 	 */
 	void pause();
 
+	Mode getMode() { return _mode; }
+	uint32_t getNextTick() { return _nextCallTickcount;}
+
 	// ---------------------------------------------------------------
 
 	// conversion utilities.
