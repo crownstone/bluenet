@@ -77,7 +77,7 @@ class LogStringExtractor:
 
     def _parseFiles(self):
         """
-        Cache all C/C++ fileNames in sourceFilesDir
+        Cache all C/C++ file names in sourceFilesDir
         """
         for root, dirs, files in os.walk(self.sourceFilesDir):
             for fileName in files:
@@ -99,23 +99,25 @@ class LogStringExtractor:
                 continue
 
             if mergingMultiLine != LogType.NONE:
+                # Continuation of a previously found log that did not end at the same line.
                 mergedLine += line.strip()
                 bracketOpenCount += self._countBrackets(line)
 
                 if bracketOpenCount == 0:
+                    # This is the last line of the multi line log.
+                    # print(f"Merged multiline: {mergedLine}")
                     if mergingMultiLine == LogType.LOG:
                         self._parseLogLine(mergedLine)
                     elif mergingMultiLine == LogType.ARRAY:
                         self._parseLogArrayLine(mergedLine)
                     mergingMultiLine = LogType.NONE
-                    # print(f"Merged multiline: {mergedLine}")
                 continue
 
             match = self.logPattern.match(line)
             if match:
                 bracketOpenCount = self._countBrackets(line)
                 if bracketOpenCount > 0:
-                    # This is probably a multi line log.
+                    # This is a multi line log, start merging multiple lines.
                     mergingMultiLine = LogType.LOG
                     mergedLine = line.strip()
                     continue
@@ -130,7 +132,7 @@ class LogStringExtractor:
             if match:
                 bracketOpenCount = self._countBrackets(line)
                 if bracketOpenCount > 0:
-                    # This is probably a multi line log.
+                    # This is a multi line log, start merging multiple lines.
                     mergingMultiLine = LogType.ARRAY
                     mergedLine = line.strip()
                     continue
@@ -376,7 +378,7 @@ class LogStringExtractor:
                 })
 
         with open(outputFileName, 'w') as jsonFile:
-            json.dump(output, jsonFile, indent=4)
+            json.dump(output, jsonFile)
 
 parser = LogStringExtractor()
 parser.parse(args.sourceFilesDir, args.outputFileName, args.topDir)
