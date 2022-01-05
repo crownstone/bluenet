@@ -650,6 +650,16 @@ else()
 			COMMENT "RTT client, runs in background"
 			)
 		
+		add_custom_target(extract_logs
+			COMMAND ${CMAKE_COMMAND} -E echo "** Extract logs"
+			COMMAND ${CMAKE_COMMAND} -E echo "WORKSPACE_DIR=${WORKSPACE_DIR}"
+			COMMAND ${CMAKE_COMMAND} -E echo "CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}"
+			COMMAND ${CMAKE_COMMAND} -E echo "CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+			COMMAND ${CMAKE_COMMAND} -E echo "BOARD_TARGET=${BOARD_TARGET}"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=EXTRACT" -P ${DEFAULT_MODULES_PATH}/extract_logs.cmake
+			COMMENT "Extract logs from preprocessed source files."
+			)
+		
 		add_custom_target(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
 			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
