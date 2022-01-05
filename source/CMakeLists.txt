@@ -639,7 +639,7 @@ else()
 
 		add_custom_target(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart"
+			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart -l ${CMAKE_CURRENT_BINARY_DIR}/extracted_logs.json"
 			COMMENT "UART client, runs in background"
 			VERBATIM
 			)
