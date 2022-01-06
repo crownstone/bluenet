@@ -10,6 +10,7 @@
 
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_CrownstoneCentral.h>
+#include <dfu/cs_MeshDfuConstants.h>
 #include <events/cs_EventListener.h>
 #include <common/cs_Component.h>
 #include <util/cs_Coroutine.h>
@@ -58,6 +59,7 @@ public:
 
 private:
 	// ----------------------- runtime phase variables -----------------------
+
 	/**
 	 * state describing what the device is currently doing/waiting for
 	 */
@@ -103,17 +105,17 @@ private:
 	bool _listening = false;
 
 	/**
-	 * current status of the connection.
-	 * TODO: maybe it's better to merge these into 1 _isConnected.
+	 * current status of the connection. (Updated by several events.)
 	 */
 	bool _isCrownstoneCentralConnected = false;
-	bool _isBleCentralConnected = false;
 
 	/**
 	 * determines how many times a reconnect will be attempted until dfu is stopped.
 	 * See MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts
 	 */
 	uint8_t _reconnectionAttemptsLeft = 0;
+
+	uint8_t _reconnectTimeoutMs = 0;
 
 	/**
 	 * the device to be dfu-d.
@@ -167,12 +169,20 @@ private:
 
 	// ###### ConnectTargetInDfuMode ######
 
+
+	/**
+	 * Waits for an incoming scan of the target or timeout
+	 * in order to give ble central time to recover from the
+	 * recent disconnect.
+	 */
+	bool startConnectTargetInDfuMode();
+
 	/**
 	 * Connect to target using BLE central.
 	 *
-	 * Continue with reconnectAfterDfuCommand.
+	 * Continue with verifyDfuMode.
 	 */
-	bool startConnectTargetInDfuMode();
+	void connectTargetInDfuMode(event_t& event);
 
 	/**
 	 * Checks if the required dfu characteristics are available on the connected
@@ -228,8 +238,10 @@ private:
 	 * Note: be sure to set the callback before the event is triggered.
 	 */
 	bool setEventCallback(
-			CS_TYPE evttype, EventCallback callback,
-			uint32_t timeoutMs = 30000, Phase onTimeout = Phase::Aborting);
+			CS_TYPE evttype,
+			EventCallback callback,
+			uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::DefaultTimeoutMs,
+			Phase onTimeout    = Phase::Aborting);
 
 	/**
 	 * sets the phase callback to nullptr.
@@ -254,6 +266,11 @@ private:
 	 * the phase indicated by _phaseOnTimeout.
 	 */
 	void onEventCallbackTimeOut();
+
+	/**
+	 * Set timeout back to to default delay.
+	 */
+	void resetTimeout(uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::DefaultTimeoutMs);
 
 	// ---------- phase start callbacks ----------
 
