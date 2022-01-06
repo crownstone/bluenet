@@ -20,6 +20,22 @@
  * NOTE: corresponds to dfu_transport_ble.py
  */
 class MeshDfuTransport : EventListener {
+public:
+	/**
+	 * Load UUIDs and sets this class as listener.
+	 */
+	cs_ret_code_t init();
+
+	// -------- util methods -----------
+	bool isTargetInDfuMode();
+
+	// -------- main protocol methods -----------
+	void open();
+	void close();
+
+	void programInitPacket();
+	void programFirmware();
+
 private:
 	UUID _controlPointUuid;
 	UUID _dataPointUuid;
@@ -30,10 +46,6 @@ private:
 	bool _firstInit = true;
 	bool _ready = false;
 
-	/**
-	 * Load UUIDs and sets this class as listener.
-	 */
-	cs_ret_code_t init();
 
 	// ----- the adapter layer for crownstone_ble -----
 	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len);
@@ -71,14 +83,5 @@ private:
 	void __parse_checksum_response();
 
 public:
-	void putTargetInDfuMode();
-	void waitForDisconnect();
-	void isTargetInDfuMode();
-
-	// -------- main protocol methods -----------
-	void open();
-	void close();
-
-	void programInitPacket();
-	void programFirmware();
+	void handleEvent(event_t& event) override;
 };

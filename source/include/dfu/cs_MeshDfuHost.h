@@ -47,13 +47,14 @@ public:
 
 	enum class Phase {
 		Idle = 0,
-		TargetTriggerDfuMode, // sending dfu command and waiting for reset
-		ConnectTargetInDfuMode, // check if desired characteristics are available
-		TargetPreparing,      // send PRN command
-		TargetInitializing,   // sending init packets
-		TargetUpdating,       // sending firmware packets
-		TargetVerifying,
-		Aborting,            // might leave the target in an ugly state but at least saves our ass.
+		TargetTriggerDfuMode,        // send dfu command and wait for disconnect
+		ConnectTargetInDfuMode,      // reconnect to target after scan or timeout
+		DiscoverDfuCharacteristics,  //
+		TargetPreparing,             // send PRN command
+		TargetInitializing,          // sending init packets
+		TargetUpdating,              // sending firmware packets
+		TargetVerifying,             //
+		Aborting,                    // might leave the target in an ugly state but at least saves our ass.
 		None = 0xFF
 	};
 
@@ -118,6 +119,9 @@ private:
 	 * the device to be dfu-d.
 	 */
 	device_address_t _targetDevice;
+
+
+	MeshDfuTransport _meshDfuTransport;
 
 	// TODO: DEBUG
 	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
@@ -198,6 +202,27 @@ private:
 	void checkDfuTargetConnected(event_t& event);
 
 	/**
+	 * Next phase:
+	 * - Phase::Abort if not successful, else
+	 * - Phase::TargetPreparing
+	 */
+	Phase completeConnectTargetInDfuMode();
+
+	// ###### DiscoverDfuCharacteristics ######
+
+	/**
+	 * Starts BLE central discovery.
+	 * Sets a callback for BLE_CENTRAL_DISCOVERY_RESULT to goto onDiscoveryResult.
+	 * Sets a timeout to complete the phase if it takes too long.
+	 */
+	bool startDiscoverDfuCharacteristics();
+
+	/**
+	 * Check result code, verifyDfuMode() and completePhase();
+	 */
+	void onDiscoveryResult(event_t& event);
+
+	/**
 	 * Checks if the required dfu characteristics are available on the connected
 	 * device.
 	 *
@@ -205,12 +230,7 @@ private:
 	 */
 	bool verifyDfuMode();
 
-	/**
-	 * Next phase:
-	 * - Phase::Abort if not successful, else
-	 * - Phase::TargetPreparing
-	 */
-	Phase completeConnectTargetInDfuMode();
+	Phase completeDiscoverDfuCharacteristics();
 
 	// ###### Aborting ######
 

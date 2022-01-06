@@ -169,27 +169,38 @@ void MeshDfuHost::checkDfuTargetConnected() {
 
 	LOGMeshDfuHostDebug("+++ reconnection successful");
 
-	if(verifyDfuMode() ) {
-		completePhase();
-	} else {
-		abort();
-	}
+	completePhase();
 }
 
-bool MeshDfuHost::verifyDfuMode() {
-	LOGMeshDfuHostDebug("+++ verifyDfuMode");
+MeshDfuHost::Phase MeshDfuHost::completeConnectTargetInDfuMode() {
+	LOGMeshDfuHostDebug("+++ completeConnectTargetInDfuMode");
+	return Phase::DiscoverDfuCharacteristics;
+}
 
-	LOGMeshDfuHostDebug("TODO: check characteristics of connected device and return abort if wrong, or Phase::TargetPreparing else.");
+// ###### DiscoverDfuCharacteristics ######
+
+bool MeshDfuHost::startDiscoverDfuCharacteristics() {
+	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, &MeshDfuHost::onDiscoveryResult);
+	setTimeoutCallback(&MeshDfuHost::completePhase);
 
 	return true;
 }
 
+void MeshDfuHost::onDiscoveryCompleteResult(event_t& event) {
+	LOGMeshDfuHostDebug("+++ onDiscoveryComplete");
+	if(event.retCode != ERR_SUCCESS){
+		// early abort on fail.
+		abort();
+		return;
+	}
 
-MeshDfuHost::Phase MeshDfuHost::completeConnectTargetInDfuMode() {
-	LOGMeshDfuHostDebug("+++ completeConnectTargetInDfuMode");
-	return Phase::TargetPreparing;
+	completePhase();
 }
 
+Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
+	LOGMeshDfuHostDebug("+++ completeDiscoverDfuCharacteristics");
+	return _meshDfuTransport.isTargetInDfuMode() ? Phase::TargetPreparing : Phase::Aborting;
+}
 
 // ###### TargetPreparing ######
 
@@ -291,6 +302,10 @@ bool MeshDfuHost::startPhase(Phase phase) {
 			success = startConnectTargetInDfuMode();
 			break;
 		}
+		case Phase::DiscoverDfuCharacteristics: {
+			success = startDiscoverDfuCharacteristics();
+			break;
+		}
 		case Phase::TargetPreparing: {
 			success = startPhaseTargetPreparing();
 			break;
@@ -322,7 +337,7 @@ bool MeshDfuHost::startPhase(Phase phase) {
 		_phaseOnComplete = Phase::None;
 	} else {
 		LOGMeshDfuHostDebug("+++ Failed to start phase %d, aborting", static_cast<uint8_t>(phase));
-		startPhase(Phase::Aborting);
+		abort();
 		return false;
 	}
 
@@ -506,17 +521,5 @@ void MeshDfuHost::handleEvent(event_t& event) {
 			LOGMeshDfuHostDebug("starting dfu at ticks left : %d ", ticks_until_start);
 			copyFirmwareTo(_debugTarget);
 		}
-
-//		uint32_t tickCount = *reinterpret_cast<TYPIFY(EVT_TICK)*>(event.data);
-//		if (tickCount % 10 == 0) {
-//			LOGMeshDfuHostDebug("_phaseCurrent: %d, _phaseOnComplete %d, _phaseOnTimeout %d",
-//					_phaseCurrent,
-//					_phaseOnComplete,
-//					_phaseOnTimeout);
-//			LOGMeshDfuHostDebug("timeoutRoutine mode %d, nexttick %u, tickcount %u",
-//					_timeOutRoutine.getMode(),
-//					_timeOutRoutine.getNextTick(),
-//					tickCount);
-//		}
 	}
 }
