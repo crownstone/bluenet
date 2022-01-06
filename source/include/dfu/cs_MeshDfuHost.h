@@ -71,24 +71,21 @@ private:
 	Phase _phaseOnComplete = Phase::None;
 
 	/**
-	 * upon timeout this phase will be entered.
-	 */
-	Phase _phaseOnTimeout = Phase::None;
-
-	/**
-	 * Administration variables for the method waiteForEvent(..);
+	 * Administration variables for the method setEventCallback(..);
 	 *
-	 * _expectedEvent is only valid if _expectedEventCallback is set.
-	 * _expectedEventCallback is a pointer to member function taking an event_t&.
+	 * _expectedEvent is only valid if _onExpectedEvent is set.
+	 * _onExpectedEvent is a pointer to member function taking an event_t&.
 	 */
 	CS_TYPE _expectedEvent;
-	typedef void(MeshDfuHost::*EventCallback)(event_t&);
-	EventCallback _expectedEventCallback = nullptr;
+	typedef void(MeshDfuHost::*ExpectedEventCallback)(event_t&);
+	ExpectedEventCallback _onExpectedEvent = nullptr;
 
 	/**
 	 * Utility to call onEventCallbackTimeOut at desired moments.
 	 */
 	Coroutine _timeOutRoutine;
+	typedef void(MeshDfuHost::*TimeoutCallback)();
+	TimeoutCallback _onTimeout = nullptr;
 
 
 	// ----------------------- ble related variables -----------------------
@@ -169,29 +166,44 @@ private:
 
 	// ###### ConnectTargetInDfuMode ######
 
-
 	/**
-	 * Waits for an incoming scan of the target or timeout
+	 * Sets callbacks to wait for an incoming scan of the target or timeout
 	 * in order to give ble central time to recover from the
 	 * recent disconnect.
 	 */
 	bool startConnectTargetInDfuMode();
 
 	/**
-	 * Connect to target using BLE central.
-	 *
-	 * Continue with verifyDfuMode.
+	 * Checks incoming scans to see if target is ready for connect
+	 * and then executeConnectTargetInDfuMode.
 	 */
 	void connectTargetInDfuMode(event_t& event);
+
+	/**
+	 * call ble central connect and set event callback to wait for result.
+	 */
+	void executeConnectTargetInDfuMode();
+
+	/**
+	 * Check is BLE central is connected. If not, retry until max attempts is reached.
+	 * If still not connected, abort().
+	 *
+	 * If connection established, continue to verifyDfuMode();
+	 */
+	void checkDfuTargetConnected();
+
+	/**
+	 * forwards to the previous method, discarding the event.
+	 */
+	void checkDfuTargetConnected(event_t& event);
 
 	/**
 	 * Checks if the required dfu characteristics are available on the connected
 	 * device.
 	 *
-	 * Connect through the BleCentral and wait for result if not yet available.
-	 *
+	 * Assumes BLE central is connected.
 	 */
-	void verifyDfuMode(event_t& event);
+	bool verifyDfuMode();
 
 	/**
 	 * Next phase:
@@ -230,25 +242,6 @@ private:
 	void startPhase(event_t& event);
 
 	/**
-	 * sets a callback to be called when the given event type is received.
-	 * The event is passed into the callback for further inspection.
-	 *
-	 * Returns true if a previous callback was overriden by this call.
-	 *
-	 * Note: be sure to set the callback before the event is triggered.
-	 */
-	bool setEventCallback(
-			CS_TYPE evttype,
-			EventCallback callback,
-			uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::DefaultTimeoutMs,
-			Phase onTimeout    = Phase::Aborting);
-
-	/**
-	 * sets the phase callback to nullptr.
-	 */
-	void clearEventCallback();
-
-	/**
 	 * Call this method in the last phase event handler. It will:
 	 *  - call completePhase(); and check intended next phase
 	 *  - check the user set _phaseNext,
@@ -261,16 +254,43 @@ private:
 	 */
 	void completePhase();
 
-	/**
-	 * To be called by the timeoutRoutine to cancel waiting event callbacks and start
-	 * the phase indicated by _phaseOnTimeout.
-	 */
-	void onEventCallbackTimeOut();
+	// ---------- callbacks ----------
 
 	/**
-	 * Set timeout back to to default delay.
+	 * sets a callback to be called when the given event type is received.
+	 * The event is passed into the callback for further inspection.
+	 *
+	 * Returns true if a previous callback was overriden by this call.
+	 *
+	 * Note: be sure to set the callback before the event is triggered.
+	 * Note: event callback is cleared after it is received. If you want to repeat, set it again.
 	 */
-	void resetTimeout(uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::DefaultTimeoutMs);
+	bool setEventCallback(
+			CS_TYPE evttype,
+			ExpectedEventCallback callback);
+
+	/**
+	 * sets the timeout callback and delay to start the given phase.
+	 */
+	bool setTimeoutCallback(
+			TimeoutCallback onTimeout,
+			uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::DefaultTimeoutMs
+			);
+
+	/**
+	 * sets the event callback to nullptr.
+	 */
+	void clearEventCallback();
+
+	/**
+	 * sets the timeout callback to nullptr.
+	 */
+	void clearTimeoutCallback();
+
+	/**
+	 * This is called by the timeoutRoutine to call the current _onTimeout callback.
+	 */
+	void onEventCallbackTimeOut();
 
 	// ---------- phase start callbacks ----------
 
@@ -282,6 +302,7 @@ private:
 	bool startPhaseBooting();
 
 	// ---------- phase complete callbacks ----------
+
 	/**
 	 * completePhaseX methods finish administration for a phase and return
 	 * what is the next intended phase. They must be synchronous.
@@ -289,27 +310,11 @@ private:
 	 * Called by completePhase.
 	 */
 
-
 	Phase completePhaseTargetPreparing();
 	Phase completePhaseTargetInitializing();
 	Phase completePhaseTargetUpdating();
 	Phase completePhaseTargetVerifying();
 	Phase completePhaseBooting();
-
-
-//	// -----------------------------------------------------------------------------------
-//	// --------------------------------- event callbacks ---------------------------------
-//	// -----------------------------------------------------------------------------------
-//
-//	void onTimeout();
-//	void onConnect(cs_ret_code_t retCode);
-//	void onDisconnect();
-//	void onDiscovery(ble_central_discovery_t& result);
-//	void onDiscoveryDone(cs_ret_code_t retCode);
-//	void onRead(ble_central_read_result_t& result);
-//	void onReadDuringConnect(ble_central_read_result_t& result);
-//	void onWrite(cs_ret_code_t result);
-//	void onNotification(ble_central_notification_t& result);
 
 
 	// -------------------------------------------------------------------------------------
@@ -338,6 +343,11 @@ private:
 
 	void connectToTarget();
 	bool startDfu(device_address_t macaddr);
+
+	/**
+	 * starts the aborting phase.
+	 */
+	void abort();
 
 public:
 	/**

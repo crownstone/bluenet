@@ -36,6 +36,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetTriggerDfuMode");
 	setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
+	setTimeoutCallback(&MeshDfuHost::abort);
 
 	auto status = _crownstoneCentral->connect(_targetDevice);
 
@@ -91,17 +92,23 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
 // ###### ConnectTargetInDfuMode ######
 
 bool MeshDfuHost::startConnectTargetInDfuMode() {
+	LOGMeshDfuHostDebug("+++ startConnectTargetInDfuMode");
 	setEventCallback(
 				CS_TYPE::EVT_DEVICE_SCANNED,
 				&MeshDfuHost::connectTargetInDfuMode);
 	LOGMeshDfuHostDebug("+++ waiting for device scan event from target");
+
+	setTimeoutCallback(&MeshDfuHost::executeConnectTargetInDfuMode);
+	LOGMeshDfuHostDebug("+++ waiting for timeout");
+
 	return true;
 }
 
 void MeshDfuHost::connectTargetInDfuMode(event_t& event) {
-	LOGMeshDfuHostDebug("+++ startConnectTargetInDfuMode");
+	LOGMeshDfuHostDebug("+++ connectTargetInDfuMode");
 	if(event.type == CS_TYPE::EVT_DEVICE_SCANNED) {
 		scanned_device_t* device = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
+
 		if(memcmp(device->address, _targetDevice.address, MAC_ADDRESS_LEN) == 0) {
 			LOGMeshDfuHostDebug("+++ received a scan from our target");
 
@@ -120,50 +127,61 @@ void MeshDfuHost::connectTargetInDfuMode(event_t& event) {
 		return;
 	}
 
-	// TODO: also respond on time-out
+	executeConnectTargetInDfuMode();
+}
 
+void MeshDfuHost::executeConnectTargetInDfuMode() {
 	setEventCallback(
 			CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT,
-			&MeshDfuHost::verifyDfuMode,
-			MeshDfuConstants::DfuHostSettings::ConnectionTimeoutMs,
-			Phase::ConnectTargetInDfuMode);
+			&MeshDfuHost::checkDfuTargetConnected);
+
+	setTimeoutCallback(&MeshDfuHost::checkDfuTargetConnected);
 
 	auto status = _bleCentral->connect(_targetDevice);
 
 	LOGMeshDfuHostDebug("+++ waiting for BLE central connect result. Status: %u", status);
+
 	if(status != ERR_WAIT_FOR_SUCCESS) {
-		LOGe("TODO: what to do if ble central is busy or in error state?");
+		LOGw("BLE central busy or in wrong state. Expecting timeout to occur");
 	}
 }
 
-void MeshDfuHost::verifyDfuMode(event_t& event) {
-	LOGMeshDfuHostDebug("+++ reconnectAfterDfuCommand");
+void MeshDfuHost::checkDfuTargetConnected(event_t& event) {
+	if(event.type != CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT) {
+		LOGMeshDfuHostDebug("checkDfuTargetConnected responded to unexpected event.");
+		return;
+	}
+	checkDfuTargetConnected();
+}
 
+void MeshDfuHost::checkDfuTargetConnected() {
+	LOGMeshDfuHostDebug("+++ checkDfuTargetConnected");
 	if(!_bleCentral->isConnected()) {
 		if(_reconnectionAttemptsLeft > 0) {
 			LOGMeshDfuHostDebug("+++ BLE central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
-			setEventCallback(
-					CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT,
-					&MeshDfuHost::verifyDfuMode,
-					MeshDfuConstants::DfuHostSettings::ConnectionTimeoutMs,
-					Phase::ConnectTargetInDfuMode);
+			_reconnectionAttemptsLeft--;
 
-			_reconnectionAttemptsLeft -= 1;
-			cs_ret_code_t res = _bleCentral->connect(_targetDevice);
-
-			if(res != ERR_WAIT_FOR_SUCCESS) {
-				LOGMeshDfuHostDebug("+++ BLE central connect result not OK: %d. Retry after timeout.", res);
-			}
-			return;
+			executeConnectTargetInDfuMode();
 		} else {
-			startPhase(Phase::Aborting);
-			return;
+			abort();
 		}
 	}
 
+	LOGMeshDfuHostDebug("+++ reconnection successful");
+
+	if(verifyDfuMode() ) {
+		completePhase();
+	} else {
+		abort();
+	}
+}
+
+bool MeshDfuHost::verifyDfuMode() {
+	LOGMeshDfuHostDebug("+++ verifyDfuMode");
+
 	LOGMeshDfuHostDebug("TODO: check characteristics of connected device and return abort if wrong, or Phase::TargetPreparing else.");
 
-	completePhase();
+	return true;
 }
 
 
@@ -229,8 +247,14 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
 
 bool MeshDfuHost::startPhaseAborting() {
 	LOGMeshDfuHostDebug("+++ startPhaseAborting");
+
+	clearEventCallback();
+	clearTimeoutCallback();
+
 	setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::aborting);
+
 	// TODO: disconnect
+
 	return true;
 }
 
@@ -244,6 +268,9 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 	return Phase::Idle;
 }
 
+void MeshDfuHost::abort() {
+	startPhase(Phase::Aborting);
+}
 
 // ---------------------------- progress related callbacks ----------------------------
 
@@ -338,29 +365,37 @@ void MeshDfuHost::completePhase() {
 	startPhase(phaseNext);
 }
 
-bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback, uint32_t timeoutMs, Phase onTimeout) {
-	bool overridden = _expectedEventCallback != nullptr;
+bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, ExpectedEventCallback callback) {
+	bool overridden = _onExpectedEvent != nullptr;
 
 	_expectedEvent         = evtToWaitOn;
-	_expectedEventCallback = callback;
-	_phaseOnTimeout = onTimeout;
-
-	resetTimeout(timeoutMs);
+	_onExpectedEvent = callback;
 
 	return overridden;
 }
-void MeshDfuHost::clearEventCallback() {
-	_expectedEventCallback = nullptr;
+
+bool MeshDfuHost::setTimeoutCallback(TimeoutCallback onTimeout, uint32_t timeoutMs) {
+	bool overriden = _onTimeout != nullptr;
+
+	_onTimeout = onTimeout;
+	_timeOutRoutine.startSingleMs(timeoutMs);
+
+	return overriden;
 }
 
+void MeshDfuHost::clearEventCallback() {
+	_onExpectedEvent = nullptr;
+}
+
+void MeshDfuHost::clearTimeoutCallback() {
+	_onTimeout = nullptr;
+}
 
 void MeshDfuHost::onEventCallbackTimeOut() {
-	LOGMeshDfuHostInfo("+++ event callback timed out, starting _phaseOnTimeout");
-	startPhase(_phaseOnTimeout);
-}
-
-void MeshDfuHost::resetTimeout(uint32_t timeoutMs) {
-	_timeOutRoutine.startSingleMs(timeoutMs);
+	LOGMeshDfuHostInfo("+++ event callback timed out, calling _onTimeout");
+	if(_onTimeout != nullptr) {
+		(this->*_onTimeout)();
+	}
 }
 
 // --------------------------------------- utils ---------------------------------------
@@ -414,7 +449,7 @@ bool MeshDfuHost::ableToLaunchDfu() {
 
 bool MeshDfuHost::dfuProcessIdle() {
 	// if not waiting on any updates, we must be done.
-	return _expectedEventCallback == nullptr;
+	return _onExpectedEvent == nullptr;
 //	return _phaseCurrent == Phase::Idle;
 }
 
@@ -449,15 +484,15 @@ void MeshDfuHost::handleEvent(event_t& event) {
 	}
 
 	// if a callback is waiting on this event call it back.
-	if (_expectedEventCallback != nullptr && event.type == _expectedEvent) {
+	if (_onExpectedEvent != nullptr && event.type == _expectedEvent) {
 		// cancel timeout
 		_timeOutRoutine.pause();
 
 		// create local copy
-		auto eventCallback = _expectedEventCallback;
+		auto eventCallback = _onExpectedEvent;
 
 		// clear expected event
-		_expectedEventCallback = nullptr;
+		_onExpectedEvent = nullptr;
 		(this->*eventCallback)(event);
 	}
 
