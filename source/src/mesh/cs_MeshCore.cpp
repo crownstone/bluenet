@@ -462,11 +462,20 @@ void MeshCore::start() {
 	}
 }
 
-void MeshCore::stop() {
+cs_ret_code_t MeshCore::stop() {
 	// Returns NRF_ERROR_INVALID_STATE if the mesh was already disabled.
-	uint32_t retCode = nrf_mesh_disable();
-	if (retCode != NRF_SUCCESS) {
-		LOGw("mesh disable failed: %u", retCode);
+	uint32_t nrfCode = nrf_mesh_disable();
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			return ERR_WAIT_FOR_SUCCESS;
+		}
+		case NRF_ERROR_INVALID_STATE: {
+			return ERR_SUCCESS;
+		}
+		default: {
+			LOGw("mesh disable failed: %u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
 	}
 
 	// Scanner doesn't stop immediately, but will quickly timeout.

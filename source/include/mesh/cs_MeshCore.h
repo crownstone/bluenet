@@ -85,8 +85,11 @@ public:
 
 	/**
 	 * Stop using the radio.
+	 *
+	 * @return ERR_SUCCESS             When the mesh stopped.
+	 * @return ERR_WAIT_FOR_SUCCESS    When the mesh will stop, wait for NRF_MESH_EVT_DISABLED.
 	 */
-	void stop();
+	cs_ret_code_t stop();
 
 	/**
 	 * Set the TX power of mesh messages.

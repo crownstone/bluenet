@@ -69,8 +69,11 @@ public:
 	 * Stop the mesh.
 	 *
 	 * Stops all radio usage.
+	 *
+	 * @return ERR_SUCCESS             When the mesh stopped.
+	 * @return ERR_WAIT_FOR_SUCCESS    When the mesh will stop, wait for NRF_MESH_EVT_DISABLED.
 	 */
-	void stop();
+	cs_ret_code_t stop();
 
 	/**
 	 * Init the advertiser.
