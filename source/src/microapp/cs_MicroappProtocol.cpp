@@ -888,8 +888,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(
 				eventData.targetIds               = &(commandData->stoneId);
 			}
 			eventData.type    = CS_MESH_MODEL_TYPE_MICROAPP;
-			eventData.payload = payload + sizeof(commandData);
-			eventData.size    = payloadSize - sizeof(commandData);
+			eventData.payload = payload + sizeof(*commandData);
+			eventData.size    = payloadSize - sizeof(*commandData);
 			if (eventData.size == 0) {
 				LOGi("No message.");
 				return ERR_WRONG_PAYLOAD_LENGTH;

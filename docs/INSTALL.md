@@ -159,7 +159,8 @@ If the dust settles we might have one single `make write_all` command as well. K
 
 You can find more on logs (over UART) in [this document](LOGGING.md).
 
-## Debug
+
+## Debug with GDB
 
 To start debugging the target, run first in a separate console:
 
@@ -170,9 +171,6 @@ Then run the debug session in another console:
 
     make debug_application
 
-In a third console, you can also run an RTT Client
-
-    make rtt_client
 
 ## Configuration
 

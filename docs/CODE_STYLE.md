@@ -1,9 +1,15 @@
 # Formatter
 
-Bluenet style is defined in source/.clang-format. Support for autoformatting in IDEs is widespread.
+You can use auto formatting by using `source/.clang-format`. Auto formatted code is not always the best though, so use it as a tool rather than the truth. Support for autoformatting in IDEs is widespread.
 E.g.: 
 - This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
 - Commandline tools such as `python3 -m pip install clang-format` are also available.
+
+Investigate the `source/.clang-format` file for more formatting details, a few:
+
+- align subsequent assignments on the `=` token
+- column limit at 120
+- brace wrapping before else
 
 # Etiquette
 
@@ -44,6 +50,8 @@ static constexpr auto BLUETOOTH_NAME = "CRWN";
 class ClassName {
 private:
 	typedef uint8_t index_t;
+	
+	uint16_t* _data; 
 
 	class Settings {
 		bool isActive;
@@ -71,6 +79,8 @@ Notes:
 	```
 - Avoid use of single letters for identifiers (with the exception of a variable for loop iterations) as it impairs search/replace tools and readability.
 - Avoid use of names longer than about 35 characters.
+- Use `uint16_t*` with no space in between (not `uint16_t *_data`). Do not declare multiple variables on one line (see below).
+- Assume C++ / g++ compiler in the sense that no `typedef` is required for the `struct` while still being able to pass it around as `func(a_packed_packet_t p)`.
 
 ## Comments
 

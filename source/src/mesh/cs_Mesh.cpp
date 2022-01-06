@@ -101,9 +101,9 @@ void Mesh::start() {
 	}
 }
 
-void Mesh::stop() {
+cs_ret_code_t Mesh::stop() {
 	LOGi("stop");
-	_core->stop();
+	return _core->stop();
 }
 
 void Mesh::initAdvertiser() {
@@ -159,9 +159,9 @@ void Mesh::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST: {
 			// An outgoing connection is made, stop listening to mesh,
 			// so that the softdevice has time to listen for advertisements.
-			stop();
+			cs_ret_code_t retCode = stop();
 			if (event.result.returnCode == ERR_EVENT_UNHANDLED || event.result.returnCode == ERR_SUCCESS) {
-				event.result.returnCode = ERR_WAIT_FOR_SUCCESS;
+				event.result.returnCode = retCode;
 			}
 			break;
 		}
