@@ -10,7 +10,7 @@
 
 #include <util/cs_Coroutine.h>
 
-#define LOGCoroutineDebug LOGd
+#define LOGCoroutineDebug LOGvv
 
 void Coroutine::startSingleMs(uint32_t ms) {
 	_nextCallTickcount = delayMs(ms);

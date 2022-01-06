@@ -101,7 +101,7 @@ bool MeshDfuHost::startConnectTargetInDfuMode() {
 
 	auto status = _bleCentral->connect(_targetDevice);
 
-	LOGMeshDfuHostDebug("+++ waiting for BLE central connect result");
+	LOGMeshDfuHostDebug("+++ waiting for BLE central connect result. Status: %u", status);
 	return status == ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -284,12 +284,18 @@ void MeshDfuHost::completePhase() {
 			phaseNext = completePhaseTargetTriggerDfuMode();
 			break;
 		}
-		case Phase::ConnectTargetInDfuMode: break;
+		case Phase::ConnectTargetInDfuMode: {
+			phaseNext = completeConnectTargetInDfuMode();
+		}
+
 		case Phase::TargetPreparing: break;
 		case Phase::TargetInitializing: break;
 		case Phase::TargetUpdating: break;
 		case Phase::TargetVerifying: break;
-		case Phase::Aborting: break;
+		case Phase::Aborting: {
+			phaseNext = completePhaseAborting();
+			break;
+		}
 		case Phase::None: break;
 	}
 
@@ -430,16 +436,16 @@ void MeshDfuHost::handleEvent(event_t& event) {
 			copyFirmwareTo(_debugTarget);
 		}
 
-		uint32_t tickCount = *reinterpret_cast<TYPIFY(EVT_TICK)*>(event.data);
-		if (tickCount % 10 == 0) {
-			LOGMeshDfuHostDebug("_phaseCurrent: %d, _phaseOnComplete %d, _phaseOnTimeout %d",
-					_phaseCurrent,
-					_phaseOnComplete,
-					_phaseOnTimeout);
-			LOGMeshDfuHostDebug("timeoutRoutine mode %d, nexttick %u, tickcount %u",
-					_timeOutRoutine.getMode(),
-					_timeOutRoutine.getNextTick(),
-					tickCount);
-		}
+//		uint32_t tickCount = *reinterpret_cast<TYPIFY(EVT_TICK)*>(event.data);
+//		if (tickCount % 10 == 0) {
+//			LOGMeshDfuHostDebug("_phaseCurrent: %d, _phaseOnComplete %d, _phaseOnTimeout %d",
+//					_phaseCurrent,
+//					_phaseOnComplete,
+//					_phaseOnTimeout);
+//			LOGMeshDfuHostDebug("timeoutRoutine mode %d, nexttick %u, tickcount %u",
+//					_timeOutRoutine.getMode(),
+//					_timeOutRoutine.getNextTick(),
+//					tickCount);
+//		}
 	}
 }
