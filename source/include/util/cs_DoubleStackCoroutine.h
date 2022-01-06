@@ -13,37 +13,9 @@
  * The coroutine implementation:
  *   - is used to switch back and forth from microapp code and bluenet code
  *   - is especially used because a delay(..) function from microapp code should not be blocking
- *   - uses a separate stack for each coroutine
+ *   - uses a separate stack for the coroutine
  *   - is in plain C
  *   - uses setjmp and longjmp to jump back and forth
- *
- * We will use it in the following way:
- *
- * typedef struct {
- *   coroutine *c;
- *   ...
- * } coargs;
- *
- * // For example in delay code we call a function that ends up in bluenet and which calls yield 
- * void microapp_code(void *p) {
- *   coargs *args = (coargs*) p;
- *   ...
- *   yield(args->c);
- * }
- *
- * // Set up first call to bluenet (will call loop() down the line)
- * void bluenet_init() {
- *   coroutine c;
- *   // set stack pointer to end of stack for microapp
- *   coargs args = {&c};
- *   start(&c, &iterate, &args, *stack);
- * }
- * // we step until next returns negative, after that we can init again
- * void bluenet_step() {
- *   if (!next(&c)) {
- *     // We are done, at the end of the microapp code, next we can call loop() again
- *   }
- * }
  */
 
 /**
@@ -51,8 +23,8 @@
  * envisioned.
  */
 typedef struct {
-	jmp_buf calleeContext;
-	jmp_buf callerContext;
+	jmp_buf microapp0Context;
+	jmp_buf bluenetContext;
 } coroutine_t;
 
 typedef void (*coroutineFunc)(void*);
@@ -60,15 +32,15 @@ typedef void (*coroutineFunc)(void*);
 /**
  * Start the coroutine.
  */
-void start(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg);
+void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg);
 
 /**
  * Yield the coroutine.
  */
-void yield(coroutine_t* coroutine);
+void yieldCoroutine(coroutine_t* coroutine);
 
 /**
- * Resume
+ * Resume the coroutine.
  */
-int next(coroutine_t* coroutine);
+int nextCoroutine(coroutine_t* coroutine);
 

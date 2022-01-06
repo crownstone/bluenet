@@ -20,6 +20,7 @@ const uint8_t MAX_PAYLOAD = 32;
  * The main opcodes for microapp commands.
  */
 enum CommandMicroapp {
+	CS_MICROAPP_COMMAND_NONE         = 0x00,
 	CS_MICROAPP_COMMAND_LOG          = 0x01,
 	CS_MICROAPP_COMMAND_DELAY        = 0x02,
 	CS_MICROAPP_COMMAND_PIN          = 0x03,  // Payload is pin_cmd_t.
@@ -29,6 +30,8 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_POWER_USAGE  = 0x07,
 	CS_MICROAPP_COMMAND_PRESENCE     = 0x08,
 	CS_MICROAPP_COMMAND_MESH         = 0x09,
+	CS_MICROAPP_COMMAND_SETUP_END    = 0x0A,
+	CS_MICROAPP_COMMAND_LOOP_END     = 0x0B,
 };
 
 enum CommandMicroappPin {
@@ -115,6 +118,7 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 	uint8_t length;
 	uintptr_t microapp_callback;
 	uintptr_t coargs_ptr;
+	bool valid;
 };
 
 /*

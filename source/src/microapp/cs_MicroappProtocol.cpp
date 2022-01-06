@@ -33,6 +33,11 @@
 
 extern "C" {
 
+/**
+ * Arguments to the coroutine.
+ */
+coargs_t g_coargs;
+
 /*
  * This function is called by the microapp in the context of its stack. Even though it is possible to call a log or
  * other bluenet function, this is strongly discouraged. In contrast, yield control towards bluenet explicitly by
@@ -55,20 +60,53 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 	uint8_t retCode  = getRamData(IPC_INDEX_CROWNSTONE_APP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
 
 	if (retCode != IPC_RET_SUCCESS) {
+		// Dubious: we are here in the microapp coroutine and shouldn't log (even though we can).
 		LOGi("Nothing found in RAM ret_code=%u", retCode);
 		return ERR_NOT_FOUND;
 	}
 
 	// We obtain coargs from bluenet2microapp upon which we set microapp2bluenet, this is no error.
+	// The reason is that we do not want to pass the coargs towards the microapp and then pass it back again.
 	bluenet2microapp_ipcdata_t& data = *(bluenet2microapp_ipcdata_t*)buf;
 	uintptr_t coargs_ptr             = data.coargs_ptr;
 	coargs_t* args                   = (coargs_t*)coargs_ptr;
 	args->microapp2bluenet.data      = payload;
 	args->microapp2bluenet.size      = length;
-	yield(args->coroutine);
+	yieldCoroutine(args->coroutine);
 
 	return ERR_SUCCESS;
 }
+
+#ifdef DUMMY_CALLBACK
+/*
+ * Helper function that does not go back and forth to the microapp and can be used to test if the coroutines and
+ * callbacks are working properly without a microapp present.
+ */
+void microapp_callback_dummy() {
+	static int first_time = true;
+	while (1) {
+		// just some random data array
+		uint8_t data[10];
+		uint8_t data_len = 10;
+		// fake setup and loop commands
+		if (first_time) {
+			data[0]    = CS_MICROAPP_COMMAND_SETUP_END;
+			first_time = false;
+		}
+		else {
+			data[0] = CS_MICROAPP_COMMAND_LOOP_END;
+		}
+		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
+		uint8_t rd_size = 0;
+		bluenet2microapp_ipcdata_t ipc_data;
+		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t), &rd_size);
+
+		// Perform the actual callback. Should call microapp_callback and in the end yield.
+		int (*callback_func)(uint8_t*, uint16_t) = (int (*)(uint8_t*, uint16_t))ipc_data.microapp_callback;
+		callback_func(data, data_len);
+	}
+}
+#endif
 
 /*
  * Jump into the microapp (this function should be called as a coroutine). It obtains the very first instruction from
@@ -81,9 +119,20 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
  * @param[in] void *p                            pointer to a coargs_t struct
  */
 void goIntoMicroapp(void* p) {
-	coargs_t* coargs       = (coargs_t*)p;
-	void (*microappMain)() = (void (*)())coargs->entry;
-	(*microappMain)();
+
+#ifdef DUMMY_CALLBACK
+	LOGi("Call main: %p", &microapp_callback_dummy);
+	microapp_callback_dummy();
+#else
+	coargs_t* coargs = (coargs_t*)p;
+	LOGd("Call main: %p", coargs->entry);
+
+	// Rather than working with raw addresses (adding 1 for thumb mode etc.) just use "goto".
+	void* ptr = (void*)coargs->entry;
+	goto* ptr;
+#endif
+	// The coroutine should never return. Incorrectly written microapp.
+	LOGe("We should not come here!");
 }
 
 }  // extern C
@@ -113,7 +162,6 @@ cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
  */
 MicroappProtocol::MicroappProtocol()
 		: EventListener()
-		, _booted(false)
 		, _callbackData(nullptr)
 		, _microappIsScanning(false)
 		, _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
@@ -128,8 +176,6 @@ MicroappProtocol::MicroappProtocol()
 		_bleIsr[i].type     = 0;
 		_bleIsr[i].callback = 0;
 	}
-
-	_coargs = new coargs_t();
 }
 
 /*
@@ -142,37 +188,12 @@ void MicroappProtocol::setIpcRam() {
 	data.protocol          = 1;
 	data.length            = sizeof(bluenet2microapp_ipcdata_t);
 	data.microapp_callback = (uintptr_t)&microapp_callback;
-	data.coargs_ptr        = (uintptr_t)&_coargs;
+	data.coargs_ptr        = (uintptr_t)&g_coargs;
+
+	LOGi("Set callback to %p", data.microapp_callback);
 
 	[[maybe_unused]] uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&data, data.length);
-	LOGi("retCode=%u", retCode);
-}
-
-/*
- * Get the ram structure in which the microapp has registered some of its data. We only check if they expect the same
- * protocol version as we do.
- */
-uint16_t MicroappProtocol::interpretRamdata() {
-	LOGi("Get IPC info for microapp");
-	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
-	uint8_t readSize = 0;
-	uint8_t retCode  = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
-
-	if (retCode != IPC_RET_SUCCESS) {
-		LOGi("Nothing found in RAM ret_code=%u", retCode);
-		return ERR_NOT_FOUND;
-	}
-	LOGi("Found RAM for Microapp");
-
-	microapp2bluenet_ipcdata_t& data = *(microapp2bluenet_ipcdata_t*)buf;
-
-	LOGi("  protocol: %02x", data.protocol);
-
-	const int accepted_protocol_version = 1;
-	if (data.protocol != accepted_protocol_version) {
-		return ERR_PROTOCOL_UNSUPPORTED;
-	}
-	return ERR_SUCCESS;
+	LOGi("Set ram data for microapp, retCode=%u", retCode);
 }
 
 /*
@@ -182,6 +203,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
  * @param[in]                                    appIndex (currently ignored)
  */
 void MicroappProtocol::callApp(uint8_t appIndex) {
+	LOGi("Call microapp #%i", appIndex);
 	// Make thumb mode explicit: will always be true
 	static bool thumbMode = true;
 
@@ -191,7 +213,7 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 	LOGi("Microapp: start at 0x%08X", address);
 
 	if (thumbMode) {
-		address += 1;
+		//		address += 8;
 		LOGi("Set address to 0x%08X (thumb mode)", address);
 	}
 
@@ -200,11 +222,12 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 		return;
 	}
 
-	_coargs->entry = address;
+	g_coargs.entry = address;
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
-	_coargs->coroutine = &_coroutine;
-	start(&_coroutine, goIntoMicroapp, &_coargs);
+	g_coargs.coroutine = &_coroutine;
+	LOGi("Start microapp coroutine at %p", g_coargs.entry);
+	startCoroutine(&_coroutine, goIntoMicroapp, &g_coargs);
 }
 
 /*
@@ -227,37 +250,17 @@ uint16_t MicroappProtocol::initMemory() {
 }
 
 /*
- * Called from cs_Microapp every time tick. Only when _booted flag is set, will we actually call the microapp.
- * The _booted flag is reset when the microapp data can not be interpreted right.
+ * Called from cs_Microapp every time tick. The microapp does not set anything in RAM but will only read from RAM and
+ * call a handler.
  *
- * TODO: _booted etc are only for single microapp
+ * There's no load failure detection. When the call fails bluenet hangs and should reboot.
  */
 void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
-
-	if (!_booted) {
-		return;
-	}
-
-	if (!_loaded) {
-		LOGi("Start loading");
-		uint16_t ret_code = interpretRamdata();
-		if (ret_code != ERR_SUCCESS) {
-			LOGw("Disable microapp. After boot not the right info available. ret_code=%u", ret_code);
-			_booted = false;
-			return;
-		}
-
-		LOGi("Set loaded to true");
-		_loaded = true;
-	}
-
-	if (_loaded) {
-		bool call_again = false;
-		do {
-			callMicroapp();
-			call_again = retrieveCommand();
-		} while (call_again);
-	}
+	bool call_again = false;
+	do {
+		callMicroapp();
+		call_again = retrieveCommand();
+	} while (call_again);
 }
 
 /*
@@ -265,9 +268,10 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
  */
 bool MicroappProtocol::retrieveCommand() {
 	// get payload from data
-	uint8_t* payload = _coargs->microapp2bluenet.data;
-	uint16_t length  = _coargs->microapp2bluenet.size;
+	uint8_t* payload = g_coargs.microapp2bluenet.data;
+	uint16_t length  = g_coargs.microapp2bluenet.size;
 	handleMicroappCommand(payload, length);
+	payload[0]      = CS_MICROAPP_COMMAND_NONE;  // set handled
 	bool call_again = false;
 	return call_again;
 }
@@ -279,16 +283,16 @@ void MicroappProtocol::writeCallback() {
 	// need to be acked. In that sense we can see if there's still an old command that has not been acked before.
 
 	// example for now, if callback from gpio
-	microapp_pin_cmd_t* cmd = (microapp_pin_cmd_t*)_coargs->bluenet2microapp.data;
-	cmd->pin = 1;
-	cmd->value = CS_MICROAPP_COMMAND_VALUE_CHANGE;
-	cmd->ack = false;
+	microapp_pin_cmd_t* cmd = (microapp_pin_cmd_t*)g_coargs.bluenet2microapp.data;
+	cmd->pin                = 1;
+	cmd->value              = CS_MICROAPP_COMMAND_VALUE_CHANGE;
+	cmd->ack                = false;
 
 	// and call the microapp
 	callMicroapp();
 
 	// check if callback has been executed, otherwise call again(?)
-	
+
 	if (!cmd->ack) {
 		LOGi("Command not acked");
 	}
@@ -298,11 +302,14 @@ void MicroappProtocol::writeCallback() {
  * We resume the previously started coroutine.
  */
 void MicroappProtocol::callMicroapp() {
-	if (!_loaded) {
-		LOGi("Not loaded");
+	static int slow_down = 0;
+	slow_down++;
+	if (slow_down != 20) {
 		return;
 	}
-	if (next(&_coroutine)) {
+	slow_down = 0;
+
+	if (nextCoroutine(&_coroutine)) {
 		return;
 	}
 	// Should only happen if microapp actually ends (and does not yield anymore).
@@ -504,12 +511,25 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t
 
 			return handleMicroappMeshCommand(meshCommand, meshPayload, meshPayloadLength);
 		}
+		case CS_MICROAPP_COMMAND_SETUP_END: {
+			LOGi("Setup end");
+			break;
+		}
+		case CS_MICROAPP_COMMAND_LOOP_END: {
+			LOGi("Loop end");
+			break;
+		}
+		case CS_MICROAPP_COMMAND_NONE: {
+			// ignore, nothing written
+			break;
+		}
 		default: {
 			_log(SERIAL_INFO, true, "Unknown command %u of length %u:", command, length);
 			_logArray(SERIAL_INFO, true, payload, length);
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length) {

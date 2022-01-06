@@ -62,23 +62,6 @@ private:
 	void operator=(MicroappProtocol const&);
 
 	/**
-	 * Local flag to check if app did boot. This flag is set to true after the main of the microapp is called
-	 * and will be set after that function returns. If there is something wrong with the microapp it can be used
-	 * to disable the microapp.
-	 *
-	 * TODO: Of course, if there is something wrong, _booted will not be reached. The foolproof implementation
-	 * sets first the state to a temporarily "POTENTIAL BOOT FAILURE" and if it after a reboots finds the state
-	 * at this particular step, it will disable the app rather than try again. The app has to be then enabled
-	 * explicitly again.
-	 */
-	bool _booted;
-
-	/**
-	 * Local flag to indicate that ram section has been loaded.
-	 */
-	bool _loaded;
-
-	/**
 	 * Addressees of pin interrupt service routines.
 	 */
 	pin_isr_t _pinIsr[MAX_PIN_ISR_COUNT];
@@ -92,11 +75,6 @@ private:
 	 * Coroutine for microapp.
 	 */
 	coroutine_t _coroutine;
-
-	/**
-	 * Arguments to the coroutine.
-	 */
-	coargs_t* _coargs;
 
 	/**
 	 * A counter used for the coroutine (to e.g. set the number of ticks for "delay" functionality).
