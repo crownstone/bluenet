@@ -10,10 +10,7 @@ if(EXISTS "${CONFIG_FILE}")
 endif()
 
 if(INSTRUCTION STREQUAL "EXTRACT")
-	message(STATUS "WORKSPACE_DIR=${WORKSPACE_DIR}")
-	message(STATUS "CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR}")
-	message(STATUS "CMAKE_CURRENT_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}")
-	message(STATUS "BOARD_TARGET=${BOARD_TARGET}")
+	message(STATUS "Extract logs from preprocessed source code in ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/crownstone.dir/src")
 	execute_process(
 		COMMAND ${DEFAULT_MODULES_PATH}/../../../../scripts/extract-log-strings.py --sourceFilesDir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/crownstone.dir/src --topDir source/ --outputFile ${CMAKE_CURRENT_BINARY_DIR}/extracted_logs.json 
 		)
