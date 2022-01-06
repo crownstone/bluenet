@@ -80,6 +80,11 @@ void MeshDfuHost::verifyDisconnectAfterDfu(event_t& event) {
 		return;
 	}
 
+	if(_reconnectTimeoutMs--) {
+		// TODO: fix clause to make sense...
+		setEventCallback(CS_TYPE::EVT_TICK, &MeshDfuHost::verifyDisconnectAfterDfu);
+	}
+
 	completePhase();
 }
 

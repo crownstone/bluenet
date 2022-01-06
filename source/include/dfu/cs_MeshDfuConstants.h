@@ -18,6 +18,7 @@ namespace MeshDfuConstants {
 
 namespace DfuHostSettings {
 constexpr uint8_t MaxReconnectionAttempts = 5;
+constexpr uint32_t ReconnectTimeoutMs = 5000;
 constexpr uint32_t ConnectionTimeoutMs = 15000u;
 
 }
