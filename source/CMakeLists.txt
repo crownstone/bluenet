@@ -241,7 +241,7 @@ else()
 	endif()
 
 	if(BUILD_MESHING)
-		# All C files in mesh/core/src
+		message(STATUS "Add all C files in mesh/core/src")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_utils.c")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_configure.c")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/queue.c")
@@ -294,7 +294,7 @@ else()
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/log.c")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_local.c")
 
-		# All C files in mesh/bearer/src
+		message(STATUS "Add all C files in mesh/bearer/src")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/bearer_handler.c")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/ad_type_filter.c")
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/rssi_filter.c")
@@ -372,6 +372,8 @@ else()
 		else()
 			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_adv.c")
 		endif()
+	else()
+		message(STATUS "Mesh SDK files not being compiled (BUILD_MESHING=OFF)")
 	endif()
 
 	if(VERBOSITY GREATER 4)
@@ -649,7 +651,7 @@ else()
 		
 		add_custom_target(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
@@ -786,8 +788,7 @@ else()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND ${CMAKE_COMMAND} -E echo "nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 ${BOOTLOADER_HEX_FILE}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}" 
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 			COMMENT "Create bootloader settings"
