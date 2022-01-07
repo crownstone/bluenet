@@ -51,7 +51,7 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 			LOGMeshDfuHostDebug("+++ Crownstone central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
 			setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
-			_reconnectionAttemptsLeft -= 1;
+			CsMath::Decrease(_reconnectionAttemptsLeft);
 			_crownstoneCentral->connect(_targetDevice);
 
 			LOGMeshDfuHostDebug("+++ waiting for crownstone central connect result");
@@ -159,7 +159,7 @@ void MeshDfuHost::checkDfuTargetConnected() {
 	if(!_bleCentral->isConnected()) {
 		if(_reconnectionAttemptsLeft > 0) {
 			LOGMeshDfuHostDebug("+++ BLE central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
-			_reconnectionAttemptsLeft--;
+			CsMath::Decrease(_reconnectionAttemptsLeft);
 
 			executeConnectTargetInDfuMode();
 		} else {
@@ -174,6 +174,7 @@ void MeshDfuHost::checkDfuTargetConnected() {
 
 MeshDfuHost::Phase MeshDfuHost::completeConnectTargetInDfuMode() {
 	LOGMeshDfuHostDebug("+++ completeConnectTargetInDfuMode");
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	return Phase::DiscoverDfuCharacteristics;
 }
 
@@ -183,12 +184,26 @@ bool MeshDfuHost::startDiscoverDfuCharacteristics() {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, &MeshDfuHost::onDiscoveryResult);
 	setTimeoutCallback(&MeshDfuHost::completePhase);
 
+	auto status = _bleCentral->discoverServices(_meshDfuTransport.getUuids(), _meshDfuTransport.getUuidCount());
+
+	if(status != ERR_WAIT_FOR_SUCCESS) {
+		if(_reconnectionAttemptsLeft > 0){
+			CsMath::Decrease(_reconnectionAttemptsLeft);
+			LOGw("BLE central busy or in wrong state. Retrying in half a second");
+			setTimeoutCallback(&MeshDfuHost::restartPhase, 500);
+		} else {
+			abort();
+		}
+	}
+
 	return true;
 }
 
-void MeshDfuHost::onDiscoveryCompleteResult(event_t& event) {
-	LOGMeshDfuHostDebug("+++ onDiscoveryComplete");
-	if(event.retCode != ERR_SUCCESS){
+void MeshDfuHost::onDiscoveryResult(event_t& event) {
+	LOGMeshDfuHostDebug("+++ onDiscoveryResult");
+
+	TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT)* result = CS_TYPE_CAST(EVT_CS_CENTRAL_CONNECT_RESULT, event.data);
+	if(*result != ERR_SUCCESS){
 		// early abort on fail.
 		abort();
 		return;
@@ -197,9 +212,16 @@ void MeshDfuHost::onDiscoveryCompleteResult(event_t& event) {
 	completePhase();
 }
 
-Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
+MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 	LOGMeshDfuHostDebug("+++ completeDiscoverDfuCharacteristics");
-	return _meshDfuTransport.isTargetInDfuMode() ? Phase::TargetPreparing : Phase::Aborting;
+
+	if(_meshDfuTransport.isTargetInDfuMode()) {
+		LOGMeshDfuHostDebug("+++ dfu mode verified");
+		return Phase::TargetPreparing;
+	}
+
+	LOGMeshDfuHostDebug("+++ dfu mode verification failed");
+	return Phase::Aborting;
 }
 
 // ###### TargetPreparing ######
@@ -279,9 +301,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 	return Phase::Idle;
 }
 
-void MeshDfuHost::abort() {
-	startPhase(Phase::Aborting);
-}
+
 
 // ---------------------------- progress related callbacks ----------------------------
 
@@ -352,15 +372,23 @@ void MeshDfuHost::completePhase() {
 	// TODO: add callbacks for completePhaseX
 
 	switch(_phaseCurrent) {
-		case Phase::Idle: break;
+		case Phase::Idle: {
+			// idle can't complete. To start another phase call startPhase instead.
+			phaseNext = Phase::Idle;
+			break;
+		}
 		case Phase::TargetTriggerDfuMode: {
 			phaseNext = completePhaseTargetTriggerDfuMode();
 			break;
 		}
 		case Phase::ConnectTargetInDfuMode: {
 			phaseNext = completeConnectTargetInDfuMode();
+			break;
 		}
-
+		case Phase::DiscoverDfuCharacteristics: {
+			phaseNext = completeDiscoverDfuCharacteristics();
+			break;
+		}
 		case Phase::TargetPreparing: break;
 		case Phase::TargetInitializing: break;
 		case Phase::TargetUpdating: break;
@@ -379,6 +407,17 @@ void MeshDfuHost::completePhase() {
 
 	startPhase(phaseNext);
 }
+
+void MeshDfuHost::restartPhase() {
+	LOGMeshDfuHostDebug("Restarting phase %u", _phaseCurrent);
+	startPhase(_phaseCurrent);
+}
+
+void MeshDfuHost::abort() {
+	startPhase(Phase::Aborting);
+}
+
+// ---------- callbacks ----------
 
 bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, ExpectedEventCallback callback) {
 	bool overridden = _onExpectedEvent != nullptr;
@@ -437,6 +476,11 @@ cs_ret_code_t MeshDfuHost::init() {
 	if(!haveInitPacket()) {
 		LOGMeshDfuHostDebug("MeshDfuHost no init packet available");
 		return ERR_NOT_AVAILABLE;
+	}
+
+	auto result = _meshDfuTransport.init();
+	if(result != ERR_SUCCESS) {
+		return result;
 	}
 
 	_timeOutRoutine._action =

@@ -11,6 +11,7 @@
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_CrownstoneCentral.h>
 #include <dfu/cs_MeshDfuConstants.h>
+#include <dfu/cs_MeshDfuTransport.h>
 #include <events/cs_EventListener.h>
 #include <common/cs_Component.h>
 #include <util/cs_Coroutine.h>
@@ -98,6 +99,11 @@ private:
 	BleCentral* _bleCentral = nullptr;
 
 	/**
+	 * sub components
+	 */
+	MeshDfuTransport _meshDfuTransport;
+
+	/**
 	 * is listen() called?
 	 */
 	bool _listening = false;
@@ -121,7 +127,6 @@ private:
 	device_address_t _targetDevice;
 
 
-	MeshDfuTransport _meshDfuTransport;
 
 	// TODO: DEBUG
 	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
@@ -274,6 +279,16 @@ private:
 	 */
 	void completePhase();
 
+	/**
+	 * restarts the current phase.
+	 */
+	void restartPhase();
+
+	/**
+	 * starts the aborting phase.
+	 */
+	void abort();
+
 	// ---------- callbacks ----------
 
 	/**
@@ -363,11 +378,6 @@ private:
 
 	void connectToTarget();
 	bool startDfu(device_address_t macaddr);
-
-	/**
-	 * starts the aborting phase.
-	 */
-	void abort();
 
 public:
 	/**

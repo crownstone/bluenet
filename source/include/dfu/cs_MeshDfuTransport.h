@@ -9,6 +9,7 @@
 #pragma once
 
 #include <ble/cs_UUID.h>
+#include <ble_gatt.h>
 #include <events/cs_EventListener.h>
 
 /**
@@ -29,6 +30,9 @@ public:
 	// -------- util methods -----------
 	bool isTargetInDfuMode();
 
+	UUID* getUuids();
+	uint8_t getUuidCount();
+
 	// -------- main protocol methods -----------
 	void open();
 	void close();
@@ -37,35 +41,53 @@ public:
 	void programFirmware();
 
 private:
-	UUID _controlPointUuid;
-	UUID _dataPointUuid;
+	enum Index : uint8_t {
+		ControlPoint = 0,
+		DataPoint,
+		ENUMLEN
+	};
 
-	uint16_t _controlPointHandle = 0x0;
-	uint16_t _dataPointHandle = 0x0;
+	/**
+	 * address elements as _uuids[Index::ControlPoint] etc.
+	 */
+	UUID _uuids[Index::ENUMLEN] = {};
+	uint16_t _uuidHandles[Index::ENUMLEN] = {};
 
 	bool _firstInit = true;
 	bool _ready = false;
 
+	// ------------------------ event handlers ------------------------
 
-	// ----- the adapter layer for crownstone_ble -----
+	void onDisconnect();
+	void onDiscover(ble_central_discovery_t& result);
+
+	// ----------------------------- utils -----------------------------
+
+	void clearUuidHandles();
+
+
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	// ++++++++++++++++++++++++ nordic protocol ++++++++++++++++++++++++
+	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+	// ------------- the adapter layer for crownstone_ble -------------
 	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len);
 	void writeCharacteristicForResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len);
 
 	void receiveRawNotification();
 
-	// ----- utility forwardering methods -----
+	// ----------------- utility forwardering methods -----------------
 	void write_control_point(uint8_t* data, uint8_t len);
 	void write_data_point(uint8_t* data, uint8_t len);
 
-
-	// ------------ recovery methods -----------
+	// ----------------------- recovery methods -----------------------
 
 	void try_to_recover_before_send_init();
 	void try_to_recover_before_send_firmware();
 
 	void validateCrcCommandResponse();
 
-	// -------------- nordic protocol commands -----------
+	// ------------------- nordic protocol commands -------------------
 	void __create_command();
 	void __create_data();
 	void __create_object();
@@ -77,10 +99,11 @@ private:
 	void __select_data();
 	void __select_object();
 
-	// ------------ raw data communication ------------
+	// -------------------- raw data communication --------------------
 	void __stream_data();
 	void __parse_response();
 	void __parse_checksum_response();
+
 
 public:
 	void handleEvent(event_t& event) override;

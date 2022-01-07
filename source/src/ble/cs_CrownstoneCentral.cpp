@@ -20,7 +20,7 @@
 #include <util/cs_Utils.h>
 
 #define LOGCsCentralInfo LOGi
-#define LOGCsCentralDebug LOGvv
+#define LOGCsCentralDebug LOGd
 #define LogLevelCsCentralDebug SERIAL_VERY_VERBOSE
 
 cs_ret_code_t CrownstoneCentral::init() {
@@ -31,10 +31,13 @@ cs_ret_code_t CrownstoneCentral::init() {
 	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DEVICE_INFO].fromShortUuid(BLE_UUID_DEVICE_INFORMATION_SERVICE);
 	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DFU].fromShortUuid(0xFE59); // DFU service
 	if (retCode != ERR_SUCCESS) {
+		LOGCsCentralDebug("Crownstone Central failed init: %d", retCode);
 		return retCode;
 	}
 	reset();
 	listen();
+
+	LOGCsCentralDebug("Crownstone central initialized");
 	return ERR_SUCCESS;
 }
 
