@@ -88,7 +88,7 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	microapp_state_t & state = _states[index];
 
 	if (!state.hasData) {
-		LOGMicroappInfo("app %u is erased", index);
+		LOGMicroappInfo("Microapp %u has no data", index);
 		return ERR_WRONG_STATE;
 	}
 
