@@ -26,6 +26,7 @@ constexpr uint32_t DefaultTimeoutMs = 30000u;
 
 namespace DFUAdapter {
 
+constexpr uint16_t dfuServiceShortUuid = 0xFE59;
 constexpr char controlPointString[] = "8ec90001-f315-4f60-9fb8-838830daea50";
 constexpr char dataPointString[]    = "8ec90002-f315-4f60-9fb8-838830daea50";
 

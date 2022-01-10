@@ -28,6 +28,13 @@ public:
 	cs_ret_code_t init();
 
 	// -------- util methods -----------
+	/**
+	 * Returns true if the DFU service id and both dfu characteristics have
+	 * been discovered.
+	 *
+	 * Note: discovery doesn't have to be 'completed', returnvalue of this function
+	 * changes as soon as the required events are handled.
+	 */
 	bool isTargetInDfuMode();
 
 	UUID* getUuids();
@@ -53,17 +60,36 @@ private:
 	UUID _uuids[Index::ENUMLEN] = {};
 	uint16_t _uuidHandles[Index::ENUMLEN] = {};
 
+	UUID _dfuServiceUuid;
+	bool _dfuServiceFound = false;
+
 	bool _firstInit = true;
-	bool _ready = false;
+	bool _discoveryComplete = false;
 
 	// ------------------------ event handlers ------------------------
 
 	void onDisconnect();
+
+	/**
+	 * Updates the handles of dfu characteristic handles and checks if
+	 * the DFU service is found.
+	 *
+	 * If _discoveryComplete is set to true, this calls clearConnectionData.
+	 */
 	void onDiscover(ble_central_discovery_t& result);
+
+	/**
+	 * sets _discoveryComplete in order to prevent connection handle information
+	 */
+	void onDiscoveryComplete();
 
 	// ----------------------------- utils -----------------------------
 
-	void clearUuidHandles();
+	/**
+	 * clears all handles etc. after calling this, isTargetInDfuMode
+	 * returns false.
+	 */
+	void clearConnectionData();
 
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

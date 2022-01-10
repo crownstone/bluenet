@@ -35,10 +35,39 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetTriggerDfuMode");
-	setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
-	setTimeoutCallback(&MeshDfuHost::abort);
 
-	auto status = _crownstoneCentral->connect(_targetDevice);
+	if (_reconnectionAttemptsLeft > 0) {
+		CsMath::Decrease(_reconnectionAttemptsLeft);
+
+		setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
+		setTimeoutCallback(&MeshDfuHost::restartPhase);
+
+		auto status = _crownstoneCentral->connect(_targetDevice);
+
+		switch (status) {
+			case ERR_BUSY: {
+				LOGMeshDfuHostDebug("+++ CrownstoneCentral busy. Retrying after timeout. %u attempts left",
+						_reconnectionAttemptsLeft);
+				break;
+			}
+			case ERR_WRONG_STATE: {
+				LOGw("+++ CrownstoneCentral is in wrong state. Retrying after timeout. %u attempts left",
+					 _reconnectionAttemptsLeft);
+				break;
+			}
+			case ERR_WAIT_FOR_SUCCESS: {
+				LOGMeshDfuHostDebug("+++ waiting for crownstone central connect result");
+				break;
+			}
+			default: {
+				LOGMeshDfuHostDebug("Unknown returnvalue");
+			}
+		}
+	}
+	else {
+		LOGMeshDfuHostDebug("+++ Can't connect to dfu target. Aborting.");
+		abort();
+	}
 
 	LOGMeshDfuHostDebug("+++ waiting for cs central connect result");
 	return status == ERR_WAIT_FOR_SUCCESS;
@@ -46,28 +75,16 @@ bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 
 void MeshDfuHost::sendDfuCommand(event_t& event) {
 	LOGMeshDfuHostDebug("+++ sendDfuCommand");
-	if(!_isCrownstoneCentralConnected) {
-		if(_reconnectionAttemptsLeft > 0) {
-			LOGMeshDfuHostDebug("+++ Crownstone central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
-			setEventCallback(CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT, &MeshDfuHost::sendDfuCommand);
 
-			CsMath::Decrease(_reconnectionAttemptsLeft);
-			_crownstoneCentral->connect(_targetDevice);
-
-			LOGMeshDfuHostDebug("+++ waiting for crownstone central connect result");
-			return;
-		} else {
-			startPhase(Phase::Aborting);
-			return;
-		}
-	}
+	// connection established, resetting attempt counter.
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 
 	// expect a disconnection after writing the control command
 	// this needs to be the BLE_CENTRAL event because CrownstoneCentral may not have an
 	// active operation.
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::verifyDisconnectAfterDfu);
+	setTimeoutCallback(&MeshDfuHost::abort);
 
-	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	_crownstoneCentral->write(CommandHandlerTypes::CTRL_CMD_GOTO_DFU, nullptr, 0);
 
 	LOGMeshDfuHostDebug("+++ waiting for disconnect after command goto dfu");
@@ -465,6 +482,7 @@ cs_ret_code_t MeshDfuHost::init() {
 	_crownstoneCentral = getComponent<CrownstoneCentral>();
 
 	if (!_listening) {
+		LOGMeshDfuHostDebug("Start listening");
 		listen();
 		_listening = true;
 	}

@@ -21,8 +21,9 @@ cs_ret_code_t MeshDfuTransport::init() {
 	cs_ret_code_t retCode = ERR_SUCCESS;
 	retCode |= _uuids[Index::ControlPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::controlPointString);
 	retCode |= _uuids[Index::DataPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::dataPointString);
+	retCode |= _dfuServiceUuid.fromShortUuid(MeshDfuConstants::DFUAdapter::dfuServiceShortUuid);
 
-	clearUuidHandles();
+	clearConnectionData();
 
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
@@ -36,7 +37,7 @@ cs_ret_code_t MeshDfuTransport::init() {
 
 bool MeshDfuTransport::isTargetInDfuMode() {
 	return _uuidHandles[Index::ControlPoint] != BLE_GATT_HANDLE_INVALID
-		   && _uuidHandles[Index::DataPoint] != BLE_GATT_HANDLE_INVALID;
+		   && _uuidHandles[Index::DataPoint] != BLE_GATT_HANDLE_INVALID && _dfuServiceFound;
 }
 
 UUID* MeshDfuTransport::getUuids(){
@@ -47,24 +48,41 @@ uint8_t MeshDfuTransport::getUuidCount() {
 	return Index::ENUMLEN;
 }
 
-void MeshDfuTransport::clearUuidHandles() {
+void MeshDfuTransport::clearConnectionData() {
 	_uuidHandles[Index::ControlPoint] = BLE_GATT_HANDLE_INVALID;
 	_uuidHandles[Index::DataPoint]    = BLE_GATT_HANDLE_INVALID;
+	_dfuServiceFound = false;
+	_discoveryComplete = false;
 }
 
 
 void MeshDfuTransport::onDisconnect() {
-	clearUuidHandles();
+	clearConnectionData();
 }
 
 void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
+	if(_discoveryComplete) {
+		LOGMeshDfuTransportDebug("Discovery was already completed. Continuing after clearing old data.");
+		clearConnectionData();
+	}
+
+	if(result.uuid == _dfuServiceUuid) {
+		LOGMeshDfuTransportDebug("Found dfu service handle");
+		_dfuServiceFound = true;
+		return;
+	}
+
 	for (auto index : {Index::ControlPoint, Index::DataPoint}) {
 		if (result.uuid == _uuids[index]) {
-			LOGMeshDfuTransportDebug("Found characteristic handle: %u", index);
+			LOGMeshDfuTransportDebug("Found dfu characteristic handle: %u", index);
 			_uuidHandles[index] = result.valueHandle;
-			break;
+			return;
 		}
 	}
+}
+
+void MeshDfuTransport::onDiscoveryComplete() {
+	_discoveryComplete = true;
 }
 
 void MeshDfuTransport::handleEvent(event_t& event) {
@@ -74,7 +92,10 @@ void MeshDfuTransport::handleEvent(event_t& event) {
 			onDiscover(*result);
 			break;
 		}
-		case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT: break;
+		case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT: {
+			onDiscoveryComplete();
+			break;
+		}
 
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
 			onDisconnect();
