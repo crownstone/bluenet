@@ -524,6 +524,9 @@ else()
 		message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
 		target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
+		# Save intermediate files, these are used for binary logging.
+		target_compile_options(${PROJECT_NAME} PRIVATE -save-temps=obj)
+
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_FILE})
@@ -638,7 +641,7 @@ else()
 
 		add_custom_target(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart"
+			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart -l ${CMAKE_CURRENT_BINARY_DIR}/extracted_logs.json"
 			COMMENT "UART client, runs in background"
 			VERBATIM
 			)
@@ -647,6 +650,12 @@ else()
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
 			COMMAND JLinkRTTClient -RTTTelnetPort ${RTT_PORT}
 			COMMENT "RTT client, runs in background"
+			)
+		
+		add_custom_target(extract_logs
+			COMMAND ${CMAKE_COMMAND} -E echo "** Extract logs"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=EXTRACT" -P ${DEFAULT_MODULES_PATH}/extract_logs.cmake
+			COMMENT "Extract logs from preprocessed source files."
 			)
 		
 		add_custom_target(debug_application
