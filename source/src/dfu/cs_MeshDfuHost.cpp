@@ -63,14 +63,13 @@ bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 				LOGMeshDfuHostDebug("Unknown returnvalue");
 			}
 		}
+
+		return true;
 	}
 	else {
 		LOGMeshDfuHostDebug("+++ Can't connect to dfu target. Aborting.");
-		abort();
+		return false;
 	}
-
-	LOGMeshDfuHostDebug("+++ waiting for cs central connect result");
-	return status == ERR_WAIT_FOR_SUCCESS;
 }
 
 void MeshDfuHost::sendDfuCommand(event_t& event) {

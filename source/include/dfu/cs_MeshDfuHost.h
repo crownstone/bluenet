@@ -131,7 +131,7 @@ private:
 	// TODO: DEBUG
 	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
 									  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
-	uint8_t ticks_until_start = 100;
+	uint8_t ticks_until_start = 200;
 	// END DEBUG
 
 
@@ -142,7 +142,7 @@ private:
 	// ###### TargetTriggerDfuMode ######
 
 	/**
-	 * Connect through CrownstoneBle and wait for result.
+	 * Connect through CrownstoneBle and wait for result. Retries if necessary.
 	 *
 	 * Continue with sendDfuCommand.
 	 */

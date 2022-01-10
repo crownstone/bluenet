@@ -60,7 +60,7 @@ void CrownstoneCentral::resetNotifactionMergerState() {
 
 cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return ERR_BUSY;
 	}
 
@@ -93,7 +93,7 @@ cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs)
 
 cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return ERR_BUSY;
 	}
 
@@ -110,7 +110,7 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 
 cs_ret_code_t CrownstoneCentral::disconnect() {
 	if (isBusy()) {
-		LOGCsCentralInfo("Cancel current operation");
+		LOGCsCentralInfo("Canceling current operation. Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 	// No need to set current operation: BleCentral will block any other operations for us.
@@ -121,7 +121,7 @@ cs_ret_code_t CrownstoneCentral::disconnect() {
 
 cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return ERR_BUSY;
 	}
 
@@ -167,6 +167,7 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 
 cs_data_t CrownstoneCentral::requestWriteBuffer() {
 	if (isBusy()) {
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return cs_data_t();
 	}
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
