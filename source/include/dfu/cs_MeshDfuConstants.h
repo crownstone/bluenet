@@ -28,7 +28,9 @@ namespace DFUAdapter {
 
 constexpr uint16_t dfuServiceShortUuid = 0xFE59;
 constexpr char controlPointString[] = "8ec90001-f315-4f60-9fb8-838830daea50";
+constexpr uint16_t controlPointShortUuid = 1;
 constexpr char dataPointString[]    = "8ec90002-f315-4f60-9fb8-838830daea50";
+constexpr uint16_t dataPointShortUuid = 2;
 
 constexpr uint8_t CONNECTION_ATTEMPTS = 3;
 constexpr uint8_t ERROR_CODE_POS      = 2;

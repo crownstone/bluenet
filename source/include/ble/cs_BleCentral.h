@@ -66,8 +66,8 @@ public:
 	 * For each discovered service and characteristic, EVT_BLE_CENTRAL_DISCOVERY is dispatched.
 	 * Use these events to figure out which handles to use for reading and writing.
 	 *
-	 * @param[in] uuids                Array of UUIDs that will be attempted to discover.
-	 * @param[in] uuidCount            Number of UUIDs in the array.
+	 * @param[in] uuids                Array of service UUIDs that will be attempted to discover.
+	 * @param[in] uuidCount            Number of service UUIDs in the array.
 	 *
 	 * @return ERR_WAIT_FOR_SUCCESS    When the discovery is started. Wait for EVT_BLE_CENTRAL_DISCOVERY_RESULT.
 	 */

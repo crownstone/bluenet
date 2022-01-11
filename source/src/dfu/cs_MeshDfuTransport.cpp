@@ -19,9 +19,10 @@ cs_ret_code_t MeshDfuTransport::init() {
 
 	// Make use of the fact ERR_SUCCESS = 0, to avoid many if statements.
 	cs_ret_code_t retCode = ERR_SUCCESS;
-	retCode |= _uuids[Index::ControlPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::controlPointString);
-	retCode |= _uuids[Index::DataPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::dataPointString);
 	retCode |= _dfuServiceUuid.fromShortUuid(MeshDfuConstants::DFUAdapter::dfuServiceShortUuid);
+
+//	retCode |= _uuids[Index::ControlPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::controlPointString);
+//	retCode |= _uuids[Index::DataPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::dataPointString);
 
 	clearConnectionData();
 
@@ -40,12 +41,12 @@ bool MeshDfuTransport::isTargetInDfuMode() {
 		   && _uuidHandles[Index::DataPoint] != BLE_GATT_HANDLE_INVALID && _dfuServiceFound;
 }
 
-UUID* MeshDfuTransport::getUuids(){
-	return _uuids;
+UUID* MeshDfuTransport::getServiceUuids(){
+	return &_dfuServiceUuid;
 }
 
-uint8_t MeshDfuTransport::getUuidCount() {
-	return Index::ENUMLEN;
+uint8_t MeshDfuTransport::getServiceUuidCount() {
+	return 1;
 }
 
 void MeshDfuTransport::clearConnectionData() {
@@ -72,12 +73,20 @@ void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
 		return;
 	}
 
-	for (auto index : {Index::ControlPoint, Index::DataPoint}) {
-		if (result.uuid == _uuids[index]) {
-			LOGMeshDfuTransportDebug("Found dfu characteristic handle: %u", index);
-			_uuidHandles[index] = result.valueHandle;
-			return;
-		}
+	UUID uuid;
+
+	uuid.fromBaseUuid(_dfuServiceUuid, MeshDfuConstants::DFUAdapter::controlPointShortUuid);
+	if (result.uuid == uuid) {
+		LOGMeshDfuTransportDebug("Found dfu control characteristic handle");
+		_uuidHandles[Index::ControlPoint] = result.valueHandle;
+		return;
+	}
+
+	uuid.fromBaseUuid(_dfuServiceUuid, MeshDfuConstants::DFUAdapter::dataPointShortUuid);
+	if (result.uuid == uuid) {
+		LOGMeshDfuTransportDebug("Found dfu data characteristic handle");
+		_uuidHandles[Index::DataPoint] = result.valueHandle;
+		return;
 	}
 }
 

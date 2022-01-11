@@ -31,7 +31,7 @@ cs_ret_code_t CrownstoneCentral::init() {
 	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DEVICE_INFO].fromShortUuid(BLE_UUID_DEVICE_INFORMATION_SERVICE);
 	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DFU].fromShortUuid(0xFE59); // DFU service
 	if (retCode != ERR_SUCCESS) {
-		LOGCsCentralDebug("Crownstone Central failed init: %d", retCode);
+		LOGe("Crownstone Central failed init: %d", retCode);
 		return retCode;
 	}
 	reset();
@@ -402,6 +402,7 @@ void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 }
 
 void CrownstoneCentral::onDisconnect() {
+	LOGCsCentralDebug("Crownstone Central onDisconnect");
 	reset();
 	finalizeOperation(_currentOperation, ERR_CANCELED);
 }

@@ -37,8 +37,8 @@ public:
 	 */
 	bool isTargetInDfuMode();
 
-	UUID* getUuids();
-	uint8_t getUuidCount();
+	UUID* getServiceUuids();
+	uint8_t getServiceUuidCount();
 
 	// -------- main protocol methods -----------
 	void open();
