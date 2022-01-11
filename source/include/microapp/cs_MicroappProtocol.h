@@ -145,6 +145,12 @@ protected:
 	void onDeviceScanned(scanned_device_t* dev);
 
 	/**
+	 * After particular microapp commands we want to stop the microapp (end of loop etc.) and continue with bluenet.
+	 * This function returns true for such commands.
+	 */
+	bool stopAfterMicroappCommand(uint8_t* payload, uint16_t length);
+
+	/**
 	 * Handle microapp log commands.
 	 */
 	cs_ret_code_t handleMicroappLogCommand(uint8_t* payload, uint16_t length);

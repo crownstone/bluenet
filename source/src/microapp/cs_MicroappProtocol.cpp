@@ -271,8 +271,9 @@ bool MicroappProtocol::retrieveCommand() {
 	uint8_t* payload = g_coargs.microapp2bluenet.data;
 	uint16_t length  = g_coargs.microapp2bluenet.size;
 	handleMicroappCommand(payload, length);
-	payload[0]      = CS_MICROAPP_COMMAND_NONE;  // set handled
-	bool call_again = false;
+	bool call_again = !stopAfterMicroappCommand(payload, length);
+	// set as handled
+	payload[0]      = CS_MICROAPP_COMMAND_NONE;
 	return call_again;
 }
 
@@ -302,13 +303,6 @@ void MicroappProtocol::writeCallback() {
  * We resume the previously started coroutine.
  */
 void MicroappProtocol::callMicroapp() {
-	static int slow_down = 0;
-	slow_down++;
-	if (slow_down != 20) {
-		return;
-	}
-	slow_down = 0;
-
 	if (nextCoroutine(&_coroutine)) {
 		return;
 	}
@@ -512,11 +506,11 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t
 			return handleMicroappMeshCommand(meshCommand, meshPayload, meshPayloadLength);
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
-			LOGi("Setup end");
+			//LOGi("Setup end");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOOP_END: {
-			LOGi("Loop end");
+			//LOGi("Loop end");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_NONE: {
@@ -532,9 +526,35 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t
 	return ERR_SUCCESS;
 }
 
+bool MicroappProtocol::stopAfterMicroappCommand(uint8_t* payload, uint16_t length) {
+	uint8_t command = payload[0];
+	switch (command) {
+		case CS_MICROAPP_COMMAND_PIN:
+		case CS_MICROAPP_COMMAND_LOG:
+		case CS_MICROAPP_COMMAND_SERVICE_DATA:
+		case CS_MICROAPP_COMMAND_TWI:
+		case CS_MICROAPP_COMMAND_BLE:
+		case CS_MICROAPP_COMMAND_POWER_USAGE:
+		case CS_MICROAPP_COMMAND_PRESENCE:
+		case CS_MICROAPP_COMMAND_MESH:
+			return false;
+		case CS_MICROAPP_COMMAND_DELAY:
+		case CS_MICROAPP_COMMAND_SETUP_END:
+		case CS_MICROAPP_COMMAND_LOOP_END:
+		case CS_MICROAPP_COMMAND_NONE:
+		default:
+			return true;
+	}
+	return true;
+}
+
+// TODO: establish a proper default log level for microapps
+#define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
+
 cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length) {
 	char type                            = payload[1];
 	char option                          = payload[2];
+
 	__attribute__((unused)) bool newLine = false;
 	if (option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
 		newLine = true;
@@ -542,18 +562,18 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint1
 	switch (type) {
 		case CS_MICROAPP_COMMAND_LOG_CHAR: {
 			__attribute__((unused)) char value = payload[3];
-			_log(SERIAL_INFO, newLine, "%i%s", (int)value);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", (int)value);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_SHORT: {
 			__attribute__((unused)) uint16_t value = *(uint16_t*)&payload[3];
-			_log(SERIAL_INFO, newLine, "%i%s", (int)value);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", (int)value);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_UINT:
 		case CS_MICROAPP_COMMAND_LOG_INT: {
 			__attribute__((unused)) int value = *(int*)&payload[3];
-			_log(SERIAL_INFO, newLine, "%i%s", (int)value);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", (int)value);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_FLOAT: {
@@ -561,13 +581,13 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint1
 			__attribute__((unused)) int value  = *(int*)&payload[3];
 			__attribute__((unused)) int before = value / 10000;
 			__attribute__((unused)) int after  = value - (before * 10000);
-			_log(SERIAL_INFO, newLine, "%i.%04i", before, after);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i.%04i", before, after);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
 			// TODO: This will fail (see float for workaround)
 			__attribute__((unused)) double value = *(double*)&payload[3];
-			_log(SERIAL_INFO, newLine, "%f%s", value);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%f%s", value);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_STR: {
@@ -575,7 +595,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint1
 					length - 3;  // Check if length <= max_length - 1, for null terminator.
 			__attribute__((unused)) char* data = reinterpret_cast<char*>(&(payload[3]));
 			data[str_length]                   = 0;
-			_log(SERIAL_INFO, newLine, "%s", data);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", data);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_ARR: {
@@ -590,7 +610,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint1
 				sprintf((dest + 2 * i), "%02X", *(src + i));
 			}
 			// print as a string
-			_log(SERIAL_INFO, newLine, "0x%s", buf);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "0x%s", buf);
 			break;
 		}
 		default: {
