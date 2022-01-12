@@ -48,7 +48,9 @@ public:
 
 	enum class Phase {
 		Idle = 0,
+		// CheckDfu
 		TargetTriggerDfuMode,        // send dfu command and wait for disconnect
+		WaitForTargetReboot,         // wait until scans from target are received or timeout
 		ConnectTargetInDfuMode,      // reconnect to target after scan or timeout
 		DiscoverDfuCharacteristics,  //
 		TargetPreparing,             // send PRN command
@@ -107,6 +109,8 @@ private:
 	 * is listen() called?
 	 */
 	bool _listening = false;
+
+	bool _triedDfuCommand = false;
 
 	/**
 	 * current status of the connection. (Updated by several events.)
@@ -172,6 +176,12 @@ private:
 	 * Resets _reconnectionAttemptsLeft.
 	 */
 	Phase completePhaseTargetTriggerDfuMode();
+
+	// ###### WaitForTargetReboot ######
+
+	bool startWaitForTargetReboot();
+	void checkScansForTarget(event_t& event);
+	Phase completeWaitForTargetReboot();
 
 	// ###### ConnectTargetInDfuMode ######
 

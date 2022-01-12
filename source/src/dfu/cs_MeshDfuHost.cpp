@@ -75,13 +75,11 @@ bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 void MeshDfuHost::sendDfuCommand(event_t& event) {
 	if(!_isCrownstoneCentralConnected) {
 		LOGMeshDfuHostDebug("+++ crownstone central not connected.");
+		// this will abort if _reconnectionAttemptsLeft reaches zero.
 		restartPhase();
 	}
 
 	LOGMeshDfuHostDebug("+++ sendDfuCommand");
-
-	// connection established, resetting attempt counter.
-	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 
 	// expect a disconnection after writing the control command
 	// this needs to be the BLE_CENTRAL event because CrownstoneCentral may not have an
@@ -107,26 +105,32 @@ void MeshDfuHost::verifyDisconnectAfterDfu(event_t& event) {
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
-	return Phase::ConnectTargetInDfuMode;
+	return Phase::WaitForTargetReboot;
 }
 
-// ###### ConnectTargetInDfuMode ######
+// ###### WaitForTargetReboot ######
 
-bool MeshDfuHost::startConnectTargetInDfuMode() {
-	LOGMeshDfuHostDebug("+++ startConnectTargetInDfuMode");
+bool MeshDfuHost::startWaitForTargetReboot() {
+	// start this phase waiting for a scan in order to give dfu target
+	// time to reboot after a possible goto-dfu command.
+	LOGMeshDfuHostDebug("+++ startWaitForTargetReboot");
+
 	setEventCallback(
 				CS_TYPE::EVT_DEVICE_SCANNED,
-				&MeshDfuHost::connectTargetInDfuMode);
+				&MeshDfuHost::checkScansForTarget);
 	LOGMeshDfuHostDebug("+++ waiting for device scan event from target");
 
-	setTimeoutCallback(&MeshDfuHost::executeConnectTargetInDfuMode);
+	setTimeoutCallback(&MeshDfuHost::completePhase);
 	LOGMeshDfuHostDebug("+++ waiting for timeout");
 
 	return true;
 }
 
-void MeshDfuHost::connectTargetInDfuMode(event_t& event) {
-	LOGMeshDfuHostDebug("+++ connectTargetInDfuMode");
+void MeshDfuHost::checkScansForTarget(event_t& event) {
+	// when the target device is scanned we can cancel the timeout and
+	// continue with connecting to it.
+	LOGMeshDfuHostDebug("+++ checkScansForTarget received scan");
+
 	if(event.type == CS_TYPE::EVT_DEVICE_SCANNED) {
 		scanned_device_t* device = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
 
@@ -135,23 +139,31 @@ void MeshDfuHost::connectTargetInDfuMode(event_t& event) {
 
 		} else {
 			LOGMeshDfuHostDebug("+++ Wait for more scans");
-			setEventCallback(
-							CS_TYPE::EVT_DEVICE_SCANNED,
-							&MeshDfuHost::connectTargetInDfuMode);
+			setEventCallback(CS_TYPE::EVT_DEVICE_SCANNED,
+							&MeshDfuHost::checkScansForTarget);
 			return;
 		}
 	} else {
 		LOGMeshDfuHostDebug("+++ not a DEVICE_SCANNED event (%u)", event.type);
-		setEventCallback(
-						CS_TYPE::EVT_DEVICE_SCANNED,
-						&MeshDfuHost::connectTargetInDfuMode);
+		setEventCallback(CS_TYPE::EVT_DEVICE_SCANNED,
+						&MeshDfuHost::checkScansForTarget);
 		return;
 	}
 
-	executeConnectTargetInDfuMode();
+	completePhase();
 }
 
-void MeshDfuHost::executeConnectTargetInDfuMode() {
+MeshDfuHost::Phase MeshDfuHost::completeWaitForTargetReboot() {
+	LOGMeshDfuHostDebug("completeWaitForTargetReboot");
+	return Phase::ConnectTargetInDfuMode;
+}
+
+// ###### ConnectTargetInDfuMode ######
+
+bool MeshDfuHost::startConnectTargetInDfuMode() {
+	// called both on timeout and after a received scan from target device.
+	LOGMeshDfuHostDebug("startConnectTargetInDfuMode");
+
 	setEventCallback(
 			CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT,
 			&MeshDfuHost::checkDfuTargetConnected);
@@ -165,6 +177,8 @@ void MeshDfuHost::executeConnectTargetInDfuMode() {
 	if(status != ERR_WAIT_FOR_SUCCESS) {
 		LOGw("BLE central busy or in wrong state. Expecting timeout to occur");
 	}
+
+	return true;
 }
 
 void MeshDfuHost::checkDfuTargetConnected(event_t& event) {
@@ -176,13 +190,16 @@ void MeshDfuHost::checkDfuTargetConnected(event_t& event) {
 }
 
 void MeshDfuHost::checkDfuTargetConnected() {
+	// Called on ble_central_connect_result and on timeout, tries reconnecting if necessary.
+	// Not waiting for scans as we have recently tried that.
+
 	LOGMeshDfuHostDebug("+++ checkDfuTargetConnected");
 	if(!_bleCentral->isConnected()) {
 		if(_reconnectionAttemptsLeft > 0) {
 			LOGMeshDfuHostDebug("+++ BLE central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
 			CsMath::Decrease(_reconnectionAttemptsLeft);
 
-			executeConnectTargetInDfuMode();
+			restartPhase();
 		} else {
 			abort();
 		}
@@ -241,6 +258,11 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 	if(_meshDfuTransport.isTargetInDfuMode()) {
 		LOGMeshDfuHostDebug("+++ dfu mode verified");
 		return Phase::TargetPreparing;
+	}
+
+	if(!_triedDfuCommand) {
+		_triedDfuCommand = true;
+		return Phase::TargetTriggerDfuMode;
 	}
 
 	LOGMeshDfuHostDebug("+++ dfu mode verification failed");
@@ -341,6 +363,9 @@ bool MeshDfuHost::startPhase(Phase phase) {
 			success = startPhaseTargetTriggerDfuMode();
 			break;
 		}
+		case Phase::WaitForTargetReboot: {
+			success = startWaitForTargetReboot();
+		}
 		case Phase::ConnectTargetInDfuMode: {
 			success = startConnectTargetInDfuMode();
 			break;
@@ -403,6 +428,9 @@ void MeshDfuHost::completePhase() {
 		case Phase::TargetTriggerDfuMode: {
 			phaseNext = completePhaseTargetTriggerDfuMode();
 			break;
+		}
+		case Phase::WaitForTargetReboot: {
+			phaseNext = completeWaitForTargetReboot();
 		}
 		case Phase::ConnectTargetInDfuMode: {
 			phaseNext = completeConnectTargetInDfuMode();
