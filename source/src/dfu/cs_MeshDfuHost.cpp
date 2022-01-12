@@ -200,7 +200,9 @@ bool MeshDfuHost::startDiscoverDfuCharacteristics() {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, &MeshDfuHost::onDiscoveryResult);
 	setTimeoutCallback(&MeshDfuHost::completePhase);
 
-	auto status = _bleCentral->discoverServices(_meshDfuTransport.getServiceUuids(), _meshDfuTransport.getServiceUuidCount());
+	auto status =_bleCentral->discoverServices(
+			_meshDfuTransport.getServiceUuids(),
+			_meshDfuTransport.getServiceUuidCount());
 
 	if(status != ERR_WAIT_FOR_SUCCESS) {
 		if(_reconnectionAttemptsLeft > 0){

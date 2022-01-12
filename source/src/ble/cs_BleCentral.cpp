@@ -225,7 +225,7 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 	uint32_t nrfCode = NRF_SUCCESS;
 	for (uint8_t i = 0; i < uuidCount; ++i) {
 		ble_uuid_t uuid = uuids[i].getUuid();
-		nrfCode = ble_db_discovery_evt_register(&uuid);
+		nrfCode = ble_db_discovery_evt_register(&uuid); // TODO(20220111): if discover is called several times, prevent re-registration?
 		switch (nrfCode) {
 			case NRF_SUCCESS:
 				break;
@@ -252,7 +252,10 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 	switch (event.evt_type) {
 		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGBleCentralDebug("Discovery found service uuid=0x%04X type=%u characteristicCount=%u", event.params.discovered_db.srv_uuid.uuid, event.params.discovered_db.srv_uuid.type, event.params.discovered_db.char_count);
+			LOGBleCentralDebug("Discovery found service uuid=0x%04X type=%u characteristicCount=%u",
+					event.params.discovered_db.srv_uuid.uuid,
+					event.params.discovered_db.srv_uuid.type,
+					event.params.discovered_db.char_count);
 
 			// Send an event for the service
 			ble_central_discovery_t packet = {
@@ -265,10 +268,19 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 
 			// Send an event for each characteristic
 			for (uint8_t i = 0; i < event.params.discovered_db.char_count; ++i) {
-				packet.uuid = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
-				packet.valueHandle = event.params.discovered_db.charateristics[i].characteristic.handle_value;
-				packet.cccdHandle = event.params.discovered_db.charateristics[i].cccd_handle;
+
+				auto db_char_entry = event.params.discovered_db.charateristics[i];
+
+				packet.uuid = UUID(db_char_entry.characteristic.uuid);
+				packet.valueHandle = db_char_entry.characteristic.handle_value;
+				packet.cccdHandle = db_char_entry.cccd_handle;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
+
+				LOGBleCentralDebug("   char {uuid: 0x%04x, valHandle: %u, cccdHandle: %d }",
+						db_char_entry.characteristic.uuid,
+						db_char_entry.characteristic.handle_value,
+						db_char_entry.cccd_handle);
+
 				eventOut.dispatch();
 			}
 

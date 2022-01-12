@@ -11,6 +11,7 @@
 
 
 #define LOGMeshDfuTransportDebug LOGd
+#define LOGMeshDfuTransportInfo LOGi
 
 cs_ret_code_t MeshDfuTransport::init() {
 	if (!_firstInit) {
@@ -68,12 +69,13 @@ void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
 	}
 
 	if(result.uuid == _dfuServiceUuid) {
-		LOGMeshDfuTransportDebug("Found dfu service handle");
+		LOGMeshDfuTransportInfo("Found dfu service handle");
 		_dfuServiceFound = true;
 		return;
 	}
 
 	UUID uuid;
+	LOGMeshDfuTransportDebug("result uuid: 0x04%x", result.uuid.getUuid().uuid);
 
 	uuid.fromBaseUuid(_dfuServiceUuid, MeshDfuConstants::DFUAdapter::controlPointShortUuid);
 	if (result.uuid == uuid) {
