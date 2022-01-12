@@ -73,6 +73,11 @@ bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 }
 
 void MeshDfuHost::sendDfuCommand(event_t& event) {
+	if(!_isCrownstoneCentralConnected) {
+		LOGMeshDfuHostDebug("+++ crownstone central not connected.");
+		restartPhase();
+	}
+
 	LOGMeshDfuHostDebug("+++ sendDfuCommand");
 
 	// connection established, resetting attempt counter.
@@ -207,8 +212,8 @@ bool MeshDfuHost::startDiscoverDfuCharacteristics() {
 	if(status != ERR_WAIT_FOR_SUCCESS) {
 		if(_reconnectionAttemptsLeft > 0){
 			CsMath::Decrease(_reconnectionAttemptsLeft);
-			LOGw("BLE central busy or in wrong state. Retrying in half a second");
-			setTimeoutCallback(&MeshDfuHost::restartPhase, 500);
+			LOGw("BLE central busy or in wrong state. Retrying in a few seconds");
+			setTimeoutCallback(&MeshDfuHost::restartPhase, 5000);
 		} else {
 			abort();
 		}
@@ -581,7 +586,7 @@ void MeshDfuHost::handleEvent(event_t& event) {
 			LOGMeshDfuHostDebug("tick counting: %d ", ticks_until_start);
 		}
 		if(CsMath::Decrease(ticks_until_start) == 1){
-			LOGMeshDfuHostDebug("starting dfu at ticks left : %d ", ticks_until_start);
+			LOGMeshDfuHostDebug("starting dfu at ticks left : %x ", ticks_until_start);
 			copyFirmwareTo(_debugTarget);
 		}
 	}

@@ -277,7 +277,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 
 				LOGBleCentralDebug("   char {uuid: 0x%04x, valHandle: %u, cccdHandle: %d }",
-						db_char_entry.characteristic.uuid,
+						db_char_entry.characteristic.uuid.uuid,
 						db_char_entry.characteristic.handle_value,
 						db_char_entry.cccd_handle);
 

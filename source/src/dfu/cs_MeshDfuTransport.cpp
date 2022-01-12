@@ -22,8 +22,8 @@ cs_ret_code_t MeshDfuTransport::init() {
 	cs_ret_code_t retCode = ERR_SUCCESS;
 	retCode |= _dfuServiceUuid.fromShortUuid(MeshDfuConstants::DFUAdapter::dfuServiceShortUuid);
 
-//	retCode |= _uuids[Index::ControlPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::controlPointString);
-//	retCode |= _uuids[Index::DataPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::dataPointString);
+	retCode |= _uuids[Index::ControlPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::controlPointString);
+	retCode |= _uuids[Index::DataPoint].fromFullUuid(MeshDfuConstants::DFUAdapter::dataPointString);
 
 	clearConnectionData();
 
@@ -38,8 +38,13 @@ cs_ret_code_t MeshDfuTransport::init() {
 }
 
 bool MeshDfuTransport::isTargetInDfuMode() {
-	return _uuidHandles[Index::ControlPoint] != BLE_GATT_HANDLE_INVALID
-		   && _uuidHandles[Index::DataPoint] != BLE_GATT_HANDLE_INVALID && _dfuServiceFound;
+	[[maybe_unused]] bool characteristicsFound = _uuidHandles[Index::ControlPoint] != BLE_GATT_HANDLE_INVALID
+			   && _uuidHandles[Index::DataPoint] != BLE_GATT_HANDLE_INVALID;
+
+	LOGMeshDfuTransportDebug("charackteristicsFound==%u, _dfuServiceFound==%u",
+			characteristicsFound, _dfuServiceFound);
+
+	return _dfuServiceFound && characteristicsFound;
 }
 
 UUID* MeshDfuTransport::getServiceUuids(){
@@ -74,22 +79,21 @@ void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
 		return;
 	}
 
-	UUID uuid;
 	LOGMeshDfuTransportDebug("result uuid: 0x04%x", result.uuid.getUuid().uuid);
 
-	uuid.fromBaseUuid(_dfuServiceUuid, MeshDfuConstants::DFUAdapter::controlPointShortUuid);
-	if (result.uuid == uuid) {
-		LOGMeshDfuTransportDebug("Found dfu control characteristic handle");
-		_uuidHandles[Index::ControlPoint] = result.valueHandle;
-		return;
+	for (auto index : {Index::ControlPoint, Index::DataPoint}) {
+		if (result.uuid == _uuids[index]) {
+			LOGMeshDfuTransportDebug("Found dfu characteristic handle for Index %u", index);
+			_uuidHandles[index] = result.valueHandle;
+			return;
+		}
 	}
 
-	uuid.fromBaseUuid(_dfuServiceUuid, MeshDfuConstants::DFUAdapter::dataPointShortUuid);
-	if (result.uuid == uuid) {
-		LOGMeshDfuTransportDebug("Found dfu data characteristic handle");
-		_uuidHandles[Index::DataPoint] = result.valueHandle;
-		return;
-	}
+//	if (result.uuid == _uuids[Index::DataPoint]) {
+//		LOGMeshDfuTransportDebug("Found dfu data characteristic handle");
+//		_uuidHandles[Index::DataPoint] = result.valueHandle;
+//		return;
+//	}
 }
 
 void MeshDfuTransport::onDiscoveryComplete() {
