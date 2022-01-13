@@ -31,6 +31,15 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 // ------------------------------- phase implementations -------------------------------
 // -------------------------------------------------------------------------------------
 
+
+// ###### TargetTriggerDfuMode ######
+
+bool MeshDfuHost::startPhaseIdle() {
+	reset();
+	return true;
+}
+
+
 // ###### TargetTriggerDfuMode ######
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
@@ -356,7 +365,7 @@ bool MeshDfuHost::startPhase(Phase phase) {
 
 	switch (phase) {
 		case Phase::Idle: {
-			success = true;
+			success = startPhaseIdle();
 			break;
 		}
 		case Phase::TargetTriggerDfuMode: {
@@ -365,6 +374,7 @@ bool MeshDfuHost::startPhase(Phase phase) {
 		}
 		case Phase::WaitForTargetReboot: {
 			success = startWaitForTargetReboot();
+			break;
 		}
 		case Phase::ConnectTargetInDfuMode: {
 			success = startConnectTargetInDfuMode();
@@ -558,10 +568,10 @@ bool MeshDfuHost::haveInitPacket() {
 
 
 bool MeshDfuHost::ableToLaunchDfu() {
-	return haveInitPacket() && dfuProcessIdle();
+	return haveInitPacket() && isDfuProcessIdle();
 }
 
-bool MeshDfuHost::dfuProcessIdle() {
+bool MeshDfuHost::isDfuProcessIdle() {
 	// if not waiting on any updates, we must be done.
 	bool idle = _phaseCurrent == Phase::Idle;
 
@@ -575,6 +585,16 @@ bool MeshDfuHost::dfuProcessIdle() {
 
 	return idle;
 }
+
+void MeshDfuHost::reset() {
+	LOGMeshDfuHostDebug("resetting");
+	_triedDfuCommand          = false;
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
+	clearEventCallback();
+	clearTimeoutCallback();
+}
+
+// ------------------- event handling ---------------------------
 
 void MeshDfuHost::handleEvent(event_t& event) {
 

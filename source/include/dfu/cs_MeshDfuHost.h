@@ -24,10 +24,17 @@
  * To start an update, send a A CMD_MESH_DFU event with parameers:
  *  - target device mac address
  *  - operation (start, cancel, info).
- * Response:
+ *
+ * Immediate response (MESH_DFU_RESULT):
  *  - busy     already updating another stone
  *  - fail     starting did not succeed somehow, reverts state to idle.
- *  - success  process will be started, subsequent calls will return busy until process terminates.
+ *  - wait for success  process will be started, subsequent calls will return busy until process terminates.
+ *
+ * Later (MESH_DFU_RESULT):
+ *  In case wait for success was issued, another result will be sent.
+ *  - ERR_SUCCESS: dfu process is done, verification checked
+ *  - ERR_NO_CHANGE: an error occured in the process before any destructive operation in the target device
+ *  - ERR_WRONG_STATE: an error occured in the process and target firmware is no longer in tact.
  *
  *  NOTE: corresponds roughly to dfu_Write_application.py
  */
@@ -52,13 +59,13 @@ public:
 	X(TargetTriggerDfuMode)       /* send dfu command and wait for disconnect */                           \
 	X(WaitForTargetReboot)        /* wait until scans from target are received or timeout */               \
 	X(ConnectTargetInDfuMode)     /* reconnect to target after scan or timeout */                          \
-	X(DiscoverDfuCharacteristics) /**/                                                                     \
+	X(DiscoverDfuCharacteristics) /* Check for DFU service and required characteristics */                 \
 	X(TargetPreparing)            /* send PRN command */                                                   \
 	X(TargetInitializing)         /* sending init packets */                                               \
 	X(TargetUpdating)             /* sending firmware packets */                                           \
 	X(TargetVerifying)            /**/                                                                     \
 	X(Aborting)                   /* might leave the target in an ugly state but at least saves our ass */ \
-	X(None)                       /* */
+	X(None)                       /* Boot up Phase, transfers to Idle when init has succeeded. */
 
 	/**
 	 * enum containing the phases list as values
@@ -134,6 +141,10 @@ private:
 	 */
 	bool _listening = false;
 
+	/**
+	 * true if an attempt has already been made to put target in dfu mode during
+	 * this of dfu-ing.
+	 */
 	bool _triedDfuCommand = false;
 
 	/**
@@ -146,8 +157,6 @@ private:
 	 * See MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts
 	 */
 	uint8_t _reconnectionAttemptsLeft = 0;
-
-	uint8_t _reconnectTimeoutMs = 0;
 
 	/**
 	 * the device to be dfu-d.
@@ -166,6 +175,11 @@ private:
 	// -------------------------------------------------------------------------------------
 	// ---------------------------------- phase callbacks ----------------------------------
 	// -------------------------------------------------------------------------------------
+
+	/**
+	 * clears any non-default values.
+	 */
+	bool startPhaseIdle();
 
 	// ###### TargetTriggerDfuMode ######
 
@@ -363,12 +377,10 @@ private:
 
 	// ---------- phase start callbacks ----------
 
-
 	bool startPhaseTargetPreparing();
 	bool startPhaseTargetInitializing();
 	bool startPhaseTargetUpdating();
 	bool startPhaseTargetVerifying();
-	bool startPhaseBooting();
 
 	// ---------- phase complete callbacks ----------
 
@@ -383,8 +395,6 @@ private:
 	Phase completePhaseTargetInitializing();
 	Phase completePhaseTargetUpdating();
 	Phase completePhaseTargetVerifying();
-	Phase completePhaseBooting();
-
 
 	// -------------------------------------------------------------------------------------
 	// --------------------------------------- utils ---------------------------------------
@@ -408,10 +418,16 @@ private:
 	/**
 	 * No current dfu operations running or planned?
 	 */
-	bool dfuProcessIdle();
+	bool isDfuProcessIdle();
 
 	void connectToTarget();
+
 	bool startDfu(device_address_t macaddr);
+
+	/**
+	 * sets all
+	 */
+	void reset();
 
 public:
 	/**
