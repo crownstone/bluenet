@@ -26,6 +26,10 @@ const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - 4;
 
 const uint8_t MAX_MICROAPP_ARRAY_LENGTH = MAX_MICROAPP_STRING_LENGTH;
 
+const uint8_t MAX_MESH_DATA_LENGTH = MAX_PAYLOAD - 4;
+
+const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
+
 /**
  * The main opcodes for microapp commands.
  */
@@ -277,10 +281,40 @@ static_assert(sizeof(microapp_ble_cmd_t) <= MAX_PAYLOAD);
 struct __attribute__((packed)) microapp_mesh_cmd_t {
 	uint8_t cmd = CS_MICROAPP_COMMAND_MESH;
 	uint8_t opcode;
-	uintptr_t callback;
 };
 
 static_assert(sizeof(microapp_mesh_cmd_t) <= MAX_PAYLOAD);
+
+/*
+ * Struct for header of microapp mesh send commands
+ */
+struct __attribute__((packed)) microapp_mesh_send_cmd_t {
+	struct microapp_mesh_cmd_t header;
+	uint8_t stoneId;  //< Target stone ID, or 0 for broadcast.
+	uint8_t dlen;
+	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
+};
+
+static_assert(sizeof(microapp_mesh_send_cmd_t) <= MAX_PAYLOAD);
+
+struct __attribute__((packed)) microapp_mesh_read_available_cmd_t {
+	struct microapp_mesh_cmd_t header;
+	uint8_t available;
+};
+
+static_assert(sizeof(microapp_mesh_read_available_cmd_t) <= MAX_PAYLOAD);
+
+/**
+ * Struct for microapp mesh read commands
+ */
+struct __attribute__((packed)) microapp_mesh_read_cmd_t {
+	struct microapp_mesh_cmd_t header;
+	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
+	uint8_t messageSize;                              // Actual message size.
+	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];  // Message buffer.
+};
+
+static_assert(sizeof(microapp_mesh_read_cmd_t) <= MAX_PAYLOAD);
 
 /*
  * Struct for scanned ble devices sent to the microapp
@@ -314,34 +348,3 @@ struct __attribute__((packed)) microapp_presence_t {
 	uint64_t presenceBitmask;
 };
 
-const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
-
-/*
- * Struct for header of microapp mesh commands
- */
-struct __attribute__((packed)) microapp_mesh_header_t {
-	uint8_t opcode;  // CommandMicroappMeshOpcode
-};
-
-/*
- * Struct for header of microapp mesh send commands
- */
-struct __attribute__((packed)) microapp_mesh_send_header_t {
-	uint8_t stoneId;  // Target stone ID, or 0 for broadcast.
-};
-
-/*
- * Struct for microapp mesh read available commands
- */
-struct __attribute__((packed)) microapp_mesh_read_available_t {
-	bool available;
-};
-
-/*
- * Struct for microapp mesh read commands
- */
-struct __attribute__((packed)) microapp_mesh_read_t {
-	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
-	uint8_t messageSize;                              // Actual message size.
-	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];  // Message buffer.
-};

@@ -499,17 +499,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t
 		}
 		case CS_MICROAPP_COMMAND_MESH: {
 			LOGd("Microapp mesh command");
-			if (length < sizeof(command) + sizeof(microapp_mesh_header_t)) {
-				LOGi("Payload too small");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			microapp_mesh_header_t* meshCommand = reinterpret_cast<microapp_mesh_header_t*>(&(payload[1]));
-
-			size_t headerSize        = sizeof(command) + sizeof(microapp_mesh_header_t);
-			uint8_t* meshPayload     = payload + headerSize;
-			size_t meshPayloadLength = length - headerSize;
-
-			return handleMicroappMeshCommand(meshCommand, meshPayload, meshPayloadLength);
+			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(payload);
+			return handleMicroappMeshCommand(mesh_cmd);
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
 			// LOGi("Setup end");
@@ -622,7 +613,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint1
 		}
 		case CS_MICROAPP_COMMAND_LOG_ARR: {
 			[[maybe_unused]] microapp_log_array_cmd_t* cmd = reinterpret_cast<microapp_log_array_cmd_t*>(payload);
-			uint8_t len = MAX_MICROAPP_ARRAY_LENGTH;
+			uint8_t len                                    = MAX_MICROAPP_ARRAY_LENGTH;
 			if (cmd->length < len) {
 				len = cmd->length;
 			}
@@ -948,45 +939,39 @@ cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(uint8_t* payload, 
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(
-		microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize) {
-	switch (meshCommand->opcode) {
+cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(microapp_mesh_cmd_t* command) {
+	switch (command->opcode) {
 		case CS_MICROAPP_COMMAND_MESH_SEND: {
-			if (payloadSize < sizeof(microapp_mesh_send_header_t)) {
-				LOGi("Payload too small");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			auto commandData = reinterpret_cast<microapp_mesh_send_header_t*>(payload);
+			auto cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(command);
 
-			TYPIFY(CMD_SEND_MESH_MSG) eventData;
-			if (commandData->stoneId == 0) {
-				// Broadcast message.
-				eventData.flags.flags.broadcast   = true;
-				eventData.flags.flags.noHops      = false;
-				eventData.flags.flags.reliable    = false;
-				eventData.flags.flags.useKnownIds = false;
-			}
-			else {
-				// Targeted message.
-				eventData.flags.flags.broadcast   = true;
-				eventData.flags.flags.noHops      = false;
-				eventData.flags.flags.reliable    = true;
-				eventData.flags.flags.useKnownIds = false;
-				eventData.idCount                 = 1;
-				eventData.targetIds               = &(commandData->stoneId);
-			}
-			eventData.type    = CS_MESH_MODEL_TYPE_MICROAPP;
-			eventData.payload = payload + sizeof(*commandData);
-			eventData.size    = payloadSize - sizeof(*commandData);
-			if (eventData.size == 0) {
+			if (cmd->dlen == 0) {
 				LOGi("No message.");
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			if (eventData.size > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-				LOGi("Message too large: %u > %u", eventData.size, MICROAPP_MAX_MESH_MESSAGE_SIZE);
+
+			if (cmd->dlen > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
+				LOGi("Message too large: %u > %u", cmd->dlen, MICROAPP_MAX_MESH_MESSAGE_SIZE);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
+			TYPIFY(CMD_SEND_MESH_MSG) eventData;
+			bool broadcast = (cmd->stoneId == 0);
+
+			if (broadcast) {
+				eventData.flags.flags.broadcast = true;
+				eventData.flags.flags.reliable  = false;
+			}
+			else {
+				eventData.flags.flags.broadcast = true;
+				eventData.flags.flags.reliable  = true;
+				eventData.idCount               = 1;
+				eventData.targetIds             = &(cmd->stoneId);
+			}
+			eventData.flags.flags.useKnownIds = false;
+			eventData.flags.flags.noHops      = false;
+			eventData.type                    = CS_MESH_MODEL_TYPE_MICROAPP;
+			eventData.payload                 = cmd->data;
+			eventData.size                    = cmd->dlen;
 			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
 			event.dispatch();
 			if (event.result.returnCode != ERR_SUCCESS) {
@@ -996,23 +981,22 @@ cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(
 			break;
 		}
 		case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
-			if (payloadSize < sizeof(microapp_mesh_read_available_t)) {
-				LOGi("Payload too small");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
+			auto cmd = reinterpret_cast<microapp_mesh_read_available_cmd_t*>(command);
+
 			if (!_meshMessageBuffer.isInitialized()) {
 				_meshMessageBuffer.init();
 			}
 
-			auto commandData       = reinterpret_cast<microapp_mesh_read_available_t*>(payload);
-			commandData->available = !_meshMessageBuffer.empty();
+			// TODO: This assumes nothing will overwrite the buffer
+			cmd->available = !_meshMessageBuffer.empty();
+
+			// TODO: One might want to call callMicroapp here (at least once).
+			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
 			break;
 		}
 		case CS_MICROAPP_COMMAND_MESH_READ: {
-			if (payloadSize < sizeof(microapp_mesh_read_t)) {
-				LOGi("Payload too small");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
+			auto cmd = reinterpret_cast<microapp_mesh_read_cmd_t*>(command);
+
 			if (!_meshMessageBuffer.isInitialized()) {
 				_meshMessageBuffer.init();
 			}
@@ -1021,11 +1005,19 @@ cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
-			auto commandData         = reinterpret_cast<microapp_mesh_read_t*>(payload);
-			auto message             = _meshMessageBuffer.pop();
-			commandData->stoneId     = message.stoneId;
-			commandData->messageSize = message.messageSize;
-			memcpy(commandData->message, message.message, message.messageSize);
+			auto message     = _meshMessageBuffer.pop();
+			
+			// TODO: This assumes nothing will overwrite the buffer
+			cmd->stoneId     = message.stoneId;
+			cmd->messageSize = message.messageSize;
+			if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
+				LOGi("Message with wrong size in buffer");
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			memcpy(cmd->message, message.message, message.messageSize);
+
+			// TODO: One might want to call callMicroapp here (at least once).
+			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
 			break;
 		}
 

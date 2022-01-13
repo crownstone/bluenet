@@ -236,7 +236,7 @@ protected:
 	/**
 	 * Handle microapp commands for sending and reading mesh messages.
 	 */
-	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_header_t* meshCommand, uint8_t* payload, size_t payloadSize);
+	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_cmd_t* command);
 
 public:
 	static MicroappProtocol& getInstance() {
