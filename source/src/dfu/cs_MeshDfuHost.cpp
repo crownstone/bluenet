@@ -351,7 +351,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 // ---------------------------- progress related callbacks ----------------------------
 
 bool MeshDfuHost::startPhase(Phase phase) {
-	LOGMeshDfuHostDebug("+++ Starting phase %d", phase);
+	LOGMeshDfuHostDebug("+++ Starting phase %s", phaseName(phase));
 	bool success = false;
 
 	switch (phase) {
@@ -404,7 +404,7 @@ bool MeshDfuHost::startPhase(Phase phase) {
 		_phaseCurrent = phase;
 		_phaseOnComplete = Phase::None;
 	} else {
-		LOGMeshDfuHostDebug("+++ Failed to start phase %d, aborting", static_cast<uint8_t>(phase));
+		LOGMeshDfuHostDebug("+++ Failed to start phase %s, aborting", phaseName(phase));
 		abort();
 		return false;
 	}
@@ -413,7 +413,7 @@ bool MeshDfuHost::startPhase(Phase phase) {
 }
 
 void MeshDfuHost::completePhase() {
-	LOGMeshDfuHostDebug("+++ Completeing phase %d", _phaseCurrent);
+	LOGMeshDfuHostDebug("+++ Completeing phase %s", phaseName(_phaseCurrent));
 
 	Phase phaseNext = Phase::None;
 
@@ -421,7 +421,7 @@ void MeshDfuHost::completePhase() {
 
 	switch(_phaseCurrent) {
 		case Phase::Idle: {
-			// idle can't complete. To start another phase call startPhase instead.
+			// idle doesn't have a 'next phase'. To start another phase call startPhase instead.
 			phaseNext = Phase::Idle;
 			break;
 		}
@@ -431,6 +431,7 @@ void MeshDfuHost::completePhase() {
 		}
 		case Phase::WaitForTargetReboot: {
 			phaseNext = completeWaitForTargetReboot();
+			break;
 		}
 		case Phase::ConnectTargetInDfuMode: {
 			phaseNext = completeConnectTargetInDfuMode();
@@ -460,7 +461,7 @@ void MeshDfuHost::completePhase() {
 }
 
 void MeshDfuHost::restartPhase() {
-	LOGMeshDfuHostDebug("Restarting phase %u", _phaseCurrent);
+	LOGMeshDfuHostDebug("Restarting phase %s", phaseName(_phaseCurrent));
 	startPhase(_phaseCurrent);
 }
 
@@ -546,6 +547,8 @@ cs_ret_code_t MeshDfuHost::init() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 
 	LOGMeshDfuHostDebug("MeshDfuHost init successful");
+
+	startPhase(Phase::Idle);
 	return ERR_SUCCESS;
 }
 
@@ -560,8 +563,17 @@ bool MeshDfuHost::ableToLaunchDfu() {
 
 bool MeshDfuHost::dfuProcessIdle() {
 	// if not waiting on any updates, we must be done.
-	return _onExpectedEvent == nullptr;
-//	return _phaseCurrent == Phase::Idle;
+	bool idle = _phaseCurrent == Phase::Idle;
+
+	if (idle) {
+		if (_onTimeout != nullptr || _onExpectedEvent != nullptr) {
+				LOGw("meshDfuHost idle but callbacks non-null clearing.");
+				clearEventCallback();
+				clearTimeoutCallback();
+			}
+	}
+
+	return idle;
 }
 
 void MeshDfuHost::handleEvent(event_t& event) {
@@ -611,10 +623,10 @@ void MeshDfuHost::handleEvent(event_t& event) {
 
 	if(event.type == CS_TYPE::EVT_TICK) {
 		if (ticks_until_start % 10 == 1) {
-			LOGMeshDfuHostDebug("tick counting: %d ", ticks_until_start);
+			LOGMeshDfuHostDebug("tick counting: %u ", ticks_until_start);
 		}
 		if(CsMath::Decrease(ticks_until_start) == 1){
-			LOGMeshDfuHostDebug("starting dfu at ticks left : %x ", ticks_until_start);
+			LOGMeshDfuHostDebug("starting dfu at ticks left : %u ", ticks_until_start);
 			copyFirmwareTo(_debugTarget);
 		}
 	}

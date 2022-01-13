@@ -46,20 +46,44 @@ public:
 	 */
 	bool copyFirmwareTo(device_address_t target);
 
-	enum class Phase {
-		Idle = 0,
 		// CheckDfu
-		TargetTriggerDfuMode,        // send dfu command and wait for disconnect
-		WaitForTargetReboot,         // wait until scans from target are received or timeout
-		ConnectTargetInDfuMode,      // reconnect to target after scan or timeout
-		DiscoverDfuCharacteristics,  //
-		TargetPreparing,             // send PRN command
-		TargetInitializing,          // sending init packets
-		TargetUpdating,              // sending firmware packets
-		TargetVerifying,             //
-		Aborting,                    // might leave the target in an ugly state but at least saves our ass.
-		None = 0xFF
+#define XPHASES                                                                                            \
+	X(Idle)                       /* nothing in progress */                                                \
+	X(TargetTriggerDfuMode)       /* send dfu command and wait for disconnect */                           \
+	X(WaitForTargetReboot)        /* wait until scans from target are received or timeout */               \
+	X(ConnectTargetInDfuMode)     /* reconnect to target after scan or timeout */                          \
+	X(DiscoverDfuCharacteristics) /**/                                                                     \
+	X(TargetPreparing)            /* send PRN command */                                                   \
+	X(TargetInitializing)         /* sending init packets */                                               \
+	X(TargetUpdating)             /* sending firmware packets */                                           \
+	X(TargetVerifying)            /**/                                                                     \
+	X(Aborting)                   /* might leave the target in an ugly state but at least saves our ass */ \
+	X(None)                       /* */
+
+	/**
+	 * enum containing the phases list as values
+	 */
+	enum class Phase : uint8_t {
+#define X(phase) phase,
+		XPHASES
+#undef X
 	};
+
+	/**
+	 * phase to string method
+	 */
+	constexpr auto phaseName(Phase p) {
+#define xstr(s) str(s)
+#define str(s) #s
+#define X(phase) case Phase::phase: { return xstr(phase); }
+		switch(p){
+			XPHASES
+			default: { return "unknown"; }
+		}
+#undef X
+#undef str
+#undef xstr
+	}
 
 private:
 	// ----------------------- runtime phase variables -----------------------
