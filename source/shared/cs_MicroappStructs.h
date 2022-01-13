@@ -14,7 +14,17 @@
 #include <stdint.h>
 #endif
 
-const uint8_t MAX_PAYLOAD = 32;
+const uint8_t MAX_PAYLOAD = 44;
+
+const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
+
+const uint8_t MAC_ADDRESS_LENGTH = 6;
+
+const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
+
+const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - 4;
+
+const uint8_t MAX_MICROAPP_ARRAY_LENGTH = MAX_MICROAPP_STRING_LENGTH;
 
 /**
  * The main opcodes for microapp commands.
@@ -32,6 +42,7 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_MESH         = 0x09,
 	CS_MICROAPP_COMMAND_SETUP_END    = 0x0A,
 	CS_MICROAPP_COMMAND_LOOP_END     = 0x0B,
+	CS_MICROAPP_COMMAND_BLE_DEVICE   = 0x0C,
 };
 
 enum CommandMicroappPin {
@@ -107,6 +118,12 @@ enum CommandMicroappMeshOpcode {
 	CS_MICROAPP_COMMAND_MESH_READ           = 0x02,
 };
 
+enum MicroappBleEventType {
+	BleEventDeviceScanned = 0x01,
+	BleEventConnected     = 0x02,
+	BleEventDisconnected  = 0x03,
+};
+
 /*
  * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
  * compatible. The length parameter functions as a extra possible check. The callback can be used by the microapp to
@@ -129,6 +146,21 @@ struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
 	uint8_t length;
 };
 
+/**
+ * A payload has always a cmd field as opcode.
+ */
+struct __attribute__((packed)) microapp_cmd_t {
+	uint8_t cmd;
+};
+
+/**
+ * An acked payload can be used for a callback.
+ */
+struct __attribute__((packed)) microapp_acked_cmd_t {
+	uint8_t cmd;
+	uint8_t ack;
+};
+
 /*
  * Struct to set and read pins. This can be used for analog and digital writes and reads. For digital writes it is
  * just zeros or ones. For analog writes it is an uint8_t. For reads the value field is the one that is being returned.
@@ -138,60 +170,134 @@ struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
  */
 struct __attribute__((packed)) microapp_pin_cmd_t {
 	uint8_t cmd = CS_MICROAPP_COMMAND_PIN;
+	uint8_t ack;
 	uint8_t pin;      // CommandMicroappPin
 	uint8_t opcode1;  // CommandMicroappPinOpcode1
 	uint8_t opcode2;  // CommandMicroappPinOpcode2
 	uint8_t value;    // CommandMicroappPinValue
-	uint8_t ack;
-	uint32_t callback;
 };
+
+static_assert(sizeof(microapp_pin_cmd_t) <= MAX_PAYLOAD);
 
 /*
  * Struct with data to implement delay command through coroutines.
  */
 struct __attribute__((packed)) microapp_delay_cmd_t {
-	uint8_t cmd;
+	uint8_t cmd = CS_MICROAPP_COMMAND_DELAY;
 	uint16_t period;
 	uintptr_t coargs;
 };
 
-const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
+static_assert(sizeof(microapp_delay_cmd_t) <= MAX_PAYLOAD);
 
 /*
  * Struct for i2c initialization, writes, and reads.
  */
 struct __attribute__((packed)) microapp_twi_cmd_t {
-	uint8_t cmd;
+	uint8_t cmd = CS_MICROAPP_COMMAND_TWI;
+	uint8_t ack;
 	uint8_t address;
 	uint8_t opcode;
 	uint8_t length;
-	uint8_t ack;
 	uint8_t stop;
 	uint8_t buf[MAX_TWI_PAYLOAD];
+};
+
+static_assert(sizeof(microapp_twi_cmd_t) <= MAX_PAYLOAD);
+
+/*
+ * Struct for log commands
+ */
+struct __attribute__((packed)) microapp_log_cmd_t {
+	uint8_t cmd = CS_MICROAPP_COMMAND_LOG;
+	uint8_t type;
+	uint8_t option;
+};
+
+static_assert(sizeof(microapp_log_cmd_t) <= MAX_PAYLOAD);
+
+struct __attribute__((packed)) microapp_log_char_cmd_t {
+	microapp_log_cmd_t header;
+	uint8_t value;
+};
+
+struct __attribute__((packed)) microapp_log_short_cmd_t {
+	microapp_log_cmd_t header;
+	uint16_t value;
+};
+
+struct __attribute__((packed)) microapp_log_uint_cmd_t {
+	microapp_log_cmd_t header;
+	uint32_t value;
+};
+
+struct __attribute__((packed)) microapp_log_int_cmd_t {
+	microapp_log_cmd_t header;
+	int32_t value;
+};
+
+struct __attribute__((packed)) microapp_log_float_cmd_t {
+	microapp_log_cmd_t header;
+	float value;
+};
+
+struct __attribute__((packed)) microapp_log_double_cmd_t {
+	microapp_log_cmd_t header;
+	double value;
+};
+
+struct __attribute__((packed)) microapp_log_string_cmd_t {
+	microapp_log_cmd_t header;
+	uint8_t length;
+	char str[MAX_MICROAPP_STRING_LENGTH];
+};
+
+static_assert(sizeof(microapp_log_string_cmd_t) <= MAX_PAYLOAD);
+
+struct __attribute__((packed)) microapp_log_array_cmd_t {
+	microapp_log_cmd_t header;
+	uint8_t length;
+	char arr[MAX_MICROAPP_ARRAY_LENGTH];
 };
 
 /*
  * Struct for microapp ble commands
  */
 struct __attribute__((packed)) microapp_ble_cmd_t {
-	uint8_t cmd;
+	uint8_t cmd = CS_MICROAPP_COMMAND_BLE;
+	uint8_t opcode;
+	uint8_t id;
+};
+
+static_assert(sizeof(microapp_ble_cmd_t) <= MAX_PAYLOAD);
+
+/**
+ * Struct for mesh message from microapp.
+ */
+struct __attribute__((packed)) microapp_mesh_cmd_t {
+	uint8_t cmd = CS_MICROAPP_COMMAND_MESH;
 	uint8_t opcode;
 	uintptr_t callback;
 };
 
-const uint8_t MAC_ADDRESS_LENGTH      = 6;
-const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
+static_assert(sizeof(microapp_mesh_cmd_t) <= MAX_PAYLOAD);
 
 /*
  * Struct for scanned ble devices sent to the microapp
  */
 struct __attribute__((packed)) microapp_ble_device_t {
+	uint8_t cmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
+	uint8_t ack;
+	uint8_t id;
+	uint8_t type;
 	uint8_t addr_type;
 	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
 	int8_t rssi;
 	uint8_t dlen;
 	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
 };
+
+static_assert(sizeof(microapp_ble_device_t) <= MAX_PAYLOAD);
 
 /*
  * Struct for microapp power usage requests

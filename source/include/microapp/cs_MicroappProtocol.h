@@ -34,12 +34,13 @@ const uint8_t MAX_BLE_ISR_COUNT = 8;
 
 struct pin_isr_t {
 	uint8_t pin;
-	uintptr_t callback;
+	bool registered;
 };
 
 struct ble_isr_t {
-	uint16_t type;
-	uintptr_t callback;
+	MicroappBleEventType type;
+	uint8_t id;
+	bool registered;
 };
 
 struct __attribute__((packed)) microapp_buffered_mesh_message_t {
@@ -125,6 +126,26 @@ protected:
 	void writeCallback();
 
 	/**
+	 * Register GPIO pin.
+	 */
+	bool registerGpio(uint8_t pin);
+
+	/**
+	 * Register BLE callback.
+	 */
+	bool registerBleCallback(uint8_t id);
+
+	/**
+	 * Callback for GPIO events.
+	 */
+	void performCallbackGpio(uint8_t pin);
+	
+	/**
+	 * Callback BLE.
+	 */
+	void performCallbackMeshMessage(scanned_device_t* dev);
+
+	/**
 	 * Initialize memory for the microapp.
 	 */
 	uint16_t initMemory();
@@ -143,6 +164,13 @@ protected:
 	 * Handle a scanned BLE device.
 	 */
 	void onDeviceScanned(scanned_device_t* dev);
+
+	/**
+	 * Flag as being processed by bluenet. This will overwrite the cmd field so that a command is not performed twice.
+	 *
+	 * @param[in] cmd                            Any microapp command
+	 */
+	void setAsProcessed(microapp_cmd_t* cmd);
 
 	/**
 	 * After particular microapp commands we want to stop the microapp (end of loop etc.) and continue with bluenet.
