@@ -101,7 +101,7 @@ In header files create a description for the methods or classes that looks like 
  */
 ```
 
-In source files additional information can be given about particular implementation details. This will not end up in doxygen (a single `/*` rather than `/**` codeblock starter is sufficient).
+In source files additional information can be given about particular implementation details. This will not end up in doxygen (a single `/*` rather than `/**` code block starter is sufficient).
 
 ```
 /*
@@ -112,7 +112,7 @@ In source files additional information can be given about particular implementat
 Within the function bodies themselves, abstain from comments unless absolutely necessary. If comments are required, write them on a line preceding the code. Do not write comments on the same line as the code.
 
 ```
-\\ Always write comments on a separate line. 
+// Always write comments on a separate line. 
 bool result = false;
 ```
 
