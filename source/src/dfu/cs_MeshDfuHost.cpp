@@ -338,9 +338,21 @@ bool MeshDfuHost::startPhaseAborting() {
 	clearEventCallback();
 	clearTimeoutCallback();
 
-	setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::aborting);
+	// its enough to disconnect crownstone central: that will disconnect
+	// ble central even if we didn't use crownstone central for the connection.
+	auto csCentralStatus = _crownstoneCentral->disconnect();
 
-	// TODO: disconnect
+	switch(csCentralStatus){
+		case ERR_WAIT_FOR_SUCCESS: {
+			setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::aborting);
+			setTimeoutCallback(&MeshDfuHost::aborting);
+			break;
+		}
+		default: {
+			setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::aborting);
+			break;
+		}
+	}
 
 	return true;
 }
@@ -351,7 +363,10 @@ void MeshDfuHost::aborting(event_t& event) {
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 	LOGMeshDfuHostDebug("+++ completePhaseAborting");
-	// TODO: clearEventCallback, set phases to none etc.
+
+	clearEventCallback();
+	clearTimeoutCallback();
+
 	return Phase::Idle;
 }
 

@@ -130,10 +130,12 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 		return;
 	}
 
+	memset(init_cmd_buffer, 63, INIT_COMMAND_MAX_SIZE);
+
 	NRF_LOG_HEXDUMP_INFO(s_dfu_settings.init_command, 128);
 
 	const uint32_t microapp_page_start     = 0x69000;
-	const uint32_t offset_size = 0x60; // INIT_COMMAND_MAX_SIZE; // offset is for debug: every phase gets moved a bit to see where the init packet is complete.
+	const uint32_t offset_size = 0x80; // INIT_COMMAND_MAX_SIZE; // offset is for debug: every phase gets moved a bit to see where the init packet is complete.
 	const uint32_t validation_int = 0xAEAEAEAE;
 
 	// (s_dfu_settings is defined external in nrf_dfu_settings.h)
@@ -143,25 +145,15 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 	const uint32_t init_packet_size = s_dfu_settings.progress.command_size;
 
 	// copy dfu init page content to single buffer before writing
-	uint32_t offset = 0;
-	uint32_t len = 0;
-
-	len = sizeof(init_packet_size);
-	memcpy(&init_cmd_buffer[offset], &init_packet_size, len);
-	offset += len;
-
-	len = sizeof(validation_int);
-	memcpy(&init_cmd_buffer[offset], &validation_int, len);
-	offset += len;
-
-	len = init_packet_size;
-	memcpy(&init_cmd_buffer[offset], &s_dfu_settings.init_command, len);
+	memcpy(&init_cmd_buffer[0], &init_packet_size, 4);
+	memcpy(&init_cmd_buffer[4], &validation_int, 4);
+	memcpy(&init_cmd_buffer[8], &s_dfu_settings.init_command, s_dfu_settings.progress.command_size);
 
 	//memcpy(&init_cmd_buffer, validationbytes[offset_index], init_packet_size);
 
 	// write the buffer to flash
 	nrf_dfu_flash_store(
-			microapp_page_start + offset_index * offset_size , init_cmd_buffer, INIT_COMMAND_MAX_SIZE, NULL);
+			microapp_page_start + offset_index * offset_size , init_cmd_buffer, offset_size, NULL);
 }
 
 /**
