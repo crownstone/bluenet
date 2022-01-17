@@ -120,13 +120,19 @@ static void clear_micro_app_page() {
 	nrf_dfu_flash_erase(microapp_page_start, 1, on_clear_micro_app_page_complete);
 }
 
-uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE];
+uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE] = {0};
 uint8_t validationbytes[3][16] = {{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70},
 							   {70, 69, 68, 67, 66, 65, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48},
 							   {48, 70, 49, 69, 50, 68, 51, 67, 52, 66, 53, 65, 54, 57, 55, 56}}; // 1,2,3... in ascii
+bool init_cmd_write_started = false;
 
 static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 	if (!micro_app_page_cleared) {
+		return;
+	}
+
+	if(init_cmd_write_started) {
+		// only write once.
 		return;
 	}
 
@@ -153,8 +159,9 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 	//memcpy(&init_cmd_buffer, validationbytes[offset_index], init_packet_size);
 
 	// write the buffer to flash
-	nrf_dfu_flash_store(
+	ret_code_t flash_write_status = nrf_dfu_flash_store(
 			microapp_page_start + offset_index * offset_size , init_cmd_buffer, offset_size, NULL);
+	init_cmd_write_started = flash_write_status == NRF_SUCCESS;
 }
 
 /**
@@ -170,6 +177,7 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
 //            bsp_board_led_off(BSP_BOARD_LED_1);
 //            bsp_board_led_on(BSP_BOARD_LED_2);
 
+	static int callcount = 0;
     switch (evt_type)
     {
         case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
@@ -187,7 +195,8 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         	break;
         }
         case NRF_DFU_EVT_OBJECT_RECEIVED: {
-        	write_init_packet_to_micro_app_page(1);
+        	write_init_packet_to_micro_app_page(callcount);
+        	callcount++;
         	break;
         }
         case NRF_DFU_EVT_DFU_COMPLETED: {
@@ -197,6 +206,8 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         default:
             break;
     }
+
+
 }
 
 /**
