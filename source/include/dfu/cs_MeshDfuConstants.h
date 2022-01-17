@@ -42,28 +42,9 @@ namespace DfuTransportBle {
 constexpr uint8_t DEFAULT_TIMEOUT = 20;
 constexpr uint8_t RETRIES_NUMBER  = 5;
 
-enum class OP_CODE : uint8_t {
-	CreateObject = 0x01,
-	SetPRN       = 0x02,
-	CalcChecSum  = 0x03,
-	Execute      = 0x04,
-	ReadObject   = 0x06,
-	Response     = 0x60,
-};
 
-enum class RES_CODE : uint8_t {
-	InvalidCode           = 0x00,
-	Success               = 0x01,
-	NotSupported          = 0x02,
-	InvalidParameter      = 0x03,
-	InsufficientResources = 0x04,
-	InvalidObject         = 0x05,
-	InvalidSignature      = 0x06,
-	UnsupportedType       = 0x07,
-	OperationNotPermitted = 0x08,
-	OperationFailed       = 0x0A,
-	ExtendedError         = 0x0B,
-};
+
+
 
 constexpr auto EXT_ERROR_CODE(uint8_t errorcode) {
 	const char* codes[] = {
@@ -93,7 +74,7 @@ constexpr auto EXT_ERROR_CODE(uint8_t errorcode) {
 		return codes[errorcode];
 	}
 
-	return "";
+	return "Errorcode out of bounds";
 }
 }  // namespace DfuTransportBle
 

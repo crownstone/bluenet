@@ -282,6 +282,7 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 
 bool MeshDfuHost::startPhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
+	_meshDfuTransport->open();
 	// TODO
 	return false;
 }
