@@ -183,7 +183,7 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         	break;
         }
         case NRF_DFU_EVT_DFU_STARTED: {
-        	write_init_packet_to_micro_app_page(0);
+//        	write_init_packet_to_micro_app_page(0);
         	break;
         }
         case NRF_DFU_EVT_OBJECT_RECEIVED: {
@@ -191,7 +191,7 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         	break;
         }
         case NRF_DFU_EVT_DFU_COMPLETED: {
-        	write_init_packet_to_micro_app_page(2);
+//        	write_init_packet_to_micro_app_page(2);
         	break;
         }
         default:
