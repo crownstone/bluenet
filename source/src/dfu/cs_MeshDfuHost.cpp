@@ -643,9 +643,6 @@ void MeshDfuHost::handleEvent(event_t& event) {
 
 	// if a callback is waiting on this event call it back.
 	if (_onExpectedEvent != nullptr && event.type == _expectedEvent) {
-		// cancel timeout
-		_timeOutRoutine.pause();
-
 		// create local copy
 		auto eventCallback = _onExpectedEvent;
 
