@@ -345,7 +345,7 @@ bool MeshDfuHost::startPhaseAborting() {
 	switch(csCentralStatus){
 		case ERR_WAIT_FOR_SUCCESS: {
 			setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::aborting);
-			setTimeoutCallback(&MeshDfuHost::aborting);
+			setTimeoutCallback(&MeshDfuHost::completePhase);
 			break;
 		}
 		default: {

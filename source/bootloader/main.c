@@ -130,7 +130,8 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 		return;
 	}
 
-	memset(init_cmd_buffer, 63, INIT_COMMAND_MAX_SIZE);
+	// fill buffer with the offset to increase memrd readibility
+	memset(init_cmd_buffer, 1+offset_index, INIT_COMMAND_MAX_SIZE);
 
 	NRF_LOG_HEXDUMP_INFO(s_dfu_settings.init_command, 128);
 
@@ -142,10 +143,10 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 	// it contains:
 	//	.init_command;          /**< Buffer for storing the init command. */
 	//	.progress.command_size; /**< The size of the current init command stored in the DFU settings. */
-	const uint32_t init_packet_size = s_dfu_settings.progress.command_size;
+//	const uint32_t init_packet_size = s_dfu_settings.progress.command_size;
 
 	// copy dfu init page content to single buffer before writing
-	memcpy(&init_cmd_buffer[0], &init_packet_size, 4);
+	memcpy(&init_cmd_buffer[0], &s_dfu_settings.progress.command_size, 4);
 	memcpy(&init_cmd_buffer[4], &validation_int, 4);
 	memcpy(&init_cmd_buffer[8], &s_dfu_settings.init_command, s_dfu_settings.progress.command_size);
 
