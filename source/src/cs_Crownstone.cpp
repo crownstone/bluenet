@@ -627,7 +627,7 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 
 			_assetFiltering.init();
 
-			_firmwareReader.init();
+//			_firmwareReader.init();
 			_meshDfuHost.init();
 
 			break;

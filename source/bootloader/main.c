@@ -133,7 +133,7 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 	NRF_LOG_HEXDUMP_INFO(s_dfu_settings.init_command, 128);
 
 	const uint32_t microapp_page_start     = 0x69000;
-	const uint32_t offset_size = INIT_COMMAND_MAX_SIZE; // offset is for debug: every phase gets moved a bit to see where the init packet is complete.
+	const uint32_t offset_size = 0x60; // INIT_COMMAND_MAX_SIZE; // offset is for debug: every phase gets moved a bit to see where the init packet is complete.
 	const uint32_t validation_int = 0xAEAEAEAE;
 
 	// (s_dfu_settings is defined external in nrf_dfu_settings.h)
@@ -190,13 +190,15 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         	break;
         }
         case NRF_DFU_EVT_DFU_STARTED: {
-        	break;
-        }
-        case NRF_DFU_EVT_OBJECT_RECEIVED: {
         	write_init_packet_to_micro_app_page(0);
         	break;
         }
+        case NRF_DFU_EVT_OBJECT_RECEIVED: {
+        	write_init_packet_to_micro_app_page(1);
+        	break;
+        }
         case NRF_DFU_EVT_DFU_COMPLETED: {
+        	write_init_packet_to_micro_app_page(2);
         	break;
         }
         default:
