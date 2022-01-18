@@ -101,6 +101,20 @@ void MeshDfuTransport::onDiscoveryComplete() {
 }
 
 
+void MeshDfuTransport::prepare() {
+	_setPrn();
+}
+
+void MeshDfuTransport::dispatchResult(cs_result_t res) {
+	event_t eventOut(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESULT, &res, sizeof(res));
+	eventOut.dispatch();
+}
+void MeshDfuTransport::dispatchResponse(MeshDfuTransportResponse res) {
+	event_t eventOut(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &res, sizeof(res));
+	eventOut.dispatch();
+
+}
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // ++++++++++++++++++++++++ async flowcontrol ++++++++++++++++++++++++
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -240,30 +254,9 @@ void MeshDfuTransport::_selectData() {
 	_selectObject(0x02);
 }
 
-//
-//
-//async def __calculate_checksum(self):
-//    raw_response = await self.write_control_point([DfuTransportBle.OP_CODE['CalcChecSum']])
-//    response = self.__parse_response(raw_response, DfuTransportBle.OP_CODE['CalcChecSum'])
-//
-//    (offset, crc) = struct.unpack('<II', bytearray(response))
-//    return {'offset': offset, 'crc': crc}
-//
-
-
-//async def __select_object(self, object_type):
-//    logger.debug("BLE: Selecting Object: type:{}".format(object_type))
-//    raw_response = await self.write_control_point([DfuTransportBle.OP_CODE['ReadObject'], object_type])
-//    response = self.__parse_response(raw_response, DfuTransportBle.OP_CODE['ReadObject'])
-//
-//    (max_size, offset, crc)= struct.unpack('<III', bytearray(response))
-//    logger.debug("BLE: Object selected: max_size:{} offset:{} crc:{}".format(max_size, offset, crc))
-//    return {'max_size': max_size, 'offset': offset, 'crc': crc}
-
-
 // -------------------- raw data communication --------------------
 
-cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, cs_const_data_t evtData) {
+cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 	if (evtData.data == nullptr || evtData.len < 2) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
@@ -272,7 +265,7 @@ cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, cs_const_d
 		return ERR_UNKNOWN_OP_CODE;
 	}
 
-	if(static_cast<OP_CODE>(evtData.data[1]) != lastOperation) {
+	if(static_cast<OP_CODE>(evtData.data[1]) != _lastOperation) {
 		return ERR_WRONG_STATE;
 	}
 
@@ -290,9 +283,54 @@ cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, cs_const_d
 		default: {
 			LOGMeshDfuTransportWarn("Dfu Transport unspecified error occured");
 			return ERR_UNSPECIFIED;
-
 		}
 	}
+}
+
+MeshDfuTransportResponse MeshDfuTransport::_parseResponseReadObject(cs_const_data_t evtData) {
+	MeshDfuTransportResponse response;
+	response.result = _parseResult(evtData);
+
+	if(response.result == ERR_SUCCESS) {
+		// incoming data starts at index 3, in little endian (native byte order).
+		const uint32_t len = sizeof(uint32_t);
+		const uint32_t start = 3;
+		const uint32_t num_items = 3;
+
+		if(evtData.len < start + num_items*len) {
+			LOGMeshDfuTransportWarn("Dfu Transport error: packet too small for current operation");
+			response.result = ERR_BUFFER_TOO_SMALL;
+		} else {
+			memcpy(&response.max_size, &evtData.data[start + 0 * len], len);
+			memcpy(&response.offset,   &evtData.data[start + 1 * len], len);
+			memcpy(&response.crc,      &evtData.data[start + 2 * len], len);
+		}
+	}
+
+	return response;
+}
+
+
+MeshDfuTransportResponse MeshDfuTransport::_parseResponseCalcChecksum(cs_const_data_t evtData) {
+	MeshDfuTransportResponse response;
+	response.result = _parseResult(evtData);
+
+	if(response.result == ERR_SUCCESS) {
+		// incoming data starts at index 3, in little endian (native byte order).
+		const uint32_t len = sizeof(uint32_t);
+		const uint32_t start = 3;
+		const uint32_t num_items = 2;
+
+		if(evtData.len < start + num_items*len) {
+			LOGMeshDfuTransportWarn("Dfu Transport error: packet too small for current operation");
+			response.result = ERR_BUFFER_TOO_SMALL;
+		} else {
+			memcpy(&response.offset,   &evtData.data[start + 0 * len], len);
+			memcpy(&response.crc,      &evtData.data[start + 1 * len], len);
+		}
+	}
+
+	return response;
 }
 
 // ---------------------------- event handling ----------------------------
@@ -300,26 +338,41 @@ cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, cs_const_d
 void MeshDfuTransport::onNotificationReceived(event_t& event) {
 	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION)* packet = CS_TYPE_CAST(EVT_BLE_CENTRAL_NOTIFICATION, event.data);
 
-	cs_ret_code_t result = _parseResponse(_lastOperation, packet->data);
-
-	if(result != ERR_SUCCESS) {
-		LOGMeshDfuTransportWarn("error during dfu transport. Result: %u");
-		return;
-	}
-
-
 	// do something specific after operation finished (?)
 	switch(_lastOperation) {
-		case OP_CODE::SetPRN: { break; }
-		case OP_CODE::CreateObject: { break;}
-		case OP_CODE::Execute: { break; }
-		case OP_CODE::Response: { break; }
+		case OP_CODE::SetPRN: {
+			cs_ret_code_t result = _parseResult(packet->data);
+			dispatchResult(result);
+			break;
+		}
+		case OP_CODE::CreateObject: {
+			cs_ret_code_t result = _parseResult(packet->data);
+			dispatchResult(result);
+			break;
+		}
+		case OP_CODE::Execute: {
+			cs_ret_code_t result = _parseResult(packet->data);
+			dispatchResult(result);
+			break;
+		}
 		case OP_CODE::ReadObject: {
-			onFinishOperationRead();
+			MeshDfuTransportResponse response = _parseResponseReadObject(packet->data);
+			dispatchResponse(response);
 			break;
 		}
 		case OP_CODE::CalcChecSum: {
-			onFinishOperationCheckSum();
+			MeshDfuTransportResponse response = _parseResponseCalcChecksum(packet->data);
+			dispatchResponse(response);
+			break;
+		}
+		case OP_CODE::Response: {
+			// _lastOperation should never be Response. It is the target that responds, not us.
+			dispatchResult(ERR_WRONG_STATE);
+			break;
+		}
+		case OP_CODE::None: {
+			// forgot to set _lastOperation somewhere?
+			dispatchResult(ERR_WRONG_STATE);
 			break;
 		}
 	}

@@ -22,6 +22,8 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
+#include <dfu/cs_MeshDfuConstants.h>
+
 #include <localisation/cs_TrackableEvent.h>
 
 #include <time/cs_TimeSyncMessage.h>
@@ -399,7 +401,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_GPIO_READ,                                    // GPIO, read value (directly)
 	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
 
-	EVT_MESH_DFU_TRANSPORT_RESULT,                    // DFU operation result. See MeshDfuTransport.h
+	EVT_MESH_DFU_TRANSPORT_RESULT,                    // DFU operation result.   See MeshDfuTransport.h
+	EVT_MESH_DFU_TRANSPORT_RESPONSE,                  // DFU operation response. See MeshDfuTransport.h
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 
@@ -701,6 +704,7 @@ typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 
 // DFU
 typedef cs_ret_code_t TYPIFY(EVT_MESH_DFU_TRANSPORT_RESULT);
+typedef MeshDfuTransportResponse TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

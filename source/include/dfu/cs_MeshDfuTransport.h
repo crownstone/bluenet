@@ -45,16 +45,25 @@ public:
 	uint8_t getServiceUuidCount();
 
 	// -------- main protocol methods -----------
-	void open();
-	void close();
+
+	/**
+	 * sends first package of dfu protocol.
+	 *
+	 * dispatches EVT_MESH_DFU_TRANSPORT_RESULT when done.
+	 */
+	void prepare();
 
 	/**
 	 * sends the init packet
+	 *
+	 * dispatches EVT_MESH_DFU_TRANSPORT_RESULT when done.
 	 */
 	void programInitPacket();
 
 	/**
 	 * sends a chunk of firmware
+	 *
+	 * dispatches EVT_MESH_DFU_TRANSPORT_RESULT when done.
 	 */
 	void programFirmware();
 
@@ -167,6 +176,9 @@ private:
 	 */
 	void clearConnectionData();
 
+	void dispatchResult(cs_result_t res);
+	void dispatchResponse(MeshDfuTransportResponse res);
+
 
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -241,7 +253,9 @@ private:
 	// -------------------- raw data communication --------------------
 	void __stream_data();
 
-	cs_ret_code_t _parseResponse(OP_CODE lastOperation, cs_const_data_t evtData);
+	cs_ret_code_t _parseResult(cs_const_data_t evtData);
+	MeshDfuTransportResponse _parseResponseReadObject(cs_const_data_t evtData);
+	MeshDfuTransportResponse _parseResponseCalcChecksum(cs_const_data_t evtData);
 
 	void __parse_checksum_response();
 

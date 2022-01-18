@@ -42,10 +42,6 @@ namespace DfuTransportBle {
 constexpr uint8_t DEFAULT_TIMEOUT = 20;
 constexpr uint8_t RETRIES_NUMBER  = 5;
 
-
-
-
-
 constexpr auto EXT_ERROR_CODE(uint8_t errorcode) {
 	const char* codes[] = {
 			"No extended error code has been set. This error indicates an implementation problem.",
@@ -79,3 +75,16 @@ constexpr auto EXT_ERROR_CODE(uint8_t errorcode) {
 }  // namespace DfuTransportBle
 
 }  //  namespace MeshDfuConstants
+
+/**
+ * Some commands return an offset, crc or other data.
+ * These results are carried by an object of this type.
+ * See EVT_MESH_DFU_TRANSPORT_RESPONSE.
+ */
+struct MeshDfuTransportResponse {
+public:
+	uint32_t max_size = 0;
+	uint32_t offset   = 0;
+	uint32_t crc      = 0;
+	cs_ret_code_t result = ERR_UNSPECIFIED;
+};
