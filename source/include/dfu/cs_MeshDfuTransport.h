@@ -12,7 +12,9 @@
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_UUID.h>
 #include <common/cs_Component.h>
+#include <dfu/cs_MeshDfuConstants.h>
 #include <events/cs_EventListener.h>
+#include <util/cs_Coroutine.h>
 
 /**
  * The class that handles transport layer communication.
@@ -75,7 +77,7 @@ private:
 	bool _firstInit = true;
 	bool _discoveryComplete = false;
 
-	BleCentral _bleCentral;
+	BleCentral* _bleCentral;
 
 
 	// ------------------------ async flowcontrol ------------------------
@@ -165,10 +167,6 @@ private:
 	 */
 	void clearConnectionData();
 
-	/**
-	 *
-	 */
-	bool setLastOperation(OP_CODE operation);
 
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -176,6 +174,7 @@ private:
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 	enum class OP_CODE : uint8_t {
+		None         = 0x00, // added by Crownstone
 		CreateObject = 0x01,
 		SetPRN       = 0x02,
 		CalcChecSum  = 0x03,
@@ -198,8 +197,14 @@ private:
 		ExtendedError         = 0x0B,
 	};
 
-	OP_CODE _lastOperation = 0;
-	uint16_t _prn = 0; // nordic protocol local variable.
+	OP_CODE _lastOperation = OP_CODE::None;
+	uint16_t _prn = 0; // nordic protocol: Packet Receipt Notification.
+
+	/**
+	 *
+	 */
+	bool setLastOperation(OP_CODE operation);
+
 
 
 	// ------------- the adapter layer for crownstone_ble -------------
@@ -225,19 +230,18 @@ private:
 
 	void _createObject(uint8_t objectType, uint32_t size);
 
-	void _set_prn();
+	void _setPrn();
 	void __calculate_checksum();
 	void _execute();
 
-	void __select_command();
-	void __select_data();
-	void __select_object();
+	void _selectCommand();
+	void _selectData();
+	void _selectObject(uint8_t objectType);
 
 	// -------------------- raw data communication --------------------
 	void __stream_data();
 
-	cs_ret_code_t _parseResponse(OP_CODE lastOperation,
-			uint8_t* data, uint8_t len);
+	cs_ret_code_t _parseResponse(OP_CODE lastOperation, cs_const_data_t evtData);
 
 	void __parse_checksum_response();
 

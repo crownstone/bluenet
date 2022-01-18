@@ -12,14 +12,15 @@
 
 #define LOGMeshDfuTransportDebug LOGd
 #define LOGMeshDfuTransportInfo LOGi
+#define LOGMeshDfuTransportWarn LOGw
 
 cs_ret_code_t MeshDfuTransport::init() {
 	if (!_firstInit) {
 		return ERR_SUCCESS;
 	}
 
-	_bleHandler = getComponent<BleCentral>();
-	if(_bleHandler == nullptr){
+	_bleCentral = getComponent<BleCentral>();
+	if(_bleCentral == nullptr){
 		return ERR_NOT_AVAILABLE;
 	}
 
@@ -131,7 +132,7 @@ void MeshDfuTransport::clearTimeoutCallback() {
 }
 
 void MeshDfuTransport::onEventCallbackTimeOut() {
-	MeshDfuTransportInfo("+++ event callback timed out, calling _onTimeout");
+	LOGMeshDfuTransportInfo("+++ event callback timed out, calling _onTimeout");
 	if(_onTimeout != nullptr) {
 		(this->*_onTimeout)();
 	}
@@ -152,15 +153,15 @@ void MeshDfuTransport::onEventCallbackTimeOut() {
 //	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
 //}
 
-void MeshDfuTransport::write_control_point(uint8_t* data, uint8_t len) {
+void MeshDfuTransport::write_control_point(cs_data_t buff) {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
-	_bleCentral->write(_uuidHandles[Index::ControlPoint], data, len);
+	_bleCentral->write(_uuidHandles[Index::ControlPoint], buff.data, buff.len);
 
 }
 
-void MeshDfuTransport::write_data_point(uint8_t* data, uint8_t len) {
+void MeshDfuTransport::write_data_point(cs_data_t buff) {
 	// data writes don't have to wait
-	_bleCentral->write(_uuidHandles[Index::DataPoint], data, len);
+	_bleCentral->write(_uuidHandles[Index::DataPoint], buff.data, buff.len);
 }
 
 
@@ -174,14 +175,14 @@ void MeshDfuTransport::write_data_point(uint8_t* data, uint8_t len) {
 void MeshDfuTransport::_setPrn() {
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
-	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(prn);
+	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(_prn);
 	if(buff.data == nullptr || buff.len < len) {
 		return;
 	}
 
 	_lastOperation = OP_CODE::SetPRN;
-	buff.data[0] = OP_CODE::SetPRN;
-	memcpy(	&buff.data[1], _prn, sizeof(prn)); // little endian unsigned uint16_t
+	buff.data[0] = static_cast<uint8_t>(OP_CODE::SetPRN);
+	memcpy(	&buff.data[1], &_prn, sizeof(_prn)); // little endian unsigned uint16_t
 
 	buff.len = len;
 
@@ -192,14 +193,14 @@ void  MeshDfuTransport::_createObject(uint8_t objectType, uint32_t size) {
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(objectType) + sizeof(size);
-	if(buff.data == nullptr || buff.len < sizeof(OP_CODE) + sizeof(prn)) {
+	if(buff.data == nullptr || buff.len < len) {
 		return;
 	}
 
 	_lastOperation = OP_CODE::CreateObject;
-	buff.data[0] = OP_CODE::CreateObject;
+	buff.data[0] = static_cast<uint8_t>(OP_CODE::CreateObject);
 	buff.data[1] = objectType;
-	memcpy(&buff.data[2], size, sizeof(size)); // little endian unsigned uint32_t
+	memcpy(&buff.data[2], &size, sizeof(size)); // little endian unsigned uint32_t
 
 	buff.len = len;
 
@@ -215,16 +216,16 @@ void MeshDfuTransport::_createData(uint32_t size) {
 }
 
 
-void  MeshDfuTransport::__execute() {
+void  MeshDfuTransport::_execute() {
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE);
-	if(buff.data == nullptr || buff.len < sizeof(OP_CODE) + sizeof(prn)) {
+	if(buff.data == nullptr || buff.len < len) {
 		return;
 	}
 
 	_lastOperation = OP_CODE::Execute;
-	buff.data[0] = OP_CODE::Execute;
+	buff.data[0] = static_cast<uint8_t>(OP_CODE::Execute);
 
 	buff.len = len;
 
@@ -262,25 +263,25 @@ void MeshDfuTransport::_selectData() {
 
 // -------------------- raw data communication --------------------
 
-cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, uint8_t* data, uint8_t len) {
-	if (data == nullptr || len < 2) {
+cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, cs_const_data_t evtData) {
+	if (evtData.data == nullptr || evtData.len < 2) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
 
-	if (data[0] != OP_CODE::Response) {
+	if (static_cast<OP_CODE>(evtData.data[0]) != OP_CODE::Response) {
 		return ERR_UNKNOWN_OP_CODE;
 	}
 
-	if(data[1] != lastOperation) {
+	if(static_cast<OP_CODE>(evtData.data[1]) != lastOperation) {
 		return ERR_WRONG_STATE;
 	}
 
-	switch(data[2]) {
+	switch(static_cast<RES_CODE>(evtData.data[2])) {
 		case RES_CODE::Success : {
 			return ERR_SUCCESS; // return result is  data[3:]
 		}
 		case RES_CODE::ExtendedError: {
-			uint8_t errcode = len >=3 ? data[3] : 0;
+			uint8_t errcode = evtData.len >=3 ? evtData.data[3] : 0;
 
 			LOGMeshDfuTransportWarn("Dfu Transport extended error: %s",
 						MeshDfuConstants::DfuTransportBle::EXT_ERROR_CODE(errcode));
@@ -297,7 +298,9 @@ cs_ret_code_t MeshDfuTransport::_parseResponse(OP_CODE lastOperation, uint8_t* d
 // ---------------------------- event handling ----------------------------
 
 void MeshDfuTransport::onNotificationReceived(event_t& event) {
-	cs_ret_code_t result = _parseResponse(event, _lastOperation);
+	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION)* packet = CS_TYPE_CAST(EVT_BLE_CENTRAL_NOTIFICATION, event.data);
+
+	cs_ret_code_t result = _parseResponse(_lastOperation, packet->data);
 
 	if(result != ERR_SUCCESS) {
 		LOGMeshDfuTransportWarn("error during dfu transport. Result: %u");
