@@ -179,8 +179,6 @@ private:
 	void dispatchResult(cs_result_t res);
 	void dispatchResponse(MeshDfuTransportResponse res);
 
-
-
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	// ++++++++++++++++++++++++ nordic protocol ++++++++++++++++++++++++
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -212,12 +210,7 @@ private:
 	OP_CODE _lastOperation = OP_CODE::None;
 	uint16_t _prn = 0; // nordic protocol: Packet Receipt Notification.
 
-	/**
-	 *
-	 */
 	bool setLastOperation(OP_CODE operation);
-
-
 
 	// ------------- the adapter layer for crownstone_ble -------------
 	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, cs_data_t buff);
@@ -258,7 +251,6 @@ private:
 	MeshDfuTransportResponse _parseResponseCalcChecksum(cs_const_data_t evtData);
 
 	void __parse_checksum_response();
-
 
 public:
 	void handleEvent(event_t& event) override;

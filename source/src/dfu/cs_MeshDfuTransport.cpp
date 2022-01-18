@@ -159,14 +159,6 @@ void MeshDfuTransport::onEventCallbackTimeOut() {
 
 // ------------- the adapter layer for crownstone_ble -------------
 
-//void MeshDfuTransport::writeCharacteristicWithoutResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len){
-//	_bleCentral->write(characteristicHandle, data, len);
-//}
-//void MeshDfuTransport::writeCharacteristicForResponse(uint16_t characteristicHandle, uint8_t* data, uint8_t len) {
-//	_bleCentral->write(characteristicHandle, data, len);
-//	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
-//}
-
 void MeshDfuTransport::write_control_point(cs_data_t buff) {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
 	_bleCentral->write(_uuidHandles[Index::ControlPoint], buff.data, buff.len);
@@ -177,9 +169,6 @@ void MeshDfuTransport::write_data_point(cs_data_t buff) {
 	// data writes don't have to wait
 	_bleCentral->write(_uuidHandles[Index::DataPoint], buff.data, buff.len);
 }
-
-
-// ----------------- utility forwardering methods -----------------
 
 // ----------------------- recovery methods -----------------------
 
@@ -276,7 +265,7 @@ cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 		case RES_CODE::ExtendedError: {
 			uint8_t errcode = evtData.len >=3 ? evtData.data[3] : 0;
 
-			LOGMeshDfuTransportWarn("Dfu Transport extended error: %s",
+			LOGMeshDfuTransportWarn("Dfu Transport extended error: %u",
 						MeshDfuConstants::DfuTransportBle::EXT_ERROR_CODE(errcode));
 			return ERR_INVALID_MESSAGE;
 		}
