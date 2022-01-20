@@ -138,7 +138,9 @@ void MeshDfuTransport::onEventCallbackTimeOut() {
 // ------------- the adapter layer for crownstone_ble -------------
 
 void MeshDfuTransport::write_control_point(cs_data_t buff) {
+	LOGMeshDfuTransportDebug("MeshDfuTransport: write control point and wait for notification");
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
+	_bleCentral->writeNotificationConfig(_cccdHandles[Index::ControlPoint], true); // TODO: maybe unnecessary?
 	_bleCentral->write(_uuidHandles[Index::ControlPoint], buff.data, buff.len);
 
 }
@@ -400,6 +402,7 @@ void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
 		if (result.uuid == _uuids[index]) {
 			LOGMeshDfuTransportDebug("Found dfu characteristic handle for Index %u", index);
 			_uuidHandles[index] = result.valueHandle;
+			_cccdHandles[index] = result.cccdHandle;
 			return;
 		}
 	}

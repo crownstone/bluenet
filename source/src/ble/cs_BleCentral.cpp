@@ -362,7 +362,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 		memmove(_buf.data, data, len);
 	}
 	else {
-		LOGBleCentralDebug("Skip copy");
+		LOGBleCentralDebug("Skip copy (optimized)");
 	}
 
 	if (len > _mtu - WRITE_OVERHEAD) {

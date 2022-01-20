@@ -79,6 +79,7 @@ private:
 	 */
 	UUID _uuids[Index::ENUMLEN] = {};
 	uint16_t _uuidHandles[Index::ENUMLEN] = {};
+	uint16_t _cccdHandles[Index::ENUMLEN] = {};
 
 	UUID _dfuServiceUuid;
 	bool _dfuServiceFound = false;

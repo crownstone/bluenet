@@ -25,7 +25,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 	_targetDevice = target;
 
-	return startPhase(Phase::TargetTriggerDfuMode);
+	return startPhase(Phase::ConnectTargetInDfuMode);
 }
 
 // -------------------------------------------------------------------------------------
@@ -271,6 +271,8 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 	}
 
 	if(!_triedDfuCommand) {
+		LOGMeshDfuHostDebug("+++ dfu mode verification failed, disconnecting and retrying");
+		_bleCentral->disconnect();
 		_triedDfuCommand = true;
 		return Phase::TargetTriggerDfuMode;
 	}
@@ -395,6 +397,9 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 
 bool MeshDfuHost::startPhase(Phase phase) {
 	LOGMeshDfuHostDebug("+++ Starting phase %s", phaseName(phase));
+	_phaseCurrent = phase;
+	_phaseOnComplete = Phase::None;
+
 	bool success = false;
 
 	switch (phase) {
@@ -444,10 +449,7 @@ bool MeshDfuHost::startPhase(Phase phase) {
 		}
 	}
 
-	if(success) {
-		_phaseCurrent = phase;
-		_phaseOnComplete = Phase::None;
-	} else {
+	if(!success) {
 		LOGMeshDfuHostDebug("+++ Failed to start phase %s, aborting", phaseName(phase));
 		abort();
 		return false;
