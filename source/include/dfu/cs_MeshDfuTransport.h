@@ -63,19 +63,28 @@ public:
 	 */
 	void prepare();
 
-	/**
-	 * sends the init packet
-	 *
-	 * dispatches EVT_MESH_DFU_TRANSPORT_RESULT when done.
-	 */
-	void programInitPacket();
+	// ------------------- nordic protocol commands -------------------
 
 	/**
-	 * sends a chunk of firmware
-	 *
-	 * dispatches EVT_MESH_DFU_TRANSPORT_RESULT when done.
+	 * All these methods send a dfu packet on the control point.
+	 * Some require a notification to be parsed.
 	 */
-	void programFirmware();
+
+	// EVT_MESH_DFU_TRANSPORT_RESULT
+	void _createCommand(uint32_t size);
+	void _createData(uint32_t size);
+	void _createObject(uint8_t objectType, uint32_t size);
+	void _setPrn();
+	void _execute();
+	void __stream_data();
+
+	// EVT_MESH_DFU_TRANSPORT_RESPONSE
+	void _calculateChecksum();
+	void _selectCommand();
+	void _selectData();
+	void _selectObject(uint8_t objectType);
+
+
 
 private:
 	enum Index : uint8_t {
@@ -247,28 +256,10 @@ private:
 
 	void validateCrcCommandResponse();
 
-	// ------------------- nordic protocol commands -------------------
 
-	/**
-	 * All these methods send a dfu packet on the control point.
-	 * Some require a notification to be parsed.
-	 */
 
-	void _createCommand(uint32_t size);
-	void _createData(uint32_t size);
-
-	void _createObject(uint8_t objectType, uint32_t size);
-
-	void _setPrn();
-	void _calculateChecksum();
-	void _execute();
-
-	void _selectCommand();
-	void _selectData();
-	void _selectObject(uint8_t objectType);
 
 	// -------------------- raw data communication --------------------
-	void __stream_data();
 
 	/**
 	 * checks if structure of incoming notifications matches _lastOperation.
