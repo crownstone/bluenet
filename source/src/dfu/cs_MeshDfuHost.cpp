@@ -382,13 +382,13 @@ bool MeshDfuHost::startPhaseAborting() {
 	switch(csCentralStatus){
 		case ERR_WAIT_FOR_SUCCESS: {
 			LOGMeshDfuHostDebug("wait for disconnect event");
-			setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::aborting);
+			setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::completePhase);
 			setTimeoutCallback(&MeshDfuHost::completePhase);
 			break;
 		}
 		default: {
 			LOGMeshDfuHostDebug("disconnect failed, finishing abort next tick");
-			setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::aborting);
+			setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::completePhase);
 			break;
 		}
 	}
@@ -396,9 +396,8 @@ bool MeshDfuHost::startPhaseAborting() {
 	return true;
 }
 
-void MeshDfuHost::aborting(event_t& event) {
-	completePhase();
-}
+// ###### Aborting ######
+
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 	LOGMeshDfuHostDebug("+++ completePhaseAborting");
@@ -509,7 +508,10 @@ void MeshDfuHost::completePhase() {
 			phaseNext = completePhaseTargetPreparing();
 			break;
 		}
-		case Phase::TargetInitializing: break;
+		case Phase::TargetInitializing: {
+			phaseNext = completePhaseTargetInitializing();
+			break;
+		}
 		case Phase::TargetUpdating: break;
 		case Phase::TargetVerifying: break;
 		case Phase::Aborting: {
@@ -530,6 +532,10 @@ void MeshDfuHost::completePhase() {
 
 void MeshDfuHost::startPhase(event_t& event) {
 	startPhase(_phaseCurrent);
+}
+
+void MeshDfuHost::completePhase(event_t& event) {
+	completePhase();
 }
 
 void MeshDfuHost::restartPhase() {

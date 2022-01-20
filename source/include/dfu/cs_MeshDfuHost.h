@@ -298,12 +298,17 @@ private:
 
 	// ###### TargetInitializing ######
 
+	/**
+	 * read init packet length,
+	 */
+	bool startPhaseTargetInitializing();
+
+	Phase completePhaseTargetInitializing();
 
 
 	// ###### Aborting ######
 
 	bool startPhaseAborting();
-	void aborting(event_t& event);
 	Phase completePhaseAborting();
 
 	// ------------------------------------------------------------------------------------
@@ -344,6 +349,11 @@ private:
 	 * completePhaseX methods must be synchronous.
 	 */
 	void completePhase();
+
+	/**
+	 * Calls completePhase and can be called on event.
+	 */
+	void completePhase(event_t& event);
 
 	/**
 	 * restarts the current phase.
@@ -395,7 +405,6 @@ private:
 
 	// ---------- phase start callbacks ----------
 
-	bool startPhaseTargetInitializing();
 	bool startPhaseTargetUpdating();
 	bool startPhaseTargetVerifying();
 
@@ -407,7 +416,6 @@ private:
 	 *
 	 * Called by completePhase.
 	 */
-	Phase completePhaseTargetInitializing();
 	Phase completePhaseTargetUpdating();
 	Phase completePhaseTargetVerifying();
 
