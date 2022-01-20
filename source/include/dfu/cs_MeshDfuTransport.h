@@ -168,6 +168,12 @@ private:
 	 */
 	void onNotificationReceived(event_t& event);
 
+	/**
+	 * check if we were busy. if so, send event of type corresponding to _lastOperation
+	 * with ERR_TIMEOUT as result. Clear event callback
+	 */
+	void onTimeout();
+
 	// ----------------------------- utils -----------------------------
 
 	/**

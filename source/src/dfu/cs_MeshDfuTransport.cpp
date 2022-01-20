@@ -73,42 +73,6 @@ bool MeshDfuTransport::isBusy() {
 }
 
 
-void MeshDfuTransport::onDisconnect() {
-	if(isBusy()) {
-		LOGMeshDfuTransportWarn("disconnected during dfu operation");
-	}
-
-	clearConnectionData();
-	clearEventCallback();
-	clearTimeoutCallback();
-}
-
-void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
-	if(_discoveryComplete) {
-		LOGMeshDfuTransportDebug("Discovery was already completed. Continuing after clearing old data.");
-		clearConnectionData();
-	}
-
-	if(result.uuid == _dfuServiceUuid) {
-		LOGMeshDfuTransportInfo("Found dfu service handle");
-		_dfuServiceFound = true;
-		return;
-	}
-
-	LOGMeshDfuTransportDebug("result uuid: 0x04%x", result.uuid.getUuid().uuid);
-
-	for (auto index : {Index::ControlPoint, Index::DataPoint}) {
-		if (result.uuid == _uuids[index]) {
-			LOGMeshDfuTransportDebug("Found dfu characteristic handle for Index %u", index);
-			_uuidHandles[index] = result.valueHandle;
-			return;
-		}
-	}
-}
-
-void MeshDfuTransport::onDiscoveryComplete() {
-	_discoveryComplete = true;
-}
 
 
 void MeshDfuTransport::prepare() {
@@ -122,7 +86,6 @@ void MeshDfuTransport::dispatchResult(cs_result_t res) {
 void MeshDfuTransport::dispatchResponse(MeshDfuTransportResponse res) {
 	event_t eventOut(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &res, sizeof(res));
 	eventOut.dispatch();
-
 }
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -365,6 +328,72 @@ MeshDfuTransportResponse MeshDfuTransport::_parseResponseCalcChecksum(cs_const_d
 }
 
 // ---------------------------- event handling ----------------------------
+
+
+void MeshDfuTransport::onDisconnect() {
+	if(isBusy()) {
+		LOGMeshDfuTransportWarn("disconnected during dfu operation");
+	}
+
+	clearConnectionData();
+	clearEventCallback();
+	clearTimeoutCallback();
+}
+
+void MeshDfuTransport::onTimeout() {
+	if(!isBusy()) {
+		LOGMeshDfuTransportDebug("timeout callback invoked, but not currently busy. Forgot to cancel timeout?");
+	}
+
+	clearEventCallback();
+
+	MeshDfuTransportResponse response;
+	response.result = ERR_TIMEOUT;
+
+	switch(_lastOperation){
+		case OP_CODE::SetPRN:
+		case OP_CODE::CreateObject:
+		case OP_CODE::Execute:
+			dispatchResult(ERR_TIMEOUT);
+			break;
+
+		case OP_CODE::ReadObject:
+		case OP_CODE::CalcChecSum:
+			dispatchResponse(response);
+			break;
+
+		case OP_CODE::Response:
+		case OP_CODE::None:
+			LOGMeshDfuTransportDebug("timeout callback invoked, but current operation is Response or None");
+	}
+}
+
+void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {
+	if(_discoveryComplete) {
+		LOGMeshDfuTransportDebug("Discovery was already completed. Continuing after clearing old data.");
+		clearConnectionData();
+	}
+
+	if(result.uuid == _dfuServiceUuid) {
+		LOGMeshDfuTransportInfo("Found dfu service handle");
+		_dfuServiceFound = true;
+		return;
+	}
+
+	LOGMeshDfuTransportDebug("result uuid: 0x04%x", result.uuid.getUuid().uuid);
+
+	for (auto index : {Index::ControlPoint, Index::DataPoint}) {
+		if (result.uuid == _uuids[index]) {
+			LOGMeshDfuTransportDebug("Found dfu characteristic handle for Index %u", index);
+			_uuidHandles[index] = result.valueHandle;
+			return;
+		}
+	}
+}
+
+void MeshDfuTransport::onDiscoveryComplete() {
+	_discoveryComplete = true;
+}
 
 void MeshDfuTransport::onNotificationReceived(event_t& event) {
 	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION)* packet = CS_TYPE_CAST(EVT_BLE_CENTRAL_NOTIFICATION, event.data);

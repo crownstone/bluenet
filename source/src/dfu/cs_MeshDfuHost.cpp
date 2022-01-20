@@ -11,6 +11,7 @@
 
 #define LOGMeshDfuHostDebug LOGd
 #define LOGMeshDfuHostInfo LOGi
+#define LOGMeshDfuHostWarn LOGw
 
 bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 	LOGMeshDfuHostDebug("+++ Copy firmware to target");
@@ -282,15 +283,32 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 
 bool MeshDfuHost::startPhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
+
+	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESULT, &MeshDfuHost::checkResultPhaseTargetPreparing);
 	_meshDfuTransport.prepare();
 	// TODO
 	return false;
 }
 
+void MeshDfuHost::checkResultPhaseTargetPreparing(event_t& event) {
+	TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT)* result = CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESULT, event.data);
+
+	switch(*result) {
+		case ERR_SUCCESS: {
+			completePhase();
+			break;
+		}
+		default: {
+			LOGMeshDfuHostWarn("failed to start dfu process: %u", *result);
+			abort();
+			break;
+		}
+	}
+}
+
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ completePhaseTargetPreparing");
-	// TODO
-	return Phase::None;
+	return Phase::TargetInitializing;
 }
 // ###### TargetInitializing ######
 

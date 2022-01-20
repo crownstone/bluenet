@@ -279,11 +279,24 @@ private:
 	 * Checks if the required dfu characteristics are available on the connected
 	 * device.
 	 *
-	 * Assumes BLE central is connected.
+	 * Next phase:
+	 *  - TargetTriggerDfuMode (once in the process, when not dfu chars aren't discovered)
+	 *  - TargetPreparing (if dfu characteristics are found)
+	 *  - Aborting (else)
 	 */
-	bool verifyDfuMode();
-
 	Phase completeDiscoverDfuCharacteristics();
+
+	// ###### TargetPreparing ######
+
+	bool startPhaseTargetPreparing();
+
+	void checkResultPhaseTargetPreparing(event_t& event);
+
+	Phase completePhaseTargetPreparing();
+
+	// ###### TargetInitializing ######
+
+
 
 	// ###### Aborting ######
 
@@ -377,7 +390,6 @@ private:
 
 	// ---------- phase start callbacks ----------
 
-	bool startPhaseTargetPreparing();
 	bool startPhaseTargetInitializing();
 	bool startPhaseTargetUpdating();
 	bool startPhaseTargetVerifying();
@@ -390,8 +402,6 @@ private:
 	 *
 	 * Called by completePhase.
 	 */
-
-	Phase completePhaseTargetPreparing();
 	Phase completePhaseTargetInitializing();
 	Phase completePhaseTargetUpdating();
 	Phase completePhaseTargetVerifying();
