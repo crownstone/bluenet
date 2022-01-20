@@ -149,6 +149,7 @@ void MeshDfuTransport::write_data_point(cs_data_t buff) {
 
 
 void MeshDfuTransport::_setPrn() {
+	LOGMeshDfuTransportDebug("set PRN");
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(_prn);
@@ -166,6 +167,7 @@ void MeshDfuTransport::_setPrn() {
 }
 
 void  MeshDfuTransport::_calculateChecksum() {
+	LOGMeshDfuTransportDebug("Calculate checksum");
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE);
@@ -182,6 +184,7 @@ void  MeshDfuTransport::_calculateChecksum() {
 }
 
 void  MeshDfuTransport::_execute() {
+	LOGMeshDfuTransportDebug("Execute");
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE);
@@ -198,6 +201,7 @@ void  MeshDfuTransport::_execute() {
 }
 
 void  MeshDfuTransport::_createObject(uint8_t objectType, uint32_t size) {
+	LOGMeshDfuTransportDebug("Create object id:%u, size:%u", objectType, size);
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(objectType) + sizeof(size);
@@ -223,6 +227,7 @@ void MeshDfuTransport::_createData(uint32_t size) {
 }
 
 void  MeshDfuTransport::_selectObject(uint8_t objectType) {
+	LOGMeshDfuTransportDebug("Select object id:%u", objectType);
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
 	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(objectType);
@@ -251,6 +256,7 @@ void MeshDfuTransport::_selectData() {
 // -------------------- raw data communication --------------------
 
 cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
+	LOGMeshDfuTransportDebug("Parse dfu notification result");
 	if (evtData.data == nullptr || evtData.len < 2) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
@@ -282,6 +288,7 @@ cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 }
 
 MeshDfuTransportResponse MeshDfuTransport::_parseResponseReadObject(cs_const_data_t evtData) {
+	LOGMeshDfuTransportDebug("Parse dfu notification read object result");
 	MeshDfuTransportResponse response;
 	response.result = _parseResult(evtData);
 
@@ -306,6 +313,8 @@ MeshDfuTransportResponse MeshDfuTransport::_parseResponseReadObject(cs_const_dat
 
 
 MeshDfuTransportResponse MeshDfuTransport::_parseResponseCalcChecksum(cs_const_data_t evtData) {
+	LOGMeshDfuTransportDebug("Parse dfu notification calck checksum result");
+
 	MeshDfuTransportResponse response;
 	response.result = _parseResult(evtData);
 
@@ -396,6 +405,7 @@ void MeshDfuTransport::onDiscoveryComplete() {
 }
 
 void MeshDfuTransport::onNotificationReceived(event_t& event) {
+	LOGMeshDfuTransportDebug("On notification received");
 	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION)* packet = CS_TYPE_CAST(EVT_BLE_CENTRAL_NOTIFICATION, event.data);
 
 	// do something specific after operation finished (?)
