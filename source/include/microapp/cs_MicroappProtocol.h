@@ -11,9 +11,12 @@ extern "C" {
 static_assert (sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 static_assert (sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 
+/**
+ * The payload only contains data. The data is limited in size through the use of structs. Therefore there is no
+ * separate size field needed.
+ */
 struct coargs_payload_t {
 	uint8_t *data;
-	uint16_t size;
 };
 
 struct coargs_t {
@@ -78,14 +81,14 @@ private:
 	coroutine_t _coroutine;
 
 	/**
-	 * A counter used for the coroutine (to e.g. set the number of ticks for "delay" functionality).
+	 * The maximum number of consecutive calls to a microapp.
 	 */
-	int _cocounter;
+	const uint8_t MAX_CONSECUTIVE_MESSAGES = 42;
 
 	/**
-	 * Implementing count down for a coroutine counter.
+	 * Call counter
 	 */
-	int _coskip;
+	uint8_t _callCounter;
 
 	/**
 	 * Store data for callbacks towards the microapp.
@@ -176,67 +179,67 @@ protected:
 	 * After particular microapp commands we want to stop the microapp (end of loop etc.) and continue with bluenet.
 	 * This function returns true for such commands.
 	 */
-	bool stopAfterMicroappCommand(uint8_t* payload, uint16_t length);
+	bool stopAfterMicroappCommand(microapp_cmd_t* cmd);
 
 	/**
 	 * Handle microapp log commands.
 	 */
-	cs_ret_code_t handleMicroappLogCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappLogCommand(microapp_log_cmd_t *cmd);
 
 	/**
 	 * Handle microapp delay commands.
 	 */
-	cs_ret_code_t handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd);
+	cs_ret_code_t handleMicroappDelayCommand(microapp_delay_cmd_t* cmd);
 
 	/**
 	 * Handle microapp pin commands.
 	 */
-	cs_ret_code_t handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinCommand(microapp_pin_cmd_t* cmd);
 
 	/**
 	 * Handle microapp pin switching commands.
 	 */
-	cs_ret_code_t handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinSwitchCommand(microapp_pin_cmd_t* cmd);
 
 	/**
 	 * Handle microapp pin commands for setting pin modes.
 	 */
-	cs_ret_code_t handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinSetModeCommand(microapp_pin_cmd_t* cmd);
 
 	/**
 	 * Handle microapp pin commands for reading and writing pins.
 	 */
-	cs_ret_code_t handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd);
+	cs_ret_code_t handleMicroappPinActionCommand(microapp_pin_cmd_t* cmd);
 
 	/**
 	 * Handle microapp commands for advertising microapp state in service data.
 	 */
-	cs_ret_code_t handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappServiceDataCommand(microapp_service_data_cmd_t *cmd);
 
 	/**
 	 * Handle microapp TWI commands.
 	 */
-	cs_ret_code_t handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd);
+	cs_ret_code_t handleMicroappTwiCommand(microapp_twi_cmd_t* cmd);
 
 	/**
 	 * Handle microapp BLE commands.
 	 */
-	cs_ret_code_t handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd);
+	cs_ret_code_t handleMicroappBleCommand(microapp_ble_cmd_t* cmd);
 
 	/**
 	 * Handle microapp commands for power usage requests.
 	 */
-	cs_ret_code_t handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t *cmd);
 
 	/**
 	 * Handle microapp commands for presence requests.
 	 */
-	cs_ret_code_t handleMicroappPresenceCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappPresenceCommand(microapp_presence_cmd_t *cmd);
 
 	/**
 	 * Handle microapp commands for sending and reading mesh messages.
 	 */
-	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_cmd_t* command);
+	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_cmd_t* cmd);
 
 public:
 	static MicroappProtocol& getInstance() {
@@ -267,5 +270,5 @@ public:
 	/**
 	 * Handle commands from the microapp
 	 */
-	cs_ret_code_t handleMicroappCommand(uint8_t* payload, uint16_t length);
+	cs_ret_code_t handleMicroappCommand(microapp_cmd_t *cmd);
 };

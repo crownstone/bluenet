@@ -22,13 +22,15 @@ const uint8_t MAC_ADDRESS_LENGTH = 6;
 
 const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
 
-const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - 4;
+const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - 5;
 
 const uint8_t MAX_MICROAPP_ARRAY_LENGTH = MAX_MICROAPP_STRING_LENGTH;
 
 const uint8_t MAX_MESH_DATA_LENGTH = MAX_PAYLOAD - 4;
 
 const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
+
+const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - 6;
 
 /**
  * The main opcodes for microapp commands.
@@ -151,10 +153,13 @@ struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
 };
 
 /**
- * A payload has always a cmd field as opcode.
+ * A payload has always a cmd field as opcode. The id can be used for identification, for example useful for callbacks.
+ * The ack field can be used for callbacks.
  */
 struct __attribute__((packed)) microapp_cmd_t {
 	uint8_t cmd;
+	uint8_t id;
+	uint8_t ack;
 };
 
 /**
@@ -214,8 +219,10 @@ static_assert(sizeof(microapp_twi_cmd_t) <= MAX_PAYLOAD);
  */
 struct __attribute__((packed)) microapp_log_cmd_t {
 	uint8_t cmd = CS_MICROAPP_COMMAND_LOG;
+	uint8_t port;
 	uint8_t type;
 	uint8_t option;
+	uint8_t length;
 };
 
 static_assert(sizeof(microapp_log_cmd_t) <= MAX_PAYLOAD);
@@ -252,7 +259,6 @@ struct __attribute__((packed)) microapp_log_double_cmd_t {
 
 struct __attribute__((packed)) microapp_log_string_cmd_t {
 	microapp_log_cmd_t header;
-	uint8_t length;
 	char str[MAX_MICROAPP_STRING_LENGTH];
 };
 
@@ -260,7 +266,6 @@ static_assert(sizeof(microapp_log_string_cmd_t) <= MAX_PAYLOAD);
 
 struct __attribute__((packed)) microapp_log_array_cmd_t {
 	microapp_log_cmd_t header;
-	uint8_t length;
 	char arr[MAX_MICROAPP_ARRAY_LENGTH];
 };
 
@@ -269,6 +274,7 @@ struct __attribute__((packed)) microapp_log_array_cmd_t {
  */
 struct __attribute__((packed)) microapp_ble_cmd_t {
 	uint8_t cmd = CS_MICROAPP_COMMAND_BLE;
+	uint8_t ack;
 	uint8_t opcode;
 	uint8_t id;
 };
@@ -333,11 +339,30 @@ struct __attribute__((packed)) microapp_ble_device_t {
 
 static_assert(sizeof(microapp_ble_device_t) <= MAX_PAYLOAD);
 
+/**
+ * Struct for microapp service data commands
+ */
+struct __attribute__((packed)) microapp_service_data_cmd_t {
+	uint8_t cmd = CS_MICROAPP_COMMAND_SERVICE_DATA;
+	uint8_t type;
+	uint8_t option;
+	uint16_t appUuid;
+	uint8_t dlen;
+	uint8_t data[MAX_COMMAND_SERVICE_DATA_LENGTH];
+};
+
+static_assert(sizeof(microapp_service_data_cmd_t) <= MAX_PAYLOAD);
+
 /*
  * Struct for microapp power usage requests
  */
 struct __attribute__((packed)) microapp_power_usage_t {
 	int32_t powerUsage;
+};
+
+struct __attribute__((packed)) microapp_power_usage_cmd_t {
+	uint8_t cmd = CS_MICROAPP_COMMAND_POWER_USAGE;
+	microapp_power_usage_t powerUsage;
 };
 
 /*
@@ -348,3 +373,7 @@ struct __attribute__((packed)) microapp_presence_t {
 	uint64_t presenceBitmask;
 };
 
+struct __attribute__((packed)) microapp_presence_cmd_t {
+	uint8_t cmd = CS_MICROAPP_COMMAND_PRESENCE;
+	microapp_presence_t presence;
+};

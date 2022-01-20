@@ -56,6 +56,12 @@ void Microapp::init() {
 void Microapp::loadApps() {
 	// Loop over every app index, as an app might've been uploaded via jlink.
 	cs_ret_code_t retCode;
+	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
+		LOGMicroappInfo("Auto-enabling of apps on boot turned on");
+	} else {
+		LOGMicroappInfo("Auto-enabling of apps on boot turned off");
+	}
+
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
 		retCode = validateApp(index);
@@ -82,15 +88,16 @@ void Microapp::loadState(uint8_t index) {
 	_states[index].hasData = !storage.isErased(index);
 }
 
+/*
+ * Validate the app.
+ *
+ * First return a possible error of an incorrect checksum. Only then return when there is no proper state information 
+ * available. This means that it can be used when AUTO_ENABLE_MICROAPP_ON_BOOT is set.
+ */
 cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	LOGMicroappDebug("validateApp %u", index);
 	cs_ret_code_t retCode;
 	microapp_state_t & state = _states[index];
-
-	if (!state.hasData) {
-		LOGMicroappInfo("Microapp %u has no data", index);
-		return ERR_WRONG_STATE;
-	}
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	retCode = storage.validateApp(index);
@@ -99,7 +106,12 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 		state.checksumTest = MICROAPP_TEST_STATE_FAILED;
 		return retCode;
 	}
-
+	
+	if (!state.hasData) {
+		LOGMicroappInfo("Microapp %u has no data", index);
+		return ERR_WRONG_STATE;
+	}
+	
 	microapp_binary_header_t appHeader;
 	storage.getAppHeader(index, appHeader);
 	if (state.checksum != appHeader.checksum || state.checksumHeader != appHeader.checksumHeader) {
@@ -110,6 +122,8 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 				appHeader.checksum,
 				appHeader.checksumHeader);
 		resetState(index);
+	} else {
+		LOGMicroappInfo("Known app on index %u", index);
 	}
 	state.checksum = appHeader.checksum;
 	state.checksumHeader = appHeader.checksumHeader;
@@ -140,7 +154,7 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 cs_ret_code_t Microapp::startApp(uint8_t index) {
 	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
-		LOGMicroappDebug("Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
+		LOGMicroappInfo("Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
 				_states[index].enabled,
 				_states[index].checksumTest,
 				_states[index].memoryUsage,
@@ -181,6 +195,15 @@ cs_ret_code_t Microapp::storeState(uint8_t index) {
 	}
 }
 
+/*
+ * An app is allowed to run when the following conditions are met:
+ *
+ *   - The app should be enabled.
+ *   - The checksum should be correct.
+ *   - Memory usage should be unequal to 1? TODO: Explain.
+ *   - There should be a failed boot test? TODO: Explain.
+ *   - There shouldn't be a failed function? TODO: Explain.
+ */
 bool Microapp::canRunApp(uint8_t index) {
 	LOGMicroappVerbose("enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
 			_states[index].enabled,

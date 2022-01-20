@@ -10,6 +10,7 @@
 
 #include "nrf_fstorage_sd.h"
 
+#include <algorithm>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
@@ -29,7 +30,32 @@
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
-#include <algorithm>
+
+/**
+ * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
+ * microapp can be started from the very first address after the header. The ResetHandler is written to that position.
+ * This is done in linker scripts. If something goes off in the microapp in the startup code it might be convenient to
+ * immediately call a particular function in the microapp. This address can be also the very first address but it can
+ * just as well be in the middle of the microapp binary. Default is 0.
+ */
+#define DEVELOPER_OPTION_USE_FUNCTION_CALL 0
+
+/*
+ * Overwrite the address that is read from the microapp header (the offset field) by the following hardcoded address.
+ * The default behaviour has this macro undefined.
+ */
+#define DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS 0x69014
+#undef DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS
+
+/*
+ * Use a dummy callback in bluenet itself (no microapp is required in that case) by setting this to 1. Default is 0.
+ */
+#define DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET 0
+
+/*
+ * Disable coroutines and use direct calls by setting this macro to 1. Default is 0.
+ */
+#define DEVELOPER_OPTION_DISABLE_COROUTINE 0
 
 extern "C" {
 
@@ -47,14 +73,17 @@ coargs_t g_coargs;
  * it to the buffer, we do this here. We can optimize this later (as long as we actually store this in an area that
  * is accessible by the microapp).
  *
+ * Note that we always should yield if we want the execution to continue. Just returning an error will not yield the
+ * control back to bluenet and will hang.
+ *
  * @param[in] payload                            pointer to buffer with command for bluenet
  * @param[in] length                             length of command (not total buffer size)
  */
 cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 	if (length == 0 || length > MAX_PAYLOAD) {
+		LOGw("Wrong length %i from microapp (still in microapp context)", length);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	uint8_t readSize = 0;
 	uint8_t retCode  = getRamData(IPC_INDEX_CROWNSTONE_APP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &readSize);
@@ -71,13 +100,18 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 	uintptr_t coargs_ptr             = data.coargs_ptr;
 	coargs_t* args                   = (coargs_t*)coargs_ptr;
 	args->microapp2bluenet.data      = payload;
-	args->microapp2bluenet.size      = length;
+//	args->microapp2bluenet.size      = length;
+#if DEVELOPER_OPTION_DISABLE_COROUTINE == 1
+	LOGi("Do not yield");
+#else
+	//LOGi("Yield");
 	yieldCoroutine(args->coroutine);
+#endif
 
 	return ERR_SUCCESS;
 }
 
-#ifdef DUMMY_CALLBACK
+#ifdef DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET
 /*
  * Helper function that does not go back and forth to the microapp and can be used to test if the coroutines and
  * callbacks are working properly without a microapp present.
@@ -108,6 +142,24 @@ void microapp_callback_dummy() {
 }
 #endif
 
+void jumpToAddress(uintptr_t address) {
+#ifdef DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS
+	address = DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS;
+#endif
+#if DEVELOPER_OPTION_USE_FUNCTION_CALL == 1
+	// You have to know which function you jump to, here we assume a function returning void and no arguments.
+	// We also have to add a 1 for thumb mode
+	void (*func)() = (void (*)())(address + 1);
+	LOGi("Call function at address: 0x%p", func);
+	(*func)();
+#else
+	void *ptr = (void*)address;
+	LOGi("Jump to address: %p", ptr);
+	goto *ptr;
+#endif
+}
+
+
 /*
  * Jump into the microapp (this function should be called as a coroutine). It obtains the very first instruction from
  * the coroutine arguments. It then considers that instruction to be a method without arguments and calls it. An
@@ -120,19 +172,16 @@ void microapp_callback_dummy() {
  */
 void goIntoMicroapp(void* p) {
 
-#ifdef DUMMY_CALLBACK
+#if DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET == 1
 	LOGi("Call main: %p", &microapp_callback_dummy);
 	microapp_callback_dummy();
 #else
 	coargs_t* coargs = (coargs_t*)p;
-	LOGd("Call main: %p", coargs->entry);
-
-	// Rather than working with raw addresses (adding 1 for thumb mode etc.) just use "goto".
-	void* ptr = (void*)coargs->entry;
-	goto* ptr;
+	LOGi("Call main: %p", coargs->entry);
+	jumpToAddress(coargs->entry);
 #endif
-	// The coroutine should never return. Incorrectly written microapp.
-	LOGe("We should not come here!");
+	// The coroutine should never return. Incorrectly written microapp!
+	LOGe("Coroutine should never return. We should not come here!");
 }
 
 }  // extern C
@@ -162,6 +211,7 @@ cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
  */
 MicroappProtocol::MicroappProtocol()
 		: EventListener()
+		, _callCounter(0)
 		, _callbackData(nullptr)
 		, _microappIsScanning(false)
 		, _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
@@ -203,10 +253,10 @@ void MicroappProtocol::setIpcRam() {
 void MicroappProtocol::callApp(uint8_t appIndex) {
 	LOGi("Call microapp #%i", appIndex);
 
-	//	initMemory();
+	initMemory();
 
 	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
-	LOGi("Microapp: start at 0x%08X", address);
+	LOGi("Microapp: start at %p", address);
 
 	if (checkFlashBoundaries(address) != ERR_SUCCESS) {
 		LOGe("Address not within microapp flash boundaries");
@@ -217,6 +267,7 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 	g_coargs.entry = address;
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
+	LOGi("Setup coroutine and configure it");
 	g_coargs.coroutine = &_coroutine;
 	startCoroutine(&_coroutine, goIntoMicroapp, &g_coargs);
 }
@@ -229,7 +280,7 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
  * TODO: Check and remove this function.
  */
 uint16_t MicroappProtocol::initMemory() {
-	LOGi("Init memory: clear 0x%p to 0x%p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
+	LOGi("Init memory: clear %p to %p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
 	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
 		uint32_t* const val = (uint32_t*)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val                = 0;
@@ -255,22 +306,26 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
 }
 
 /*
- * Overwrite the command field so it is not performed twice.
+ * Overwrite the command field so it is not (accidentally) executed twice.
  */
 void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
 	cmd->cmd = CS_MICROAPP_COMMAND_NONE;
 }
 
 /*
- * Retrieve command from the microapp.
+ * Retrieve command from the microapp. This is within the crownstone coroutine context. It gets the payload from the
+ * global `g_coargs` variable and calls `handleMicroappCommand` afterwards. The `g_coargs.microapp2bluenet buffer` only
+ * stores a single command. This is fine because after each command the microapp should transfer control to bluenet.
+ * For each command is decided in `stopAfterMicroappCommand` if the microapp should be called again. For example, for
+ * the end of setup, loop, or delay, it is **not** immediately called again but normal bluenet execution continues.
+ * In that case the microapp is called again on the next tick.
  */
 bool MicroappProtocol::retrieveCommand() {
-	// get payload from data
 	uint8_t* payload = g_coargs.microapp2bluenet.data;
-	uint16_t length  = g_coargs.microapp2bluenet.size;
-	handleMicroappCommand(payload, length);
-	bool call_again = !stopAfterMicroappCommand(payload, length);
-	setAsProcessed(reinterpret_cast<microapp_cmd_t*>(payload));
+	microapp_cmd_t *cmd = reinterpret_cast<microapp_cmd_t*>(payload);
+	handleMicroappCommand(cmd);
+	bool call_again = !stopAfterMicroappCommand(cmd);
+	setAsProcessed(cmd);
 	return call_again;
 }
 
@@ -338,6 +393,7 @@ void MicroappProtocol::writeCallback() {
 	const uint8_t num_retries = 2;
 	microapp_acked_cmd_t* buf = (microapp_acked_cmd_t*)g_coargs.bluenet2microapp.data;
 
+	buf->ack = false;
 	for (int i = 0; i < num_retries; ++i) {
 		callMicroapp();
 
@@ -353,9 +409,21 @@ void MicroappProtocol::writeCallback() {
  * We resume the previously started coroutine.
  */
 void MicroappProtocol::callMicroapp() {
+#if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
 	if (nextCoroutine(&_coroutine)) {
 		return;
 	}
+#else
+	static bool start = false;
+	// just do it from current coroutine context
+	if (!start) {
+		start = true;
+		LOGi("Call address: %p", g_coargs->entry);
+		jumpToAddress(g_coargs->entry);
+		LOGi("Microapp might have run, but this statement is never reached (no coroutine used).");
+	}
+	return;
+#endif
 	// Should only happen if microapp actually ends (and does not yield anymore).
 	LOGi("End of coroutine. Should not happen.")
 }
@@ -449,65 +517,60 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 /*
  * Forwards commands from the microapp to the relevant handler
  */
-cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t length) {
-	_logArray(SERIAL_DEBUG, true, payload, length);
-	uint8_t command = reinterpret_cast<microapp_cmd_t*>(payload)->cmd;
+cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t *cmd) {
+	uint8_t command = cmd->cmd;
 	switch (command) {
 		case CS_MICROAPP_COMMAND_LOG: {
 			LOGd("Microapp log command");
-			return handleMicroappLogCommand(payload, length);
+			microapp_log_cmd_t* log_cmd = reinterpret_cast<microapp_log_cmd_t*>(cmd);
+			return handleMicroappLogCommand(log_cmd);
 		}
 		case CS_MICROAPP_COMMAND_DELAY: {
 			LOGd("Microapp delay command");
-			if (length != sizeof(microapp_delay_cmd_t)) {
-				LOGi("Wrong payload length");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			microapp_delay_cmd_t* delay_cmd = reinterpret_cast<microapp_delay_cmd_t*>(payload);
+			microapp_delay_cmd_t* delay_cmd = reinterpret_cast<microapp_delay_cmd_t*>(cmd);
 			return handleMicroappDelayCommand(delay_cmd);
 		}
 		case CS_MICROAPP_COMMAND_PIN: {
 			LOGd("Microapp pin command");
-			microapp_pin_cmd_t* pin_cmd = reinterpret_cast<microapp_pin_cmd_t*>(payload);
+			microapp_pin_cmd_t* pin_cmd = reinterpret_cast<microapp_pin_cmd_t*>(cmd);
 			return handleMicroappPinCommand(pin_cmd);
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
 			LOGd("Microapp service data command");
-			return handleMicroappServiceDataCommand(payload, length);
+			microapp_service_data_cmd_t* service_data_cmd = reinterpret_cast<microapp_service_data_cmd_t*>(cmd);
+			return handleMicroappServiceDataCommand(service_data_cmd);
 		}
 		case CS_MICROAPP_COMMAND_TWI: {
 			LOGd("Microapp TWI command");
-			microapp_twi_cmd_t* twi_cmd = reinterpret_cast<microapp_twi_cmd_t*>(payload);
+			microapp_twi_cmd_t* twi_cmd = reinterpret_cast<microapp_twi_cmd_t*>(cmd);
 			return handleMicroappTwiCommand(twi_cmd);
 		}
 		case CS_MICROAPP_COMMAND_BLE: {
 			LOGd("Microapp BLE command");
-			if (length != sizeof(microapp_ble_cmd_t)) {
-				LOGi("Wrong payload length");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			microapp_ble_cmd_t* ble_cmd = reinterpret_cast<microapp_ble_cmd_t*>(payload);
+			microapp_ble_cmd_t* ble_cmd = reinterpret_cast<microapp_ble_cmd_t*>(cmd);
 			return handleMicroappBleCommand(ble_cmd);
 		}
 		case CS_MICROAPP_COMMAND_POWER_USAGE: {
 			LOGd("Microapp power usage command");
-			return handleMicroappPowerUsageCommand(payload, length);
+			microapp_power_usage_cmd_t* power_usage_cmd = reinterpret_cast<microapp_power_usage_cmd_t*>(cmd);
+			return handleMicroappPowerUsageCommand(power_usage_cmd);
 		}
 		case CS_MICROAPP_COMMAND_PRESENCE: {
 			LOGd("Microapp presence command");
-			return handleMicroappPresenceCommand(payload, length);
+			microapp_presence_cmd_t* presence_cmd = reinterpret_cast<microapp_presence_cmd_t*>(cmd);
+			return handleMicroappPresenceCommand(presence_cmd);
 		}
 		case CS_MICROAPP_COMMAND_MESH: {
 			LOGd("Microapp mesh command");
-			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(payload);
+			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(cmd);
 			return handleMicroappMeshCommand(mesh_cmd);
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
-			// LOGi("Setup end");
+			LOGi("Setup end");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOOP_END: {
-			// LOGi("Loop end");
+			LOGi("Loop end");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_NONE: {
@@ -515,16 +578,16 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(uint8_t* payload, uint16_t
 			break;
 		}
 		default: {
-			_log(SERIAL_INFO, true, "Unknown command %u of length %u:", command, length);
-			_logArray(SERIAL_INFO, true, payload, length);
+			_log(SERIAL_INFO, true, "Unknown command %u", command);
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
 	return ERR_SUCCESS;
 }
 
-bool MicroappProtocol::stopAfterMicroappCommand(uint8_t* payload, uint16_t length) {
-	uint8_t command = reinterpret_cast<microapp_cmd_t*>(payload)->cmd;
+bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t *cmd) {
+	uint8_t command = cmd->cmd;
+	bool stop = true;
 	switch (command) {
 		case CS_MICROAPP_COMMAND_PIN:
 		case CS_MICROAPP_COMMAND_LOG:
@@ -533,102 +596,104 @@ bool MicroappProtocol::stopAfterMicroappCommand(uint8_t* payload, uint16_t lengt
 		case CS_MICROAPP_COMMAND_BLE:
 		case CS_MICROAPP_COMMAND_POWER_USAGE:
 		case CS_MICROAPP_COMMAND_PRESENCE:
-		case CS_MICROAPP_COMMAND_MESH: return false;
+		case CS_MICROAPP_COMMAND_MESH:
+			stop = false;
+			break;
 		case CS_MICROAPP_COMMAND_DELAY:
 		case CS_MICROAPP_COMMAND_SETUP_END:
 		case CS_MICROAPP_COMMAND_LOOP_END:
 		case CS_MICROAPP_COMMAND_NONE:
-		default: return true;
+		default:
+			stop = true;
+			break;
 	}
-	return true;
+	if (stop) {
+		_callCounter = 0;
+	} else {
+		if (++_callCounter % MAX_CONSECUTIVE_MESSAGES == 0) {
+			_callCounter = 0;
+			LOGi("Stop because we've reached a max # of calls");
+			return true;
+		}
+	}
+	return stop;
 }
 
 // TODO: establish a proper default log level for microapps
 #define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
 
-cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(microapp_log_cmd_t *command) {
 
-	microapp_log_cmd_t* command = reinterpret_cast<microapp_log_cmd_t*>(payload);
-
+	if(command->length == 0) {
+		LOGi("Incorrect length for log message");
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
 	__attribute__((unused)) bool newLine = false;
 	if (command->option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
 		newLine = true;
 	}
 	switch (command->type) {
 		case CS_MICROAPP_COMMAND_LOG_CHAR: {
-			[[maybe_unused]] microapp_log_char_cmd_t* cmd = reinterpret_cast<microapp_log_char_cmd_t*>(payload);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", (int)cmd->value);
+			[[maybe_unused]] microapp_log_char_cmd_t* cmd = reinterpret_cast<microapp_log_char_cmd_t*>(command);
+			[[maybe_unused]] uint32_t val = cmd->value;
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_SHORT: {
-			[[maybe_unused]] microapp_log_short_cmd_t* cmd = reinterpret_cast<microapp_log_short_cmd_t*>(payload);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", (int)cmd->value);
+			[[maybe_unused]] microapp_log_short_cmd_t* cmd = reinterpret_cast<microapp_log_short_cmd_t*>(command);
+			[[maybe_unused]] uint32_t val = cmd->value;
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_UINT: {
-			[[maybe_unused]] microapp_log_uint_cmd_t* cmd = reinterpret_cast<microapp_log_uint_cmd_t*>(payload);
+			[[maybe_unused]] microapp_log_uint_cmd_t* cmd = reinterpret_cast<microapp_log_uint_cmd_t*>(command);
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%u%s", cmd->value);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_INT: {
-			[[maybe_unused]] microapp_log_int_cmd_t* cmd = reinterpret_cast<microapp_log_int_cmd_t*>(payload);
+			[[maybe_unused]] microapp_log_int_cmd_t* cmd = reinterpret_cast<microapp_log_int_cmd_t*>(command);
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", cmd->value);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_FLOAT: {
-			[[maybe_unused]] microapp_log_float_cmd_t* cmd = reinterpret_cast<microapp_log_float_cmd_t*>(payload);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%f%s", cmd->value);
-
-			// TODO: We get into trouble when printing using %f
-			//__attribute__((unused)) int value  = *(int*)&payload[3];
-			//__attribute__((unused)) int before = value / 10000;
-			//__attribute__((unused)) int after  = value - (before * 10000);
-			//_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i.%04i", before, after);
+			[[maybe_unused]] microapp_log_float_cmd_t* cmd = reinterpret_cast<microapp_log_float_cmd_t*>(command);
+			[[maybe_unused]] uint32_t val = cmd->value;
+			// We automatically cast to int because printf of floats is disabled due to size limitations
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
-			[[maybe_unused]] microapp_log_double_cmd_t* cmd = reinterpret_cast<microapp_log_double_cmd_t*>(payload);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%f%s", cmd->value);
-			// TODO: This will fail (see float for workaround)
-			//__attribute__((unused)) double value = *(double*)&payload[3];
-			//_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%f%s", value);
+			[[maybe_unused]] microapp_log_double_cmd_t* cmd = reinterpret_cast<microapp_log_double_cmd_t*>(command);
+			[[maybe_unused]] uint32_t val = cmd->value;
+			// We automatically cast to int because printf of floats is disabled due to size limitations
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_STR: {
-			[[maybe_unused]] microapp_log_string_cmd_t* cmd = reinterpret_cast<microapp_log_string_cmd_t*>(payload);
+			[[maybe_unused]] microapp_log_string_cmd_t* cmd = reinterpret_cast<microapp_log_string_cmd_t*>(command);
 			// Enforce a zero-byte at the end before we log
 			uint8_t zeroByteIndex = MAX_MICROAPP_STRING_LENGTH - 1;
-			if (cmd->length < zeroByteIndex) {
-				zeroByteIndex = cmd->length;
+			if (command->length < zeroByteIndex) {
+				zeroByteIndex = command->length;
 			}
 			cmd->str[zeroByteIndex] = 0;
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", cmd->str);
-
-			//__attribute__((unused)) int str_length = length - 3;
-			// TODO: Check if length <= max_length - 1, for null terminator.
-			//__attribute__((unused)) char* data = reinterpret_cast<char*>(&(payload[3]));
-			// data[str_length]                   = 0;
-			//_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", data);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_ARR: {
-			[[maybe_unused]] microapp_log_array_cmd_t* cmd = reinterpret_cast<microapp_log_array_cmd_t*>(payload);
-			uint8_t len                                    = MAX_MICROAPP_ARRAY_LENGTH;
-			if (cmd->length < len) {
-				len = cmd->length;
+			[[maybe_unused]] microapp_log_array_cmd_t* cmd = reinterpret_cast<microapp_log_array_cmd_t*>(command);
+			if (command->length >= MAX_MICROAPP_ARRAY_LENGTH) {
+				// Truncate, but don't send an error
+				command->length = MAX_MICROAPP_ARRAY_LENGTH;
 			}
-			if (len == 0) {
-				break;
-			}
-			for (uint8_t i = 0; i < len; ++i) {
-				// Print hexadecimal values
+			for (uint8_t i = 0; i < command->length; ++i) {
 				_log(LOCAL_MICROAPP_LOG_LEVEL, false, "0x%x ", (int)cmd->arr[i]);
 			}
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "");
 			break;
 		}
 		default: {
-			LOGi("Unsupported microapp log type: %u", type);
+			LOGi("Unsupported microapp log type: %u", command->type);
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
@@ -794,21 +859,19 @@ cs_ret_code_t MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappServiceDataCommand(uint8_t* payload, uint16_t length) {
+cs_ret_code_t MicroappProtocol::handleMicroappServiceDataCommand(microapp_service_data_cmd_t *cmd) {
 
-	_logArray(SERIAL_DEBUG, true, payload, length);
-
-	uint16_t commandDataSize = length - 3;  // byte 0 is command, byte 1 is type, byte 2 is option.
-	TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
-	if (commandDataSize < sizeof(eventData.appUuid)) {
-		LOGi("Payload too small");
+	if(cmd->dlen > MAX_COMMAND_SERVICE_DATA_LENGTH) {
+		LOGi("Payload size incorrect");
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
+	
+	TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
 	eventData.version   = 0;  // TODO: define somewhere.
 	eventData.type      = 0;  // TODO: define somewhere.
-	eventData.appUuid   = (payload[3] << 8) + payload[4];
-	eventData.data.len  = commandDataSize - sizeof(eventData.appUuid);
-	eventData.data.data = &(payload[5]);
+	eventData.appUuid   = cmd->appUuid;
+	eventData.data.len  = cmd->dlen;
+	eventData.data.data = cmd->data;
 	event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 	event.dispatch();
 	return ERR_SUCCESS;
@@ -839,6 +902,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi
 		}
 		case CS_MICROAPP_COMMAND_TWI_READ: {
 			LOGd("Read from i2c address: 0x%02x", twi_cmd->address);
+
+			// Create a synchronous event to retrieve twi data
 			uint8_t bufSize = twi_cmd->length;
 			TYPIFY(EVT_TWI_READ) twi;
 			twi.address = twi_cmd->address;
@@ -847,12 +912,10 @@ cs_ret_code_t MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi
 			twi.stop    = twi_cmd->stop;
 			event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
 			EventDispatcher::getInstance().dispatch(event);
+
+			// Get data back and prepare for microapp
 			twi_cmd->ack    = event.result.returnCode;
 			twi_cmd->length = twi.length;
-			// LOGi("Return value of length: %i", twi_cmd->length);
-			// for (int i = 0; i < (int)twi_cmd->length; ++i) {
-			//	LOGi("Read: 0x%02x", twi.buf[i]);
-			//}
 			break;
 		}
 		default: LOGw("Unknown i2c opcode: %i", twi_cmd->opcode); return ERR_UNKNOWN_OP_CODE;
@@ -882,14 +945,17 @@ cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
 			bool success = registerBleCallback(ble_cmd->id);
+			ble_cmd->ack = success;
 			return success ? ERR_SUCCESS : ERR_NO_SPACE;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
 			_microappIsScanning = true;
+			ble_cmd->ack        = true;
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
 			_microappIsScanning = false;
+			ble_cmd->ack        = true;
 			break;
 		}
 		default: {
@@ -900,12 +966,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(uint8_t* payload, uint16_t length) {
-	if (length < sizeof(payload[0]) + sizeof(microapp_power_usage_t)) {
-		LOGi("Payload too small");
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-	microapp_power_usage_t* commandPayload = reinterpret_cast<microapp_power_usage_t*>(&(payload[1]));
+cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t *cmd) {
+	microapp_power_usage_t* commandPayload = &cmd->powerUsage;
 
 	TYPIFY(STATE_POWER_USAGE) powerUsage;
 	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
@@ -915,13 +977,18 @@ cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(uint8_t* payload
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(uint8_t* payload, uint16_t length) {
-	if (length < sizeof(payload[0]) + sizeof(microapp_presence_t)) {
-		LOGi("Payload too small");
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-	microapp_presence_t* commandPayload = reinterpret_cast<microapp_presence_t*>(&(payload[1]));
+/*
+ * This queries for a presence event.
+ */
+cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(microapp_presence_cmd_t *cmd) {
 
+	microapp_presence_t *microappPresence = &cmd->presence;
+	if (microappPresence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
+		LOGi("Incorrect profileId");
+		return ERR_UNSAFE;
+	}
+
+	// Obtains presence array
 	presence_t resultBuf;
 	event_t event(CS_TYPE::CMD_GET_PRESENCE);
 	event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resultBuf), sizeof(resultBuf));
@@ -935,7 +1002,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(uint8_t* payload, 
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	commandPayload->presenceBitmask = resultBuf.presence[commandPayload->profileId];
+	microappPresence->presenceBitmask = resultBuf.presence[microappPresence->profileId];
 	return ERR_SUCCESS;
 }
 
@@ -956,17 +1023,12 @@ cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(microapp_mesh_cmd_t* c
 
 			TYPIFY(CMD_SEND_MESH_MSG) eventData;
 			bool broadcast = (cmd->stoneId == 0);
-
-			if (broadcast) {
-				eventData.flags.flags.broadcast = true;
-				eventData.flags.flags.reliable  = false;
+			if (!broadcast) {
+				eventData.idCount   = 1;
+				eventData.targetIds = &(cmd->stoneId);
 			}
-			else {
-				eventData.flags.flags.broadcast = true;
-				eventData.flags.flags.reliable  = true;
-				eventData.idCount               = 1;
-				eventData.targetIds             = &(cmd->stoneId);
-			}
+			eventData.flags.flags.broadcast   = broadcast;
+			eventData.flags.flags.reliable    = !broadcast;
 			eventData.flags.flags.useKnownIds = false;
 			eventData.flags.flags.noHops      = false;
 			eventData.type                    = CS_MESH_MODEL_TYPE_MICROAPP;
@@ -1005,8 +1067,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(microapp_mesh_cmd_t* c
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
-			auto message     = _meshMessageBuffer.pop();
-			
+			auto message = _meshMessageBuffer.pop();
+
 			// TODO: This assumes nothing will overwrite the buffer
 			cmd->stoneId     = message.stoneId;
 			cmd->messageSize = message.messageSize;
@@ -1022,7 +1084,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(microapp_mesh_cmd_t* c
 		}
 
 		default: {
-			LOGi("Unknown microapp mesh command opcode: %u", meshCommand->opcode);
+			LOGi("Unknown microapp mesh command opcode: %u", command->opcode);
 			return ERR_UNKNOWN_OP_CODE;
 		}
 	}
