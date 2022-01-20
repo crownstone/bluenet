@@ -92,6 +92,7 @@ public:
 #undef xstr
 	}
 
+
 private:
 	// ----------------------- runtime phase variables -----------------------
 

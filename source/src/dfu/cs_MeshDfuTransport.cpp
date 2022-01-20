@@ -16,11 +16,13 @@
 
 cs_ret_code_t MeshDfuTransport::init() {
 	if (!_firstInit) {
+		LOGMeshDfuTransportDebug("mesh dfu transport already initialized");
 		return ERR_SUCCESS;
 	}
 
-	_bleCentral = getComponent<BleCentral>();
+	_bleCentral = &BleCentral::getInstance();
 	if(_bleCentral == nullptr){
+		LOGMeshDfuTransportDebug("could't find ble central");
 		return ERR_NOT_AVAILABLE;
 	}
 
@@ -34,10 +36,13 @@ cs_ret_code_t MeshDfuTransport::init() {
 	clearConnectionData();
 
 	if (retCode != ERR_SUCCESS) {
+		LOGMeshDfuTransportDebug("failed to register required uuids");
 		return retCode;
 	}
 
 	listen();
+
+	LOGMeshDfuTransportDebug("MeshDfuTransport init successful");
 
 	_firstInit = false;
 	return ERR_SUCCESS;

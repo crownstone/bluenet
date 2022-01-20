@@ -286,8 +286,8 @@ bool MeshDfuHost::startPhaseTargetPreparing() {
 
 	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESULT, &MeshDfuHost::checkResultPhaseTargetPreparing);
 	_meshDfuTransport.prepare();
-	// TODO
-	return false;
+
+	return true;
 }
 
 void MeshDfuHost::checkResultPhaseTargetPreparing(event_t& event) {
@@ -550,6 +550,7 @@ void MeshDfuHost::onEventCallbackTimeOut() {
 
 // --------------------------------------- utils ---------------------------------------
 
+
 bool MeshDfuHost::isInitialized() {
 	return _bleCentral != nullptr && _crownstoneCentral != nullptr;
 }
@@ -577,6 +578,7 @@ cs_ret_code_t MeshDfuHost::init() {
 
 	auto result = _meshDfuTransport.init();
 	if(result != ERR_SUCCESS) {
+		LOGMeshDfuHostDebug("mesh dfu transport failed to initialize");
 		return result;
 	}
 
