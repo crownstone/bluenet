@@ -14,6 +14,8 @@
 #include <stdint.h>
 #endif
 
+// Size limitations
+
 const uint8_t MAX_PAYLOAD = 44;
 
 const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
@@ -30,25 +32,32 @@ const uint8_t MAX_MESH_DATA_LENGTH = MAX_PAYLOAD - 4;
 
 const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
 
-const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - 6;
+const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - 8;
+
+// Protocol definitions
+
+#define MICROAPP_SERIAL_DEFAULT_PORT_NUMBER 1
+
+#define MICROAPP_SERIAL_SERVICE_DATA_PORT_NUMBER 4
 
 /**
  * The main opcodes for microapp commands.
  */
 enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_NONE         = 0x00,
-	CS_MICROAPP_COMMAND_LOG          = 0x01,
-	CS_MICROAPP_COMMAND_DELAY        = 0x02,
-	CS_MICROAPP_COMMAND_PIN          = 0x03,  // Payload is pin_cmd_t.
-	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
-	CS_MICROAPP_COMMAND_TWI          = 0x05,
-	CS_MICROAPP_COMMAND_BLE          = 0x06,
-	CS_MICROAPP_COMMAND_POWER_USAGE  = 0x07,
-	CS_MICROAPP_COMMAND_PRESENCE     = 0x08,
-	CS_MICROAPP_COMMAND_MESH         = 0x09,
-	CS_MICROAPP_COMMAND_SETUP_END    = 0x0A,
-	CS_MICROAPP_COMMAND_LOOP_END     = 0x0B,
-	CS_MICROAPP_COMMAND_BLE_DEVICE   = 0x0C,
+	CS_MICROAPP_COMMAND_NONE          = 0x00,
+	CS_MICROAPP_COMMAND_LOG           = 0x01,
+	CS_MICROAPP_COMMAND_DELAY         = 0x02,
+	CS_MICROAPP_COMMAND_PIN           = 0x03,  // Payload is pin_cmd_t.
+	CS_MICROAPP_COMMAND_SERVICE_DATA  = 0x04,
+	CS_MICROAPP_COMMAND_TWI           = 0x05,
+	CS_MICROAPP_COMMAND_BLE           = 0x06,
+	CS_MICROAPP_COMMAND_POWER_USAGE   = 0x07,
+	CS_MICROAPP_COMMAND_PRESENCE      = 0x08,
+	CS_MICROAPP_COMMAND_MESH          = 0x09,
+	CS_MICROAPP_COMMAND_SETUP_END     = 0x0A,
+	CS_MICROAPP_COMMAND_LOOP_END      = 0x0B,
+	CS_MICROAPP_COMMAND_BLE_DEVICE    = 0x0C,
+	CS_MICROAPP_COMMAND_CALLBACK_DONE = 0x0D,
 };
 
 enum CommandMicroappPin {
@@ -340,15 +349,22 @@ struct __attribute__((packed)) microapp_ble_device_t {
 static_assert(sizeof(microapp_ble_device_t) <= MAX_PAYLOAD);
 
 /**
- * Struct for microapp service data commands
+ * Struct for microapp service data itself.
  */
-struct __attribute__((packed)) microapp_service_data_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_SERVICE_DATA;
-	uint8_t type;
-	uint8_t option;
+struct __attribute__((packed)) microapp_service_data_t {
 	uint16_t appUuid;
 	uint8_t dlen;
 	uint8_t data[MAX_COMMAND_SERVICE_DATA_LENGTH];
+};
+
+/**
+ * Struct for microapp service data commands
+ *
+ * This reuses the log_cmd format.
+ */
+struct __attribute__((packed)) microapp_service_data_cmd_t {
+	microapp_log_cmd_t header;
+	microapp_service_data_t body;
 };
 
 static_assert(sizeof(microapp_service_data_cmd_t) <= MAX_PAYLOAD);

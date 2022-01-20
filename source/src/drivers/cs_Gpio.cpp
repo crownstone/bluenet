@@ -104,7 +104,7 @@ void Gpio::init(const boards_config_t & board) {
 
 void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity) {
 	if (pin_index >= _pins.size()) {
-		LOGi("Pin index does not exist");
+		LOGi("Pin index %i does not exist (max %i)", pin_index, _pins.size());
 		return;
 	}
 
@@ -114,18 +114,20 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 	switch(pull) {
 		case GpioPullResistor::NONE:
 			nrf_pull = NRF_GPIO_PIN_NOPULL;
+			LOGi("Set pin %i with index %i to use no pull-up", pin, pin_index);
 			break;
 		case GpioPullResistor::UP:
 			nrf_pull = NRF_GPIO_PIN_PULLUP;
+			LOGi("Set pin %i with index %i to use pull-up", pin, pin_index);
 			break;
 		case GpioPullResistor::DOWN:
 			nrf_pull = NRF_GPIO_PIN_PULLDOWN;
+			LOGi("Set pin %i with index %i to use pull-down", pin, pin_index);
 			break;
 		default:
 			LOGw("Huh? No such pull registor construction exists");
 			return;
 	}
-	LOGi("Set pin with pull none / up / down setting: %i", nrf_pull);
 
 	switch(direction) {
 		case GpioDirection::INPUT:
@@ -222,7 +224,7 @@ void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
  * Called from interrupt service routine, only write which pin is fired and return immediately.
  */
 void Gpio::registerEvent(uint8_t pin) {
-	//LOGi("GPIO event on pin %i", pin);
+	LOGi("GPIO event on pin %i", pin);
 	for (uint8_t i = 0; i < _pins.size(); ++i) {
 		if (_pins[i].pin == pin) {
 			_pins[i].event = true;
@@ -249,7 +251,7 @@ void Gpio::tick() {
 void Gpio::handleEvent(event_t& event) {
 	switch(event.type) {
 		case CS_TYPE::EVT_GPIO_INIT: {
-			LOGi("Configure GPIO pin");
+			LOGi("Configure pin in GPIO module");
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
 			GpioPolarity polarity = (GpioPolarity)gpio.polarity;
 			GpioDirection direction = (GpioDirection)gpio.direction;

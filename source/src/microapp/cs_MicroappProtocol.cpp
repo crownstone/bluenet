@@ -153,12 +153,11 @@ void jumpToAddress(uintptr_t address) {
 	LOGi("Call function at address: 0x%p", func);
 	(*func)();
 #else
-	void *ptr = (void*)address;
+	void* ptr = (void*)address;
 	LOGi("Jump to address: %p", ptr);
-	goto *ptr;
+	goto* ptr;
 #endif
 }
-
 
 /*
  * Jump into the microapp (this function should be called as a coroutine). It obtains the very first instruction from
@@ -321,8 +320,8 @@ void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
  * In that case the microapp is called again on the next tick.
  */
 bool MicroappProtocol::retrieveCommand() {
-	uint8_t* payload = g_coargs.microapp2bluenet.data;
-	microapp_cmd_t *cmd = reinterpret_cast<microapp_cmd_t*>(payload);
+	uint8_t* payload    = g_coargs.microapp2bluenet.data;
+	microapp_cmd_t* cmd = reinterpret_cast<microapp_cmd_t*>(payload);
 	handleMicroappCommand(cmd);
 	bool call_again = !stopAfterMicroappCommand(cmd);
 	setAsProcessed(cmd);
@@ -335,6 +334,7 @@ bool MicroappProtocol::retrieveCommand() {
 void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	// Write pin command into the buffer.
 	microapp_pin_cmd_t* cmd = (microapp_pin_cmd_t*)g_coargs.bluenet2microapp.data;
+	cmd->cmd                = CS_MICROAPP_COMMAND_PIN;
 	cmd->pin                = pin;
 	cmd->value              = CS_MICROAPP_COMMAND_VALUE_CHANGE;
 	cmd->ack                = false;
@@ -398,7 +398,7 @@ void MicroappProtocol::writeCallback() {
 		callMicroapp();
 
 		if (buf->ack) {
-			// Successful execution, resume bluenet.
+			LOGi("Successful execution, resume bluenet");
 			return;
 		}
 		LOGi("Command not acked (try %i)", i);
@@ -452,9 +452,11 @@ void MicroappProtocol::handleEvent(event_t& event) {
 	switch (event.type) {
 		// Listen to GPIO events, will be used later to implement attachInterrupt in microapp.
 		case CS_TYPE::EVT_GPIO_INIT: {
-			LOGi("Register GPIO event handler for microapp");
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
-			registerGpio(gpio.pin_index);
+			if (gpio.direction == INPUT || gpio.direction == SENSE) {
+				LOGd("Register GPIO event handler for microapp");
+				registerGpio(gpio.pin_index);
+			}
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_UPDATE: {
@@ -517,7 +519,7 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 /*
  * Forwards commands from the microapp to the relevant handler
  */
-cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t *cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t* cmd) {
 	uint8_t command = cmd->cmd;
 	switch (command) {
 		case CS_MICROAPP_COMMAND_LOG: {
@@ -565,6 +567,10 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t *cmd) {
 			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(cmd);
 			return handleMicroappMeshCommand(mesh_cmd);
 		}
+		case CS_MICROAPP_COMMAND_CALLBACK_DONE: {
+			LOGi("Callback done for %i", (int)cmd->id);
+			break;
+		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
 			LOGi("Setup end");
 			break;
@@ -585,9 +591,9 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t *cmd) {
 	return ERR_SUCCESS;
 }
 
-bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t *cmd) {
+bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 	uint8_t command = cmd->cmd;
-	bool stop = true;
+	bool stop       = true;
 	switch (command) {
 		case CS_MICROAPP_COMMAND_PIN:
 		case CS_MICROAPP_COMMAND_LOG:
@@ -596,20 +602,17 @@ bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t *cmd) {
 		case CS_MICROAPP_COMMAND_BLE:
 		case CS_MICROAPP_COMMAND_POWER_USAGE:
 		case CS_MICROAPP_COMMAND_PRESENCE:
-		case CS_MICROAPP_COMMAND_MESH:
-			stop = false;
-			break;
+		case CS_MICROAPP_COMMAND_MESH: stop = false; break;
 		case CS_MICROAPP_COMMAND_DELAY:
 		case CS_MICROAPP_COMMAND_SETUP_END:
 		case CS_MICROAPP_COMMAND_LOOP_END:
 		case CS_MICROAPP_COMMAND_NONE:
-		default:
-			stop = true;
-			break;
+		default: stop = true; break;
 	}
 	if (stop) {
 		_callCounter = 0;
-	} else {
+	}
+	else {
 		if (++_callCounter % MAX_CONSECUTIVE_MESSAGES == 0) {
 			_callCounter = 0;
 			LOGi("Stop because we've reached a max # of calls");
@@ -622,9 +625,9 @@ bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t *cmd) {
 // TODO: establish a proper default log level for microapps
 #define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
 
-cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(microapp_log_cmd_t *command) {
+cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(microapp_log_cmd_t* command) {
 
-	if(command->length == 0) {
+	if (command->length == 0) {
 		LOGi("Incorrect length for log message");
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
@@ -635,13 +638,13 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(microapp_log_cmd_t *com
 	switch (command->type) {
 		case CS_MICROAPP_COMMAND_LOG_CHAR: {
 			[[maybe_unused]] microapp_log_char_cmd_t* cmd = reinterpret_cast<microapp_log_char_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val = cmd->value;
+			[[maybe_unused]] uint32_t val                 = cmd->value;
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_SHORT: {
 			[[maybe_unused]] microapp_log_short_cmd_t* cmd = reinterpret_cast<microapp_log_short_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val = cmd->value;
+			[[maybe_unused]] uint32_t val                  = cmd->value;
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
 			break;
 		}
@@ -657,14 +660,14 @@ cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(microapp_log_cmd_t *com
 		}
 		case CS_MICROAPP_COMMAND_LOG_FLOAT: {
 			[[maybe_unused]] microapp_log_float_cmd_t* cmd = reinterpret_cast<microapp_log_float_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val = cmd->value;
+			[[maybe_unused]] uint32_t val                  = cmd->value;
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
 			[[maybe_unused]] microapp_log_double_cmd_t* cmd = reinterpret_cast<microapp_log_double_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val = cmd->value;
+			[[maybe_unused]] uint32_t val                   = cmd->value;
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
@@ -779,7 +782,9 @@ cs_ret_code_t MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
 	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP: gpio.pull = 1;
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
+			gpio.pull = 1;
+			// fall-through is on purpose
 		case CS_MICROAPP_COMMAND_PIN_READ: {
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
 			switch (val) {
@@ -859,19 +864,19 @@ cs_ret_code_t MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappServiceDataCommand(microapp_service_data_cmd_t *cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappServiceDataCommand(microapp_service_data_cmd_t* cmd) {
 
-	if(cmd->dlen > MAX_COMMAND_SERVICE_DATA_LENGTH) {
+	if (cmd->body.dlen > MAX_COMMAND_SERVICE_DATA_LENGTH) {
 		LOGi("Payload size incorrect");
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	
+
 	TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
 	eventData.version   = 0;  // TODO: define somewhere.
 	eventData.type      = 0;  // TODO: define somewhere.
-	eventData.appUuid   = cmd->appUuid;
-	eventData.data.len  = cmd->dlen;
-	eventData.data.data = cmd->data;
+	eventData.appUuid   = cmd->body.appUuid;
+	eventData.data.len  = cmd->body.dlen;
+	eventData.data.data = cmd->body.data;
 	event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 	event.dispatch();
 	return ERR_SUCCESS;
@@ -966,7 +971,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t *cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t* cmd) {
 	microapp_power_usage_t* commandPayload = &cmd->powerUsage;
 
 	TYPIFY(STATE_POWER_USAGE) powerUsage;
@@ -980,9 +985,9 @@ cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(microapp_power_u
 /*
  * This queries for a presence event.
  */
-cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(microapp_presence_cmd_t *cmd) {
+cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(microapp_presence_cmd_t* cmd) {
 
-	microapp_presence_t *microappPresence = &cmd->presence;
+	microapp_presence_t* microappPresence = &cmd->presence;
 	if (microappPresence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
 		LOGi("Incorrect profileId");
 		return ERR_UNSAFE;

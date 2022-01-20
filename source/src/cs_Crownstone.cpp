@@ -427,10 +427,14 @@ void Crownstone::initDrivers1() {
 
 #if BUILD_TWI == 1
 	_twi->init(_boardsConfig);
+#else
+	LOGi("Init: TWI module NOT enabled");
 #endif
 
 #if BUILD_GPIOTE == 1
 	_gpio->init(_boardsConfig);
+#else
+	LOGi("Init: Gpio module NOT enabled");
 #endif
 }
 
