@@ -68,9 +68,19 @@ void MeshDfuTransport::clearConnectionData() {
 	_discoveryComplete = false;
 }
 
+bool MeshDfuTransport::isBusy() {
+	return _onExpectedEvent != nullptr || _onTimeout != nullptr;
+}
+
 
 void MeshDfuTransport::onDisconnect() {
+	if(isBusy()) {
+		LOGMeshDfuTransportWarn("disconnected during dfu operation");
+	}
+
 	clearConnectionData();
+	clearEventCallback();
+	clearTimeoutCallback();
 }
 
 void MeshDfuTransport::onDiscover(ble_central_discovery_t& result) {

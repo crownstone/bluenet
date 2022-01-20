@@ -176,6 +176,12 @@ private:
 	 */
 	void clearConnectionData();
 
+	/**
+	 * true: an operation is sent to the connected device and we are
+	 * awaiting response.
+	 */
+	bool isBusy();
+
 	void dispatchResult(cs_result_t res);
 	void dispatchResponse(MeshDfuTransportResponse res);
 
