@@ -121,11 +121,11 @@ private:
 			ExpectedEventCallback callback);
 
 	/**
-	 * sets the timeout callback and delay to start the given phase.
+	 * sets the timeout callback and delay before calling it.
 	 */
 	bool setTimeoutCallback(
 			TimeoutCallback onTimeout,
-			uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::DefaultTimeoutMs
+			uint32_t timeoutMs = MeshDfuConstants::DfuHostSettings::NotificationTimeoutMs
 			);
 
 	/**
@@ -216,13 +216,9 @@ private:
 	OP_CODE _lastOperation = OP_CODE::None;
 	uint16_t _prn = 0; // nordic protocol: Packet Receipt Notification.
 
-	bool setLastOperation(OP_CODE operation);
-
 	// ------------- the adapter layer for crownstone_ble -------------
 	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, cs_data_t buff);
 	void writeCharacteristicForResponse(uint16_t characteristicHandle, cs_data_t buff);
-
-	void receiveRawNotification();
 
 	// ----------------- utility forwardering methods -----------------
 	void write_control_point(cs_data_t buff);
@@ -236,13 +232,19 @@ private:
 	void validateCrcCommandResponse();
 
 	// ------------------- nordic protocol commands -------------------
+
+	/**
+	 * All these methods send a dfu packet on the control point.
+	 * Some require a notification to be parsed.
+	 */
+
 	void _createCommand(uint32_t size);
 	void _createData(uint32_t size);
 
 	void _createObject(uint8_t objectType, uint32_t size);
 
 	void _setPrn();
-	void __calculate_checksum();
+	void _calculateChecksum();
 	void _execute();
 
 	void _selectCommand();
@@ -252,8 +254,20 @@ private:
 	// -------------------- raw data communication --------------------
 	void __stream_data();
 
+	/**
+	 * checks if structure of incoming notifications matches _lastOperation.
+	 */
 	cs_ret_code_t _parseResult(cs_const_data_t evtData);
+
+	/**
+	 * Extracts data from a notification received after an OP_CODE::ReadObject command.
+	 * E.g. _selectData, _selectCommand and _selectObject.
+	 */
 	MeshDfuTransportResponse _parseResponseReadObject(cs_const_data_t evtData);
+
+	/**
+	 * Extracts data from a notification received after an OP_CODE::CalcChecksum command.
+	 */
 	MeshDfuTransportResponse _parseResponseCalcChecksum(cs_const_data_t evtData);
 
 	void __parse_checksum_response();

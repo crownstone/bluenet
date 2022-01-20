@@ -202,32 +202,21 @@ void MeshDfuTransport::_setPrn() {
 	write_control_point(buff);
 }
 
-void  MeshDfuTransport::_createObject(uint8_t objectType, uint32_t size) {
+void  MeshDfuTransport::_calculateChecksum() {
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
 
-	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(objectType) + sizeof(size);
+	constexpr uint8_t len = sizeof(OP_CODE);
 	if(buff.data == nullptr || buff.len < len) {
 		return;
 	}
 
-	_lastOperation = OP_CODE::CreateObject;
-	buff.data[0] = static_cast<uint8_t>(OP_CODE::CreateObject);
-	buff.data[1] = objectType;
-	memcpy(&buff.data[2], &size, sizeof(size)); // little endian unsigned uint32_t
+	_lastOperation = OP_CODE::CalcChecSum;
+	buff.data[0] = static_cast<uint8_t>(OP_CODE::CalcChecSum);
 
 	buff.len = len;
 
 	write_control_point(buff);
 }
-
-void MeshDfuTransport::_createCommand(uint32_t size) {
-	_createObject(0x01, size);
-}
-
-void MeshDfuTransport::_createData(uint32_t size) {
-	_createObject(0x02, size);
-}
-
 
 void  MeshDfuTransport::_execute() {
 	cs_data_t buff = _bleCentral->requestWriteBuffer();
@@ -244,6 +233,49 @@ void  MeshDfuTransport::_execute() {
 
 	write_control_point(buff);
 }
+
+void  MeshDfuTransport::_createObject(uint8_t objectType, uint32_t size) {
+	cs_data_t buff = _bleCentral->requestWriteBuffer();
+
+	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(objectType) + sizeof(size);
+	if(buff.data == nullptr || buff.len < len) {
+		return;
+	}
+
+	_lastOperation = OP_CODE::CreateObject;
+	buff.data[0] = static_cast<uint8_t>(OP_CODE::CreateObject);
+	buff.data[1] = objectType;
+
+	buff.len = len;
+
+	write_control_point(buff);
+}
+
+void MeshDfuTransport::_createCommand(uint32_t size) {
+	_createObject(0x01, size);
+}
+
+void MeshDfuTransport::_createData(uint32_t size) {
+	_createObject(0x02, size);
+}
+
+void  MeshDfuTransport::_selectObject(uint8_t objectType) {
+	cs_data_t buff = _bleCentral->requestWriteBuffer();
+
+	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(objectType);
+	if(buff.data == nullptr || buff.len < len) {
+		return;
+	}
+
+	_lastOperation = OP_CODE::ReadObject;
+	buff.data[0] = static_cast<uint8_t>(OP_CODE::ReadObject);
+	buff.data[1] = objectType;
+
+	buff.len = len;
+
+	write_control_point(buff);
+}
+
 
 void MeshDfuTransport::_selectCommand(){
 	_selectObject(0x01);

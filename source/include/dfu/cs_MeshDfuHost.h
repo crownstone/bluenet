@@ -353,7 +353,7 @@ private:
 			ExpectedEventCallback callback);
 
 	/**
-	 * sets the timeout callback and delay to start the given phase.
+	 * sets the timeout callback and delay before calling it.
 	 */
 	bool setTimeoutCallback(
 			TimeoutCallback onTimeout,

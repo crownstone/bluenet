@@ -22,6 +22,12 @@ constexpr uint32_t ReconnectTimeoutMs = 5000u;
 constexpr uint32_t ConnectionTimeoutMs = 15000u;
 constexpr uint32_t DefaultTimeoutMs = 30000u;
 
+/**
+ * max time before connected device is considered non-responsive during
+ * firmware uploading phase of dfu.
+ */
+constexpr uint32_t NotificationTimeoutMs = 5000u;
+
 }
 
 namespace DFUAdapter {
