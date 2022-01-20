@@ -12,6 +12,7 @@
 #include <ble/cs_CrownstoneCentral.h>
 #include <dfu/cs_MeshDfuConstants.h>
 #include <dfu/cs_MeshDfuTransport.h>
+#include <dfu/cs_FirmwareReader.h>
 #include <events/cs_EventListener.h>
 #include <common/cs_Component.h>
 #include <util/cs_Coroutine.h>
@@ -133,6 +134,7 @@ private:
 	 */
 	CrownstoneCentral* _crownstoneCentral = nullptr;
 	BleCentral* _bleCentral = nullptr;
+	FirmwareReader* _firmwareReader = nullptr;
 
 	/**
 	 * sub components
@@ -299,10 +301,12 @@ private:
 	// ###### TargetInitializing ######
 
 	/**
-	 * read init packet length,
+	 * read init packet length, send select command
 	 */
 	bool startPhaseTargetInitializing();
-
+	void targetInitializingCreateCommand(event_t& event);
+	void targetInitializingStreamInitPacket(event_t& event);
+	void targetInitializingExecute(event_t& event);
 	Phase completePhaseTargetInitializing();
 
 

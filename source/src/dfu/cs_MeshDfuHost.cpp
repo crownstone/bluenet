@@ -7,6 +7,7 @@
 
 #include <dfu/cs_MeshDfuHost.h>
 #include <dfu/cs_MeshDfuConstants.h>
+#include <dfu/cs_FirmwareSections.h>
 #include <logging/cs_Logger.h>
 
 #define LOGMeshDfuHostDebug LOGd
@@ -331,9 +332,40 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
 
 bool MeshDfuHost::startPhaseTargetInitializing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetInitializing");
-	// TODO
-	return false;
+	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingCreateCommand);
+	_meshDfuTransport._selectCommand();
+
+	return true;
 }
+
+void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
+	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
+
+	if(result.result != ERR_SUCCESS || result.offset != 0) {
+		LOGMeshDfuHostWarn("dfu create command failed: %u, offset: %u", result.result, result.offset);
+		abort();
+	}
+
+	uint32_t initPacketLen = 0;
+	_firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::Ipc); // Start here tomorrow..
+
+	if (initPacketLen == 0) {
+		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero.");
+		abort();
+	}
+
+	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingStreamInitPacket);
+	_meshDfuTransport._createCommand(initPacketLen);
+}
+
+void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
+
+}
+
+void MeshDfuHost::targetInitializingExecute(event_t& event) {
+
+}
+
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
 	LOGMeshDfuHostDebug("+++ completePhaseTargetInitializing");
@@ -594,6 +626,7 @@ cs_ret_code_t MeshDfuHost::init() {
 
 	_bleCentral = &BleCentral::getInstance();
 	_crownstoneCentral = getComponent<CrownstoneCentral>();
+	_firmwareReader = getComponent<FirmwareReader>();
 
 	if (!_listening) {
 		LOGMeshDfuHostDebug("Start listening");
