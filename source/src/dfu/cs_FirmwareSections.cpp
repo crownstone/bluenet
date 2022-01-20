@@ -46,6 +46,14 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>()
 			0x00001000};
 }
 
+
+template<>
+const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Ipc>() {
+// TODO: WARNING THIS IS CURRENTLY SET TO THE MICROAPP PAGE DURING DEVELOPMENT
+	return {0x00069000,
+			0x00001000};
+}
+
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>() {
 	return {BOOTLOADER_SETTINGS_ADDRESS,
@@ -86,6 +94,14 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
 };
 
 
+NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceIpc) = {
+		.evt_handler = firmwareReaderFsEventHandler,
+		.start_addr  = getFirmwareSectionLocation<FirmwareSection::Ipc>()._start,
+		.end_addr    = getFirmwareSectionLocation<FirmwareSection::Ipc>()._end,
+};
+
+
+
 // ------- BootloaderSettings -------
 
 NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBootloaderSettings) = {
@@ -120,6 +136,13 @@ template<>
 const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>() {
 	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceMbr,
 			._addr        = getFirmwareSectionLocation<FirmwareSection::Mbr>()};
+}
+
+
+template<>
+const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Ipc>() {
+	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceIpc,
+			._addr        = getFirmwareSectionLocation<FirmwareSection::Ipc>()};
 }
 
 template<>

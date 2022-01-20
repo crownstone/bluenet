@@ -48,6 +48,7 @@ template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSect
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::MicroApp>();
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bootloader>();
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>();
+template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Ipc>();
 template<> const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>();
 
 
@@ -84,5 +85,6 @@ template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Blu
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::MicroApp>();
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bootloader>();
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>();
+template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Ipc>();
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>();
 
