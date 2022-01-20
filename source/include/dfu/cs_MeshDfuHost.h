@@ -97,7 +97,9 @@ private:
 	// ----------------------- runtime phase variables -----------------------
 
 	/**
-	 * state describing what the device is currently doing/waiting for
+	 * state describing what the device is currently doing/waiting for.
+	 *
+	 * Is also used for a phase that is pending to start next tick.
 	 */
 	Phase _phaseCurrent = Phase::None;
 	/**
@@ -290,9 +292,8 @@ private:
 	// ###### TargetPreparing ######
 
 	bool startPhaseTargetPreparing();
-
+	void continuePhaseTargetPreparing(event_t& event);
 	void checkResultPhaseTargetPreparing(event_t& event);
-
 	Phase completePhaseTargetPreparing();
 
 	// ###### TargetInitializing ######
@@ -323,8 +324,11 @@ private:
 	bool startPhase(Phase phase);
 
 	/**
-	 * Calls the startPhaseX function for the _phaseCurrent.
-	 * (Used by startPhase to get into async 'processing mode'.)
+	 * Calls the startPhase(_phaseCurrent).
+	 *
+	 * Used by startPhase to ensure that the stack built up by all dispatched events
+	 * is wound down so that all components have updated their state variables, thus
+	 * simplifying dependencies a bit and giving the system time to breath.
 	 */
 	void startPhase(event_t& event);
 

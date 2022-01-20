@@ -86,7 +86,7 @@ void BleCentral::init() {
 
 cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 
@@ -169,7 +169,7 @@ cs_ret_code_t BleCentral::connectWithClearance(const device_address_t& address, 
 
 cs_ret_code_t BleCentral::disconnect() {
 	if (isBusy()) {
-		LOGBleCentralInfo("Cancel current operation");
+		LOGBleCentralInfo("Cancel current operation (%u)", static_cast<uint8_t>(_currentOperation));
 		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 
@@ -214,7 +214,7 @@ bool BleCentral::isBusy() {
 
 cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 	if (!isConnected()) {
@@ -325,6 +325,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 
 cs_data_t BleCentral::requestWriteBuffer() {
 	if (isBusy()) {
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return cs_data_t();
 	}
 	uint16_t maxWriteSize = 256;
@@ -333,7 +334,7 @@ cs_data_t BleCentral::requestWriteBuffer() {
 
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 
@@ -439,7 +440,7 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 
 cs_ret_code_t BleCentral::read(uint16_t handle) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 

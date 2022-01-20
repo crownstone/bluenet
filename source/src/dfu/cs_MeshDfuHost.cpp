@@ -286,17 +286,32 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 bool MeshDfuHost::startPhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
 
+	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT,&MeshDfuHost::continuePhaseTargetPreparing);
+	cs_ret_code_t ret = _meshDfuTransport.enableNotifications(true);
+
+	// TODO: retry?
+
+	return ret == ERR_WAIT_FOR_SUCCESS;
+}
+
+void MeshDfuHost::continuePhaseTargetPreparing(event_t& event) {
+	TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT)* result = CS_TYPE_CAST(EVT_BLE_CENTRAL_WRITE_RESULT, event.data);
+
+	if(*result != ERR_SUCCESS) {
+		LOGMeshDfuHostWarn("failed enabling notifications.");
+		abort();
+	}
+
 	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESULT, &MeshDfuHost::checkResultPhaseTargetPreparing);
 	_meshDfuTransport.prepare();
-
-	return true;
 }
 
 void MeshDfuHost::checkResultPhaseTargetPreparing(event_t& event) {
-	TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT)* result = CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESULT, event.data);
+	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESULT)* result = CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESULT, event.data);
 
 	switch(*result) {
 		case ERR_SUCCESS: {
+			LOGMeshDfuHostDebug("check result of target preparing: success");
 			completePhase();
 			break;
 		}
@@ -361,15 +376,18 @@ bool MeshDfuHost::startPhaseAborting() {
 
 	// its enough to disconnect crownstone central: that will disconnect
 	// ble central even if we didn't use crownstone central for the connection.
+	LOGMeshDfuHostDebug("disconnecting crownstone central");
 	auto csCentralStatus = _crownstoneCentral->disconnect();
 
 	switch(csCentralStatus){
 		case ERR_WAIT_FOR_SUCCESS: {
+			LOGMeshDfuHostDebug("wait for disconnect event");
 			setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::aborting);
 			setTimeoutCallback(&MeshDfuHost::completePhase);
 			break;
 		}
 		default: {
+			LOGMeshDfuHostDebug("disconnect failed, finishing abort next tick");
 			setEventCallback(CS_TYPE::EVT_TICK,&MeshDfuHost::aborting);
 			break;
 		}
@@ -487,7 +505,10 @@ void MeshDfuHost::completePhase() {
 			phaseNext = completeDiscoverDfuCharacteristics();
 			break;
 		}
-		case Phase::TargetPreparing: break;
+		case Phase::TargetPreparing: {
+			phaseNext = completePhaseTargetPreparing();
+			break;
+		}
 		case Phase::TargetInitializing: break;
 		case Phase::TargetUpdating: break;
 		case Phase::TargetVerifying: break;
@@ -503,7 +524,12 @@ void MeshDfuHost::completePhase() {
 		phaseNext = _phaseOnComplete;
 	}
 
-	startPhase(phaseNext);
+	_phaseCurrent = phaseNext;
+	setEventCallback(CS_TYPE::EVT_TICK, &MeshDfuHost::startPhase);
+}
+
+void MeshDfuHost::startPhase(event_t& event) {
+	startPhase(_phaseCurrent);
 }
 
 void MeshDfuHost::restartPhase() {

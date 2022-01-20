@@ -48,6 +48,11 @@ cs_ret_code_t MeshDfuTransport::init() {
 	return ERR_SUCCESS;
 }
 
+cs_ret_code_t MeshDfuTransport::enableNotifications(bool on) {
+	LOGMeshDfuTransportDebug("MeshDfuTransport: activate notifications");
+	return _bleCentral->writeNotificationConfig(_cccdHandles[Index::ControlPoint], true);
+}
+
 bool MeshDfuTransport::isTargetInDfuMode() {
 	[[maybe_unused]] bool characteristicsFound = _uuidHandles[Index::ControlPoint] != BLE_GATT_HANDLE_INVALID
 			   && _uuidHandles[Index::DataPoint] != BLE_GATT_HANDLE_INVALID;
@@ -138,15 +143,14 @@ void MeshDfuTransport::onEventCallbackTimeOut() {
 // ------------- the adapter layer for crownstone_ble -------------
 
 void MeshDfuTransport::write_control_point(cs_data_t buff) {
-	LOGMeshDfuTransportDebug("MeshDfuTransport: write control point and wait for notification");
+	LOGMeshDfuTransportDebug("MeshDfuTransport: write control point");
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
-	_bleCentral->writeNotificationConfig(_cccdHandles[Index::ControlPoint], true); // TODO: maybe unnecessary?
 	_bleCentral->write(_uuidHandles[Index::ControlPoint], buff.data, buff.len);
 
 }
 
 void MeshDfuTransport::write_data_point(cs_data_t buff) {
-	// data writes don't have to wait
+	LOGMeshDfuTransportDebug("MeshDfuTransport: write data point");
 	_bleCentral->write(_uuidHandles[Index::DataPoint], buff.data, buff.len);
 }
 

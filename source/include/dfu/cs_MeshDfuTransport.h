@@ -47,6 +47,16 @@ public:
 	// -------- main protocol methods -----------
 
 	/**
+	 * sets the notifications on/off. These must be turned on
+	 * before any of the other protocol methods are called.
+	 *
+  	 * @return ERR_BUFFER_TOO_SMALL    The data size is too large.
+	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
+	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_BLE_CENTRAL_WRITE_RESULT.
+	 */
+	cs_ret_code_t enableNotifications(bool on);
+
+	/**
 	 * sends first package of dfu protocol.
 	 *
 	 * dispatches EVT_MESH_DFU_TRANSPORT_RESULT when done.
@@ -88,7 +98,6 @@ private:
 	bool _discoveryComplete = false;
 
 	BleCentral* _bleCentral;
-
 
 	// ------------------------ async flowcontrol ------------------------
 	/**
