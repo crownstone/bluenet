@@ -85,6 +85,9 @@ Notes:
 ## Comments
 
 ### Function comments
+
+In header files create a description for the methods or classes that looks like this (which is doxygen compatible). Do use good comment hygiene. Don't describe how a function works, but the conditions under which it is expected to be used or why it is written in a certain way. Use complete grammatical sentences starting with a capital and ending with a dot.
+
 ```
 /**
  * Short description.
@@ -97,6 +100,23 @@ Notes:
  * @return        Explanation.
  */
 ```
+
+In source files additional information can be given about particular implementation details. This will not end up in doxygen (a single `/*` rather than `/**` code block starter is sufficient).
+
+```
+/*
+ * Optional longer explanation.
+ */
+```
+
+Within the function bodies themselves, abstain from comments unless absolutely necessary. If comments are required, write them on a line preceding the code. Do not write comments on the same line as the code.
+
+```
+// Always write comments on a separate line. 
+bool result = false;
+```
+
+Don't sprinkle the code with many TODOs, use them only when absolutely necessary.
 
 ## Various
 
