@@ -112,14 +112,15 @@ distributors. It changes for each type of commercially available product.
 | Crownstone Plug              | Crownstone Plug European Type F                    | CE            | Type F    | CR102M01/01 |
 | Crownstone Guidestone        | Guidestone                                         | CE            | 240V      | CR201M01/01 |
 
-The vendor product number exists of `CRfppMmm/vv` with:
+The vendor product number exists of `CRfppMmm`, `CRfppMmm/vv` or `CRfppMmm/vvBbb` with:
 
     f - family
     pp - product
     mm - market
     vv - variant
+    bb - box/package
 
-Again. The product `pp` number is not the same as the binary product presentation used in manufacturing, it is only bumped when a new product enters the market. If the product is in the same category only the `vv` variant is updated (e.g. from the Crownstone Built-in Zero to the Crownstone Built-in One). This VPN contains market information (which means it is certified for that market). This can be found on the packaging. On the product itself this information is not there, it is shortened, see next section.
+The product `pp` number is **not** the same as the binary product presentation used in manufacturing. It is only bumped when a new product enters the market. If the product is in the same category only the `vv` variant is updated (e.g. from the Crownstone Built-in Zero to the Crownstone Built-in One). The full VPN contains market information (which means it is certified for that market). This is what can be found on the packaging. On the product itself this information is not there, it is shortened, see next section. It is also possible that the same product is delivered in different boxes/cartons/quantities. This is indicated by an option `Bbb` at the end. 
 
 # Distribution
 
@@ -219,8 +220,6 @@ These are from hardware version strings, which are based on the board version on
 
 There may be Crownstones in the field with other, or empty, UICR values. These have not been documented.
 
-
-
 # Shops
 
 ## EAN
@@ -230,8 +229,8 @@ There may be Crownstones in the field with other, or empty, UICR values. These h
 | Crownstone Built-in Zero - Minimal Kit (3 units)  | CR101M01/01 | 7091047158574 |
 | Crownstone Plugs - Ready to Go Kit                | CR102M01/01 | 7091048321175 |
 | Crownstone Guidestone - Kit (10 units)            | CR201M01/01 | 7091047327949 |
-| Crownstone Built-in One - Starter Kit (10 units)  | CR101M01/02 | 8719326566085 |
-| Crownstone Built-in One - Extension Kit (1 unit)  | CR101M01/02 | 8719326566092 |
+| Crownstone Built-in One - Extension Kit (1 unit)  | CR101M01/02B00 | 8719326566092 |
+| Crownstone Built-in One - Starter Kit (10 units)  | CR101M01/02B01 | 8719326566085 |
 | Crownstone Hub                                    | CR103M01/01 | 8719326566078 |
 
 For questions, contact [Crownstone](https://crownstone.rocks/team/).

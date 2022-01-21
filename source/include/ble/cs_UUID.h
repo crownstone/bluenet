@@ -48,6 +48,9 @@ public:
 	 * The 128b UUID will be registered at the soft device.
 	 *
 	 * @param[in] fullUuid        In the form XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX.
+	 *
+	 * @return ERR_NO_SPACE       When there are too many UUIDs registered at the soft device.
+	 * @return ERR_SUCCESS        When the UUID was successfully registered at the soft device.
 	 */
 	cs_ret_code_t fromFullUuid(const char* fullUuid);
 
@@ -57,6 +60,9 @@ public:
 	 * The 128b UUID will be registered at the soft device.
 	 *
 	 * @param[in] fullUuid        The 128b UUID.
+	 *
+	 * @return ERR_NO_SPACE       When there are too many UUIDs registered at the soft device.
+	 * @return ERR_SUCCESS        When the UUID was successfully registered at the soft device.
 	 */
 	cs_ret_code_t fromFullUuid(const ble_uuid128_t& fullUuid);
 

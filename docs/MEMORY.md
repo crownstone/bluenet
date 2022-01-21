@@ -15,8 +15,8 @@ The global layout of the the flash is shown below:
 | ------------- |:-------------:| -----:|
 | 0x00000000 | MBR | 1
 | 0x00001000 | SD | 37
-| 0x00026000 | App / Bluenet | 43
-| 0x00051000 | Free | 24
+| 0x00026000 | App / Bluenet | 54
+| 0x0005C000 | Free | 13
 | 0x00069000 | Microapp | 4
 | 0x0006D000 | IPC page | 1
 | 0x0006E000 | Reserved for FDS expansion | 4
@@ -32,7 +32,7 @@ The bootloader start address is defined in the _CMakeBuild.config_ as `BOOTLOADE
 
 The application start address is defined in the _CMakeBuild.config_ as `APPLICATION_START_ADDRESS`.
 
-The firmware size + free size is 352kB. For the dual bank bootloader, this means that the firmware can be 176kB max.
+The firmware size + free size is about 268kB. For a dual bank bootloader, this means that the firmware can be 132kB max.
 
 ### RAM
 
