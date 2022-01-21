@@ -57,7 +57,7 @@ cs_ret_code_t FirmwareReader::init() {
 	return ERR_SUCCESS;
 }
 
-void FirmwareReader::read(uint16_t startIndex, uint16_t size, void* data_out) {
+void FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out) {
 	// can verify the output with nrfjprog. E.g.: `nrfjprog --memrd 0x00026000 --w 8 --n 50`
 
 	uint32_t readAddress = firmwareSectionInfo._addr._start + startIndex;
@@ -75,6 +75,11 @@ void FirmwareReader::read(uint16_t startIndex, uint16_t size, void* data_out) {
 	}
 }
 
+void FirmwareReader::read(uint16_t startIndex, uint16_t size, void* data_out, FirmwareSection section) {
+	auto firmwareSectionInfo = getFirmwareSectionInfo(section);
+	read(firmwareSectionInfo._addr._start + startIndex, size, data_out);
+}
+
 uint32_t FirmwareReader::printRoutine() {
 	constexpr size_t readSize = 128;
 
@@ -87,7 +92,7 @@ uint32_t FirmwareReader::printRoutine() {
 		dataoffSet = 0;
 	}
 
-	read(dataoffSet, readSize, buff);
+	read(dataoffSet, readSize, buff, FirmwareSection::BootloaderSettings);
 
 	_logArray(FIRMWAREREADER_LOG_LVL, true, buff, readSize);
 

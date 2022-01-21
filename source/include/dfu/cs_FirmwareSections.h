@@ -80,6 +80,8 @@ const FirmwareSectionInfo getFirmwareSectionInfo() {
 	return FirmwareSectionInfo(nullptr, {0, 0});
 }
 
+const FirmwareSectionInfo getFirmwareSectionInfo(FirmwareSection section);
+
 // explicit specializations for implemented sections
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bluenet>();
 template<> const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::MicroApp>();

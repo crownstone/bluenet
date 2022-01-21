@@ -113,6 +113,19 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBootloaderSettings) = {
 
 // specializations that implement getFirmwareSectionInfo
 
+
+const FirmwareSectionInfo getFirmwareSectionInfo(FirmwareSection section) {
+	switch(section) {
+		case FirmwareSection::Bluenet: return getFirmwareSectionInfo<FirmwareSection::Bluenet>();
+		case FirmwareSection::MicroApp: return getFirmwareSectionInfo<FirmwareSection::MicroApp>();
+		case FirmwareSection::Bootloader: return getFirmwareSectionInfo<FirmwareSection::Bootloader>();
+		case FirmwareSection::Mbr: return getFirmwareSectionInfo<FirmwareSection::Mbr>();
+		case FirmwareSection::Ipc: return getFirmwareSectionInfo<FirmwareSection::Ipc>();
+		case FirmwareSection::BootloaderSettings: return getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>();
+		default: return getFirmwareSectionInfo();
+	}
+}
+
 template<>
 const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bluenet>() {
 	return FirmwareSectionInfo(&firmwareReaderFsInstanceBluenet,

@@ -24,7 +24,8 @@ public:
 	/**
 	 * reads flash using fstorage
 	 */
-	void read(uint16_t startIndex, uint16_t size, void* data_out);
+	void read(uint32_t startIndex, uint32_t size, void* data_out);
+	void read(uint32_t startIndex, uint32_t size, void* data_out, FirmwareSection section);
 
 
 	cs_ret_code_t init();
