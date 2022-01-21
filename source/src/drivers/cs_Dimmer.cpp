@@ -18,7 +18,12 @@ void Dimmer::init(const boards_config_t& board) {
 	initialized = true;
 
 	hardwareBoard = board.hardwareBoard;
-	pinEnableDimmer = board.pinGpioEnablePwm;
+	pinEnableDimmer = board.pinEnableDimmer;
+	_hasDimmer = board.pinDimmer != PIN_NONE;
+
+	if (!_hasDimmer) {
+		return;
+	}
 
 	nrf_gpio_cfg_output(pinEnableDimmer);
 	nrf_gpio_pin_clear(pinEnableDimmer);
@@ -28,15 +33,19 @@ void Dimmer::init(const boards_config_t& board) {
 
 	State::getInstance().get(CS_TYPE::STATE_SOFT_ON_SPEED, &softOnfSpeed, sizeof(softOnfSpeed));
 
-	LOGd("init enablePin=%u pwmPin=%u inverted=%u period=%u µs softOnSpeed=%u", board.pinGpioEnablePwm, board.pinGpioPwm, board.flags.pwmInverted, pwmPeriodUs, softOnfSpeed);
+	LOGd("init enablePin=%u dimmerPin=%u inverted=%u period=%u µs softOnSpeed=%u", board.pinEnableDimmer, board.pinDimmer, board.flags.dimmerInverted, pwmPeriodUs, softOnfSpeed);
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
 	pwmConfig.period_us = pwmPeriodUs;
-	pwmConfig.channels[0].pin = board.pinGpioPwm;
-	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
+	pwmConfig.channels[0].pin = board.pinDimmer;
+	pwmConfig.channels[0].inverted = board.flags.dimmerInverted;
 
 	PWM::getInstance().init(pwmConfig);
+}
+
+bool Dimmer::hasDimmer() {
+	return _hasDimmer;
 }
 
 void Dimmer::start() {

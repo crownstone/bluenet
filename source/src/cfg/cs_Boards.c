@@ -41,30 +41,57 @@
 /**
  * Initialize conservatively (as if given pins are not present).
  */
-void init(boards_config_t* p_config) {
+void init(boards_config_t* config) {
+	config->pinDimmer = PIN_NONE;
+	config->pinEnableDimmer= PIN_NONE;
+	config->pinRelayOn = PIN_NONE;
+	config->pinRelayOff = PIN_NONE;
+	config->pinAinZeroRef = PIN_NONE;
+	config->pinAinDimmerTemp = PIN_NONE;
+	config->pinCurrentZeroCrossing = PIN_NONE;
+	config->pinVoltageZeroCrossing = PIN_NONE;
+	config->pinRx = PIN_NONE;
+	config->pinTx = PIN_NONE;
+	config->deviceType = DEVICE_UNDEF;
+	config->powerZero = 0;
+//	config->voltageRange = ;
+//	config->currentRange = ;
+	config->minTxPower = 0;
+//	config->pwmTempVoltageThreshold = ;
+//	config->pwmTempVoltageThresholdDown = ;
+//	config->scanIntervalUs = ;
+//	config->scanWindowUs = ;
+//	config->tapToToggleDefaultRssiThreshold = ;
+
+//	config->flags.dimmerInverted = ;
+	config->flags.enableUart = false;
+	config->flags.enableLeds = false;
+//	config->flags.ledInverted = ;
+//	config->flags.dimmerTempInverted = ;
+	config->flags.usesNfcPins = false;
+	config->flags.canDimOnWarmBoot = false;
+	config->flags.dimmerOnWhenPinsFloat = true;
+
 	for (uint8_t i = 0; i < GAIN_COUNT; ++i) {
-		p_config->pinAinVoltage[i] = GAIN_UNUSED;
-		p_config->pinAinCurrent[i] = GAIN_UNUSED;
-		p_config->pinAinVoltageAfterLoad[i] = GAIN_UNUSED;
-		p_config->voltageMultiplier[i] = 0.0;
-		p_config->voltageAfterLoadMultiplier[i] = 0.0;
-		p_config->currentMultiplier[i] = 0.0;
-		p_config->voltageZero[i] = 0;
-		p_config->voltageAfterLoadZero[i] = 0;
-		p_config->currentZero[i] = 0;
+		config->pinAinVoltage[i] = PIN_NONE;
+		config->pinAinCurrent[i] = PIN_NONE;
+		config->pinAinVoltageAfterLoad[i] = PIN_NONE;
+		config->voltageMultiplier[i] = 0.0;
+		config->voltageAfterLoadMultiplier[i] = 0.0;
+		config->currentMultiplier[i] = 0.0;
+		config->voltageZero[i] = 0;
+		config->voltageAfterLoadZero[i] = 0;
+		config->currentZero[i] = 0;
 	}
 	for (uint8_t i = 0; i < GPIO_INDEX_COUNT; ++i) {
-		p_config->pinGpio[i] = GPIO_UNUSED;
+		config->pinGpio[i] = PIN_NONE;
 	}
 	for (uint8_t i = 0; i < LED_COUNT; ++i) {
-		p_config->pinLed[i] = LED_UNUSED;
+		config->pinLed[i] = PIN_NONE;
 	}
 	for (uint8_t i = 0; i < BUTTON_COUNT; ++i) {
-		p_config->pinButton[i] = BUTTON_UNUSED;
+		config->pinButton[i] = PIN_NONE;
 	}
-	p_config->pinAinZeroRef                      = PIN_UNUSED;
-
-	p_config->pinGpioEnablePwm                   = PIN_UNUSED;
 }
 
 /**
@@ -72,23 +99,23 @@ void init(boards_config_t* p_config) {
  */
 uint8_t GpioToAinOnChipset(uint8_t gpio, uint8_t chipset) {
 	switch(chipset) {
-	case CHIPSET_NRF52832:
-	case CHIPSET_NRF52833:
-	case CHIPSET_NRF52840:
-		switch(gpio) {
-		case  2: return 0;
-		case  3: return 1;
-		case  4: return 2;
-		case  5: return 3;
-		case 28: return 4;
-		case 29: return 5;
-		case 30: return 6;
-		case 31: return 7;
+		case CHIPSET_NRF52832:
+		case CHIPSET_NRF52833:
+		case CHIPSET_NRF52840:
+			switch(gpio) {
+				case  2: return 0;
+				case  3: return 1;
+				case  4: return 2;
+				case  5: return 3;
+				case 28: return 4;
+				case 29: return 5;
+				case 30: return 6;
+				case 31: return 7;
+				default:
+					return PIN_NONE;
+			}
 		default:
-			return PIN_UNUSED;
-		}
-	default:
-		return PIN_UNUSED;
+			return PIN_NONE;
 	}
 }
 
@@ -108,63 +135,62 @@ uint8_t GpioToAin(uint8_t gpio) {
  * It is either possible to use VDD as reference (VDD/4) or an internal reference (0.6V). It is configured with an
  * internal reference.
  */
-void asACR01B1D(boards_config_t* p_config) {
-	// Pins can be set either to XXX_UNUSED or this pin
-	p_config->pinUnused                          = 11;
+void asACR01B1D(boards_config_t* config) {
+	config->pinDimmer                          = 8;
+	config->pinRelayOn                         = 6;
+	config->pinRelayOff                        = 7;
+	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
+	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
+	config->pinAinDimmerTemp                   = GpioToAin(5);
 
-	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                   = p_config->pinUnused;
+	config->pinRx                              = 20;
+	config->pinTx                              = 19;
+	config->pinLed[LED_RED]                    = 10;
+	config->pinLed[LED_GREEN]                  = 9;
 
-	p_config->pinGpioRelayOn                     = 6;
-	p_config->pinGpioRelayOff                    = 7;
+	config->flags.dimmerInverted               = false;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = true;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = false;
+	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
-	p_config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
-	p_config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
-	p_config->pinAinPwmTemp                      = GpioToAin(5);
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 19;
-	p_config->pinLed[LED_RED]                    = 10;
-	p_config->pinLed[LED_GREEN]                  = 9;
-
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = true;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = false;
-	p_config->flags.pwmTempInverted              = false;
-
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
+	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 	// TODO: Explain this value
-	p_config->voltageMultiplier[GAIN_SINGLE]     = 0.2f;
+	config->voltageMultiplier[GAIN_SINGLE]     = 0.2f;
 	
 	// TODO: Explain this value
-	p_config->currentMultiplier[GAIN_SINGLE]     = 0.0044f;
+	config->currentMultiplier[GAIN_SINGLE]     = 0.0044f;
 	
 	// TODO: Explain this value
-	p_config->voltageZero[GAIN_SINGLE]           = 1993;
+	config->voltageZero[GAIN_SINGLE]           = 1993;
 	
 	// TODO: Explain this value
-	p_config->currentZero[GAIN_SINGLE]           = 1980;
+	config->currentZero[GAIN_SINGLE]           = 1980;
 
 	// TODO: Explain this value
-	p_config->powerZero                          = 3500;
+	config->powerZero                          = 3500;
 
-	p_config->voltageRange                       = 1200;
-	p_config->currentRange                       = 1200;
+	// ADC values [0, 4095] map to [0V, 1.2V].
+	config->voltageRange                       = 1200;
+	config->currentRange                       = 1200;
 
 	// TODO: Explain these comments. About 1.5kOhm --> 90-100C
-	p_config->pwmTempVoltageThreshold            = 0.76;
+	config->pwmTempVoltageThreshold            = 0.76;
 	// TODO: Explain these comments. About 0.7kOhm --> 70-95C
-	p_config->pwmTempVoltageThresholdDown        = 0.41;
+	config->pwmTempVoltageThresholdDown        = 0.41;
 
-	p_config->minTxPower                         = -20;
+	config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
 	// This board cannot provide enough power for 100% scanning!
-	p_config->scanWindowUs                       = 105 * 1000;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	// So set an interval that's not in sync with advertising interval.
+	// And a scan window of 75% of the interval.
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = 105 * 1000;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 /* ********************************************************************************************************************
@@ -228,76 +254,90 @@ void asACR01B1D(boards_config_t* p_config) {
  *   - It should be visible as a steady 15V * 80.6/(80.6+324) = 2.99V input on P0.05.
  *   - The TX power is with -20 higher for the built-ins than for the plugs.
  */
-void asACR01B10D(boards_config_t* p_config) {
-	// not a particular pin assigned to be dangling
-	p_config->pinUnused                          = PIN_UNUSED;
+void asACR01B10D(boards_config_t* config) {
+	config->pinDimmer                          = 8;
+	config->pinEnableDimmer                    = 10;
+	config->pinRelayOn                         = 14;
+	config->pinRelayOff                        = 13;
 
-	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                   = 10;
-	p_config->pinGpioRelayOn                     = 14;
-	p_config->pinGpioRelayOff                    = 13;
+	config->pinAinCurrent[GAIN_LOW]            = GpioToAin(30);
+	config->pinAinCurrent[GAIN_MIDDLE]         = GpioToAin(29);
+	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(28);
 
-	p_config->pinAinCurrent[GAIN_LOW]            = GpioToAin(30);
-	p_config->pinAinCurrent[GAIN_MIDDLE]         = GpioToAin(29);
-	p_config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(28);
+	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
 
-	p_config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
+	config->pinAinZeroRef                      = GpioToAin(2);
+	config->pinAinDimmerTemp                   = GpioToAin(4);
 
-	p_config->pinAinZeroRef                      = GpioToAin(2);
-	p_config->pinAinPwmTemp                      = GpioToAin(4);
+	config->pinRx                              = 20;
+	config->pinTx                              = 19;
 
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 19;
+	config->flags.dimmerInverted               = false;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = false;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = true;
+	config->flags.usesNfcPins                  = true;
+	config->flags.canDimOnWarmBoot             = true;
+	config->flags.dimmerOnWhenPinsFloat        = false;
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = false;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true;
-
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
+	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	// TODO: Explain why not -0.26632 (see above). If incorrect, replace.
-	p_config->voltageMultiplier[GAIN_SINGLE]     = -0.2547;
+	config->voltageMultiplier[GAIN_SINGLE]     = -0.2547;
 
 	// TODO: Explain this value
-	p_config->currentMultiplier[GAIN_LOW]        = 0.01486f;
+	config->currentMultiplier[GAIN_LOW]        = 0.01486f;
 
 	// TODO: Calculate the following values (now set to something arbitrary)
-	p_config->currentMultiplier[GAIN_MIDDLE]     = 0.015;
-	p_config->currentMultiplier[GAIN_HIGH]       = 0.015;
+	config->currentMultiplier[GAIN_MIDDLE]     = 0.015;
+	config->currentMultiplier[GAIN_HIGH]       = 0.015;
 
 	// TODO: Explain why not 512 (see above). If 500 incorrect, replace.
-	p_config->voltageZero[GAIN_SINGLE]           = 500;
+	config->voltageZero[GAIN_SINGLE]           = 500;
 
 	// TODO: Explain this value
-	p_config->currentZero[GAIN_LOW]              = -125;
+	config->currentZero[GAIN_LOW]              = -125;
 
 	// TODO: Calculate the following values (now set to something arbitrary)
-	p_config->currentZero[GAIN_MIDDLE]           = -125;
-	p_config->currentZero[GAIN_HIGH]             = -125;
+	config->currentZero[GAIN_MIDDLE]           = -125;
+	config->currentZero[GAIN_HIGH]             = -125;
 
 	// TODO: Explain this value
-	p_config->powerZero                          = 800;
+	config->powerZero                          = 800;
 
-	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 1200;
+	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
+	config->voltageRange                       = 1800;
+	// ADC values [-2048, 2047] map to [REF - 1.2V, REF + 1.2V].
+	config->currentRange                       = 1200;
 
 	// TODO: These are incorrectly calculated with R_12 = 16k and B_ntc = 3380 K.
-	p_config->pwmTempVoltageThreshold            = 0.35; // 0.3518
-	p_config->pwmTempVoltageThresholdDown        = 0.30; // 0.3036
+	config->pwmTempVoltageThreshold            = 0.35; // 0.3518
+	config->pwmTempVoltageThresholdDown        = 0.30; // 0.3036
 	
 	// TODO: It should be with R_12 = 18k and B_ntc = 3434 K (enable the following).
-	//p_config->pwmTempVoltageThreshold            = 0.3090;
-	//p_config->pwmTempVoltageThresholdDown        = 0.2655;
+	//config->pwmTempVoltageThreshold            = 0.3090;
+	//config->pwmTempVoltageThresholdDown        = 0.2655;
 
-	p_config->minTxPower                         = -20;
+	config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
-	p_config->scanWindowUs                       = p_config->scanIntervalUs;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = config->scanIntervalUs;
+	config->tapToToggleDefaultRssiThreshold    = -35;
+}
+
+void asACR01B10B(boards_config_t* config) {
+	// The ACR01B10B is similar to ACR01B10D, but lacks the dimmer enable pin.
+	asACR01B10D(config);
+	config->flags.usesNfcPins                  = false;
+	config->pinEnableDimmer                    = PIN_NONE;
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
+
+//	// With patch 2:
+//	config->pinEnableDimmer                    = 15;
+//	config->flags.canDimOnWarmBoot             = true; // TODO: can it?
+//	config->flags.dimmerOnWhenPinsFloat        = false;
 }
 
 /* ********************************************************************************************************************
@@ -308,154 +348,158 @@ void asACR01B10D(boards_config_t* p_config) {
  * The built-in two has an nRF52833 chipset. The pin layout however depends on the actual form factor being used,
  * for example the aQFN73, the QFN48 or the WLCSP assignments are different.
  */
-void asACR01B13B(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 15;
+void asACR01B13B(boards_config_t* config) {
+	config->pinDimmer                          = 15;
+	config->pinEnableDimmer                    = PIN_NONE;
+	config->pinRelayOn                         = 17;
+	config->pinRelayOff                        = 18; // P0.18 / RESET
 
-	p_config->pinGpioRelayOn                     = 17;
-	p_config->pinGpioRelayOff                    = 18; // P0.18 / RESET
+	config->pinAinCurrent[GAIN_LOW]            = GpioToAin(3);
+	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(2);
 
-	p_config->pinAinCurrent[GAIN_LOW]            = GpioToAin(3);
-	p_config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(2);
-
-	p_config->pinAinVoltage[GAIN_LOW]            = GpioToAin(31);
-	p_config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(28);
+	config->pinAinVoltage[GAIN_LOW]            = GpioToAin(31);
+	config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(28);
 	
-	p_config->pinAinVoltageAfterLoad[GAIN_LOW]   = GpioToAin(30);
-	p_config->pinAinVoltageAfterLoad[GAIN_HIGH]  = GpioToAin(29);
+	config->pinAinVoltageAfterLoad[GAIN_LOW]   = GpioToAin(30);
+	config->pinAinVoltageAfterLoad[GAIN_HIGH]  = GpioToAin(29);
 
-	p_config->pinAinZeroRef                      = GpioToAin(4); // REF
-	p_config->pinAinPwmTemp                      = GpioToAin(5);
+	config->pinAinZeroRef                      = GpioToAin(4); // REF
+	config->pinAinDimmerTemp                   = GpioToAin(5);
 
-	p_config->pinAinCurrentZeroCrossing          = GpioToAin(11);
-	p_config->pinAinVoltageZeroCrossing          = GpioToAin(41); // P1.09
+	config->pinCurrentZeroCrossing             = GpioToAin(11);
+	config->pinVoltageZeroCrossing             = GpioToAin(41); // P1.09
 
-	p_config->pinGpioRx                          = 10;
-	p_config->pinGpioTx                          = 9;
+	config->pinRx                              = 10;
+	config->pinTx                              = 9;
 	
-	p_config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
-	p_config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
-	p_config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
-	p_config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
+	config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
+	config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
+	config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
+	config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = true;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = false;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true;
+	config->flags.usesNfcPins                  = true;
+	config->flags.dimmerInverted               = true;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = false;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = true;
+	config->flags.canDimOnWarmBoot             = true;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
+	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
 
-	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 1800;
+	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
+	config->voltageRange                       = 1800;
+	config->currentRange                       = 1800;
 
 	// TODO: All the following values have to be calculated still, now set to some guessed values.
-	p_config->voltageMultiplier[GAIN_LOW]        = -0.25;
-	p_config->voltageMultiplier[GAIN_HIGH]       = -0.25;
+	config->voltageMultiplier[GAIN_LOW]        = -0.25;
+	config->voltageMultiplier[GAIN_HIGH]       = -0.25;
 	
-	p_config->voltageAfterLoadMultiplier[GAIN_LOW]  = -0.25;
-	p_config->voltageAfterLoadMultiplier[GAIN_HIGH] = -0.25;
+	config->voltageAfterLoadMultiplier[GAIN_LOW]  = -0.25;
+	config->voltageAfterLoadMultiplier[GAIN_HIGH] = -0.25;
 
-	p_config->currentMultiplier[GAIN_LOW]        = 0.01;
-	p_config->currentMultiplier[GAIN_HIGH]       = 0.01;
+	config->currentMultiplier[GAIN_LOW]        = 0.01;
+	config->currentMultiplier[GAIN_HIGH]       = 0.01;
 
-	p_config->voltageZero[GAIN_LOW]              = 0;
-	p_config->voltageZero[GAIN_HIGH]             = 0;
+	config->voltageZero[GAIN_LOW]              = 0;
+	config->voltageZero[GAIN_HIGH]             = 0;
 
-	p_config->currentZero[GAIN_LOW]              = 0;
-	p_config->currentZero[GAIN_HIGH]             = 0;
+	config->currentZero[GAIN_LOW]              = 0;
+	config->currentZero[GAIN_HIGH]             = 0;
 
-	p_config->powerZero                          = 0;
+	config->powerZero                          = 0;
 
-	p_config->pwmTempVoltageThreshold            = 0.2;
-	p_config->pwmTempVoltageThresholdDown        = 0.18;
+	config->pwmTempVoltageThreshold            = 0.2;
+	config->pwmTempVoltageThresholdDown        = 0.18;
 
-	p_config->minTxPower                         = -20;
+	config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
-	p_config->scanWindowUs                       = p_config->scanIntervalUs;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = config->scanIntervalUs;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 /**
  * This prototype is based on the nRF52840 (in contrast with the unit above which is based on the nRF52833).
  */
-void asACR01B15A(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 45;  // GPIO P1.13 / Gate-N
-	p_config->pinGpioEnablePwm                   = 46;  // GPIO P1.14 / Gate-P
+void asACR01B15A(boards_config_t* config) {
+	config->pinDimmer                          = 45;  // GPIO P1.13 / Gate-N
+	config->pinEnableDimmer                    = 46;  // GPIO P1.14 / Gate-P
 
-	p_config->pinGpioRelayOn                     = 13;
-	p_config->pinGpioRelayOff                    = 15;
+	config->pinRelayOn                         = 13;
+	config->pinRelayOff                        = 15;
 
-	p_config->pinAinCurrent[GAIN_LOW]            = GpioToAin(2);
-	p_config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(30);
+	config->pinAinCurrent[GAIN_LOW]            = GpioToAin(2);
+	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(30);
 
-	p_config->pinAinVoltage[GAIN_LOW]            = GpioToAin(28);
-	p_config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(3);
+	config->pinAinVoltage[GAIN_LOW]            = GpioToAin(28);
+	config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(3);
 	
-	p_config->pinAinVoltageAfterLoad[GAIN_LOW]   = GpioToAin(29);
-	p_config->pinAinVoltageAfterLoad[GAIN_HIGH]  = GpioToAin(31);
+	config->pinAinVoltageAfterLoad[GAIN_LOW]   = GpioToAin(29);
+	config->pinAinVoltageAfterLoad[GAIN_HIGH]  = GpioToAin(31);
 
-	p_config->pinAinZeroRef                      = GpioToAin(5);
-	p_config->pinAinPwmTemp                      = GpioToAin(4);
+	config->pinAinZeroRef                      = GpioToAin(5);
+	config->pinAinDimmerTemp                   = GpioToAin(4);
 	
-	p_config->pinAinCurrentZeroCrossing          = GpioToAin(8);
-	p_config->pinAinVoltageZeroCrossing          = GpioToAin(41); // P1.09
+	config->pinCurrentZeroCrossing             = GpioToAin(8);
+	config->pinVoltageZeroCrossing             = GpioToAin(41); // P1.09
 
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 22;
+	config->pinRx                              = 20;
+	config->pinTx                              = 22;
 	
-	p_config->pinGpio[0]                         = 24;
-	p_config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
-	p_config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
-	p_config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
-	p_config->pinGpio[4]                         = 38;  // GPIO P1.06
-	p_config->pinGpio[5]                         = 39;  // GPIO P1.07
-	p_config->pinGpio[6]                         = 9;
-	p_config->pinGpio[7]                         = 16;
-	p_config->pinGpio[8]                         = 21;
-	p_config->pinGpio[9]                         = 47;  // GPIO P1.15
+	config->pinGpio[0]                         = 24;
+	config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
+	config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
+	config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
+	config->pinGpio[4]                         = 38;  // GPIO P1.06
+	config->pinGpio[5]                         = 39;  // GPIO P1.07
+	config->pinGpio[6]                         = 9;
+	config->pinGpio[7]                         = 16;
+	config->pinGpio[8]                         = 21;
+	config->pinGpio[9]                         = 47;  // GPIO P1.15
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = true;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = false;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true;
+	config->flags.dimmerInverted               = true;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = false;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = true;
+	config->flags.usesNfcPins                  = true;
+	config->flags.canDimOnWarmBoot             = true;
+	config->flags.dimmerOnWhenPinsFloat        = false;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
+	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
 
-	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 1800;
+	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
+	config->voltageRange                       = 1800;
+	config->currentRange                       = 1800;
 
 	//TODO: All the following values have to be calculated still, now set to some guessed values.
-	p_config->voltageMultiplier[GAIN_LOW]        = -0.25;
-	p_config->voltageMultiplier[GAIN_HIGH]       = -0.25;
+	config->voltageMultiplier[GAIN_LOW]        = -0.25;
+	config->voltageMultiplier[GAIN_HIGH]       = -0.25;
 	
-	p_config->voltageAfterLoadMultiplier[GAIN_LOW]  = -0.25;
-	p_config->voltageAfterLoadMultiplier[GAIN_HIGH] = -0.25;
+	config->voltageAfterLoadMultiplier[GAIN_LOW]  = -0.25;
+	config->voltageAfterLoadMultiplier[GAIN_HIGH] = -0.25;
 
-	p_config->currentMultiplier[GAIN_LOW]        = 0.01;
-	p_config->currentMultiplier[GAIN_HIGH]       = 0.01;
+	config->currentMultiplier[GAIN_LOW]        = 0.01;
+	config->currentMultiplier[GAIN_HIGH]       = 0.01;
 
-	p_config->voltageZero[GAIN_LOW]              = 0;
-	p_config->voltageZero[GAIN_HIGH]             = 0;
+	config->voltageZero[GAIN_LOW]              = 0;
+	config->voltageZero[GAIN_HIGH]             = 0;
 
-	p_config->currentZero[GAIN_LOW]              = 0;
-	p_config->currentZero[GAIN_HIGH]             = 0;
+	config->currentZero[GAIN_LOW]              = 0;
+	config->currentZero[GAIN_HIGH]             = 0;
 
-	p_config->powerZero                          = 0;
+	config->powerZero                          = 0;
 
-	p_config->pwmTempVoltageThreshold            = 0.2;
-	p_config->pwmTempVoltageThresholdDown        = 0.18;
+	config->pwmTempVoltageThreshold            = 0.2;
+	config->pwmTempVoltageThresholdDown        = 0.18;
 
-	p_config->minTxPower                         = -20;
+	config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
-	p_config->scanWindowUs                       = p_config->scanIntervalUs;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = config->scanIntervalUs;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 /* ********************************************************************************************************************
@@ -485,57 +529,55 @@ void asACR01B15A(boards_config_t* p_config) {
  * TODO: Here voltageMultiplier=0.2f is used instead of 0.20446f. Check.
  * TODO: The values used now might be empirical. Replace by theoretic values or tell why the calcluation is incorrect.
  */
-void asACR01B2C(boards_config_t* p_config) {
-	// Pins can be set either to XXX_UNUSED or this pin
-	p_config->pinUnused                          = 11;
+void asACR01B2C(boards_config_t* config) {
+	config->pinDimmer                          = 8;
+	config->pinRelayOn                         = 6;
+	config->pinRelayOff                        = 7;
+	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
+	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
+	config->pinAinDimmerTemp                   = GpioToAin(5);
+	config->pinRx                              = 20;
+	config->pinTx                              = 19;
 
-	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                   = p_config->pinUnused;
-	p_config->pinGpioRelayOn                     = 6;
-	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
-	p_config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
-	p_config->pinAinPwmTemp                      = GpioToAin(5);
-	p_config->pinAinZeroRef                      = PIN_UNUSED;
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 19;
+	config->pinLed[LED_RED]                    = 10;
+	config->pinLed[LED_GREEN]                  = 9;
 
-	p_config->pinLed[LED_RED]                    = 10;
-	p_config->pinLed[LED_GREEN]                  = 9;
+	config->flags.dimmerInverted               = false;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = true;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = false;
+	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = true;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = false;
-	p_config->flags.pwmTempInverted              = false;
+	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
-
-	p_config->voltageMultiplier[GAIN_SINGLE]     = 0.2f;
-	p_config->currentMultiplier[GAIN_SINGLE]     = 0.0045f;
+	config->voltageMultiplier[GAIN_SINGLE]     = 0.2f;
+	config->currentMultiplier[GAIN_SINGLE]     = 0.0045f;
 	
 	// TODO: 2010 seems to be better than 2003 (check this old remark with theory).
-	p_config->voltageZero[GAIN_SINGLE]           = 2003;
+	config->voltageZero[GAIN_SINGLE]           = 2003;
 	// TODO: 1991 seems to be better than 1997 (check this old remark with theory).
-	p_config->currentZero[GAIN_SINGLE]           = 1997;
+	config->currentZero[GAIN_SINGLE]           = 1997;
 
-	p_config->powerZero                          = 1500;
-	p_config->voltageRange                       = 1200;
-	p_config->currentRange                       = 1200;
+	config->powerZero                          = 1500;
+
+	// ADC values [0, 4095] map to [0V, 1.2V].
+	config->voltageRange                       = 1200;
+	config->currentRange                       = 1200;
 
 	// About 1.5kOhm --> 90-100C
-	p_config->pwmTempVoltageThreshold            = 0.76;
+	config->pwmTempVoltageThreshold            = 0.76;
 	// About 0.7kOhm --> 70-95C
-	p_config->pwmTempVoltageThresholdDown        = 0.41;
+	config->pwmTempVoltageThresholdDown        = 0.41;
 
-	p_config->minTxPower                         = -20;
+	config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
+	config->scanIntervalUs                     = 140 * 1000;
 	// This board cannot provide enough power for 100% scanning.
-	p_config->scanWindowUs                       = 105 * 1000;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                       = 105 * 1000;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 /**
@@ -564,61 +606,62 @@ void asACR01B2C(boards_config_t* p_config) {
  * TODO: Here voltageZero=-99 is used instead of 0. The offset should be at max 56. Check.
  * TODO: The values used now might be empirical. Replace by theoretic values or tell why the calcluation is incorrect.
  */
-void asACR01B2G(boards_config_t* p_config) {
-	// Pins can be set either to XXX_UNUSED or this pin
-	p_config->pinUnused                          = 11;
-	
-	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioRelayOn                     = 6;
-	p_config->pinGpioRelayOff                    = 7;
+void asACR01B2G(boards_config_t* config) {
+	config->pinDimmer                          = 8;
+	config->pinRelayOn                         = 6;
+	config->pinRelayOff                        = 7;
 
-	p_config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
-	p_config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
+	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
+	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
 
-	p_config->pinAinZeroRef                      = GpioToAin(2);
-	p_config->pinAinPwmTemp                      = GpioToAin(5);
+	config->pinAinZeroRef                      = GpioToAin(2);
+	config->pinAinDimmerTemp                   = GpioToAin(5);
 
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 19;
+	config->pinRx                              = 20;
+	config->pinTx                              = 19;
 
-	p_config->pinLed[LED_RED]                    = 10;
-	p_config->pinLed[LED_GREEN]                  = 9;
+	config->pinLed[LED_RED]                    = 10;
+	config->pinLed[LED_GREEN]                  = 9;
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = true;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true;
+	config->flags.dimmerInverted               = false;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = true;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = true;
+	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
+	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
 	// The following two values are empirically determined, through calibration over 10 production crownstones
-	p_config->voltageMultiplier[GAIN_SINGLE]     = 0.171f;
-	p_config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
+	config->voltageMultiplier[GAIN_SINGLE]     = 0.171f;
+	config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
 
 	// Calibrated by noisy data from 1 crownstone
 	// The following two values are empirically determined, through calibration over noisy data from 1 Crownstone.
-	p_config->voltageZero[GAIN_SINGLE]           = -99;
-	p_config->currentZero[GAIN_SINGLE]           = -270;
+	config->voltageZero[GAIN_SINGLE]           = -99;
+	config->currentZero[GAIN_SINGLE]           = -270;
 
 	// The following value is empirically determined, through calibration over 10 production crownstones
-	p_config->powerZero                          = 9000;
+	config->powerZero                          = 9000;
 
-	p_config->voltageRange                       = 1200;
-	p_config->currentRange                       = 600;
+	// ADC values [-2048, 2047] map to [REF - 1.2V, REF + 1.2V].
+	config->voltageRange                       = 1200;
 
-	p_config->pwmTempVoltageThreshold            = 0.70;
-	p_config->pwmTempVoltageThresholdDown        = 0.25;
+	// ADC values [-2048, 2047] map to [REF - 0.6V, REF + 0.6V].
+	config->currentRange                       = 600;
 
-	p_config->minTxPower                         = -20;
+	config->pwmTempVoltageThreshold            = 0.70;
+	config->pwmTempVoltageThresholdDown        = 0.25;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
+	config->minTxPower                         = -20;
+
+	config->scanIntervalUs                     = 140 * 1000;
 
 	// This board cannot provide enough power for 100% scanning.
-	p_config->scanWindowUs                       = 105 * 1000;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                       = 105 * 1000;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 /* ********************************************************************************************************************
@@ -660,63 +703,63 @@ void asACR01B2G(boards_config_t* p_config) {
  * Thus it is 1.24V each way. A range of 1300 would be fine. Then 1240 would correspond to 240V RMS.
  * Hence, the voltage multiplier (from ADC values to volts RMS) is 0.19355.
  */
-void asACR01B11A(boards_config_t* p_config) {
-	// Pins can be set either to XXX_UNUSED or this pin
-	p_config->pinUnused                          = 11;
+void asACR01B11A(boards_config_t* config) {
+	config->pinDimmer                          = 8;
+	config->pinRelayOn                         = 15;
+	config->pinRelayOff                        = 13;
 
-	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                   = p_config->pinUnused;
-	p_config->pinGpioRelayOn                     = 15;
-	p_config->pinGpioRelayOff                    = 13;
+	config->pinAinCurrent[GAIN_LOW]            = GpioToAin(2);
+	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(3);
 
-	p_config->pinAinCurrent[GAIN_LOW]            = GpioToAin(2);
-	p_config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(3);
+	config->pinAinVoltage[GAIN_LOW]            = GpioToAin(31);
+	config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(29);
 
-	p_config->pinAinVoltage[GAIN_LOW]            = GpioToAin(31);
-	p_config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(29);
+	config->pinAinDimmerTemp                   = GpioToAin(4);
+	config->pinAinZeroRef                      = GpioToAin(5);
 
-	p_config->pinAinPwmTemp                      = GpioToAin(4);
-	p_config->pinAinZeroRef                      = GpioToAin(5);
+	config->pinRx                              = 22;
+	config->pinTx                              = 20;
 
-	p_config->pinGpioRx                          = 22;
-	p_config->pinGpioTx                          = 20;
+	config->pinGpio[0]                         = 24;
+	config->pinGpio[1]                         = 32;
+	config->pinGpio[2]                         = 34;
+	config->pinGpio[3]                         = 36;
 
-	p_config->pinGpio[0]                         = 24;
-	p_config->pinGpio[1]                         = 32;
-	p_config->pinGpio[2]                         = 34;
-	p_config->pinGpio[3]                         = 36;
+	config->flags.dimmerInverted               = true;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = false;
+	config->flags.ledInverted                  = false;
+	config->flags.dimmerTempInverted           = true;
+	config->flags.usesNfcPins                  = false;
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = true;
-	p_config->flags.hasSerial                    = true;
-	p_config->flags.hasLed                       = false;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true;
-
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+	config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
 
 	// All the values below are just copied from configuration values from other hardware and should be adjusted.
-	p_config->voltageMultiplier[GAIN_SINGLE]     = 0.19355f;
-	p_config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
-	p_config->voltageZero[GAIN_SINGLE]           = 0;
+	config->voltageMultiplier[GAIN_SINGLE]     = 0.19355f;
+	config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
+	config->voltageZero[GAIN_SINGLE]           = 0;
 
-	p_config->currentZero[GAIN_LOW]              = -270;
-	p_config->currentZero[GAIN_HIGH]             = -270;
+	config->currentZero[GAIN_LOW]              = -270;
+	config->currentZero[GAIN_HIGH]             = -270;
 
-	p_config->powerZero                          = 9000;
+	config->powerZero                          = 9000;
 
-	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 600;
+	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
+	config->voltageRange                       = 1800;
 
-	p_config->pwmTempVoltageThreshold            = 0.3639;
-	p_config->pwmTempVoltageThresholdDown        = 0.3135;
+	// ADC values [-2048, 2047] map to [REF - 0.6V, REF + 0.6V].
+	config->currentRange                       = 600;
 
-	p_config->minTxPower                         = -20;
+	config->pwmTempVoltageThreshold            = 0.3639;
+	config->pwmTempVoltageThresholdDown        = 0.3135;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
-	p_config->scanWindowUs                       = p_config->scanIntervalUs;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->minTxPower                         = -20;
+
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = config->scanIntervalUs;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 /* ********************************************************************************************************************
@@ -751,152 +794,157 @@ void asACR01B11A(boards_config_t* p_config) {
  *
  * The voltageMultiplier and currentMultiplier values are set to 0.0 which disables checks with respect to sampling.
  */
-void asPca10040(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 17;
-	p_config->pinGpioEnablePwm                   = 22;
-	p_config->pinGpioRelayOn                     = 11;
-	p_config->pinGpioRelayOff                    = 12;
-	p_config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(3);
-	p_config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(2);
-	p_config->pinAinZeroRef                      = GpioToAin(28);
-	p_config->pinAinPwmTemp                      = GpioToAin(2);
-	p_config->pinGpioRx                          = 8;
-	p_config->pinGpioTx                          = 6;
+void asPca10040(boards_config_t* config) {
+	config->pinDimmer                          = 17;
+//	config->pinEnableDimmer                    = 22;
+	config->pinRelayOn                         = 11;
+	config->pinRelayOff                        = 12;
+	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(3);
+	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(2);
+//	config->pinAinZeroRef                      = GpioToAin(28);
+	config->pinAinDimmerTemp                   = GpioToAin(2);
+	config->pinRx                              = 8;
+	config->pinTx                              = 6;
 	
-	p_config->pinLed[LED_RED]                    = 19;
-	p_config->pinLed[LED_GREEN]                  = 20;
+	config->pinLed[LED2]                       = 19;
+	config->pinLed[LED3]                       = 20;
 
-	p_config->pinGpio[0]                         = 27;  // Also SCL
-	p_config->pinGpio[1]                         = 26;  // Also SDA
-	p_config->pinGpio[2]                         = 25;
-	p_config->pinGpio[3]                         = 24;
+	config->pinGpio[0]                         = 27;  // Also SCL
+	config->pinGpio[1]                         = 26;  // Also SDA
+	config->pinGpio[2]                         = 25;
+	config->pinGpio[3]                         = 24;
 
-	p_config->pinButton[0]                       = 13;
-	p_config->pinButton[1]                       = 14;
-	p_config->pinButton[2]                       = 15;
-	p_config->pinButton[3]                       = 16;
+	config->pinButton[0]                       = 13;
+	config->pinButton[1]                       = 14;
+	config->pinButton[2]                       = 15;
+	config->pinButton[3]                       = 16;
 	
-	p_config->pinLed[0]                          = 17;
-	p_config->pinLed[1]                          = 18;
-	p_config->pinLed[2]                          = 19;
-	p_config->pinLed[3]                          = 20;
+	config->pinLed[0]                          = 17;
+	config->pinLed[1]                          = 18;
+	config->pinLed[2]                          = 19;
+	config->pinLed[3]                          = 20;
 
-	p_config->flags.hasRelay                     = false;
-	p_config->flags.pwmInverted                  = true;
-	p_config->flags.hasSerial                    = true;
-	p_config->flags.hasLed                       = true;
-	p_config->flags.ledInverted                  = true;
-	p_config->flags.hasAdcZeroRef                = false;
-	p_config->flags.pwmTempInverted              = false;
+	config->flags.dimmerInverted               = true;
+	config->flags.enableUart                   = true;
+	config->flags.enableLeds                   = true;
+	config->flags.ledInverted                  = true;
+	config->flags.dimmerTempInverted           = false;
+	config->flags.usesNfcPins                  = false;
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
+	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
 	// All values below are set to something rather than nothing, but are not truly in use.
-	p_config->voltageZero[GAIN_SINGLE]           = 1000;
-	p_config->currentZero[GAIN_SINGLE]           = 1000;
-	p_config->powerZero                          = 0;
-	p_config->voltageRange                       = 3600;
-	p_config->currentRange                       = 3600;
+	config->voltageZero[GAIN_SINGLE]           = 1000;
+	config->currentZero[GAIN_SINGLE]           = 1000;
+	config->powerZero                          = 0;
 
-	p_config->pwmTempVoltageThreshold            = 2.0;
-	p_config->pwmTempVoltageThresholdDown        = 1.0;
+	// ADC values [0, 4095] map to [0, 3.6V].
+	config->voltageRange                       = 3600;
+	config->currentRange                       = 3600;
 
-	p_config->minTxPower                         = -40;
+	config->pwmTempVoltageThreshold            = 2.0;
+	config->pwmTempVoltageThresholdDown        = 1.0;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
-	p_config->scanWindowUs                       = 140 * 1000;
-	p_config->tapToToggleDefaultRssiThreshold    = -35;
+	config->minTxPower                         = -40;
+
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = 140 * 1000;
+	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
-void asUsbDongle(boards_config_t* p_config) {
-	asPca10040(p_config);
-	p_config->deviceType                         = DEVICE_CROWNSTONE_USB;
+void asUsbDongle(boards_config_t* config) {
+	asPca10040(config);
+	config->deviceType                         = DEVICE_CROWNSTONE_USB;
 }
 
 /**
  * The Guidestone has pads for pin 9, 10, 25, 26, 27, SWDIO, SWDCLK, GND, VDD.
  */
-void asGuidestone(boards_config_t* p_config) {
-	p_config->pinGpioRx                          = 25;
-	p_config->pinGpioTx                          = 26;
+void asGuidestone(boards_config_t* config) {
+	config->pinRx                              = 25;
+	config->pinTx                              = 26;
 
-	p_config->flags.hasRelay                     = false;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasLed                       = false;
+	config->flags.usesNfcPins                  = false;
+	config->flags.dimmerInverted               = false;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = false;
 
-	p_config->deviceType                         = DEVICE_GUIDESTONE;
+	config->deviceType                         = DEVICE_GUIDESTONE;
 
-	p_config->minTxPower                         = -20;
+	config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 140 * 1000;
-	p_config->scanWindowUs                       = 140 * 1000;
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = 140 * 1000;
 }
 
-uint32_t configure_board(boards_config_t* p_config) {
+uint32_t configure_board(boards_config_t* config) {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
 		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
 	}
 
-	init(p_config);
+	init(config);
 
 	switch(hardwareBoard) {
-	case ACR01B1A:
-	case ACR01B1B:
-	case ACR01B1C:
-	case ACR01B1D:
-	case ACR01B1E:
-		asACR01B1D(p_config);
-		break;
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+			asACR01B1D(config);
+			break;
 
-	case ACR01B10B:
-	case ACR01B10D:
-		asACR01B10D(p_config);
-		break;
+		case ACR01B10B:
 
-	case ACR01B13B:
-		asACR01B13B(p_config);
-		break;
-	
-	case ACR01B15A:
-		asACR01B15A(p_config);
-		break;
+		case ACR01B10D:
+			asACR01B10D(config);
+			break;
 
-	case ACR01B2A:
-	case ACR01B2B:
-	case ACR01B2C:
-		asACR01B2C(p_config);
-		break;
+		case ACR01B13B:
+			asACR01B13B(config);
+			break;
 
-	case ACR01B2E:
-	case ACR01B2G:
-		asACR01B2G(p_config);
-		break;
-	case ACR01B11A:
-		asACR01B11A(p_config);
-		break;
-	case GUIDESTONE:
-		asGuidestone(p_config);
-		break;
+		case ACR01B15A:
+			asACR01B15A(config);
+			break;
 
-	case PCA10036:
-	case PCA10040:
-	case PCA10056:
-	case PCA10100:
-		asPca10040(p_config);
-		break;
-	case CS_USB_DONGLE:
-		asUsbDongle(p_config);
-		break;
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+			asACR01B2C(config);
+			break;
 
-	default:
-		// undefined board layout !!!
-		asACR01B2C(p_config);
-		return NRF_ERROR_INVALID_PARAM;
+		case ACR01B2E:
+		case ACR01B2G:
+			asACR01B2G(config);
+			break;
+		case ACR01B11A:
+			asACR01B11A(config);
+			break;
+		case GUIDESTONE:
+			asGuidestone(config);
+			break;
+
+		case PCA10036:
+		case PCA10040:
+		case PCA10056:
+		case PCA10100:
+			asPca10040(config);
+			break;
+		case CS_USB_DONGLE:
+			asUsbDongle(config);
+			break;
+
+		default:
+			// undefined board layout !!!
+			asACR01B2C(config);
+			return NRF_ERROR_INVALID_PARAM;
 	}
-	p_config->hardwareBoard = hardwareBoard;
+
+	config->hardwareBoard = hardwareBoard;
 
 	return NRF_SUCCESS;
 }

@@ -85,19 +85,17 @@ extern "C" {
 #define ACR01B11A            1505
 
 
-#define PIN_UNUSED 0xFF
+#define PIN_NONE 0xFF
 
 enum GainIndex {
-	GAIN_UNUSED = PIN_UNUSED,
 	GAIN_HIGH = 0,
 	GAIN_MIDDLE = 1,
 	GAIN_LOW = 2,
-	GAIN_SINGLE = 0, // if there is only a single gain
 	GAIN_COUNT = 3,
+	GAIN_SINGLE = 0, // if there is only a single gain
 };
 
 enum ButtonIndex {
-	BUTTON_UNUSED = PIN_UNUSED,
 	BUTTON0 = 0,
 	BUTTON1 = 1,
 	BUTTON2 = 2,
@@ -106,7 +104,6 @@ enum ButtonIndex {
 };
 
 enum GpioIndex {
-	GPIO_UNUSED = PIN_UNUSED,
 	GPIO_INDEX0 = 0,
 	GPIO_INDEX1 = 1,
 	GPIO_INDEX2 = 2,
@@ -145,97 +142,98 @@ uint8_t GpioToAinOnChipset(uint8_t gpio, uint8_t chipset);
 uint8_t GpioToAin(uint8_t gpio);
 
 enum LedIndex {
-	LED_UNUSED = PIN_UNUSED,
 	LED0 = 0,
 	LED1 = 1,
 	LED2 = 2,
 	LED3 = 3,
+	LED_COUNT = 4,
 	LED_RED = 0,
 	LED_GREEN = 1,
-	LED_COUNT = 4,
 };
 
-/** Board configuration
+/**
+ * Board configuration
  *
  * Configure pins for control relays, IGBTs, LEDs, UART, current sensing, etc.
  */
 typedef struct  {
-	//! The hardware board type (number).
+	// The hardware board type (number).
 	uint32_t hardwareBoard;
 
-	//! GPIO pin to control the IGBTs.
-	uint8_t pinGpioPwm;
+	// GPIO pin to control the IGBTs.
+	uint8_t pinDimmer;
 
-	//! GPIO pin to enable the IGBT circuit.
-	uint8_t pinGpioEnablePwm;
+	// GPIO pin to enable the IGBT circuit.
+	uint8_t pinEnableDimmer;
 
-	//! GPIO pin to switch the relay on.
-	uint8_t pinGpioRelayOn;
+	// GPIO pin to switch the relay on.
+	uint8_t pinRelayOn;
 
-	//! GPIO pin to switch the relay off.
-	uint8_t pinGpioRelayOff;
+	// GPIO pin to switch the relay off.
+	uint8_t pinRelayOff;
 
-	//! Analog input pins to read the current with different gains (if present).
+	// Analog input pins to read the current with different gains (if present).
 	uint8_t pinAinCurrent[GAIN_COUNT];
 
-	//! Analog input pins to read the voltage with different gains (if present).
+	// Analog input pins to read the voltage with different gains (if present).
 	uint8_t pinAinVoltage[GAIN_COUNT];
 
-	//! Analog input pins to read the voltage after the load with different gains (if present).
+	// Analog input pins to read the voltage after the load with different gains (if present).
 	uint8_t pinAinVoltageAfterLoad[GAIN_COUNT];
 
-	//! Analog input pin to read 'zero' / offset (to be used for both current and voltage measurements).
+	// Analog input pin to read 'zero' / offset (to be used for both current and voltage measurements).
 	uint8_t pinAinZeroRef;
 
-	//! Analog input pin to get zero-crossing information for current
-	uint8_t pinAinCurrentZeroCrossing;
+	// Analog input pin to read the dimmer temperature.
+	uint8_t pinAinDimmerTemp;
+
+	// GPIO pin to get zero-crossing information for current.
+	uint8_t pinCurrentZeroCrossing;
 	
-	//! Analog input pin to get zero-crossing information for voltage
-	uint8_t pinAinVoltageZeroCrossing;
+	// GPIO pin to get zero-crossing information for voltage.
+	uint8_t pinVoltageZeroCrossing;
 
-	//! Analog input pin to read the pwm temperature.
-	uint8_t pinAinPwmTemp;
+	// GPIO pin to receive UART.
+	uint8_t pinRx;
 
-	//! GPIO pin to receive uart.
-	uint8_t pinGpioRx;
-
-	//! GPIO pin to send uart.
-	uint8_t pinGpioTx;
+	// GPIO pin to send UART.
+	uint8_t pinTx;
 	
-	//! GPIO custom pins
+	// GPIO pins that can be used as GPIO by the user, for example microapps.
 	uint8_t pinGpio[GPIO_INDEX_COUNT];
 
-	//! Buttons (on dev. kit)
+	// GPIO pins of buttons (on dev. kit).
 	uint8_t pinButton[BUTTON_COUNT];
 
-	//! Leds as array
+	// GPIO pins of LEDs.
 	uint8_t pinLed[LED_COUNT];
-
-	//! Unused pin
-	uint8_t pinUnused;
 
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {
-		//! True if board has relays.
-		bool hasRelay: 1;
+		//! True if the dimmer is inverted (setting gpio high turns dimmer off).
+		bool dimmerInverted: 1;
 
-		//! True if the pwm is inverted (setting gpio high turns light off).
-		bool pwmInverted: 1;
+		// True if the board should have UART enabled by default.
+		bool enableUart: 1;
 
-		//! True if the board has serial / uart.
-		bool hasSerial: 1;
+		// True if the board has LEDs that should be enabled by default.
+		// Some boards do have LEDs, but cannot deliver enough power when also listening (scanning / meshing).
+		bool enableLeds : 1;
 
-		//! True if the board has leds.
-		bool hasLed : 1;
-
-		//! True if led off when GPIO set high.
+		//! True if LED is off when GPIO is set high.
 		bool ledInverted: 1;
 
-		//! True if the board has a zero ref pin for current and voltage measurements.
-		bool hasAdcZeroRef: 1;
-
 		//! True if the temperature sensor of the dimmer is inverted (NTC).
-		bool pwmTempInverted: 1;
+		bool dimmerTempInverted: 1;
+
+		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
+		bool usesNfcPins: 1;
+
+		// True if the Crownstone can dim immediately after a warm boot.
+		bool canDimOnWarmBoot: 1;
+
+		// True if the dimmer can be on when the pins are floating (during boot).
+		bool dimmerOnWhenPinsFloat: 1;
 	} flags;
 
 	/** Device type, e.g. crownstone plug, crownstone builtin, guidestone.

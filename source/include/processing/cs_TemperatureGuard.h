@@ -61,7 +61,7 @@ private:
 	COMP* _comp;
 	CS_TYPE _lastChipTempEvent;
 	CS_TYPE _lastPwmTempEvent;
-	bool _pwmTempInverted;
+	bool _dimmerTempInverted;
 };
 
 

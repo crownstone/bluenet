@@ -344,11 +344,11 @@ void Crownstone::initDrivers1() {
 
 	// If not done already, init UART
 	// TODO: make into a class with proper init() function
-	if (!_boardsConfig.flags.hasSerial) {
-		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
+	if (!_boardsConfig.flags.enableUart) {
+		serial_config(_boardsConfig.pinRx, _boardsConfig.pinTx);
 		TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
 		_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
-		serial_enable((serial_enable_t)uartEnabled);
+		serial_init(static_cast<serial_enable_t>(uartEnabled));
 		UartHandler::getInstance().init((serial_enable_t)uartEnabled);
 	}
 	else {
@@ -409,12 +409,11 @@ void Crownstone::initDrivers1() {
 	}
 
 	// init GPIOs
-	if (_boardsConfig.flags.hasLed) {
+	if (_boardsConfig.flags.enableLeds) {
 		LOGi("Configure LEDs");
 
-		// Note: DO NOT USE LEDS WHILE SCANNING OR MESHING
 		for (int i = 0; i < LED_COUNT; ++i) {
-			if (_boardsConfig.pinLed[i] == LED_UNUSED) {
+			if (_boardsConfig.pinLed[i] == PIN_NONE) {
 				continue;
 			}
 			nrf_gpio_cfg_output(_boardsConfig.pinLed[i]);
@@ -989,36 +988,41 @@ int main() {
 	APP_ERROR_CHECK(errCode);
 
 	// Init GPIO pins early in the process!
-	switch (board.hardwareBoard) {
-		// These boards use the NFC pins (p0.09 and p0.10).
-		// They have to be configured as GPIO before they can be used as GPIO.
-		case ACR01B10D:
-			enableNfcPins();
-			break;
-		default:
-			break;
+
+	if (board.flags.usesNfcPins) {
+		enableNfcPins();
 	}
-	if (IS_CROWNSTONE(board.deviceType)) {
-		nrf_gpio_cfg_output(board.pinGpioPwm);
-		if (board.flags.pwmInverted) {
-			nrf_gpio_pin_set(board.pinGpioPwm);
+
+//	if (IS_CROWNSTONE(board.deviceType)) {
+	// Turn dimmer off.
+	if (board.pinDimmer != PIN_NONE) {
+		nrf_gpio_cfg_output(board.pinDimmer);
+		if (board.flags.dimmerInverted) {
+			nrf_gpio_pin_set(board.pinDimmer);
 		}
 		else {
-			nrf_gpio_pin_clear(board.pinGpioPwm);
-		}
-		nrf_gpio_cfg_output(board.pinGpioEnablePwm);
-		nrf_gpio_pin_clear(board.pinGpioEnablePwm);
-		//! Relay pins
-		if (board.flags.hasRelay) {
-			nrf_gpio_cfg_output(board.pinGpioRelayOff);
-			nrf_gpio_pin_clear(board.pinGpioRelayOff);
-			nrf_gpio_cfg_output(board.pinGpioRelayOn);
-			nrf_gpio_pin_clear(board.pinGpioRelayOn);
+			nrf_gpio_pin_clear(board.pinDimmer);
 		}
 	}
 
-	if (board.flags.hasSerial) {
-		initUart(board.pinGpioRx, board.pinGpioTx);
+	if (board.pinEnableDimmer != PIN_NONE) {
+		nrf_gpio_cfg_output(board.pinEnableDimmer);
+		nrf_gpio_pin_clear(board.pinEnableDimmer);
+	}
+
+	// Relay pins.
+	if (board.pinRelayOff != PIN_NONE) {
+		nrf_gpio_cfg_output(board.pinRelayOff);
+		nrf_gpio_pin_clear(board.pinRelayOff);
+	}
+	if (board.pinRelayOn != PIN_NONE) {
+		nrf_gpio_cfg_output(board.pinRelayOn);
+		nrf_gpio_pin_clear(board.pinRelayOn);
+	}
+//	}
+
+	if (board.flags.enableUart) {
+		initUart(board.pinRx, board.pinRx);
 		LOG_FLUSH();
 	}
 

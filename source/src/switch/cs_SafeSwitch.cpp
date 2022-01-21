@@ -17,6 +17,8 @@ void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);
 	relay.init(board);
 	hardwareBoard = board.hardwareBoard;
+	canDimOnWarmBoot = board.flags.canDimOnWarmBoot;
+	dimmerOnWhenPinsFloat = board.flags.dimmerOnWhenPinsFloat;
 	
 	// Load switch state.
 	// Only relay state is persistent.
@@ -50,7 +52,7 @@ void SafeSwitch::start() {
 		LOGSafeSwitch("Not starting dimmer, operationMode = %u", static_cast<uint8_t>(operationMode));
 	}
 
-	if (isWarmBoot() && canDimOnWarmBoot()) {
+	if (isWarmBoot() && canDimOnWarmBoot) {
 		dimmerPoweredUp();
 	}
 }
@@ -338,17 +340,6 @@ bool SafeSwitch::isWarmBoot() {
 	return false;
 }
 
-bool SafeSwitch::canDimOnWarmBoot() {
-	switch (hardwareBoard) {
-		case ACR01B10D:
-			return true;
-		default:
-			return false;
-	}
-}
-
-
-
 void SafeSwitch::onUnexpextedStateChange(const callback_on_state_change_t& closure) {
 	callbackOnStateChange = closure;
 }
@@ -373,39 +364,13 @@ void SafeSwitch::goingToDfu() {
 		// dependency on who receives the event first.
 		turnOnRelay = true;
 	}
-	switch (hardwareBoard) {
-		// Dev boards
-		case PCA10036:
-		case PCA10040:
-		case PCA10100:
-		case PCA10056:
-		// Builtin zero
-		case ACR01B1A:
-		case ACR01B1B:
-		case ACR01B1C:
-		case ACR01B1D:
-		case ACR01B1E:
-		// First builtin one
-		case ACR01B10B:
-		// Plugs
-		case ACR01B2A:
-		case ACR01B2B:
-		case ACR01B2C:
-		case ACR01B2E:
-		case ACR01B2G: {
-			// These boards turn on the dimmer when GPIO pins are floating.
-			// Turn relay on, to prevent current going through the dimmer.
-			turnOnRelay = true;
-			break;
-		}
-		// These don't have a dimmer.
-		case GUIDESTONE:
-		case CS_USB_DONGLE:
-		// Newer ones have dimmer enable pin.
-		case ACR01B10D:
-		default:
-			break;
+
+	if (dimmer.hasDimmer() && relay.hasRelay() && dimmerOnWhenPinsFloat) {
+		// These boards turn on the dimmer when GPIO pins are floating.
+		// Turn relay on, to prevent current going through the dimmer.
+		turnOnRelay = true;
 	}
+
 	if (turnOnRelay) {
 		setRelayUnchecked(true);
 		setDimmerUnchecked(0, false);

@@ -92,6 +92,10 @@ private:
 
 	uint32_t hardwareBoard;
 
+	bool canDimOnWarmBoot = false;
+
+	bool dimmerOnWhenPinsFloat = true;
+
 	/**
 	 * Current state of relay and dimmer.
 	 */
@@ -226,13 +230,6 @@ private:
 	 * Returns true when the crownstone booted, while the hardware has been powered for a longer time.
 	 */
 	bool isWarmBoot();
-
-	/**
-	 * Returns true when the dimmer is ready on warm boot.
-	 *
-	 * Depends on hardware board.
-	 */
-	bool canDimOnWarmBoot();
 
 	/**
 	 * Send state update to listeners.
