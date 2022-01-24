@@ -17,6 +17,10 @@
 #include <common/cs_Component.h>
 #include <util/cs_Coroutine.h>
 
+
+#define DEBUG_MESH_DFU_HOST 1
+
+
 /**
  * This bluenet component manages the progress and protocol of a crownstone-to-crownstone firmware update.
  * I.e. application layer dfu implementation.
@@ -170,11 +174,12 @@ private:
 
 
 
-	// TODO: DEBUG
-	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
-									  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
-	uint8_t ticks_until_start = 200;
-	// END DEBUG
+
+#if(DEBUG_MESH_DFU_HOST == 1)
+		device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
+										  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
+		uint8_t ticks_until_start = 200;
+#endif
 
 
 	// -------------------------------------------------------------------------------------

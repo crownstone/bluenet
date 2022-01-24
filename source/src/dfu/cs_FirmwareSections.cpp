@@ -47,12 +47,12 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>()
 }
 
 
-template<>
-const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Ipc>() {
-// TODO: WARNING THIS IS CURRENTLY SET TO THE MICROAPP PAGE DURING DEVELOPMENT
-	return {0x00069000,
-			0x00001000};
-}
+//template<>
+//const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Ipc>() {
+//// TODO: WARNING THIS IS CURRENTLY SET TO THE MICROAPP PAGE DURING DEVELOPMENT
+//	return {0x00069000,
+//			0x00001000};
+//}
 
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>() {
@@ -94,11 +94,11 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
 };
 
 
-NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceIpc) = {
-		.evt_handler = firmwareReaderFsEventHandler,
-		.start_addr  = getFirmwareSectionLocation<FirmwareSection::Ipc>()._start,
-		.end_addr    = getFirmwareSectionLocation<FirmwareSection::Ipc>()._end,
-};
+//NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceIpc) = {
+//		.evt_handler = firmwareReaderFsEventHandler,
+//		.start_addr  = getFirmwareSectionLocation<FirmwareSection::Ipc>()._start,
+//		.end_addr    = getFirmwareSectionLocation<FirmwareSection::Ipc>()._end,
+//};
 
 
 
@@ -120,7 +120,7 @@ const FirmwareSectionInfo getFirmwareSectionInfo(FirmwareSection section) {
 		case FirmwareSection::MicroApp: return getFirmwareSectionInfo<FirmwareSection::MicroApp>();
 		case FirmwareSection::Bootloader: return getFirmwareSectionInfo<FirmwareSection::Bootloader>();
 		case FirmwareSection::Mbr: return getFirmwareSectionInfo<FirmwareSection::Mbr>();
-		case FirmwareSection::Ipc: return getFirmwareSectionInfo<FirmwareSection::Ipc>();
+//		case FirmwareSection::Ipc: return getFirmwareSectionInfo<FirmwareSection::Ipc>();
 		case FirmwareSection::BootloaderSettings: return getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>();
 		default: return getFirmwareSectionInfo();
 	}
@@ -152,11 +152,11 @@ const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>() {
 }
 
 
-template<>
-const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Ipc>() {
-	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceIpc,
-			._addr        = getFirmwareSectionLocation<FirmwareSection::Ipc>()};
-}
+//template<>
+//const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Ipc>() {
+//	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceIpc,
+//			._addr        = getFirmwareSectionLocation<FirmwareSection::Ipc>()};
+//}
 
 template<>
 const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>() {

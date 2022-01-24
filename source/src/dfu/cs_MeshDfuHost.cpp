@@ -98,7 +98,12 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::verifyDisconnectAfterDfu);
 	setTimeoutCallback(&MeshDfuHost::abort);
 
-	_crownstoneCentral->write(CommandHandlerTypes::CTRL_CMD_GOTO_DFU, nullptr, 0);
+	cs_ret_code_t result = _crownstoneCentral->write(CommandHandlerTypes::CTRL_CMD_GOTO_DFU, nullptr, 0);
+
+	if(result != ERR_WAIT_FOR_SUCCESS) {
+		// this will abort if _reconnectionAttemptsLeft reaches zero.
+		restartPhase();
+	}
 
 	LOGMeshDfuHostDebug("+++ waiting for disconnect after command goto dfu");
 }
@@ -344,14 +349,16 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	if(result.result != ERR_SUCCESS || result.offset != 0) {
 		LOGMeshDfuHostWarn("dfu create command failed: %u, offset: %u", result.result, result.offset);
 		abort();
+		return;
 	}
 
 	uint32_t initPacketLen = 0;
-	_firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::Ipc); // Start here tomorrow..
+	_firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp); // Start here tomorrow..
 
-	if (initPacketLen == 0) {
+	if (initPacketLen == 0 || 0xffffffff) {
 		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero.");
 		abort();
+		return;
 	}
 
 	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingStreamInitPacket);
@@ -690,7 +697,7 @@ bool MeshDfuHost::isDfuProcessIdle() {
 }
 
 void MeshDfuHost::reset() {
-	LOGMeshDfuHostDebug("resetting");
+	LOGMeshDfuHostDebug("resetting component");
 	_triedDfuCommand          = false;
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	clearEventCallback();
@@ -741,13 +748,15 @@ void MeshDfuHost::handleEvent(event_t& event) {
 
 	_timeOutRoutine.handleEvent(event);
 
+#if(DEBUG_MESH_DFU_HOST == 1)
 	if(event.type == CS_TYPE::EVT_TICK) {
+		if(CsMath::Decrease(ticks_until_start) == 1){
+			LOGMeshDfuHostDebug("starting dfu process");
+			copyFirmwareTo(_debugTarget);
+		}
 		if (ticks_until_start % 10 == 1) {
 			LOGMeshDfuHostDebug("tick counting: %u ", ticks_until_start);
 		}
-		if(CsMath::Decrease(ticks_until_start) == 1){
-			LOGMeshDfuHostDebug("starting dfu at ticks left : %u ", ticks_until_start);
-			copyFirmwareTo(_debugTarget);
-		}
 	}
+#endif
 }

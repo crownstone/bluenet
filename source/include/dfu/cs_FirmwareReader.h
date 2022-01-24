@@ -22,20 +22,21 @@ public:
 	FirmwareReader();
 
 	/**
-	 * reads flash using fstorage
-	 */
-	void read(uint32_t startIndex, uint32_t size, void* data_out);
-
-	/**
 	 * reads with startIndex relative to the given section
 	 */
-	void read(uint32_t startIndex, uint32_t size, void* data_out, FirmwareSection section);
+	uint32_t read(uint32_t startIndex, uint32_t size, void* data_out, FirmwareSection section);
 
 
 	cs_ret_code_t init();
 
 protected:
 private:
+
+	/**
+	 * initialize the section read access an return the status.
+	 */
+	uint32_t initFStorage(FirmwareSection sect);
+
 	/**
 	 * current offset in section (for printing purposes)
 	 */
