@@ -88,11 +88,11 @@ extern "C" {
 #define PIN_NONE 0xFF
 
 enum GainIndex {
-	GAIN_HIGH = 0,
+	GAIN_LOW = 0,
 	GAIN_MIDDLE = 1,
-	GAIN_LOW = 2,
+	GAIN_HIGH = 2,
 	GAIN_COUNT = 3,
-	GAIN_SINGLE = 0, // if there is only a single gain
+	GAIN_SINGLE = 0, // If there is only a single gain, use the low gain.
 };
 
 enum ButtonIndex {

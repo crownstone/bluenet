@@ -26,7 +26,12 @@ public:
 		return instance;
 	}
 
-	void init(const boards_config_t& boardConfig);
+	/**
+	 * Init the class.
+	 *
+	 * The board config must remain in memory.
+	 */
+	void init(const boards_config_t* boardConfig);
 
 	/** Initializes and starts the ADC, also starts interval timer.
 	 */
@@ -93,6 +98,8 @@ private:
 
 	//! Operation mode of this device.
 	OperationMode _operationMode;
+
+	const boards_config_t* _boardConfig = nullptr;
 
 	/**
 	 * Queue of buffers we can use for processing.
@@ -175,17 +182,21 @@ private:
 
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
-		uint16_t rangeMilliVolt[2];       //! For both channels
-		uint8_t currentPinGainHigh;       //! Stores the current pin
-		uint8_t currentPinGainMed;        //! Stores the current pin with medium gain
-		uint8_t currentPinGainLow;        //! Stores the current pin with lowest gain
-		uint8_t voltagePin;               //! Stores the voltage pin
-		uint8_t zeroReferencePin;         //! Stores the zero reference pin
-		uint8_t voltageChannelPin;        //! Stores which pin is currently set on the voltage channel.
-		uint8_t voltageChannelUsedAs : 4; //! 0 for voltage, 1 for reference, 2 for VDD, 3 for current1, 4 for current2.
-		bool currentDifferential     : 1; //! True when differential mode is used for current channel (if possible).
-		bool voltageDifferential     : 1; //! True when differential mode is used for voltage channel (if possible).
-	} _adcConfig;
+		// Store the range in mV for this channel.
+		uint16_t rangeMilliVolt;
+
+		// The pin that is currently being used.
+		uint8_t pinInUse = PIN_NONE;
+
+		// True when differential mode is used for this channel (if possible).
+		bool differentialMode;
+
+		// Iterate over the different pins for this channel.
+		uint8_t pinIndex = 0;
+
+		// Number of pins we can iterate over.
+		uint8_t pinCount = 0;
+	} _adcConfig[2];
 
 	union {
 		struct __attribute__((packed)) {
@@ -295,6 +306,8 @@ private:
 	void enableDifferentialModeVoltage(bool enable);
 
 	void changeRange(uint8_t channel, int32_t amount);
+
+	void applyAdcConfig(adc_channel_id_t channelIndex);
 
 	void enableSwitchcraft(bool enable);
 

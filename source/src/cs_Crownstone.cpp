@@ -405,7 +405,7 @@ void Crownstone::initDrivers1() {
 		_temperatureGuard->init(_boardsConfig);
 
 		LOGi(FMT_INIT, "power sampler");
-		_powerSampler->init(_boardsConfig);
+		_powerSampler->init(&_boardsConfig);
 	}
 
 	// init GPIOs
@@ -983,7 +983,7 @@ int main() {
 #endif
 
 	uint32_t errCode;
-	boards_config_t board = {};
+	boards_config_t board = {}; // TODO: why do this at all?
 	errCode = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
