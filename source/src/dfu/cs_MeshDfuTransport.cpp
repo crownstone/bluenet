@@ -230,6 +230,7 @@ void  MeshDfuTransport::_createObject(uint8_t objectType, uint32_t size) {
 }
 
 void MeshDfuTransport::_createCommand(uint32_t size) {
+	LOGMeshDfuTransportDebug("_createCommand %u", size);
 	_createObject(0x01, size);
 }
 

@@ -74,7 +74,7 @@ struct FirmwareSectionInfo {
  * E.g.:
  *   uint32_t start = getFirmwareSectionInfo<FirmwareSection::Bootloader>()._addr._start;
  */
-template<FirmwareSection Sect>
+template<FirmwareSection Sect = FirmwareSection::Unknown>
 const FirmwareSectionInfo getFirmwareSectionInfo() {
 	LOGd("Info for FirmwareSection %d Unknown", static_cast<uint8_t>(Sect));
 	return FirmwareSectionInfo(nullptr, {0, 0});

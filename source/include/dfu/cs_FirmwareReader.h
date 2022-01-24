@@ -25,6 +25,10 @@ public:
 	 * reads flash using fstorage
 	 */
 	void read(uint32_t startIndex, uint32_t size, void* data_out);
+
+	/**
+	 * reads with startIndex relative to the given section
+	 */
 	void read(uint32_t startIndex, uint32_t size, void* data_out, FirmwareSection section);
 
 

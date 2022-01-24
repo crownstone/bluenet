@@ -75,8 +75,8 @@ void FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out) {
 	}
 }
 
-void FirmwareReader::read(uint16_t startIndex, uint16_t size, void* data_out, FirmwareSection section) {
-	auto firmwareSectionInfo = getFirmwareSectionInfo(section);
+void FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out, FirmwareSection section) {
+	auto firmwareSectionInfo = getFirmwareSectionInfo(section); // TODO: add boundary check
 	read(firmwareSectionInfo._addr._start + startIndex, size, data_out);
 }
 
