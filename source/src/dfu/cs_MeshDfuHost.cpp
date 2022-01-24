@@ -26,8 +26,8 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 	_targetDevice = target;
 
-//	return startPhase(Phase::ConnectTargetInDfuMode);
-	return startPhase(Phase::TargetTriggerDfuMode);
+	return startPhase(Phase::ConnectTargetInDfuMode);
+//	return startPhase(Phase::TargetTriggerDfuMode);
 }
 
 // -------------------------------------------------------------------------------------
@@ -756,7 +756,6 @@ void MeshDfuHost::handleEvent(event_t& event) {
 
 	_timeOutRoutine.handleEvent(event);
 
-#if(DEBUG_MESH_DFU_HOST == 1)
 	if(event.type == CS_TYPE::EVT_TICK) {
 		if(CsMath::Decrease(ticks_until_start) == 1){
 			LOGMeshDfuHostDebug("starting dfu process");
@@ -766,5 +765,4 @@ void MeshDfuHost::handleEvent(event_t& event) {
 			LOGMeshDfuHostDebug("tick counting: %u ", ticks_until_start);
 		}
 	}
-#endif
 }
