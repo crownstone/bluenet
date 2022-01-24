@@ -74,7 +74,7 @@ uint32_t FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out
 			data_out,
 			size);
 
-	LOGFirmwareReaderDebug("reading %d bytes from address: 0x%x", size, readAddress);
+	LOGFirmwareReaderDebug("reading %u bytes from address: 0x%x", size, readAddress);
 
 	if(nrfCode != NRF_SUCCESS) {
 		LOGFirmwareReaderInfo("failed read, %d", nrfCode);

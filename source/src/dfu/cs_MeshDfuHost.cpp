@@ -21,6 +21,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 	}
 
 	if (!ableToLaunchDfu()) {
+		LOGMeshDfuHostWarn("+++ no init packet available");
 		return false;
 	}
 
@@ -350,6 +351,24 @@ bool MeshDfuHost::startPhaseTargetInitializing() {
 	return true;
 }
 
+uint32_t MeshDfuHost::getInitPacketLen() {
+	uint32_t initPacketLen = 0;
+	uint32_t nrfCode = _firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp);
+
+
+	if(nrfCode != ERR_SUCCESS) {
+		LOGMeshDfuHostWarn("init packet couldnt be read. Status: %u", nrfCode);
+		return 0;
+	}
+
+	if (initPacketLen == 0 || initPacketLen == 0xffffffff) {
+		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1: %u", initPacketLen);
+		return 0;
+	}
+
+	return initPacketLen;
+}
+
 void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
 
@@ -359,17 +378,14 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 		return;
 	}
 
-	uint32_t initPacketLen = 0;
-	_firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp);
+	uint32_t initLen = getInitPacketLen();
 
-	if (initPacketLen == 0 || 0xffffffff) {
-		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1.");
+	if(initLen != 0) {
+		setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingStreamInitPacket);
+		_meshDfuTransport._createCommand(initLen);
+	} else {
 		abort();
-		return;
 	}
-
-	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingStreamInitPacket);
-	_meshDfuTransport._createCommand(initPacketLen);
 }
 
 void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
@@ -681,9 +697,14 @@ cs_ret_code_t MeshDfuHost::init() {
 }
 
 bool MeshDfuHost::haveInitPacket() {
-	return true; // TODO actually check
+	switch (getInitPacketLen()) {
+		case 0:
+		case 0xffffffff:
+			return false;
+		default:
+			return true;
+	}
 }
-
 
 bool MeshDfuHost::ableToLaunchDfu() {
 	return haveInitPacket() && isDfuProcessIdle();
