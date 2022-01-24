@@ -88,7 +88,7 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 	if(!_isCrownstoneCentralConnected) {
 		LOGMeshDfuHostDebug("+++ crownstone central not connected.");
 		// this will abort if _reconnectionAttemptsLeft reaches zero.
-		restartPhase();
+		setTimeoutCallback(&MeshDfuHost::restartPhase, 10000);
 		return;
 	}
 
@@ -104,7 +104,7 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 
 	if(result != ERR_WAIT_FOR_SUCCESS) {
 		// this will abort if _reconnectionAttemptsLeft reaches zero.
-		restartPhase();
+		setTimeoutCallback(&MeshDfuHost::restartPhase, 10000);
 		return;
 	}
 
@@ -218,7 +218,7 @@ void MeshDfuHost::checkDfuTargetConnected() {
 			LOGMeshDfuHostDebug("+++ BLE central connection failed, retrying. Attempts left: %d", _reconnectionAttemptsLeft);
 			CsMath::Decrease(_reconnectionAttemptsLeft);
 
-			restartPhase();
+			setTimeoutCallback(&MeshDfuHost::restartPhase, 10000);
 			return;
 		} else {
 			abort();
