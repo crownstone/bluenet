@@ -1022,7 +1022,7 @@ int main() {
 //	}
 
 	if (board.flags.enableUart) {
-		initUart(board.pinRx, board.pinRx);
+		initUart(board.pinRx, board.pinTx);
 		LOG_FLUSH();
 	}
 
