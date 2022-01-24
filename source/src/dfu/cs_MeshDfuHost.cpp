@@ -353,10 +353,10 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	}
 
 	uint32_t initPacketLen = 0;
-	_firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp); // Start here tomorrow..
+	_firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp);
 
 	if (initPacketLen == 0 || 0xffffffff) {
-		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero.");
+		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1.");
 		abort();
 		return;
 	}
@@ -612,6 +612,7 @@ void MeshDfuHost::clearEventCallback() {
 
 void MeshDfuHost::clearTimeoutCallback() {
 	_onTimeout = nullptr;
+	_timeOutRoutine.pause();
 }
 
 void MeshDfuHost::onEventCallbackTimeOut() {
