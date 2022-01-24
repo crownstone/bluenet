@@ -25,8 +25,10 @@ void Dimmer::init(const boards_config_t& board) {
 		return;
 	}
 
-	nrf_gpio_cfg_output(pinEnableDimmer);
-	nrf_gpio_pin_clear(pinEnableDimmer);
+	if (pinEnableDimmer != PIN_NONE) {
+		nrf_gpio_cfg_output(pinEnableDimmer);
+		nrf_gpio_pin_clear(pinEnableDimmer);
+	}
 
 	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriodUs;
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriodUs, sizeof(pwmPeriodUs));
@@ -98,36 +100,8 @@ void Dimmer::setSoftOnSpeed(uint8_t speed) {
 
 void Dimmer::enable() {
 	LOGd("enable");
-	switch (hardwareBoard) {
-		// Dev boards
-		case PCA10036:
-		case PCA10040:
-		case PCA10100:
-		// Builtin zero
-		case ACR01B1A:
-		case ACR01B1B:
-		case ACR01B1C:
-		case ACR01B1D:
-		case ACR01B1E:
-		// First builtin one
-		case ACR01B10B:
-		// Plugs
-		case ACR01B2A:
-		case ACR01B2B:
-		case ACR01B2C:
-		case ACR01B2E:
-		case ACR01B2G:
-		// These don't have a dimmer.
-		case GUIDESTONE:
-		case CS_USB_DONGLE: {
-			break;
-		}
-		// Newer ones have a dimmer enable pin.
-		case ACR01B10D:
-		default: {
-			nrf_gpio_pin_set(pinEnableDimmer);
-			break;
-		}
+	if (pinEnableDimmer != PIN_NONE) {
+		nrf_gpio_pin_set(pinEnableDimmer);
 	}
 	enabled = true;
 }
