@@ -983,7 +983,7 @@ int main() {
 #endif
 
 	uint32_t errCode;
-	boards_config_t board = {}; // TODO: why do this at all?
+	boards_config_t board;
 	errCode = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
