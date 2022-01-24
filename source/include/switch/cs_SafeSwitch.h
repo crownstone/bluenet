@@ -90,7 +90,7 @@ private:
 
 	bool initialized = false;
 
-	uint32_t hardwareBoard;
+	bool canTryDimmingOnBoot = false;
 
 	bool canDimOnWarmBoot = false;
 

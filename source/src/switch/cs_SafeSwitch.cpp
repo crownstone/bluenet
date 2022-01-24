@@ -16,7 +16,7 @@
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);
 	relay.init(board);
-	hardwareBoard = board.hardwareBoard;
+	canTryDimmingOnBoot = board.flags.canTryDimmingOnBoot;
 	canDimOnWarmBoot = board.flags.canDimOnWarmBoot;
 	dimmerOnWhenPinsFloat = board.flags.dimmerOnWhenPinsFloat;
 	
@@ -115,7 +115,7 @@ cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity, bool fade) {
 		}
 		if (!dimmerPowered) {
 			cs_ret_code_t retCode = startDimmerPowerCheck(intensity, fade);
-			if (retCode == ERR_NOT_AVAILABLE) {
+			if (retCode != ERR_SUCCESS) {
 				return ERR_NOT_POWERED;
 			}
 			return retCode;
@@ -145,23 +145,8 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity, bool fade) {
 		return ERR_NOT_AVAILABLE;
 	}
 
-	switch (hardwareBoard) {
-		// Builtin zero don't have an accurate enough power measurement.
-		case ACR01B1A:
-		case ACR01B1B:
-		case ACR01B1C:
-		case ACR01B1D:
-		case ACR01B1E:
-		// Plugs don't have an accurate enough power measurement.
-		case ACR01B2A:
-		case ACR01B2B:
-		case ACR01B2C:
-		case ACR01B2E:
-		case ACR01B2G:
-			return ERR_NOT_AVAILABLE;
-			// Newer ones have an accurate power measurement, and a lower startup time of the dimmer circuit.
-		default:
-			break;
+	if (!canTryDimmingOnBoot) {
+		return ERR_NOT_AVAILABLE;
 	}
 
 	setDimmerPowered(true);

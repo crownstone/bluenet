@@ -69,6 +69,7 @@ void init(boards_config_t* config) {
 //	config->flags.ledInverted = ;
 //	config->flags.dimmerTempInverted = ;
 	config->flags.usesNfcPins = false;
+	config->flags.canTryDimmingOnBoot = false;
 	config->flags.canDimOnWarmBoot = false;
 	config->flags.dimmerOnWhenPinsFloat = true;
 
@@ -154,6 +155,7 @@ void asACR01B1D(boards_config_t* config) {
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = false;
 	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
+	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
 	config->flags.dimmerOnWhenPinsFloat        = true;
 
@@ -278,6 +280,7 @@ void asACR01B10D(boards_config_t* config) {
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = true;
+	config->flags.canTryDimmingOnBoot          = true;
 	config->flags.canDimOnWarmBoot             = true;
 	config->flags.dimmerOnWhenPinsFloat        = false;
 
@@ -383,6 +386,7 @@ void asACR01B13B(boards_config_t* config) {
 	config->flags.enableLeds                   = false;
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
+	config->flags.canTryDimmingOnBoot          = true;
 	config->flags.canDimOnWarmBoot             = true;
 	config->flags.dimmerOnWhenPinsFloat        = true;
 
@@ -465,6 +469,7 @@ void asACR01B15A(boards_config_t* config) {
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = true;
+	config->flags.canTryDimmingOnBoot          = true;
 	config->flags.canDimOnWarmBoot             = true;
 	config->flags.dimmerOnWhenPinsFloat        = false;
 
@@ -548,6 +553,7 @@ void asACR01B2C(boards_config_t* config) {
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = false;
 	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
+	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
 	config->flags.dimmerOnWhenPinsFloat        = true;
 
@@ -629,6 +635,7 @@ void asACR01B2G(boards_config_t* config) {
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
+	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
 	config->flags.dimmerOnWhenPinsFloat        = true;
 
@@ -731,6 +738,7 @@ void asACR01B11A(boards_config_t* config) {
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = false;
+	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
 	config->flags.dimmerOnWhenPinsFloat        = true;
 
@@ -830,8 +838,9 @@ void asPca10040(boards_config_t* config) {
 	config->flags.ledInverted                  = true;
 	config->flags.dimmerTempInverted           = false;
 	config->flags.usesNfcPins                  = false;
-	config->flags.canDimOnWarmBoot             = false;
-	config->flags.dimmerOnWhenPinsFloat        = true;
+//	config->flags.canTryDimmingOnBoot          = false;
+//	config->flags.canDimOnWarmBoot             = false;
+//	config->flags.dimmerOnWhenPinsFloat        = true;
 
 	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
@@ -898,7 +907,8 @@ uint32_t configure_board(boards_config_t* config) {
 			break;
 
 		case ACR01B10B:
-
+			asACR01B10B(config);
+			break;
 		case ACR01B10D:
 			asACR01B10D(config);
 			break;

@@ -229,6 +229,10 @@ typedef struct  {
 		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
 		bool usesNfcPins: 1;
 
+		// True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
+		// and a lower startup time of the dimmer circuit.
+		bool canTryDimmingOnBoot: 1;
+
 		// True if the Crownstone can dim immediately after a warm boot.
 		bool canDimOnWarmBoot: 1;
 
