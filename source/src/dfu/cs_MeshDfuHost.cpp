@@ -26,7 +26,8 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 	_targetDevice = target;
 
-	return startPhase(Phase::ConnectTargetInDfuMode);
+//	return startPhase(Phase::ConnectTargetInDfuMode);
+	return startPhase(Phase::TargetTriggerDfuMode);
 }
 
 // -------------------------------------------------------------------------------------
@@ -88,6 +89,7 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 		LOGMeshDfuHostDebug("+++ crownstone central not connected.");
 		// this will abort if _reconnectionAttemptsLeft reaches zero.
 		restartPhase();
+		return;
 	}
 
 	LOGMeshDfuHostDebug("+++ sendDfuCommand");
@@ -103,6 +105,7 @@ void MeshDfuHost::sendDfuCommand(event_t& event) {
 	if(result != ERR_WAIT_FOR_SUCCESS) {
 		// this will abort if _reconnectionAttemptsLeft reaches zero.
 		restartPhase();
+		return;
 	}
 
 	LOGMeshDfuHostDebug("+++ waiting for disconnect after command goto dfu");
@@ -188,7 +191,7 @@ bool MeshDfuHost::startConnectTargetInDfuMode() {
 
 	auto status = _bleCentral->connect(_targetDevice);
 
-	LOGMeshDfuHostDebug("+++ waiting for BLE central connect result. Status: %u", status);
+	LOGMeshDfuHostDebug("+++ waiting for BLE central connect result. returnval: %u", status);
 
 	if(status != ERR_WAIT_FOR_SUCCESS) {
 		LOGw("BLE central busy or in wrong state. Expecting timeout to occur");
@@ -216,8 +219,10 @@ void MeshDfuHost::checkDfuTargetConnected() {
 			CsMath::Decrease(_reconnectionAttemptsLeft);
 
 			restartPhase();
+			return;
 		} else {
 			abort();
+			return;
 		}
 	}
 
@@ -249,6 +254,7 @@ bool MeshDfuHost::startDiscoverDfuCharacteristics() {
 			setTimeoutCallback(&MeshDfuHost::restartPhase, 5000);
 		} else {
 			abort();
+			return false;
 		}
 	}
 
@@ -306,6 +312,7 @@ void MeshDfuHost::continuePhaseTargetPreparing(event_t& event) {
 	if(*result != ERR_SUCCESS) {
 		LOGMeshDfuHostWarn("failed enabling notifications.");
 		abort();
+		return;
 	}
 
 	setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESULT, &MeshDfuHost::checkResultPhaseTargetPreparing);

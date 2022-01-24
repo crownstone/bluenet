@@ -366,11 +366,13 @@ private:
 
 	/**
 	 * restarts the current phase.
+	 * Don't forget to return after calling this ;-)
 	 */
 	void restartPhase();
 
 	/**
 	 * starts the aborting phase.
+	 * Don't forget to return after calling this ;-)
 	 */
 	void abort();
 

@@ -35,6 +35,12 @@ extern "C" {
 }
 
 
+#define LOGMeshCoreDebug LOGvv
+#define LOGMeshCoreInfo LOGvv
+#define LOGMeshCoreWarn LOGvv
+
+
+
 #define MESH_FLASH_HANDLE_SEQNUM   (0x0001)
 #define MESH_FLASH_HANDLE_IV_INDEX (0x0002)
 
@@ -61,7 +67,7 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	cs_ret_code_t retCode = State::getInstance().set(type, data_ptr, data_size);
-	LOGi("cs_mesh_write_cb handle=%u retCode=%u", handle, retCode);
+	LOGMeshCoreInfo("cs_mesh_write_cb handle=%u retCode=%u", handle, retCode);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
@@ -82,7 +88,7 @@ static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_s
 }
 
 static uint32_t cs_mesh_erase_cb(uint16_t handle) {
-	LOGi("cs_mesh_erase_cb handle=%u", handle);
+	LOGMeshCoreInfo("cs_mesh_erase_cb handle=%u", handle);
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().remove(type, 0);
@@ -304,11 +310,11 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
-	LOGi("Mesh scanner: interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
+	LOGMeshCoreInfo("Mesh scanner: interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
 	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 	nrf_mesh_rx_cb_set(scan_cb);
 #else
-	LOGw("Scanner in mesh not enabled");
+	LOGMeshCoreWarn("Scanner in mesh not enabled");
 #endif
 
 	ble_gap_addr_t macAddress;
@@ -349,7 +355,7 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 
 void MeshCore::provisionSelf(uint16_t id) {
-	LOGi("provisionSelf");
+	LOGMeshCoreInfo("provisionSelf");
 	uint32_t retCode;
 
 	State::getInstance().get(CS_TYPE::CONFIG_MESH_DEVICE_KEY, _devkey, sizeof(_devkey));
@@ -366,7 +372,7 @@ void MeshCore::provisionSelf(uint16_t id) {
 	localAddress.count = 1;
 	retCode = dsm_local_unicast_addresses_set(&localAddress);
 	APP_ERROR_CHECK(retCode);
-	LOGi("unicast address=%u", localAddress.address_start);
+	LOGMeshCoreInfo("unicast address=%u", localAddress.address_start);
 
 	retCode = dsm_subnet_add(0, _netkey, &_netkeyHandle);
 	APP_ERROR_CHECK(retCode);
@@ -397,7 +403,7 @@ void MeshCore::provisionSelf(uint16_t id) {
 }
 
 void MeshCore::provisionLoad() {
-	LOGi("provisionLoad");
+	LOGMeshCoreInfo("provisionLoad");
 	// Used provisioner_helper.c::prov_helper_device_handles_load() as example.
 	uint32_t retCode;
 	dsm_local_unicast_address_t localAddress;
@@ -420,7 +426,7 @@ void MeshCore::provisionLoad() {
 	retCode = dsm_devkey_handle_get(localAddress.address_start, &_devkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
-	LOGi("unicast address=%u", localAddress.address_start);
+	LOGMeshCoreInfo("unicast address=%u", localAddress.address_start);
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
@@ -458,7 +464,7 @@ void MeshCore::start() {
 	// Returns NRF_ERROR_INVALID_STATE if the mesh was already enabled (or mesh stack not initialized).
 	retCode = mesh_stack_start();
 	if (retCode != NRF_SUCCESS) {
-		LOGw("mesh stack start failed: %u", retCode);
+		LOGMeshCoreWarn("mesh stack start failed: %u", retCode);
 	}
 }
 
@@ -473,7 +479,7 @@ cs_ret_code_t MeshCore::stop() {
 			return ERR_SUCCESS;
 		}
 		default: {
-			LOGw("mesh disable failed: %u", nrfCode);
+			LOGMeshCoreWarn("mesh disable failed: %u", nrfCode);
 			return ERR_UNSPECIFIED;
 		}
 	}
@@ -487,7 +493,7 @@ cs_ret_code_t MeshCore::stop() {
 
 
 cs_ret_code_t MeshCore::setTxPower(int8_t txPower) {
-	LOGi("setTxPower %i", txPower);
+	LOGMeshCoreInfo("setTxPower %i", txPower);
 	radio_tx_power_t radioTxPower = RADIO_POWER_NRF_POS4DBM;
 	switch (txPower) {
 		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
@@ -509,7 +515,7 @@ cs_ret_code_t MeshCore::setTxPower(int8_t txPower) {
 
 
 void MeshCore::factoryReset() {
-	LOGw("factoryReset");
+	LOGMeshCoreWarn("factoryReset");
 
 	mesh_stack_config_clear(); // Check if flash_is_stable, or wait for NRF_MESH_EVT_FLASH_STABLE
 	_performingFactoryReset = true;
@@ -522,7 +528,7 @@ void MeshCore::factoryResetDone() {
 	if (!_performingFactoryReset) {
 		return;
 	}
-	LOGi("factoryResetDone");
+	LOGMeshCoreInfo("factoryResetDone");
 	_performingFactoryReset = false;
 	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET_DONE);
 	event.dispatch();
@@ -536,7 +542,7 @@ bool MeshCore::isFlashValid() {
 	getFlashPages(startAddress, endAddress);
 	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
 	for (unsigned int* ptr = (unsigned int*)startAddress; ptr < (unsigned int*)endAddress; ptr += pageSize / sizeof(uint32_t)) {
-		LOGd("0x%p: 0x%x 0x%x", ptr, ptr[0], ptr[1]);
+		LOGMeshCoreDebug("0x%p: 0x%x 0x%x", ptr, ptr[0], ptr[1]);
 		// Check only if header is correct.
 		// See https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.meshsdk.v4.0.0/md_doc_libraries_flash_manager.html#flash_manager_areas.
 		// Since each "area" only has 1 page, we can check of page count == 01, and index == 00.
@@ -545,7 +551,7 @@ bool MeshCore::isFlashValid() {
 			// Valid
 		}
 		else {
-			LOGw("Flash page with invalid data");
+			LOGMeshCoreWarn("Flash page with invalid data");
 			return false;
 		}
 	}
@@ -557,7 +563,7 @@ void MeshCore::getFlashPages(void* & startAddress, void* & endAddress) {
 	// Unless one of these is defined:  ACCESS_FLASH_AREA_LOCATION, DSM_FLASH_AREA_LOCATION, NET_FLASH_AREA_LOCATION.
 	void * recoveryPage = flash_manager_defrag_calc_recovery_page();
 	const unsigned int numPages = (2 + ACCESS_FLASH_PAGE_COUNT + DSM_FLASH_PAGE_COUNT);
-	LOGd("flash manager recovery page = 0x%p numPages=%u", recoveryPage, numPages);
+	LOGMeshCoreDebug("flash manager recovery page = 0x%p numPages=%u", recoveryPage, numPages);
 
 	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
 	unsigned int endAddr = (unsigned int)recoveryPage;
@@ -570,7 +576,7 @@ cs_ret_code_t Mesh::eraseAllPages() {
 	void* startAddress = NULL;
 	void* endAddress = NULL;
 	getFlashPages(startAddress, endAddress);
-	LOGw("eraseAllPages start=0x%p end=0x%p", startAddress, endAddress);
+	LOGMeshCoreWarn("eraseAllPages start=0x%p end=0x%p", startAddress, endAddress);
 	return Storage::getInstance().erasePages(CS_TYPE::EVT_MESH_PAGES_ERASED, startAddress, endAddress);
 }
 #endif // MESH_PERSISTENT_STORAGE == 1
@@ -606,7 +612,7 @@ void MeshCore::handleEvent(event_t & event) {
 				case CS_TYPE::STATE_MESH_SEQ_NUMBER: {
 					TYPIFY(STATE_MESH_SEQ_NUMBER) seqNumber;
 					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER, &seqNumber, sizeof(seqNumber));
-					LOGi("net_state_ext_write_done seqNum=%u", seqNumber);
+					LOGMeshCoreInfo("net_state_ext_write_done seqNum=%u", seqNumber);
 					net_state_ext_write_done(MESH_FLASH_HANDLE_SEQNUM, &seqNumber, sizeof(seqNumber));
 					break;
 				}
