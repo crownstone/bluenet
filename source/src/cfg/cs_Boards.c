@@ -61,17 +61,22 @@ void init(boards_config_t* config) {
 //	config->pwmTempVoltageThresholdDown = ;
 //	config->scanIntervalUs = ;
 //	config->scanWindowUs = ;
-//	config->tapToToggleDefaultRssiThreshold = ;
 
-//	config->flags.dimmerInverted = ;
-	config->flags.enableUart = false;
-	config->flags.enableLeds = false;
-//	config->flags.ledInverted = ;
-//	config->flags.dimmerTempInverted = ;
-	config->flags.usesNfcPins = false;
-	config->flags.canTryDimmingOnBoot = false;
-	config->flags.canDimOnWarmBoot = false;
-	config->flags.dimmerOnWhenPinsFloat = true;
+	// Set an interval that's not in sync with advertising interval.
+	// And a scan window of 75% of the interval, in case the board cannot provide enough power.
+	config->scanIntervalUs                     = 140 * 1000;
+	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
+	config->tapToToggleDefaultRssiThreshold    = 0;
+
+//	config->flags.dimmerInverted               = ;
+	config->flags.enableUart                   = false;
+	config->flags.enableLeds                   = false;
+//	config->flags.ledInverted                  = ;
+//	config->flags.dimmerTempInverted           = ;
+	config->flags.usesNfcPins                  = false;
+	config->flags.canTryDimmingOnBoot          = false;
+	config->flags.canDimOnWarmBoot             = false;
+	config->flags.dimmerOnWhenPinsFloat        = true;
 
 	for (uint8_t i = 0; i < GAIN_COUNT; ++i) {
 		config->pinAinVoltage[i] = PIN_NONE;
@@ -151,7 +156,7 @@ void asACR01B1D(boards_config_t* config) {
 
 	config->flags.dimmerInverted               = false;
 	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = true;
+	config->flags.enableLeds                   = false;
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = false;
 	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
@@ -188,10 +193,8 @@ void asACR01B1D(boards_config_t* config) {
 	config->minTxPower                         = -20;
 
 	// This board cannot provide enough power for 100% scanning!
-	// So set an interval that's not in sync with advertising interval.
-	// And a scan window of 75% of the interval.
-	config->scanIntervalUs                     = 140 * 1000;
-	config->scanWindowUs                       = 105 * 1000;
+	// So set a scan window of 75% of the interval.
+	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -277,7 +280,6 @@ void asACR01B10D(boards_config_t* config) {
 	config->flags.dimmerInverted               = false;
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;
-	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = true;
 	config->flags.canTryDimmingOnBoot          = true;
@@ -324,7 +326,6 @@ void asACR01B10D(boards_config_t* config) {
 
 	config->minTxPower                         = -20;
 
-	config->scanIntervalUs                     = 140 * 1000;
 	config->scanWindowUs                       = config->scanIntervalUs;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
@@ -369,23 +370,23 @@ void asACR01B13B(boards_config_t* config) {
 	config->pinAinZeroRef                      = GpioToAin(4); // REF
 	config->pinAinDimmerTemp                   = GpioToAin(5);
 
-	config->pinCurrentZeroCrossing             = GpioToAin(11);
-	config->pinVoltageZeroCrossing             = GpioToAin(41); // P1.09
+	config->pinCurrentZeroCrossing             = 11;
+	config->pinVoltageZeroCrossing             = 41; // P1.09
 
 	config->pinRx                              = 10;
 	config->pinTx                              = 9;
 	
-	config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
-	config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
-	config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
-	config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
+//	config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
+//	config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
+//	config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
+//	config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
+	config->pinGpio[3]                         = 20;
 
-	config->flags.usesNfcPins                  = true;
 	config->flags.dimmerInverted               = true;
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;
-	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
+	config->flags.usesNfcPins                  = true;
 	config->flags.canTryDimmingOnBoot          = true;
 	config->flags.canDimOnWarmBoot             = true;
 	config->flags.dimmerOnWhenPinsFloat        = true;
@@ -419,7 +420,6 @@ void asACR01B13B(boards_config_t* config) {
 
 	config->minTxPower                         = -20;
 
-	config->scanIntervalUs                     = 140 * 1000;
 	config->scanWindowUs                       = config->scanIntervalUs;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
@@ -446,11 +446,11 @@ void asACR01B15A(boards_config_t* config) {
 	config->pinAinZeroRef                      = GpioToAin(5);
 	config->pinAinDimmerTemp                   = GpioToAin(4);
 	
-	config->pinCurrentZeroCrossing             = GpioToAin(8);
-	config->pinVoltageZeroCrossing             = GpioToAin(41); // P1.09
+	config->pinCurrentZeroCrossing             = 8;
+	config->pinVoltageZeroCrossing             = 41; // P1.09
 
-	config->pinRx                              = 20;
-	config->pinTx                              = 22;
+	config->pinRx                              = 22;
+	config->pinTx                              = 20;
 	
 	config->pinGpio[0]                         = 24;
 	config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
@@ -466,7 +466,6 @@ void asACR01B15A(boards_config_t* config) {
 	config->flags.dimmerInverted               = true;
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;
-	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = true;
 	config->flags.canTryDimmingOnBoot          = true;
@@ -502,7 +501,6 @@ void asACR01B15A(boards_config_t* config) {
 
 	config->minTxPower                         = -20;
 
-	config->scanIntervalUs                     = 140 * 1000;
 	config->scanWindowUs                       = config->scanIntervalUs;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
@@ -549,7 +547,7 @@ void asACR01B2C(boards_config_t* config) {
 
 	config->flags.dimmerInverted               = false;
 	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = true;
+	config->flags.enableLeds                   = false;
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = false;
 	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
@@ -580,9 +578,7 @@ void asACR01B2C(boards_config_t* config) {
 
 	config->minTxPower                         = -20;
 
-	config->scanIntervalUs                     = 140 * 1000;
-	// This board cannot provide enough power for 100% scanning.
-	config->scanWindowUs                       = 105 * 1000;
+	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -626,12 +622,12 @@ void asACR01B2G(boards_config_t* config) {
 	config->pinRx                              = 20;
 	config->pinTx                              = 19;
 
-	config->pinLed[LED_RED]                    = 10;
-	config->pinLed[LED_GREEN]                  = 9;
+	config->pinLed[LED_RED]                    = 9;
+	config->pinLed[LED_GREEN]                  = 10;
 
 	config->flags.dimmerInverted               = false;
 	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = true;
+	config->flags.enableLeds                   = false;
 	config->flags.ledInverted                  = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
@@ -664,10 +660,9 @@ void asACR01B2G(boards_config_t* config) {
 
 	config->minTxPower                         = -20;
 
-	config->scanIntervalUs                     = 140 * 1000;
 
 	// This board cannot provide enough power for 100% scanning.
-	config->scanWindowUs                       = 105 * 1000;
+	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
@@ -711,7 +706,7 @@ void asACR01B2G(boards_config_t* config) {
  * Hence, the voltage multiplier (from ADC values to volts RMS) is 0.19355.
  */
 void asACR01B11A(boards_config_t* config) {
-	config->pinDimmer                          = 8;
+	config->pinDimmer                          = 8; // Actually red LED, but the dimmer pin is N.C.
 	config->pinRelayOn                         = 15;
 	config->pinRelayOff                        = 13;
 
@@ -721,16 +716,19 @@ void asACR01B11A(boards_config_t* config) {
 	config->pinAinVoltage[GAIN_LOW]            = GpioToAin(31);
 	config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(29);
 
-	config->pinAinDimmerTemp                   = GpioToAin(4);
 	config->pinAinZeroRef                      = GpioToAin(5);
+	config->pinAinDimmerTemp                   = GpioToAin(4);
 
 	config->pinRx                              = 22;
 	config->pinTx                              = 20;
 
 	config->pinGpio[0]                         = 24;
-	config->pinGpio[1]                         = 32;
-	config->pinGpio[2]                         = 34;
-	config->pinGpio[3]                         = 36;
+	config->pinGpio[1]                         = 32; // P1.00
+	config->pinGpio[2]                         = 34; // P1.02
+	config->pinGpio[3]                         = 36; // P1.04
+
+	config->pinLed[LED_RED]                    = 8;
+	config->pinLed[LED_GREEN]                  = 41;
 
 	config->flags.dimmerInverted               = true;
 	config->flags.enableUart                   = false;
@@ -765,7 +763,6 @@ void asACR01B11A(boards_config_t* config) {
 
 	config->minTxPower                         = -20;
 
-	config->scanIntervalUs                     = 140 * 1000;
 	config->scanWindowUs                       = config->scanIntervalUs;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
@@ -831,7 +828,7 @@ void asPca10040(boards_config_t* config) {
 	config->pinButton[2]                       = 15;
 	config->pinButton[3]                       = 16;
 	
-	config->pinLed[0]                          = 17;
+//	config->pinLed[0]                          = 17; // Already used as dimmer
 	config->pinLed[1]                          = 18;
 	config->pinLed[2]                          = 19;
 	config->pinLed[3]                          = 20;
@@ -862,14 +859,17 @@ void asPca10040(boards_config_t* config) {
 
 	config->minTxPower                         = -40;
 
-	config->scanIntervalUs                     = 140 * 1000;
-	config->scanWindowUs                       = 140 * 1000;
+	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
 	config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
 void asUsbDongle(boards_config_t* config) {
-	asPca10040(config);
+	config->pinRx                              = 8;
+	config->pinTx                              = 6;
+	config->flags.enableUart                   = true;
 	config->deviceType                         = DEVICE_CROWNSTONE_USB;
+	config->minTxPower                         = -40;
+	config->scanWindowUs                       = config->scanIntervalUs;
 }
 
 /**
@@ -878,18 +878,9 @@ void asUsbDongle(boards_config_t* config) {
 void asGuidestone(boards_config_t* config) {
 	config->pinRx                              = 25;
 	config->pinTx                              = 26;
-
-	config->flags.usesNfcPins                  = false;
-	config->flags.dimmerInverted               = false;
-	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = false;
-
 	config->deviceType                         = DEVICE_GUIDESTONE;
-
 	config->minTxPower                         = -20;
-
-	config->scanIntervalUs                     = 140 * 1000;
-	config->scanWindowUs                       = 140 * 1000;
+	config->scanWindowUs                       = config->scanIntervalUs;
 }
 
 uint32_t configure_board(boards_config_t* config) {
