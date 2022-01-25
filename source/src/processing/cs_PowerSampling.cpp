@@ -186,6 +186,11 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 		}
 	}
 	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinVoltageAfterLoad[i] != PIN_NONE) {
+			++pinCount;
+		}
+	}
+	for (int i = 0; i < GAIN_COUNT; ++i) {
 		if (_boardConfig->pinAinCurrent[i] != PIN_NONE) {
 			++pinCount;
 		}
@@ -1272,6 +1277,14 @@ void PowerSampling::selectNextPin(adc_channel_id_t channel) {
 		if (_boardConfig->pinAinVoltage[i] != PIN_NONE) {
 			if (_adcConfig[channel].pinIndex == pinCount) {
 				_adcConfig[channel].config.pin = _boardConfig->pinAinVoltage[i];
+			}
+			++pinCount;
+		}
+	}
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinVoltageAfterLoad[i] != PIN_NONE) {
+			if (_adcConfig[channel].pinIndex == pinCount) {
+				_adcConfig[channel].config.pin = _boardConfig->pinAinVoltageAfterLoad[i];
 			}
 			++pinCount;
 		}
