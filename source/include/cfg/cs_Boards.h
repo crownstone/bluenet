@@ -22,8 +22,8 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  *  We use part of the UICR to store information about the hardware board. So the firmware is independent on the
@@ -117,6 +117,16 @@ enum GpioIndex {
 	GPIO_INDEX_COUNT = 10,
 };
 
+enum LedIndex {
+	LED0 = 0,
+	LED1 = 1,
+	LED2 = 2,
+	LED3 = 3,
+	LED_COUNT = 4,
+	LED_RED = 0,
+	LED_GREEN = 1,
+};
+
 enum Chipset {
 	CHIPSET_NRF52832 = 0,
 	CHIPSET_NRF52833 = 1,
@@ -141,15 +151,8 @@ uint8_t GpioToAinOnChipset(uint8_t gpio, uint8_t chipset);
 // For now mapping is always the same, so this simplified function can be used.
 uint8_t GpioToAin(uint8_t gpio);
 
-enum LedIndex {
-	LED0 = 0,
-	LED1 = 1,
-	LED2 = 2,
-	LED3 = 3,
-	LED_COUNT = 4,
-	LED_RED = 0,
-	LED_GREEN = 1,
-};
+// Maps P1.01 to uint8 pin number.
+uint8_t GetGpioPin(uint8_t major, uint8_t minor);
 
 /**
  * Board configuration
