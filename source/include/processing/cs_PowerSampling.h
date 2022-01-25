@@ -180,16 +180,9 @@ private:
 	bool _dimmerFailureDetectionStarted = false; //! Keep up whether the IGBT failure detection has started yet.
 	uint32_t _calibratePowerZeroCountDown = 4000 / TICK_INTERVAL_MS;
 
-	//! Store the adc config, so that the actual adc config can be changed.
+	// Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
-		// Store the range in mV for this channel.
-		uint16_t rangeMilliVolt;
-
-		// The pin that is currently being used.
-		uint8_t pinInUse = PIN_NONE;
-
-		// True when differential mode is used for this channel (if possible).
-		bool differentialMode;
+		adc_channel_config_t config;
 
 		// Iterate over the different pins for this channel.
 		uint8_t pinIndex = 0;
@@ -299,7 +292,7 @@ private:
 
 	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 
-	void toggleVoltageChannelInput();
+	void selectNextPin(adc_channel_id_t channel);
 
 	void enableDifferentialModeCurrent(bool enable);
 
