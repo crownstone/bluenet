@@ -272,6 +272,7 @@ void MeshDfuHost::onDiscoveryResult(event_t& event) {
 		return;
 	}
 
+	// TODO:!!! wait for disconnect before completing (make disconnecting phase?)
 	completePhase();
 }
 

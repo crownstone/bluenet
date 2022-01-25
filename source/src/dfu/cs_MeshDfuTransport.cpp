@@ -8,6 +8,7 @@
 
 #include <dfu/cs_MeshDfuTransport.h>
 #include <dfu/cs_MeshDfuConstants.h>
+#include <util/cs_Utils.h>
 
 
 #define LOGMeshDfuTransportDebug LOGd
@@ -268,7 +269,9 @@ void MeshDfuTransport::_selectData() {
 // -------------------- raw data communication --------------------
 
 cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
-	LOGMeshDfuTransportDebug("Parse dfu notification result");
+	LOGMeshDfuTransportDebug("Parse dfu notification result, len %u", evtData.len);
+	_logArray(SERIAL_DEBUG, true, evtData.data, CsMath::min(evtData.len, 32u), "%02x");
+
 	if (evtData.data == nullptr || evtData.len < 2) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
