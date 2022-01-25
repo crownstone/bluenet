@@ -808,9 +808,13 @@ void asPca10040(boards_config_t* config) {
 	config->pinRelayOn                         = 11;
 	config->pinRelayOff                        = 12;
 	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(3);
-	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(2);
+	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(4);
 //	config->pinAinZeroRef                      = GpioToAin(28);
+//	config->pinAinVoltage[GAIN_MIDDLE]         = GpioToAin(29);
+//	config->pinAinCurrent[GAIN_MIDDLE]         = GpioToAin(30);
+//	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(31);
 	config->pinAinDimmerTemp                   = GpioToAin(2);
+
 	config->pinRx                              = 8;
 	config->pinTx                              = 6;
 	
