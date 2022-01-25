@@ -364,6 +364,8 @@ uint32_t MeshDfuHost::getInitPacketLen() {
 	if (initPacketLen == 0 || initPacketLen == 0xffffffff) {
 		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1: %u", initPacketLen);
 		return 0;
+	} else {
+		LOGMeshDfuHostDebug("found init packet, len: %u", initPacketLen);
 	}
 
 	return initPacketLen;
