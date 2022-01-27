@@ -272,7 +272,17 @@ void MeshDfuHost::onDiscoveryResult(event_t& event) {
 		return;
 	}
 
-	// TODO:!!! wait for disconnect before completing (make disconnecting phase?)
+	if(! _meshDfuTransport.isTargetInDfuMode() && !_triedDfuCommand) {
+		LOGMeshDfuHostDebug("+++ dfu mode verification failed, disconnecting and retrying");
+		// we'll need to reconnect as crownstone central
+
+		setTimeoutCallback(&MeshDfuHost::completePhase);
+		setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED, &MeshDfuHost::completePhase);
+
+		_bleCentral->disconnect();
+		return;
+	}
+
 	completePhase();
 }
 
@@ -280,18 +290,17 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 	LOGMeshDfuHostDebug("+++ completeDiscoverDfuCharacteristics");
 
 	if(_meshDfuTransport.isTargetInDfuMode()) {
-		LOGMeshDfuHostDebug("+++ dfu mode verified");
+		LOGMeshDfuHostDebug("+++ TargetTriggerDfuMode: success, dfu mode verified");
 		return Phase::TargetPreparing;
 	}
 
 	if(!_triedDfuCommand) {
-		LOGMeshDfuHostDebug("+++ dfu mode verification failed, disconnecting and retrying");
-		_bleCentral->disconnect();
+		LOGMeshDfuHostDebug("+++ TargetTriggerDfuMode retrying");
 		_triedDfuCommand = true;
 		return Phase::TargetTriggerDfuMode;
 	}
 
-	LOGMeshDfuHostDebug("+++ dfu mode verification failed");
+	LOGMeshDfuHostDebug("+++ DiscoverDfuCharacteristics failed");
 	return Phase::Aborting;
 }
 

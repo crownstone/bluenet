@@ -277,7 +277,7 @@ cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 	}
 
 	if (static_cast<OP_CODE>(evtData.data[0]) != OP_CODE::Response) {
-		return ERR_UNKNOWN_OP_CODE;
+		return ERR_WRONG_MODE;
 	}
 
 	if(static_cast<OP_CODE>(evtData.data[1]) != _lastOperation) {
@@ -285,15 +285,23 @@ cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 	}
 
 	switch(static_cast<RES_CODE>(evtData.data[2])) {
-		case RES_CODE::Success : {
-			return ERR_SUCCESS; // return result is  data[3:]
-		}
+		case RES_CODE::InvalidCode:           return ERR_UNKNOWN_OP_CODE;
+		case RES_CODE::Success:               return ERR_SUCCESS; // return result is  data[3:]
+		case RES_CODE::NotSupported:          return ERR_PROTOCOL_UNSUPPORTED;
+		case RES_CODE::InvalidParameter:      return ERR_WRONG_PARAMETER;
+		case RES_CODE::InsufficientResources: return ERR_NO_SPACE;
+		case RES_CODE::InvalidObject:         return ERR_INVALID_MESSAGE;
+		case RES_CODE::InvalidSignature:      return ERR_MISMATCH;
+		case RES_CODE::UnsupportedType:       return ERR_UNKNOWN_TYPE;
+		case RES_CODE::OperationNotPermitted: return ERR_WRONG_OPERATION;
+		case RES_CODE::OperationFailed:       return ERR_OPERATION_FAILED;
+
 		case RES_CODE::ExtendedError: {
 			uint8_t errcode = evtData.len >=3 ? evtData.data[3] : 0;
 
 			LOGMeshDfuTransportWarn("Dfu Transport extended error: %u",
 						MeshDfuConstants::DfuTransportBle::EXT_ERROR_CODE(errcode));
-			return ERR_INVALID_MESSAGE;
+			return ERR_UNHANDLED;
 		}
 		default: {
 			LOGMeshDfuTransportWarn("Dfu Transport unspecified error occured");

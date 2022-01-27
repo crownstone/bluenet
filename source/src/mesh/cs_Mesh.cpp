@@ -164,7 +164,7 @@ void Mesh::handleEvent(event_t & event) {
 			// An outgoing connection is made, stop listening to mesh,
 			// so that the softdevice has time to listen for advertisements.
 			cs_ret_code_t retCode = stop();
-			if (event.result.returnCode == ERR_EVENT_UNHANDLED || event.result.returnCode == ERR_SUCCESS) {
+			if (event.result.returnCode == ERR_UNHANDLED || event.result.returnCode == ERR_SUCCESS) {
 				event.result.returnCode = retCode;
 			}
 			break;

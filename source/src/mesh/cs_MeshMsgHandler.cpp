@@ -61,7 +61,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh
 
 	event.dispatch();
 
-	if (event.result.returnCode != ERR_EVENT_UNHANDLED) {
+	if (event.result.returnCode != ERR_UNHANDLED) {
 		// some handler took care of business.
 		return;
 	}
@@ -296,7 +296,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t pa
 //		return event.result.returnCode;
 		return ERR_SUCCESS;
 	}
-	return ERR_EVENT_UNHANDLED;
+	return ERR_UNHANDLED;
 }
 
 cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops) {

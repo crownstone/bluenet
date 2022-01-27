@@ -717,7 +717,7 @@ void Advertiser::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST: {
 			onConnectOutgoing();
-			if (event.result.returnCode == ERR_EVENT_UNHANDLED) {
+			if (event.result.returnCode == ERR_UNHANDLED) {
 				event.result.returnCode = ERR_SUCCESS;
 			}
 			break;
