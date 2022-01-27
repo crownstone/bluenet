@@ -28,6 +28,8 @@ constexpr uint32_t DefaultTimeoutMs = 30000u;
  */
 constexpr uint32_t NotificationTimeoutMs = 5000u;
 
+constexpr uint32_t StreamIntervalMs = 50u;
+
 }
 
 namespace DFUAdapter {

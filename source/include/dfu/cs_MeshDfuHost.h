@@ -182,20 +182,33 @@ private:
 	// ---------------------------------- data streaming ----------------------------------
 	// -------------------------------------------------------------------------------------
 
+	FirmwareSection _steamSection = FirmwareSection::Unknown;
+
+	uint32_t _streamNextWriteOffset = 0;
+
+	// this is updated when the WRITE_RESULT is ok.
 	uint32_t _streamLeftToWrite = 0;
-	uint32_t _streamNextWriteAddress = 0;
+
+	// if a write operation is in progress, this amount has been written to the buffer
+	uint32_t _streamCurrentChunkSize = 0;
+
+	// TODO: streaming should keep up a crc for validation acording to protocol.
+	uint32_t _streamCrc = 0;
 
 	/**
-	 * Use _meshDfuTransport to send a chunk of data and setup timout,
+	 * Use _meshDfuTransport to send a chunk of data and setup timeout,
 	 * then wait for the result.
+	 *
+	 * If all data is sent, call completePhase();
+	 * If no buffer can be aqcuired or reading flash failed:
+	 *  - try again until _reconnectionAttemptsLeft reaches 0.
 	 */
 	void stream();
 
 	/**
 	 * 	expects EVT_BLE_CENTRAL_WRITE_RESULT.
 	 * 	On success:
-	 * 		- check if more data needs to be sent, do so if needed.
-	 * 		- if all data is sent, call completePhase();
+	 * 		- update stream state and stream() again.
 	 * 	On fail:
 	 * 		- abort();
 	 *

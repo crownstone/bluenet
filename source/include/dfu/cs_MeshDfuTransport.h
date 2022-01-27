@@ -87,7 +87,10 @@ public:
 	void _selectData();
 	void _selectObject(uint8_t objectType);
 
-
+	/**
+	 * results in EVT_BLE_CENTRAL_WRITE_RESULT.
+	 */
+	void write_data_point(cs_data_t buff);
 
 private:
 	enum Index : uint8_t {
@@ -252,10 +255,6 @@ private:
 	 */
 	void write_control_point(cs_data_t buff);
 
-	/**
-	 * results in EVT_BLE_CENTRAL_WRITE_RESULT.
-	 */
-	void write_data_point(cs_data_t buff);
 
 	// ----------------------- recovery methods -----------------------
 

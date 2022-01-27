@@ -140,22 +140,70 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 // -------------------------------------------------------------------------------------
 
 void MeshDfuHost::stream() {
+	LOGMeshDfuHostDebug("steaming: startAddress 0x%08X, bytes left: %u", _streamNextWriteOffset, _streamLeftToWrite);
 
-
-
-	cs_data_t buff = _bleCentral->requestWriteBuffer();
-
-	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(_prn);
-	if(buff.data == nullptr || buff.len < len) {
+	if(_streamLeftToWrite == 0 || _steamSection == FirmwareSection::Unknown) {
+		completePhase();
 		return;
 	}
 
+	cs_data_t buff = _bleCentral->requestWriteBuffer();
+
+	if(buff.data == nullptr || buff.len == 0) {
+		if(CsMath::Decrease(_reconnectionAttemptsLeft) > 0) {
+			LOGMeshDfuHostInfo("Dfu stream couldn't aqcuire buffer, retrying %u more times", _reconnectionAttemptsLeft);
+			setTimeoutCallback(&MeshDfuHost::stream, MeshDfuConstants::DfuHostSettings::ReconnectTimeoutMs);
+		} else {
+		LOGMeshDfuHostWarn("Dfu stream couldn't aqcuire buffer, aborting.");
+			abort();
+		}
+
+		return;
+	}
+
+	_streamCurrentChunkSize = CsMath::min(CsMath::min(_streamLeftToWrite, buff.len),
+					MeshDfuConstants::DFUAdapter::LOCAL_ATT_MTU);
+
+	buff.len = _streamCurrentChunkSize;
+	cs_ret_code_t readResult = _firmwareReader->read(_streamNextWriteOffset, buff.len, buff.data, _steamSection);
+
+	if(readResult != ERR_SUCCESS) {
+		if(CsMath::Decrease(_reconnectionAttemptsLeft) > 0) {
+			LOGMeshDfuHostInfo("Dfu stream couldn't read required data into buffer, retrying %u more times", _reconnectionAttemptsLeft);
+			setTimeoutCallback(&MeshDfuHost::stream, MeshDfuConstants::DfuHostSettings::ReconnectTimeoutMs);
+		} else {
+			LOGMeshDfuHostWarn("Dfu stream couldn't read required data into buffer, aborting.");
+			abort();
+		}
+
+		return;
+	}
+
+	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, &MeshDfuHost::onStreamResult);
+	setTimeoutCallback(&MeshDfuHost::abort);
+	_meshDfuTransport.write_data_point(buff);
 }
 
 void MeshDfuHost::onStreamResult(event_t& event) {
+	TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT) result = *CS_TYPE_CAST(EVT_BLE_CENTRAL_WRITE_RESULT, event.data);
 	// check result
-	// streamMore();
+	// on ok, update write data
 
+	if(result == ERR_SUCCESS) {
+		// update state
+		_streamNextWriteOffset += _streamCurrentChunkSize;
+		_streamLeftToWrite -= _streamCurrentChunkSize;
+		_streamCurrentChunkSize = 0;
+
+		// stream more
+		setTimeoutCallback(&MeshDfuHost::stream, MeshDfuConstants::DfuHostSettings::StreamIntervalMs);
+	} else {
+		// @Bart: what errors can be expected here and when can I be sure no data has been sent to the
+		// target device so that I can try again?
+
+		abort();
+		return;
+	}
 }
 
 
@@ -527,6 +575,7 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 	}
 
 	// TODO: setup stream and call it.
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 }
 
 
@@ -762,7 +811,7 @@ void MeshDfuHost::abort() {
 
 static void ________CALLBACK_IMPLEMENTATION________() { }
 
-bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, ExpectedEventCallback callback) {
+bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback) {
 	bool overridden = _onExpectedEvent != nullptr;
 
 	_expectedEvent         = evtToWaitOn;
