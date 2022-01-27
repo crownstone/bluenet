@@ -444,7 +444,8 @@ private:
 	bool haveInitPacket();
 
 	/**
-	 *
+	 * Reads init packet length from flash using FirmwareReader.
+	 * Returns 0 on failure.
 	 */
 	uint32_t getInitPacketLen();
 
@@ -452,10 +453,6 @@ private:
 	 * No current dfu operations running or planned?
 	 */
 	bool isDfuProcessIdle();
-
-	void connectToTarget();
-
-	bool startDfu(device_address_t macaddr);
 
 	/**
 	 * sets all

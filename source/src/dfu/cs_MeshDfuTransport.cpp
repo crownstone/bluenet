@@ -281,12 +281,22 @@ cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 	}
 
 	if(static_cast<OP_CODE>(evtData.data[1]) != _lastOperation) {
+		LOGMeshDfuTransportWarn("Wrong operation: last sent %u != notification result %u",
+				_lastOperation, static_cast<OP_CODE>(evtData.data[1]));
 		return ERR_WRONG_STATE;
 	}
 
-	switch(static_cast<RES_CODE>(evtData.data[2])) {
+	RES_CODE resCode = static_cast<RES_CODE>(evtData.data[2]);
+
+	if(resCode == RES_CODE::Success) {
+		LOGMeshDfuTransportDebug("notification result: success");
+		return ERR_SUCCESS; // return result is  data[3:]
+	}
+
+	LOGMeshDfuTransportDebug("notification result: error %u", static_cast<uint8_t>(resCode));
+
+	switch(resCode) {
 		case RES_CODE::InvalidCode:           return ERR_UNKNOWN_OP_CODE;
-		case RES_CODE::Success:               return ERR_SUCCESS; // return result is  data[3:]
 		case RES_CODE::NotSupported:          return ERR_PROTOCOL_UNSUPPORTED;
 		case RES_CODE::InvalidParameter:      return ERR_WRONG_PARAMETER;
 		case RES_CODE::InsufficientResources: return ERR_NO_SPACE;

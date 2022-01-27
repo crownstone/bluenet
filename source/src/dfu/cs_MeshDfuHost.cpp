@@ -14,6 +14,108 @@
 #define LOGMeshDfuHostInfo LOGi
 #define LOGMeshDfuHostWarn LOGw
 
+
+// -------------------------------------------------------------------------------------
+// ---------------------------------- public methods -----------------------------------
+// -------------------------------------------------------------------------------------
+
+cs_ret_code_t MeshDfuHost::init() {
+	LOGMeshDfuHostDebug("init");
+
+	_bleCentral = &BleCentral::getInstance();
+	_crownstoneCentral = getComponent<CrownstoneCentral>();
+	_firmwareReader = getComponent<FirmwareReader>();
+
+	if (!_listening) {
+		LOGMeshDfuHostDebug("Start listening");
+		listen();
+		_listening = true;
+	}
+
+	if(!isInitialized()) {
+		LOGMeshDfuHostDebug("MeshDfuHost failed to initialize, blecentral: %0x, cronwstonecentral: %0x", _bleCentral, _crownstoneCentral);
+		return ERR_NOT_INITIALIZED;
+	}
+	if(!haveInitPacket()) {
+		LOGMeshDfuHostDebug("MeshDfuHost no init packet available");
+		return ERR_NOT_AVAILABLE;
+	}
+
+	auto result = _meshDfuTransport.init();
+	if(result != ERR_SUCCESS) {
+		LOGMeshDfuHostDebug("mesh dfu transport failed to initialize");
+		return result;
+	}
+
+	_timeOutRoutine._action =
+			[this]() {
+				onEventCallbackTimeOut();
+				// (timeoutroutine is intended as single shot but have to return a delay value)
+				return Coroutine::delayS(10);
+			};
+	_timeOutRoutine.pause();
+
+	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
+
+	LOGMeshDfuHostDebug("MeshDfuHost init successful");
+
+	startPhase(Phase::Idle);
+	return ERR_SUCCESS;
+}
+
+void MeshDfuHost::handleEvent(event_t& event) {
+
+	// connection events always need to update their local _isConnected prior to any event callback handling.
+	switch(event.type){
+		case CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT : {
+			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_CS_CENTRAL_CONNECT_RESULT, event.data);
+			_isCrownstoneCentralConnected = *connectResult == ERR_SUCCESS;
+
+			LOGMeshDfuHostDebug("Crownstone central connect result received: result %d. Isconnected: %d",
+					*connectResult,
+					_isCrownstoneCentralConnected);
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
+			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_BLE_CENTRAL_CONNECT_RESULT, event.data);
+			LOGMeshDfuHostDebug("BLE central connect result received: result %d. Isconnected: %d",
+					*connectResult,
+					_bleCentral->isConnected());
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
+			LOGMeshDfuHostDebug("Ble central disconnected, setting _isCrownstoneCentralConnected to false.");
+			_isCrownstoneCentralConnected = false;
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+
+	// if a callback is waiting on this event call it back.
+	if (_onExpectedEvent != nullptr && event.type == _expectedEvent) {
+		// create local copy
+		auto eventCallback = _onExpectedEvent;
+
+		// clear expected event
+		_onExpectedEvent = nullptr;
+		(this->*eventCallback)(event);
+	}
+
+	_timeOutRoutine.handleEvent(event);
+
+	if(event.type == CS_TYPE::EVT_TICK) {
+		if(CsMath::Decrease(ticks_until_start) == 1){
+			LOGMeshDfuHostDebug("starting dfu process");
+			copyFirmwareTo(_debugTarget);
+		}
+		if (ticks_until_start % 10 == 1) {
+			LOGMeshDfuHostDebug("tick counting: %u ", ticks_until_start);
+		}
+	}
+}
+
 bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 	LOGMeshDfuHostDebug("+++ Copy firmware to target");
 	if(!isInitialized()) {
@@ -30,6 +132,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 	return startPhase(Phase::ConnectTargetInDfuMode);
 //	return startPhase(Phase::TargetTriggerDfuMode);
 }
+
 
 // -------------------------------------------------------------------------------------
 // ------------------------------- phase implementations -------------------------------
@@ -361,31 +464,14 @@ bool MeshDfuHost::startPhaseTargetInitializing() {
 	return true;
 }
 
-uint32_t MeshDfuHost::getInitPacketLen() {
-	uint32_t initPacketLen = 0;
-	uint32_t nrfCode = _firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp);
 
-
-	if(nrfCode != ERR_SUCCESS) {
-		LOGMeshDfuHostWarn("init packet couldnt be read. Status: %u", nrfCode);
-		return 0;
-	}
-
-	if (initPacketLen == 0 || initPacketLen == 0xffffffff) {
-		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1: %u", initPacketLen);
-		return 0;
-	} else {
-		LOGMeshDfuHostDebug("found init packet, len: %u", initPacketLen);
-	}
-
-	return initPacketLen;
-}
 
 void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
+	LOGMeshDfuHostDebug("response packet: %u, {max: %u, off: %u, crc: %x}", result.result, result.max_size, result.offset, result.crc);
 
 	if(result.result != ERR_SUCCESS || result.offset != 0) {
-		LOGMeshDfuHostWarn("dfu create command failed: %u, offset: %u", result.result, result.offset);
+		LOGMeshDfuHostWarn("dfu select command failed: %u, offset: %u", result.result, result.offset);
 		abort();
 		return;
 	}
@@ -401,6 +487,14 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 }
 
 void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
+	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
+	LOGMeshDfuHostDebug("response packet: %u, {max: %u, off: %u, crc: %x}", result.result, result.max_size, result.offset, result.crc);
+
+	if(result.result != ERR_SUCCESS || result.offset != 0) {
+		LOGMeshDfuHostWarn("dfu create command failed: %u, offset: %u", result.result, result.offset);
+		abort();
+		return;
+	}
 
 }
 
@@ -483,8 +577,9 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 }
 
 
-
-// ---------------------------- progress related callbacks ----------------------------
+// ------------------------------------------------------------------------------------
+// --------------------------- phase administration methods ---------------------------
+// ------------------------------------------------------------------------------------
 
 bool MeshDfuHost::startPhase(Phase phase) {
 	LOGMeshDfuHostDebug("+++ Starting phase %s", phaseName(phase));
@@ -554,8 +649,6 @@ void MeshDfuHost::completePhase() {
 
 	Phase phaseNext = Phase::None;
 
-	// TODO: add callbacks for completePhaseX
-
 	switch(_phaseCurrent) {
 		case Phase::Idle: {
 			// idle doesn't have a 'next phase'. To start another phase call startPhase instead.
@@ -586,8 +679,8 @@ void MeshDfuHost::completePhase() {
 			phaseNext = completePhaseTargetInitializing();
 			break;
 		}
-		case Phase::TargetUpdating: break;
-		case Phase::TargetVerifying: break;
+		case Phase::TargetUpdating: break;  // TODO: add callbacks for completePhaseX
+		case Phase::TargetVerifying: break; // TODO: add callbacks for completePhaseX
 		case Phase::Aborting: {
 			phaseNext = completePhaseAborting();
 			break;
@@ -621,7 +714,9 @@ void MeshDfuHost::abort() {
 	startPhase(Phase::Aborting);
 }
 
-// ---------- callbacks ----------
+// ------------------------------------------------------------------------------------
+// -------------------------- callback administration methods -------------------------
+// ------------------------------------------------------------------------------------
 
 bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, ExpectedEventCallback callback) {
 	bool overridden = _onExpectedEvent != nullptr;
@@ -657,55 +752,17 @@ void MeshDfuHost::onEventCallbackTimeOut() {
 	}
 }
 
+// -------------------------------------------------------------------------------------
 // --------------------------------------- utils ---------------------------------------
+// -------------------------------------------------------------------------------------
 
 
 bool MeshDfuHost::isInitialized() {
 	return _bleCentral != nullptr && _crownstoneCentral != nullptr;
 }
 
-cs_ret_code_t MeshDfuHost::init() {
-	LOGMeshDfuHostDebug("init");
-
-	_bleCentral = &BleCentral::getInstance();
-	_crownstoneCentral = getComponent<CrownstoneCentral>();
-	_firmwareReader = getComponent<FirmwareReader>();
-
-	if (!_listening) {
-		LOGMeshDfuHostDebug("Start listening");
-		listen();
-		_listening = true;
-	}
-
-	if(!isInitialized()) {
-		LOGMeshDfuHostDebug("MeshDfuHost failed to initialize, blecentral: %0x, cronwstonecentral: %0x", _bleCentral, _crownstoneCentral);
-		return ERR_NOT_INITIALIZED;
-	}
-	if(!haveInitPacket()) {
-		LOGMeshDfuHostDebug("MeshDfuHost no init packet available");
-		return ERR_NOT_AVAILABLE;
-	}
-
-	auto result = _meshDfuTransport.init();
-	if(result != ERR_SUCCESS) {
-		LOGMeshDfuHostDebug("mesh dfu transport failed to initialize");
-		return result;
-	}
-
-	_timeOutRoutine._action =
-			[this]() {
-				onEventCallbackTimeOut();
-				// (timeoutroutine is intended as single shot but have to return a delay value)
-				return Coroutine::delayS(10);
-			};
-	_timeOutRoutine.pause();
-
-	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
-
-	LOGMeshDfuHostDebug("MeshDfuHost init successful");
-
-	startPhase(Phase::Idle);
-	return ERR_SUCCESS;
+bool MeshDfuHost::ableToLaunchDfu() {
+	return haveInitPacket() && isDfuProcessIdle();
 }
 
 bool MeshDfuHost::haveInitPacket() {
@@ -718,9 +775,26 @@ bool MeshDfuHost::haveInitPacket() {
 	}
 }
 
-bool MeshDfuHost::ableToLaunchDfu() {
-	return haveInitPacket() && isDfuProcessIdle();
+uint32_t MeshDfuHost::getInitPacketLen() {
+	uint32_t initPacketLen = 0;
+	uint32_t nrfCode = _firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp);
+
+
+	if(nrfCode != ERR_SUCCESS) {
+		LOGMeshDfuHostWarn("init packet couldnt be read. Status: %u", nrfCode);
+		return 0;
+	}
+
+	if (initPacketLen == 0 || initPacketLen == 0xffffffff) {
+		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1: %u", initPacketLen);
+		return 0;
+	} else {
+		LOGMeshDfuHostDebug("found init packet, len: %u", initPacketLen);
+	}
+
+	return initPacketLen;
 }
+
 
 bool MeshDfuHost::isDfuProcessIdle() {
 	// if not waiting on any updates, we must be done.
@@ -743,59 +817,4 @@ void MeshDfuHost::reset() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	clearEventCallback();
 	clearTimeoutCallback();
-}
-
-// ------------------- event handling ---------------------------
-
-void MeshDfuHost::handleEvent(event_t& event) {
-
-	// connection events always need to update their local _isConnected prior to any event callback handling.
-	switch(event.type){
-		case CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT : {
-			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_CS_CENTRAL_CONNECT_RESULT, event.data);
-			_isCrownstoneCentralConnected = *connectResult == ERR_SUCCESS;
-
-			LOGMeshDfuHostDebug("Crownstone central connect result received: result %d. Isconnected: %d",
-					*connectResult,
-					_isCrownstoneCentralConnected);
-			break;
-		}
-		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
-			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_BLE_CENTRAL_CONNECT_RESULT, event.data);
-			LOGMeshDfuHostDebug("BLE central connect result received: result %d. Isconnected: %d",
-					*connectResult,
-					_bleCentral->isConnected());
-			break;
-		}
-		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
-			LOGMeshDfuHostDebug("Ble central disconnected, setting _isCrownstoneCentralConnected to false.");
-			_isCrownstoneCentralConnected = false;
-			break;
-		}
-		default: {
-			break;
-		}
-	}
-
-	// if a callback is waiting on this event call it back.
-	if (_onExpectedEvent != nullptr && event.type == _expectedEvent) {
-		// create local copy
-		auto eventCallback = _onExpectedEvent;
-
-		// clear expected event
-		_onExpectedEvent = nullptr;
-		(this->*eventCallback)(event);
-	}
-
-	_timeOutRoutine.handleEvent(event);
-
-	if(event.type == CS_TYPE::EVT_TICK) {
-		if(CsMath::Decrease(ticks_until_start) == 1){
-			LOGMeshDfuHostDebug("starting dfu process");
-			copyFirmwareTo(_debugTarget);
-		}
-		if (ticks_until_start % 10 == 1) {
-			LOGMeshDfuHostDebug("tick counting: %u ", ticks_until_start);
-		}
-	}
 }
