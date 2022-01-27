@@ -182,7 +182,7 @@ private:
 	// ---------------------------------- data streaming ----------------------------------
 	// -------------------------------------------------------------------------------------
 
-	FirmwareSection _steamSection = FirmwareSection::Unknown;
+	FirmwareSection _streamSection = FirmwareSection::Unknown;
 
 	uint32_t _streamNextWriteOffset = 0;
 

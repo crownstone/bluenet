@@ -142,7 +142,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 void MeshDfuHost::stream() {
 	LOGMeshDfuHostDebug("steaming: startAddress 0x%08X, bytes left: %u", _streamNextWriteOffset, _streamLeftToWrite);
 
-	if(_streamLeftToWrite == 0 || _steamSection == FirmwareSection::Unknown) {
+	if(_streamLeftToWrite == 0 || _streamSection == FirmwareSection::Unknown) {
 		completePhase();
 		return;
 	}
@@ -165,7 +165,7 @@ void MeshDfuHost::stream() {
 					MeshDfuConstants::DFUAdapter::LOCAL_ATT_MTU);
 
 	buff.len = _streamCurrentChunkSize;
-	cs_ret_code_t readResult = _firmwareReader->read(_streamNextWriteOffset, buff.len, buff.data, _steamSection);
+	cs_ret_code_t readResult = _firmwareReader->read(_streamNextWriteOffset, buff.len, buff.data, _streamSection);
 
 	if(readResult != ERR_SUCCESS) {
 		if(CsMath::Decrease(_reconnectionAttemptsLeft) > 0) {
@@ -574,8 +574,13 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 		return;
 	}
 
-	// TODO: setup stream and call it.
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
+	_streamSection = FirmwareSection::MicroApp;
+	_streamNextWriteOffset = 2*sizeof(uint32_t); // 4 byte size and 4 byte verification in flash must be skipped
+	_streamLeftToWrite = getInitPacketLen(); // TODO: cache this.
+	_streamCrc = 0;
+
+	stream();
 }
 
 
@@ -911,4 +916,6 @@ void MeshDfuHost::reset() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	clearEventCallback();
 	clearTimeoutCallback();
+
+	// TODO: clear streaming data
 }
