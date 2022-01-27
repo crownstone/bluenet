@@ -244,12 +244,17 @@ private:
 	OP_CODE _lastOperation = OP_CODE::None;
 	uint16_t _prn = 0; // nordic protocol: Packet Receipt Notification.
 
-	// ------------- the adapter layer for crownstone_ble -------------
-	void writeCharacteristicWithoutResponse(uint16_t characteristicHandle, cs_data_t buff);
-	void writeCharacteristicForResponse(uint16_t characteristicHandle, cs_data_t buff);
-
 	// ----------------- utility forwardering methods -----------------
+	/**
+	 * results in on of, depending on the operation:
+	 *  - EVT_MESH_DFU_TRANSPORT_RESULT
+	 *  - EVT_MESH_DFU_TRANSPORT_RESPONSE
+	 */
 	void write_control_point(cs_data_t buff);
+
+	/**
+	 * results in EVT_BLE_CENTRAL_WRITE_RESULT.
+	 */
 	void write_data_point(cs_data_t buff);
 
 	// ----------------------- recovery methods -----------------------
@@ -258,9 +263,6 @@ private:
 	void try_to_recover_before_send_firmware();
 
 	void validateCrcCommandResponse();
-
-
-
 
 	// -------------------- raw data communication --------------------
 

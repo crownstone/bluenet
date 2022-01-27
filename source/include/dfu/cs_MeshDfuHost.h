@@ -117,8 +117,8 @@ private:
 	 * _onExpectedEvent is a pointer to member function taking an event_t&.
 	 */
 	CS_TYPE _expectedEvent;
-	typedef void(MeshDfuHost::*ExpectedEventCallback)(event_t&);
-	ExpectedEventCallback _onExpectedEvent = nullptr;
+	typedef void(MeshDfuHost::*EventCallback)(event_t&);
+	EventCallback _onExpectedEvent = nullptr;
 
 	/**
 	 * Utility to call onEventCallbackTimeOut at desired moments.
@@ -131,7 +131,7 @@ private:
 	// ----------------------- ble related variables -----------------------
 
 	/**
-	 * cached ble component pointers
+	 * cached component pointers
 	 */
 	CrownstoneCentral* _crownstoneCentral = nullptr;
 	BleCentral* _bleCentral = nullptr;
@@ -148,15 +148,22 @@ private:
 	bool _listening = false;
 
 	/**
+	 * current status of the connection. (Updated by several events.)
+	 */
+	bool _isCrownstoneCentralConnected = false;
+
+	/**
+	 * the device to be dfu-d.
+	 */
+	device_address_t _targetDevice;
+
+	// ----------------------- progress variables -----------------------
+
+	/**
 	 * true if an attempt has already been made to put target in dfu mode during
 	 * this of dfu-ing.
 	 */
 	bool _triedDfuCommand = false;
-
-	/**
-	 * current status of the connection. (Updated by several events.)
-	 */
-	bool _isCrownstoneCentralConnected = false;
 
 	/**
 	 * determines how many times a reconnect will be attempted until dfu is stopped.
@@ -164,17 +171,37 @@ private:
 	 */
 	uint8_t _reconnectionAttemptsLeft = 0;
 
-	/**
-	 * the device to be dfu-d.
-	 */
-	device_address_t _targetDevice;
-
 
 	// DEBUG
 	device_address_t _debugTarget = {.address     = {0x35, 0x01, 0x59, 0x11, 0xE1,0xEE}, // 0xEE, 0xE1, 0x11, 0x59, 0x01, 0x35
 									  .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC};
 	uint8_t ticks_until_start = 200;
 	// END DEBUG
+
+	// -------------------------------------------------------------------------------------
+	// ---------------------------------- data streaming ----------------------------------
+	// -------------------------------------------------------------------------------------
+
+	uint32_t _streamLeftToWrite = 0;
+	uint32_t _streamNextWriteAddress = 0;
+
+	/**
+	 * Use _meshDfuTransport to send a chunk of data and setup timout,
+	 * then wait for the result.
+	 */
+	void stream();
+
+	/**
+	 * 	expects EVT_BLE_CENTRAL_WRITE_RESULT.
+	 * 	On success:
+	 * 		- check if more data needs to be sent, do so if needed.
+	 * 		- if all data is sent, call completePhase();
+	 * 	On fail:
+	 * 		- abort();
+	 *
+	 */
+	void onStreamResult(event_t& event);
+
 
 	// -------------------------------------------------------------------------------------
 	// ---------------------------------- phase callbacks ----------------------------------
@@ -383,7 +410,7 @@ private:
 	 */
 	bool setEventCallback(
 			CS_TYPE evttype,
-			ExpectedEventCallback callback);
+			EventCallback callback);
 
 	/**
 	 * sets the timeout callback and delay before calling it.

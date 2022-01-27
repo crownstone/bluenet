@@ -19,6 +19,8 @@
 // ---------------------------------- public methods -----------------------------------
 // -------------------------------------------------------------------------------------
 
+static void ________PUBLIC_METHODS________() { }
+
 cs_ret_code_t MeshDfuHost::init() {
 	LOGMeshDfuHostDebug("init");
 
@@ -133,11 +135,35 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 //	return startPhase(Phase::TargetTriggerDfuMode);
 }
 
+// -------------------------------------------------------------------------------------
+// ------------------------------- stream implementation -------------------------------
+// -------------------------------------------------------------------------------------
+
+void MeshDfuHost::stream() {
+
+
+
+	cs_data_t buff = _bleCentral->requestWriteBuffer();
+
+	constexpr uint8_t len = sizeof(OP_CODE) + sizeof(_prn);
+	if(buff.data == nullptr || buff.len < len) {
+		return;
+	}
+
+}
+
+void MeshDfuHost::onStreamResult(event_t& event) {
+	// check result
+	// streamMore();
+
+}
+
 
 // -------------------------------------------------------------------------------------
 // ------------------------------- phase implementations -------------------------------
 // -------------------------------------------------------------------------------------
 
+static void ________PHASE_IMPLEMENTATIONS________() { }
 
 // ###### TargetTriggerDfuMode ######
 
@@ -148,6 +174,7 @@ bool MeshDfuHost::startPhaseIdle() {
 
 
 // ###### TargetTriggerDfuMode ######
+static void _PHASE_TargetTriggerDfuMode_() { }
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetTriggerDfuMode");
@@ -232,6 +259,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
 }
 
 // ###### WaitForTargetReboot ######
+static void _PHASE_WaitForTargetReboot_() { }
 
 bool MeshDfuHost::startWaitForTargetReboot() {
 	// start this phase waiting for a scan in order to give dfu target
@@ -282,6 +310,7 @@ MeshDfuHost::Phase MeshDfuHost::completeWaitForTargetReboot() {
 }
 
 // ###### ConnectTargetInDfuMode ######
+static void _PHASE_ConnectTargetInDfuMode_() { }
 
 bool MeshDfuHost::startConnectTargetInDfuMode() {
 	// called both on timeout and after a received scan from target device.
@@ -342,6 +371,7 @@ MeshDfuHost::Phase MeshDfuHost::completeConnectTargetInDfuMode() {
 }
 
 // ###### DiscoverDfuCharacteristics ######
+static void _PHASE_DiscoverDfuCharacteristics_() { }
 
 bool MeshDfuHost::startDiscoverDfuCharacteristics() {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, &MeshDfuHost::onDiscoveryResult);
@@ -408,6 +438,7 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 }
 
 // ###### TargetPreparing ######
+static void _PHASE_TargetPreparing_() { }
 
 bool MeshDfuHost::startPhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
@@ -455,6 +486,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
 	return Phase::TargetInitializing;
 }
 // ###### TargetInitializing ######
+static void _PHASE_TargetInitializing_(){ }
 
 bool MeshDfuHost::startPhaseTargetInitializing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetInitializing");
@@ -463,8 +495,6 @@ bool MeshDfuHost::startPhaseTargetInitializing() {
 
 	return true;
 }
-
-
 
 void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
@@ -496,7 +526,9 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 		return;
 	}
 
+	// TODO: setup stream and call it.
 }
+
 
 void MeshDfuHost::targetInitializingExecute(event_t& event) {
 
@@ -508,7 +540,10 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
 	// TODO
 	return Phase::None;
 }
+
 // ###### TargetUpdating ######
+static void _PHASE_TargetUpdating_() { }
+
 
 bool MeshDfuHost::startPhaseTargetUpdating() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetUpdating");
@@ -521,7 +556,9 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
 	// TODO
 	return Phase::None;
 }
+
 // ###### TargetVerifying ######
+static void _PHASE_TargetVerifying_() { }
 
 bool MeshDfuHost::startPhaseTargetVerifying() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetVerifying");
@@ -534,7 +571,10 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
 	// TODO
 	return Phase::None;
 }
-// ###### TargetTriggerDfuMode ######
+
+// ###### Aborting ######
+static void _PHASE_Aborting_() { }
+
 
 bool MeshDfuHost::startPhaseAborting() {
 	LOGMeshDfuHostDebug("+++ startPhaseAborting");
@@ -580,6 +620,8 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 // ------------------------------------------------------------------------------------
 // --------------------------- phase administration methods ---------------------------
 // ------------------------------------------------------------------------------------
+
+static void ________PHASE_ADMINISTRATION________() { }
 
 bool MeshDfuHost::startPhase(Phase phase) {
 	LOGMeshDfuHostDebug("+++ Starting phase %s", phaseName(phase));
@@ -715,8 +757,10 @@ void MeshDfuHost::abort() {
 }
 
 // ------------------------------------------------------------------------------------
-// -------------------------- callback administration methods -------------------------
+// -------------------------- callback implementation methods -------------------------
 // ------------------------------------------------------------------------------------
+
+static void ________CALLBACK_IMPLEMENTATION________() { }
 
 bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, ExpectedEventCallback callback) {
 	bool overridden = _onExpectedEvent != nullptr;
@@ -756,6 +800,7 @@ void MeshDfuHost::onEventCallbackTimeOut() {
 // --------------------------------------- utils ---------------------------------------
 // -------------------------------------------------------------------------------------
 
+static void ________UTILS________() { }
 
 bool MeshDfuHost::isInitialized() {
 	return _bleCentral != nullptr && _crownstoneCentral != nullptr;
