@@ -68,6 +68,9 @@ public:
 	/**
 	 * All these methods send a dfu packet on the control point.
 	 * Some require a notification to be parsed.
+	 *
+	 * Note: Parameter types are fixed by protocol,
+	 * E.g.: Size *must* be uint32_t.
 	 */
 
 	// EVT_MESH_DFU_TRANSPORT_RESULT

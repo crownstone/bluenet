@@ -225,6 +225,8 @@ void  MeshDfuTransport::_createObject(uint8_t objectType, uint32_t size) {
 	buff.data[0] = static_cast<uint8_t>(OP_CODE::CreateObject);
 	buff.data[1] = objectType;
 
+	memcpy(&buff.data[2], &size, sizeof(size));
+
 	buff.len = len;
 
 	write_control_point(buff);
