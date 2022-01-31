@@ -146,6 +146,7 @@ private:
 	 * is listen() called?
 	 */
 	bool _listening = false;
+	uint32_t _initPacketLen = 0;
 
 	/**
 	 * current status of the connection. (Updated by several events.)
@@ -182,8 +183,10 @@ private:
 	// ---------------------------------- data streaming ----------------------------------
 	// -------------------------------------------------------------------------------------
 
+	// this is set to Unknown on complete/abort streaming.
 	FirmwareSection _streamSection = FirmwareSection::Unknown;
 
+	// this is updated when the WRITE_RESULT is ok.
 	uint32_t _streamNextWriteOffset = 0;
 
 	// this is updated when the WRITE_RESULT is ok.
@@ -214,6 +217,8 @@ private:
 	 *
 	 */
 	void onStreamResult(event_t& event);
+
+	void clearStreamState();
 
 
 	// -------------------------------------------------------------------------------------
@@ -480,14 +485,15 @@ private:
 
 	/**
 	 * Is the dfu packet written to ICP flash page?
+	 * haveInitPacket is not available before loadInitPacketLen is succesful.
 	 */
 	bool haveInitPacket();
 
 	/**
 	 * Reads init packet length from flash using FirmwareReader.
-	 * Returns 0 on failure.
+	 * After calling this, haveInitPacket is available.
 	 */
-	uint32_t getInitPacketLen();
+	void loadInitPacketLen();
 
 	/**
 	 * No current dfu operations running or planned?

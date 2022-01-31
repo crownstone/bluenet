@@ -38,6 +38,9 @@ cs_ret_code_t MeshDfuHost::init() {
 		LOGMeshDfuHostDebug("MeshDfuHost failed to initialize, blecentral: %0x, cronwstonecentral: %0x", _bleCentral, _crownstoneCentral);
 		return ERR_NOT_INITIALIZED;
 	}
+
+	loadInitPacketLen();
+
 	if(!haveInitPacket()) {
 		LOGMeshDfuHostDebug("MeshDfuHost no init packet available");
 		return ERR_NOT_AVAILABLE;
@@ -138,11 +141,13 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 // -------------------------------------------------------------------------------------
 // ------------------------------- stream implementation -------------------------------
 // -------------------------------------------------------------------------------------
+static void ________STREAM_IMPLEMENTATION________() { }
 
 void MeshDfuHost::stream() {
 	LOGMeshDfuHostDebug("steaming: startAddress 0x%08X, bytes left: %u", _streamNextWriteOffset, _streamLeftToWrite);
 
 	if(_streamLeftToWrite == 0 || _streamSection == FirmwareSection::Unknown) {
+		clearStreamState();
 		completePhase();
 		return;
 	}
@@ -205,6 +210,16 @@ void MeshDfuHost::onStreamResult(event_t& event) {
 		return;
 	}
 }
+
+
+void MeshDfuHost::clearStreamState() {
+	_streamSection = FirmwareSection::Unknown;
+	_streamNextWriteOffset = 0;
+	_streamLeftToWrite = 0;
+	_streamCurrentChunkSize = 0;
+	_streamCrc = 0;
+}
+
 
 
 // -------------------------------------------------------------------------------------
@@ -554,11 +569,9 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 		return;
 	}
 
-	uint32_t initLen = getInitPacketLen();
-
-	if(initLen != 0) {
+	if(_initPacketLen != 0) {
 		setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingStreamInitPacket);
-		_meshDfuTransport._createCommand(initLen);
+		_meshDfuTransport._createCommand(_initPacketLen);
 	} else {
 		abort();
 	}
@@ -577,7 +590,7 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	_streamSection = FirmwareSection::MicroApp;
 	_streamNextWriteOffset = 2*sizeof(uint32_t); // 4 byte size and 4 byte verification in flash must be skipped
-	_streamLeftToWrite = getInitPacketLen(); // TODO: cache this.
+	_streamLeftToWrite = _initPacketLen;
 	_streamCrc = 0;
 
 	stream();
@@ -865,7 +878,7 @@ bool MeshDfuHost::ableToLaunchDfu() {
 }
 
 bool MeshDfuHost::haveInitPacket() {
-	switch (getInitPacketLen()) {
+	switch (_initPacketLen) {
 		case 0:
 		case 0xffffffff:
 			return false;
@@ -874,24 +887,21 @@ bool MeshDfuHost::haveInitPacket() {
 	}
 }
 
-uint32_t MeshDfuHost::getInitPacketLen() {
-	uint32_t initPacketLen = 0;
-	uint32_t nrfCode = _firmwareReader->read(0, sizeof(initPacketLen), &initPacketLen, FirmwareSection::MicroApp);
+void MeshDfuHost::loadInitPacketLen() {
+	uint32_t nrfCode = _firmwareReader->read(0, sizeof(_initPacketLen), &_initPacketLen, FirmwareSection::MicroApp);
 
 
 	if(nrfCode != ERR_SUCCESS) {
 		LOGMeshDfuHostWarn("init packet couldnt be read. Status: %u", nrfCode);
-		return 0;
+		_initPacketLen = 0;
 	}
 
-	if (initPacketLen == 0 || initPacketLen == 0xffffffff) {
-		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1: %u", initPacketLen);
-		return 0;
+	if (_initPacketLen == 0 || _initPacketLen == 0xffffffff) {
+		LOGMeshDfuHostWarn("init packet seems to be missing, length is zero or -1: %u", _initPacketLen);
+		_initPacketLen = 0;
 	} else {
-		LOGMeshDfuHostDebug("found init packet, len: %u", initPacketLen);
+		LOGMeshDfuHostDebug("found init packet, len: %u", _initPacketLen);
 	}
-
-	return initPacketLen;
 }
 
 
@@ -916,6 +926,5 @@ void MeshDfuHost::reset() {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 	clearEventCallback();
 	clearTimeoutCallback();
-
-	// TODO: clear streaming data
+	clearStreamState();
 }
