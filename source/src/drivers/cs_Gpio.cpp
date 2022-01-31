@@ -1,3 +1,4 @@
+#include <ble/cs_Nordic.h>
 #include <cfg/cs_AutoConfig.h>
 #include <drivers/cs_Gpio.h>
 #include <events/cs_EventDispatcher.h>
@@ -241,7 +242,7 @@ void Gpio::tick() {
 			// we send back the pin index, not the pin number
 			gpio.pin_index = i;
 			gpio.length = 0;
-			LOGi("Send GPIO event on pin %i at index %i", _pins[i], gpio.pin_index);
+			LOGd("Send GPIO event on pin %i at index %i", _pins[i].pin, gpio.pin_index);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);
 		}

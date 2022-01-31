@@ -14,31 +14,48 @@
 #include <stdint.h>
 #endif
 
-// Size limitations
-
-const uint8_t MAX_PAYLOAD = 44;
-
-const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
-
+// This is a given for a MAC address
 const uint8_t MAC_ADDRESS_LENGTH = 6;
 
+// This is a given for BLE advertisement data
 const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
 
-const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - 5;
+// This is a given for Mesh messages
+const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
+
+// This is the information we want in each command
+const uint8_t MICROAPP_CMD_SIZE_HEADER = 6;
+
+// This is the size of a pin command header
+const uint8_t MICROAPP_PIN_CMD_SIZE_HEADER = 10;
+
+// Derived maximum payload (should at least fit BLE advertisement data)
+
+const uint8_t MAX_PAYLOAD = 48;
+
+const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - MICROAPP_CMD_SIZE_HEADER - 5;
+
+// Derived size limitations (change when structs get more info)
+
+const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - MICROAPP_CMD_SIZE_HEADER - 4;
 
 const uint8_t MAX_MICROAPP_ARRAY_LENGTH = MAX_MICROAPP_STRING_LENGTH;
 
-const uint8_t MAX_MESH_DATA_LENGTH = MAX_PAYLOAD - 4;
-
-const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
-
-const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - 8;
+const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - MICROAPP_PIN_CMD_SIZE_HEADER - 3;
 
 // Protocol definitions
 
 #define MICROAPP_SERIAL_DEFAULT_PORT_NUMBER 1
 
 #define MICROAPP_SERIAL_SERVICE_DATA_PORT_NUMBER 4
+
+enum CommandMicroappAck {
+	CS_ACK_NONE                     = 0x00,
+	CS_ACK_BLUENET_MICROAPP_REQUEST = 0x01,
+	CS_ACK_BLUENET_MICROAPP_REQ_ACK = 0x02,
+	CS_ACK_MICROAPP_BLUENET_REQUEST = 0x03,
+	CS_ACK_MICROAPP_BLUENET_REQ_ACK = 0x04,
+};
 
 /**
  * The main opcodes for microapp commands.
@@ -169,15 +186,11 @@ struct __attribute__((packed)) microapp_cmd_t {
 	uint8_t cmd;
 	uint8_t id;
 	uint8_t ack;
+	uint8_t prev;
+	uint16_t counter;
 };
 
-/**
- * An acked payload can be used for a callback.
- */
-struct __attribute__((packed)) microapp_acked_cmd_t {
-	uint8_t cmd;
-	uint8_t ack;
-};
+static_assert(sizeof(microapp_cmd_t) == MICROAPP_CMD_SIZE_HEADER);
 
 /*
  * Struct to set and read pins. This can be used for analog and digital writes and reads. For digital writes it is
@@ -187,21 +200,21 @@ struct __attribute__((packed)) microapp_acked_cmd_t {
  * The value field is large enough to store a function pointer.
  */
 struct __attribute__((packed)) microapp_pin_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_PIN;
-	uint8_t ack;
+	microapp_cmd_t header;
 	uint8_t pin;      // CommandMicroappPin
 	uint8_t opcode1;  // CommandMicroappPinOpcode1
 	uint8_t opcode2;  // CommandMicroappPinOpcode2
 	uint8_t value;    // CommandMicroappPinValue
 };
 
+static_assert(sizeof(microapp_pin_cmd_t) == MICROAPP_PIN_CMD_SIZE_HEADER);
 static_assert(sizeof(microapp_pin_cmd_t) <= MAX_PAYLOAD);
 
 /*
  * Struct with data to implement delay command through coroutines.
  */
 struct __attribute__((packed)) microapp_delay_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_DELAY;
+	microapp_cmd_t header;
 	uint16_t period;
 	uintptr_t coargs;
 };
@@ -212,8 +225,7 @@ static_assert(sizeof(microapp_delay_cmd_t) <= MAX_PAYLOAD);
  * Struct for i2c initialization, writes, and reads.
  */
 struct __attribute__((packed)) microapp_twi_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_TWI;
-	uint8_t ack;
+	microapp_cmd_t header;
 	uint8_t address;
 	uint8_t opcode;
 	uint8_t length;
@@ -227,7 +239,7 @@ static_assert(sizeof(microapp_twi_cmd_t) <= MAX_PAYLOAD);
  * Struct for log commands
  */
 struct __attribute__((packed)) microapp_log_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_LOG;
+	microapp_cmd_t header;
 	uint8_t port;
 	uint8_t type;
 	uint8_t option;
@@ -237,44 +249,44 @@ struct __attribute__((packed)) microapp_log_cmd_t {
 static_assert(sizeof(microapp_log_cmd_t) <= MAX_PAYLOAD);
 
 struct __attribute__((packed)) microapp_log_char_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	uint8_t value;
 };
 
 struct __attribute__((packed)) microapp_log_short_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	uint16_t value;
 };
 
 struct __attribute__((packed)) microapp_log_uint_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	uint32_t value;
 };
 
 struct __attribute__((packed)) microapp_log_int_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	int32_t value;
 };
 
 struct __attribute__((packed)) microapp_log_float_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	float value;
 };
 
 struct __attribute__((packed)) microapp_log_double_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	double value;
 };
 
 struct __attribute__((packed)) microapp_log_string_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	char str[MAX_MICROAPP_STRING_LENGTH];
 };
 
 static_assert(sizeof(microapp_log_string_cmd_t) <= MAX_PAYLOAD);
 
 struct __attribute__((packed)) microapp_log_array_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	char arr[MAX_MICROAPP_ARRAY_LENGTH];
 };
 
@@ -282,8 +294,7 @@ struct __attribute__((packed)) microapp_log_array_cmd_t {
  * Struct for microapp ble commands
  */
 struct __attribute__((packed)) microapp_ble_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_BLE;
-	uint8_t ack;
+	microapp_cmd_t header;
 	uint8_t opcode;
 	uint8_t id;
 };
@@ -294,7 +305,7 @@ static_assert(sizeof(microapp_ble_cmd_t) <= MAX_PAYLOAD);
  * Struct for mesh message from microapp.
  */
 struct __attribute__((packed)) microapp_mesh_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_MESH;
+	microapp_cmd_t header;
 	uint8_t opcode;
 };
 
@@ -304,7 +315,7 @@ static_assert(sizeof(microapp_mesh_cmd_t) <= MAX_PAYLOAD);
  * Struct for header of microapp mesh send commands
  */
 struct __attribute__((packed)) microapp_mesh_send_cmd_t {
-	struct microapp_mesh_cmd_t header;
+	struct microapp_mesh_cmd_t mesh_header;
 	uint8_t stoneId;  //< Target stone ID, or 0 for broadcast.
 	uint8_t dlen;
 	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
@@ -313,7 +324,7 @@ struct __attribute__((packed)) microapp_mesh_send_cmd_t {
 static_assert(sizeof(microapp_mesh_send_cmd_t) <= MAX_PAYLOAD);
 
 struct __attribute__((packed)) microapp_mesh_read_available_cmd_t {
-	struct microapp_mesh_cmd_t header;
+	struct microapp_mesh_cmd_t mesh_header;
 	uint8_t available;
 };
 
@@ -323,7 +334,7 @@ static_assert(sizeof(microapp_mesh_read_available_cmd_t) <= MAX_PAYLOAD);
  * Struct for microapp mesh read commands
  */
 struct __attribute__((packed)) microapp_mesh_read_cmd_t {
-	struct microapp_mesh_cmd_t header;
+	struct microapp_mesh_cmd_t mesh_header;
 	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
 	uint8_t messageSize;                              // Actual message size.
 	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];  // Message buffer.
@@ -335,9 +346,7 @@ static_assert(sizeof(microapp_mesh_read_cmd_t) <= MAX_PAYLOAD);
  * Struct for scanned ble devices sent to the microapp
  */
 struct __attribute__((packed)) microapp_ble_device_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
-	uint8_t ack;
-	uint8_t id;
+	microapp_cmd_t header;
 	uint8_t type;
 	uint8_t addr_type;
 	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
@@ -363,7 +372,7 @@ struct __attribute__((packed)) microapp_service_data_t {
  * This reuses the log_cmd format.
  */
 struct __attribute__((packed)) microapp_service_data_cmd_t {
-	microapp_log_cmd_t header;
+	microapp_log_cmd_t log_header;
 	microapp_service_data_t body;
 };
 

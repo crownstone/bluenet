@@ -70,14 +70,39 @@ void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_contex
 	BleHandler::handleEvent(p_ble_evt);
 }
 
+/*
+ * Registers a softdevice handler for BLE events.
+ * The section .sdh_ble_observers1 will be used, it's just appending the priority 1 here.
+ */
 NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_evt_handler, NULL);
-
-
 
 static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context) {
 	SdhStateHandler::handleEvent(state);
 }
 
+/*
+ * This writes to a new static m_crownstone_state_handler object of type nrf_sdh_state_observer_t.
+ * Using the macro means NRF_SDH_ENABLED is checked as well as the priority level available.
+ * The section .sdh_state_observers0 will be used, it's just appending the priority 0 here.
+ * The macro is written in the form of an assignment so we get a compilation error if the implementation changes.
+ * More, detailed: it will be this:
+ *
+ *    m_crownstone_state_handler
+ *            __attribute__ ((section(".sdh_state_observers0")))
+ *            __attribute__ ((used)) =
+ *        {
+ *            .handler   = crownstone_sdh_state_evt_handler,
+ *            .p_context = __null
+ *        };
+ * In the linker file we have previously defined where we want such sections using a wildcard construction:
+ *     .sdh_state_observers :
+ *     {
+ *         KEEP(*(SORT(.sdh_state_observers*)))
+ *     } > FLASH
+ *
+ * Here '.sdh_state_observers*' is a wildcard pattern, SORT is a shortcut for SORT_BY_NAME and will sort the sections
+ * alphabetically.
+ */
 NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
 {
 	.handler   = crownstone_sdh_state_evt_handler,

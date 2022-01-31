@@ -192,6 +192,20 @@ void goIntoMicroapp(void* p) {
  */
 
 /*
+ * Get from interrupt to digital pin.
+ *
+ * We have one virtual device at location 0, so we just decrement the pin number by one to map to the array in the
+ * GPIO module.
+ */
+int interruptToDigitalPin(int interrupt) {
+	return interrupt - 1;
+}
+
+int digitalPinToInterrupt(int pin) {
+	return pin + 1;
+}
+
+/*
  * Checks flash boundaries (for single microapp).
  */
 cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
@@ -308,7 +322,8 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
  * Overwrite the command field so it is not (accidentally) executed twice.
  */
 void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
-	cmd->cmd = CS_MICROAPP_COMMAND_NONE;
+	cmd->prev = cmd->cmd;
+	cmd->cmd  = CS_MICROAPP_COMMAND_NONE;
 }
 
 /*
@@ -333,12 +348,15 @@ bool MicroappProtocol::retrieveCommand() {
  */
 void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	// Write pin command into the buffer.
-	microapp_pin_cmd_t* cmd = (microapp_pin_cmd_t*)g_coargs.bluenet2microapp.data;
-	cmd->cmd                = CS_MICROAPP_COMMAND_PIN;
-	cmd->pin                = pin;
+	uint8_t* payload        = g_coargs.microapp2bluenet.data;
+	microapp_pin_cmd_t* cmd = reinterpret_cast<microapp_pin_cmd_t*>(payload);
+	cmd->header.cmd         = CS_MICROAPP_COMMAND_PIN;
+	cmd->header.ack         = false;
+	cmd->header.id          = digitalPinToInterrupt(pin);
+	cmd->pin                = digitalPinToInterrupt(pin);
 	cmd->value              = CS_MICROAPP_COMMAND_VALUE_CHANGE;
-	cmd->ack                = false;
 	// Resume microapp so it can pick up this command.
+	LOGd("Send callback on virtual pin %i", cmd->pin);
 	writeCallback();
 }
 
@@ -369,11 +387,11 @@ void MicroappProtocol::performCallbackMeshMessage(scanned_device_t* dev) {
 		return;
 	}
 
-	buf->cmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
+	buf->header.cmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
 
 	// Allow microapp to map to handler with given id
-	buf->id   = id;
-	buf->type = type;
+	buf->header.id = id;
+	buf->type      = type;
 
 	// Copy address and at the same time convert from little endian to big endian
 	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, buf->addr);
@@ -390,19 +408,19 @@ void MicroappProtocol::performCallbackMeshMessage(scanned_device_t* dev) {
  * Write the callback to the microapp and have it execute it, hopefully. Try it more than once.
  */
 void MicroappProtocol::writeCallback() {
-	const uint8_t num_retries = 2;
-	microapp_acked_cmd_t* buf = (microapp_acked_cmd_t*)g_coargs.bluenet2microapp.data;
+	uint8_t* payload          = g_coargs.microapp2bluenet.data;
+	microapp_cmd_t* buf       = reinterpret_cast<microapp_cmd_t*>(payload);
 
-	buf->ack = false;
-	for (int i = 0; i < num_retries; ++i) {
+	buf->ack = CS_ACK_BLUENET_MICROAPP_REQUEST;
+	bool call_again = false;
+	do {
 		callMicroapp();
-
-		if (buf->ack) {
-			LOGi("Successful execution, resume bluenet");
-			return;
+		if (buf->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK) {
+			buf->ack = CS_ACK_NONE;
+			LOGd("Acked callback");
 		}
-		LOGi("Command not acked (try %i)", i);
-	}
+		call_again = retrieveCommand();
+	} while (call_again);
 }
 
 /*
@@ -437,11 +455,11 @@ bool MicroappProtocol::registerGpio(uint8_t pin) {
 		if (!_pinIsr[i].registered) {
 			_pinIsr[i].registered = true;
 			_pinIsr[i].pin        = pin;
-			LOGi("Register callback for pin %i", pin);
+			LOGi("Register callback for microapp pin %i", pin);
 			return true;
 		}
 	}
-	LOGw("Could not register callback for pin %i", pin);
+	LOGw("Could not register callback for microapp pin %i", pin);
 	return false;
 }
 
@@ -461,7 +479,7 @@ void MicroappProtocol::handleEvent(event_t& event) {
 		}
 		case CS_TYPE::EVT_GPIO_UPDATE: {
 			TYPIFY(EVT_GPIO_UPDATE) gpio = *(TYPIFY(EVT_GPIO_UPDATE)*)event.data;
-			LOGi("GPIO callback for pin %i", gpio.pin_index);
+			LOGi("GPIO callback for microapp pin %i", gpio.pin_index);
 			performCallbackGpio(gpio.pin_index);
 			break;
 		}
@@ -727,9 +745,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin
 		case CS_MICROAPP_COMMAND_PIN_LED3:
 		case CS_MICROAPP_COMMAND_PIN_LED4: {
 			CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
-			// We have one virtual device at location 0, so we have to decrement the pin number by one to map
-			// to the array in the GPIO module
-			pin_cmd->pin--;
+			pin_cmd->pin = interruptToDigitalPin(pin_cmd->pin);
 			switch (opcode1) {
 				case CS_MICROAPP_COMMAND_PIN_MODE: return handleMicroappPinSetModeCommand(pin_cmd);
 				case CS_MICROAPP_COMMAND_PIN_ACTION: return handleMicroappPinActionCommand(pin_cmd);
@@ -919,8 +935,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi
 			EventDispatcher::getInstance().dispatch(event);
 
 			// Get data back and prepare for microapp
-			twi_cmd->ack    = event.result.returnCode;
-			twi_cmd->length = twi.length;
+			twi_cmd->header.ack = event.result.returnCode;
+			twi_cmd->length     = twi.length;
 			break;
 		}
 		default: LOGw("Unknown i2c opcode: %i", twi_cmd->opcode); return ERR_UNKNOWN_OP_CODE;
@@ -949,18 +965,18 @@ bool MicroappProtocol::registerBleCallback(uint8_t id) {
 cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			bool success = registerBleCallback(ble_cmd->id);
-			ble_cmd->ack = success;
+			bool success        = registerBleCallback(ble_cmd->id);
+			ble_cmd->header.ack = success;
 			return success ? ERR_SUCCESS : ERR_NO_SPACE;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
 			_microappIsScanning = true;
-			ble_cmd->ack        = true;
+			ble_cmd->header.ack = true;
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
 			_microappIsScanning = false;
-			ble_cmd->ack        = true;
+			ble_cmd->header.ack = true;
 			break;
 		}
 		default: {
