@@ -578,7 +578,8 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	}
 
 	if(_initPacketLen != 0) {
-		setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESPONSE, &MeshDfuHost::targetInitializingStreamInitPacket);
+
+		setEventCallback(CS_TYPE::EVT_MESH_DFU_TRANSPORT_RESULT, &MeshDfuHost::targetInitializingStreamInitPacket);
 		_meshDfuTransport._createCommand(_initPacketLen);
 	} else {
 		abort();
