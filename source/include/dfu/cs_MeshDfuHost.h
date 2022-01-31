@@ -220,6 +220,15 @@ private:
 
 	void clearStreamState();
 
+	/**
+	 * utility to make sure all variables are set.
+	 */
+	void setStreamState(
+			FirmwareSection streamSection,
+			uint32_t streamNextWriteOffset,
+			uint32_t streamLeftToWrite,
+			uint32_t streamCurrentChunkSize,
+			uint32_t streamCrc);
 
 	// -------------------------------------------------------------------------------------
 	// ---------------------------------- phase callbacks ----------------------------------

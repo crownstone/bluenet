@@ -211,13 +211,21 @@ void MeshDfuHost::onStreamResult(event_t& event) {
 	}
 }
 
+void MeshDfuHost::setStreamState(
+		FirmwareSection streamSection,
+		uint32_t streamNextWriteOffset,
+		uint32_t streamLeftToWrite,
+		uint32_t streamCurrentChunkSize,
+		uint32_t streamCrc) {
+	_streamSection          = streamSection;
+	_streamNextWriteOffset  = streamNextWriteOffset;
+	_streamLeftToWrite      = streamLeftToWrite;
+	_streamCurrentChunkSize = streamCurrentChunkSize;
+	_streamCrc              = streamCrc;
+}
 
 void MeshDfuHost::clearStreamState() {
-	_streamSection = FirmwareSection::Unknown;
-	_streamNextWriteOffset = 0;
-	_streamLeftToWrite = 0;
-	_streamCurrentChunkSize = 0;
-	_streamCrc = 0;
+	setStreamState(FirmwareSection::Unknown, 0, 0, 0, 0);
 }
 
 
@@ -588,13 +596,13 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 	}
 
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
-	_streamSection = FirmwareSection::MicroApp;
-	_streamNextWriteOffset = 2*sizeof(uint32_t); // 4 byte size and 4 byte verification in flash must be skipped
-	_streamLeftToWrite = _initPacketLen;
-	_streamCrc = 0;
+
+	// setup stream: offset by 4 byte size and 4 byte verification in flash must be skipped
+	setStreamState(FirmwareSection::MicroApp, 0, 2 * sizeof(uint32_t), _initPacketLen, 0);
 
 	stream();
 }
+
 
 
 void MeshDfuHost::targetInitializingExecute(event_t& event) {
