@@ -144,14 +144,14 @@ void MeshDfuTransport::onEventCallbackTimeOut() {
 // ------------- the adapter layer for crownstone_ble -------------
 
 void MeshDfuTransport::write_control_point(cs_data_t buff) {
-	LOGMeshDfuTransportDebug("MeshDfuTransport: write control point");
+	LOGMeshDfuTransportDebug("MeshDfuTransport: write control point 0x%04X", _uuidHandles[Index::ControlPoint]);
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
 	_bleCentral->write(_uuidHandles[Index::ControlPoint], buff.data, buff.len);
 
 }
 
 void MeshDfuTransport::write_data_point(cs_data_t buff) {
-	LOGMeshDfuTransportDebug("MeshDfuTransport: write data point");
+	LOGMeshDfuTransportDebug("MeshDfuTransport: write data point 0x%04X", _uuidHandles[Index::DataPoint]);
 	_bleCentral->write(_uuidHandles[Index::DataPoint], buff.data, buff.len);
 }
 

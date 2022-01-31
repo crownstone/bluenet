@@ -227,7 +227,6 @@ private:
 			FirmwareSection streamSection,
 			uint32_t streamNextWriteOffset,
 			uint32_t streamLeftToWrite,
-			uint32_t streamCurrentChunkSize,
 			uint32_t streamCrc);
 
 	// -------------------------------------------------------------------------------------

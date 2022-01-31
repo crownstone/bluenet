@@ -144,9 +144,10 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 static void ________STREAM_IMPLEMENTATION________() { }
 
 void MeshDfuHost::stream() {
-	LOGMeshDfuHostDebug("steaming: startAddress 0x%08X, bytes left: %u", _streamNextWriteOffset, _streamLeftToWrite);
+	LOGMeshDfuHostDebug("steaming: startOffset 0x%08X, bytes left: %u", _streamNextWriteOffset, _streamLeftToWrite);
 
 	if(_streamLeftToWrite == 0 || _streamSection == FirmwareSection::Unknown) {
+		LOGMeshDfuHostDebug("done streaming, bytes left is 0 or section unknown.");
 		clearStreamState();
 		completePhase();
 		return;
@@ -159,7 +160,7 @@ void MeshDfuHost::stream() {
 			LOGMeshDfuHostInfo("Dfu stream couldn't aqcuire buffer, retrying %u more times", _reconnectionAttemptsLeft);
 			setTimeoutCallback(&MeshDfuHost::stream, MeshDfuConstants::DfuHostSettings::ReconnectTimeoutMs);
 		} else {
-		LOGMeshDfuHostWarn("Dfu stream couldn't aqcuire buffer, aborting.");
+			LOGMeshDfuHostWarn("Dfu stream couldn't aqcuire buffer, aborting.");
 			abort();
 		}
 
@@ -184,13 +185,16 @@ void MeshDfuHost::stream() {
 		return;
 	}
 
+	LOGMeshDfuHostDebug("writing data chunk of size %u", _streamCurrentChunkSize);
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, &MeshDfuHost::onStreamResult);
 	setTimeoutCallback(&MeshDfuHost::abort);
 	_meshDfuTransport.write_data_point(buff);
 }
 
 void MeshDfuHost::onStreamResult(event_t& event) {
-	TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT) result = *CS_TYPE_CAST(EVT_BLE_CENTRAL_WRITE_RESULT, event.data);
+	TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = *CS_TYPE_CAST(EVT_BLE_CENTRAL_WRITE_RESULT, event.data);
+	LOGMeshDfuHostDebug("stream result received: %u", static_cast<uint8_t>(result));
+
 	// check result
 	// on ok, update write data
 
@@ -215,17 +219,16 @@ void MeshDfuHost::setStreamState(
 		FirmwareSection streamSection,
 		uint32_t streamNextWriteOffset,
 		uint32_t streamLeftToWrite,
-		uint32_t streamCurrentChunkSize,
 		uint32_t streamCrc) {
 	_streamSection          = streamSection;
 	_streamNextWriteOffset  = streamNextWriteOffset;
 	_streamLeftToWrite      = streamLeftToWrite;
-	_streamCurrentChunkSize = streamCurrentChunkSize;
 	_streamCrc              = streamCrc;
 }
 
 void MeshDfuHost::clearStreamState() {
-	setStreamState(FirmwareSection::Unknown, 0, 0, 0, 0);
+	setStreamState(FirmwareSection::Unknown, 0, 0, 0);
+	_streamCurrentChunkSize = 0;
 }
 
 
@@ -569,7 +572,7 @@ bool MeshDfuHost::startPhaseTargetInitializing() {
 
 void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
-	LOGMeshDfuHostDebug("response packet: %u, {max: %u, off: %u, crc: %x}", result.result, result.max_size, result.offset, result.crc);
+	LOGMeshDfuHostDebug("response for selectCommand: %u, {max: %u, off: %u, crc: %x}", result.result, result.max_size, result.offset, result.crc);
 
 	if(result.result != ERR_SUCCESS || result.offset != 0) {
 		LOGMeshDfuHostWarn("dfu select command failed: %u, offset: %u", result.result, result.offset);
@@ -587,11 +590,11 @@ void MeshDfuHost::targetInitializingCreateCommand(event_t& event) {
 }
 
 void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
-	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESPONSE, event.data);
-	LOGMeshDfuHostDebug("response packet: %u, {max: %u, off: %u, crc: %x}", result.result, result.max_size, result.offset, result.crc);
+	TYPIFY(EVT_MESH_DFU_TRANSPORT_RESULT) result = *CS_TYPE_CAST(EVT_MESH_DFU_TRANSPORT_RESULT, event.data);
+	LOGMeshDfuHostDebug("response for createCommand: %u", result);
 
-	if(result.result != ERR_SUCCESS || result.offset != 0) {
-		LOGMeshDfuHostWarn("dfu create command failed: %u, offset: %u", result.result, result.offset);
+	if(result != ERR_SUCCESS) {
+		LOGMeshDfuHostWarn("dfu createCommand failed: %u", result);
 		abort();
 		return;
 	}
@@ -599,7 +602,7 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 	_reconnectionAttemptsLeft = MeshDfuConstants::DfuHostSettings::MaxReconnectionAttempts;
 
 	// setup stream: offset by 4 byte size and 4 byte verification in flash must be skipped
-	setStreamState(FirmwareSection::MicroApp, 0, 2 * sizeof(uint32_t), _initPacketLen, 0);
+	setStreamState(FirmwareSection::MicroApp, 2 * sizeof(uint32_t), _initPacketLen, 0);
 
 	stream();
 }
