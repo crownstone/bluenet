@@ -17,7 +17,7 @@
 
 #define LOGBleCentralInfo LOGi
 #define LOGBleCentralDebug LOGd
-#define LogLevelBleCentralDebug SERIAL_VERY_VERBOSE
+#define LogLevelBleCentralDebug SERIAL_DEBUG
 
 const uint16_t WRITE_OVERHEAD = 3;
 const uint16_t LONG_WRITE_OVERHEAD = 5;
@@ -276,7 +276,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 				packet.cccdHandle = db_char_entry.cccd_handle;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 
-				LOGBleCentralDebug("   char {uuid: 0x%04x, valHandle: %u, cccdHandle: %d }",
+				LOGBleCentralDebug("   char {uuid: 0x%04x, valHandle: 0x%04X, cccdHandle: 0x%04X }",
 						db_char_entry.characteristic.uuid.uuid,
 						db_char_entry.characteristic.handle_value,
 						db_char_entry.cccd_handle);

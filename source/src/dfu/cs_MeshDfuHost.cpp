@@ -206,6 +206,7 @@ void MeshDfuHost::onStreamResult(event_t& event) {
 
 		// stream more
 		setTimeoutCallback(&MeshDfuHost::stream, MeshDfuConstants::DfuHostSettings::StreamIntervalMs);
+		stream();
 	} else {
 		// @Bart: what errors can be expected here and when can I be sure no data has been sent to the
 		// target device so that I can try again?
@@ -703,6 +704,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 static void ________PHASE_ADMINISTRATION________() { }
 
 bool MeshDfuHost::startPhase(Phase phase) {
+	LOGMeshDfuHostDebug("*************************************************");
 	LOGMeshDfuHostDebug("+++ Starting phase %s", phaseName(phase));
 	_phaseCurrent = phase;
 	_phaseOnComplete = Phase::None;
