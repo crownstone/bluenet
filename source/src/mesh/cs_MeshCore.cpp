@@ -393,7 +393,9 @@ void MeshCore::provisionSelf(uint16_t id) {
 	retCode = config_server_bind(_devkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
+#if MESH_SDK_VERSION_MAJOR < 5
 	access_flash_config_store();
+#endif
 }
 
 void MeshCore::provisionLoad() {
