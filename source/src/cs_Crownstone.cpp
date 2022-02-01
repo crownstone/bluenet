@@ -257,7 +257,7 @@ void Crownstone::init(uint16_t step) {
 }
 
 void Crownstone::init0() {
-	LOGi(FMT_HEADER, "init");
+	LOGi(FMT_HEADER "init");
 	initDrivers(0);
 }
 
@@ -270,28 +270,28 @@ void Crownstone::init1() {
 	_operationMode = getOperationMode(mode);
 
 	//! configure the crownstone
-	LOGi(FMT_HEADER, "configure");
+	LOGi(FMT_HEADER "configure");
 	configure();
 	LOG_FLUSH();
 
-	LOGi(FMT_CREATE, "timer");
+	LOGi(FMT_CREATE "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
 	LOG_FLUSH();
 
-	LOGi(FMT_HEADER, "mode");
+	LOGi(FMT_HEADER "mode");
 	switchMode(_operationMode);
 	LOG_FLUSH();
 
-	LOGi(FMT_HEADER, "init services");
+	LOGi(FMT_HEADER "init services");
 	_stack->initServices();
 	LOG_FLUSH();
 
-	LOGi(FMT_HEADER, "init central");
+	LOGi(FMT_HEADER "init central");
 	_bleCentral->init();
 	_crownstoneCentral->init();
 
 #if BUILD_MICROAPP_SUPPORT == 1
-	LOGi(FMT_HEADER, "init microapp");
+	LOGi(FMT_HEADER "init microapp");
 	_microapp->init();
 #endif
 }
@@ -386,25 +386,25 @@ void Crownstone::initDrivers1() {
 		_state->set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 	}
 
-	LOGi(FMT_INIT, "command handler");
+	LOGi(FMT_INIT "command handler");
 	_commandHandler->init(&_boardsConfig);
 
-	LOGi(FMT_INIT, "factory reset");
+	LOGi(FMT_INIT "factory reset");
 	_factoryReset->init();
 
-	LOGi(FMT_INIT, "encryption");
+	LOGi(FMT_INIT "encryption");
 	ConnectionEncryption::getInstance().init();
 	KeysAndAccess::getInstance().init();
 
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		LOGi(FMT_INIT, "switch");
+		LOGi(FMT_INIT "switch");
 		_switchAggregator.init(_boardsConfig);
 
-		LOGi(FMT_INIT, "temperature guard");
+		LOGi(FMT_INIT "temperature guard");
 		_temperatureGuard->init(_boardsConfig);
 
-		LOGi(FMT_INIT, "power sampler");
+		LOGi(FMT_INIT "power sampler");
 		_powerSampler->init(&_boardsConfig);
 	}
 
@@ -569,7 +569,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 
 	// Enable AES encryption.
 	if (_state->isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
-		LOGi(FMT_ENABLE, "AES encryption");
+		LOGi(FMT_ENABLE "AES encryption");
 		_stack->setAesEncrypted(true);
 	}
 
@@ -644,7 +644,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 void Crownstone::startUp() {
 
-	LOGi(FMT_HEADER, "startup");
+	LOGi(FMT_HEADER "startup");
 
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
@@ -664,11 +664,11 @@ void Crownstone::startUp() {
 		_switchAggregator.switchPowered();
 
 		//! Start temperature guard regardless of operation mode
-		LOGi(FMT_START, "temp guard");
+		LOGi(FMT_START "temp guard");
 		_temperatureGuard->start();
 
 		//! Start power sampler regardless of operation mode (as it is used for the current based soft fuse)
-		LOGi(FMT_START, "power sampling");
+		LOGi(FMT_START "power sampling");
 		_powerSampler->startSampling();
 
 		// Let the power sampler call the PWM callback function on zero crossings.
@@ -782,7 +782,7 @@ void Crownstone::scheduleNextTick() {
 }
 
 void Crownstone::run() {
-	LOGi(FMT_HEADER, "running");
+	LOGi(FMT_HEADER "running");
 
 	while (1) {
 		app_sched_execute();

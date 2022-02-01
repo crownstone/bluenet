@@ -139,7 +139,7 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
 	_boardPowerZero = boardConfig->powerZero;
 
-	LOGi(FMT_INIT, "buffers");
+	LOGi(FMT_INIT "buffers");
 	_powerMilliWattHist->init(); // Allocates buffer
 	_currentRmsMilliAmpHist->init(); // Allocates buffer
 	_voltageRmsMilliVoltHist->init(); // Allocates buffer
@@ -159,7 +159,7 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 
 	_boardConfig = boardConfig;
 
-	LOGd(FMT_INIT, "ADC");
+	LOGd(FMT_INIT "ADC");
 	adc_config_t adcConfig;
 	adcConfig.channelCount = 2;
 	// TODO: there are now multiple voltage pins
@@ -223,7 +223,7 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 }
 
 void PowerSampling::startSampling() {
-	LOGi(FMT_START, "power sample");
+	LOGi(FMT_START "power sample");
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));

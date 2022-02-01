@@ -51,7 +51,7 @@ State::~State() {
 }
 
 void State::init(boards_config_t* boardsConfig) {
-	LOGi(FMT_INIT, "board config");
+	LOGi(FMT_INIT "State");
 	if (isInitialized()) {
 		return;
 	}
@@ -60,7 +60,7 @@ void State::init(boards_config_t* boardsConfig) {
 	_boardsConfig = boardsConfig;
 
 	if (!_storage->isInitialized()) {
-		LOGe(FMT_NOT_INITIALIZED, "Storage");
+		LOGe(FMT_NOT_INITIALIZED "Storage");
 		return;
 	}
 	_storage->setErrorCallback(storageErrorCallback);
