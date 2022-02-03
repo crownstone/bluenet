@@ -110,8 +110,7 @@ void asACR01B10D(boards_config_t* config) {
 	config->currentMultiplier[GAIN_MIDDLE]     = 0.015;
 	config->currentMultiplier[GAIN_HIGH]       = 0.015;
 
-	// TODO: Explain why not 512 (see above). If 500 incorrect, replace.
-	config->voltageZero[GAIN_SINGLE]           = 500;
+	config->voltageZero[GAIN_SINGLE]           = 512;
 
 	// TODO: Explain this value
 	config->currentZero[GAIN_LOW]              = -125;
