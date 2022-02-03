@@ -336,9 +336,15 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 //	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
 //	bearer_adtype_add(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE);
 //	bearer_adtype_add(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE);
+
+	// Add all AD types, as we don't know what types will be used for asset filters or microapps.
+	// This does not use more RAM, they are simply bits in a bitmask.
 	for (int i = 0; i < 256; ++i) {
 		bearer_adtype_add(i);
 	}
+
+	// If you want to see all connectionless packets (scan requests, advertisements without data, etc), uncomment the next line:
+//	bearer_adtype_filtering_set(false);
 
 #else
 	LOGw("Scanner in mesh not enabled");
