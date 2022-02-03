@@ -21,7 +21,7 @@
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <util/cs_Utils.h>
 
-#define LOGStackDebug LOGnone
+#define LOGStackDebug LOGvv
 
 
 Stack::Stack() {
