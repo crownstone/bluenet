@@ -323,10 +323,11 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 	nrf_mesh_evt_handler_add(&meshEventHandlerStruct);
 
-#if MESH_SCANNER == 1
-	// Init scanned device variable before registering the callback.
 	LOGi("Mesh scanner: interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
 	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
+
+#if MESH_SCANNER == 1
+	// Init scanned device variable before registering the callback.
 	nrf_mesh_rx_cb_set(scan_cb);
 #else
 	LOGw("Scanner in mesh not enabled");
