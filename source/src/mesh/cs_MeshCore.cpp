@@ -35,8 +35,17 @@ extern "C" {
 }
 
 
-#define MESH_FLASH_HANDLE_SEQNUM   (0x0001)
-#define MESH_FLASH_HANDLE_IV_INDEX (0x0002)
+/**
+ * Copied from mest_opt_net_state.h
+ */
+enum
+{
+	MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD = 1,
+	MESH_OPT_NET_STATE_IV_INDEX_LEGACY_RECORD,
+	MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD,
+	MESH_OPT_NET_STATE_IV_INDEX_RECORD
+};
+
 
 #if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
 #error "Mesh key size doesn't match encryption key size"
@@ -45,23 +54,26 @@ extern "C" {
 #if MESH_PERSISTENT_STORAGE == 2
 
 static CS_TYPE cs_mesh_get_type_from_handle(uint16_t handle) {
-	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
 	switch (handle) {
-		case MESH_FLASH_HANDLE_SEQNUM:
-			type = CS_TYPE::STATE_MESH_SEQ_NUMBER;
-			break;
-		case MESH_FLASH_HANDLE_IV_INDEX:
-			type = CS_TYPE::STATE_MESH_IV_INDEX;
-			break;
+		case MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD:
+			return CS_TYPE::STATE_MESH_SEQ_NUMBER;
+		case MESH_OPT_NET_STATE_IV_INDEX_LEGACY_RECORD:
+			return CS_TYPE::STATE_MESH_IV_INDEX;
+		case MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD:
+			return CS_TYPE::STATE_MESH_SEQ_NUMBER_V5;
+		case MESH_OPT_NET_STATE_IV_INDEX_RECORD:
+			return CS_TYPE::STATE_MESH_IV_INDEX_V5;
+		default:
+			return CS_TYPE::CONFIG_DO_NOT_USE;
 	}
-	return type;
 }
 
 static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	cs_ret_code_t retCode = State::getInstance().set(type, data_ptr, data_size);
-	LOGi("cs_mesh_write_cb handle=%u retCode=%u", handle, retCode);
+	_log(SERIAL_DEBUG, false, "cs_mesh_write_cb handle=%u retCode=%u data=", handle, retCode);
+	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
@@ -74,19 +86,28 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
-	State::getInstance().get(type, data_ptr, data_size);
-	_log(SERIAL_INFO, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
-//	CsUtils::printArray(data_ptr, data_size, SERIAL_INFO);
-	_logArray(SERIAL_INFO, true, (uint8_t*)data_ptr, data_size);
-	return NRF_SUCCESS;
+	cs_ret_code_t retCode = State::getInstance().get(type, data_ptr, data_size);
+	_log(SERIAL_DEBUG, false, "cs_mesh_read_cb handle=%u retCode=%u data=", handle, retCode);
+	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
+	switch (retCode) {
+		case ERR_SUCCESS:
+			return NRF_SUCCESS;
+		default:
+			return retCode;
+	}
 }
 
 static uint32_t cs_mesh_erase_cb(uint16_t handle) {
-	LOGi("cs_mesh_erase_cb handle=%u", handle);
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
-	State::getInstance().remove(type, 0);
-	return NRF_SUCCESS;
+	cs_ret_code_t retCode = State::getInstance().remove(type, 0);
+	LOGd("cs_mesh_erase_cb handle=%u retCode=%u", handle, retCode);
+	switch (retCode) {
+		case ERR_SUCCESS:
+			return NRF_SUCCESS;
+		default:
+			return retCode;
+	}
 }
 #endif // MESH_PERSISTENT_STORAGE == 2
 
@@ -605,11 +626,11 @@ void MeshCore::handleEvent(event_t & event) {
 	//			case CS_TYPE::STATE_MESH_IV_INDEX: {
 	//				break;
 	//			}
-				case CS_TYPE::STATE_MESH_SEQ_NUMBER: {
-					TYPIFY(STATE_MESH_SEQ_NUMBER) seqNumber;
-					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER, &seqNumber, sizeof(seqNumber));
-					LOGi("net_state_ext_write_done seqNum=%u", seqNumber);
-					net_state_ext_write_done(MESH_FLASH_HANDLE_SEQNUM, &seqNumber, sizeof(seqNumber));
+				case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5: {
+					TYPIFY(STATE_MESH_SEQ_NUMBER_V5) seqNumber;
+					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER_V5, &seqNumber, sizeof(seqNumber));
+					LOGi("net_state_ext_write_done seqNum=%u syncIndex=%u", seqNumber.next_block, seqNumber.synchro_index);
+					net_state_ext_write_done(MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD, &seqNumber, sizeof(seqNumber));
 					break;
 				}
 				default:

@@ -204,12 +204,12 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(STATE_BEHAVIOUR_MASTER_HASH)*)data.value = STATE_BEHAVIOUR_MASTER_HASH_DEFAULT;
 		return ERR_SUCCESS;
 	case CS_TYPE::STATE_MESH_IV_INDEX:
-		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_index = STATE_MESH_IV_INDEX_DEFAULT;
-		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_update_in_progress = STATE_MESH_IV_STATUS_DEFAULT;
-		return ERR_SUCCESS;
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
-		*reinterpret_cast<TYPIFY(STATE_MESH_SEQ_NUMBER)*>(data.value) = STATE_MESH_SEQ_NUMBER_DEFAULT;
-		return ERR_SUCCESS;
+	case CS_TYPE::STATE_MESH_IV_INDEX_V5:
+	case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5:
+		// We do not want a default, so that we know whether the value exists on flash.
+		// The default value will be set by the mesh code.
+		return ERR_NOT_IMPLEMENTED;
 	case CS_TYPE::STATE_IBEACON_CONFIG_ID: {
 //		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = TYPIFY(STATE_IBEACON_CONFIG_ID)();
 		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = ibeacon_config_id_packet_t();
@@ -477,6 +477,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_MESH_IV_INDEX_V5:
+	case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5:
 	case CS_TYPE::STATE_IBEACON_CONFIG_ID:
 	case CS_TYPE::STATE_MICROAPP:
 	case CS_TYPE::STATE_SOFT_ON_SPEED:
