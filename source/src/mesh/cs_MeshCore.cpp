@@ -12,26 +12,27 @@
 #include <util/cs_Utils.h>
 
 extern "C" {
-#include "nrf_mesh.h"
+#include "access_config.h"
+#include "access_internal.h"
+#include "access.h"
+#include "ad_type_filter.h"
+#include "config_server_events.h"
+#include "config_server.h"
+#include "device_state_manager.h"
+#include "flash_manager_defrag.h"
+#include "log.h"
 #include "mesh_config.h"
 #include "mesh_opt_core.h"
-#include "mesh_stack.h"
-#include "access.h"
-#include "access_config.h"
-#include "config_server.h"
-#include "config_server_events.h"
-#include "device_state_manager.h"
 #include "mesh_provisionee.h"
+#include "mesh_stack.h"
+#include "net_state.h"
 #include "nrf_mesh_configure.h"
 #include "nrf_mesh_events.h"
-#include "net_state.h"
+#include "nrf_mesh.h"
 #include "scanner.h"
+#include "transport.h"
 #include "uri.h"
 #include "utils.h"
-#include "log.h"
-#include "access_internal.h"
-#include "flash_manager_defrag.h"
-#include "transport.h"
 }
 
 
@@ -329,6 +330,16 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
 	nrf_mesh_rx_cb_set(scan_cb);
+
+	// Add all AD types we are interested in.
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE);
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE);
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE);
+	for (int i = 0; i < 256; ++i) {
+		bearer_adtype_add(i);
+	}
+
 #else
 	LOGw("Scanner in mesh not enabled");
 #endif
