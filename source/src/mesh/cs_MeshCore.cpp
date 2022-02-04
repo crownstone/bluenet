@@ -331,6 +331,7 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	// Init scanned device variable before registering the callback.
 	nrf_mesh_rx_cb_set(scan_cb);
 
+#if MESH_SCANNER_FILTERED == 1
 	// Add all AD types we are interested in.
 //	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE);
 //	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
@@ -342,9 +343,9 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	for (int i = 0; i < 256; ++i) {
 		bearer_adtype_add(i);
 	}
-
-	// If you want to see all connectionless packets (scan requests, advertisements without data, etc), uncomment the next line:
-//	bearer_adtype_filtering_set(false);
+#else
+	bearer_adtype_filtering_set(false);
+#endif
 
 #else
 	LOGw("Scanner in mesh not enabled");
