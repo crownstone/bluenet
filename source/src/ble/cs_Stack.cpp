@@ -519,27 +519,20 @@ struct cs_stack_scan_t {
 	uint8_t data[31]; // Same size as _scanBuffer
 };
 
+/*
+ * When meshing is enabled, this function will not be used but the scanner in the mesh is used.
+ */
 void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 	scanned_device_t scan;
 	memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
 	scan.resolvedPrivateAddress = advReport->peer_addr.addr_id_peer;
 	scan.addressType = advReport->peer_addr.addr_type;
 	scan.rssi = advReport->rssi;
+	scan.setId = advReport->set_id;
 	scan.channel = advReport->ch_index;
 	scan.dataSize = advReport->data.len;
 	scan.data = advReport->data.p_data;
 
-//	uint16_t type = *((uint16_t*)&(advReport->type));
-//	const uint8_t* addr = scan.address;
-//	const uint8_t* p = scan.data;
-//	if (p[0] == 0x15 && p[1] == 0x16 && p[2] == 0x01 && p[3] == 0xC0 && p[4] == 0x05) {
-////		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
-////		if (advReport->peer_addr.addr_type == BLE_GAP_ADDR_TYPE_PUBLIC && addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-////		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-//		LOGi("Stack scan: address=%02X:%02X:%02X:%02X:%02X:%02X addrType=%u type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], advReport->peer_addr.addr_type, type, scan.rssi, scan.channel);
-//		LOGi("  adv_type=%u len=%u data=", type, scan.dataSize);
-//		CsUtils::printArray(scan.data, scan.dataSize);
-//	}
 	event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 	EventDispatcher::getInstance().dispatch(event);
 }

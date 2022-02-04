@@ -225,7 +225,7 @@ void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
  * Called from interrupt service routine, only write which pin is fired and return immediately.
  */
 void Gpio::registerEvent(uint8_t pin) {
-	LOGi("GPIO event on pin %i", pin);
+	LOGd("GPIO event on pin %i", pin);
 	for (uint8_t i = 0; i < _pins.size(); ++i) {
 		if (_pins[i].pin == pin) {
 			_pins[i].event = true;

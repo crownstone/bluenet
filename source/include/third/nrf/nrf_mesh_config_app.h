@@ -145,6 +145,9 @@
  */
 #define ACCESS_ELEMENT_COUNT (1)
 
+/** The number of instances of the health server model. */
+#define HEALTH_SERVER_ELEMENT_COUNT (1)
+
 /**
  * The number of allocated subscription lists for the application.
  *

@@ -142,6 +142,7 @@ enum CommandMicroappBleOpcode {
 	CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER = 0x01,
 	CS_MICROAPP_COMMAND_BLE_SCAN_START       = 0x02,
 	CS_MICROAPP_COMMAND_BLE_SCAN_STOP        = 0x03,
+	CS_MICROAPP_COMMAND_BLE_CONNECT          = 0x04,
 };
 
 enum CommandMicroappMeshOpcode {
@@ -187,7 +188,8 @@ struct __attribute__((packed)) microapp_cmd_t {
 	uint8_t id;
 	uint8_t ack;
 	uint8_t prev;
-	uint16_t counter;
+	uint8_t callbackCmd;
+	uint8_t counter;
 };
 
 static_assert(sizeof(microapp_cmd_t) == MICROAPP_CMD_SIZE_HEADER);
@@ -297,6 +299,7 @@ struct __attribute__((packed)) microapp_ble_cmd_t {
 	microapp_cmd_t header;
 	uint8_t opcode;
 	uint8_t id;
+	uint8_t addr[MAC_ADDRESS_LENGTH];  // big-endian!
 };
 
 static_assert(sizeof(microapp_ble_cmd_t) <= MAX_PAYLOAD);

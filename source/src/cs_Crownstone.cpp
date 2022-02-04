@@ -723,9 +723,6 @@ void Crownstone::startUp() {
 	CsUtils::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 	LOGi("Address id=%u type=%u", address.addr_id_peer, address.addr_type);
 
-	// Plain text log.
-	CLOGi("\r\nAddress: %X:%X:%X:%X:%X:%X", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
-
 	_state->startWritesToFlash();
 
 #if BUILD_MESHING == 1

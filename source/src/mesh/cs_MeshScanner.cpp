@@ -24,16 +24,17 @@ void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 			}
 
 			scanned_device_t _scannedDevice = {0};
+			
+			auto &scanner = scanData->p_metadata->params.scanner;
 
-			memcpy(_scannedDevice.address,
-					scanData->p_metadata->params.scanner.adv_addr.addr,
-					sizeof(_scannedDevice.address));
+			memcpy(_scannedDevice.address, scanner.adv_addr.addr, sizeof(_scannedDevice.address));
 
-			_scannedDevice.resolvedPrivateAddress = scanData->p_metadata->params.scanner.adv_addr.addr_id_peer;
-			_scannedDevice.addressType = scanData->p_metadata->params.scanner.adv_addr.addr_type;
-
-			_scannedDevice.rssi = scanData->p_metadata->params.scanner.rssi;
-			_scannedDevice.channel = scanData->p_metadata->params.scanner.channel;
+			_scannedDevice.resolvedPrivateAddress = scanner.adv_addr.addr_id_peer;
+			_scannedDevice.addressType = scanner.adv_addr.addr_type;
+			_scannedDevice.rssi = scanner.rssi;
+			//_scannedDevice.setId = scanner.set_id;
+			_scannedDevice.advType = scanner.adv_type;
+			_scannedDevice.channel = scanner.channel;
 			_scannedDevice.dataSize = scanData->length;
 			_scannedDevice.data = const_cast<uint8_t*>(scanData->p_payload);
 

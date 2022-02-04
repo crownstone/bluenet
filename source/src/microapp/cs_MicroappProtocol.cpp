@@ -8,9 +8,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "nrf_fstorage_sd.h"
-
-#include <algorithm>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
@@ -30,6 +27,10 @@
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
+
+#include <algorithm>
+
+#include "nrf_fstorage_sd.h"
 
 /**
  * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
@@ -81,8 +82,8 @@ coargs_t g_coargs;
  */
 cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 	if (length == 0 || length > MAX_PAYLOAD) {
-		LOGw("Wrong length %i from microapp (still in microapp context)", length);
-		return ERR_WRONG_PAYLOAD_LENGTH;
+	//	LOGw("Wrong length %i from microapp (still in microapp context)", length);
+	//	return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	uint8_t readSize = 0;
@@ -104,7 +105,7 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 1
 	LOGi("Do not yield");
 #else
-	//LOGi("Yield");
+	// LOGi("Yield");
 	yieldCoroutine(args->coroutine);
 #endif
 
@@ -337,6 +338,8 @@ void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
 bool MicroappProtocol::retrieveCommand() {
 	uint8_t* payload    = g_coargs.microapp2bluenet.data;
 	microapp_cmd_t* cmd = reinterpret_cast<microapp_cmd_t*>(payload);
+
+	LOGv("Handle command %i (previous %i, callback %i)", cmd->cmd, cmd->prev, cmd->callbackCmd);
 	handleMicroappCommand(cmd);
 	bool call_again = !stopAfterMicroappCommand(cmd);
 	setAsProcessed(cmd);
@@ -350,7 +353,7 @@ void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	// Write pin command into the buffer.
 	uint8_t* payload        = g_coargs.microapp2bluenet.data;
 	microapp_pin_cmd_t* cmd = reinterpret_cast<microapp_pin_cmd_t*>(payload);
-	cmd->header.cmd         = CS_MICROAPP_COMMAND_PIN;
+	cmd->header.callbackCmd = CS_MICROAPP_COMMAND_PIN;
 	cmd->header.ack         = false;
 	cmd->header.id          = digitalPinToInterrupt(pin);
 	cmd->pin                = digitalPinToInterrupt(pin);
@@ -360,12 +363,86 @@ void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	writeCallback();
 }
 
+struct type_t {
+	uint8_t *p_data;
+	uint16_t data_len;
+};
+
+static uint32_t adv_report_parse(uint8_t type, type_t * p_advdata, type_t * p_typedata)
+{
+	uint32_t  index = 0;
+	uint8_t * p_data;
+
+	p_data = p_advdata->p_data;
+
+	while (index < p_advdata->data_len)
+	{
+		uint8_t field_length = p_data[index];
+		uint8_t field_type   = p_data[index + 1];
+
+		if (field_type == type)
+		{
+			p_typedata->p_data = &p_data[index + 2];
+			p_typedata->data_len   = field_length - 1;
+			return NRF_SUCCESS;
+		}
+		index += field_length + 1;
+	}
+	return NRF_ERROR_NOT_FOUND;
+}
+
 /*
  * Communicate mesh message towards microapp.
  */
-void MicroappProtocol::performCallbackMeshMessage(scanned_device_t* dev) {
+void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t* dev) {
+
+	if (dev->rssi < -50) {
+		return;
+	}
+
+	bool newline = false;
+	_log(SERIAL_INFO, newline, "Advertisement: ");
+	CsUtils::printAddress((uint8_t*)dev->address, BLE_GAP_ADDR_LEN, SERIAL_INFO, newline);
+	LOGi(" rssi=%i ch=%i type=%i", dev->rssi, dev->channel, dev->advType);
+	if (dev->dataSize && dev->data) {
+		_log(SERIAL_INFO, newline, "Data [%i]: ", dev->dataSize);
+		for (int i = 0; i < dev->dataSize; ++i) {
+			_log(SERIAL_INFO, newline, "%02x ", dev->data[i]);
+		}
+		_log(SERIAL_INFO, true, "");
+
+//		uint8_t *complete_name = (uint8_t*)malloc((sizeof(uint8_t) * 21));
+		type_t type_data = { .p_data = NULL, .data_len = 0, };
+
+		type_t source_data = { .p_data = dev->data, .data_len = dev->dataSize, };
+
+		bool found = false;
+
+		int err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
+				&source_data,
+				&type_data);
+		if (err_code == NRF_SUCCESS) {
+			found = true;
+		}
+		err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
+				&source_data,
+				&type_data);
+		if (err_code == NRF_SUCCESS) {
+			found = true;
+		}
+
+		if (found) {
+			char *name = (char*)malloc(sizeof(char) * (type_data.data_len + 1));
+			memcpy(name, type_data.p_data, type_data.data_len);
+			name[type_data.data_len] = 0;
+			LOGi("Name [%i]: %s", type_data.data_len, name);
+			delete(name);
+		}
+	}
+	return; // for now
 	// Write bluetooth device to buffer
-	microapp_ble_device_t* buf = (microapp_ble_device_t*)g_coargs.bluenet2microapp.data;
+	uint8_t* payload    = g_coargs.microapp2bluenet.data;
+	microapp_ble_device_t* buf = reinterpret_cast<microapp_ble_device_t*>(payload);
 
 	bool found                     = false;
 	uint8_t id                     = 0;
@@ -387,7 +464,7 @@ void MicroappProtocol::performCallbackMeshMessage(scanned_device_t* dev) {
 		return;
 	}
 
-	buf->header.cmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
+	buf->header.callbackCmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
 
 	// Allow microapp to map to handler with given id
 	buf->header.id = id;
@@ -401,25 +478,37 @@ void MicroappProtocol::performCallbackMeshMessage(scanned_device_t* dev) {
 	buf->dlen = dev->dataSize;
 	memcpy(buf->data, dev->data, dev->dataSize);
 
-	writeCallback();
+	LOGv("Incoming advertisement");
+	static int throttle = 0;
+	if (++throttle % 100 == 0) {
+		writeCallback();
+	}
 }
 
 /*
  * Write the callback to the microapp and have it execute it, hopefully. Try it more than once.
  */
 void MicroappProtocol::writeCallback() {
-	uint8_t* payload          = g_coargs.microapp2bluenet.data;
-	microapp_cmd_t* buf       = reinterpret_cast<microapp_cmd_t*>(payload);
+	uint8_t* payload    = g_coargs.microapp2bluenet.data;
+	microapp_cmd_t* buf = reinterpret_cast<microapp_cmd_t*>(payload);
 
-	buf->ack = CS_ACK_BLUENET_MICROAPP_REQUEST;
+	buf->ack        = CS_ACK_BLUENET_MICROAPP_REQUEST;
 	bool call_again = false;
 	do {
+		LOGv("Call app, command %i (previous %i, callback %i)", buf->cmd, buf->prev, buf->callbackCmd);
 		callMicroapp();
 		if (buf->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK) {
 			buf->ack = CS_ACK_NONE;
 			LOGd("Acked callback");
 		}
 		call_again = retrieveCommand();
+		/*
+		if (call_again) {
+			LOGi("Callback. Call again.");
+		}
+		else {
+			LOGi("Callback. Drop out");
+		}*/
 	} while (call_again);
 }
 
@@ -531,7 +620,7 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 		return;
 	}
 
-	performCallbackMeshMessage(dev);
+	performCallbackIncomingBLEAdvertisement(dev);
 }
 
 /*
@@ -594,7 +683,8 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t* cmd) {
 			break;
 		}
 		case CS_MICROAPP_COMMAND_LOOP_END: {
-			LOGi("Loop end");
+			// Only in debug mode
+			LOGv("Loop end");
 			break;
 		}
 		case CS_MICROAPP_COMMAND_NONE: {
@@ -745,7 +835,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin
 		case CS_MICROAPP_COMMAND_PIN_LED3:
 		case CS_MICROAPP_COMMAND_PIN_LED4: {
 			CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
-			pin_cmd->pin = interruptToDigitalPin(pin_cmd->pin);
+			pin_cmd->pin                      = interruptToDigitalPin(pin_cmd->pin);
 			switch (opcode1) {
 				case CS_MICROAPP_COMMAND_PIN_MODE: return handleMicroappPinSetModeCommand(pin_cmd);
 				case CS_MICROAPP_COMMAND_PIN_ACTION: return handleMicroappPinActionCommand(pin_cmd);
@@ -965,19 +1055,35 @@ bool MicroappProtocol::registerBleCallback(uint8_t id) {
 cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			bool success        = registerBleCallback(ble_cmd->id);
-			ble_cmd->header.ack = success;
+			LOGi("Set scan event callback handler");
+#if BUILD_MESHING == 0
+			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled")
+#endif
+					bool success = registerBleCallback(ble_cmd->id);
+			ble_cmd->header.ack  = success;
 			return success ? ERR_SUCCESS : ERR_NO_SPACE;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
+			LOGi("Start scanning");
 			_microappIsScanning = true;
 			ble_cmd->header.ack = true;
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
+			LOGi("Stop scanning");
 			_microappIsScanning = false;
 			ble_cmd->header.ack = true;
 			break;
+		}
+		case CS_MICROAPP_COMMAND_BLE_CONNECT: {
+			LOGi("Set up BLE connection");
+			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
+			std::reverse_copy(ble_cmd->addr, ble_cmd->addr + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
+			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
+			event.dispatch();
+			ble_cmd->header.ack = true;
+			LOGi("BLE command result: %u", event.result.returnCode);
+			return event.result.returnCode;
 		}
 		default: {
 			LOGi("Unknown microapp BLE command opcode: %u", ble_cmd->opcode);

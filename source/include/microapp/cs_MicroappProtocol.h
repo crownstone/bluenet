@@ -146,7 +146,7 @@ protected:
 	/**
 	 * Callback BLE.
 	 */
-	void performCallbackMeshMessage(scanned_device_t* dev);
+	void performCallbackIncomingBLEAdvertisement(scanned_device_t* dev);
 
 	/**
 	 * Initialize memory for the microapp.

@@ -4,7 +4,8 @@ Language: Cpp
 
 ###### Source file preamble and comments ######
 
-IncludeBlocks: Preserve
+SortIncludes: true
+IncludeBlocks: Regroup
 AlignTrailingComments: true
 
 ###### brackets ######
