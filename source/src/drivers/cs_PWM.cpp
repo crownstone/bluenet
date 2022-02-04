@@ -61,7 +61,7 @@ PWM::PWM() :
 }
 
 uint32_t PWM::init(const pwm_config_t& config) {
-	LOGi(FMT_INIT, "PWM");
+	LOGi(FMT_INIT "PWM");
 	_config = config;
 //	memcpy(&_config, &config, sizeof(pwm_config_t));
 
@@ -202,7 +202,7 @@ void PWM::start() {
 
 void PWM::setValue(uint8_t channel, uint8_t newValue, uint8_t stepSize) {
 	if (!_initialized) {
-		LOGe(FMT_NOT_INITIALIZED, "PWM");
+		LOGe(FMT_NOT_INITIALIZED "PWM");
 		return;
 	}
 
@@ -351,7 +351,7 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 
 uint8_t PWM::getValue(uint8_t channel) {
 	if (!_initialized) {
-		LOGe(FMT_NOT_INITIALIZED, "PWM");
+		LOGe(FMT_NOT_INITIALIZED "PWM");
 		return 0;
 	}
 	if (channel >= _config.channelCount) {
@@ -363,7 +363,7 @@ uint8_t PWM::getValue(uint8_t channel) {
 
 void PWM::onZeroCrossingInterrupt() {
 	if (!_initialized) {
-		LOGe(FMT_NOT_INITIALIZED, "PWM");
+		LOGe(FMT_NOT_INITIALIZED "PWM");
 		return;
 	}
 

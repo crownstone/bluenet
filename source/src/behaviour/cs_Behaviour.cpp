@@ -130,14 +130,14 @@ bool Behaviour::isValid(Time currenttime) {
 
 void Behaviour::print() {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
-	LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #% (%s)",
+	LOGd("Behaviour: type(%u) %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X) for profileId(%u) isValid(%u)",
 			static_cast<uint8_t>(typ),
 			from().h(), from().m(), from().s(),
 			until().h(), until().m(), until().s(),
 			activeIntensity,
 			activeDays,
 			profileId,
-			(isValid(SystemTime::now()) ? "valid" : "invalid")
+			isValid(SystemTime::now())
 	);
 #endif
 }

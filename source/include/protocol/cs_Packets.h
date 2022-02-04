@@ -406,6 +406,9 @@ struct __attribute__((__packed__)) mesh_state_part_1_t {
 	cs_mesh_model_msg_state_1_t meshState;
 };
 
+/**
+ * Same as mesh_opt_iv_index_persist_data_legacy_t
+ */
 struct cs_mesh_iv_index_t {
 	// Same as net_flash_data_iv_index_t
 	uint32_t iv_index;
@@ -413,6 +416,33 @@ struct cs_mesh_iv_index_t {
 };
 
 typedef uint32_t cs_mesh_seq_number_t;
+
+
+/** Same as net_state_iv_update_t */
+typedef enum
+{
+    CS_MESH_NET_STATE_IV_UPDATE_NORMAL,
+    CS_MESH_NET_STATE_IV_UPDATE_IN_PROGRESS,
+} cs_mesh_iv_update_v5_t;
+
+/**
+ * Same as mesh_opt_iv_index_persist_data_t
+ */
+struct __attribute__((packed)) cs_mesh_iv_index_v5_t {
+	uint32_t iv_index;
+	cs_mesh_iv_update_v5_t iv_update_in_progress;
+	uint16_t iv_update_timeout_counter;
+	uint8_t synchro_index;
+};
+
+/**
+ * Same as mesh_opt_seqnum_persist_data_t
+ */
+struct __attribute__((packed)) cs_mesh_seq_number_v5_t {
+	uint32_t next_block;
+	uint8_t synchro_index;
+};
+
 
 struct __attribute__((packed)) cs_uicr_data_t {
 	uint32_t board;

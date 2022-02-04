@@ -22,8 +22,8 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /**
  *  We use part of the UICR to store information about the hardware board. So the firmware is independent on the
@@ -62,6 +62,7 @@ extern "C" {
 #define ACR01B10D            1008 // Builtin One v25
 
 #define ACR01B13B            1009 // Builtin Two development version
+#define ACR01B15A            1010 // Builtin Two (V3-ACR01B15A-rev7)
 
 // CROWNSTONE PLUGS
 
@@ -79,97 +80,167 @@ extern "C" {
 #define ACR01B2E             1503
 // Schematic change. Change power measurement resistor values.
 #define ACR01B2G             1504
-	
+
 // Crownstone Plug One (first prototype of second edition of the plug)
 #define ACR01B11A            1505
 
-/** Board configuration
+
+#define PIN_NONE 0xFF
+
+enum GainIndex {
+	GAIN_LOW = 0,
+	GAIN_MIDDLE = 1,
+	GAIN_HIGH = 2,
+	GAIN_COUNT = 3,
+	GAIN_SINGLE = 0, // If there is only a single gain, use the low gain.
+};
+
+enum ButtonIndex {
+	BUTTON0 = 0,
+	BUTTON1 = 1,
+	BUTTON2 = 2,
+	BUTTON3 = 3,
+	BUTTON_COUNT = 4,
+};
+
+enum GpioIndex {
+	GPIO_INDEX0 = 0,
+	GPIO_INDEX1 = 1,
+	GPIO_INDEX2 = 2,
+	GPIO_INDEX3 = 3,
+	GPIO_INDEX4 = 4,
+	GPIO_INDEX5 = 5,
+	GPIO_INDEX6 = 6,
+	GPIO_INDEX7 = 7,
+	GPIO_INDEX8 = 8,
+	GPIO_INDEX9 = 9,
+	GPIO_INDEX_COUNT = 10,
+};
+
+enum LedIndex {
+	LED0 = 0,
+	LED1 = 1,
+	LED2 = 2,
+	LED3 = 3,
+	LED_COUNT = 4,
+	LED_RED = 0,
+	LED_GREEN = 1,
+};
+
+enum Chipset {
+	CHIPSET_NRF52832 = 0,
+	CHIPSET_NRF52833 = 1,
+	CHIPSET_NRF52840 = 2,
+};
+
+/**
+ * Maps GPIO pins to AIN pins.
+ *
+ * nRF52832
+ *  - https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fpin.html&anchor=pin_assign
+ *  - same pin layout for the QFN48 and WLCSP package (in the respect of this mapping)
+ * nRF52833
+ *  - https://infocenter.nordicsemi.com/topic/ps_nrf52833/pin.html?cp=4_1_0_6_0
+ *  - same pin layout as nRF52832 (in this respect)
+ * nRF52840
+ *  - https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52840%2Fpin.html&cp=4_0_0_6_0
+ *  - same pin layout as nRF52832 (in this respect)
+ */
+uint8_t GpioToAinOnChipset(uint8_t gpio, uint8_t chipset);
+
+// For now mapping is always the same, so this simplified function can be used.
+uint8_t GpioToAin(uint8_t gpio);
+
+// Maps P1.01 to uint8 pin number.
+uint8_t GetGpioPin(uint8_t major, uint8_t minor);
+
+/**
+ * Board configuration
  *
  * Configure pins for control relays, IGBTs, LEDs, UART, current sensing, etc.
  */
 typedef struct  {
-	//! The hardware board type (number).
+	// The hardware board type (number).
 	uint32_t hardwareBoard;
 
-	//! GPIO pin to control the IGBTs.
-	uint8_t pinGpioPwm;
+	// GPIO pin to control the IGBTs.
+	uint8_t pinDimmer;
 
-	//! GPIO pin to enable the IGBT circuit.
-	uint8_t pinGpioEnablePwm;
+	// GPIO pin to enable the IGBT circuit.
+	uint8_t pinEnableDimmer;
 
-	//! GPIO pin to switch the relay on.
-	uint8_t pinGpioRelayOn;
+	// GPIO pin to switch the relay on.
+	uint8_t pinRelayOn;
 
-	//! GPIO pin to switch the relay off.
-	uint8_t pinGpioRelayOff;
+	// GPIO pin to switch the relay off.
+	uint8_t pinRelayOff;
 
-	//! Analog input pin to read the current with high gain.
-	uint8_t pinAinCurrentGainHigh;
+	// Analog input pins to read the current with different gains (if present).
+	uint8_t pinAinCurrent[GAIN_COUNT];
 
-	//! Analog input pin to read the current with medium gain.
-	uint8_t pinAinCurrentGainMed;
+	// Analog input pins to read the voltage with different gains (if present).
+	uint8_t pinAinVoltage[GAIN_COUNT];
 
-	//! Analog input pin to read the current with low gain.
-	uint8_t pinAinCurrentGainLow;
+	// Analog input pins to read the voltage after the load with different gains (if present).
+	uint8_t pinAinVoltageAfterLoad[GAIN_COUNT];
 
-	//! Analog input pin to read the voltage.
-	uint8_t pinAinVoltage;
-
-//	//! Analog input pin to read the voltage.
-//	uint8_t pinAinVoltageGainHigh;
-
-//	//! Analog input pin to read the voltage.
-//	uint8_t pinAinVoltageGainLow;
-
-	//! Analog input pin to read 'zero' line for current and voltage measurement (optional).
+	// Analog input pin to read 'zero' / offset (to be used for both current and voltage measurements).
 	uint8_t pinAinZeroRef;
 
-	//! Analog input pin to read the pwm temperature.
-	uint8_t pinAinPwmTemp;
+	// Analog input pin to read the dimmer temperature.
+	uint8_t pinAinDimmerTemp;
 
-	//! GPIO pin to receive uart.
-	uint8_t pinGpioRx;
-
-	//! GPIO pin to send uart.
-	uint8_t pinGpioTx;
+	// GPIO pin to get zero-crossing information for current.
+	uint8_t pinCurrentZeroCrossing;
 	
-	//! GPIO custom pins (only four)
-	uint8_t pinGpio[4];
+	// GPIO pin to get zero-crossing information for voltage.
+	uint8_t pinVoltageZeroCrossing;
 
-	//! Buttons (four on dev. kit)
-	uint8_t pinButton[4];
+	// GPIO pin to receive UART.
+	uint8_t pinRx;
 
-	//! GPIO pin to control the "red" led.
-	uint8_t pinLedRed;
+	// GPIO pin to send UART.
+	uint8_t pinTx;
+	
+	// GPIO pins that can be used as GPIO by the user, for example microapps.
+	uint8_t pinGpio[GPIO_INDEX_COUNT];
 
-	//! GPIO pin to control the "green" led.
-	uint8_t pinLedGreen;
+	// GPIO pins of buttons (on dev. kit).
+	uint8_t pinButton[BUTTON_COUNT];
 
-	//! Leds as array
-	uint8_t pinLed[4];
+	// GPIO pins of LEDs.
+	uint8_t pinLed[LED_COUNT];
 
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {
-		//! True if board has relays.
-		bool hasRelay: 1;
+		//! True if the dimmer is inverted (setting gpio high turns dimmer off).
+		bool dimmerInverted: 1;
 
-		//! True if the pwm is inverted (setting gpio high turns light off).
-		bool pwmInverted: 1;
+		// True if the board should have UART enabled by default.
+		bool enableUart: 1;
 
-		//! True if the board has serial / uart.
-		bool hasSerial: 1;
+		// True if the board has LEDs that should be enabled by default.
+		// Some boards do have LEDs, but cannot deliver enough power when also listening (scanning / meshing).
+		bool enableLeds : 1;
 
-		//! True if the board has leds.
-		bool hasLed : 1;
-
-		//! True if led off when GPIO set high.
+		//! True if LED is off when GPIO is set high.
 		bool ledInverted: 1;
 
-		//! True if the board has a zero ref pin for current and voltage measurements.
-		bool hasAdcZeroRef: 1;
-
 		//! True if the temperature sensor of the dimmer is inverted (NTC).
-		bool pwmTempInverted: 1;
+		bool dimmerTempInverted: 1;
+
+		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
+		bool usesNfcPins: 1;
+
+		// True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
+		// and a lower startup time of the dimmer circuit.
+		bool canTryDimmingOnBoot: 1;
+
+		// True if the Crownstone can dim immediately after a warm boot.
+		bool canDimOnWarmBoot: 1;
+
+		// True if the dimmer can be on when the pins are floating (during boot).
+		bool dimmerOnWhenPinsFloat: 1;
 	} flags;
 
 	/** Device type, e.g. crownstone plug, crownstone builtin, guidestone.
@@ -178,17 +249,23 @@ typedef struct  {
 	 */
 	uint8_t deviceType;
 
-	//! Multiplication factor for current measurement.
-	float currentMultiplier;
-
 	//! Multiplication factor for voltage measurement.
-	float voltageMultiplier;
+	float voltageMultiplier[GAIN_COUNT];
 
-	//! Offset for voltage measurement.
-	int32_t voltageZero;
+	//! Multiplication factor for voltage measurement after the load.
+	float voltageAfterLoadMultiplier[GAIN_COUNT];
 
-	//! Offset for current measurement.
-	int32_t currentZero;
+	//! Multiplication factor for current measurement.
+	float currentMultiplier[GAIN_COUNT];
+
+	//! Offset for voltage measurement (in ADC values).
+	int32_t voltageZero[GAIN_COUNT];
+
+	//! Offset for voltage measurement after the load (in ADC values)
+	int32_t voltageAfterLoadZero[GAIN_COUNT];
+
+	//! Offset for current measurement (in ADC values).
+	int32_t currentZero[GAIN_COUNT];
 
 	//! Measured power when there is no load (mW).
 	int32_t powerZero;

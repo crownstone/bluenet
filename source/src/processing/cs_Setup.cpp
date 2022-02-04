@@ -172,7 +172,7 @@ void Setup::finalize() {
 	OperationMode operationMode = static_cast<OperationMode>(mode);
 	LOGd("Operation mode: %s", operationModeName(operationMode));
 	if (!ValidMode(operationMode)) {
-		LOGe("Invalid operation mode!");
+		LOGe("Invalid operation mode: 0x%X", operationMode);
 		// for now continue with reset (will be considered setup mode)
 	}
 

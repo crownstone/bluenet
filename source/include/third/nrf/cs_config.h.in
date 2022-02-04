@@ -12,6 +12,8 @@
 
 #define MESH_SCANNER                             @MESH_SCANNER@
 
+#define MESH_SCANNER_FILTERED                    @MESH_SCANNER_FILTERED@
+
 #define MESH_PERSISTENT_STORAGE                  @MESH_PERSISTENT_STORAGE@
 
 #define ATTR_TABLE_SIZE                          @ATTR_TABLE_SIZE@
