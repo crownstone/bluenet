@@ -71,17 +71,17 @@ void asACR01B2G(boards_config_t* config) {
 
 	// Calibrated by noisy data from 1 crownstone
 	// The following two values are empirically determined, through calibration over noisy data from 1 Crownstone.
-	config->voltageZero[GAIN_SINGLE]           = -99;
-	config->currentZero[GAIN_SINGLE]           = -270;
+	config->voltageOffset[GAIN_SINGLE]         = -99;
+	config->currentOffset[GAIN_SINGLE]         = -270;
 
 	// The following value is empirically determined, through calibration over 10 production crownstones
-	config->powerZero                          = 9000;
+	config->powerOffsetMilliWatt               = 9000;
 
 	// ADC values [-2048, 2047] map to [REF - 1.2V, REF + 1.2V].
-	config->voltageRange                       = 1200;
+	config->voltageAdcRangeMilliVolt           = 1200;
 
 	// ADC values [-2048, 2047] map to [REF - 0.6V, REF + 0.6V].
-	config->currentRange                       = 600;
+	config->currentAdcRangeMilliVolt           = 600;
 
 	config->pwmTempVoltageThreshold            = 0.70;
 	config->pwmTempVoltageThresholdDown        = 0.25;

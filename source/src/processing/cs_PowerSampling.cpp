@@ -137,7 +137,7 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
-	_boardPowerZero = boardConfig->powerZero;
+	_boardPowerZero = boardConfig->powerOffsetMilliWatt;
 
 	LOGi(FMT_INIT, "buffers");
 	_powerMilliWattHist->init(); // Allocates buffer
@@ -164,10 +164,10 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 	adcConfig.channelCount = 2;
 	// TODO: there are now multiple voltage pins
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig->pinAinVoltage[GAIN_SINGLE];
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig->voltageRange;
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig->voltageAdcRangeMilliVolt;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig->pinAinCurrent[GAIN_SINGLE];
-	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig->currentRange;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig->currentAdcRangeMilliVolt;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.samplingIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	_adc->init(adcConfig);

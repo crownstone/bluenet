@@ -136,16 +136,15 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
  * Make sure all GPIO is initialized.
  */
 void cs_gpio_init(boards_config_t* board) {
-	switch (board->hardwareBoard) {
-	case ACR01B10D:
-		// Enable NFC pins
+	if (board->flags.usesNfcPins) {
+		// Enable NFC pins to be used as GPIO.
+		// Warning: this is stored in UICR, so it's persistent.
+		// Warning: NFC pins leak a bit of current when not at same voltage level.
 		if (NRF_UICR->NFCPINS != 0) {
 			nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
 		}
-		break;
-	default:
-		break;
 	}
+
 //	if (IS_CROWNSTONE(board->deviceType)) {
 	// Turn dimmer off.
 	if (board->pinDimmer != PIN_NONE) {

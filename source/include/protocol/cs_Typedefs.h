@@ -7,9 +7,14 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
-#include <cstring>
+/**
+ * Simple typedefs with few dependencies, that we can use in both C and C++ code.
+ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include <stdint.h>
 
 typedef uint8_t* buffer_ptr_t;
 typedef uint16_t cs_buffer_size_t;
@@ -36,16 +41,12 @@ typedef uint8_t  adc_buffer_seq_nr_t;
 /**
  * Length of a MAC address
  */
-static constexpr uint8_t MAC_ADDRESS_LEN = 6;
+static const uint8_t MAC_ADDRESS_LEN = 6;
 
-struct __attribute__((__packed__)) mac_address_t {
-	uint8_t data[MAC_ADDRESS_LEN];
-
-	void copyFrom(const void* macAddress) { memcpy(data, macAddress, MAC_ADDRESS_LEN); }
-
-	bool operator==(const mac_address_t& other) { return memcmp(this, &other, MAC_ADDRESS_LEN) == 0; }
-};
-
-struct __attribute__((__packed__)) cs_uuid128_t{
+typedef struct __attribute__((__packed__)) {
   uint8_t uuid128[16];
-};
+} cs_uuid128_t;
+
+#ifdef __cplusplus
+}
+#endif

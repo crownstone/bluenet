@@ -89,13 +89,13 @@ void asPca10040(boards_config_t* config) {
 	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
 	// All values below are set to something rather than nothing, but are not truly in use.
-	config->voltageZero[GAIN_SINGLE]           = 1000;
-	config->currentZero[GAIN_SINGLE]           = 1000;
-	config->powerZero                          = 0;
+	config->voltageOffset[GAIN_SINGLE]         = 1000;
+	config->currentOffset[GAIN_SINGLE]         = 1000;
+	config->powerOffsetMilliWatt               = 0;
 
 	// ADC values [0, 4095] map to [0, 3.6V].
-	config->voltageRange                       = 3600;
-	config->currentRange                       = 3600;
+	config->voltageAdcRangeMilliVolt           = 3600;
+	config->currentAdcRangeMilliVolt           = 3600;
 
 	config->pwmTempVoltageThreshold            = 2.0;
 	config->pwmTempVoltageThresholdDown        = 1.0;

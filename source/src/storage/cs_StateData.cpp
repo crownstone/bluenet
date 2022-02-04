@@ -130,10 +130,10 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_CURRENT_MULTIPLIER)*)data.value = boardsConfig.currentMultiplier[GAIN_SINGLE];
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO: // TODO: There is now for each voltage a possible offset
-		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = boardsConfig.voltageZero[GAIN_SINGLE];
+		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = boardsConfig.voltageOffset[GAIN_SINGLE];
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO: // TODO: There is now for each current a possible offset
-		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = boardsConfig.currentZero[GAIN_SINGLE];
+		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = boardsConfig.currentOffset[GAIN_SINGLE];
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_POWER_ZERO:
 		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_INVALID;

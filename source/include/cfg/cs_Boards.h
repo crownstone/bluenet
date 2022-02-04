@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 
+#include <protocol/cs_Typedefs.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -249,34 +250,51 @@ typedef struct  {
 	 */
 	uint8_t deviceType;
 
-	//! Multiplication factor for voltage measurement.
+	/**
+	 * Multiplication factor for voltage measurement.
+	 * Voltage on mains = (ADC value - offset) * multiplier
+	 */
 	float voltageMultiplier[GAIN_COUNT];
 
-	//! Multiplication factor for voltage measurement after the load.
+	/**
+	 * Multiplication factor for voltage measurement after the load.
+	 * Voltage on mains after load = (ADC value - offset) * multiplier
+	 */
 	float voltageAfterLoadMultiplier[GAIN_COUNT];
 
-	//! Multiplication factor for current measurement.
+	/**
+	 * Multiplication factor for current measurement.
+	 * Current through mains = (ADC value - offset) * multiplier
+	 */
 	float currentMultiplier[GAIN_COUNT];
 
 	//! Offset for voltage measurement (in ADC values).
-	int32_t voltageZero[GAIN_COUNT];
+	int32_t voltageOffset[GAIN_COUNT];
 
-	//! Offset for voltage measurement after the load (in ADC values)
-	int32_t voltageAfterLoadZero[GAIN_COUNT];
+	//! Offset for voltage measurement after the load (in ADC values).
+	int32_t voltageAfterLoadOffset[GAIN_COUNT];
 
 	//! Offset for current measurement (in ADC values).
-	int32_t currentZero[GAIN_COUNT];
+	int32_t currentOffset[GAIN_COUNT];
 
 	//! Measured power when there is no load (mW).
-	int32_t powerZero;
+	int32_t powerOffsetMilliWatt;
 
-	//! Default range in mV on the voltage pin. Example: if default should be [-0.6V, 0.6V] then voltageRange is 1200.
-	uint32_t voltageRange;
+	/**
+	 * Range in mV to be used for the voltage pin. Determines the ADC gain.
+	 * Example: if the ADC should measure [0V, 3.6V] then range is 3600.
+	 * Example with zero ref pin: if the ADC should measure [-0.6V, 0.6V] then range is 600.
+	 */
+	uint32_t voltageAdcRangeMilliVolt;
 
-	//! Default range in mV on the current pin. Example: if default should be [0V, 3.6V] then currentRange is 3600.
-	uint32_t currentRange;
+	/**
+	 * Range in mV to be used for the current pin. Determines the ADC gain.
+	 * See adcRangeVoltage.
+	 */
+	uint32_t currentAdcRangeMilliVolt;
 
-	/** The minimum radio transmission power to be used.
+	/**
+	 * The minimum radio transmission power to be used.
 	 *
 	 * Builtins need higher TX power than plugs because of surrounding metal and wall material.
 	 */
@@ -326,7 +344,7 @@ typedef struct  {
  * @param p_config                               configuration to be populated
  * @return                                       error value (NRF_SUCCESS or NRF_ERROR_INVALID_PARAM)
  */
-uint32_t configure_board(boards_config_t* p_config);
+cs_ret_code_t configure_board(boards_config_t* p_config);
 
 #ifdef __cplusplus
 }
