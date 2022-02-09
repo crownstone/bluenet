@@ -81,7 +81,7 @@ void adc_done_callback(adc_buffer_id_t bufIndex) {
 	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
 }
 
-void PowerSampling::init(const boards_config_t& boardConfig) {
+void PowerSampling::init(const boards_config_t* boardConfig) {
 	State& settings = State::getInstance();
 	settings.get(CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier, sizeof(_voltageMultiplier));
 	settings.get(CS_TYPE::CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier, sizeof(_currentMultiplier));
@@ -92,7 +92,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER, &_currentMilliAmpThresholdDimmer, sizeof(_currentMilliAmpThresholdDimmer));
 	bool switchcraftEnabled = settings.isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 
-	switch (boardConfig.hardwareBoard) {
+	switch (boardConfig->hardwareBoard) {
 		// Builtin zero
 		case ACR01B1A:
 		case ACR01B1B:
@@ -137,7 +137,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
-	_boardPowerZero = boardConfig.powerZero;
+	_boardPowerZero = boardConfig->powerOffsetMilliWatt;
 
 	LOGi(FMT_INIT, "buffers");
 	_powerMilliWattHist->init(); // Allocates buffer
@@ -157,32 +157,53 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_inputSamples = new PowerVector(bufSize + halfWindowSize*2);
 	_outputSamples = new PowerVector(bufSize);
 
+	_boardConfig = boardConfig;
+
 	LOGd(FMT_INIT, "ADC");
 	adc_config_t adcConfig;
 	adcConfig.channelCount = 2;
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage;
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig.voltageRange;
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainLow;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	// TODO: there are now multiple voltage pins
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig->pinAinVoltage[GAIN_SINGLE];
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig->voltageAdcRangeMilliVolt;
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig->pinAinCurrent[GAIN_SINGLE];
+	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig->currentAdcRangeMilliVolt;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.samplingIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	_adc->init(adcConfig);
 
 	_adc->setDoneCallback(adc_done_callback);
 
 	// init the adc config
-	_adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX] = boardConfig.voltageRange;
-	_adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX] = boardConfig.currentRange;
-	_adcConfig.currentPinGainHigh = boardConfig.pinAinCurrentGainHigh;
-	_adcConfig.currentPinGainMed  = boardConfig.pinAinCurrentGainMed;
-	_adcConfig.currentPinGainLow  = boardConfig.pinAinCurrentGainLow;
-	_adcConfig.voltagePin = boardConfig.pinAinVoltage;
-	_adcConfig.zeroReferencePin = adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin;
-	_adcConfig.voltageChannelPin = _adcConfig.voltagePin;
-	_adcConfig.voltageChannelUsedAs = 0;
-	_adcConfig.currentDifferential = true;
-	_adcConfig.voltageDifferential = true;
+	_adcConfig[VOLTAGE_CHANNEL_IDX].config = adcConfig.channels[VOLTAGE_CHANNEL_IDX];
+	_adcConfig[CURRENT_CHANNEL_IDX].config = adcConfig.channels[CURRENT_CHANNEL_IDX];
+
+	// Count all available pins.
+	uint8_t pinCount = 0;
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinVoltage[i] != PIN_NONE) {
+			++pinCount;
+		}
+	}
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinVoltageAfterLoad[i] != PIN_NONE) {
+			++pinCount;
+		}
+	}
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinCurrent[i] != PIN_NONE) {
+			++pinCount;
+		}
+	}
+	if (_boardConfig->pinAinZeroRef != PIN_NONE) {
+		++pinCount;
+	}
+	// Increase by 1 for VDD as input.
+	++pinCount;
+
+	// Both channels can select any pin.
+	_adcConfig[VOLTAGE_CHANNEL_IDX].pinCount = pinCount;
+	_adcConfig[CURRENT_CHANNEL_IDX].pinCount = pinCount;
 
 	// Set last softfuse header data.
 	_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
@@ -232,7 +253,7 @@ void PowerSampling::handleEvent(event_t & event) {
 			_logsEnabled.flags.filteredCurrent = *(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
 			break;
 		case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
-			toggleVoltageChannelInput();
+			selectNextPin(VOLTAGE_CHANNEL_IDX);
 			break;
 		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
 			enableDifferentialModeCurrent(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
@@ -1246,98 +1267,92 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 	}
 }
 
-void PowerSampling::toggleVoltageChannelInput() {
-	_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 5;
+void PowerSampling::selectNextPin(adc_channel_id_t channel) {
+	_adcConfig[channel].pinIndex = (_adcConfig[channel].pinIndex + 1) % _adcConfig[channel].pinCount;
+	LOGd("selectNextPin channel=%u pinIndex=%u", channel, _adcConfig[channel].pinIndex);
 
-	switch (_adcConfig.voltageChannelUsedAs) {
-	case 0: // voltage pin
-		_adcConfig.voltageChannelPin = _adcConfig.voltagePin;
-		break;
-	case 1: // zero reference pin
-		if (_adcConfig.zeroReferencePin == CS_ADC_REF_PIN_NOT_AVAILABLE) {
-			// Skip this pin
-			_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 5;
-			// No break here.
+	// For now, both channels use the same selection.
+	uint8_t pinCount = 0;
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinVoltage[i] != PIN_NONE) {
+			if (_adcConfig[channel].pinIndex == pinCount) {
+				_adcConfig[channel].config.pin = _boardConfig->pinAinVoltage[i];
+			}
+			++pinCount;
 		}
-		else {
-			_adcConfig.voltageChannelPin = _adcConfig.zeroReferencePin;
-			break;
-		}
-	case 2: // VDD
-		_adcConfig.voltageChannelPin = CS_ADC_PIN_VDD;
-		break;
-	case 3: // Current high gain
-		_adcConfig.voltageChannelPin  = _adcConfig.currentPinGainHigh;
-		break;
-	case 4: // Current low gain
-		_adcConfig.voltageChannelPin  = _adcConfig.currentPinGainLow;
-		break;
 	}
-
-	adc_channel_config_t channelConfig;
-	channelConfig.pin = _adcConfig.voltageChannelPin;
-	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];
-	channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinVoltageAfterLoad[i] != PIN_NONE) {
+			if (_adcConfig[channel].pinIndex == pinCount) {
+				_adcConfig[channel].config.pin = _boardConfig->pinAinVoltageAfterLoad[i];
+			}
+			++pinCount;
+		}
+	}
+	for (int i = 0; i < GAIN_COUNT; ++i) {
+		if (_boardConfig->pinAinCurrent[i] != PIN_NONE) {
+			if (_adcConfig[channel].pinIndex == pinCount) {
+				_adcConfig[channel].config.pin = _boardConfig->pinAinCurrent[i];
+			}
+			++pinCount;
+		}
+	}
+	if (_boardConfig->pinAinZeroRef != PIN_NONE) {
+		if (_adcConfig[channel].pinIndex == pinCount) {
+			_adcConfig[channel].config.pin = _boardConfig->pinAinZeroRef;
+		}
+		++pinCount;
+	}
+	if (_adcConfig[channel].pinIndex == pinCount) {
+		_adcConfig[channel].config.pin = CS_ADC_PIN_VDD;
+	}
+	++pinCount;
+	applyAdcConfig(channel);
 }
 
 void PowerSampling::enableDifferentialModeCurrent(bool enable) {
-	_adcConfig.currentDifferential = enable;
-	adc_channel_config_t channelConfig;
-	channelConfig.pin = _adcConfig.currentPinGainMed;
-	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[CURRENT_CHANNEL_IDX];
-	channelConfig.referencePin = _adcConfig.currentDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
+	_adcConfig[CURRENT_CHANNEL_IDX].config.referencePin = enable ? _boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	applyAdcConfig(CURRENT_CHANNEL_IDX);
 }
 
 void PowerSampling::enableDifferentialModeVoltage(bool enable) {
-	_adcConfig.voltageDifferential = enable;
-	adc_channel_config_t channelConfig;
-	channelConfig.pin = _adcConfig.voltageChannelPin;
-	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[VOLTAGE_CHANNEL_IDX];
-	channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
+	_adcConfig[VOLTAGE_CHANNEL_IDX].config.referencePin = enable ? _boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	applyAdcConfig(VOLTAGE_CHANNEL_IDX);
 }
 
-void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
-	uint16_t newRange = _adcConfig.rangeMilliVolt[channel] + amount;
-	switch (_adcConfig.rangeMilliVolt[channel]) {
-	case 600:
-		if (amount < 0) {
-			newRange = 300;
-		}
-		break;
-	case 300:
-		if (amount < 0) {
-			newRange = 150;
-		}
-		else {
-			newRange = 600;
-		}
-		break;
-	case 150:
-		if (amount > 0) {
-			newRange = 300;
-		}
-		break;
+void PowerSampling::changeRange(adc_channel_id_t channel, int32_t amount) {
+	uint16_t newRange = _adcConfig[channel].config.rangeMilliVolt + amount;
+	switch (_adcConfig[channel].config.rangeMilliVolt) {
+		case 600:
+			if (amount < 0) {
+				newRange = 300;
+			}
+			break;
+		case 300:
+			if (amount < 0) {
+				newRange = 150;
+			}
+			else {
+				newRange = 600;
+			}
+			break;
+		case 150:
+			if (amount > 0) {
+				newRange = 300;
+			}
+			break;
 	}
 
 	if (newRange < 150 || newRange > 3600) {
 		return;
 	}
-	_adcConfig.rangeMilliVolt[channel] = newRange;
+	_adcConfig[channel].config.rangeMilliVolt = newRange;
 
-	adc_channel_config_t channelConfig;
-	if (channel == VOLTAGE_CHANNEL_IDX) {
-		channelConfig.pin = _adcConfig.voltageChannelPin;
-		channelConfig.referencePin = _adcConfig.voltageDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	}
-	else {
-		channelConfig.pin = _adcConfig.currentPinGainMed;
-		channelConfig.referencePin = _adcConfig.currentDifferential ? _adcConfig.zeroReferencePin : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	}
-	channelConfig.rangeMilliVolt = _adcConfig.rangeMilliVolt[channel];
-	_adc->changeChannel(channel, channelConfig);
+	applyAdcConfig(channel);
+}
+
+void PowerSampling::applyAdcConfig(adc_channel_id_t channelIndex) {
+	_adc->changeChannel(channelIndex, _adcConfig[channelIndex].config);
 }
 
 void PowerSampling::enableSwitchcraft(bool enable) {

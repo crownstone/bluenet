@@ -18,9 +18,9 @@ void Relay::init(const boards_config_t& board) {
 
 	State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &_relayHighDurationMs, sizeof(_relayHighDurationMs));
 
-	_hasRelay = board.flags.hasRelay;
-	_pinRelayOn = board.pinGpioRelayOn;
-	_pinRelayOff =board.pinGpioRelayOff;
+	_hasRelay = ((board.pinRelayOn != PIN_NONE) && (board.pinRelayOff != PIN_NONE));
+	_pinRelayOn = board.pinRelayOn;
+	_pinRelayOff = board.pinRelayOff;
 
 	nrf_gpio_cfg_output(_pinRelayOff);
 	nrf_gpio_pin_clear(_pinRelayOff);
@@ -28,6 +28,10 @@ void Relay::init(const boards_config_t& board) {
 	nrf_gpio_pin_clear(_pinRelayOn);
 
 	LOGd("init duration=%u ms", _relayHighDurationMs);
+}
+
+bool Relay::hasRelay() {
+	return _hasRelay;
 }
 
 bool Relay::set(bool value) {

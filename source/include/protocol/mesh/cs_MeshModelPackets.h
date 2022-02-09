@@ -203,7 +203,20 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 	uint8_t reserved : 7;    // @arend maybe use these bits to increase version size.
 };
 
+/**
+ * MAC address struct, with some useful functions.
+ */
+struct __attribute__((__packed__)) mac_address_t {
+	uint8_t data[MAC_ADDRESS_LEN];
 
+	void copyFrom(const void* macAddress) {
+		memcpy(data, macAddress, MAC_ADDRESS_LEN);
+	}
+
+	bool operator==(const mac_address_t& other) {
+		return memcmp(this, &other, MAC_ADDRESS_LEN) == 0;
+	}
+};
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_asset_report_mac_t {
 	mac_address_t mac;

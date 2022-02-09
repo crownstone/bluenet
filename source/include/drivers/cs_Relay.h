@@ -20,6 +20,11 @@ public:
 	void init(const boards_config_t& board);
 
 	/**
+	 * Returns true when this board has a relay.
+	 */
+	bool hasRelay();
+
+	/**
 	 * Set relay on or off.
 	 *
 	 * @param[in] value      True to set the relay on.

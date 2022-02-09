@@ -26,5 +26,3 @@ extern const uint8_t g_BOOTLOADER_VERSION_PATCH;
 extern const uint8_t g_BOOTLOADER_VERSION_PRERELEASE;
 
 extern const uint8_t g_BOOTLOADER_BUILD_TYPE;
-
-extern const uint32_t g_DEFAULT_HARDWARE_BOARD;
