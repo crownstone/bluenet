@@ -86,16 +86,27 @@ set(TEST_SOURCE_DIR "test")
 # Extra source files
 list(APPEND TEST_SOURCE_FILES "src/nrf_stubs.c")
 
+### --- 
 set(TEST test_InterleavedBuffer)
 add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
 add_test(NAME ${TEST} COMMAND ${TEST})
 install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 
+### --- 
+set(TEST test_BitmaskVarSize)
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
 
-set(TEST test_BitmaskVarSize)
 add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
 add_test(NAME ${TEST} COMMAND ${TEST})
 install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+
+### --- 
+set(TEST test_HashFletcher32)
+list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_Hash.cpp")
+
+add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
+add_test(NAME ${TEST} COMMAND ${TEST})
+install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+
 
 
