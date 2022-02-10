@@ -110,22 +110,22 @@ void asACR01B10D(boards_config_t* config) {
 	config->currentMultiplier[GAIN_MIDDLE]     = 0.015;
 	config->currentMultiplier[GAIN_HIGH]       = 0.015;
 
-	config->voltageZero[GAIN_SINGLE]           = 512;
+	config->voltageOffset[GAIN_SINGLE]         = 512;
 
 	// TODO: Explain this value
-	config->currentZero[GAIN_LOW]              = -125;
+	config->currentOffset[GAIN_LOW]            = -125;
 
 	// TODO: Calculate the following values (now set to something arbitrary)
-	config->currentZero[GAIN_MIDDLE]           = -125;
-	config->currentZero[GAIN_HIGH]             = -125;
+	config->currentOffset[GAIN_MIDDLE]         = -125;
+	config->currentOffset[GAIN_HIGH]           = -125;
 
 	// TODO: Explain this value
-	config->powerZero                          = 800;
+	config->powerOffsetMilliWatt               = 800;
 
 	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
-	config->voltageRange                       = 1800;
+	config->voltageAdcRangeMilliVolt           = 1800;
 	// ADC values [-2048, 2047] map to [REF - 1.2V, REF + 1.2V].
-	config->currentRange                       = 1200;
+	config->currentAdcRangeMilliVolt           = 1200;
 
 	// TODO: These are incorrectly calculated with R_12 = 16k and B_ntc = 3380 K.
 	config->pwmTempVoltageThreshold            = 0.35; // 0.3518

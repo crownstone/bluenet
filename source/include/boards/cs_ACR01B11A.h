@@ -89,18 +89,18 @@ void asACR01B11A(boards_config_t* config) {
 	// All the values below are just copied from configuration values from other hardware and should be adjusted.
 	config->voltageMultiplier[GAIN_SINGLE]     = 0.19355f;
 	config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
-	config->voltageZero[GAIN_SINGLE]           = 0;
+	config->voltageOffset[GAIN_SINGLE]         = 0;
 
-	config->currentZero[GAIN_LOW]              = -270;
-	config->currentZero[GAIN_HIGH]             = -270;
+	config->currentOffset[GAIN_LOW]            = -270;
+	config->currentOffset[GAIN_HIGH]           = -270;
 
-	config->powerZero                          = 9000;
+	config->powerOffsetMilliWatt               = 9000;
 
 	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
-	config->voltageRange                       = 1800;
+	config->voltageAdcRangeMilliVolt           = 1800;
 
 	// ADC values [-2048, 2047] map to [REF - 0.6V, REF + 0.6V].
-	config->currentRange                       = 600;
+	config->currentAdcRangeMilliVolt           = 600;
 
 	config->pwmTempVoltageThreshold            = 0.3639;
 	config->pwmTempVoltageThresholdDown        = 0.3135;

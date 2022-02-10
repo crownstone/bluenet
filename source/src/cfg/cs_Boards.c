@@ -49,6 +49,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <nrf_error.h>
 #include <nrf52.h>
+#include <protocol/cs_ErrorCodes.h>
 
 /**
  * Initialize conservatively (as if given pins are not present).
@@ -65,14 +66,8 @@ void init(boards_config_t* config) {
 	config->pinRx = PIN_NONE;
 	config->pinTx = PIN_NONE;
 	config->deviceType = DEVICE_UNDEF;
-	config->powerZero = 0;
-//	config->voltageRange = ;
-//	config->currentRange = ;
+	config->powerOffsetMilliWatt = 0;
 	config->minTxPower = 0;
-//	config->pwmTempVoltageThreshold = ;
-//	config->pwmTempVoltageThresholdDown = ;
-//	config->scanIntervalUs = ;
-//	config->scanWindowUs = ;
 
 	// Set an interval that's not in sync with advertising interval.
 	// And a scan window of 75% of the interval, in case the board cannot provide enough power.
@@ -80,11 +75,8 @@ void init(boards_config_t* config) {
 	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
 	config->tapToToggleDefaultRssiThreshold    = 0;
 
-//	config->flags.dimmerInverted               = ;
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;
-//	config->flags.ledInverted                  = ;
-//	config->flags.dimmerTempInverted           = ;
 	config->flags.usesNfcPins                  = false;
 	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
@@ -97,9 +89,9 @@ void init(boards_config_t* config) {
 		config->voltageMultiplier[i] = 0.0;
 		config->voltageAfterLoadMultiplier[i] = 0.0;
 		config->currentMultiplier[i] = 0.0;
-		config->voltageZero[i] = 0;
-		config->voltageAfterLoadZero[i] = 0;
-		config->currentZero[i] = 0;
+		config->voltageOffset[i] = 0;
+		config->voltageAfterLoadOffset[i] = 0;
+		config->currentOffset[i] = 0;
 	}
 	for (uint8_t i = 0; i < GPIO_INDEX_COUNT; ++i) {
 		config->pinGpio[i] = PIN_NONE;
@@ -146,7 +138,7 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor) {
 	return major * 32 + minor;
 }
 
-uint32_t configure_board(boards_config_t* config) {
+cs_ret_code_t configure_board(boards_config_t* config) {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
@@ -208,11 +200,10 @@ uint32_t configure_board(boards_config_t* config) {
 
 		default:
 			// undefined board layout !!!
-			asACR01B2C(config);
-			return NRF_ERROR_INVALID_PARAM;
+			return ERR_UNKNOWN_TYPE;
 	}
 
 	config->hardwareBoard = hardwareBoard;
 
-	return NRF_SUCCESS;
+	return ERR_SUCCESS;
 }

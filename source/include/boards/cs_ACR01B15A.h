@@ -61,8 +61,8 @@ void asACR01B15A(boards_config_t* config) {
 	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
 
 	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
-	config->voltageRange                       = 1800;
-	config->currentRange                       = 1800;
+	config->voltageAdcRangeMilliVolt           = 1800;
+	config->currentAdcRangeMilliVolt           = 1800;
 
 	//TODO: All the following values have to be calculated still, now set to some guessed values.
 	config->voltageMultiplier[GAIN_LOW]        = -0.25;
@@ -74,13 +74,13 @@ void asACR01B15A(boards_config_t* config) {
 	config->currentMultiplier[GAIN_LOW]        = 0.01;
 	config->currentMultiplier[GAIN_HIGH]       = 0.01;
 
-	config->voltageZero[GAIN_LOW]              = 0;
-	config->voltageZero[GAIN_HIGH]             = 0;
+	config->voltageOffset[GAIN_LOW]            = 0;
+	config->voltageOffset[GAIN_HIGH]           = 0;
 
-	config->currentZero[GAIN_LOW]              = 0;
-	config->currentZero[GAIN_HIGH]             = 0;
+	config->currentOffset[GAIN_LOW]            = 0;
+	config->currentOffset[GAIN_HIGH]           = 0;
 
-	config->powerZero                          = 0;
+	config->powerOffsetMilliWatt               = 0;
 
 	config->pwmTempVoltageThreshold            = 0.2;
 	config->pwmTempVoltageThresholdDown        = 0.18;

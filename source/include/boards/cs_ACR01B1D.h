@@ -53,17 +53,17 @@ void asACR01B1D(boards_config_t* config) {
 	config->currentMultiplier[GAIN_SINGLE]     = 0.0044f;
 
 	// TODO: Explain this value
-	config->voltageZero[GAIN_SINGLE]           = 1993;
+	config->voltageOffset[GAIN_SINGLE]         = 1993;
 
 	// TODO: Explain this value
-	config->currentZero[GAIN_SINGLE]           = 1980;
+	config->currentOffset[GAIN_SINGLE]         = 1980;
 
 	// TODO: Explain this value
-	config->powerZero                          = 3500;
+	config->powerOffsetMilliWatt               = 3500;
 
 	// ADC values [0, 4095] map to [0V, 1.2V].
-	config->voltageRange                       = 1200;
-	config->currentRange                       = 1200;
+	config->voltageAdcRangeMilliVolt           = 1200;
+	config->currentAdcRangeMilliVolt           = 1200;
 
 	// TODO: Explain these comments. About 1.5kOhm --> 90-100C
 	config->pwmTempVoltageThreshold            = 0.76;
