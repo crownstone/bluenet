@@ -51,7 +51,7 @@ cs_ret_code_t MeshDfuTransport::init() {
 
 cs_ret_code_t MeshDfuTransport::enableNotifications(bool on) {
 	LOGMeshDfuTransportDebug("MeshDfuTransport: activate notifications");
-	return _bleCentral->writeNotificationConfig(_cccdHandles[Index::ControlPoint], true);
+	return _bleCentral->writeNotificationConfig(_cccdHandles[Index::ControlPoint], on);
 }
 
 bool MeshDfuTransport::isTargetInDfuMode() {
@@ -146,12 +146,19 @@ void MeshDfuTransport::onEventCallbackTimeOut() {
 void MeshDfuTransport::write_control_point(cs_data_t buff) {
 	LOGMeshDfuTransportDebug("MeshDfuTransport: write control point 0x%04X", _uuidHandles[Index::ControlPoint]);
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &MeshDfuTransport::onNotificationReceived);
+	// TODO:
+	//  - turn on notifications
+	//  - wait for write complete
+	//  - update onNotificationReceived to cache result
 	_bleCentral->write(_uuidHandles[Index::ControlPoint], buff.data, buff.len);
-
+	// TODO:
+	//  - turn off notifications
+	//  - wait for write complete
+	//  - dispatch cached notification result
 }
 
 void MeshDfuTransport::write_data_point(cs_data_t buff) {
-	LOGMeshDfuTransportDebug("MeshDfuTransport: write data point 0x%04X", _uuidHandles[Index::DataPoint]);
+	LOGMeshDfuTransportDebug("MeshDfuTransport: write data point 0x%04X (%d bytes)", _uuidHandles[Index::DataPoint], buff.len);
 	_bleCentral->write(_uuidHandles[Index::DataPoint], buff.data, buff.len);
 }
 

@@ -83,9 +83,12 @@ void MeshDfuHost::handleEvent(event_t& event) {
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
 			cs_ret_code_t* connectResult = CS_TYPE_CAST(EVT_BLE_CENTRAL_CONNECT_RESULT, event.data);
-			LOGMeshDfuHostDebug("BLE central connect result received: result %d. Isconnected: %d",
-					*connectResult,
-					_bleCentral->isConnected());
+
+			if (_bleCentral != nullptr) {
+				LOGMeshDfuHostDebug("BLE central connect result received: result %d. Isconnected: %d",
+						*connectResult,
+						_bleCentral->isConnected());
+			}
 			break;
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
