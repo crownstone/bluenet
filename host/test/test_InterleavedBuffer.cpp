@@ -1,9 +1,10 @@
-
-//#define SERIAL_VERBOSITY SERIAL_DEBUG
-
-#ifndef HOST_TARGET
-#error "This should only be compiled for the host"
-#endif
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Feb 10, 2022
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+#if defined HOST_TARGET
 
 #include <structs/buffer/cs_AdcBuffer.h>
 #include <structs/buffer/cs_CircularBuffer.h>
@@ -70,3 +71,11 @@ int main() {
 
 	return EXIT_SUCCESS;
 }
+
+#else
+int main() {
+	// test fails, still needs to be decoupled from embedded only code
+	return -1;
+}
+
+#endif // defined HOST_TARGET
