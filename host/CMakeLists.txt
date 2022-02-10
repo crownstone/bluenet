@@ -79,7 +79,7 @@ include_directories(${THIRD_PARTY_NRF_SDK_INCLUDE_PATH})
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
-enable_testing()
+#enable_testing()
 
 set(TEST_SOURCE_DIR "test")
 
