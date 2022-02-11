@@ -236,7 +236,7 @@ void CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessL
 }
 
 void CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "goto dfu");
+	LOGi(STR_HANDLE_COMMAND "goto dfu");
 	event_t event(CS_TYPE::EVT_GOING_TO_DFU);
 	event.dispatch();
 	resetDelayed(CS_RESET_CODE_GO_TO_DFU_MODE);
@@ -244,7 +244,7 @@ void CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAcc
 }
 
 void CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get bootloader version");
+	LOGi(STR_HANDLE_COMMAND "get bootloader version");
 
 	uint8_t dataSize;
 	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, result.buf.data, result.buf.len, &dataSize);
@@ -259,7 +259,7 @@ void CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const 
 }
 
 void CommandHandler::handleCmdGetHardwareVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get hardware version");
+	LOGi(STR_HANDLE_COMMAND "get hardware version");
 
 	// TODO: use UICR to determine hardware version, use struct instead of string.
 	result.returnCode = ERR_NOT_IMPLEMENTED;
@@ -267,7 +267,7 @@ void CommandHandler::handleCmdGetHardwareVersion(cs_data_t commandData, const En
 }
 
 void CommandHandler::handleCmdGetFirmwareVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get firmware version");
+	LOGi(STR_HANDLE_COMMAND "get firmware version");
 
 //	// Let std string handle the null termination.
 //	std::string firmwareVersion;
@@ -298,7 +298,7 @@ void CommandHandler::handleCmdGetFirmwareVersion(cs_data_t commandData, const En
 
 
 void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get UICR data");
+	LOGi(STR_HANDLE_COMMAND "get UICR data");
 
 	if (result.buf.len < sizeof(cs_uicr_data_t)) {
 		result.returnCode = ERR_BUFFER_TOO_SMALL;
@@ -333,13 +333,13 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 }
 
 void CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "reset");
+	LOGi(STR_HANDLE_COMMAND "reset");
 	resetDelayed(CS_RESET_CODE_SOFT_RESET);
 	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "factory reset");
+	LOGi(STR_HANDLE_COMMAND "factory reset");
 
 	if (commandData.len != sizeof(FACTORY_RESET_CODE)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(FACTORY_RESET_CODE));
@@ -358,7 +358,7 @@ void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const Encrypti
 }
 
 void CommandHandler::handleCmdGetMacAddress(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get MAC");
+	LOGi(STR_HANDLE_COMMAND "get MAC");
 
 	if (result.buf.len < MAC_ADDRESS_LEN) {
 		result.returnCode = ERR_BUFFER_TOO_SMALL;
@@ -376,7 +376,7 @@ void CommandHandler::handleCmdGetMacAddress(cs_data_t commandData, const Encrypt
 }
 
 void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "state get");
+	LOGi(STR_HANDLE_COMMAND "state get");
 
 	// Check if command data is large enough for header.
 	if (commandData.len < sizeof(state_packet_header_t)) {
@@ -447,7 +447,7 @@ void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAc
 }
 
 void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "state set");
+	LOGi(STR_HANDLE_COMMAND "state set");
 
 	// Check if command data is large enough for header.
 	if (commandData.len < sizeof(state_packet_header_t)) {
@@ -515,7 +515,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 }
 
 void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time");
+	LOGCommandHandlerDebug(STR_HANDLE_COMMAND "set sun time");
 	if (commandData.len != sizeof(sun_time_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(sun_time_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -526,7 +526,7 @@ void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const Encryption
 }
 
 void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get time");
+	LOGi(STR_HANDLE_COMMAND "get time");
 
 	if (result.buf.len < sizeof(uint32_t)) {
 		result.returnCode = ERR_BUFFER_TOO_SMALL;
@@ -540,25 +540,25 @@ void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAcc
 }
 
 void CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "increase TX");
+	LOGi(STR_HANDLE_COMMAND "increase TX");
 	Advertiser::getInstance().setNormalTxPower();
 	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdSetup(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "setup");
+	LOGi(STR_HANDLE_COMMAND "setup");
 	cs_ret_code_t errCode = Setup::getInstance().handleCommand(commandData);
 	result.returnCode = errCode;
 }
 
 void CommandHandler::handleCmdDisconnect(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "disconnect");
+	LOGi(STR_HANDLE_COMMAND "disconnect");
 	Stack::getInstance().disconnect();
 	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdResetErrors(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "reset errors");
+	LOGi(STR_HANDLE_COMMAND "reset errors");
 	if (commandData.len != sizeof(state_errors_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(state_errors_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -581,7 +581,7 @@ void CommandHandler::handleCmdPwm(cs_data_t commandData, const cmd_source_with_c
 		return;
 	}
 
-	LOGi(STR_HANDLE_COMMAND, "PWM");
+	LOGi(STR_HANDLE_COMMAND "PWM");
 
 	if (commandData.len != sizeof(switch_message_payload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(switch_message_payload_t));
@@ -607,7 +607,7 @@ void CommandHandler::handleCmdSwitch(cs_data_t commandData, const cmd_source_wit
 		return;
 	}
 
-	LOGi(STR_HANDLE_COMMAND, "switch");
+	LOGi(STR_HANDLE_COMMAND "switch");
 
 	if (commandData.len != sizeof(switch_message_payload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(switch_message_payload_t));
@@ -632,7 +632,7 @@ void CommandHandler::handleCmdRelay(cs_data_t commandData, const cmd_source_with
 		return;
 	}
 
-	LOGi(STR_HANDLE_COMMAND, "relay");
+	LOGi(STR_HANDLE_COMMAND "relay");
 
 	if (commandData.len != sizeof(switch_message_payload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(switch_message_payload_t));
@@ -650,7 +650,7 @@ void CommandHandler::handleCmdRelay(cs_data_t commandData, const cmd_source_with
 }
 
 void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "multi switch");
+	LOGi(STR_HANDLE_COMMAND "multi switch");
 	multi_switch_t* multiSwitchPacket = (multi_switch_t*)commandData.data;
 	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, commandData.len)) {
 		LOGw("invalid message");
@@ -676,7 +676,7 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
-	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND, "mesh command: ");
+	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND "mesh command: ");
 	_logArray(SERIAL_INFO, true, buffer, size);
 
 	// Keep up the required size, and where in the buffer we are.
@@ -818,7 +818,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 }
 
 void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "allow dimming");
+	LOGi(STR_HANDLE_COMMAND "allow dimming");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(enable_message_payload_t));
@@ -836,7 +836,7 @@ void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const Encrypti
 }
 
 void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "lock switch");
+	LOGi(STR_HANDLE_COMMAND "lock switch");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(enable_message_payload_t));
@@ -854,7 +854,7 @@ void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const Encryption
 }
 
 void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGd(STR_HANDLE_COMMAND, "UART msg");
+	LOGd(STR_HANDLE_COMMAND "UART msg");
 
 	if (!commandData.len) {
 		LOGe(FMT_ZERO_PAYLOAD_LENGTH, commandData.len);
@@ -867,7 +867,7 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 
 
 void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGd(STR_HANDLE_COMMAND, "hub data");
+	LOGd(STR_HANDLE_COMMAND "hub data");
 
 	if (commandData.len < sizeof(hub_data_header_t)) {
 		LOGe(FMT_ZERO_PAYLOAD_LENGTH, commandData.len);
@@ -893,7 +893,7 @@ void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAcc
 
 
 void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "register tracked device");
+	LOGi(STR_HANDLE_COMMAND "register tracked device");
 	if (commandData.len != sizeof(register_tracked_device_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(register_tracked_device_packet_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -911,7 +911,7 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 }
 
 void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "tracked device heartbeat");
+	LOGi(STR_HANDLE_COMMAND "tracked device heartbeat");
 //	result.returnCode = ERR_NOT_IMPLEMENTED;
 //	return;
 
@@ -932,7 +932,7 @@ void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, cons
 }
 
 void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "get uptime");
+	LOGi(STR_HANDLE_COMMAND "get uptime");
 	if (result.buf.len < sizeof(uint32_t)) {
 		result.returnCode = ERR_BUFFER_TOO_SMALL;
 		return;
@@ -945,7 +945,7 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 }
 
 void CommandHandler::handleCmdMicroappUpload(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "microapp upload");
+	LOGi(STR_HANDLE_COMMAND "microapp upload");
 	if (commandData.len < sizeof(microapp_upload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;

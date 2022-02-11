@@ -118,6 +118,10 @@ MESHING=1
 # Use the (active) scanner of the mesh.
 MESH_SCANNER=1
 
+# Filter the scans. This is done by whitelisting AD types.
+# Also results in filtering out scan requests, and advertisements without data.
+MESH_SCANNER_FILTERED=1
+
 # Build and use the mesh persistent storage
 # 0 to disable.
 # 1 to use the default: flash manager.

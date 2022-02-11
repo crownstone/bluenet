@@ -328,15 +328,28 @@ class LogStringExtractor:
         return hashVal
 
     def _removeQuotes(self, line: str):
-        startIndex = 0
-        endIndex = len(line)
-        if len(line) > 0 and line[0] == '"':
-            startIndex = 1
-        if len(line) > 1 and line[-1] == '"':
-            endIndex = -1
-        return line[startIndex:endIndex]
-
-
+        """
+        Removes quotes that make a string, and concatenates strings.
+        Example: '"This is just an " "example"'
+        Will return: 'This is just an example'
+        """
+        escape = False
+        inQuotes = False
+        result = ""
+        for c in line:
+            if escape:
+                escape = False
+                result += c
+                continue
+            if c == '\\':
+                escape = True
+                continue
+            if c == '"':
+                inQuotes = not inQuotes
+                continue
+            if inQuotes:
+                result += c
+        return result
 
     def _exportToFile(self, outputFileName: str, topDir: str):
         self.fileCleanupPattern = re.compile(f".*?({topDir}.*)")

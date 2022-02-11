@@ -90,7 +90,7 @@ void Scanner::start() {
 		_opCode = SCAN_START;
 		executeScan();
 	} else {
-		LOGi(FMT_ALREADY, "scanning");
+		LOGi(FMT_ALREADY "scanning");
 	}
 }
 
@@ -102,7 +102,7 @@ void Scanner::delayedStart(uint16_t delay) {
 		_opCode = SCAN_START;
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
 	} else {
-		LOGd(FMT_ALREADY, "scanning");
+		LOGd(FMT_ALREADY "scanning");
 	}
 }
 
