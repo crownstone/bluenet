@@ -323,7 +323,15 @@ Type | Name | Length | Description
 uint32 | Filename hash | 4 | 32 bits DJB2 hash of the reversed filename of the source code where the log is.
 uint16 | Line number | 2 | Line number (starting at line 1) where the ; of the source code where the log is.
 uint8 | Log level | 1 | Verbosity of the log, similar to serial_verbosity in config: verbose=8, debug=7, info=6, warn=5, error=4, fatal=3.
-uint8 | Flags | 1 | Options for the log. Currently only bit 0 is used, which is true to end the line.
+[flags](#binary-log-flags) | Flags | 1 | Options for the log.
+
+##### Binary log flags
+
+Bit | Name |  Description
+--- | --- | ---
+0 | New line | Whether this log should end with a new line.
+1 | Reverse | Whether to print in reverse (arrays only).
+2-7 | Reserved | Reserved for future use.
 
 ### Binary log packet
 

@@ -70,20 +70,7 @@ constexpr auto ArraySize(T(&)[N]) {
 
 template<typename T>
 void printAddress(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG, bool addNewLine = true) {
-	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
-	for (int i = len - 1; i > 0; i=i-1) {
-		_log(verbosity, false, "%02X:", ptr[i]);
-	}
-	_log(verbosity, addNewLine, "%02X", ptr[0]);
-}
-
-template<typename T>
-std::string toBinaryString(T& value) {
-	std::string result("");
-	for (int i = sizeof(T) * 8 - 1; i >= 0; --i) {
-		result += value & (1 << i) ? "1" : "0";
-	}
-	return result;
+	_logArray(verbosity, addNewLine, arr, len, "", "", "%02X", ":", true);
 }
 
 inline void print_heap(const std::string & msg) {

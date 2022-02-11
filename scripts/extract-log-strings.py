@@ -42,7 +42,7 @@ class LogStringExtractor:
         # if (6 <= 7) { cs_log_args(fileNameHash("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp", sizeof("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp")), 64, 6, true, "cs_mesh_write_cb handle=%u retCode=%u", handle, retCode); };
         self.logPattern = re.compile(".*?cs_log_args\((.*)")
 
-        # if (7 <= 7) { cs_log_array(fileNameHash("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp", sizeof("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp")), 455, 7, true, nrf_mesh_configure_device_uuid_get(), (16), "{", "}", " - ", "0x%02X"); };
+        # if (7 <= 7) { cs_log_array(fileNameHash("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp", sizeof("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp")), 455, 7, true, false, nrf_mesh_configure_device_uuid_get(), (16), "{", "}", " - ", "0x%02X"); };
         self.logArrayPattern = re.compile(".*?cs_log_array\((.*)")
 
         self.sourceFilesDir = None
@@ -177,12 +177,13 @@ class LogStringExtractor:
         #  1   456,
         #  2   7,
         #  3   true,
-        #  4   nrf_mesh_configure_device_uuid_get(),
-        #  5   (16),
-        #  6   "[",
-        #  7   "]",
-        #  8   " - ",
-        #  9   "%02X, "
+        #  4   false,
+        #  5   nrf_mesh_configure_device_uuid_get(),
+        #  6   (16),
+        #  7   "[",
+        #  8   "]",
+        #  9   " - ",
+        #  10  "%02X, "
         #  ); };
         # print(f"Line: {line}")
         match = self.logArrayPattern.match(line)
@@ -201,12 +202,13 @@ class LogStringExtractor:
         lineNumber = int(logArgs[1])
         # logLevel = int(logArgs[2])
         # addNewLine = logArgs[3]
-        startFormat = self._removeQuotes(logArgs[6])
-        endFormat = self._removeQuotes(logArgs[7])
-        separationFormat = self._removeQuotes(logArgs[8])
+        # reverse = logArgs[4]
+        startFormat = self._removeQuotes(logArgs[7])
+        endFormat = self._removeQuotes(logArgs[8])
+        separationFormat = self._removeQuotes(logArgs[9])
         elementFormat = None
-        if len(logArgs) > 9:
-            elementFormat = self._removeQuotes(logArgs[9])
+        if len(logArgs) > 10:
+            elementFormat = self._removeQuotes(logArgs[10])
 
         if fileNameHash not in self.logArrays:
             self.logArrays[fileNameHash] = {}
