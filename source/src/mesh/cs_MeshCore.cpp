@@ -36,6 +36,18 @@ extern "C" {
 }
 
 
+#if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
+#error "Mesh key size doesn't match encryption key size"
+#endif
+
+static void meshEventHandler(const nrf_mesh_evt_t * p_evt);
+
+static nrf_mesh_evt_handler_t meshEventHandlerStruct = {
+		meshEventHandler
+};
+
+#if MESH_PERSISTENT_STORAGE == 2
+
 /**
  * Copied from mest_opt_net_state.h
  */
@@ -46,13 +58,6 @@ enum
 	MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD,
 	MESH_OPT_NET_STATE_IV_INDEX_RECORD
 };
-
-
-#if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
-#error "Mesh key size doesn't match encryption key size"
-#endif
-
-#if MESH_PERSISTENT_STORAGE == 2
 
 static CS_TYPE cs_mesh_get_type_from_handle(uint16_t handle) {
 	switch (handle) {
@@ -113,13 +118,11 @@ static uint32_t cs_mesh_erase_cb(uint16_t handle) {
 #endif // MESH_PERSISTENT_STORAGE == 2
 
 static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
-//	LOGMeshInfo("Mesh event type=%u", p_evt->type);
 	switch (p_evt->type) {
 		case NRF_MESH_EVT_MESSAGE_RECEIVED:
 			LOGMeshVerbose("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//			LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//			LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
-//			CsUtils::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
+			_log(SERIAL_VERY_VERBOSE, false, "src=%u data:", p_evt->params.message.p_metadata->source);
+			_logArray(SERIAL_VERY_VERBOSE, true, p_evt->params.message.p_buffer, p_evt->params.message.length);
 			break;
 		case NRF_MESH_EVT_TX_COMPLETE:
 			LOGMeshVerbose("NRF_MESH_EVT_TX_COMPLETE");
@@ -222,10 +225,6 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 #endif
 	}
 }
-static nrf_mesh_evt_handler_t meshEventHandlerStruct = {
-		meshEventHandler
-};
-
 
 
 static void configServerEventCallback(const config_server_evt_t * p_evt) {
@@ -466,7 +465,6 @@ void MeshCore::provisionLoad() {
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
-//	CsUtils::printArray(key, NRF_MESH_KEY_SIZE);
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
