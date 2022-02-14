@@ -66,15 +66,15 @@ void asACR01B2C(boards_config_t* config) {
 	config->currentMultiplier[GAIN_SINGLE]     = 0.0045f;
 
 	// TODO: 2010 seems to be better than 2003 (check this old remark with theory).
-	config->voltageZero[GAIN_SINGLE]           = 2003;
+	config->voltageOffset[GAIN_SINGLE]         = 2003;
 	// TODO: 1991 seems to be better than 1997 (check this old remark with theory).
-	config->currentZero[GAIN_SINGLE]           = 1997;
+	config->currentOffset[GAIN_SINGLE]         = 1997;
 
-	config->powerZero                          = 1500;
+	config->powerOffsetMilliWatt               = 1500;
 
 	// ADC values [0, 4095] map to [0V, 1.2V].
-	config->voltageRange                       = 1200;
-	config->currentRange                       = 1200;
+	config->voltageAdcRangeMilliVolt           = 1200;
+	config->currentAdcRangeMilliVolt           = 1200;
 
 	// About 1.5kOhm --> 90-100C
 	config->pwmTempVoltageThreshold            = 0.76;

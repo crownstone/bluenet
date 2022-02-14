@@ -66,17 +66,6 @@ extern "C" {
 
 /****************************************************** Preamble *******************************************************/ 
 
-// Define test pin to enable gpio debug.
-//#define CS_TEST_PIN 18
-
-#ifdef CS_TEST_PIN
-	#ifdef DEBUG
-		#pragma message("Crownstone test pin enabled")
-	#else
-		#warning "Crownstone test pin enabled"
-	#endif
-#endif
-
 cs_ram_stats_t Crownstone::_ramStats;
 
 
@@ -966,11 +955,6 @@ void printBootloaderInfo() {
  *********************************************************************************************************************/
 
 int main() {
-#ifdef CS_TEST_PIN
-	nrf_gpio_cfg_output(CS_TEST_PIN);
-	nrf_gpio_pin_clear(CS_TEST_PIN);
-#endif
-
 	// this enabled the hard float, without it, we get a hardfault
 	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
 
