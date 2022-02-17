@@ -93,9 +93,20 @@ add_test(NAME ${testname} COMMAND ${testname})
 install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 endfunction()
 
+# TODO(#180407661, Arend) @ANNE: I'd like to move this out into a separate file. 
+# If we have to include dependencies explicitly it should be as simple as 'all of bluenet', except for a mock layer.
+# That means we basically need 3 lists: 
+#     platform independent bluenet sources, 
+#     platform dependend bluenet sources, and 
+#     mock for platform dependend sources.
+# effectively splitting crownstone.src.cmake into 2 pieces and adding the mock layer as new part.
+
+# Question(Arend) @ANNE: what is CMakeLists.host_target.txt doing in source/conf/cmake? Is that legacy?
 
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_Hash.cpp")
+list(APPEND TEST_SOURCE_FILES "../source/src/time/cs_SystemTime.cpp")
+# E.G.: SystemTime needs Timer.cpp which needs to be mocked and Event.cpp, which is still host compatible
  
 add_crownstone_test(test_InterleavedBuffer)
 add_crownstone_test(test_HashFletcher32)
