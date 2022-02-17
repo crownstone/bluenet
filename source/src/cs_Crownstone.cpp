@@ -666,7 +666,7 @@ void Crownstone::startUp() {
 
 	// Start ticking main and services.
 	scheduleNextTick();
-	SystemTime::init();
+	_systemTime.init();
 
 	// The rest we only execute if we are in normal operation.
 	// During other operation modes, most of the crownstone's functionality is disabled.

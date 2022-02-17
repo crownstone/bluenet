@@ -381,7 +381,7 @@ ExternalProject_Add(${NORDIC_SDK_TARGET}
 	)
 
 if(COMPILE_FOR_HOST)
-	include(CTest)
+	#include(CTest)
 	set(NORDIC_HOST_SDK_TARGET nordic_host_sdk${NORDIC_SDK_VERSION_FULL})
 	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
 	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
@@ -1016,7 +1016,7 @@ list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_S
 list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 
 if(COMPILE_FOR_HOST)
-	add_subdirectory("host")
+	#add_subdirectory("host")
 	set(BLUENET_HOST_TARGET bluenet_host)
 	message(STATUS "Configure ${BLUENET_HOST_TARGET} target")
 	ExternalProject_Add(${BLUENET_HOST_TARGET}

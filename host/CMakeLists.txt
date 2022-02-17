@@ -79,34 +79,26 @@ include_directories(${THIRD_PARTY_NRF_SDK_INCLUDE_PATH})
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
-#enable_testing()
-
 set(TEST_SOURCE_DIR "test")
 
-# Extra source files
-list(APPEND TEST_SOURCE_FILES "src/nrf_stubs.c")
 
-### --- 
-set(TEST test_InterleavedBuffer)
-add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
-add_test(NAME ${TEST} COMMAND ${TEST})
-install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+### --- register test files for ctest
 
-### --- 
-set(TEST test_BitmaskVarSize)
+enable_testing()
+
+# util function to reduce verbosity
+function(add_crownstone_test testname)
+add_executable(${testname} ${TEST_SOURCE_FILES} "test/${testname}.cpp")
+add_test(NAME ${testname} COMMAND ${testname})
+install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+endfunction()
+
+
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
-
-add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
-add_test(NAME ${TEST} COMMAND ${TEST})
-install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
-
-### --- 
-set(TEST test_HashFletcher32)
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_Hash.cpp")
-
-add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
-add_test(NAME ${TEST} COMMAND ${TEST})
-install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
-
-
+ 
+add_crownstone_test(test_InterleavedBuffer)
+add_crownstone_test(test_HashFletcher32)
+add_crownstone_test(test_BitmaskVarSize)
+add_crownstone_test(test_SystemTimeSync)
 

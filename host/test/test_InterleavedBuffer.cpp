@@ -4,7 +4,6 @@
  * Date: Feb 10, 2022
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#if defined HOST_TARGET
 
 #include <structs/buffer/cs_AdcBuffer.h>
 #include <structs/buffer/cs_CircularBuffer.h>
@@ -19,7 +18,6 @@ const uint8_t sin_table[]= {0,0,1,2,4,6,9,12,16,20,24,29,35,40,46,53,59,66,73,81
 #define BUFFER_SIZE 200
 
 int main() {
-
 	cout << "Test InterleavedBuffer implementation" << endl;
 
 	AdcBuffer & buffer = AdcBuffer::getInstance();
@@ -71,11 +69,3 @@ int main() {
 
 	return EXIT_SUCCESS;
 }
-
-#else
-int main() {
-	// test fails, still needs to be decoupled from embedded only code
-	return -1;
-}
-
-#endif // defined HOST_TARGET

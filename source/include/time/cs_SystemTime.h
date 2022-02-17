@@ -54,7 +54,7 @@ public:
 	/**
 	 * Creates and starts the first tick timer.
 	 */
-	static void init();
+	void init();
 
 	virtual void handleEvent(event_t& event);
 
