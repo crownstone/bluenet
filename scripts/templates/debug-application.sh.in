@@ -1,0 +1,3 @@
+#!/bin/sh
+
+@COMPILER_PATH@/bin/arm-none-eabi-gdb-py --command @CONF_DIR@/gdb/gdbinit --eval-command="target remote localhost:@GDB_PORT@" --command @CONF_DIR@/gdb/gdbstart --exec=@PROJECT_NAME@.elf @PROJECT_NAME@.elf

@@ -8,6 +8,8 @@
 
 #include <setjmp.h>
 
+enum { COROUTINE_BLUENET = 0, COROUTINE_MICROAPP0 = 1 };
+
 /**
  * We introduce here the DoubleStackCoroutine because the term Coroutine already has been taken in cs_Coroutine.h.
  * The coroutine implementation:
@@ -29,6 +31,17 @@ typedef struct {
 
 typedef void (*coroutineFunc)(void*);
 
+/*
+ * The struct stack_params_t is stored "beyond the stack" of the microapp so it can be used by the microapp to jump
+ * back to bluenet.
+ */
+typedef struct {
+	coroutine_t* coroutine;
+	coroutineFunc coroutineFunction;
+	void* arg;
+	void* oldStackPointer;
+} stack_params_t;
+
 /**
  * Start the coroutine.
  */
@@ -37,10 +50,14 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
 /**
  * Yield the coroutine.
  */
-void yieldCoroutine(coroutine_t* coroutine);
+void yieldCoroutine(coroutine_t* cor);
 
 /**
  * Resume the coroutine.
  */
-int nextCoroutine(coroutine_t* coroutine);
+int nextCoroutine(coroutine_t* cor);
 
+/**
+ * Get stack parameters (be very careful)
+ */
+stack_params_t* getStackParams();

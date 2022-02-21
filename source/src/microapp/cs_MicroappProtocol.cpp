@@ -60,10 +60,24 @@
 
 extern "C" {
 
-/**
- * Arguments to the coroutine.
+/*
+ * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can later
+ * be used to get information back and forth between microapp and bluenet.
  */
-coargs_t g_coargs;
+coargs_t sharedState;
+
+/*
+ * Set arguments for coroutine.
+ */
+void setCoroutineContext(uint8_t coroutineIndex, uint8_t* payload) {
+	stack_params_t* stack_params = getStackParams();
+	coargs_t* args               = (coargs_t*)stack_params->arg;
+	switch (coroutineIndex) {
+		case COROUTINE_BLUENET: args->bluenet2microapp.data = payload; break;
+		case COROUTINE_MICROAPP0: args->microapp2bluenet.data = payload; break;
+		default: break;
+	}
+}
 
 /*
  * This function is called by the microapp in the context of its stack. Even though it is possible to call a log or
@@ -81,9 +95,10 @@ coargs_t g_coargs;
  * @param[in] length                             length of command (not total buffer size)
  */
 cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
+	/*
 	if (length == 0 || length > MAX_PAYLOAD) {
-	//	LOGw("Wrong length %i from microapp (still in microapp context)", length);
-	//	return ERR_WRONG_PAYLOAD_LENGTH;
+		//	LOGw("Wrong length %i from microapp (still in microapp context)", length);
+		//	return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	uint8_t readSize = 0;
@@ -99,14 +114,22 @@ cs_ret_code_t microapp_callback(uint8_t* payload, uint16_t length) {
 	// The reason is that we do not want to pass the coargs towards the microapp and then pass it back again.
 	bluenet2microapp_ipcdata_t& data = *(bluenet2microapp_ipcdata_t*)buf;
 	uintptr_t coargs_ptr             = data.coargs_ptr;
-	coargs_t* args                   = (coargs_t*)coargs_ptr;
-	args->microapp2bluenet.data      = payload;
+	coargs_t* args                   = (coargs_t*)coargs_ptr; */
+
+	setCoroutineContext(COROUTINE_MICROAPP0, payload);
+
+	// or perhaps just... although... how?? The microapp just calls into this... How would it know the address of
+	// sharedState? Mmmm... not so different than stack_params I guess. This is just written to flash. Although...
+	// a const somewhere at a fixed address is quite different from just a sharedState parameter.
+	// sharedState.microapp2bluenet.data = payload;
+
+	// args->microapp2bluenet.data      = payload;
 //	args->microapp2bluenet.size      = length;
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 1
 	LOGi("Do not yield");
 #else
 	// LOGi("Yield");
-	yieldCoroutine(args->coroutine);
+	yieldCoroutine(NULL);
 #endif
 
 	return ERR_SUCCESS;
@@ -202,6 +225,9 @@ int interruptToDigitalPin(int interrupt) {
 	return interrupt - 1;
 }
 
+/*
+ * Get from digital pin to interrupt. See also interruptToDigitalPin.
+ */
 int digitalPinToInterrupt(int pin) {
 	return pin + 1;
 }
@@ -213,7 +239,7 @@ cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
 	if (address < g_FLASH_MICROAPP_BASE) {
 		return ERR_UNSAFE;
 	}
-	if (address > (g_FLASH_MICROAPP_BASE + g_FLASH_MICROAPP_BASE * 0x1000)) {
+	if (address > (g_FLASH_MICROAPP_BASE + g_FLASH_MICROAPP_PAGES * 0x1000)) {
 		return ERR_UNSAFE;
 	}
 	return ERR_SUCCESS;
@@ -246,15 +272,16 @@ MicroappProtocol::MicroappProtocol()
  */
 void MicroappProtocol::setIpcRam() {
 	LOGi("Set IPC info for microapp");
-	bluenet2microapp_ipcdata_t data;
-	data.protocol          = 1;
-	data.length            = sizeof(bluenet2microapp_ipcdata_t);
-	data.microapp_callback = (uintptr_t)&microapp_callback;
-	data.coargs_ptr        = (uintptr_t)&g_coargs;
+	bluenet2microapp_ipcdata_t bluenet2microapp;
+	bluenet2microapp.protocol          = 1;
+	bluenet2microapp.length            = sizeof(bluenet2microapp_ipcdata_t);
+	bluenet2microapp.microapp_callback = (uintptr_t)&microapp_callback;
+	// bluenet2microapp.coargs_ptr        = (uintptr_t)&sharedState; // TODO: remove
 
-	LOGi("Set callback to %p", data.microapp_callback);
+	LOGi("Set callback to %p", bluenet2microapp.microapp_callback);
 
-	[[maybe_unused]] uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&data, data.length);
+	[[maybe_unused]] uint32_t retCode =
+			setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&bluenet2microapp, bluenet2microapp.length);
 	LOGi("Set ram data for microapp, retCode=%u", retCode);
 }
 
@@ -278,12 +305,12 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 	}
 
 	// The entry function is this immediate address (no correction for thumb mode)
-	g_coargs.entry = address;
+	sharedState.entry = address;
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
 	LOGi("Setup coroutine and configure it");
-	g_coargs.coroutine = &_coroutine;
-	startCoroutine(&_coroutine, goIntoMicroapp, &g_coargs);
+	//	sharedState.coroutine = &_coroutine;
+	startCoroutine(&_coroutine, goIntoMicroapp, &sharedState);
 }
 
 /*
@@ -329,14 +356,14 @@ void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
 
 /*
  * Retrieve command from the microapp. This is within the crownstone coroutine context. It gets the payload from the
- * global `g_coargs` variable and calls `handleMicroappCommand` afterwards. The `g_coargs.microapp2bluenet buffer` only
- * stores a single command. This is fine because after each command the microapp should transfer control to bluenet.
- * For each command is decided in `stopAfterMicroappCommand` if the microapp should be called again. For example, for
- * the end of setup, loop, or delay, it is **not** immediately called again but normal bluenet execution continues.
- * In that case the microapp is called again on the next tick.
+ * global `sharedState` variable and calls `handleMicroappCommand` afterwards. The `sharedState.microapp2bluenet buffer`
+ * only stores a single command. This is fine because after each command the microapp should transfer control to
+ * bluenet. For each command is decided in `stopAfterMicroappCommand` if the microapp should be called again. For
+ * example, for the end of setup, loop, or delay, it is **not** immediately called again but normal bluenet execution
+ * continues. In that case the microapp is called again on the next tick.
  */
 bool MicroappProtocol::retrieveCommand() {
-	uint8_t* payload    = g_coargs.microapp2bluenet.data;
+	uint8_t* payload    = sharedState.microapp2bluenet.data;
 	microapp_cmd_t* cmd = reinterpret_cast<microapp_cmd_t*>(payload);
 
 	LOGv("Handle command %i (previous %i, callback %i)", cmd->cmd, cmd->prev, cmd->callbackCmd);
@@ -351,7 +378,7 @@ bool MicroappProtocol::retrieveCommand() {
  */
 void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	// Write pin command into the buffer.
-	uint8_t* payload        = g_coargs.microapp2bluenet.data;
+	uint8_t* payload        = sharedState.microapp2bluenet.data;
 	microapp_pin_cmd_t* cmd = reinterpret_cast<microapp_pin_cmd_t*>(payload);
 	cmd->header.callbackCmd = CS_MICROAPP_COMMAND_PIN;
 	cmd->header.ack         = false;
@@ -363,85 +390,100 @@ void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	writeCallback();
 }
 
+/*
 struct type_t {
-	uint8_t *p_data;
+	uint8_t* p_data;
 	uint16_t data_len;
 };
 
-static uint32_t adv_report_parse(uint8_t type, type_t * p_advdata, type_t * p_typedata)
-{
-	uint32_t  index = 0;
-	uint8_t * p_data;
+static uint32_t adv_report_parse(uint8_t type, type_t* p_advdata, type_t* p_typedata) {
+	uint32_t index = 0;
+	uint8_t* p_data;
 
 	p_data = p_advdata->p_data;
 
-	while (index < p_advdata->data_len)
-	{
+	while (index < p_advdata->data_len) {
 		uint8_t field_length = p_data[index];
 		uint8_t field_type   = p_data[index + 1];
 
-		if (field_type == type)
-		{
-			p_typedata->p_data = &p_data[index + 2];
-			p_typedata->data_len   = field_length - 1;
+		if (field_type == type) {
+			p_typedata->p_data   = &p_data[index + 2];
+			p_typedata->data_len = field_length;
 			return NRF_SUCCESS;
 		}
 		index += field_length + 1;
 	}
 	return NRF_ERROR_NOT_FOUND;
 }
+*/
 
 /*
  * Communicate mesh message towards microapp.
  */
 void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t* dev) {
 
+	/*
+	static int cnt = 0;
+
+
+	if (++cnt % 20 == 0) {
+		uint8_t* payload           = sharedState.microapp2bluenet.data;
+		microapp_ble_device_t* buf = reinterpret_cast<microapp_ble_device_t*>(payload);
+		LOGi("Buffer at %p", buf);
+	}
+	*/
+	// return;
+
 	if (dev->rssi < -50) {
 		return;
 	}
+	/*
+		bool newline = false;
+		_log(SERIAL_INFO, newline, "Advertisement: ");
+		CsUtils::printAddress((uint8_t*)dev->address, BLE_GAP_ADDR_LEN, SERIAL_INFO, newline);
+		LOGi(" rssi=%i ch=%i type=%i", dev->rssi, dev->channel, dev->advType);
+		if (dev->dataSize && dev->data) {
+			_log(SERIAL_INFO, newline, "Data [%i]: ", dev->dataSize);
+			for (int i = 0; i < dev->dataSize; ++i) {
+				_log(SERIAL_INFO, newline, "%02x ", dev->data[i]);
+			}
+			_log(SERIAL_INFO, true, "");
 
-	bool newline = false;
-	_log(SERIAL_INFO, newline, "Advertisement: ");
-	CsUtils::printAddress((uint8_t*)dev->address, BLE_GAP_ADDR_LEN, SERIAL_INFO, newline);
-	LOGi(" rssi=%i ch=%i type=%i", dev->rssi, dev->channel, dev->advType);
-	if (dev->dataSize && dev->data) {
-		_log(SERIAL_INFO, newline, "Data [%i]: ", dev->dataSize);
-		for (int i = 0; i < dev->dataSize; ++i) {
-			_log(SERIAL_INFO, newline, "%02x ", dev->data[i]);
+			//		uint8_t *complete_name = (uint8_t*)malloc((sizeof(uint8_t) * 21));
+			type_t type_data = {
+					.p_data   = NULL,
+					.data_len = 0,
+			};
+
+			type_t source_data = {
+					.p_data   = dev->data,
+					.data_len = dev->dataSize,
+			};
+
+			bool found = false;
+
+			int err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME, &source_data, &type_data);
+			if (err_code == NRF_SUCCESS) {
+				found = true;
+			}
+			err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME, &source_data, &type_data);
+			if (err_code == NRF_SUCCESS) {
+				found = true;
+			}
+
+			if (found) {
+				char* name = (char*)malloc(sizeof(char) * (type_data.data_len + 1));
+				memcpy(name, type_data.p_data, type_data.data_len);
+				name[type_data.data_len] = 0;
+				LOGi("Name [%i]: %s", type_data.data_len, name);
+				delete (name);
+			}
 		}
-		_log(SERIAL_INFO, true, "");
+		return;  // for now
+		*/
 
-//		uint8_t *complete_name = (uint8_t*)malloc((sizeof(uint8_t) * 21));
-		type_t type_data = { .p_data = NULL, .data_len = 0, };
-
-		type_t source_data = { .p_data = dev->data, .data_len = dev->dataSize, };
-
-		bool found = false;
-
-		int err_code = adv_report_parse(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME,
-				&source_data,
-				&type_data);
-		if (err_code == NRF_SUCCESS) {
-			found = true;
-		}
-		err_code = adv_report_parse(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME,
-				&source_data,
-				&type_data);
-		if (err_code == NRF_SUCCESS) {
-			found = true;
-		}
-
-		if (found) {
-			char *name = (char*)malloc(sizeof(char) * (type_data.data_len + 1));
-			memcpy(name, type_data.p_data, type_data.data_len);
-			name[type_data.data_len] = 0;
-			LOGi("Name [%i]: %s", type_data.data_len, name);
-			delete(name);
-		}
-	}
-	return; // for now
 	// Write bluetooth device to buffer
-	uint8_t* payload    = g_coargs.microapp2bluenet.data;
+	uint8_t* payload           = sharedState.microapp2bluenet.data;
 	microapp_ble_device_t* buf = reinterpret_cast<microapp_ble_device_t*>(payload);
 
 	bool found                     = false;
@@ -478,18 +520,15 @@ void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t*
 	buf->dlen = dev->dataSize;
 	memcpy(buf->data, dev->data, dev->dataSize);
 
-	LOGv("Incoming advertisement");
-	static int throttle = 0;
-	if (++throttle % 100 == 0) {
-		writeCallback();
-	}
+	LOGi("Incoming advertisement written to %p", buf);
+	writeCallback();
 }
 
 /*
  * Write the callback to the microapp and have it execute it, hopefully. Try it more than once.
  */
 void MicroappProtocol::writeCallback() {
-	uint8_t* payload    = g_coargs.microapp2bluenet.data;
+	uint8_t* payload    = sharedState.microapp2bluenet.data;
 	microapp_cmd_t* buf = reinterpret_cast<microapp_cmd_t*>(payload);
 
 	buf->ack        = CS_ACK_BLUENET_MICROAPP_REQUEST;
@@ -525,8 +564,8 @@ void MicroappProtocol::callMicroapp() {
 	// just do it from current coroutine context
 	if (!start) {
 		start = true;
-		LOGi("Call address: %p", g_coargs->entry);
-		jumpToAddress(g_coargs->entry);
+		LOGi("Call address: %p", sharedState->entry);
+		jumpToAddress(sharedState->entry);
 		LOGi("Microapp might have run, but this statement is never reached (no coroutine used).");
 	}
 	return;

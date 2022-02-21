@@ -26,6 +26,7 @@ set(MAIN_FILE "cs_Crownstone.cpp")
 
 # The directory with additional CMake files
 set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+set(DEFAULT_CONF_GDB_PATH ${CMAKE_SOURCE_DIR}/conf/gdb)
 
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
@@ -613,10 +614,14 @@ else()
 	
 		# TODO: Rename CONFIG_FILE here to TARGET_RUNTIME_CONFIG_FILE
 		set(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
+			-DPROJECT_NAME:STRING=${PROJECT_NAME}\
+			-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}\
 			-DDEFAULT_CONFIG_FILE:STRING=${DEFAULT_CONFIG_FILE}\
 			-DTARGET_CONFIG_FILE:STRING=${TARGET_CONFIG_FILE}\
 			-DTARGET_CONFIG_OVERWRITE_FILE:STRING=${TARGET_CONFIG_OVERWRITE_FILE}\
 			-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config\
+			-DDEFAULT_CONF_GDB_PATH:STRING=${DEFAULT_CONF_GDB_PATH}\
+			-DCOMPILER_PATH:STRING=${COMPILER_PATH}\
 			-DKEYS_JSON_FILE:STRING=${KEYS_JSON_FILE}\
 			-DDEVICE:STRING=${DEVICE}\
 			-DNRF_DEVICE_FAMILY:STRING=${NRF_DEVICE_FAMILY}\
@@ -643,11 +648,13 @@ else()
 		
 		set(UART_CONFIG_PARAM "-DCONFIG_NAME:STRING=UART_DEVICE")
 
+		# This is a complicated function call in which we get the UART config parameter through cmake and run it through
+		# "bash -c" so that we are able to run it without getting issues with block buffering.
 		add_custom_target(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart -l ${CMAKE_CURRENT_BINARY_DIR}/extracted_logs.json"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
+			COMMAND ./log-client.sh
 			COMMENT "UART client, runs in background"
-			VERBATIM
 			)
 		
 		add_custom_target(rtt_client
@@ -664,14 +671,17 @@ else()
 		
 		add_custom_target(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
+			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
+			COMMAND ./debug-application.sh
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
 		
 		add_custom_target(debug_bootloader
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug bootloader"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb-py --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=bootloader.elf bootloader.elf
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
+			COMMAND ./debug-bootloader.sh
 			WORKING_DIRECTORY bootloader
 			DEPENDS bootloader
 			COMMENT "Debug bootloader.elf"

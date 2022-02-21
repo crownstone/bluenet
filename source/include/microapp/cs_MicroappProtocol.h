@@ -8,19 +8,24 @@ extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
-static_assert (sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
-static_assert (sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+static_assert(sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 
 /**
  * The payload only contains data. The data is limited in size through the use of structs. Therefore there is no
  * separate size field needed.
  */
 struct coargs_payload_t {
-	uint8_t *data;
+	uint8_t* data;
 };
 
+/**
+ * The IPC buffers can be used to bootstrap communication between microapp and bluenet. However, when in the microapp
+ * coroutine context it is convenient if we can immediately yield towards the other context. For this we reserve a bit
+ * of space on the stack (apart from stack pointer etc.).
+ */
 struct coargs_t {
-	coroutine_t* coroutine;
+	//	coroutine_t* coroutine;
 	uintptr_t entry;
 	coargs_payload_t microapp2bluenet;
 	coargs_payload_t bluenet2microapp;
@@ -142,7 +147,7 @@ protected:
 	 * Callback for GPIO events.
 	 */
 	void performCallbackGpio(uint8_t pin);
-	
+
 	/**
 	 * Callback BLE.
 	 */
@@ -184,7 +189,7 @@ protected:
 	/**
 	 * Handle microapp log commands.
 	 */
-	cs_ret_code_t handleMicroappLogCommand(microapp_log_cmd_t *cmd);
+	cs_ret_code_t handleMicroappLogCommand(microapp_log_cmd_t* cmd);
 
 	/**
 	 * Handle microapp delay commands.
@@ -214,7 +219,7 @@ protected:
 	/**
 	 * Handle microapp commands for advertising microapp state in service data.
 	 */
-	cs_ret_code_t handleMicroappServiceDataCommand(microapp_service_data_cmd_t *cmd);
+	cs_ret_code_t handleMicroappServiceDataCommand(microapp_service_data_cmd_t* cmd);
 
 	/**
 	 * Handle microapp TWI commands.
@@ -229,12 +234,12 @@ protected:
 	/**
 	 * Handle microapp commands for power usage requests.
 	 */
-	cs_ret_code_t handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t *cmd);
+	cs_ret_code_t handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t* cmd);
 
 	/**
 	 * Handle microapp commands for presence requests.
 	 */
-	cs_ret_code_t handleMicroappPresenceCommand(microapp_presence_cmd_t *cmd);
+	cs_ret_code_t handleMicroappPresenceCommand(microapp_presence_cmd_t* cmd);
 
 	/**
 	 * Handle microapp commands for sending and reading mesh messages.
@@ -270,5 +275,5 @@ public:
 	/**
 	 * Handle commands from the microapp
 	 */
-	cs_ret_code_t handleMicroappCommand(microapp_cmd_t *cmd);
+	cs_ret_code_t handleMicroappCommand(microapp_cmd_t* cmd);
 };
