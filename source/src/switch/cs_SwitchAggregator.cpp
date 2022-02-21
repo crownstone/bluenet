@@ -473,7 +473,16 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 }
 
 void SwitchAggregator::addToSwitchHistory(const cs_switch_history_item_t& cmd) {
-	LOGd("addToSwitchHistory val=%u state=%u srcType=%u, srcId=%u", cmd.value, cmd.state.asInt, cmd.source.type, cmd.source.id);
+	LOGd("addToSwitchHistory val=%u state=%u srcType=%u srcId=%u", cmd.value, cmd.state.asInt, cmd.source.type, cmd.source.id);
+	if (!_switchHistory.empty()) {
+		auto prevEntry = _switchHistory[_switchHistory.size() - 1];
+		if (memcmp(&prevEntry.source, &cmd.source, sizeof(cmd.source)) == 0
+				&& (prevEntry.state.asInt == cmd.state.asInt)
+				&& (prevEntry.value == cmd.value)) {
+			LOGd("Avoid duplicate entry");
+			return;
+		}
+	}
 	_switchHistory.push(cmd);
 	printSwitchHistory();
 }
