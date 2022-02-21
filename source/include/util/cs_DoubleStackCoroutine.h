@@ -50,12 +50,12 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
 /**
  * Yield the coroutine.
  */
-void yieldCoroutine(coroutine_t* cor);
+void yieldCoroutine();
 
 /**
  * Resume the coroutine.
  */
-int nextCoroutine(coroutine_t* cor);
+int nextCoroutine();
 
 /**
  * Get stack parameters (be very careful)

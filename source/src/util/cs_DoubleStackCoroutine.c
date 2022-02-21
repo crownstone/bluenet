@@ -58,7 +58,7 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
  * argument it restores all registers and execution resumes again from the same if statement but now setjmp returns 1
  * (or the value given by longjmp).
  */
-int nextCoroutine(coroutine_t* cor) {
+int nextCoroutine() {
 	// Save current context (registers) for bluenet.
 	coroutine_t* coroutine = stack_params->coroutine;
 	int ret                = setjmp(coroutine->bluenetContext);
@@ -77,7 +77,7 @@ int nextCoroutine(coroutine_t* cor) {
 /*
  * This function is always preceded by nextCoroutine. That's where it will be yielding to.
  */
-void yieldCoroutine(coroutine_t* cor) {
+void yieldCoroutine() {
 	// Save current context (registers) for microapp 0.
 	coroutine_t* coroutine = stack_params->coroutine;
 	int ret                = setjmp(coroutine->microapp0Context);

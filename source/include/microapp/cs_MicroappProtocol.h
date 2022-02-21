@@ -8,16 +8,16 @@ extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
-static_assert(sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+//static_assert(sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 
 /**
  * The payload only contains data. The data is limited in size through the use of structs. Therefore there is no
  * separate size field needed.
  */
-struct coargs_payload_t {
-	uint8_t* data;
-};
+//struct coargs_payload_t {
+//	uint8_t* data;
+//};
 
 /**
  * The IPC buffers can be used to bootstrap communication between microapp and bluenet. However, when in the microapp
@@ -25,10 +25,10 @@ struct coargs_payload_t {
  * of space on the stack (apart from stack pointer etc.).
  */
 struct coargs_t {
-	//	coroutine_t* coroutine;
 	uintptr_t entry;
-	coargs_payload_t microapp2bluenet;
-	coargs_payload_t bluenet2microapp;
+	bluenet_io_buffer_t *io_buffer;
+//	coargs_payload_t microapp2bluenet;
+//	coargs_payload_t bluenet2microapp;
 };
 
 // Call loop every 10 ticks. The ticks are every 100 ms so this means every second.

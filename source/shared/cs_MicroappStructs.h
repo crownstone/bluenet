@@ -75,6 +75,7 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_LOOP_END      = 0x0B,
 	CS_MICROAPP_COMMAND_BLE_DEVICE    = 0x0C,
 	CS_MICROAPP_COMMAND_CALLBACK_DONE = 0x0D,
+	CS_MICROAPP_COMMAND_CALLBACK_END  = 0x0E,
 };
 
 enum CommandMicroappPin {
@@ -158,6 +159,25 @@ enum MicroappBleEventType {
 };
 
 /*
+ * The layout of the struct in ramdata from microapp to bluenet.
+ */
+//struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
+//	uint8_t protocol;
+//	uint8_t length;
+//};
+
+struct __attribute__((packed)) io_buffer_t {
+	uint8_t payload[MAX_PAYLOAD];
+};
+
+struct __attribute__((packed)) bluenet_io_buffer_t {
+	io_buffer_t microapp2bluenet;
+	io_buffer_t bluenet2microapp;
+};
+
+typedef uint16_t (*microappCallbackFunc)(bluenet_io_buffer_t*);
+
+/*
  * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
  * compatible. The length parameter functions as a extra possible check. The callback can be used by the microapp to
  * call back into bluenet. The pointer to the coargs struct can be used to switch back from the used coroutine and
@@ -166,17 +186,10 @@ enum MicroappBleEventType {
 struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 	uint8_t protocol;
 	uint8_t length;
-	uintptr_t microapp_callback;
-	uintptr_t coargs_ptr;
+	microappCallbackFunc microapp_callback;
+//	uintptr_t microapp_callback;
+//	uintptr_t coargs_ptr;
 	bool valid;
-};
-
-/*
- * The layout of the struct in ramdata from microapp to bluenet.
- */
-struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
-	uint8_t protocol;
-	uint8_t length;
 };
 
 /**
