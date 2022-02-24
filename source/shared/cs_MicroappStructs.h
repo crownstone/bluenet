@@ -50,32 +50,35 @@ const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - MICROAPP_PIN_CMD_S
 #define MICROAPP_SERIAL_SERVICE_DATA_PORT_NUMBER 4
 
 enum CommandMicroappAck {
-	CS_ACK_NONE                     = 0x00,
-	CS_ACK_BLUENET_MICROAPP_REQUEST = 0x01,
-	CS_ACK_BLUENET_MICROAPP_REQ_ACK = 0x02,
-	CS_ACK_MICROAPP_BLUENET_REQUEST = 0x03,
-	CS_ACK_MICROAPP_BLUENET_REQ_ACK = 0x04,
+	CS_ACK_NONE                      = 0x00,
+	CS_ACK_BLUENET_MICROAPP_REQUEST  = 0x01,
+	CS_ACK_BLUENET_MICROAPP_REQ_ACK  = 0x02,
+	CS_ACK_BLUENET_MICROAPP_REQ_BUSY = 0x03,
+	CS_ACK_MICROAPP_BLUENET_REQUEST  = 0x04,
+	CS_ACK_MICROAPP_BLUENET_REQ_ACK  = 0x05,
+	CS_ACK_MICROAPP_BLUENET_REQ_BUSY = 0x06,
 };
 
 /**
  * The main opcodes for microapp commands.
  */
 enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_NONE          = 0x00,
-	CS_MICROAPP_COMMAND_LOG           = 0x01,
-	CS_MICROAPP_COMMAND_DELAY         = 0x02,
-	CS_MICROAPP_COMMAND_PIN           = 0x03,  // Payload is pin_cmd_t.
-	CS_MICROAPP_COMMAND_SERVICE_DATA  = 0x04,
-	CS_MICROAPP_COMMAND_TWI           = 0x05,
-	CS_MICROAPP_COMMAND_BLE           = 0x06,
-	CS_MICROAPP_COMMAND_POWER_USAGE   = 0x07,
-	CS_MICROAPP_COMMAND_PRESENCE      = 0x08,
-	CS_MICROAPP_COMMAND_MESH          = 0x09,
-	CS_MICROAPP_COMMAND_SETUP_END     = 0x0A,
-	CS_MICROAPP_COMMAND_LOOP_END      = 0x0B,
-	CS_MICROAPP_COMMAND_BLE_DEVICE    = 0x0C,
-	CS_MICROAPP_COMMAND_CALLBACK_DONE = 0x0D,
-	CS_MICROAPP_COMMAND_CALLBACK_END  = 0x0E,
+	CS_MICROAPP_COMMAND_NONE              = 0x00,
+	CS_MICROAPP_COMMAND_LOG               = 0x01,
+	CS_MICROAPP_COMMAND_DELAY             = 0x02,
+	CS_MICROAPP_COMMAND_PIN               = 0x03,
+	CS_MICROAPP_COMMAND_SERVICE_DATA      = 0x04,
+	CS_MICROAPP_COMMAND_TWI               = 0x05,
+	CS_MICROAPP_COMMAND_BLE               = 0x06,
+	CS_MICROAPP_COMMAND_POWER_USAGE       = 0x07,
+	CS_MICROAPP_COMMAND_PRESENCE          = 0x08,
+	CS_MICROAPP_COMMAND_MESH              = 0x09,
+	CS_MICROAPP_COMMAND_SETUP_END         = 0x0A,
+	CS_MICROAPP_COMMAND_LOOP_END          = 0x0B,
+	CS_MICROAPP_COMMAND_BLE_DEVICE        = 0x0C,
+	CS_MICROAPP_COMMAND_CALLBACK_RECEIVED = 0x0D,
+	CS_MICROAPP_COMMAND_CALLBACK_END      = 0x0E,
+	CS_MICROAPP_COMMAND_CALLBACK_FAILURE  = 0x0F,
 };
 
 enum CommandMicroappPin {
@@ -158,14 +161,6 @@ enum MicroappBleEventType {
 	BleEventDisconnected  = 0x03,
 };
 
-/*
- * The layout of the struct in ramdata from microapp to bluenet.
- */
-//struct __attribute__((packed)) microapp2bluenet_ipcdata_t {
-//	uint8_t protocol;
-//	uint8_t length;
-//};
-
 struct __attribute__((packed)) io_buffer_t {
 	uint8_t payload[MAX_PAYLOAD];
 };
@@ -187,8 +182,8 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 	uint8_t protocol;
 	uint8_t length;
 	microappCallbackFunc microapp_callback;
-//	uintptr_t microapp_callback;
-//	uintptr_t coargs_ptr;
+	//	uintptr_t microapp_callback;
+	//	uintptr_t coargs_ptr;
 	bool valid;
 };
 
@@ -350,7 +345,7 @@ static_assert(sizeof(microapp_mesh_read_available_cmd_t) <= MAX_PAYLOAD);
  * Struct for microapp mesh read commands
  */
 struct __attribute__((packed)) microapp_mesh_read_cmd_t {
-	struct microapp_mesh_cmd_t mesh_header;
+	microapp_mesh_cmd_t mesh_header;
 	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
 	uint8_t messageSize;                              // Actual message size.
 	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];  // Message buffer.
@@ -402,7 +397,7 @@ struct __attribute__((packed)) microapp_power_usage_t {
 };
 
 struct __attribute__((packed)) microapp_power_usage_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_POWER_USAGE;
+	microapp_cmd_t header;
 	microapp_power_usage_t powerUsage;
 };
 
@@ -415,6 +410,6 @@ struct __attribute__((packed)) microapp_presence_t {
 };
 
 struct __attribute__((packed)) microapp_presence_cmd_t {
-	uint8_t cmd = CS_MICROAPP_COMMAND_PRESENCE;
+	microapp_cmd_t header;
 	microapp_presence_t presence;
 };

@@ -8,16 +8,7 @@ extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
-//static_assert(sizeof(microapp2bluenet_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
-
-/**
- * The payload only contains data. The data is limited in size through the use of structs. Therefore there is no
- * separate size field needed.
- */
-//struct coargs_payload_t {
-//	uint8_t* data;
-//};
 
 /**
  * The IPC buffers can be used to bootstrap communication between microapp and bluenet. However, when in the microapp
@@ -26,9 +17,7 @@ static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SI
  */
 struct coargs_t {
 	uintptr_t entry;
-	bluenet_io_buffer_t *io_buffer;
-//	coargs_payload_t microapp2bluenet;
-//	coargs_payload_t bluenet2microapp;
+	bluenet_io_buffer_t* io_buffer;
 };
 
 // Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
@@ -88,7 +77,7 @@ private:
 	/**
 	 * The maximum number of consecutive calls to a microapp.
 	 */
-	const uint8_t MAX_CONSECUTIVE_MESSAGES = 42;
+	const uint8_t MAX_CONSECUTIVE_MESSAGES = 8;
 
 	/**
 	 * Call counter
@@ -116,6 +105,41 @@ private:
 	 * Starts with microapp_buffered_mesh_message_header_t, followed by the message.
 	 */
 	CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
+
+	/**
+	 * Counter that counts how many callbacks have been received.
+	 */
+	uint32_t _callbackReceivedCounter;
+
+	/**
+	 * Counter that counts how many callbacks have been executed until the end.
+	 */
+	uint32_t _callbackEndCounter;
+
+	/**
+	 * Counter that counts how many callbacks have been executed until the end.
+	 */
+	uint32_t _callbackFailCounter;
+
+	/**
+	 * Callback execute counter
+	 */
+	int8_t _callbackExecCounter;
+
+	/**
+	 * Limit the number of callbacks in a tick (if -1) there is no limit.
+	 */
+	const int8_t MAX_CALLBACKS_WITHIN_A_TICK = 10;
+
+	/**
+	 * Maximum number of soft interrupts in parallel.
+	 */
+	const uint8_t MAX_SOFTINTERRUPTS_IN_PARALLEL = 2;
+
+	/**
+	 * To throttle the ticks themselves.
+	 */
+	uint8_t _tickCounter;
 
 protected:
 	/**
@@ -154,6 +178,11 @@ protected:
 	void performCallbackIncomingBLEAdvertisement(scanned_device_t* dev);
 
 	/**
+	 * A callback already in progress.
+	 */
+	bool callbackInProgress();
+
+	/**
 	 * Initialize memory for the microapp.
 	 */
 	uint16_t initMemory();
@@ -174,25 +203,24 @@ protected:
 	void onDeviceScanned(scanned_device_t* dev);
 
 	/**
-	 * Flag as being processed by bluenet. This will overwrite the cmd field so that a command is not performed twice.
-	 *
-	 * @param[in] cmd                            Any microapp command
-	 */
-	void setAsProcessed(microapp_cmd_t* cmd);
-
-	/**
 	 * After particular microapp commands we want to stop the microapp (end of loop etc.) and continue with bluenet.
 	 * This function returns true for such commands.
+	 *
+	 * @param[in] cmd                            Any microapp command
 	 */
 	bool stopAfterMicroappCommand(microapp_cmd_t* cmd);
 
 	/**
 	 * Handle microapp log commands.
+	 *
+	 * @param[in] cmd                            A microapp command for logging to serial.
 	 */
 	cs_ret_code_t handleMicroappLogCommand(microapp_log_cmd_t* cmd);
 
 	/**
 	 * Handle microapp delay commands.
+	 *
+	 * @param[in] cmd                            A microapp command to introduce a delay for the microapp itself.
 	 */
 	cs_ret_code_t handleMicroappDelayCommand(microapp_delay_cmd_t* cmd);
 

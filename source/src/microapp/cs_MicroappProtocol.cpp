@@ -73,9 +73,8 @@ void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer)
 	stack_params_t* stack_params = getStackParams();
 	coargs_t* args               = (coargs_t*)stack_params->arg;
 	switch (coroutineIndex) {
-			//		case COROUTINE_BLUENET: args->bluenet2microapp.data = payload; break;
-			// case COROUTINE_MICROAPP0: args->microapp2bluenet.data = payload; break;
 		case COROUTINE_MICROAPP0: args->io_buffer = io_buffer; break;
+		// potentially more microapps here
 		default: break;
 	}
 }
@@ -86,10 +85,8 @@ void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer)
  *
  * @param[in] payload                            pointer to buffer with command for bluenet
  */
-// struct __attribute__((packed)) bluenet_io_buffer_t {
 cs_ret_code_t microapp_callback(bluenet_io_buffer_t* io_buffer) {
 	setCoroutineContext(COROUTINE_MICROAPP0, io_buffer);
-//	setCoroutineContext(COROUTINE_MICROAPP0, payload);
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 1
 	LOGi("Do not yield");
 #else
@@ -303,18 +300,17 @@ uint16_t MicroappProtocol::initMemory() {
  */
 void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
 	bool call_again = false;
+	_tickCounter++;
+	if (_tickCounter % MICROAPP_LOOP_FREQUENCY != 0) {
+		return;
+	}
+	_tickCounter = 0;
+	LOGv("Tick microapp");
+	_callbackExecCounter = 0;
 	do {
 		callMicroapp();
 		call_again = retrieveCommand();
 	} while (call_again);
-}
-
-/*
- * Overwrite the command field so it is not (accidentally) executed twice.
- */
-void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
-	cmd->prev = cmd->cmd;
-	cmd->cmd  = CS_MICROAPP_COMMAND_NONE;
 }
 
 /*
@@ -326,14 +322,18 @@ void MicroappProtocol::setAsProcessed(microapp_cmd_t* cmd) {
  * continues. In that case the microapp is called again on the next tick.
  */
 bool MicroappProtocol::retrieveCommand() {
-	// uint8_t* payload    = sharedState.microapp2bluenet.data;
-	uint8_t* payload    = sharedState.io_buffer->microapp2bluenet.payload;
-	microapp_cmd_t* cmd = reinterpret_cast<microapp_cmd_t*>(payload);
+	uint8_t* payload       = sharedState.io_buffer->microapp2bluenet.payload;
+	microapp_cmd_t* cmd_in = reinterpret_cast<microapp_cmd_t*>(payload);
 
-	LOGv("Handle command %i (previous %i, callback %i)", cmd->cmd, cmd->prev, cmd->callbackCmd);
-	handleMicroappCommand(cmd);
-	bool call_again = !stopAfterMicroappCommand(cmd);
-	setAsProcessed(cmd);
+	[[maybe_unused]] static int retrieveCounter = 0;
+	if (cmd_in->cmd != CS_MICROAPP_COMMAND_LOOP_END) {
+		LOGv("Retrieve and handle [%i] command %i (callback %i)", ++retrieveCounter, cmd_in->cmd, cmd_in->callbackCmd);
+	}
+	handleMicroappCommand(cmd_in);
+	bool call_again = !stopAfterMicroappCommand(cmd_in);
+	if (!call_again) {
+		LOGv("Command %i, do not call again", cmd_in->cmd);
+	}
 	return call_again;
 }
 
@@ -341,6 +341,10 @@ bool MicroappProtocol::retrieveCommand() {
  * A GPIO callback towards the microapp.
  */
 void MicroappProtocol::performCallbackGpio(uint8_t pin) {
+	if (callbackInProgress()) {
+		LOGi("Callback in progress, ignore pin %i event", digitalPinToInterrupt(pin));
+		return;
+	}
 	// Write pin command into the buffer.
 	uint8_t* payload        = sharedState.io_buffer->bluenet2microapp.payload;
 	microapp_pin_cmd_t* cmd = reinterpret_cast<microapp_pin_cmd_t*>(payload);
@@ -355,11 +359,30 @@ void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 }
 
 /*
+ * We either get a callback received or a callback failure when we start a callback. However, there can be a failure
+ * also halfway the execution which will not lead to a proper end.
+ *
+ * TODO: This relies too much on proper counters for callbacks received versus callbacks ended. It should at least be
+ * reset so now and then (or updated with info from the microapp itself).
+ */
+bool MicroappProtocol::callbackInProgress() {
+	uint32_t inProgress = (_callbackReceivedCounter - _callbackEndCounter);
+	return ((uint8_t)inProgress >= MAX_SOFTINTERRUPTS_IN_PARALLEL);
+}
+
+/*
  * Communicate mesh message towards microapp.
  */
 void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t* dev) {
 
+#ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
 	if (dev->rssi < -50) {
+		return;
+	}
+#endif
+
+	if (callbackInProgress()) {
+		LOGv("Callback in progress, ignore scanned device event");
 		return;
 	}
 
@@ -401,31 +424,58 @@ void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t*
 	buf->dlen = dev->dataSize;
 	memcpy(buf->data, dev->data, dev->dataSize);
 
-	LOGi("Incoming advertisement written to %p", buf);
+	LOGv("Incoming advertisement written to %p", buf);
 	writeCallback();
 }
 
 /*
- * Write the callback to the microapp and have it execute it, hopefully. Try it more than once.
+ * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the soft interrupt.
+ * Hence, we call retrieveCommand after this. Then a number of calls are executed until we reach the end of the loop
+ * or until we have reached a maximum of consecutive calls (within retrieveCommand).
+ *
+ * Note that although we do throttle the number of consecutive calls, this does not throttle the callbacks themselves.
+ *
  */
 void MicroappProtocol::writeCallback() {
-	uint8_t* payload = sharedState.io_buffer->bluenet2microapp.payload;
-	//uint8_t* payload    = sharedState.io_buffer->microapp2bluenet.payload;
-	microapp_cmd_t* buf = reinterpret_cast<microapp_cmd_t*>(payload);
+	uint8_t* data_out                       = sharedState.io_buffer->bluenet2microapp.payload;
+	microapp_cmd_t* buf_out                 = reinterpret_cast<microapp_cmd_t*>(data_out);
+	[[maybe_unused]] uint8_t* data_in       = sharedState.io_buffer->microapp2bluenet.payload;
+	[[maybe_unused]] microapp_cmd_t* buf_in = reinterpret_cast<microapp_cmd_t*>(data_in);
 
-	buf->ack        = CS_ACK_BLUENET_MICROAPP_REQUEST;
-	bool call_again = false;
-	int8_t counter  = 0;
+	if (_callbackExecCounter == MAX_CALLBACKS_WITHIN_A_TICK - 1) {
+		LOGi("Last callback (next one in next tick)");
+	}
+
+	if (_callbackExecCounter == MAX_CALLBACKS_WITHIN_A_TICK) {
+		return;
+	}
+	_callbackExecCounter++;
+
+	buf_out->ack                   = CS_ACK_BLUENET_MICROAPP_REQUEST;
+	bool call_again                = false;
+	int8_t repeatCounter           = 0;
+	static int32_t callbackCounter = 0;
 	do {
-		LOGi("Call [%i], command %i (previous %i, callback %i)", counter, buf->cmd, buf->prev, buf->callbackCmd);
+		LOGv("Call [%i,%i,%i], within callback %i: (cur=%i)",
+			 callbackCounter,
+			 repeatCounter,
+			 buf_out->counter,
+			 buf_out->callbackCmd,
+			 buf_in->cmd);
 		callMicroapp();
-		if (buf->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK) {
-			buf->ack = CS_ACK_NONE;
-			LOGd("Acked callback");
+		bool acked = (buf_out->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK);
+		if (acked) {
+			// buf_out->ack = CS_ACK_NONE;
+			LOGv("Acked callback");
 		}
 		call_again = retrieveCommand();
-		counter++;
+		if (!acked) {
+			LOGv("Not acked... Give it space");
+			call_again = false;
+		}
+		repeatCounter++;
 	} while (call_again);
+	callbackCounter++;
 }
 
 /*
@@ -590,12 +640,19 @@ cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t* cmd) {
 			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(cmd);
 			return handleMicroappMeshCommand(mesh_cmd);
 		}
-		case CS_MICROAPP_COMMAND_CALLBACK_DONE: {
-			LOGi("Callback done for %i", (int)cmd->id);
+		case CS_MICROAPP_COMMAND_CALLBACK_RECEIVED: {
+			_callbackReceivedCounter++;
+			LOGv("Callback received [%i] for %i", _callbackReceivedCounter, (int)cmd->id);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_CALLBACK_FAILURE: {
+			_callbackFailCounter++;
+			LOGv("Callback fail [%i] for %i", _callbackFailCounter, (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_CALLBACK_END: {
-			LOGi("Callback end for %i", (int)cmd->id);
+			_callbackEndCounter++;
+			LOGv("Callback end [%i] for %i", _callbackEndCounter, (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
@@ -630,12 +687,25 @@ bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 		case CS_MICROAPP_COMMAND_BLE:
 		case CS_MICROAPP_COMMAND_POWER_USAGE:
 		case CS_MICROAPP_COMMAND_PRESENCE:
-		case CS_MICROAPP_COMMAND_MESH: stop = false; break;
+		case CS_MICROAPP_COMMAND_CALLBACK_RECEIVED:
+		case CS_MICROAPP_COMMAND_MESH: {
+			stop = false;
+			break;
+		}
 		case CS_MICROAPP_COMMAND_DELAY:
 		case CS_MICROAPP_COMMAND_SETUP_END:
 		case CS_MICROAPP_COMMAND_LOOP_END:
-		case CS_MICROAPP_COMMAND_NONE:
-		default: stop = true; break;
+		case CS_MICROAPP_COMMAND_CALLBACK_END:
+		case CS_MICROAPP_COMMAND_CALLBACK_FAILURE:
+		case CS_MICROAPP_COMMAND_NONE: {
+			stop = true;
+			break;
+		}
+		default: {
+			LOGi("Unknown command: %i", command);
+			stop = true;
+			break;
+		}
 	}
 	if (stop) {
 		_callCounter = 0;
@@ -643,7 +713,7 @@ bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 	else {
 		if (++_callCounter % MAX_CONSECUTIVE_MESSAGES == 0) {
 			_callCounter = 0;
-			LOGi("Stop because we've reached a max # of calls");
+			LOGv("Stop because we've reached a max # of calls");
 			return true;
 		}
 	}
