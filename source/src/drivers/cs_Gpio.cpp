@@ -111,6 +111,11 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 
 	uint32_t pin = _pins[pin_index].pin;
 
+	if (pin == 0xFF) {
+		LOGi("Pin index %i is not connected", pin_index);
+		return;
+	}
+
 	nrf_gpio_pin_pull_t nrf_pull;
 	switch(pull) {
 		case GpioPullResistor::NONE:
