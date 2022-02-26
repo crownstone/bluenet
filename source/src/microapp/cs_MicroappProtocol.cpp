@@ -354,7 +354,7 @@ void MicroappProtocol::performCallbackGpio(uint8_t pin) {
 	cmd->pin                = digitalPinToInterrupt(pin);
 	cmd->value              = CS_MICROAPP_COMMAND_VALUE_CHANGE;
 	// Resume microapp so it can pick up this command.
-	LOGd("Send callback on virtual pin %i", cmd->pin);
+	LOGi("Send callback on virtual pin %i", cmd->pin);
 	writeCallback();
 }
 
@@ -1047,10 +1047,10 @@ cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
 			LOGi("Set scan event callback handler");
 #if BUILD_MESHING == 0
-			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled")
+			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
 #endif
-					bool success = registerBleCallback(ble_cmd->id);
-			ble_cmd->header.ack  = success;
+			bool success        = registerBleCallback(ble_cmd->id);
+			ble_cmd->header.ack = success;
 			return success ? ERR_SUCCESS : ERR_NO_SPACE;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {

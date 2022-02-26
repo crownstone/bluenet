@@ -20,11 +20,6 @@ struct coargs_t {
 	bluenet_io_buffer_t* io_buffer;
 };
 
-// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
-#define MICROAPP_LOOP_FREQUENCY 10
-
-#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
-
 // The number of 8 interrupt service routines per type should be sufficient.
 const uint8_t MAX_PIN_ISR_COUNT = 8;
 const uint8_t MAX_BLE_ISR_COUNT = 8;

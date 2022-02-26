@@ -49,6 +49,18 @@ const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - MICROAPP_PIN_CMD_S
 
 #define MICROAPP_SERIAL_SERVICE_DATA_PORT_NUMBER 4
 
+// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
+#define MICROAPP_LOOP_FREQUENCY 10
+
+#ifndef TICK_INTERVAL_MS
+#define TICK_INTERVAL_MS 100
+#endif
+
+#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
+
+/**
+ * Acknowledgments from microapp to bluenet or the other way around.
+ */
 enum CommandMicroappAck {
 	CS_ACK_NONE                      = 0x00,
 	CS_ACK_BLUENET_MICROAPP_REQUEST  = 0x01,
