@@ -632,17 +632,27 @@ else()
 			-DUART_DEVICE:STRING=${UART_DEVICE}\
 			-DUART_BAUDRATE:STRING=${UART_BAUDRATE}\
 			-DRTT_PORT:STRING=${RTT_PORT}")
-		
+
+		# An internal target that updates scripts with (even) runtime configuration values
+		add_custom_target(write_runtime_config
+			COMMAND ${CMAKE_COMMAND} -E echo "** Write runtime config"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
+			COMMENT "Write runtime config"
+		)
+
 		# The gdb server can be started with configuration specific information
 		add_custom_target(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_GDB_SERVER" -P ${DEFAULT_MODULES_PATH}/debug_tool.cmake
+			#COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_GDB_SERVER" -P ${DEFAULT_MODULES_PATH}/debug_tool.cmake
+			COMMAND ./gdb-server.sh
+			DEPENDS write_runtime_config
 			COMMENT "Debug server, runs in background"
 			)
 
 		add_custom_target(uart_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_MINICOM" -P ${DEFAULT_MODULES_PATH}/uart_tool.cmake
+			COMMAND ./minicom.sh
+			DEPENDS write_runtime_config
 			COMMENT "UART client, runs in background"
 			)
 		
@@ -651,15 +661,16 @@ else()
 		# This is a complicated function call in which we get the UART config parameter through cmake and run it through
 		# "bash -c" so that we are able to run it without getting issues with block buffering.
 		add_custom_target(uart_binary_client
-			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
+			COMMAND ${CMAKE_COMMAND} -E echo "** UART binary client, keep running in separate shell"
 			COMMAND ./log-client.sh
+			DEPENDS write_runtime_config
 			COMMENT "UART client, runs in background"
 			)
 		
 		add_custom_target(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
-			COMMAND JLinkRTTClient -RTTTelnetPort ${RTT_PORT}
+			COMMAND ./rtt-client.sh
+			DEPENDS write_runtime_config
 			COMMENT "RTT client, runs in background"
 			)
 		
@@ -670,20 +681,17 @@ else()
 			)
 		
 		add_custom_target(debug_application
-			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
+			COMMAND ${CMAKE_COMMAND} -E echo "** Debug application"
 			COMMAND ./debug-application.sh
-			DEPENDS ${PROJECT_NAME}.elf
+			DEPENDS ${PROJECT_NAME}.elf write_runtime_config
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
 		
 		add_custom_target(debug_bootloader
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug bootloader"
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
 			COMMAND ./debug-bootloader.sh
 			WORKING_DIRECTORY bootloader
-			DEPENDS bootloader
+			DEPENDS bootloader write_runtime_config
 			COMMENT "Debug bootloader.elf"
 			)
 
@@ -700,6 +708,9 @@ else()
 
 		add_custom_target(factory_reset
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=FACTORY_RESET" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
+			COMMAND ${CMAKE_COMMAND} -E echo "** Factory reset"
+			COMMAND ./factory-reset.sh
+			DEPENDS write_runtime_config
 			COMMENT "Perform a factory reset of a Crownstone via csutil"
 			)
 
@@ -709,13 +720,8 @@ else()
 			)
 
 		add_custom_target(check
-			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 
-			COMMENT "Check for style or worse types of errors (linter)"
-			)
-		
-		add_custom_target(lint
-			COMMAND cpplint --filter=-whitespace/tab --linelength=120 --recursive ${CMAKE_SOURCE_DIR} 
-			COMMENT "Check for style according to Google C++ style guide"
+			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR}
+			COMMENT "Check for style or worse types of errors"
 			)
 		
 		add_custom_target(generate_documentation
@@ -783,7 +789,6 @@ else()
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
 		#if(NOT CONFIG_DIR STREQUAL "release")
-
 		set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
 		message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
@@ -800,8 +805,10 @@ else()
 			)
 	
 		add_custom_target(increment_application_version
-			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
-			COMMENT "Increment application version (in VERSION file)"
+			COMMAND ${CMAKE_COMMAND} -E echo "Increment application version in VERSION file"
+			COMMAND ./increment-application-version.sh
+			COMMENT "Increment application version"
+			DEPENDS write_runtime_config
 			)
 			
 		set(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")

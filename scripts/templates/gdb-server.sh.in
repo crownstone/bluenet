@@ -1,0 +1,3 @@
+#!/bin/sh
+
+JLinkGDBServer -Device @DEVICE@ @SERIAL_NUM_GDB_SELECT@ @SERIAL_NUM_GDB_PARAM@ -If SWD -speed 4000 -port @GDB_PORT@ -swoport @SWO_PORT@ -telnetport @TELNET_PORT@ -RTTTelnetPort @RTT_PORT@

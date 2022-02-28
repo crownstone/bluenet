@@ -1,0 +1,3 @@
+#!/bin/sh
+
+minicom -b @UART_BAUDRATE@ -c on -D @UART_DEVICE@
