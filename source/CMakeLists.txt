@@ -611,7 +611,9 @@ else()
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
 			)
-	
+
+		# The reason to - again - write all those parameters is that at runtime they are not available. If we want
+		# them to be available we will have to send them as arguments like this.
 		# TODO: Rename CONFIG_FILE here to TARGET_RUNTIME_CONFIG_FILE
 		set(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
 			-DPROJECT_NAME:STRING=${PROJECT_NAME}\
@@ -640,10 +642,8 @@ else()
 			COMMENT "Write runtime config"
 		)
 
-		# The gdb server can be started with configuration specific information
 		add_custom_target(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			#COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_GDB_SERVER" -P ${DEFAULT_MODULES_PATH}/debug_tool.cmake
 			COMMAND ./gdb-server.sh
 			DEPENDS write_runtime_config
 			COMMENT "Debug server, runs in background"
@@ -656,10 +656,6 @@ else()
 			COMMENT "UART client, runs in background"
 			)
 		
-		set(UART_CONFIG_PARAM "-DCONFIG_NAME:STRING=UART_DEVICE")
-
-		# This is a complicated function call in which we get the UART config parameter through cmake and run it through
-		# "bash -c" so that we are able to run it without getting issues with block buffering.
 		add_custom_target(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART binary client, keep running in separate shell"
 			COMMAND ./log-client.sh
@@ -764,8 +760,6 @@ else()
 			COMMENT "Read MBR parameter page address"
 			)
 	
-		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
-		# cmake utility function
 		add_custom_target(read_nrf_chip_version
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10000100" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10000104" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
