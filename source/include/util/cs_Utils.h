@@ -73,13 +73,13 @@ void printAddress(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG, bool a
 	_logArray(verbosity, addNewLine, arr, len, "", "", "%02X", ":", true);
 }
 
-inline void print_heap(const std::string & msg) {
+inline void print_heap([[maybe_unused]] const std::string & msg) {
 	uint8_t *p = (uint8_t*)malloc(128);
 	LOGd("%s %p", msg.c_str(), p);
 	free(p);
 }
 
-inline void print_stack(const std::string & msg) {
+inline void print_stack([[maybe_unused]] const std::string & msg) {
 	void* sp;
 	asm("mov %0, sp" : "=r"(sp) : : );
 	LOGd("%s %p", msg.c_str(), (uint8_t*)sp);

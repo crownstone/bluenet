@@ -12,7 +12,7 @@
 
 #include <cstring>
 
-void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
+void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t* scanData) {
 	switch (scanData->p_metadata->source) {
 		case NRF_MESH_RX_SOURCE_SCANNER: {
 
@@ -23,30 +23,27 @@ void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 				return;
 			}
 
-			scanned_device_t _scannedDevice = {0};
-			
-			auto &scanner = scanData->p_metadata->params.scanner;
+			scanned_device_t _scannedDevice = {};
+
+			auto& scanner = scanData->p_metadata->params.scanner;
 
 			memcpy(_scannedDevice.address, scanner.adv_addr.addr, sizeof(_scannedDevice.address));
 
 			_scannedDevice.resolvedPrivateAddress = scanner.adv_addr.addr_id_peer;
-			_scannedDevice.addressType = scanner.adv_addr.addr_type;
-			_scannedDevice.rssi = scanner.rssi;
+			_scannedDevice.addressType            = scanner.adv_addr.addr_type;
+			_scannedDevice.rssi                   = scanner.rssi;
 			//_scannedDevice.setId = scanner.set_id;
-			_scannedDevice.advType = scanner.adv_type;
-			_scannedDevice.channel = scanner.channel;
+			_scannedDevice.advType  = scanner.adv_type;
+			_scannedDevice.channel  = scanner.channel;
 			_scannedDevice.dataSize = scanData->length;
-			_scannedDevice.data = const_cast<uint8_t*>(scanData->p_payload);
+			_scannedDevice.data     = const_cast<uint8_t*>(scanData->p_payload);
 
 			event_t event(CS_TYPE::EVT_DEVICE_SCANNED, static_cast<void*>(&_scannedDevice), sizeof(_scannedDevice));
 			event.dispatch();
 			break;
 		}
-		case NRF_MESH_RX_SOURCE_GATT:
-			break;
-		case NRF_MESH_RX_SOURCE_INSTABURST:
-			break;
-		case NRF_MESH_RX_SOURCE_LOOPBACK:
-			break;
+		case NRF_MESH_RX_SOURCE_GATT: break;
+		case NRF_MESH_RX_SOURCE_INSTABURST: break;
+		case NRF_MESH_RX_SOURCE_LOOPBACK: break;
 	}
 }

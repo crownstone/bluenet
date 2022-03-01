@@ -120,7 +120,7 @@ void Service::on_ble_event(const ble_evt_t * p_ble_evt) {
  * An individual service normally doesn't respond to a connect event. However, it can be used to for example allocate
  * memory only when a user is connected.
  */
-void Service::on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt) {
+void Service::on_connect([[maybe_unused]] uint16_t conn_handle, [[maybe_unused]] const ble_gap_evt_connected_t& gap_evt) {
 	// nothing here yet.
 }
 
@@ -129,7 +129,7 @@ void Service::on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& ga
  * Just as on_connect this method can be used to for example deallocate structures that only need to exist when a user
  * is connected.
  */
-void Service::on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected_t& gap_evt) {
+void Service::on_disconnect([[maybe_unused]] uint16_t conn_handle, [[maybe_unused]] const ble_gap_evt_disconnected_t& gap_evt) {
 	// nothing here yet.
 }
 

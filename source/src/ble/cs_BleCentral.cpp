@@ -19,7 +19,7 @@
 #define LOGBleCentralDebug LOGvv
 #define LogLevelBleCentralDebug SERIAL_VERY_VERBOSE
 
-const uint16_t WRITE_OVERHEAD = 3;
+const uint16_t WRITE_OVERHEAD      = 3;
 const uint16_t LONG_WRITE_OVERHEAD = 5;
 
 void handle_discovery(ble_db_discovery_evt_t* event) {
@@ -28,32 +28,20 @@ void handle_discovery(ble_db_discovery_evt_t* event) {
 }
 
 #if NORDIC_SDK_VERSION == 15
-BleCentral::BleCentral():
-	_discoveryModule {
-		.discovery_in_progress = false,
-		.discovery_pending = false,
-		.conn_handle = BLE_CONN_HANDLE_INVALID
-	}
-{
+BleCentral::BleCentral() {
+	_discoveryModule.discovery_in_progress = false;
+	_discoveryModule.discovery_pending     = false;
+	_discoveryModule.conn_handle           = BLE_CONN_HANDLE_INVALID;
 }
 #else
 
 // TODO: Get rid of this macro and only create data structure if class instance is used...
-NRF_BLE_GQ_DEF(m_ble_gatt_queue,
-		NRF_SDH_BLE_PERIPHERAL_LINK_COUNT,
-		NRF_BLE_GQ_QUEUE_SIZE);
+NRF_BLE_GQ_DEF(m_ble_gatt_queue, NRF_SDH_BLE_PERIPHERAL_LINK_COUNT, NRF_BLE_GQ_QUEUE_SIZE);
 
-BleCentral::BleCentral():
-	_discoveryModule {
-		.discovery_in_progress = false,
-		.conn_handle = BLE_CONN_HANDLE_INVALID
-	},
-	_discoveryInit {
-		.evt_handler = NULL,
-		.p_gatt_queue = NULL
-	}
-{
-	_queue = &m_ble_gatt_queue;
+BleCentral::BleCentral() {
+	_discoveryModule.discovery_in_progress = false;
+	_discoveryModule.conn_handle           = BLE_CONN_HANDLE_INVALID;
+	_queue                                 = &m_ble_gatt_queue;
 }
 #endif
 
@@ -61,18 +49,16 @@ void BleCentral::init() {
 #if NORDIC_SDK_VERSION == 15
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
 #else
-	_discoveryInit.evt_handler = handle_discovery;
+	_discoveryInit.evt_handler  = handle_discovery;
 	_discoveryInit.p_gatt_queue = _queue;
-	ret_code_t nrfCode = ble_db_discovery_init(&_discoveryInit);
+	ret_code_t nrfCode          = ble_db_discovery_init(&_discoveryInit);
 #endif
 	switch (nrfCode) {
-		case NRF_SUCCESS:
-			break;
+		case NRF_SUCCESS: break;
 		case NRF_ERROR_NULL:
 			// * @retval NRF_ERROR_NULL If the handler was NULL.
 			// This shouldn't happen: crash.
-		default:
-			APP_ERROR_HANDLER(nrfCode);
+		default: APP_ERROR_HANDLER(nrfCode);
 	}
 
 	// Use the encryption buffer, as that contains the encrypted data, which is what we usually write or read.
@@ -105,7 +91,7 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 		}
 		case ERR_WAIT_FOR_SUCCESS: {
 			memcpy(&_address, &address, sizeof(address));
-			_timeoutMs = timeoutMs;
+			_timeoutMs        = timeoutMs;
 			_currentOperation = Operation::CONNECT_CLEARANCE;
 			return ERR_WAIT_FOR_SUCCESS;
 		}
@@ -121,27 +107,26 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 
 cs_ret_code_t BleCentral::connectWithClearance(const device_address_t& address, uint16_t timeoutMs) {
 
-
 	ble_gap_addr_t gapAddress;
 	memcpy(gapAddress.addr, address.address, sizeof(address.address));
 	gapAddress.addr_id_peer = 0;
-	gapAddress.addr_type = address.addressType;
+	gapAddress.addr_type    = address.addressType;
 
 	// The soft device has to scan for the address in order to connect, so we need to set the scan parameters.
 	ble_gap_scan_params_t scanParams;
-	scanParams.extended = 0;
+	scanParams.extended               = 0;
 	scanParams.report_incomplete_evts = 0;
-	scanParams.active = 1;
-	scanParams.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
-	scanParams.scan_phys = BLE_GAP_PHY_1MBPS;
-	scanParams.timeout = timeoutMs / 10; // This acts as connection timeout.
-	scanParams.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.interval = _scanInterval;
-	scanParams.window = _scanWindow;
+	scanParams.active                 = 1;
+	scanParams.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL;  // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
+	scanParams.scan_phys     = BLE_GAP_PHY_1MBPS;
+	scanParams.timeout       = timeoutMs / 10;  // This acts as connection timeout.
+	scanParams.channel_mask[0] = 0;             // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[1] = 0;             // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[2] = 0;             // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[3] = 0;             // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[4] = 0;             // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.interval        = _scanInterval;
+	scanParams.window          = _scanWindow;
 
 	if (scanParams.timeout < BLE_GAP_SCAN_TIMEOUT_MIN) {
 		scanParams.timeout = BLE_GAP_SCAN_TIMEOUT_MIN;
@@ -150,8 +135,8 @@ cs_ret_code_t BleCentral::connectWithClearance(const device_address_t& address, 
 	ble_gap_conn_params_t connectionParams;
 	connectionParams.min_conn_interval = MIN_CONNECTION_INTERVAL;
 	connectionParams.max_conn_interval = MAX_CONNECTION_INTERVAL;
-	connectionParams.slave_latency = SLAVE_LATENCY;
-	connectionParams.conn_sup_timeout = CONNECTION_SUPERVISION_TIMEOUT;
+	connectionParams.slave_latency     = SLAVE_LATENCY;
+	connectionParams.conn_sup_timeout  = CONNECTION_SUPERVISION_TIMEOUT;
 
 	uint32_t nrfCode = sd_ble_gap_connect(&gapAddress, &scanParams, &connectionParams, APP_BLE_CONN_CFG_TAG);
 	if (nrfCode != NRF_SUCCESS) {
@@ -178,8 +163,10 @@ cs_ret_code_t BleCentral::disconnect() {
 		return ERR_SUCCESS;
 	}
 
-	// NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
-	// BLE_ERROR_INVALID_CONN_HANDLE can safely be ignored, see: https://devzone.nordicsemi.com/f/nordic-q-a/34353/error-0x3002/132078#132078
+	// NRF_ERROR_INVALID_STATE can safely be ignored, see:
+	// https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
+	// BLE_ERROR_INVALID_CONN_HANDLE can safely be ignored, see:
+	// https://devzone.nordicsemi.com/f/nordic-q-a/34353/error-0x3002/132078#132078
 	uint32_t nrfCode = sd_ble_gap_disconnect(_connectionHandle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 	switch (nrfCode) {
 		case NRF_SUCCESS: {
@@ -225,15 +212,13 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 	uint32_t nrfCode = NRF_SUCCESS;
 	for (uint8_t i = 0; i < uuidCount; ++i) {
 		ble_uuid_t uuid = uuids[i].getUuid();
-		nrfCode = ble_db_discovery_evt_register(&uuid);
+		nrfCode         = ble_db_discovery_evt_register(&uuid);
 		switch (nrfCode) {
-			case NRF_SUCCESS:
-				break;
+			case NRF_SUCCESS: break;
 			case NRF_ERROR_NO_MEM: {
 				return ERR_NO_SPACE;
 			}
-			default:
-				return ERR_UNSPECIFIED;
+			default: return ERR_UNSPECIFIED;
 		}
 	}
 
@@ -252,22 +237,25 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 	switch (event.evt_type) {
 		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGBleCentralDebug("Discovery found service uuid=0x%04X type=%u characteristicCount=%u", event.params.discovered_db.srv_uuid.uuid, event.params.discovered_db.srv_uuid.type, event.params.discovered_db.char_count);
+			LOGBleCentralDebug(
+					"Discovery found service uuid=0x%04X type=%u characteristicCount=%u",
+					event.params.discovered_db.srv_uuid.uuid,
+					event.params.discovered_db.srv_uuid.type,
+					event.params.discovered_db.char_count);
 
 			// Send an event for the service
 			ble_central_discovery_t packet = {
-				.uuid = UUID(event.params.discovered_db.srv_uuid),
-				.valueHandle = BLE_GATT_HANDLE_INVALID,
-				.cccdHandle = BLE_GATT_HANDLE_INVALID
-			};
+					.uuid        = UUID(event.params.discovered_db.srv_uuid),
+					.valueHandle = BLE_GATT_HANDLE_INVALID,
+					.cccdHandle  = BLE_GATT_HANDLE_INVALID};
 			event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 			eventOut.dispatch();
 
 			// Send an event for each characteristic
 			for (uint8_t i = 0; i < event.params.discovered_db.char_count; ++i) {
-				packet.uuid = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
+				packet.uuid        = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
 				packet.valueHandle = event.params.discovered_db.charateristics[i].characteristic.handle_value;
-				packet.cccdHandle = event.params.discovered_db.charateristics[i].cccd_handle;
+				packet.cccdHandle  = event.params.discovered_db.charateristics[i].cccd_handle;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 				eventOut.dispatch();
 			}
@@ -275,7 +263,10 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 			break;
 		}
 		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
-			LOGBleCentralDebug("Discovery did not find service uuid=0x%04X type=%u", event.params.discovered_db.srv_uuid.uuid, event.params.discovered_db.srv_uuid.type);
+			LOGBleCentralDebug(
+					"Discovery did not find service uuid=0x%04X type=%u",
+					event.params.discovered_db.srv_uuid.uuid,
+					event.params.discovered_db.srv_uuid.type);
 			break;
 		}
 		case BLE_DB_DISCOVERY_ERROR: {
@@ -285,19 +276,25 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 		}
 		case BLE_DB_DISCOVERY_AVAILABLE: {
 			// A bug prevents this event from ever firing. It is fixed in SDK 16.0.0.
-			// Instead, we should be done when the number of registered uuids equals the number of received BLE_DB_DISCOVERY_COMPLETE + BLE_DB_DISCOVERY_SRV_NOT_FOUND events.
-			// See https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module
-			// We apply a similar patch to the SDK.
+			// Instead, we should be done when the number of registered uuids equals the number of received
+			// BLE_DB_DISCOVERY_COMPLETE + BLE_DB_DISCOVERY_SRV_NOT_FOUND events. See
+			// https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module We
+			// apply a similar patch to the SDK.
 			LOGBleCentralInfo("Discovery done");
 
 			// According to the doc, the "services" struct is only for internal usage.
 			// But it seems to store all the discovered services and characteristics.
 			// Also contains the services that have not been found.
 			for (uint8_t s = 0; s < _discoveryModule.discoveries_count; ++s) {
-				LOGBleCentralDebug("service: uuidType=%u uuid=0x%04X", _discoveryModule.services[s].srv_uuid.type, _discoveryModule.services[s].srv_uuid.uuid);
+				LOGBleCentralDebug(
+						"service: uuidType=%u uuid=0x%04X",
+						_discoveryModule.services[s].srv_uuid.type,
+						_discoveryModule.services[s].srv_uuid.uuid);
 				for (uint8_t c = 0; c < _discoveryModule.services[s].char_count; ++c) {
-					__attribute__((unused)) ble_gatt_db_char_t* characteristic = &(_discoveryModule.services[s].charateristics[c]);
-					LOGBleCentralDebug("    char: cccd_handle=0x%X uuidType=%u uuid=0x%04X handle_value=0x%X handle_decl=0x%X",
+					__attribute__((unused)) ble_gatt_db_char_t* characteristic =
+							&(_discoveryModule.services[s].charateristics[c]);
+					LOGBleCentralDebug(
+							"    char: cccd_handle=0x%X uuidType=%u uuid=0x%04X handle_value=0x%X handle_decl=0x%X",
 							characteristic->cccd_handle,
 							characteristic->characteristic.uuid.type,
 							characteristic->characteristic.uuid.uuid,
@@ -370,19 +367,18 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 
 	// We can do a single write with response.
 	ble_gattc_write_params_t writeParams = {
-			.write_op = BLE_GATT_OP_WRITE_REQ, // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
-			.flags = 0,
-			.handle = handle,
-			.offset = 0,
-			.len = len,
-			.p_value = _buf.data
-	};
+			.write_op = BLE_GATT_OP_WRITE_REQ,  // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
+			.flags    = 0,
+			.handle   = handle,
+			.offset   = 0,
+			.len      = len,
+			.p_value  = _buf.data};
 
 	uint32_t nrfCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to write. nrfCode=%u", nrfCode);
 		switch (nrfCode) {
-			default:                             return ERR_UNSPECIFIED;
+			default: return ERR_UNSPECIFIED;
 		}
 	}
 
@@ -393,37 +389,41 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 	ble_gattc_write_params_t writeParams;
 	if (offset < _bufDataSize) {
-		const int chunkSize = _mtu - LONG_WRITE_OVERHEAD;
+		const int chunkSize  = _mtu - LONG_WRITE_OVERHEAD;
 		writeParams.write_op = BLE_GATT_OP_PREP_WRITE_REQ;
-		writeParams.flags = 0;
-		writeParams.handle = handle;
-		writeParams.offset = offset;
-		writeParams.len = std::min(chunkSize, _bufDataSize - offset);
-		writeParams.p_value = _buf.data + offset;
+		writeParams.flags    = 0;
+		writeParams.handle   = handle;
+		writeParams.offset   = offset;
+		writeParams.len      = std::min(chunkSize, _bufDataSize - offset);
+		writeParams.p_value  = _buf.data + offset;
 	}
 	else {
 		writeParams.write_op = BLE_GATT_OP_EXEC_WRITE_REQ;
-		writeParams.flags = BLE_GATT_EXEC_WRITE_FLAG_PREPARED_WRITE;
-		writeParams.handle = handle;
-		writeParams.offset = 0;
-		writeParams.len = 0;
-		writeParams.p_value = nullptr;
+		writeParams.flags    = BLE_GATT_EXEC_WRITE_FLAG_PREPARED_WRITE;
+		writeParams.handle   = handle;
+		writeParams.offset   = 0;
+		writeParams.len      = 0;
+		writeParams.p_value  = nullptr;
 	}
-	LOGBleCentralDebug("nextWrite offset=%u _bufDataSize=%u writeParams: offset=%u len=%u op=%u", offset, _bufDataSize, writeParams.offset, writeParams.len, writeParams.write_op);
+	LOGBleCentralDebug(
+			"nextWrite offset=%u _bufDataSize=%u writeParams: offset=%u len=%u op=%u",
+			offset,
+			_bufDataSize,
+			writeParams.offset,
+			writeParams.len,
+			writeParams.write_op);
 
 	uint32_t nrfCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to long write. nrfCode=%u", nrfCode);
 		switch (nrfCode) {
-			case BLE_ERROR_INVALID_CONN_HANDLE:  return ERR_WRONG_PARAMETER;
-			default:                             return ERR_UNSPECIFIED;
+			case BLE_ERROR_INVALID_CONN_HANDLE: return ERR_WRONG_PARAMETER;
+			default: return ERR_UNSPECIFIED;
 		}
 	}
 	_currentOperation = Operation::WRITE;
 	return ERR_WAIT_FOR_SUCCESS;
 }
-
-
 
 cs_ret_code_t BleCentral::read(uint16_t handle) {
 	if (isBusy()) {
@@ -445,7 +445,7 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to read. nrfCode=%u", nrfCode);
 		switch (nrfCode) {
-			default:                             return ERR_UNSPECIFIED;
+			default: return ERR_UNSPECIFIED;
 		}
 	}
 
@@ -470,10 +470,7 @@ void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 			break;
 		}
 		case Operation::READ: {
-			ble_central_read_result_t result = {
-					.retCode = retCode,
-					.data = cs_data_t()
-			};
+			ble_central_read_result_t result = {.retCode = retCode, .data = cs_data_t()};
 			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 			break;
 		}
@@ -481,7 +478,8 @@ void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 }
 
 void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize) {
-	LOGBleCentralDebug("finalizeOperation operation=%u _currentOperation=%u dataSize=%u", operation, _currentOperation, dataSize);
+	LOGBleCentralDebug(
+			"finalizeOperation operation=%u _currentOperation=%u dataSize=%u", operation, _currentOperation, dataSize);
 	event_t event(CS_TYPE::CONFIG_DO_NOT_USE);
 
 	// Handle error first.
@@ -492,14 +490,16 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 			}
 			case Operation::CONNECT_CLEARANCE: {
 				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				event_t errEvent(
+						CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
 			case Operation::CONNECT: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				event_t errEvent(
+						CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
@@ -510,24 +510,24 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 			case Operation::DISCOVERY: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT) result = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				event_t errEvent(
+						CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
 			case Operation::READ: {
 				// Ignore data, finalize with error instead.
-				TYPIFY(EVT_BLE_CENTRAL_READ_RESULT) result = {
-						.retCode = ERR_WRONG_STATE,
-						.data = cs_data_t()
-				};
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				TYPIFY(EVT_BLE_CENTRAL_READ_RESULT) result = {.retCode = ERR_WRONG_STATE, .data = cs_data_t()};
+				event_t errEvent(
+						CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
 			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				event_t errEvent(
+						CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
@@ -587,8 +587,6 @@ void BleCentral::sendOperationResult(event_t& event) {
 	}
 }
 
-
-
 void BleCentral::onConnectClearance() {
 	if (_currentOperation != Operation::CONNECT_CLEARANCE) {
 		return;
@@ -597,8 +595,7 @@ void BleCentral::onConnectClearance() {
 	cs_ret_code_t retCode = connectWithClearance(_address, _timeoutMs);
 	switch (retCode) {
 		case ERR_SUCCESS:
-		case ERR_WAIT_FOR_SUCCESS:
-			break;
+		case ERR_WAIT_FOR_SUCCESS: break;
 		default:
 			// No need to do anything, connectWithClearance() already sent EVT_BLE_CENTRAL_CONNECT_RESULT.
 			break;
@@ -662,14 +659,12 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	_log(LogLevelBleCentralDebug, false, "Read offset=%u len=%u data=", event.offset, event.len);
 	_logArray(LogLevelBleCentralDebug, true, event.data, event.len);
 
-	// According to https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.1.1/group___b_l_e___g_a_t_t_c___v_a_l_u_e___r_e_a_d___m_s_c.html
+	// According to
+	// https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.1.1/group___b_l_e___g_a_t_t_c___v_a_l_u_e___r_e_a_d___m_s_c.html
 	// we should continue reading, until we get a gatt status of invalid offset.
 	// But it seems like the last read we get is with a length of 0.
 	if (gattStatus == BLE_GATT_STATUS_ATTERR_INVALID_OFFSET) {
-		ble_central_read_result_t result = {
-				.retCode = ERR_SUCCESS,
-				.data = cs_data_t(_buf.data, event.offset)
-		};
+		ble_central_read_result_t result = {.retCode = ERR_SUCCESS, .data = cs_data_t(_buf.data, event.offset)};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
@@ -681,10 +676,7 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	}
 
 	if (event.len == 0) {
-		ble_central_read_result_t result = {
-				.retCode = ERR_SUCCESS,
-				.data = cs_data_t(_buf.data, event.offset)
-		};
+		ble_central_read_result_t result = {.retCode = ERR_SUCCESS, .data = cs_data_t(_buf.data, event.offset)};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
@@ -748,16 +740,11 @@ void BleCentral::onNotification(uint16_t gattStatus, const ble_gattc_evt_hvx_t& 
 		return;
 	}
 
-	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION) packet = {
-			.handle = event.handle,
-			.data = cs_const_data_t(event.data, event.len)
-	};
+	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION)
+	packet = {.handle = event.handle, .data = cs_const_data_t(event.data, event.len)};
 	event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &packet, sizeof(packet));
 	eventOut.dispatch();
 }
-
-
-
 
 void BleCentral::onGapEvent(uint16_t evtId, const ble_gap_evt_t& event) {
 	switch (evtId) {
@@ -817,7 +804,7 @@ void BleCentral::onBleEvent(const ble_evt_t* event) {
 void BleCentral::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_BLE_CENTRAL_CONNECT: {
-			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_CONNECT, event.data);
+			auto packet             = CS_TYPE_CAST(CMD_BLE_CENTRAL_CONNECT, event.data);
 			event.result.returnCode = connect(packet->address, packet->timeoutMs);
 			break;
 		}
@@ -826,17 +813,17 @@ void BleCentral::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::CMD_BLE_CENTRAL_DISCOVER: {
-			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_DISCOVER, event.data);
+			auto packet             = CS_TYPE_CAST(CMD_BLE_CENTRAL_DISCOVER, event.data);
 			event.result.returnCode = discoverServices(packet->uuids, packet->uuidCount);
 			break;
 		}
 		case CS_TYPE::CMD_BLE_CENTRAL_READ: {
-			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_READ, event.data);
+			auto packet             = CS_TYPE_CAST(CMD_BLE_CENTRAL_READ, event.data);
 			event.result.returnCode = read(packet->handle);
 			break;
 		}
 		case CS_TYPE::CMD_BLE_CENTRAL_WRITE: {
-			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_WRITE, event.data);
+			auto packet             = CS_TYPE_CAST(CMD_BLE_CENTRAL_WRITE, event.data);
 			event.result.returnCode = write(packet->handle, packet->data.data, packet->data.len);
 			break;
 		}
@@ -849,4 +836,3 @@ void BleCentral::handleEvent(event_t& event) {
 		}
 	}
 }
-

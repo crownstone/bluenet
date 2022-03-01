@@ -7,7 +7,6 @@
 #pragma once
 
 #include <cfg/cs_Config.h>
-#include <cstdint>
 #include <protocol/cs_CmdSource.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
@@ -16,12 +15,14 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
+#include <cstdint>
+
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1 + 1)
 #define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 
 #define VALIDATION_KEY_LENGTH 4
-#define SESSION_NONCE_LENGTH  5
-#define PACKET_NONCE_LENGTH   3
+#define SESSION_NONCE_LENGTH 5
+#define PACKET_NONCE_LENGTH 3
 
 /**
  * Packets (structs) that are used over the air, over uart, or stored in flash.
@@ -228,7 +229,7 @@ union __attribute__((__packed__)) switch_state_t {
  * We could also write this as struct with 7 bits value,
  * and 1 bit that determines whether the value is switch value (0-100), or a special value (enum).
  */
-enum SwitchCommandValue {
+enum SwitchCommandValue : uint8_t {
 	CS_SWITCH_CMD_VAL_OFF = 0,
 	// Dimmed from 1 - 99
 	CS_SWITCH_CMD_VAL_FULLY_ON                 = 100,
@@ -417,12 +418,10 @@ struct cs_mesh_iv_index_t {
 
 typedef uint32_t cs_mesh_seq_number_t;
 
-
 /** Same as net_state_iv_update_t */
-typedef enum
-{
-    CS_MESH_NET_STATE_IV_UPDATE_NORMAL,
-    CS_MESH_NET_STATE_IV_UPDATE_IN_PROGRESS,
+typedef enum {
+	CS_MESH_NET_STATE_IV_UPDATE_NORMAL,
+	CS_MESH_NET_STATE_IV_UPDATE_IN_PROGRESS,
 } cs_mesh_iv_update_v5_t;
 
 /**
@@ -442,7 +441,6 @@ struct __attribute__((packed)) cs_mesh_seq_number_v5_t {
 	uint32_t next_block;
 	uint8_t synchro_index;
 };
-
 
 struct __attribute__((packed)) cs_uicr_data_t {
 	uint32_t board;

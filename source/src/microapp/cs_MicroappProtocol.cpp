@@ -878,9 +878,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
 	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
-			gpio.pull = 1;
-			// fall-through is on purpose
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP: gpio.pull = 1; [[fallthrough]];
 		case CS_MICROAPP_COMMAND_PIN_READ: {
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
 			switch (val) {
