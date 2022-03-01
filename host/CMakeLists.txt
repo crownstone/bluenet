@@ -105,7 +105,14 @@ endfunction()
 
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
 list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_Hash.cpp")
+
+
 list(APPEND TEST_SOURCE_FILES "../source/src/time/cs_SystemTime.cpp")
+list(APPEND TEST_SOURCE_FILES "../source/src/storage/cs_State.cpp")
+list(APPEND TEST_SOURCE_FILES "../source/src/events/cs_EventDispatcher.cpp")
+list(APPEND TEST_SOURCE_FILES "../source/src/events/cs_EventListener.cpp")
+list(APPEND TEST_SOURCE_FILES "../source/src/events/cs_Event.cpp")
+
 # E.G.: SystemTime needs Timer.cpp which needs to be mocked and Event.cpp, which is still host compatible
  
 add_crownstone_test(test_InterleavedBuffer)
