@@ -20,6 +20,11 @@ public:
 	void init(const boards_config_t& board);
 
 	/**
+	 * Returns true when this board has a dimmer.
+	 */
+	bool hasDimmer();
+
+	/**
 	 * Start dimmer.
 	 *
 	 * To be called once there is enough power to enable the dimmer.
@@ -45,6 +50,7 @@ public:
 private:
 	uint32_t hardwareBoard;
 	uint8_t pinEnableDimmer;
+	bool _hasDimmer = false;
 
 	TYPIFY(STATE_SOFT_ON_SPEED) softOnfSpeed;
 

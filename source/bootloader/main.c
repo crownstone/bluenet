@@ -214,35 +214,42 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
  * Make sure all GPIO is initialized.
  */
 void cs_gpio_init(boards_config_t* board) {
-	switch (board->hardwareBoard) {
-	case ACR01B10D:
-		// Enable NFC pins
+	if (board->flags.usesNfcPins) {
+		// Enable NFC pins to be used as GPIO.
+		// Warning: this is stored in UICR, so it's persistent.
+		// Warning: NFC pins leak a bit of current when not at same voltage level.
 		if (NRF_UICR->NFCPINS != 0) {
 			nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
 		}
-		break;
-	default:
-		break;
 	}
-	if (IS_CROWNSTONE(board->deviceType)) {
-		// Turn dimmer off.
-		nrf_gpio_cfg_output(board->pinGpioPwm);
-		if (board->flags.pwmInverted) {
-			nrf_gpio_pin_set(board->pinGpioPwm);
+
+//	if (IS_CROWNSTONE(board->deviceType)) {
+	// Turn dimmer off.
+	if (board->pinDimmer != PIN_NONE) {
+		nrf_gpio_cfg_output(board->pinDimmer);
+		if (board->flags.dimmerInverted) {
+			nrf_gpio_pin_set(board->pinDimmer);
 		}
 		else {
-			nrf_gpio_pin_clear(board->pinGpioPwm);
-		}
-		nrf_gpio_cfg_output(board->pinGpioEnablePwm);
-		nrf_gpio_pin_clear(board->pinGpioEnablePwm);
-		// Don't do anything with relay.
-		if (board->flags.hasRelay) {
-			nrf_gpio_cfg_output(board->pinGpioRelayOff);
-			nrf_gpio_pin_clear(board->pinGpioRelayOff);
-			nrf_gpio_cfg_output(board->pinGpioRelayOn);
-			nrf_gpio_pin_clear(board->pinGpioRelayOn);
+			nrf_gpio_pin_clear(board->pinDimmer);
 		}
 	}
+
+	if (board->pinEnableDimmer != PIN_NONE) {
+		nrf_gpio_cfg_output(board->pinEnableDimmer);
+		nrf_gpio_pin_clear(board->pinEnableDimmer);
+	}
+
+	// Relay pins
+	if (board->pinRelayOff != PIN_NONE) {
+		nrf_gpio_cfg_output(board->pinRelayOff);
+		nrf_gpio_pin_clear(board->pinRelayOff);
+	}
+	if (board->pinRelayOn != PIN_NONE) {
+		nrf_gpio_cfg_output(board->pinRelayOn);
+		nrf_gpio_pin_clear(board->pinRelayOn);
+	}
+//	}
 }
 
 /** See cs_GpRegRet.h */

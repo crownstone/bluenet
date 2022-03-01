@@ -146,14 +146,14 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentPresence) {
 
 void SwitchBehaviour::print() {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
-	LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(0x%x), presencetype(%d), timeout(%d) (%s)",
+	LOGd("SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) isValid(%u)",
 			from().h(), from().m(), from().s(),
 			until().h(), until().m(), until().s(),
 			activeIntensity,
 			activeDays,
 			presenceCondition.predicate._condition,
 			presenceCondition.timeOut,
-			(isValid(SystemTime::now()) ? "valid" : "invalid")
+			isValid(SystemTime::now())
 	);
 	presenceCondition.predicate._presence.print();
 #endif

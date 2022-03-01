@@ -12,26 +12,27 @@
 #include <util/cs_Utils.h>
 
 extern "C" {
-#include "nrf_mesh.h"
+#include "access_config.h"
+#include "access_internal.h"
+#include "access.h"
+#include "ad_type_filter.h"
+#include "config_server_events.h"
+#include "config_server.h"
+#include "device_state_manager.h"
+#include "flash_manager_defrag.h"
+#include "log.h"
 #include "mesh_config.h"
 #include "mesh_opt_core.h"
-#include "mesh_stack.h"
-#include "access.h"
-#include "access_config.h"
-#include "config_server.h"
-#include "config_server_events.h"
-#include "device_state_manager.h"
 #include "mesh_provisionee.h"
+#include "mesh_stack.h"
+#include "net_state.h"
 #include "nrf_mesh_configure.h"
 #include "nrf_mesh_events.h"
-#include "net_state.h"
+#include "nrf_mesh.h"
 #include "scanner.h"
+#include "transport.h"
 #include "uri.h"
 #include "utils.h"
-#include "log.h"
-#include "access_internal.h"
-#include "flash_manager_defrag.h"
-#include "transport.h"
 }
 
 
@@ -48,26 +49,46 @@ extern "C" {
 #error "Mesh key size doesn't match encryption key size"
 #endif
 
+static void meshEventHandler(const nrf_mesh_evt_t * p_evt);
+
+static nrf_mesh_evt_handler_t meshEventHandlerStruct = {
+		meshEventHandler
+};
+
 #if MESH_PERSISTENT_STORAGE == 2
 
+/**
+ * Copied from mest_opt_net_state.h
+ */
+enum
+{
+	MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD = 1,
+	MESH_OPT_NET_STATE_IV_INDEX_LEGACY_RECORD,
+	MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD,
+	MESH_OPT_NET_STATE_IV_INDEX_RECORD
+};
+
 static CS_TYPE cs_mesh_get_type_from_handle(uint16_t handle) {
-	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
 	switch (handle) {
-		case MESH_FLASH_HANDLE_SEQNUM:
-			type = CS_TYPE::STATE_MESH_SEQ_NUMBER;
-			break;
-		case MESH_FLASH_HANDLE_IV_INDEX:
-			type = CS_TYPE::STATE_MESH_IV_INDEX;
-			break;
+		case MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD:
+			return CS_TYPE::STATE_MESH_SEQ_NUMBER;
+		case MESH_OPT_NET_STATE_IV_INDEX_LEGACY_RECORD:
+			return CS_TYPE::STATE_MESH_IV_INDEX;
+		case MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD:
+			return CS_TYPE::STATE_MESH_SEQ_NUMBER_V5;
+		case MESH_OPT_NET_STATE_IV_INDEX_RECORD:
+			return CS_TYPE::STATE_MESH_IV_INDEX_V5;
+		default:
+			return CS_TYPE::CONFIG_DO_NOT_USE;
 	}
-	return type;
 }
 
 static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	cs_ret_code_t retCode = State::getInstance().set(type, data_ptr, data_size);
-	LOGMeshCoreInfo("cs_mesh_write_cb handle=%u retCode=%u", handle, retCode);
+	_log(SERIAL_DEBUG, false, "cs_mesh_write_cb handle=%u retCode=%u data=", handle, retCode);
+	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
@@ -80,30 +101,37 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
-	State::getInstance().get(type, data_ptr, data_size);
-	_log(SERIAL_INFO, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
-//	CsUtils::printArray(data_ptr, data_size, SERIAL_INFO);
-	_logArray(SERIAL_INFO, true, (uint8_t*)data_ptr, data_size);
-	return NRF_SUCCESS;
+	cs_ret_code_t retCode = State::getInstance().get(type, data_ptr, data_size);
+	_log(SERIAL_DEBUG, false, "cs_mesh_read_cb handle=%u retCode=%u data=", handle, retCode);
+	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
+	switch (retCode) {
+		case ERR_SUCCESS:
+			return NRF_SUCCESS;
+		default:
+			return retCode;
+	}
 }
 
 static uint32_t cs_mesh_erase_cb(uint16_t handle) {
-	LOGMeshCoreInfo("cs_mesh_erase_cb handle=%u", handle);
 	assert(CsUtils::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
-	State::getInstance().remove(type, 0);
-	return NRF_SUCCESS;
+	cs_ret_code_t retCode = State::getInstance().remove(type, 0);
+	LOGd("cs_mesh_erase_cb handle=%u retCode=%u", handle, retCode);
+	switch (retCode) {
+		case ERR_SUCCESS:
+			return NRF_SUCCESS;
+		default:
+			return retCode;
+	}
 }
 #endif // MESH_PERSISTENT_STORAGE == 2
 
 static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
-//	LOGMeshInfo("Mesh event type=%u", p_evt->type);
 	switch (p_evt->type) {
 		case NRF_MESH_EVT_MESSAGE_RECEIVED:
 			LOGMeshVerbose("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//			LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//			LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
-//			CsUtils::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
+			_log(SERIAL_VERY_VERBOSE, false, "src=%u data:", p_evt->params.message.p_metadata->source);
+			_logArray(SERIAL_VERY_VERBOSE, true, p_evt->params.message.p_buffer, p_evt->params.message.length);
 			break;
 		case NRF_MESH_EVT_TX_COMPLETE:
 			LOGMeshVerbose("NRF_MESH_EVT_TX_COMPLETE");
@@ -206,10 +234,6 @@ static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 #endif
 	}
 }
-static nrf_mesh_evt_handler_t meshEventHandlerStruct = {
-		meshEventHandler
-};
-
 
 
 static void configServerEventCallback(const config_server_evt_t * p_evt) {
@@ -308,13 +332,31 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 	nrf_mesh_evt_handler_add(&meshEventHandlerStruct);
 
+	LOGi("Mesh scanner: interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
+	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
+
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
-	LOGMeshCoreInfo("Mesh scanner: interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
-	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 	nrf_mesh_rx_cb_set(scan_cb);
+
+#if MESH_SCANNER_FILTERED == 1
+	// Add all AD types we are interested in.
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE);
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE);
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE);
+//	bearer_adtype_add(BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE);
+
+	// Add all AD types, as we don't know what types will be used for asset filters or microapps.
+	// This does not use more RAM, they are simply bits in a bitmask.
+	for (int i = 0; i < 256; ++i) {
+		bearer_adtype_add(i);
+	}
 #else
-	LOGMeshCoreWarn("Scanner in mesh not enabled");
+	bearer_adtype_filtering_set(false);
+#endif
+
+#else
+	LOGw("Scanner in mesh not enabled");
 #endif
 
 	ble_gap_addr_t macAddress;
@@ -399,7 +441,9 @@ void MeshCore::provisionSelf(uint16_t id) {
 	retCode = config_server_bind(_devkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
+#if MESH_SDK_VERSION_MAJOR < 5
 	access_flash_config_store();
+#endif
 }
 
 void MeshCore::provisionLoad() {
@@ -430,7 +474,6 @@ void MeshCore::provisionLoad() {
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
-//	CsUtils::printArray(key, NRF_MESH_KEY_SIZE);
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
@@ -609,11 +652,11 @@ void MeshCore::handleEvent(event_t & event) {
 	//			case CS_TYPE::STATE_MESH_IV_INDEX: {
 	//				break;
 	//			}
-				case CS_TYPE::STATE_MESH_SEQ_NUMBER: {
-					TYPIFY(STATE_MESH_SEQ_NUMBER) seqNumber;
-					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER, &seqNumber, sizeof(seqNumber));
-					LOGMeshCoreInfo("net_state_ext_write_done seqNum=%u", seqNumber);
-					net_state_ext_write_done(MESH_FLASH_HANDLE_SEQNUM, &seqNumber, sizeof(seqNumber));
+				case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5: {
+					TYPIFY(STATE_MESH_SEQ_NUMBER_V5) seqNumber;
+					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER_V5, &seqNumber, sizeof(seqNumber));
+					LOGi("net_state_ext_write_done seqNum=%u syncIndex=%u", seqNumber.next_block, seqNumber.synchro_index);
+					net_state_ext_write_done(MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_RECORD, &seqNumber, sizeof(seqNumber));
 					break;
 				}
 				default:

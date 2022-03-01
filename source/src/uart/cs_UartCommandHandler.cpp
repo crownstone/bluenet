@@ -151,7 +151,7 @@ void UartCommandHandler::dispatchEventForCommand(
 }
 
 void UartCommandHandler::handleCommandHello(cs_data_t commandData) {
-	LOGd(STR_HANDLE_COMMAND, "hello");
+	LOGd(STR_HANDLE_COMMAND "hello");
 	if (commandData.len < sizeof(uart_msg_status_user_flags_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
@@ -162,7 +162,7 @@ void UartCommandHandler::handleCommandHello(cs_data_t commandData) {
 }
 
 void UartCommandHandler::handleCommandSessionNonce(cs_data_t commandData) {
-	LOGd(STR_HANDLE_COMMAND, "session nonce");
+	LOGd(STR_HANDLE_COMMAND "session nonce");
 	if (commandData.len < sizeof(uart_msg_session_nonce_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
@@ -173,7 +173,7 @@ void UartCommandHandler::handleCommandSessionNonce(cs_data_t commandData) {
 }
 
 void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData, bool wasEncrypted) {
-	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND, "heartbeat wasEncrypted=%u", wasEncrypted);
+	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND "heartbeat wasEncrypted=%u", wasEncrypted);
 	if (commandData.len < sizeof(uart_msg_heartbeat_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
@@ -184,7 +184,7 @@ void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData, bool wasE
 }
 
 void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
-	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND, "status");
+	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND "status");
 	if (commandData.len < sizeof(uart_msg_status_user_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
@@ -195,7 +195,7 @@ void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
 }
 
 void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer) {
-	LOGd(STR_HANDLE_COMMAND, "control");
+	LOGd(STR_HANDLE_COMMAND "control");
 	control_packet_header_t* controlHeader = reinterpret_cast<control_packet_header_t*>(commandData.data);
 	if (commandData.len < sizeof(*controlHeader)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
@@ -262,7 +262,7 @@ void UartCommandHandler::handleCommandGetMacAddress(cs_data_t commandData) {
 }
 
 void UartCommandHandler::handleCommandInjectEvent(cs_data_t commandData) {
-	LOGd(STR_HANDLE_COMMAND, "inject event");
+	LOGd(STR_HANDLE_COMMAND "inject event");
 
 	// Header is uint16 cs type.
 	if (commandData.len < sizeof(uint16_t)) {

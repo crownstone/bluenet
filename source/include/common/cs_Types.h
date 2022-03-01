@@ -194,6 +194,9 @@ enum class CS_TYPE: uint16_t {
 	STATE_ASSET_FILTER_256                  = 163,
 	STATE_ASSET_FILTER_512                  = 164,
 
+	STATE_MESH_IV_INDEX_V5                  = 165,
+	STATE_MESH_SEQ_NUMBER_V5                = 166,
+
 	/*
 	 * Internal commands and events.
 	 * Start at Internal_Base.
@@ -518,6 +521,8 @@ typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
+typedef cs_mesh_iv_index_v5_t TYPIFY(STATE_MESH_IV_INDEX_V5);
+typedef cs_mesh_seq_number_v5_t TYPIFY(STATE_MESH_SEQ_NUMBER_V5);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef microapp_state_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);

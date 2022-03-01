@@ -21,7 +21,7 @@
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <util/cs_Utils.h>
 
-#define LOGStackDebug LOGnone
+#define LOGStackDebug LOGvv
 
 
 Stack::Stack() {
@@ -136,7 +136,7 @@ void Stack::initRadio() {
 
 	ret_code_t nrfCode;
 
-	LOGi(FMT_INIT, "radio");
+	LOGi(FMT_INIT "radio");
 	// Enable BLE stack
 	uint32_t ram_start = g_RAM_R1_BASE;
 //	uint32_t ram_start = 0;
@@ -322,7 +322,7 @@ void Stack::startScanning() {
 		return;
 	}
 
-//	LOGi(FMT_START, "scanning");
+//	LOGi(FMT_START "scanning");
 	ble_gap_scan_params_t scanParams;
 	scanParams.extended = 0;
 	scanParams.report_incomplete_evts = 0;

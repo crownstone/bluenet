@@ -84,7 +84,7 @@ DeviceInformationService::DeviceInformationService():
 }
 
 void DeviceInformationService::createCharacteristics() {
-	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_DEVICE_INFORMATION);
+	LOGi(FMT_SERVICE_INIT BLE_SERVICE_DEVICE_INFORMATION);
 
 	addHardwareRevisionCharacteristic();
 	addFirmwareRevisionCharacteristic();
@@ -97,9 +97,9 @@ void DeviceInformationService::createCharacteristics() {
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
-	LOGi(FMT_CHAR_ADD, STR_CHAR_HARDWARE_REVISION);
+	LOGi(FMT_CHAR_ADD STR_CHAR_HARDWARE_REVISION);
 	if (_hardwareRevisionCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_HARDWARE_REVISION);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_HARDWARE_REVISION);
 		return;
 	}
 
@@ -118,9 +118,9 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
-	LOGi(FMT_CHAR_ADD, STR_CHAR_FIRMWARE_REVISION);
+	LOGi(FMT_CHAR_ADD STR_CHAR_FIRMWARE_REVISION);
 	if (_firmwareRevisionCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_FIRMWARE_REVISION);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_FIRMWARE_REVISION);
 		return;
 	}
 	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
@@ -144,9 +144,9 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addSoftwareRevisionCharacteristic() {
-	LOGi(FMT_CHAR_ADD, STR_CHAR_SOFTWARE_REVISION);
+	LOGi(FMT_CHAR_ADD STR_CHAR_SOFTWARE_REVISION);
 	if (_softwareRevisionCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SOFTWARE_REVISION);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_SOFTWARE_REVISION);
 		return;
 	}
 	_softwareRevisionCharacteristic = new Characteristic<std::string>();

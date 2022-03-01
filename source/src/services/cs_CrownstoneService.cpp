@@ -29,7 +29,7 @@ CrownstoneService::CrownstoneService() : EventListener()
 }
 
 void CrownstoneService::createCharacteristics() {
-	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_CROWNSTONE);
+	LOGi(FMT_SERVICE_INIT BLE_SERVICE_CROWNSTONE);
 
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
 	_controlPacketAccessor = new ControlPacketAccessor<>();
@@ -42,12 +42,12 @@ void CrownstoneService::createCharacteristics() {
 	addResultCharacteristic(readBuf.data, readBuf.len, RESULT_UUID, BASIC);
 
 	{
-		LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_DATA);
+		LOGi(FMT_CHAR_ADD STR_CHAR_SESSION_DATA);
 		cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
 		addSessionDataCharacteristic(readBuf.data, readBuf.len);
 	}
 
-	LOGi(FMT_CHAR_ADD, STR_CHAR_FACTORY_RESET);
+	LOGi(FMT_CHAR_ADD STR_CHAR_FACTORY_RESET);
 	addFactoryResetCharacteristic();
 
 	updatedCharacteristics();
@@ -55,7 +55,7 @@ void CrownstoneService::createCharacteristics() {
 
 void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel) {
 	if (_controlCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_CONTROL);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_CONTROL);
 		return;
 	}
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -105,7 +105,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 
 void CrownstoneService::addResultCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel) {
 	if (_resultCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_RESULT);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_RESULT);
 		return;
 	}
 	_resultCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -122,7 +122,7 @@ void CrownstoneService::addResultCharacteristic(buffer_ptr_t buffer, cs_buffer_s
 
 void CrownstoneService::addSessionDataCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, EncryptionAccessLevel minimumAccessLevel) {
 	if (_sessionDataCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SESSION_DATA);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_SESSION_DATA);
 		return;
 	}
 	_sessionDataCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -138,7 +138,7 @@ void CrownstoneService::addSessionDataCharacteristic(buffer_ptr_t buffer, cs_buf
 	_sessionDataCharacteristic->setValueLength(0);
 
 	if (_sessionDataUnencryptedCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SESSION_DATA);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_SESSION_DATA);
 		return;
 	}
 	_sessionDataUnencryptedCharacteristic = new Characteristic<buffer_ptr_t>();
