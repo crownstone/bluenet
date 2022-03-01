@@ -19,7 +19,7 @@
 // ---------------------------------- public methods -----------------------------------
 // -------------------------------------------------------------------------------------
 
-static void ________PUBLIC_METHODS________() { }
+#define ________PUBLIC_METHODS________
 
 cs_ret_code_t MeshDfuHost::init() {
 	LOGMeshDfuHostDebug("init");
@@ -144,7 +144,7 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 // -------------------------------------------------------------------------------------
 // ------------------------------- stream implementation -------------------------------
 // -------------------------------------------------------------------------------------
-static void ________STREAM_IMPLEMENTATION________() { }
+#define ________STREAM_IMPLEMENTATION________
 
 void MeshDfuHost::stream() {
 	LOGMeshDfuHostDebug("steaming: startOffset 0x%08X, bytes left: %u", _streamNextWriteOffset, _streamLeftToWrite);
@@ -241,7 +241,7 @@ void MeshDfuHost::clearStreamState() {
 // ------------------------------- phase implementations -------------------------------
 // -------------------------------------------------------------------------------------
 
-static void ________PHASE_IMPLEMENTATIONS________() { }
+#define ________PHASE_IMPLEMENTATIONS________
 
 // ###### TargetTriggerDfuMode ######
 
@@ -252,7 +252,7 @@ bool MeshDfuHost::startPhaseIdle() {
 
 
 // ###### TargetTriggerDfuMode ######
-static void _PHASE_TargetTriggerDfuMode_() { }
+#define _PHASE_TargetTriggerDfuMode_
 
 bool MeshDfuHost::startPhaseTargetTriggerDfuMode() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetTriggerDfuMode");
@@ -337,7 +337,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetTriggerDfuMode() {
 }
 
 // ###### WaitForTargetReboot ######
-static void _PHASE_WaitForTargetReboot_() { }
+#define _PHASE_WaitForTargetReboot_
 
 bool MeshDfuHost::startWaitForTargetReboot() {
 	// start this phase waiting for a scan in order to give dfu target
@@ -388,7 +388,7 @@ MeshDfuHost::Phase MeshDfuHost::completeWaitForTargetReboot() {
 }
 
 // ###### ConnectTargetInDfuMode ######
-static void _PHASE_ConnectTargetInDfuMode_() { }
+#define _PHASE_ConnectTargetInDfuMode_
 
 bool MeshDfuHost::startConnectTargetInDfuMode() {
 	// called both on timeout and after a received scan from target device.
@@ -449,7 +449,7 @@ MeshDfuHost::Phase MeshDfuHost::completeConnectTargetInDfuMode() {
 }
 
 // ###### DiscoverDfuCharacteristics ######
-static void _PHASE_DiscoverDfuCharacteristics_() { }
+#define _PHASE_DiscoverDfuCharacteristics_
 
 bool MeshDfuHost::startDiscoverDfuCharacteristics() {
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, &MeshDfuHost::onDiscoveryResult);
@@ -516,7 +516,7 @@ MeshDfuHost::Phase MeshDfuHost::completeDiscoverDfuCharacteristics() {
 }
 
 // ###### TargetPreparing ######
-static void _PHASE_TargetPreparing_() { }
+#define _PHASE_TargetPreparing_
 
 bool MeshDfuHost::startPhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
@@ -564,7 +564,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetPreparing() {
 	return Phase::TargetInitializing;
 }
 // ###### TargetInitializing ######
-static void _PHASE_TargetInitializing_(){ }
+#define _PHASE_TargetInitializing_(){ }
 
 bool MeshDfuHost::startPhaseTargetInitializing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetInitializing");
@@ -625,7 +625,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
 }
 
 // ###### TargetUpdating ######
-static void _PHASE_TargetUpdating_() { }
+#define _PHASE_TargetUpdating_
 
 
 bool MeshDfuHost::startPhaseTargetUpdating() {
@@ -641,7 +641,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetUpdating() {
 }
 
 // ###### TargetVerifying ######
-static void _PHASE_TargetVerifying_() { }
+#define _PHASE_TargetVerifying_
 
 bool MeshDfuHost::startPhaseTargetVerifying() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetVerifying");
@@ -656,7 +656,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseTargetVerifying() {
 }
 
 // ###### Aborting ######
-static void _PHASE_Aborting_() { }
+#define _PHASE_Aborting_
 
 
 bool MeshDfuHost::startPhaseAborting() {
@@ -704,7 +704,7 @@ MeshDfuHost::Phase MeshDfuHost::completePhaseAborting() {
 // --------------------------- phase administration methods ---------------------------
 // ------------------------------------------------------------------------------------
 
-static void ________PHASE_ADMINISTRATION________() { }
+#define ________PHASE_ADMINISTRATION________
 
 bool MeshDfuHost::startPhase(Phase phase) {
 	LOGMeshDfuHostDebug("*************************************************");
@@ -844,7 +844,7 @@ void MeshDfuHost::abort() {
 // -------------------------- callback implementation methods -------------------------
 // ------------------------------------------------------------------------------------
 
-static void ________CALLBACK_IMPLEMENTATION________() { }
+#define ________CALLBACK_IMPLEMENTATION________
 
 bool MeshDfuHost::setEventCallback(CS_TYPE evtToWaitOn, EventCallback callback) {
 	bool overridden = _onExpectedEvent != nullptr;
@@ -884,7 +884,7 @@ void MeshDfuHost::onEventCallbackTimeOut() {
 // --------------------------------------- utils ---------------------------------------
 // -------------------------------------------------------------------------------------
 
-static void ________UTILS________() { }
+#define ________UTILS________
 
 bool MeshDfuHost::isInitialized() {
 	return _bleCentral != nullptr && _crownstoneCentral != nullptr;
