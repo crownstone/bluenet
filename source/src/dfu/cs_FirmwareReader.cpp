@@ -5,7 +5,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #include <dfu/cs_FirmwareReader.h>
 #include <dfu/cs_FirmwareSections.h>
 
@@ -15,28 +14,24 @@
 //#include <components/libraries/crypto/nrf_crypto.h>
 //#include <components/libraries/crypto/nrf_crypto_hash.h>
 
-
 #define LOGFirmwareReaderDebug LOGd
 #define LOGFirmwareReaderInfo LOGi
 
 #define FIRMWAREREADER_LOG_LVL SERIAL_DEBUG
 
-
 // --------------------------------------------------------------------------------
 
-FirmwareReader::FirmwareReader() :
-	firmwarePrinter(/*[this]() {	return this->printRoutine();}*/),
-	firmwareHashPrinter(/*[this]() { return this->printHashRoutine(); }*/) {
-
-}
-
+FirmwareReader::FirmwareReader()
+	: firmwarePrinter(/*[this]() {	return this->printRoutine();}*/)
+	, firmwareHashPrinter(/*[this]() { return this->printHashRoutine(); }*/) {}
 
 uint32_t FirmwareReader::initFStorage(FirmwareSection sect) {
 	auto sectionInfo = getFirmwareSectionInfo(sect);
-	LOGFirmwareReaderInfo("initializing fstorage pointer: 0x%X, section: [0x%08X - 0x%08X]",
-				sectionInfo._fStoragePtr,
-				sectionInfo._addr._start,
-				sectionInfo._addr._end);
+	LOGFirmwareReaderInfo(
+			"initializing fstorage pointer: 0x%X, section: [0x%08X - 0x%08X]",
+			sectionInfo._fStoragePtr,
+			sectionInfo._addr._start,
+			sectionInfo._addr._end);
 
 	return nrf_fstorage_init(sectionInfo._fStoragePtr, &nrf_fstorage_sd, nullptr);
 }
@@ -45,12 +40,13 @@ cs_ret_code_t FirmwareReader::init() {
 	for (auto section : {FirmwareSection::MicroApp /*, FirmwareSection::Ipc */}) {
 		uint32_t nrfCode = initFStorage(section);
 
-		if(nrfCode != NRF_SUCCESS) {
+		if (nrfCode != NRF_SUCCESS) {
 			LOGw("Failed to initialize firmwareReader section %u. NRF error code %u",
-					static_cast<uint8_t>(section),
-					nrfCode);
+				 static_cast<uint8_t>(section),
+				 nrfCode);
 			return ERR_NOT_INITIALIZED;
-		} else {
+		}
+		else {
 			LOGFirmwareReaderInfo("success");
 		}
 	}
@@ -65,25 +61,22 @@ uint32_t FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out
 
 	auto firmwareSectionInfo = getFirmwareSectionInfo(section);
 
-	uint32_t readAddress = firmwareSectionInfo._addr._start + startIndex;
+	[[maybe_unused]] uint32_t readAddress = firmwareSectionInfo._addr._start + startIndex;
 	// TODO: add boundary check
 
 	uint32_t nrfCode = nrf_fstorage_read(
-			firmwareSectionInfo._fStoragePtr,
-			firmwareSectionInfo._addr._start + startIndex,
-			data_out,
-			size);
+			firmwareSectionInfo._fStoragePtr, firmwareSectionInfo._addr._start + startIndex, data_out, size);
 
 	LOGFirmwareReaderDebug("reading %u bytes from address: 0x%x", size, readAddress);
 
-	if(nrfCode != NRF_SUCCESS) {
+	if (nrfCode != NRF_SUCCESS) {
 		LOGFirmwareReaderInfo("failed read, %d", nrfCode);
 	}
 
 	return nrfCode;
 }
 
-//uint32_t FirmwareReader::printRoutine() {
+// uint32_t FirmwareReader::printRoutine() {
 //	constexpr size_t readSize = 128;
 //
 //	__attribute__((aligned(4))) uint8_t buff[readSize] = {};
@@ -102,21 +95,21 @@ uint32_t FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out
 //	return Coroutine::delayMs(1000);
 //}
 
-uint32_t FirmwareReader::printHashRoutine(){
-	if(CsMath::Decrease(printFirmwareHashCountDown) == 1){
+uint32_t FirmwareReader::printHashRoutine() {
+	if (CsMath::Decrease(printFirmwareHashCountDown) == 1) {
 		LOGFirmwareReaderInfo("computing firmware hash");
 
-//		computeHash();
+		//		computeHash();
 
 		LOGFirmwareReaderInfo("result of computation:");
-	} else {
+	}
+	else {
 		LOGFirmwareReaderInfo("not doing firmware hash computation now");
 	}
 	return Coroutine::delayMs(1000);
 }
 
-
 void FirmwareReader::handleEvent(event_t& evt) {
-//	firmwarePrinter.handleEvent(evt);
-//	firmwareHashPrinter.handleEvent(evt);
+	//	firmwarePrinter.handleEvent(evt);
+	//	firmwareHashPrinter.handleEvent(evt);
 }

@@ -6,17 +6,12 @@
  */
 #pragma once
 
-/** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
- * General includes
- ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
-
 #include <behaviour/cs_BehaviourStore.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_CrownstoneCentral.h>
-#include <ble/cs_iBeacon.h>
 #include <ble/cs_Stack.h>
+#include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <dfu/cs_FirmwareReader.h>
 #include <dfu/cs_MeshDfuHost.h>
@@ -59,19 +54,19 @@
 #include <drivers/cs_Gpio.h>
 #endif
 
-/** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
- * Main functionality
- ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
-
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.
  */
 class Crownstone : public EventListener, public Component {
 public:
-
 	enum ServiceEvent {
-		CREATE_DEVICE_INFO_SERVICE, CREATE_SETUP_SERVICE, CREATE_CROWNSTONE_SERVICE,
-		REMOVE_DEVICE_INFO_SERVICE, REMOVE_SETUP_SERVICE, REMOVE_CROWNSTONE_SERVICE };
+		CREATE_DEVICE_INFO_SERVICE,
+		CREATE_SETUP_SERVICE,
+		CREATE_CROWNSTONE_SERVICE,
+		REMOVE_DEVICE_INFO_SERVICE,
+		REMOVE_SETUP_SERVICE,
+		REMOVE_CROWNSTONE_SERVICE
+	};
 
 	/** Allocate Crownstone class and internal references.
 	 *
@@ -80,8 +75,9 @@ public:
 	 * too risky. It might not be freed and memory might overflow. This type of hardware should run months without
 	 * interruption.
 	 *
-	 * There is a function IS_CROWNSTONE. What this actually is contrasted with are other BLE type devices, in particular
-	 * the Guidestone. The latter devices do not have the ability to switch, dim, or measure power consumption.
+	 * There is a function IS_CROWNSTONE. What this actually is contrasted with are other BLE type devices, in
+	 * particular the Guidestone. The latter devices do not have the ability to switch, dim, or measure power
+	 * consumption.
 	 *
 	 * The order with which items are created.
 	 *
@@ -146,8 +142,8 @@ public:
 	 *    2. wait for ble events
 	 */
 	/**
-	 * An infinite loop in which the application ceases control to the SoftDevice at regular times. It runs the scheduler,
-	 * waits for events, and handles them. Also the printed statements in the log module are flushed.
+	 * An infinite loop in which the application ceases control to the SoftDevice at regular times. It runs the
+	 * scheduler, waits for events, and handles them. Also the printed statements in the log module are flushed.
 	 */
 	void run();
 
@@ -157,7 +153,7 @@ public:
 	 * Handle events that can come from other parts of the Crownstone firmware and even originate from outside of the
 	 * firmware via the BLE interface (an application, or the mesh).
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 	/**
 	 * Update the heap statistics.
@@ -178,15 +174,12 @@ public:
 
 	/** tick function called by app timer
 	 */
-	static void staticTick(Crownstone *ptr) {
-		ptr->tick();
-	}
+	static void staticTick(Crownstone* ptr) { ptr->tick(); }
 
 protected:
 	std::vector<Component*> getChildren() override;
 
 private:
-
 	/**
 	 * The distinct init phases.
 	 */
@@ -196,7 +189,8 @@ private:
 	/** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
 	 */
 	/**
-	 * This must be called after the SoftDevice has started. The order in which things should be initialized is as follows:
+	 * This must be called after the SoftDevice has started. The order in which things should be initialized is as
+	 * follows:
 	 *   1. Stack.               Starts up the softdevice. It controls a lot of devices, so need to set it early.
 	 *   2. Timer.               Also initializes the app scheduler.
 	 *   3. Storage.             Definitely after the stack has been initialized.
@@ -253,8 +247,8 @@ private:
 	void configureAdvertisement();
 
 	/**
-	 * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
-	 * It is loaded from memory or from the default and written to the Stack.
+	 * The default name. This can later be altered by the user if the corresponding service and characteristic is
+	 * enabled. It is loaded from memory or from the default and written to the Stack.
 	 */
 	void setName();
 
@@ -286,14 +280,14 @@ private:
 	 * Start the different modules depending on the operational mode. For example, in normal mode we use a scanner and
 	 * the mesh. In setup mode we use the serial module (but only RX).
 	 */
-	void startOperationMode(const OperationMode & mode);
+	void startOperationMode(const OperationMode& mode);
 
 	/** Switch from one operation mode to another.
 	 *
 	 * Depending on the operation mode we have a different set of services / characteristics enabled. Subsequently,
 	 * also different entities are started (for example a scanner, or the BLE mesh).
 	 */
-	void switchMode(const OperationMode & mode);
+	void switchMode(const OperationMode& mode);
 
 	/** tick function for crownstone to update/execute periodically
 	 */
@@ -315,9 +309,6 @@ private:
 	 */
 	void increaseResetCounter();
 
-	// Keep the board config in memory, so other classes can store a pointer to it.
-	boards_config_t _boardsConfig;
-
 	// --------------------------------------------------------
 	// ------------------ firmware components -----------------
 	// --------------------------------------------------------
@@ -332,12 +323,12 @@ private:
 	State* _state;
 
 	TemperatureGuard* _temperatureGuard = nullptr;
-	PowerSampling* _powerSampler = nullptr;
+	PowerSampling* _powerSampler        = nullptr;
 
 	// services
 	DeviceInformationService* _deviceInformationService = nullptr;
-	CrownstoneService* _crownstoneService = nullptr;
-	SetupService* _setupService = nullptr;
+	CrownstoneService* _crownstoneService               = nullptr;
+	SetupService* _setupService                         = nullptr;
 
 	// advertise
 	ServiceData* _serviceData = nullptr;
@@ -346,10 +337,10 @@ private:
 #if BUILD_MESHING == 1
 	Mesh* _mesh = nullptr;
 #endif
-	CommandHandler* _commandHandler = nullptr;
-	Scanner* _scanner = nullptr;
-	FactoryReset* _factoryReset = nullptr;
-	CommandAdvHandler* _commandAdvHandler = nullptr;
+	CommandHandler* _commandHandler         = nullptr;
+	Scanner* _scanner                       = nullptr;
+	FactoryReset* _factoryReset             = nullptr;
+	CommandAdvHandler* _commandAdvHandler   = nullptr;
 	MultiSwitchHandler* _multiSwitchHandler = nullptr;
 	SystemTime _systemTime;
 
@@ -367,7 +358,6 @@ private:
 	FirmwareReader _firmwareReader;
 	MeshDfuHost _meshDfuHost;
 
-
 #if BUILD_MICROAPP_SUPPORT == 1
 	Microapp* _microapp;
 #endif
@@ -384,18 +374,18 @@ private:
 	Gpio* _gpio = nullptr;
 #endif
 
-
 	// --------------------------------------------------------
 	// ------------------ run time variables ------------------
 	// --------------------------------------------------------
 
+	// Keep the board config in memory, so other classes can store a pointer to it.
 	boards_config_t _boardsConfig;
 
-	app_timer_t              _mainTimerData = { {0} };
-	app_timer_id_t           _mainTimerId = nullptr;
+	app_timer_t _mainTimerData  = {{0}};
+	app_timer_id_t _mainTimerId = nullptr;
 	TYPIFY(EVT_TICK) _tickCount = 0;
 
-	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
+	OperationMode _operationMode    = OperationMode::OPERATION_MODE_UNINITIALIZED;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	//! Store gpregret as it was on boot.
