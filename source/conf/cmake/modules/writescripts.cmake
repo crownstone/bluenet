@@ -83,5 +83,3 @@ message(STATUS "Generate increment-application-version.sh script")
 configure_file(${TEMPLATE_DIR}/increment-application-version.sh.in tmp/increment-application-version.sh)
 file(COPY tmp/increment-application-version.sh DESTINATION . FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
-
-

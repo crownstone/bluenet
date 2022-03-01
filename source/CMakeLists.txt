@@ -8,7 +8,7 @@
 # Copyright © 2013 Crownstone
 #######################################################################################################################
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 if(COMMAND cmake_policy)
 	# only interpret arguments as variables when unquoted
@@ -263,10 +263,12 @@ list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf)
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL})
 
-message(STATUS "Application start address: ${APPLICATION_START_ADDRESS}")
-message(STATUS "Application length: ${APPLICATION_LENGTH}")
-message(STATUS "RAM base: ${RAM_R1_BASE}")
-message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
+math(EXPR FLASH_MICROAPP_LENGTH "${FLASH_MICROAPP_PAGES} * 1024" OUTPUT_FORMAT HEXADECIMAL)
+
+set(TEMPLATE_DIR ${WORKSPACE_DIR}/scripts/templates)
+message(STATUS "Generate build-status.txt script")
+configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-status.txt)
+
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
 add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
@@ -310,6 +312,7 @@ add_custom_command(OUTPUT ${PROJECT_NAME}.bin
 	COMMAND ${CMAKE_COMMAND} -E echo "** Available size: 360kB, that is 512kB - softdevice - bootloader - app storage"
 	COMMAND ${CMAKE_COMMAND} -E echo "** Dual bank Size: 180kB = DFU_IMAGE_MAX_SIZE_BANKED"
 	DEPENDS
+		display_build_status
 		${PROJECT_NAME}
 	COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 
@@ -362,6 +365,12 @@ add_custom_target(analyze
 	DEPENDS ${PROJECT_NAME}.elf
 	COMMENT "Read headers ${PROJECT_NAME}.elf"
 	)
+
+add_custom_target(display_build_status
+	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
+	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	COMMENT "Display build status"
+)
 
 # The reason to - again - write all those parameters is that at runtime they are not available. If we want
 # them to be available we will have to send them as arguments like this.
