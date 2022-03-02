@@ -70,8 +70,9 @@
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 
+#ifdef BUILD_P2P_DFU
 #include "nrf_dfu_settings.h"
-
+#endif
 
 static void on_error(void)
 {
@@ -107,6 +108,8 @@ void app_error_handler_bare(uint32_t error_code)
     NRF_LOG_ERROR("Received an error: 0x%08x!", error_code);
     on_error();
 }
+
+#ifdef BUILD_P2P_DFU
 
 static bool micro_app_page_cleared = false;
 
@@ -164,6 +167,8 @@ static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
 	init_cmd_write_started = flash_write_status == NRF_SUCCESS;
 }
 
+#endif
+
 /**
  * @brief Function notifies certain events in DFU process.
  */
@@ -177,7 +182,9 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
 //            bsp_board_led_off(BSP_BOARD_LED_1);
 //            bsp_board_led_on(BSP_BOARD_LED_2);
 
-	static int callcount = 0;
+#ifdef BUILD_P2P_DFU
+    static int callcount = 0;
+#endif
     switch (evt_type)
     {
         case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
@@ -186,23 +193,25 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
         case NRF_DFU_EVT_DFU_ABORTED:
             break;
 		// ---------------------------------------
+#ifdef BUILD_P2P_DFU
         case NRF_DFU_EVT_DFU_INITIALIZED: {
-        	clear_micro_app_page();
-        	break;
+            clear_micro_app_page();
+            break;
         }
         case NRF_DFU_EVT_DFU_STARTED: {
-//        	write_init_packet_to_micro_app_page(0);
-        	break;
+//          write_init_packet_to_micro_app_page(0);
+            break;
         }
         case NRF_DFU_EVT_OBJECT_RECEIVED: {
-        	write_init_packet_to_micro_app_page(callcount);
-        	callcount++;
-        	break;
+            write_init_packet_to_micro_app_page(callcount);
+            callcount++;
+            break;
         }
         case NRF_DFU_EVT_DFU_COMPLETED: {
-//        	write_init_packet_to_micro_app_page(2);
-        	break;
+//          write_init_packet_to_micro_app_page(2);
+            break;
         }
+#endif
         default:
             break;
     }

@@ -13,8 +13,6 @@
 #include <ble/cs_Stack.h>
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
-#include <dfu/cs_FirmwareReader.h>
-#include <dfu/cs_MeshDfuHost.h>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_AssetFiltering.h>
 #include <localisation/cs_MeshTopology.h>
@@ -52,6 +50,11 @@
 
 #if BUILD_GPIOTE == 1
 #include <drivers/cs_Gpio.h>
+#endif
+
+#if BUILD_P2P_DFU == 1
+#include <dfu/cs_FirmwareReader.h>
+#include <dfu/cs_MeshDfuHost.h>
 #endif
 
 /**
@@ -354,10 +357,6 @@ private:
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
 
-	// dfu
-	FirmwareReader _firmwareReader;
-	MeshDfuHost _meshDfuHost;
-
 #if BUILD_MICROAPP_SUPPORT == 1
 	Microapp* _microapp;
 #endif
@@ -372,6 +371,11 @@ private:
 
 #if BUILD_GPIOTE == 1
 	Gpio* _gpio = nullptr;
+#endif
+
+#if BUILD_P2P_DFU == 1
+	FirmwareReader _firmwareReader;
+	MeshDfuHost _meshDfuHost;
 #endif
 
 	// --------------------------------------------------------

@@ -803,8 +803,12 @@ void MeshDfuHost::completePhase() {
 			phaseNext = completePhaseTargetInitializing();
 			break;
 		}
-		case Phase::TargetUpdating: break;   // TODO: add callbacks for completePhaseX
-		case Phase::TargetVerifying: break;  // TODO: add callbacks for completePhaseX
+		case Phase::TargetUpdating: {
+			break;  // TODO: add callbacks for completePhaseX
+		}
+		case Phase::TargetVerifying: {
+			break;  // TODO: add callbacks for completePhaseX
+		}
 		case Phase::Aborting: {
 			phaseNext = completePhaseAborting();
 			break;
@@ -894,9 +898,15 @@ bool MeshDfuHost::ableToLaunchDfu() {
 
 bool MeshDfuHost::haveInitPacket() {
 	switch (_initPacketLen) {
-		case 0:
-		case 0xffffffff: return false;
-		default: return true;
+		case 0: {
+			[[fallthrough]];
+		}
+		case 0xffffffff: {
+			return false;
+		}
+		default: {
+			return true;
+		}
 	}
 }
 

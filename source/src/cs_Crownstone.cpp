@@ -218,7 +218,13 @@ Crownstone::Crownstone(boards_config_t& board)
 std::vector<Component*> Crownstone::getChildren() {
 	LOGd("inspecting children of Crownstone object");
 	return {
-			&_switchAggregator, &_presenceHandler, &_behaviourStore, _crownstoneCentral, &_meshDfuHost,
+			&_switchAggregator,
+			&_presenceHandler,
+			&_behaviourStore,
+			_crownstoneCentral,
+#if BUILD_P2P_DFU == 1
+			&_meshDfuHost,
+#endif
 			// (add others when necessary for weak dependences)
 	};
 }
@@ -609,10 +615,10 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 			_meshTopology.init();
 
 			_assetFiltering.init();
-
+#if BUILD_P2P_DFU == 1
 			_firmwareReader.init();
 			_meshDfuHost.init();
-
+#endif
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {
