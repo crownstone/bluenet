@@ -71,8 +71,8 @@ static inline const char* get_hardware_version() {
 		case ACR01B10D: return "10106000100";
 
 		// CROWNSTONE BUILTIN TWOS
-		case ACR01B13B: return "10107000100";
-		case ACR01B15A: return "10107000200";
+		case ACR01B13B: return "10108000100";
+		case ACR01B15A: return "10108000200";
 
 		// CROWNSTONE PLUGS
 		case ACR01B2A: return "10102000100";
