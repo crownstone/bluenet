@@ -50,6 +50,8 @@
 #include <nrf_error.h>
 #include <nrf52.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <boards/cs_BoardMap.h>
+#include <protocol/cs_UicrPacket.h>
 
 /**
  * Initialize conservatively (as if given pins are not present).
@@ -206,4 +208,75 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 	config->hardwareBoard = hardwareBoard;
 
 	return ERR_SUCCESS;
+}
+
+cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_config_t* config) {
+	switch (uicrData->productRegionFamily.fields.productType) {
+		case PRODUCT_DEV_BOARD:
+			asPca10040(config);
+			return ERR_SUCCESS;
+		case PRODUCT_CROWNSTONE_PLUG_ZERO: {
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+					asACR01B2C(config);
+					return ERR_SUCCESS;
+				case 1:
+					switch (uicrData->majorMinorPatch.fields.minor) {
+						case 0:
+							asACR01B2C(config);
+							return ERR_SUCCESS;
+						case 1:
+						case 3:
+							asACR01B2G(config);
+							return ERR_SUCCESS;
+					}
+			}
+			break;
+		}
+		case PRODUCT_CROWNSTONE_PLUG_ONE: {
+			asACR01B11A(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_BUILTIN_ZERO: {
+			asACR01B1D(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_BUILTIN_ONE: {
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+					switch (uicrData->majorMinorPatch.fields.minor) {
+						case 0:
+							asACR01B10B(config);
+							return ERR_SUCCESS;
+						case 1:
+							asACR01B10D(config);
+							return ERR_SUCCESS;
+					}
+			}
+			break;
+		}
+		case PRODUCT_CROWNSTONE_BUILTIN_TWO: {
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+					switch (uicrData->majorMinorPatch.fields.minor) {
+						case 1:
+							asACR01B13B(config);
+							return ERR_SUCCESS;
+						case 2:
+							asACR01B15A(config);
+							return ERR_SUCCESS;
+					}
+			}
+			break;
+		}
+		case PRODUCT_GUIDESTONE: {
+			asGuidestone(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_USB_DONGLE: {
+			asUsbDongle(config);
+			return ERR_SUCCESS;
+		}
+	}
+	return ERR_UNKNOWN_TYPE;
 }
