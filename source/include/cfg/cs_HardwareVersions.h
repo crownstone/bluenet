@@ -104,7 +104,7 @@ static inline const char* get_hardware_version() {
 	}
 }
 
-static inline const char* get_hardware_version(const cs_uicr_data_t* uicrData) {
+static inline const char* get_hardware_version_from_uicr(const cs_uicr_data_t* uicrData) {
 	// The string is always 11 chars, add 1 byte for the null terminator.
 	// Since you can't specify a max width, just use modulo to limit it.
 	char versionString[12];
