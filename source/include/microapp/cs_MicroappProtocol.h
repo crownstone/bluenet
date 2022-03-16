@@ -156,6 +156,11 @@ protected:
 	void softInterrupt();
 
 	/**
+	 * Check if start address of the microapp is within the flash boundaries assigned to the microapps.
+	 */
+	cs_ret_code_t checkFlashBoundaries(uint8_t appIndex, uintptr_t address);
+
+	/**
 	 * Register GPIO pin.
 	 */
 	bool registerSoftInterruptSlotGpio(uint8_t pin);

@@ -198,19 +198,6 @@ int digitalPinToInterrupt(int pin) {
 }
 
 /*
- * Checks flash boundaries (for single microapp).
- */
-cs_ret_code_t checkFlashBoundaries(uintptr_t address) {
-	if (address < g_FLASH_MICROAPP_BASE) {
-		return ERR_UNSAFE;
-	}
-	if (address > (g_FLASH_MICROAPP_BASE + g_FLASH_MICROAPP_PAGES * 0x1000)) {
-		return ERR_UNSAFE;
-	}
-	return ERR_SUCCESS;
-}
-
-/*
  * MicroappProtocol constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
@@ -250,6 +237,22 @@ void MicroappProtocol::setIpcRam() {
 }
 
 /*
+ * Checks flash boundaries (for single microapp).
+ */
+cs_ret_code_t MicroappProtocol::checkFlashBoundaries(uint8_t appIndex, uintptr_t address) {
+	uintptr_t memoryMicroappOffset = (g_FLASH_MICROAPP_PAGES * 0x1000) * appIndex;
+	uintptr_t addressLow = g_FLASH_MICROAPP_BASE + memoryMicroappOffset;
+	uintptr_t addressHigh = addressLow + g_FLASH_MICROAPP_PAGES * 0x1000;
+	if (address < addressLow) {
+		return ERR_UNSAFE;
+	}
+	if (address > addressHigh) {
+		return ERR_UNSAFE;
+	}
+	return ERR_SUCCESS;
+}
+
+/*
  * Gets the first instruction for the microapp (this is written in its header). We correct for thumb and check its
  * boundaries. Then we call it from a coroutine context and expect it to yield.
  *
@@ -261,7 +264,7 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
 	LOGi("Microapp: start at %p", address);
 
-	if (checkFlashBoundaries(address) != ERR_SUCCESS) {
+	if (checkFlashBoundaries(appIndex, address) != ERR_SUCCESS) {
 		LOGe("Address not within microapp flash boundaries");
 		return;
 	}
