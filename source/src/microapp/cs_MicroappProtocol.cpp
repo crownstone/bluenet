@@ -241,8 +241,8 @@ void MicroappProtocol::setIpcRam() {
  */
 cs_ret_code_t MicroappProtocol::checkFlashBoundaries(uint8_t appIndex, uintptr_t address) {
 	uintptr_t memoryMicroappOffset = (g_FLASH_MICROAPP_PAGES * 0x1000) * appIndex;
-	uintptr_t addressLow = g_FLASH_MICROAPP_BASE + memoryMicroappOffset;
-	uintptr_t addressHigh = addressLow + g_FLASH_MICROAPP_PAGES * 0x1000;
+	uintptr_t addressLow           = g_FLASH_MICROAPP_BASE + memoryMicroappOffset;
+	uintptr_t addressHigh          = addressLow + g_FLASH_MICROAPP_PAGES * 0x1000;
 	if (address < addressLow) {
 		return ERR_UNSAFE;
 	}
@@ -520,19 +520,16 @@ bool MicroappProtocol::registerSoftInterruptSlotGpio(uint8_t pin) {
  */
 void MicroappProtocol::handleEvent(event_t& event) {
 	switch (event.type) {
-		// Listen to GPIO events, will be used later to implement attachInterrupt in microapp.
 		case CS_TYPE::EVT_GPIO_INIT: {
-			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
-			if (gpio.direction == INPUT || gpio.direction == SENSE) {
-				LOGd("Register GPIO event handler for microapp");
-				registerSoftInterruptSlotGpio(gpio.pin_index);
+			auto gpio = CS_TYPE_CAST(EVT_GPIO_INIT, event.data);
+			if (gpio->direction == INPUT || gpio->direction == SENSE) {
+				registerSoftInterruptSlotGpio(gpio->pin_index);
 			}
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_UPDATE: {
-			TYPIFY(EVT_GPIO_UPDATE) gpio = *(TYPIFY(EVT_GPIO_UPDATE)*)event.data;
-			LOGi("GPIO update for microapp pin %i", gpio.pin_index);
-			softInterruptGpio(gpio.pin_index);
+			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);
+			softInterruptGpio(gpio->pin_index);
 			break;
 		}
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
@@ -543,6 +540,11 @@ void MicroappProtocol::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
 			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
 			onMeshMessage(*msg);
+			break;
+		}
+		case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
+			auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
+			registerSoftInterruptSlotBle(ble->index);
 			break;
 		}
 		default: break;
@@ -1049,7 +1051,11 @@ cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble
 #if BUILD_MESHING == 0
 			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
 #endif
-			bool success        = registerSoftInterruptSlotBle(ble_cmd->id);
+			TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT) ble;
+			ble.index = ble_cmd->id;
+			event_t event(CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT, &ble, sizeof(ble));
+			EventDispatcher::getInstance().dispatch(event);
+			bool success        = event.result.returnCode;
 			ble_cmd->header.ack = success;
 			return success ? ERR_SUCCESS : ERR_NO_SPACE;
 		}
