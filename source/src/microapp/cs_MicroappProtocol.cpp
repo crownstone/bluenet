@@ -18,6 +18,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
+#include <microapp/cs_MicroappCommandHandler.h>
 #include <microapp/cs_MicroappProtocol.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
@@ -175,38 +176,13 @@ void goIntoMicroapp(void* p) {
 }  // extern C
 
 /*
- * Helper functions.
- *
- * TODO: Move to appropriate files.
- */
-
-/*
- * Get from interrupt to digital pin.
- *
- * We have one virtual device at location 0, so we just decrement the pin number by one to map to the array in the
- * GPIO module.
- */
-int interruptToDigitalPin(int interrupt) {
-	return interrupt - 1;
-}
-
-/*
- * Get from digital pin to interrupt. See also interruptToDigitalPin.
- */
-int digitalPinToInterrupt(int pin) {
-	return pin + 1;
-}
-
-/*
  * MicroappProtocol constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
 MicroappProtocol::MicroappProtocol()
 		: EventListener()
 		, _callCounter(0)
-		, _callbackData(nullptr)
-		, _microappIsScanning(false)
-		, _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
+		, _microappIsScanning(false) {
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -216,6 +192,13 @@ MicroappProtocol::MicroappProtocol()
 	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		_bleIsr[i].id = 0;
 	}
+}
+
+/*
+ * Get from digital pin to interrupt. See also interruptToDigitalPin.
+ */
+int MicroappProtocol::digitalPinToInterrupt(int pin) {
+	return pin + 1;
 }
 
 /*
@@ -333,7 +316,8 @@ bool MicroappProtocol::retrieveCommand() {
 			 incomingMessage->cmd,
 			 incomingMessage->interruptCmd);
 	}
-	handleMicroappCommand(incomingMessage);
+	MicroappCommandHandler & microappCommandHandler = MicroappCommandHandler::getInstance();
+	microappCommandHandler.handleMicroappCommand(incomingMessage);
 	bool callAgain = !stopAfterMicroappCommand(incomingMessage);
 	if (!callAgain) {
 		LOGv("Command %i, do not call again", incomingMessage->cmd);
@@ -345,7 +329,8 @@ bool MicroappProtocol::retrieveCommand() {
  * A GPIO callback towards the microapp.
  */
 void MicroappProtocol::softInterruptGpio(uint8_t pin) {
-	if (softInterruptInProgress()) {
+	MicroappCommandHandler & microappCommandHandler = MicroappCommandHandler::getInstance();
+	if (microappCommandHandler.softInterruptInProgress()) {
 		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
 		return;
 	}
@@ -363,14 +348,6 @@ void MicroappProtocol::softInterruptGpio(uint8_t pin) {
 }
 
 /*
- * When getting returns from a soft interrupt they will update us on the number of slots available in the microapp
- * for new interrupts. If there are no slots left, we don't bother sending them a new interrupt.
- */
-bool MicroappProtocol::softInterruptInProgress() {
-	return _emptyInterruptSlots > 0;
-}
-
-/*
  * Communicate mesh message towards microapp.
  */
 void MicroappProtocol::softInterruptBle(scanned_device_t* bluenetBleDevice) {
@@ -381,7 +358,8 @@ void MicroappProtocol::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 	}
 #endif
 
-	if (softInterruptInProgress()) {
+	MicroappCommandHandler & microappCommandHandler = MicroappCommandHandler::getInstance();
+	if (microappCommandHandler.softInterruptInProgress()) {
 		LOGv("Callback in progress, ignore scanned device event");
 		return;
 	}
@@ -499,84 +477,6 @@ void MicroappProtocol::callMicroapp() {
 }
 
 /*
- * Register GPIO pin
- */
-bool MicroappProtocol::registerSoftInterruptSlotGpio(uint8_t pin) {
-	// We register the pin at the first empty slot
-	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
-		if (!_pinIsr[i].registered) {
-			_pinIsr[i].registered = true;
-			_pinIsr[i].pin        = pin;
-			LOGi("Register interrupt slot for microapp pin %i", pin);
-			return true;
-		}
-	}
-	LOGw("Could not register interrupt slot for microapp pin %i", pin);
-	return false;
-}
-
-/**
- * Required if we have to pass events through to the microapp.
- */
-void MicroappProtocol::handleEvent(event_t& event) {
-	switch (event.type) {
-		case CS_TYPE::EVT_GPIO_INIT: {
-			auto gpio = CS_TYPE_CAST(EVT_GPIO_INIT, event.data);
-			if (gpio->direction == INPUT || gpio->direction == SENSE) {
-				registerSoftInterruptSlotGpio(gpio->pin_index);
-			}
-			break;
-		}
-		case CS_TYPE::EVT_GPIO_UPDATE: {
-			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);
-			softInterruptGpio(gpio->pin_index);
-			break;
-		}
-		case CS_TYPE::EVT_DEVICE_SCANNED: {
-			auto dev = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
-			onDeviceScanned(dev);
-			break;
-		}
-		case CS_TYPE::EVT_RECV_MESH_MSG: {
-			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
-			onMeshMessage(*msg);
-			break;
-		}
-		case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
-			auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
-			registerSoftInterruptSlotBle(ble->index);
-			break;
-		}
-		default: break;
-	}
-}
-
-/*
- * Called upon receiving mesh message, places mesh message in buffer
- */
-void MicroappProtocol::onMeshMessage(MeshMsgEvent event) {
-	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		return;
-	}
-
-	if (_meshMessageBuffer.full()) {
-		LOGi("Dropping message, buffer is full");
-		return;
-	}
-
-	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-		LOGi("Message is too large: %u", event.msg.len);
-		return;
-	}
-
-	microapp_buffered_mesh_message_t bufferedMessage;
-	bufferedMessage.stoneId     = event.srcAddress;
-	bufferedMessage.messageSize = event.msg.len;
-	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
-	_meshMessageBuffer.push(bufferedMessage);
-}
-
-/*
  * Called upon receiving scanned BLE device, generates a soft interrupt if a slot has been registered before.
  */
 void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
@@ -586,96 +486,6 @@ void MicroappProtocol::onDeviceScanned(scanned_device_t* dev) {
 	}
 
 	softInterruptBle(dev);
-}
-
-/*
- * Forwards commands from the microapp to the relevant handler
- */
-cs_ret_code_t MicroappProtocol::handleMicroappCommand(microapp_cmd_t* cmd) {
-	uint8_t command = cmd->cmd;
-	switch (command) {
-		case CS_MICROAPP_COMMAND_LOG: {
-			LOGd("Microapp log command");
-			microapp_log_cmd_t* log_cmd = reinterpret_cast<microapp_log_cmd_t*>(cmd);
-			return handleMicroappLogCommand(log_cmd);
-		}
-		case CS_MICROAPP_COMMAND_DELAY: {
-			LOGd("Microapp delay command");
-			microapp_delay_cmd_t* delay_cmd = reinterpret_cast<microapp_delay_cmd_t*>(cmd);
-			return handleMicroappDelayCommand(delay_cmd);
-		}
-		case CS_MICROAPP_COMMAND_PIN: {
-			LOGd("Microapp pin command");
-			microapp_pin_cmd_t* pin_cmd = reinterpret_cast<microapp_pin_cmd_t*>(cmd);
-			return handleMicroappPinCommand(pin_cmd);
-		}
-		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
-			LOGd("Microapp service data command");
-			microapp_service_data_cmd_t* service_data_cmd = reinterpret_cast<microapp_service_data_cmd_t*>(cmd);
-			return handleMicroappServiceDataCommand(service_data_cmd);
-		}
-		case CS_MICROAPP_COMMAND_TWI: {
-			LOGd("Microapp TWI command");
-			microapp_twi_cmd_t* twi_cmd = reinterpret_cast<microapp_twi_cmd_t*>(cmd);
-			return handleMicroappTwiCommand(twi_cmd);
-		}
-		case CS_MICROAPP_COMMAND_BLE: {
-			LOGd("Microapp BLE command");
-			microapp_ble_cmd_t* ble_cmd = reinterpret_cast<microapp_ble_cmd_t*>(cmd);
-			return handleMicroappBleCommand(ble_cmd);
-		}
-		case CS_MICROAPP_COMMAND_POWER_USAGE: {
-			LOGd("Microapp power usage command");
-			microapp_power_usage_cmd_t* power_usage_cmd = reinterpret_cast<microapp_power_usage_cmd_t*>(cmd);
-			return handleMicroappPowerUsageCommand(power_usage_cmd);
-		}
-		case CS_MICROAPP_COMMAND_PRESENCE: {
-			LOGd("Microapp presence command");
-			microapp_presence_cmd_t* presence_cmd = reinterpret_cast<microapp_presence_cmd_t*>(cmd);
-			return handleMicroappPresenceCommand(presence_cmd);
-		}
-		case CS_MICROAPP_COMMAND_MESH: {
-			LOGd("Microapp mesh command");
-			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(cmd);
-			return handleMicroappMeshCommand(mesh_cmd);
-		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED: {
-			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGv("Soft interrupt received for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
-			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGv("Soft interrupt error for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
-			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGv("Soft interrupt end for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_SETUP_END: {
-			LOGi("Setup end");
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOOP_END: {
-			// Only in debug mode
-			LOGv("Loop end");
-			break;
-		}
-		case CS_MICROAPP_COMMAND_NONE: {
-			// ignore, nothing written
-			break;
-		}
-		default: {
-			_log(SERIAL_INFO, true, "Unknown command %u", command);
-			return ERR_UNKNOWN_TYPE;
-		}
-	}
-	return ERR_SUCCESS;
 }
 
 bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
@@ -722,312 +532,25 @@ bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 	return stop;
 }
 
-// TODO: establish a proper default log level for microapps
-#define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
-
-cs_ret_code_t MicroappProtocol::handleMicroappLogCommand(microapp_log_cmd_t* command) {
-
-	if (command->length == 0) {
-		LOGi("Incorrect length for log message");
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-	__attribute__((unused)) bool newLine = false;
-	if (command->option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
-		newLine = true;
-	}
-	switch (command->type) {
-		case CS_MICROAPP_COMMAND_LOG_CHAR: {
-			[[maybe_unused]] microapp_log_char_cmd_t* cmd = reinterpret_cast<microapp_log_char_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                 = cmd->value;
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_SHORT: {
-			[[maybe_unused]] microapp_log_short_cmd_t* cmd = reinterpret_cast<microapp_log_short_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                  = cmd->value;
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_UINT: {
-			[[maybe_unused]] microapp_log_uint_cmd_t* cmd = reinterpret_cast<microapp_log_uint_cmd_t*>(command);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%u%s", cmd->value);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_INT: {
-			[[maybe_unused]] microapp_log_int_cmd_t* cmd = reinterpret_cast<microapp_log_int_cmd_t*>(command);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", cmd->value);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_FLOAT: {
-			[[maybe_unused]] microapp_log_float_cmd_t* cmd = reinterpret_cast<microapp_log_float_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                  = cmd->value;
-			// We automatically cast to int because printf of floats is disabled due to size limitations
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
-			[[maybe_unused]] microapp_log_double_cmd_t* cmd = reinterpret_cast<microapp_log_double_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                   = cmd->value;
-			// We automatically cast to int because printf of floats is disabled due to size limitations
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_STR: {
-			[[maybe_unused]] microapp_log_string_cmd_t* cmd = reinterpret_cast<microapp_log_string_cmd_t*>(command);
-			// Enforce a zero-byte at the end before we log
-			uint8_t zeroByteIndex = MAX_MICROAPP_STRING_LENGTH - 1;
-			if (command->length < zeroByteIndex) {
-				zeroByteIndex = command->length;
-			}
-			cmd->str[zeroByteIndex] = 0;
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", cmd->str);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_LOG_ARR: {
-			[[maybe_unused]] microapp_log_array_cmd_t* cmd = reinterpret_cast<microapp_log_array_cmd_t*>(command);
-			if (command->length >= MAX_MICROAPP_ARRAY_LENGTH) {
-				// Truncate, but don't send an error
-				command->length = MAX_MICROAPP_ARRAY_LENGTH;
-			}
-			for (uint8_t i = 0; i < command->length; ++i) {
-				_log(LOCAL_MICROAPP_LOG_LEVEL, false, "0x%x ", (int)cmd->arr[i]);
-			}
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "");
-			break;
-		}
-		default: {
-			LOGi("Unsupported microapp log type: %u", command->type);
-			return ERR_UNKNOWN_TYPE;
+/*
+ * Register a slot for a GPIO pin interrupt.
+ */
+bool MicroappProtocol::registerSoftInterruptSlotGpio(uint8_t pin) {
+	// We register the pin at the first empty slot
+	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
+		if (!_pinIsr[i].registered) {
+			_pinIsr[i].registered = true;
+			_pinIsr[i].pin        = pin;
+			LOGi("Register interrupt slot for microapp pin %i", pin);
+			return true;
 		}
 	}
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd) {
-	// don't do anything
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	switch (pin) {
-		case CS_MICROAPP_COMMAND_PIN_SWITCH: {  // same as DIMMER
-			return handleMicroappPinSwitchCommand(pin_cmd);
-		}
-		case CS_MICROAPP_COMMAND_PIN_GPIO1:
-		case CS_MICROAPP_COMMAND_PIN_GPIO2:
-		case CS_MICROAPP_COMMAND_PIN_GPIO3:
-		case CS_MICROAPP_COMMAND_PIN_GPIO4:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON1:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON2:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON3:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON4:
-		case CS_MICROAPP_COMMAND_PIN_LED1:
-		case CS_MICROAPP_COMMAND_PIN_LED2:
-		case CS_MICROAPP_COMMAND_PIN_LED3:
-		case CS_MICROAPP_COMMAND_PIN_LED4: {
-			CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
-			pin_cmd->pin                      = interruptToDigitalPin(pin_cmd->pin);
-			switch (opcode1) {
-				case CS_MICROAPP_COMMAND_PIN_MODE: return handleMicroappPinSetModeCommand(pin_cmd);
-				case CS_MICROAPP_COMMAND_PIN_ACTION: return handleMicroappPinActionCommand(pin_cmd);
-				default: LOGw("Unknown opcode1"); return ERR_UNKNOWN_OP_CODE;
-			}
-			break;
-		}
-		default: {
-			LOGw("Unknown pin: %i", pin_cmd->pin);
-			return ERR_UNKNOWN_TYPE;
-		}
-	}
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	switch (mode) {
-		case CS_MICROAPP_COMMAND_PIN_WRITE: {
-			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_VALUE_OFF: {
-					LOGi("Turn switch off");
-					event_t event(CS_TYPE::CMD_SWITCH_OFF);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_VALUE_ON: {
-					LOGi("Turn switch on");
-					event_t event(CS_TYPE::CMD_SWITCH_ON);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				default: {
-					LOGw("Unknown switch command");
-					return ERR_UNKNOWN_TYPE;
-				}
-			}
-			break;
-		}
-		default: LOGw("Unknown pin mode / opcode: %u", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
-	}
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	TYPIFY(EVT_GPIO_INIT) gpio;
-	gpio.pin_index                    = pin;
-	gpio.pull                         = 0;
-	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
-	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
-			gpio.pull = 1;
-			// fall-through is on purpose
-		case CS_MICROAPP_COMMAND_PIN_READ: {
-			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_VALUE_RISING:
-					gpio.direction = SENSE;
-					gpio.polarity  = LOTOHI;
-					break;
-				case CS_MICROAPP_COMMAND_VALUE_FALLING:
-					gpio.direction = SENSE;
-					gpio.polarity  = HITOLO;
-					break;
-				case CS_MICROAPP_COMMAND_VALUE_CHANGE:
-					gpio.direction = SENSE;
-					gpio.polarity  = TOGGLE;
-					break;
-				default:
-					gpio.direction = INPUT;
-					gpio.polarity  = NONE;
-					break;
-			}
-			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_PIN_WRITE: {
-			gpio.direction = OUTPUT;
-			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		default: LOGw("Unknown mode"); return ERR_UNKNOWN_TYPE;
-	}
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	LOGd("Clear, set or configure pin %i", pin);
-	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_WRITE: {
-			TYPIFY(EVT_GPIO_WRITE) gpio;
-			gpio.pin_index              = pin;
-			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_VALUE_OFF: {
-					LOGd("Clear GPIO pin");
-					gpio.length = 1;
-					uint8_t buf[1];
-					buf[0]   = 0;
-					gpio.buf = buf;
-					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_VALUE_ON: {
-					LOGd("Set GPIO pin");
-					gpio.length = 1;
-					uint8_t buf[1];
-					buf[0]   = 1;
-					gpio.buf = buf;
-					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				default: LOGw("Unknown switch command"); return ERR_UNKNOWN_TYPE;
-			}
-			break;
-		}
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
-		case CS_MICROAPP_COMMAND_PIN_READ: {
-			// TODO; (note that we do not handle event handler registration here but in SetMode above
-			break;
-		}
-		default: LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
-	}
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappServiceDataCommand(microapp_service_data_cmd_t* cmd) {
-
-	if (cmd->body.dlen > MAX_COMMAND_SERVICE_DATA_LENGTH) {
-		LOGi("Payload size incorrect");
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-
-	TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
-	eventData.version   = 0;  // TODO: define somewhere.
-	eventData.type      = 0;  // TODO: define somewhere.
-	eventData.appUuid   = cmd->body.appUuid;
-	eventData.data.len  = cmd->body.dlen;
-	eventData.data.data = cmd->body.data;
-	event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
-	event.dispatch();
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd) {
-	CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
-	switch (opcode) {
-		case CS_MICROAPP_COMMAND_TWI_INIT: {
-			LOGi("Init i2c");
-			TYPIFY(EVT_TWI_INIT) twi;
-			// no need to write twi.config (is not under control of microapp)
-			event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_TWI_WRITE: {
-			LOGd("Write over i2c to address: 0x%02x", twi_cmd->address);
-			uint8_t bufSize = twi_cmd->length;
-			TYPIFY(EVT_TWI_WRITE) twi;
-			twi.address = twi_cmd->address;
-			twi.buf     = twi_cmd->buf;
-			twi.length  = bufSize;
-			twi.stop    = twi_cmd->stop;
-			event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_TWI_READ: {
-			LOGd("Read from i2c address: 0x%02x", twi_cmd->address);
-
-			// Create a synchronous event to retrieve twi data
-			uint8_t bufSize = twi_cmd->length;
-			TYPIFY(EVT_TWI_READ) twi;
-			twi.address = twi_cmd->address;
-			twi.buf     = twi_cmd->buf;
-			twi.length  = bufSize;
-			twi.stop    = twi_cmd->stop;
-			event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
-
-			// Get data back and prepare for microapp
-			twi_cmd->header.ack = event.result.returnCode;
-			twi_cmd->length     = twi.length;
-			break;
-		}
-		default: LOGw("Unknown i2c opcode: %i", twi_cmd->opcode); return ERR_UNKNOWN_OP_CODE;
-	}
-	return ERR_SUCCESS;
+	LOGw("Could not register interrupt slot for microapp pin %i", pin);
+	return false;
 }
 
 /*
- * We will register a slot for a BLE soft interrupt
+ * Register a slot for a BLE soft interrupt.
  */
 bool MicroappProtocol::registerSoftInterruptSlotBle(uint8_t id) {
 	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
@@ -1044,172 +567,39 @@ bool MicroappProtocol::registerSoftInterruptSlotBle(uint8_t id) {
 	return false;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
-	switch (ble_cmd->opcode) {
-		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			LOGi("Set scan event callback handler");
-#if BUILD_MESHING == 0
-			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-#endif
-			TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT) ble;
-			ble.index = ble_cmd->id;
-			event_t event(CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT, &ble, sizeof(ble));
-			EventDispatcher::getInstance().dispatch(event);
-			bool success        = event.result.returnCode;
-			ble_cmd->header.ack = success;
-			return success ? ERR_SUCCESS : ERR_NO_SPACE;
-		}
-		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
-			LOGi("Start scanning");
-			_microappIsScanning = true;
-			ble_cmd->header.ack = true;
-			break;
-		}
-		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
-			LOGi("Stop scanning");
-			_microappIsScanning = false;
-			ble_cmd->header.ack = true;
-			break;
-		}
-		case CS_MICROAPP_COMMAND_BLE_CONNECT: {
-			LOGi("Set up BLE connection");
-			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
-			std::reverse_copy(ble_cmd->addr, ble_cmd->addr + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
-			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
-			event.dispatch();
-			ble_cmd->header.ack = true;
-			LOGi("BLE command result: %u", event.result.returnCode);
-			return event.result.returnCode;
-		}
-		default: {
-			LOGi("Unknown microapp BLE command opcode: %u", ble_cmd->opcode);
-			return ERR_UNKNOWN_OP_CODE;
-		}
-	}
-	return ERR_SUCCESS;
+void MicroappProtocol::setScanning(bool scanning) {
+	_microappIsScanning = scanning;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t* cmd) {
-	microapp_power_usage_t* commandPayload = &cmd->powerUsage;
-
-	TYPIFY(STATE_POWER_USAGE) powerUsage;
-	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
-
-	commandPayload->powerUsage = powerUsage;
-
-	return ERR_SUCCESS;
-}
-
-/*
- * This queries for a presence event.
+/**
+ * Listen to events from the microapp with respect to initialization (registering soft interrupt service routines) and
+ * get the interrupts for those routines and forward them.
  */
-cs_ret_code_t MicroappProtocol::handleMicroappPresenceCommand(microapp_presence_cmd_t* cmd) {
-
-	microapp_presence_t* microappPresence = &cmd->presence;
-	if (microappPresence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
-		LOGi("Incorrect profileId");
-		return ERR_UNSAFE;
+void MicroappProtocol::handleEvent(event_t& event) {
+	switch (event.type) {
+		case CS_TYPE::EVT_GPIO_INIT: {
+			auto gpio = CS_TYPE_CAST(EVT_GPIO_INIT, event.data);
+			if (gpio->direction == INPUT || gpio->direction == SENSE) {
+				registerSoftInterruptSlotGpio(gpio->pin_index);
+			}
+			break;
+		}
+		case CS_TYPE::EVT_GPIO_UPDATE: {
+			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);
+			softInterruptGpio(gpio->pin_index);
+			break;
+		}
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			auto dev = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
+			onDeviceScanned(dev);
+			break;
+		}
+		case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
+			auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
+			registerSoftInterruptSlotBle(ble->index);
+			break;
+		}
+		default: break;
 	}
-
-	// Obtains presence array
-	presence_t resultBuf;
-	event_t event(CS_TYPE::CMD_GET_PRESENCE);
-	event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resultBuf), sizeof(resultBuf));
-	event.dispatch();
-	if (event.result.returnCode != ERR_SUCCESS) {
-		LOGi("No success, result code: %u", event.result.returnCode);
-		return event.result.returnCode;
-	}
-	if (event.result.dataSize != sizeof(presence_t)) {
-		LOGi("Result is of size %u expected size %u", event.result.dataSize, sizeof(presence_t));
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-
-	microappPresence->presenceBitmask = resultBuf.presence[microappPresence->profileId];
-	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappProtocol::handleMicroappMeshCommand(microapp_mesh_cmd_t* command) {
-	switch (command->opcode) {
-		case CS_MICROAPP_COMMAND_MESH_SEND: {
-			auto cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(command);
-
-			if (cmd->dlen == 0) {
-				LOGi("No message.");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-
-			if (cmd->dlen > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-				LOGi("Message too large: %u > %u", cmd->dlen, MICROAPP_MAX_MESH_MESSAGE_SIZE);
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-
-			TYPIFY(CMD_SEND_MESH_MSG) eventData;
-			bool broadcast = (cmd->stoneId == 0);
-			if (!broadcast) {
-				eventData.idCount   = 1;
-				eventData.targetIds = &(cmd->stoneId);
-			}
-			eventData.flags.flags.broadcast   = broadcast;
-			eventData.flags.flags.reliable    = !broadcast;
-			eventData.flags.flags.useKnownIds = false;
-			eventData.flags.flags.noHops      = false;
-			eventData.type                    = CS_MESH_MODEL_TYPE_MICROAPP;
-			eventData.payload                 = cmd->data;
-			eventData.size                    = cmd->dlen;
-			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
-			event.dispatch();
-			if (event.result.returnCode != ERR_SUCCESS) {
-				LOGi("Failed to send message, return code: %u", event.result.returnCode);
-				return event.result.returnCode;
-			}
-			break;
-		}
-		case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
-			auto cmd = reinterpret_cast<microapp_mesh_read_available_cmd_t*>(command);
-
-			if (!_meshMessageBuffer.isInitialized()) {
-				_meshMessageBuffer.init();
-			}
-
-			// TODO: This assumes nothing will overwrite the buffer
-			cmd->available = !_meshMessageBuffer.empty();
-
-			// TODO: One might want to call callMicroapp here (at least once).
-			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
-			break;
-		}
-		case CS_MICROAPP_COMMAND_MESH_READ: {
-			auto cmd = reinterpret_cast<microapp_mesh_read_cmd_t*>(command);
-
-			if (!_meshMessageBuffer.isInitialized()) {
-				_meshMessageBuffer.init();
-			}
-			if (_meshMessageBuffer.empty()) {
-				LOGi("No message in buffer");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-
-			auto message = _meshMessageBuffer.pop();
-
-			// TODO: This assumes nothing will overwrite the buffer
-			cmd->stoneId     = message.stoneId;
-			cmd->messageSize = message.messageSize;
-			if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-				LOGi("Message with wrong size in buffer");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			memcpy(cmd->message, message.message, message.messageSize);
-
-			// TODO: One might want to call callMicroapp here (at least once).
-			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
-			break;
-		}
-
-		default: {
-			LOGi("Unknown microapp mesh command opcode: %u", command->opcode);
-			return ERR_UNKNOWN_OP_CODE;
-		}
-	}
-	return ERR_SUCCESS;
-}
