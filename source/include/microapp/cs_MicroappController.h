@@ -37,17 +37,17 @@ struct microapp_ble_isr_t {
 };
 
 /**
- * The class MicroappProtocol has functionality to store a second app (and perhaps in the future even more apps) on
+ * The class MicroappController has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
  */
-class MicroappProtocol : public EventListener {
+class MicroappController : public EventListener {
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
-	MicroappProtocol();
-	MicroappProtocol(MicroappProtocol const&);
-	void operator=(MicroappProtocol const&);
+	MicroappController();
+	MicroappController(MicroappController const&);
+	void operator=(MicroappController const&);
 
 	/**
 	 * Limit maximum number of to be registered service routines for the microapp.
@@ -180,8 +180,8 @@ protected:
 	bool stopAfterMicroappCommand(microapp_cmd_t* cmd);
 
 public:
-	static MicroappProtocol& getInstance() {
-		static MicroappProtocol instance;
+	static MicroappController& getInstance() {
+		static MicroappController instance;
 		return instance;
 	}
 

@@ -1,10 +1,9 @@
 /**
- *
- * Microapp protocol.
+ * Microapp command handler.
  *
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: April 4, 2020
+ * Date: March 16, 2022
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -19,7 +18,7 @@
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappCommandHandler.h>
-#include <microapp/cs_MicroappProtocol.h>
+#include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
@@ -466,15 +465,15 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
 			LOGi("Start scanning");
-			MicroappProtocol & protocol = MicroappProtocol::getInstance();
-			protocol.setScanning(true);
+			MicroappController & controller = MicroappController::getInstance();
+			controller.setScanning(true);
 			ble_cmd->header.ack = true;
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
 			LOGi("Stop scanning");
-			MicroappProtocol & protocol = MicroappProtocol::getInstance();
-			protocol.setScanning(false);
+			MicroappController & controller = MicroappController::getInstance();
+			controller.setScanning(false);
 			ble_cmd->header.ack = true;
 			break;
 		}
