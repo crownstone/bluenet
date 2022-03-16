@@ -6,16 +6,16 @@
 enum { WORKING = 1, YIELDING_MICROAPP0 = 2, DONE };
 
 // Get stack pointer
-#define get_sp(p) asm volatile("mov %0, sp" : "=r"(p) : :)
+#define getStackPointer(p) asm volatile("mov %0, sp" : "=r"(p) : :)
 
 // Set stack pointer
-#define set_sp(p) asm volatile("mov sp, %0" : : "r"(p))
+#define setStackPointer(p) asm volatile("mov sp, %0" : : "r"(p))
 
 // We hardcode the stack at the end of the RAM dedicated to the microapp
-stack_params_t* const stack_params = (stack_params_t*)(uintptr_t)(g_RAM_MICROAPP_END);
+stack_params_t* const stackParams = (stack_params_t*)(uintptr_t)(g_RAM_MICROAPP_END);
 
 stack_params_t* getStackParams() {
-	return stack_params;
+	return stackParams;
 }
 
 /*
@@ -23,33 +23,33 @@ stack_params_t* getStackParams() {
  */
 void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg) {
 	// Save parameters before the coroutine stack (in hardcoded area, see above).
-	stack_params->coroutine         = coroutine;
-	stack_params->coroutineFunction = coroutineFunction;
-	stack_params->arg               = arg;
+	stackParams->coroutine         = coroutine;
+	stackParams->coroutineFunction = coroutineFunction;
+	stackParams->arg               = arg;
 	// Store current stack pointer in oldStackPointer.
-	get_sp(stack_params->oldStackPointer);
+	getStackPointer(stackParams->oldStackPointer);
 
 	// Set the stack pointer for the microapp to where we want it.
 	size_t move_down = sizeof(stack_params_t);
-	set_sp(stack_params - move_down);
+	setStackPointer(stackParams - move_down);
 
 	// Save current context (registers) for the microapp.
-	int ret = setjmp(stack_params->coroutine->microapp0Context);
+	int ret = setjmp(stackParams->coroutine->microapp0Context);
 	if (ret == 0) {
 		// We have saved the context for the microapp, but set stack pointer back.
 		// We first continue with bluenet as usual.
-		set_sp(stack_params->oldStackPointer);
+		setStackPointer(stackParams->oldStackPointer);
 		return;
 	}
 
 	// We now come here from the first call to nextCoroutine.
-	// The stack pointer is now again at stack_params - move_down.
+	// The stack pointer is now again at stackParams - move_down.
 
 	// Call the very first function in the microapp. This will in the end yield.
-	(*stack_params->coroutineFunction)(stack_params->arg);
+	(*stackParams->coroutineFunction)(stackParams->arg);
 
 	// We should not end up here. This means that the microapp function actually returns while it should always yield.
-	longjmp(stack_params->coroutine->bluenetContext, DONE);
+	longjmp(stackParams->coroutine->bluenetContext, DONE);
 }
 
 /*
@@ -60,7 +60,7 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
  */
 int nextCoroutine() {
 	// Save current context (registers) for bluenet.
-	coroutine_t* coroutine = stack_params->coroutine;
+	coroutine_t* coroutine = stackParams->coroutine;
 	int ret                = setjmp(coroutine->bluenetContext);
 	if (ret == 0) {
 		// The bluenet registers are saved, fine now to jump to the microapp.
@@ -79,7 +79,7 @@ int nextCoroutine() {
  */
 void yieldCoroutine() {
 	// Save current context (registers) for microapp 0.
-	coroutine_t* coroutine = stack_params->coroutine;
+	coroutine_t* coroutine = stackParams->coroutine;
 	int ret                = setjmp(coroutine->microapp0Context);
 	if (ret == 0) {
 		// Context (registers) have been saved. Jump to bluenet.

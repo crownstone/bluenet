@@ -61,17 +61,11 @@
 extern "C" {
 
 /*
- * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can later
- * be used to get information back and forth between microapp and bluenet.
- */
-coargs_t sharedState;
-
-/*
  * Set arguments for coroutine.
  */
 void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer) {
-	stack_params_t* stack_params = getStackParams();
-	coargs_t* args               = (coargs_t*)stack_params->arg;
+	stack_params_t* stackParams = getStackParams();
+	coroutine_args_t* args      = (coroutine_args_t*)stackParams->arg;
 	switch (coroutineIndex) {
 		case COROUTINE_MICROAPP0: args->io_buffer = io_buffer; break;
 		// potentially more microapps here
@@ -153,7 +147,7 @@ void jumpToAddress(uintptr_t address) {
  * microapp forever. Alternatively, if the function never yields, it will trip the watchdog. If the watchdog is
  * triggered, we might presume that a microapp was the reason for it and disable it.
  *
- * @param[in] void *p                            pointer to a coargs_t struct
+ * @param[in] void *p                            pointer to a coroutine_args_t struct
  */
 void goIntoMicroapp(void* p) {
 
@@ -161,7 +155,7 @@ void goIntoMicroapp(void* p) {
 	LOGi("Call main: %p", &microapp_callback_dummy);
 	microapp_callback_dummy();
 #else
-	coargs_t* coargs = (coargs_t*)p;
+	coroutine_args_t* coargs = (coroutine_args_t*)p;
 	LOGi("Call main: %p", coargs->entry);
 	jumpToAddress(coargs->entry);
 #endif
@@ -216,14 +210,14 @@ MicroappProtocol::MicroappProtocol()
 		, _callCounter(0)
 		, _callbackData(nullptr)
 		, _microappIsScanning(false)
-		, _meshMessageBuffer(MAX_MESH_MESSAGES_BUFFERED) {
+		, _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
 
 	EventDispatcher::getInstance().addListener(this);
 
-	for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
 		_pinIsr[i].pin = 0;
 	}
-	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
+	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		_bleIsr[i].id = 0;
 	}
 }
@@ -293,13 +287,29 @@ uint16_t MicroappProtocol::initMemory() {
 }
 
 /*
+ * Get incoming microapp buffer (from coargs).
+ */
+uint8_t* MicroappProtocol::getInputMicroappBuffer() {
+	uint8_t* payload = sharedState.io_buffer->microapp2bluenet.payload;
+	return payload;
+}
+
+/*
+ * Get outgoing microapp buffer (from coargs).
+ */
+uint8_t* MicroappProtocol::getOutputMicroappBuffer() {
+	uint8_t* payload = sharedState.io_buffer->bluenet2microapp.payload;
+	return payload;
+}
+
+/*
  * Called from cs_Microapp every time tick. The microapp does not set anything in RAM but will only read from RAM and
  * call a handler.
  *
  * There's no load failure detection. When the call fails bluenet hangs and should reboot.
  */
 void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
-	bool call_again = false;
+	bool callAgain = false;
 	_tickCounter++;
 	if (_tickCounter % MICROAPP_LOOP_FREQUENCY != 0) {
 		return;
@@ -309,8 +319,8 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
 	_callbackExecCounter = 0;
 	do {
 		callMicroapp();
-		call_again = retrieveCommand();
-	} while (call_again);
+		callAgain = retrieveCommand();
+	} while (callAgain);
 }
 
 /*
@@ -322,19 +332,22 @@ void MicroappProtocol::tickMicroapp(uint8_t appIndex) {
  * continues. In that case the microapp is called again on the next tick.
  */
 bool MicroappProtocol::retrieveCommand() {
-	uint8_t* payload       = sharedState.io_buffer->microapp2bluenet.payload;
-	microapp_cmd_t* cmd_in = reinterpret_cast<microapp_cmd_t*>(payload);
+	uint8_t* inputBuffer            = getInputMicroappBuffer();
+	microapp_cmd_t* incomingMessage = reinterpret_cast<microapp_cmd_t*>(inputBuffer);
 
 	[[maybe_unused]] static int retrieveCounter = 0;
-	if (cmd_in->cmd != CS_MICROAPP_COMMAND_LOOP_END) {
-		LOGv("Retrieve and handle [%i] command %i (callback %i)", ++retrieveCounter, cmd_in->cmd, cmd_in->callbackCmd);
+	if (incomingMessage->cmd != CS_MICROAPP_COMMAND_LOOP_END) {
+		LOGv("Retrieve and handle [%i] command %i (callback %i)",
+			 ++retrieveCounter,
+			 incomingMessage->cmd,
+			 incomingMessage->callbackCmd);
 	}
-	handleMicroappCommand(cmd_in);
-	bool call_again = !stopAfterMicroappCommand(cmd_in);
-	if (!call_again) {
-		LOGv("Command %i, do not call again", cmd_in->cmd);
+	handleMicroappCommand(incomingMessage);
+	bool callAgain = !stopAfterMicroappCommand(incomingMessage);
+	if (!callAgain) {
+		LOGv("Command %i, do not call again", incomingMessage->cmd);
 	}
-	return call_again;
+	return callAgain;
 }
 
 /*
@@ -373,10 +386,10 @@ bool MicroappProtocol::callbackInProgress() {
 /*
  * Communicate mesh message towards microapp.
  */
-void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t* dev) {
+void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t* bluenetBleDevice) {
 
 #ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
-	if (dev->rssi < -50) {
+	if (bluenetBleDevice->rssi < -50) {
 		return;
 	}
 #endif
@@ -387,13 +400,13 @@ void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t*
 	}
 
 	// Write bluetooth device to buffer
-	uint8_t* payload           = sharedState.io_buffer->bluenet2microapp.payload;
-	microapp_ble_device_t* buf = reinterpret_cast<microapp_ble_device_t*>(payload);
+	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
+	microapp_ble_device_t* microappBleDevice = reinterpret_cast<microapp_ble_device_t*>(outputBuffer);
 
 	bool found                     = false;
 	uint8_t id                     = 0;
 	enum MicroappBleEventType type = BleEventDeviceScanned;
-	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
+	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		if (_bleIsr[i].type == type) {
 			id    = _bleIsr[i].id;
 			found = true;
@@ -405,26 +418,27 @@ void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t*
 		return;
 	}
 
-	if (dev->dataSize > sizeof(buf->data)) {
+	if (bluenetBleDevice->dataSize > sizeof(microappBleDevice->data)) {
 		LOGw("BLE advertisement data too large");
 		return;
 	}
 
-	buf->header.callbackCmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
+	microappBleDevice->header.callbackCmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
 
 	// Allow microapp to map to handler with given id
-	buf->header.id = id;
-	buf->type      = type;
+	microappBleDevice->header.id = id;
+	microappBleDevice->type      = type;
 
 	// Copy address and at the same time convert from little endian to big endian
-	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, buf->addr);
-	buf->rssi = dev->rssi;
+	std::reverse_copy(
+			bluenetBleDevice->address, bluenetBleDevice->address + MAC_ADDRESS_LENGTH, microappBleDevice->addr);
+	microappBleDevice->rssi = bluenetBleDevice->rssi;
 
 	// Copy the data itself
-	buf->dlen = dev->dataSize;
-	memcpy(buf->data, dev->data, dev->dataSize);
+	microappBleDevice->dlen = bluenetBleDevice->dataSize;
+	memcpy(microappBleDevice->data, bluenetBleDevice->data, bluenetBleDevice->dataSize);
 
-	LOGv("Incoming advertisement written to %p", buf);
+	LOGv("Incoming advertisement written to %p", microappBleDevice);
 	writeCallback();
 }
 
@@ -437,10 +451,8 @@ void MicroappProtocol::performCallbackIncomingBLEAdvertisement(scanned_device_t*
  *
  */
 void MicroappProtocol::writeCallback() {
-	uint8_t* data_out                       = sharedState.io_buffer->bluenet2microapp.payload;
-	microapp_cmd_t* buf_out                 = reinterpret_cast<microapp_cmd_t*>(data_out);
-	[[maybe_unused]] uint8_t* data_in       = sharedState.io_buffer->microapp2bluenet.payload;
-	[[maybe_unused]] microapp_cmd_t* buf_in = reinterpret_cast<microapp_cmd_t*>(data_in);
+	uint8_t* outputBuffer           = getOutputMicroappBuffer();
+	microapp_cmd_t* outgoingCommand = reinterpret_cast<microapp_cmd_t*>(outputBuffer);
 
 	if (_callbackExecCounter == MAX_CALLBACKS_WITHIN_A_TICK - 1) {
 		LOGi("Last callback (next one in next tick)");
@@ -451,30 +463,29 @@ void MicroappProtocol::writeCallback() {
 	}
 	_callbackExecCounter++;
 
-	buf_out->ack                   = CS_ACK_BLUENET_MICROAPP_REQUEST;
-	bool call_again                = false;
+	outgoingCommand->ack           = CS_ACK_BLUENET_MICROAPP_REQUEST;
+	bool callAgain                 = false;
 	int8_t repeatCounter           = 0;
 	static int32_t callbackCounter = 0;
 	do {
-		LOGv("Call [%i,%i,%i], within callback %i: (cur=%i)",
+		LOGv("Call [%i,%i,%i], within callback %i",
 			 callbackCounter,
 			 repeatCounter,
-			 buf_out->counter,
-			 buf_out->callbackCmd,
-			 buf_in->cmd);
+			 outgoingCommand->counter,
+			 outgoingCommand->callbackCmd);
 		callMicroapp();
-		bool acked = (buf_out->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK);
+		bool acked = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK);
 		if (acked) {
-			// buf_out->ack = CS_ACK_NONE;
+			// outgoingCommand->ack = CS_ACK_NONE;
 			LOGv("Acked callback");
 		}
-		call_again = retrieveCommand();
+		callAgain = retrieveCommand();
 		if (!acked) {
 			LOGv("Not acked... Give it space");
-			call_again = false;
+			callAgain = false;
 		}
 		repeatCounter++;
-	} while (call_again);
+	} while (callAgain);
 	callbackCounter++;
 }
 
@@ -506,7 +517,7 @@ void MicroappProtocol::callMicroapp() {
  */
 bool MicroappProtocol::registerGpio(uint8_t pin) {
 	// We register the pin at the first empty slot
-	for (int i = 0; i < MAX_PIN_ISR_COUNT; ++i) {
+	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
 		if (!_pinIsr[i].registered) {
 			_pinIsr[i].registered = true;
 			_pinIsr[i].pin        = pin;
@@ -711,7 +722,7 @@ bool MicroappProtocol::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 		_callCounter = 0;
 	}
 	else {
-		if (++_callCounter % MAX_CONSECUTIVE_MESSAGES == 0) {
+		if (++_callCounter % MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES == 0) {
 			_callCounter = 0;
 			LOGv("Stop because we've reached a max # of calls");
 			return true;
@@ -1028,7 +1039,7 @@ cs_ret_code_t MicroappProtocol::handleMicroappTwiCommand(microapp_twi_cmd_t* twi
  * We will register the handler in the class for first empty slot
  */
 bool MicroappProtocol::registerBleCallback(uint8_t id) {
-	for (int i = 0; i < MAX_BLE_ISR_COUNT; ++i) {
+	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		if (!_bleIsr[i].registered) {
 			_bleIsr[i].registered = true;
 			_bleIsr[i].type       = BleEventDeviceScanned;

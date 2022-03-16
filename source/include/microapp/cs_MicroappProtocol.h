@@ -15,21 +15,23 @@ static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SI
  * coroutine context it is convenient if we can immediately yield towards the other context. For this we reserve a bit
  * of space on the stack (apart from stack pointer etc.).
  */
-struct coargs_t {
+struct coroutine_args_t {
 	uintptr_t entry;
 	bluenet_io_buffer_t* io_buffer;
 };
 
-// The number of 8 interrupt service routines per type should be sufficient.
-const uint8_t MAX_PIN_ISR_COUNT = 8;
-const uint8_t MAX_BLE_ISR_COUNT = 8;
-
-struct pin_isr_t {
+/**
+ * Interrupt service routines for pins as registered by the microapp.
+ */
+struct microapp_pin_isr_t {
 	uint8_t pin;
 	bool registered;
 };
 
-struct ble_isr_t {
+/**
+ * Interrupt service routines for bluetooth events as registered by the microapp.
+ */
+struct microapp_ble_isr_t {
 	MicroappBleEventType type;
 	uint8_t id;
 	bool registered;
@@ -55,24 +57,55 @@ private:
 	void operator=(MicroappProtocol const&);
 
 	/**
+	 * Limit maximum number of to be registered service routines for the microapp.
+	 */
+	static const uint8_t MICROAPP_MAX_PIN_ISR_COUNT = 8;
+
+	/**
+	 * Limit maximum number of to be registered service routines for the microapp.
+	 */
+	static const uint8_t MICROAPP_MAX_BLE_ISR_COUNT = 8;
+
+	/**
+	 * Max number of mesh messages that will be queued.
+	 */
+	const uint8_t MICROAPP_MAX_MESH_MESSAGES_BUFFERED = 3;
+
+	/**
+	 * Limit the number of callbacks in a tick (if -1) there is no limit.
+	 */
+	const int8_t MAX_CALLBACKS_WITHIN_A_TICK = 10;
+
+	/**
+	 * Maximum number of soft interrupts in parallel.
+	 */
+	const uint8_t MAX_SOFTINTERRUPTS_IN_PARALLEL = 2;
+
+	/**
+	 * The maximum number of consecutive calls to a microapp.
+	 */
+	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES = 8;
+
+	/**
 	 * Addressees of pin interrupt service routines.
 	 */
-	pin_isr_t _pinIsr[MAX_PIN_ISR_COUNT];
+	microapp_pin_isr_t _pinIsr[MICROAPP_MAX_PIN_ISR_COUNT];
 
 	/**
 	 * Addressees of ble interrupt service routines.
 	 */
-	ble_isr_t _bleIsr[MAX_BLE_ISR_COUNT];
+	microapp_ble_isr_t _bleIsr[MICROAPP_MAX_BLE_ISR_COUNT];
 
 	/**
 	 * Coroutine for microapp.
 	 */
 	coroutine_t _coroutine;
 
-	/**
-	 * The maximum number of consecutive calls to a microapp.
+	/*
+	 * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can
+	 * later be used to get information back and forth between microapp and bluenet.
 	 */
-	const uint8_t MAX_CONSECUTIVE_MESSAGES = 8;
+	coroutine_args_t sharedState;
 
 	/**
 	 * Call counter
@@ -88,11 +121,6 @@ private:
 	 * Flag to indicate whether to forward scanned devices to microapp
 	 */
 	bool _microappIsScanning;
-
-	/**
-	 * Max number of mesh messages that will be queued.
-	 */
-	const uint8_t MAX_MESH_MESSAGES_BUFFERED = 3;
 
 	/**
 	 * Buffer received mesh messages.
@@ -120,16 +148,6 @@ private:
 	 * Callback execute counter
 	 */
 	int8_t _callbackExecCounter;
-
-	/**
-	 * Limit the number of callbacks in a tick (if -1) there is no limit.
-	 */
-	const int8_t MAX_CALLBACKS_WITHIN_A_TICK = 10;
-
-	/**
-	 * Maximum number of soft interrupts in parallel.
-	 */
-	const uint8_t MAX_SOFTINTERRUPTS_IN_PARALLEL = 2;
 
 	/**
 	 * To throttle the ticks themselves.
@@ -186,6 +204,16 @@ protected:
 	 * Load ram information, set by microapp.
 	 */
 	uint16_t interpretRamdata();
+
+	/**
+	 * Get incoming microapp buffer (from coargs).
+	 */
+	uint8_t* getInputMicroappBuffer();
+	
+	/**
+	 * Get outgoing microapp buffer (from coargs).
+	 */
+	uint8_t* getOutputMicroappBuffer();
 
 	/**
 	 * Handle a received mesh message.
