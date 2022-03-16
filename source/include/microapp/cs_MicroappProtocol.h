@@ -77,11 +77,6 @@ private:
 	const int8_t MAX_CALLBACKS_WITHIN_A_TICK = 10;
 
 	/**
-	 * Maximum number of soft interrupts in parallel.
-	 */
-	const uint8_t MAX_SOFTINTERRUPTS_IN_PARALLEL = 2;
-
-	/**
 	 * The maximum number of consecutive calls to a microapp.
 	 */
 	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES = 8;
@@ -130,24 +125,14 @@ private:
 	CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
 
 	/**
-	 * Counter that counts how many callbacks have been received.
+	 * Soft interrupt counter
 	 */
-	uint32_t _callbackReceivedCounter;
+	int8_t _softInterruptCounter;
 
 	/**
-	 * Counter that counts how many callbacks have been executed until the end.
+	 * Number of empty interrupt slots
 	 */
-	uint32_t _callbackEndCounter;
-
-	/**
-	 * Counter that counts how many callbacks have been executed until the end.
-	 */
-	uint32_t _callbackFailCounter;
-
-	/**
-	 * Callback execute counter
-	 */
-	int8_t _callbackExecCounter;
+	int8_t _emptyInterruptSlots;
 
 	/**
 	 * To throttle the ticks themselves.
@@ -168,42 +153,32 @@ protected:
 	/**
 	 * Write the callback.
 	 */
-	void writeCallback();
+	void softInterrupt();
 
 	/**
 	 * Register GPIO pin.
 	 */
-	bool registerGpio(uint8_t pin);
+	bool registerSoftInterruptSlotGpio(uint8_t pin);
 
 	/**
-	 * Register BLE callback.
+	 * Register slot for BLE soft interrupt.
 	 */
-	bool registerBleCallback(uint8_t id);
+	bool registerSoftInterruptSlotBle(uint8_t id);
 
 	/**
-	 * Callback for GPIO events.
+	 * Interrupt microapp with GPIO event.
 	 */
-	void performCallbackGpio(uint8_t pin);
+	void softInterruptGpio(uint8_t pin);
 
 	/**
-	 * Callback BLE.
+	 * Interrupt microapp with new BLE event.
 	 */
-	void performCallbackIncomingBLEAdvertisement(scanned_device_t* dev);
+	void softInterruptBle(scanned_device_t* dev);
 
 	/**
-	 * A callback already in progress.
+	 * A soft interrupt is already in progress.
 	 */
-	bool callbackInProgress();
-
-	/**
-	 * Initialize memory for the microapp.
-	 */
-	uint16_t initMemory();
-
-	/**
-	 * Load ram information, set by microapp.
-	 */
-	uint16_t interpretRamdata();
+	bool softInterruptInProgress();
 
 	/**
 	 * Get incoming microapp buffer (from coargs).

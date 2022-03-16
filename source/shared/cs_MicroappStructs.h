@@ -59,6 +59,15 @@ const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - MICROAPP_PIN_CMD_S
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
 /**
+ * Arguments for the opcode as first argument in the callback from the microapp to bluenet.
+ */
+enum CallbackMicroappOpcode {
+	CS_MICROAPP_CALLBACK_NONE             = 0x00,
+	CS_MICROAPP_CALLBACK_SIGNAL           = 0x01,
+	CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER = 0x02,
+};
+
+/**
  * Acknowledgments from microapp to bluenet or the other way around.
  */
 enum CommandMicroappAck {
@@ -75,22 +84,22 @@ enum CommandMicroappAck {
  * The main opcodes for microapp commands.
  */
 enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_NONE              = 0x00,
-	CS_MICROAPP_COMMAND_LOG               = 0x01,
-	CS_MICROAPP_COMMAND_DELAY             = 0x02,
-	CS_MICROAPP_COMMAND_PIN               = 0x03,
-	CS_MICROAPP_COMMAND_SERVICE_DATA      = 0x04,
-	CS_MICROAPP_COMMAND_TWI               = 0x05,
-	CS_MICROAPP_COMMAND_BLE               = 0x06,
-	CS_MICROAPP_COMMAND_POWER_USAGE       = 0x07,
-	CS_MICROAPP_COMMAND_PRESENCE          = 0x08,
-	CS_MICROAPP_COMMAND_MESH              = 0x09,
-	CS_MICROAPP_COMMAND_SETUP_END         = 0x0A,
-	CS_MICROAPP_COMMAND_LOOP_END          = 0x0B,
-	CS_MICROAPP_COMMAND_BLE_DEVICE        = 0x0C,
-	CS_MICROAPP_COMMAND_CALLBACK_RECEIVED = 0x0D,
-	CS_MICROAPP_COMMAND_CALLBACK_END      = 0x0E,
-	CS_MICROAPP_COMMAND_CALLBACK_FAILURE  = 0x0F,
+	CS_MICROAPP_COMMAND_NONE                    = 0x00,
+	CS_MICROAPP_COMMAND_LOG                     = 0x01,
+	CS_MICROAPP_COMMAND_DELAY                   = 0x02,
+	CS_MICROAPP_COMMAND_PIN                     = 0x03,
+	CS_MICROAPP_COMMAND_SERVICE_DATA            = 0x04,
+	CS_MICROAPP_COMMAND_TWI                     = 0x05,
+	CS_MICROAPP_COMMAND_BLE                     = 0x06,
+	CS_MICROAPP_COMMAND_POWER_USAGE             = 0x07,
+	CS_MICROAPP_COMMAND_PRESENCE                = 0x08,
+	CS_MICROAPP_COMMAND_MESH                    = 0x09,
+	CS_MICROAPP_COMMAND_SETUP_END               = 0x0A,
+	CS_MICROAPP_COMMAND_LOOP_END                = 0x0B,
+	CS_MICROAPP_COMMAND_BLE_DEVICE              = 0x0C,
+	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED = 0x0D,
+	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END      = 0x0E,
+	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR    = 0x0F,
 };
 
 enum CommandMicroappPin {
@@ -182,7 +191,7 @@ struct __attribute__((packed)) bluenet_io_buffer_t {
 	io_buffer_t bluenet2microapp;
 };
 
-typedef uint16_t (*microappCallbackFunc)(bluenet_io_buffer_t*);
+typedef uint16_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffer_t*);
 
 /*
  * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
@@ -193,22 +202,20 @@ typedef uint16_t (*microappCallbackFunc)(bluenet_io_buffer_t*);
 struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 	uint8_t protocol;
 	uint8_t length;
-	microappCallbackFunc microapp_callback;
-	//	uintptr_t microapp_callback;
-	//	uintptr_t coargs_ptr;
+	microappCallbackFunc microappCallback;
 	bool valid;
 };
 
 /**
- * A payload has always a cmd field as opcode. The id can be used for identification, for example useful for callbacks.
- * The ack field can be used for callbacks.
+ * A payload has always a cmd field as opcode. The id can be used for identification, for example useful for soft
+ * interrupts. The ack field can also be used for interrupts.
  */
 struct __attribute__((packed)) microapp_cmd_t {
 	uint8_t cmd;
 	uint8_t id;
 	uint8_t ack;
 	uint8_t prev;
-	uint8_t callbackCmd;
+	uint8_t interruptCmd;
 	uint8_t counter;
 };
 
@@ -425,3 +432,10 @@ struct __attribute__((packed)) microapp_presence_cmd_t {
 	microapp_cmd_t header;
 	microapp_presence_t presence;
 };
+
+struct __attribute__((packed)) microapp_soft_interrupt_cmd_t {
+	microapp_cmd_t header;
+	uint8_t emptyInterruptSlots;
+};
+
+static_assert(sizeof(microapp_soft_interrupt_cmd_t) <= MAX_PAYLOAD);
