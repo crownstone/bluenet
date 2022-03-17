@@ -313,6 +313,7 @@ private:
 	 */
 	void increaseResetCounter();
 
+	// Keep the board config in memory, so other classes can store a pointer to it.
 	boards_config_t _boardsConfig;
 
 	// drivers

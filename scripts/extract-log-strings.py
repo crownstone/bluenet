@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import re
+import traceback
 from enum import Enum
 
 defaultSourceFilesDir = os.path.abspath(f"{os.path.dirname(os.path.abspath(__file__))}/../build/default/CMakeFiles/crownstone.dir/src")
@@ -30,6 +31,11 @@ argParser.add_argument('--outputFile',
                        type=str,
                        default="extracted_logs.json",
                        help='The output file.')
+argParser.add_argument('--verbose',
+                       '-v',
+                       dest="verbose",
+                       action='store_true',
+                       help='Show verbose output')
 args = argParser.parse_args()
 
 class LogType(Enum):
@@ -38,11 +44,13 @@ class LogType(Enum):
     ARRAY = 2
 
 class LogStringExtractor:
-    def __init__(self):
+    def __init__(self, debug=False):
+        self.debugOuput = debug
+
         # if (6 <= 7) { cs_log_args(fileNameHash("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp", sizeof("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp")), 64, 6, true, "cs_mesh_write_cb handle=%u retCode=%u", handle, retCode); };
         self.logPattern = re.compile(".*?cs_log_args\((.*)")
 
-        # if (7 <= 7) { cs_log_array(fileNameHash("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp", sizeof("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp")), 455, 7, true, nrf_mesh_configure_device_uuid_get(), (16), "{", "}", " - ", "0x%02X"); };
+        # if (7 <= 7) { cs_log_array(fileNameHash("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp", sizeof("/home/bluenet-workspace/bluenet/source/src/mesh/cs_MeshCore.cpp")), 455, 7, true, false, nrf_mesh_configure_device_uuid_get(), (16), "{", "}", " - ", "0x%02X"); };
         self.logArrayPattern = re.compile(".*?cs_log_array\((.*)")
 
         self.sourceFilesDir = None
@@ -177,12 +185,13 @@ class LogStringExtractor:
         #  1   456,
         #  2   7,
         #  3   true,
-        #  4   nrf_mesh_configure_device_uuid_get(),
-        #  5   (16),
-        #  6   "[",
-        #  7   "]",
-        #  8   " - ",
-        #  9   "%02X, "
+        #  4   false,
+        #  5   nrf_mesh_configure_device_uuid_get(),
+        #  6   (16),
+        #  7   "[",
+        #  8   "]",
+        #  9   " - ",
+        #  10  "%02X, "
         #  ); };
         # print(f"Line: {line}")
         match = self.logArrayPattern.match(line)
@@ -196,22 +205,29 @@ class LogStringExtractor:
         (endIndex, fileNameHashArgs) = self._getArgs(logArgs[0], len("fileNameHash("))
         # print(fileNameHashArgs)
 
-        fileName = fileNameHashArgs[0][1:-1] # Remove quotes from string
-        fileNameHash = self._getFileNameHash(fileName)
-        lineNumber = int(logArgs[1])
-        # logLevel = int(logArgs[2])
-        # addNewLine = logArgs[3]
-        startFormat = self._removeQuotes(logArgs[6])
-        endFormat = self._removeQuotes(logArgs[7])
-        separationFormat = self._removeQuotes(logArgs[8])
-        elementFormat = None
-        if len(logArgs) > 9:
-            elementFormat = self._removeQuotes(logArgs[9])
+        try:
+            fileName = fileNameHashArgs[0][1:-1] # Remove quotes from string
+            fileNameHash = self._getFileNameHash(fileName)
+            lineNumber = int(logArgs[1])
+            # logLevel = int(logArgs[2])
+            # addNewLine = logArgs[3]
+            # reverse = logArgs[4]
+            startFormat = self._removeQuotes(logArgs[7])
+            endFormat = self._removeQuotes(logArgs[8])
+            separationFormat = self._removeQuotes(logArgs[9])
+            elementFormat = None
+            if len(logArgs) > 10:
+                elementFormat = self._removeQuotes(logArgs[10])
 
-        if fileNameHash not in self.logArrays:
-            self.logArrays[fileNameHash] = {}
-        self.logArrays[fileNameHash][lineNumber] = (startFormat, endFormat, separationFormat, elementFormat)
-        self.fileNames[fileNameHash] = fileName
+            if fileNameHash not in self.logArrays:
+                self.logArrays[fileNameHash] = {}
+            self.logArrays[fileNameHash][lineNumber] = (startFormat, endFormat, separationFormat, elementFormat)
+            self.fileNames[fileNameHash] = fileName
+        except Exception as e:
+            print(f"Failed to parse line: {line}")
+            if self.debugOuput:
+                print(f"Extracted args: {logArgs}")
+                traceback.print_exc()
         pass
 
     def _countBrackets(self, line):
@@ -328,15 +344,28 @@ class LogStringExtractor:
         return hashVal
 
     def _removeQuotes(self, line: str):
-        startIndex = 0
-        endIndex = len(line)
-        if len(line) > 0 and line[0] == '"':
-            startIndex = 1
-        if len(line) > 1 and line[-1] == '"':
-            endIndex = -1
-        return line[startIndex:endIndex]
-
-
+        """
+        Removes quotes that make a string, and concatenates strings.
+        Example: '"This is just an " "example"'
+        Will return: 'This is just an example'
+        """
+        escape = False
+        inQuotes = False
+        result = ""
+        for c in line:
+            if escape:
+                escape = False
+                result += c
+                continue
+            if c == '\\':
+                escape = True
+                continue
+            if c == '"':
+                inQuotes = not inQuotes
+                continue
+            if inQuotes:
+                result += c
+        return result
 
     def _exportToFile(self, outputFileName: str, topDir: str):
         self.fileCleanupPattern = re.compile(f".*?({topDir}.*)")
@@ -380,6 +409,6 @@ class LogStringExtractor:
         with open(outputFileName, 'w') as jsonFile:
             json.dump(output, jsonFile)
 
-parser = LogStringExtractor()
+parser = LogStringExtractor(debug=args.verbose)
 parser.parse(args.sourceFilesDir, args.outputFileName, args.topDir)
 

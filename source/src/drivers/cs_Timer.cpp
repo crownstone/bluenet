@@ -16,7 +16,7 @@ Timer& Timer::getInstance() {
 }
 
 void Timer::init() {
-	LOGi(FMT_INIT, "timer");
+	LOGi(FMT_INIT "timer");
 	uint32_t err_code = app_timer_init();
 	APP_ERROR_CHECK(err_code);
 	APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);

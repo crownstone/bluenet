@@ -26,7 +26,7 @@ void comp_event_callback(CompEvent_t event) {
 void TemperatureGuard::init(const boards_config_t& boardConfig) {
 	State::getInstance().get(CS_TYPE::CONFIG_MAX_CHIP_TEMP, &_maxChipTemp, sizeof(_maxChipTemp));
 
-	_pwmTempInverted = boardConfig.flags.pwmTempInverted;
+	_dimmerTempInverted = boardConfig.flags.dimmerTempInverted;
 
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)TemperatureGuard::staticTick);
 
@@ -35,7 +35,7 @@ void TemperatureGuard::init(const boards_config_t& boardConfig) {
 	TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN) pwmTempThresholdDown;
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp, sizeof(pwmTempThresholdUp));
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown, sizeof(pwmTempThresholdDown));
-	_comp->init(boardConfig.pinAinPwmTemp, pwmTempThresholdDown, pwmTempThresholdUp, nullptr);
+	_comp->init(boardConfig.pinAinDimmerTemp, pwmTempThresholdDown, pwmTempThresholdUp, nullptr);
 
 	_lastChipTempEvent = CS_TYPE::EVT_CHIP_TEMP_OK;
 	_lastPwmTempEvent = CS_TYPE::EVT_DIMMER_TEMP_OK;
@@ -89,7 +89,7 @@ void TemperatureGuard::tick() {
 	// Check PWM temperature, send event if it changed
 	bool compVal = _comp->sample();
 	bool dimmerTempError;
-	if (_pwmTempInverted) {
+	if (_dimmerTempInverted) {
 		dimmerTempError = compVal ? false : true;
 	}
 	else {

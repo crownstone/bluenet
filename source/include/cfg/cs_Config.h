@@ -49,12 +49,7 @@
  *  The scheduler will require a buffer of size:
  *  (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1)
  */
-#if (NORDIC_SDK_VERSION == 16)
-// TODO: only this big because something fills up the scheduler during connection.
-#define SCHED_QUEUE_SIZE                         512
-#else
 #define SCHED_QUEUE_SIZE                         32
-#endif
 
 #define SCHEDULER_QUEUE_ALMOST_FULL              (SCHED_QUEUE_SIZE - 10)
 
@@ -299,18 +294,6 @@
 
 #ifndef STATE_BEHAVIOUR_MASTER_HASH_DEFAULT
 #define STATE_BEHAVIOUR_MASTER_HASH_DEFAULT 0
-#endif
-
-#ifndef STATE_MESH_IV_INDEX_DEFAULT
-#define STATE_MESH_IV_INDEX_DEFAULT 0
-#endif
-
-#ifndef STATE_MESH_IV_STATUS_DEFAULT
-#define STATE_MESH_IV_STATUS_DEFAULT 0 // NET_STATE_IV_UPDATE_NORMAL
-#endif
-
-#ifndef STATE_MESH_SEQ_NUMBER_DEFAULT
-#define STATE_MESH_SEQ_NUMBER_DEFAULT 0
 #endif
 
 #ifndef STATE_HUB_MODE_DEFAULT
