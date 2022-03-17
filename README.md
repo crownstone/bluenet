@@ -1,10 +1,10 @@
 # Bluenet
 
 <p align="center">
-  <a href="https://crownstone.rocks#gh-dark-mode-only">
+  <a href="https://crownstone.rocks#gh-light-mode-only">
     <img src="https://raw.githubusercontent.com/crownstone/bluenet/master/docs/images/crownstone_logo_text_black.svg?sanitize=true" alt="Crownstone Logo in Light Mode" />
   </a>
-  <a href="https://crownstone.rocks#gh-light-mode-only">
+  <a href="https://crownstone.rocks#gh-dark-mode-only">
     <img src="https://raw.githubusercontent.com/crownstone/bluenet/master/docs/images/crownstone_logo_text_white.svg?sanitize=true" alt="Crownstone Logo in Dark Mode" />
   </a>
 </p>
