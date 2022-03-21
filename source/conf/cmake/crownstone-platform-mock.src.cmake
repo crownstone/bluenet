@@ -1,3 +1,7 @@
+###################################################################################################################
+# If a source file cannot be compiled in a test because of platform dependence, a mock file should be defined here.
+###################################################################################################################
+
 message(STATUS "crownstone platform mock source files appended to FOLDER_SOURCE")
 
 #list(APPEND TEST_SOURCE_FILES "${SOURCE_DIR}/time/cs_SystemTime.cpp")
