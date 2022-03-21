@@ -89,6 +89,9 @@ set(TEST_SOURCE_DIR "test")
 # Include crownstone platform and mock
 ######################################
 
+# Source directory
+set(SOURCE_DIR "../source/src")
+
 include(crownstone-application.src)
 include(crownstone-platform-mock.src)
 

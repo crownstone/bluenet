@@ -1,1 +1,1 @@
-MESSAGE(STATUS "crownstone platform dependent source files appended to FOLDER_SOURCE")
+message(STATUS "crownstone platform dependent source files appended to FOLDER_SOURCE")
