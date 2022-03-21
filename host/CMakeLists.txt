@@ -62,7 +62,11 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "$
 
 include_directories( "../source/include" "include" "${CMAKE_BLUENET_BINARY_DIR}/include")
 
+
+##############################
 # Get all includes from nordic
+##############################
+
 include(nordic.src)
 
 set(THIRD_PARTY_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third")
@@ -81,39 +85,26 @@ add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
 set(TEST_SOURCE_DIR "test")
 
+######################################
+# Include crownstone platform and mock
+######################################
 
-### --- register test files for ctest
+include(crownstone-application.src)
+include(crownstone-platform-mock.src)
+
+###############################
+# register test files for ctest
+###############################
 
 enable_testing()
 
 # util function to reduce verbosity
 function(add_crownstone_test testname)
-add_executable(${testname} ${TEST_SOURCE_FILES} "test/${testname}.cpp")
+add_executable(${testname} ${FOLDER_SOURCE} "test/${testname}.cpp")
 add_test(NAME ${testname} COMMAND ${testname})
 install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 endfunction()
 
-# TODO(#180407661, Arend) @ANNE: I'd like to move this out into a separate file. 
-# If we have to include dependencies explicitly it should be as simple as 'all of bluenet', except for a mock layer.
-# That means we basically need 3 lists: 
-#     platform independent bluenet sources, 
-#     platform dependend bluenet sources, and 
-#     mock for platform dependend sources.
-# effectively splitting crownstone.src.cmake into 2 pieces and adding the mock layer as new part.
-
-# Question(Arend) @ANNE: what is CMakeLists.host_target.txt doing in source/conf/cmake? Is that legacy?
-
-list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
-list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_Hash.cpp")
-
-
-list(APPEND TEST_SOURCE_FILES "../source/src/time/cs_SystemTime.cpp")
-list(APPEND TEST_SOURCE_FILES "../source/src/storage/cs_State.cpp")
-list(APPEND TEST_SOURCE_FILES "../source/src/events/cs_EventDispatcher.cpp")
-list(APPEND TEST_SOURCE_FILES "../source/src/events/cs_EventListener.cpp")
-list(APPEND TEST_SOURCE_FILES "../source/src/events/cs_Event.cpp")
-
-# E.G.: SystemTime needs Timer.cpp which needs to be mocked and Event.cpp, which is still host compatible
  
 add_crownstone_test(test_InterleavedBuffer)
 add_crownstone_test(test_HashFletcher32)

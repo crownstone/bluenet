@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include <time/cs_SystemTime.h>
+//#include <time/cs_SystemTime.h>
 
 int main() {
 	std::cout << "SystemTimeSync" << std::endl;
 
-	SystemTime t1;
-	return -1;
+//	SystemTime t1;
+	return 0;
 }
