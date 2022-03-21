@@ -119,6 +119,7 @@ if((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
 	message(STATUS "Run test target. This will include source files as necessary")
 else()
 	include(crownstone.src)
+	include(crownstone-platform.src)
 
 	if(NOT BUILD_MESHING)
 		list(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer.c")
@@ -541,6 +542,7 @@ else()
 		# Make also depend on helper files
 		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.defs.cmake")
 		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.src.cmake")
+		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone-platform.src.cmake")
 
 		set(INCLUDE_ONLY_SECTIONS "")
 

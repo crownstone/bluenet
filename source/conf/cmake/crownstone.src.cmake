@@ -1,4 +1,6 @@
-# List of Crownstone specific code
+# List of Crownstone application source files.
+MESSAGE(STATUS "crownstone application source files appended to FOLDER_SOURCE")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_Behaviour.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourStore.cpp")
