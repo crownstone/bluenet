@@ -113,4 +113,4 @@ add_crownstone_test(test_InterleavedBuffer)
 add_crownstone_test(test_HashFletcher32)
 add_crownstone_test(test_BitmaskVarSize)
 add_crownstone_test(test_SystemTimeSync)
-
+add_crownstone_test(test_EventDispatcher)
