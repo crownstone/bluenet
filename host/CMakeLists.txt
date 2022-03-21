@@ -13,7 +13,9 @@ set(CMAKE_CXX_FLAGS          "${DEFAULT_CXX_FLAGS}"             CACHE STRING "C+
 set(CMAKE_C_FLAGS            "${DEFAULT_C_FLAGS}"               CACHE STRING "C flags" FORCE)
 set(CMAKE_C_AND_CXX_FLAGS    "${DEFAULT_C_AND_CXX_FLAGS}"       CACHE STRING "C and C++ flags")
 
+set(CMAKE_BLUENET_SOURCE_DIR_MOCK ${CMAKE_CURRENT_SOURCE_DIR}/../mock/source)
 set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
+
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
 if(HOST_TARGET)
@@ -60,7 +62,32 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
 
-include_directories( "../source/include" "include" "${CMAKE_BLUENET_BINARY_DIR}/include")
+
+##################################
+# Get all includes from crownstone
+##################################
+
+# these includes don't have the
+include_directories("include" "${CMAKE_BLUENET_BINARY_DIR}/include")
+
+# add include directories relative to the CMAKE_BLUENET_SOURCE_DIR here:
+set(HOST_INCLUDE_DIRS "include")
+
+LIST(APPEND HOST_INCLUDE_DIRS "include/third")
+LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf")
+LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
+
+# loop over all host includes, adding them and adding a mock include with higher priority.
+foreach(cs_include_dir ${HOST_INCLUDE_DIRS})
+	# add the normal include so that everything that isn't mocked doesn't need explicit mocking.
+	message(STATUS "Include Crownstone directory: " ${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir})
+	include_directories("${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir}")
+	
+	# Add mock include with higher prio.
+	# Override header files by adding a mock file in the exact same relative location in the mock folder.
+	message(STATUS "Include Crownstone directory: " ${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir})
+	include_directories(BEFORE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir}")
+endforeach()
 
 
 ##############################
@@ -69,25 +96,13 @@ include_directories( "../source/include" "include" "${CMAKE_BLUENET_BINARY_DIR}/
 
 include(nordic.src)
 
-set(THIRD_PARTY_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third")
-set(THIRD_PARTY_NRF_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf")
-set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
-
-message(STATUS "Include path: ${THIRD_PARTY_INCLUDE_PATH}")
-message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
-message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
-
-include_directories(${THIRD_PARTY_INCLUDE_PATH})
-include_directories(${THIRD_PARTY_NRF_INCLUDE_PATH})
-include_directories(${THIRD_PARTY_NRF_SDK_INCLUDE_PATH})
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
-set(TEST_SOURCE_DIR "test")
 
-######################################
-# Include crownstone platform and mock
-######################################
+##############################################
+# Include crownstone platform and mock sources
+##############################################
 
 # Source directory
 set(SOURCE_DIR "../source/src")
