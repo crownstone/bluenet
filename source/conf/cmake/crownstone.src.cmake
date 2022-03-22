@@ -23,7 +23,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/../shared/ipc/cs_IpcRamData.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Component.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Types.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_COMP.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Dimmer.cpp")
