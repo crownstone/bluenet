@@ -40,7 +40,7 @@ extern "C" {
  */
 
 // Change to LOGd to log the interrupt levels.
-#define LOGInterruptLevel LOGnone
+#define LOGInterruptLevel LOGvv
 
 
 
@@ -202,7 +202,7 @@ void SocHandler::handleEventDecoupled(uint32_t event) {
 
 
 void BleHandler::handleEvent(const ble_evt_t* event) {
-	LOGInterruptLevel("handleEvent int=%u", CsUtils::getInterruptLevel());
+	LOGInterruptLevel("handleEvent int=%u event=%u", CsUtils::getInterruptLevel(), event->header.evt_id);
 	switch (event->header.evt_id) {
 		case BLE_GAP_EVT_ADV_REPORT: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT

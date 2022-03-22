@@ -351,6 +351,9 @@ else()
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/assertion_handler_weak.c")
 
 		list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/app_timer/app_timer_mesh.c")
+		if(MESH_SDK_VERSION_MAJOR EQUAL 5)
+			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/app_timer/app_timer_workaround.c")
+		endif()
 		
 		if(MESH_MEM_BACKEND STREQUAL "stdlib")
 			list(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/mesh_mem_stdlib.c")

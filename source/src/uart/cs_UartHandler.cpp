@@ -16,18 +16,12 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-extern "C" {
-#include "log.h"
-}
-#endif
-
-#define LOGUartHandlerDebug LOGnone
+#define LOGUartHandlerDebug LOGvv
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
-#define LOGUartHandlerRtt(fmt, ...) __LOG(LOG_SRC_APP, LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
+#define LOGUartHandlerRtt LOGi
 #else
-#define LOGUartHandlerRtt(fmt, ...)
+#define LOGUartHandlerRtt LOGvv
 #endif
 
 void handle_msg(void * data, uint16_t size) {
@@ -56,11 +50,6 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
 	_writeBuffer = new uint8_t[UART_TX_BUFFER_SIZE];
 	_encryptionBuffer = new uint8_t[UART_TX_ENCRYPTION_BUFFER_SIZE];
-
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-	__LOG_INIT(LOG_SRC_APP, LOG_LEVEL_INFO, LOG_CALLBACK_DEFAULT);
-	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "----- UartHandler init -----\n");
-#endif
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_stoneId, sizeof(_stoneId));
 

@@ -28,35 +28,35 @@ SetupService::SetupService() :
 }
 
 void SetupService::createCharacteristics() {
-	LOGi(FMT_SERVICE_INIT, "Setup");
+	LOGi(FMT_SERVICE_INIT "Setup");
 
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
 	_controlPacketAccessor = new ControlPacketAccessor<>();
 	_controlPacketAccessor->assign(writeBuf.data, writeBuf.len);
 	addControlCharacteristic(writeBuf.data, writeBuf.len, SETUP_CONTROL_UUID, SETUP);
-	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
+	LOGi(FMT_CHAR_ADD STR_CHAR_CONTROL);
 
 	cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
 	_resultPacketAccessor = new ResultPacketAccessor<>();
 	_resultPacketAccessor->assign(readBuf.data, readBuf.len);
 	addResultCharacteristic(readBuf.data, readBuf.len, SETUP_RESULT_UUID, SETUP);
-	LOGi(FMT_CHAR_ADD, STR_CHAR_RESULT);
+	LOGi(FMT_CHAR_ADD STR_CHAR_RESULT);
 
 	addMacAddressCharacteristic();
-	LOGi(FMT_CHAR_ADD, STR_CHAR_MAC_ADDRESS);
+	LOGi(FMT_CHAR_ADD STR_CHAR_MAC_ADDRESS);
 
 	addSetupKeyCharacteristic(_keyBuffer, sizeof(_keyBuffer));
-	LOGi(FMT_CHAR_ADD, STR_CHAR_SETUP_KEY);
+	LOGi(FMT_CHAR_ADD STR_CHAR_SETUP_KEY);
 
 	addSessionDataCharacteristic(readBuf.data, readBuf.len, SETUP);
-	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_DATA);
+	LOGi(FMT_CHAR_ADD STR_CHAR_SESSION_DATA);
 
 	updatedCharacteristics();
 }
 
 void SetupService::addMacAddressCharacteristic() {
 	if (_macAddressCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_MAC_ADDRESS);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_MAC_ADDRESS);
 		return;
 	}
 	sd_ble_gap_addr_get(&_myAddr);
@@ -75,7 +75,7 @@ void SetupService::addMacAddressCharacteristic() {
 
 void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size) {
 	if (_setupKeyCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SETUP_KEY);
+		LOGe(FMT_CHAR_EXISTS STR_CHAR_SETUP_KEY);
 		return;
 	}
 	_setupKeyCharacteristic = new Characteristic<buffer_ptr_t>();

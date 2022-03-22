@@ -15,6 +15,10 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <vector>
 
+/**
+ * These strings end up in the firmware, even with binary logging.
+ * So keep them short.
+ */
 constexpr const char* operationModeName(OperationMode const & mode) {
     switch(mode) {
 		case OperationMode::OPERATION_MODE_SETUP:
@@ -22,26 +26,26 @@ constexpr const char* operationModeName(OperationMode const & mode) {
 		case OperationMode::OPERATION_MODE_DFU:
 			return "DFU";
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
-			return "FACTORY_RESET";
+			return "RESET";
 		case OperationMode::OPERATION_MODE_NORMAL:
 			return "NORMAL";
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
-			return "UNINITIALIZED";
+			return "UNINIT";
     }
     // should never be reached
-    return "Unknown mode!";
+    return "UNKNOWN";
 }
 
 constexpr int ValidMode(OperationMode const & mode) {
-    switch(mode) {
-	case OperationMode::OPERATION_MODE_SETUP:
-	case OperationMode::OPERATION_MODE_DFU:
-	case OperationMode::OPERATION_MODE_FACTORY_RESET:
-	case OperationMode::OPERATION_MODE_NORMAL:
-	case OperationMode::OPERATION_MODE_UNINITIALIZED:
-	    return 1;
-    }
-    return 0;
+	switch(mode) {
+		case OperationMode::OPERATION_MODE_SETUP:
+		case OperationMode::OPERATION_MODE_DFU:
+		case OperationMode::OPERATION_MODE_FACTORY_RESET:
+		case OperationMode::OPERATION_MODE_NORMAL:
+		case OperationMode::OPERATION_MODE_UNINITIALIZED:
+			return 1;
+	}
+	return 0;
 }
 
 // TODO: what to do when for invalid operation mode?

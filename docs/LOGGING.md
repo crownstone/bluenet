@@ -57,7 +57,11 @@ To generate the file with log strings, first compile the code, and then run `ext
 
 The generated file with log strings will end up in the `build/default` dir.
 
-To read the logs you need to install [bluenet-lib-logs](#https://github.com/crownstone/bluenet-lib-logs/). You can run the client through:
+To read the logs you need to install [bluenet-lib-logs](https://github.com/crownstone/bluenet-lib-logs/).
+
+    python3 -m pip install bluenet_logs
+
+You can run the client through:
 
     make uart_binary_client
 

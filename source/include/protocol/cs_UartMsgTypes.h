@@ -80,6 +80,7 @@ struct __attribute__((__packed__)) uart_msg_log_common_header_t {
 	uint8_t logLevel; // SERIAL_VERBOSE, SERIAL_DEBUG, etc.
 	struct __attribute__((packed)) {
 		bool newLine : 1; // Whether this log should end with a new line.
+		bool reverse : 1; // Whether to print in reverse (arrays only).
 	} flags;
 };
 
