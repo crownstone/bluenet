@@ -28,6 +28,7 @@ endif()
 
 add_compile_definitions("NRF52832_XXAA")
 
+# add paths to our custom cmake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
@@ -44,9 +45,6 @@ load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
 
 # These should come from a CMakeBuild.config.default file
 add_compile_definitions("SERIAL_VERBOSITY=${SERIAL_VERBOSITY}")
-
-# On debug print all these macros
-#message(STATUS "Config list: ${CONFIG_LIST}")
 
 message(STATUS "Configure cs_Git.cpp file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_BLUENET_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
@@ -80,12 +78,12 @@ LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
 # loop over all host includes, adding them and adding a mock include with higher priority.
 foreach(cs_include_dir ${HOST_INCLUDE_DIRS})
 	# add the normal include so that everything that isn't mocked doesn't need explicit mocking.
-	message(STATUS "Include Crownstone directory: " ${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir})
+	message(STATUS "Add include directory: " ${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir})
 	include_directories("${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir}")
 	
 	# Add mock include with higher prio.
 	# Override header files by adding a mock file in the exact same relative location in the mock folder.
-	message(STATUS "Include Crownstone directory: " ${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir})
+	message(STATUS "Add mock include directory: " ${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir})
 	include_directories(BEFORE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir}")
 endforeach()
 
@@ -96,14 +94,11 @@ endforeach()
 
 include(nordic.src)
 
-
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
-
-
-##############################################
-# Include crownstone platform and mock sources
-##############################################
+#################################################
+# Include crownstone application and mock sources
+#################################################
 
 # Source directory
 set(SOURCE_DIR "../source/src")
@@ -124,7 +119,7 @@ add_test(NAME ${testname} COMMAND ${testname})
 install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 endfunction()
 
- 
+# actual test definitions
 add_crownstone_test(test_InterleavedBuffer)
 add_crownstone_test(test_HashFletcher32)
 add_crownstone_test(test_BitmaskVarSize)
