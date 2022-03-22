@@ -120,7 +120,6 @@ enable_testing()
 # util function to reduce verbosity
 function(add_crownstone_test testname)
 add_executable(${testname} ${FOLDER_SOURCE} "test/${testname}.cpp")
-target_compile_options(${testname} PRIVATE -save-temps=obj)
 add_test(NAME ${testname} COMMAND ${testname})
 install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 endfunction()
