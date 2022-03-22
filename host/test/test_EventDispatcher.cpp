@@ -5,8 +5,6 @@
 #include <events/cs_EventListener.h>
 
 #include <util/cs_Error.h>
-#include <typeinfo>
-
 
 
 class TestListener : public EventListener {
