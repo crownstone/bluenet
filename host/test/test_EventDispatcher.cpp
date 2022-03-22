@@ -16,6 +16,7 @@ class TestListener : public EventListener {
 	public:
 
 	TestListener(std::string name) : _name(name) {}
+
 	virtual void handleEvent(event_t & event) override {
 		printf("handle event in %s\n", _name.c_str());
 		_receivedEvent = true;
