@@ -1,6 +1,6 @@
 # Developer Guide
 
-For syntax see the separate [code style document](/docs/CODE_STYLE.md).
+For syntax see the separate [code style document](../docs/CODE_STYLE.md).
 
 ## Embedded development
 
