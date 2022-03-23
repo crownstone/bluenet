@@ -79,3 +79,8 @@ To mock the file `./source/${FOLDER}/${SUBFOLDER}/${PLATORMDEPENDENT_SOURCE}.cpp
 That's all, `/host/CMakeLists.txt` takes care of including the mock file you have just defined.
 
 
+## Mocked NRF files
+
+When CMake is configured with `COMPILE_FOR_HOST=1` , an external project is added to the build to provide a mocked NRF sdk.
+This is pulled from https://github.com/mrquincle/nrf5_sdk and the project name is set to `NORDIC_HOST_SDK_TARGET`. 
+
