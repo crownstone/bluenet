@@ -69,3 +69,12 @@ jobs:
       - name: Finish up
         run: |
           echo "🍏 This job's status is ${{ job.status }}."
+	markdown-link-check:
+		runs-on: ubuntu-latest
+		steps:
+		- uses: actions/checkout@master
+		- uses: gaurav-nelson/github-action-markdown-link-check@v1
+		  with:
+		    use-quiet-mode: 'yes'
+		    folder-path: 'docs/'
+		    max-depth: -1
