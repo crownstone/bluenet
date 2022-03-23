@@ -15,7 +15,7 @@ These are meant to be broadcasted by phones all the time.
 
 The packet that the phone should advertise to send a background broadcast.
 
-![Background broadcast packet](../docs/diagrams/background_broadcast_packet.png)
+![Background broadcast packet](../diagrams/background_broadcast_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -32,7 +32,7 @@ Either [v0](#background-broadcast-data-v0) or [v1](#background-broadcast-data-v1
 
 #### Background broadcast data v0
 
-![Background broadcast data v0](../docs/diagrams/background_broadcast_data_v0.png)
+![Background broadcast data v0](../diagrams/background_broadcast_data_v0.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -42,7 +42,7 @@ uint16 [] | Payload | 32 | Encrypted [payload](#background-broadcast-payload), u
 
 #### Background broadcast data v1
 
-![Background broadcast data v1](../docs/diagrams/background_broadcast_data_v1.png)
+![Background broadcast data v1](../diagrams/background_broadcast_data_v1.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -52,7 +52,7 @@ uint16 | reserved | 16 | Reserved for future use, should be 0 for now.
 
 #### Background broadcast payload
 
-![Background broadcast payload](../docs/diagrams/background_broadcast_payload.png)
+![Background broadcast payload](../diagrams/background_broadcast_payload.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -82,7 +82,7 @@ These are meant to be broadcasted by phones for specific commands, like switchin
 
 The packet that the phone should advertise to send a command broadcast.
 
-![Command broadcast packet](../docs/diagrams/command_broadcast_packet.png)
+![Command broadcast packet](../diagrams/command_broadcast_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -95,7 +95,7 @@ uint64[] | 128bit service | 16 | Single 128 bit service UUID, which is used as [
 
 ## Command broadcast header
 
-![Command broadcast header](../docs/diagrams/command_broadcast_header.png)
+![Command broadcast header](../diagrams/command_broadcast_header.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -115,7 +115,7 @@ uint16 | RC5 payload | 14 | Last 14 bits of second block of [encrypted RC5 paylo
 
 #### RC5 broadcast payload
 
-![RC5 broadcast payload](../docs/diagrams/rc5_broadcast_payload.png)
+![RC5 broadcast payload](../diagrams/rc5_broadcast_payload.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -128,7 +128,7 @@ uint8 | Flags | 3 | [Flags](#background-broadcast-flags).
 
 ## Command broadcast payload
 
-![Command broadcast payload](../docs/diagrams/command_broadcast_payload.png)
+![Command broadcast payload](../diagrams/command_broadcast_payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -149,7 +149,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 
 ##### Multi switch short list packet
 
-![Multi switch short list](../docs/diagrams/multi_switch_short_list.png)
+![Multi switch short list](../diagrams/multi_switch_short_list.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -159,7 +159,7 @@ uint 8 | Count | 1 | Number of valid entries.
 
 ##### Multi switch short entry
 
-![Multi switch short entry](../docs/diagrams/multi_switch_short_entry.png)
+![Multi switch short entry](../diagrams/multi_switch_short_entry.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -168,7 +168,7 @@ uint 8 | [Switch value](PROTOCOL.md#switch-command-value) | 1 | The switch value
 
 ##### Set time packet
 
-![Set time packet](../docs/diagrams/broadcast_set_time_packet.png)
+![Set time packet](../diagrams/broadcast_set_time_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -179,7 +179,7 @@ uint 24 | Sunset | 3 | Seconds after midnight that the sun sets.
 
 ##### Set time flags
 
-![Set time flags](../docs/diagrams/broadcast_set_time_flags.png)
+![Set time flags](../diagrams/broadcast_set_time_flags.png)
 
 Bit | Name |  Description
 --- | --- | ---
@@ -190,7 +190,7 @@ Bit | Name |  Description
 
 ##### Behaviour settings
 
-![Behaviour settings packet](../docs/diagrams/broadcast_behaviour_settings_packet.png)
+![Behaviour settings packet](../diagrams/broadcast_behaviour_settings_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -199,7 +199,7 @@ uint 8[] | Reserved | 7 | Reserved for future use, should be 0 for now.
 
 ##### Behaviour settings flags
 
-![Behaviour settings packet](../docs/diagrams/behaviour_settings_flags.png)
+![Behaviour settings packet](../diagrams/behaviour_settings_flags.png)
 
 Bit | Name |  Description
 --- | --- | ---
@@ -208,7 +208,7 @@ Bit | Name |  Description
 
 ##### Update tracked device packet
 
-![Update tracked device packet](../docs/diagrams/update_tracked_device_packet.png)
+![Update tracked device packet](../diagrams/update_tracked_device_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---

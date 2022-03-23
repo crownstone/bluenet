@@ -164,7 +164,7 @@ Type | Name | Length | Description
 
 #### Behaviour payload
 
-![Behaviour payload](../docs/diagrams/behaviour-payload.png)
+![Behaviour payload](../diagrams/behaviour-payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -173,7 +173,7 @@ uint8_t[] | Data | ... | Type dependent
 
 #### Switch behaviour
 
-![Switch behaviour](../docs/diagrams/switch-behaviour.png)
+![Switch behaviour](../diagrams/switch-behaviour.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -186,7 +186,7 @@ uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Current
 
 #### Twilight behaviour
 
-![Twilight behaviour](../docs/diagrams/twilight-behaviour.png)
+![Twilight behaviour](../diagrams/twilight-behaviour.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -206,7 +206,7 @@ If that is the case, a temporary extension for the behaviour is created which is
 by the Extension Presence and the Until time replaced by the Extension Until time. This temporary rule will be destroyed after the Extension Until time
 expires. If the extension end condition timeout is set to 0, the temporary behaviour will be destroyed as soon as the presencecondition is no longer met.
 
-![Smart timer](../docs/diagrams/smart-timer.png)
+![Smart timer](../diagrams/smart-timer.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -215,7 +215,7 @@ Type | Name | Length | Description
 
 #### Behaviour end condition
 
-![End Condition](../docs/diagrams/behaviour-end-condition.png)
+![End Condition](../diagrams/behaviour-end-condition.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -241,7 +241,7 @@ uint8 | IndexLast | 1 (padded with 0x00)
 
 For each behaviour individually, a hash can be calculated as well, similar to the [master hash](#behaviour-master-hash).
 
-![Index and behaviour hash](../docs/diagrams/behaviour-index-and-behaviour-hash.png)
+![Index and behaviour hash](../diagrams/behaviour-index-and-behaviour-hash.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -251,7 +251,7 @@ uint32 | Behaviour hash | 4 | The hash of the behaviour at this index. Generated
 
 #### Time difference
 
-![Time difference](../docs/diagrams/time-difference.png)
+![Time difference](../diagrams/time-difference.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -259,7 +259,7 @@ int32 | Time payload | 4 | Signed difference in seconds since a known-from-conte
 
 #### Time of day
 
-![Time of day](../docs/diagrams/time-of-day.png)
+![Time of day](../diagrams/time-of-day.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -268,7 +268,7 @@ uint8 | Base time |  1 | <ol start="0"><li>Midnight </li><li>Sunrise </li><li>Su
 
 #### Day of week bitmask
 
-![Day of week](../docs/diagrams/day-of-week-bitmask.png)
+![Day of week](../diagrams/day-of-week-bitmask.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -279,7 +279,7 @@ uint8 | Bitmask | 1 | 0: sunday - 6: saturday. 7: must be 0.
 Given that for each room it is known if there are users present in that room or not, a Presence Description
 evaluates to 'true' or 'false'. It can be used to implement behaviours that take current presence into account.
 
-![Presence description](../docs/diagrams/presence-description.png)
+![Presence description](../diagrams/presence-description.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -297,4 +297,4 @@ Main essence of the design is that there are multiple ways that a use can operat
 
 Storing behaviours and Twilights will require additional logic in order to ensure synchronisation across different devices/phones. All communication from and to host devices regarding Behaviours and Twilights is extracted into a Store object, that takes care of this matter. The corresponding handler object can access the store to query the active Behaviours/Twilights whenever necessary through a static reference.
 
-![Behaviour handler overview](../docs/diagrams/behaviourhandler-overview.svg)
+![Behaviour handler overview](../diagrams/behaviourhandler-overview.svg)

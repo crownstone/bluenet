@@ -98,7 +98,7 @@ Get a summary of all filters currently on the Crownstone and some extra metadata
 
 #### Get filter summaries result packet
 
-![Filter summaries packet](../docs/diagrams/asset_filter_summaries_packet.png)
+![Filter summaries packet](../diagrams/asset_filter_summaries_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -121,7 +121,7 @@ Command to upload a filter in chunks. All chunks will be merged by the Crownston
 
 #### Upload filter packet
 class
-![Upload filter packet](../docs/diagrams/asset_filter_upload_packet.png)
+![Upload filter packet](../diagrams/asset_filter_upload_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -147,7 +147,7 @@ Removes the filter with given filter ID.
 
 #### Remove filter packet
 
-![Remove filter packet](../docs/diagrams/asset_filter_remove_packet.png)
+![Remove filter packet](../diagrams/asset_filter_remove_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -167,7 +167,7 @@ Commit the changes that were made.
 
 #### Commit filter packet
 
-![Commit filter packet](../docs/diagrams/asset_filter_commit_packet.png)
+![Commit filter packet](../diagrams/asset_filter_commit_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -188,7 +188,7 @@ Result codes:
 ### Filter summary
 A summary of a filter.
 
-![Filter summary packet](../docs/diagrams/asset_filter_summary_packet.png)
+![Filter summary packet](../diagrams/asset_filter_summary_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -202,7 +202,7 @@ uint32 | Filter CRC | 4 | The CRC-32 of the [filter](#filter-packet).
 
 ### Filter packet
 
-![Filter packet](../docs/diagrams/asset_filter_packet.png)
+![Filter packet](../diagrams/asset_filter_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -212,7 +212,7 @@ uint8[] | Filter data |  | Byte representation of the filter, format depends on 
 
 ### Filter metadata
 
-![Filter metadata packet](../docs/diagrams/asset_filter_metadata_packet.png)
+![Filter metadata packet](../diagrams/asset_filter_metadata_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -249,7 +249,7 @@ Bit | Name | Description
 
 ### Exact match filter data
 
-![Exact match filter data](../docs/diagrams/exact_match_filter_data.png)
+![Exact match filter data](../diagrams/exact_match_filter_data.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -299,7 +299,7 @@ Before explaining the advertisement selection, let's first have a look at the da
 ### BLE advertisement
 A BLE advertisement has the following data:
 
-![BLE advertisement](../docs/diagrams/ble_adv_packet.png)
+![BLE advertisement](../diagrams/ble_adv_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -311,7 +311,7 @@ uint8[] | MAC address | 6 | The MAC address.
 
 #### AD field
 
-![BLE advertisement data field](../docs/diagrams/ble_adv_data_packet.png)
+![BLE advertisement data field](../diagrams/ble_adv_data_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
