@@ -11,18 +11,17 @@ DOCS_DIR = "../docs/"
 DIR = "diagrams/"
 GEN_DIR = DOCS_DIR + DIR
 FILENAMES = [DOCS_DIR + F for F in [
-	"PROTOCOL.md",
-	"BEHAVIOUR.md",
-	"SERVICE_DATA.md",
+	"protocol/PROTOCOL.md",
+	"protocol/BEHAVIOUR.md",
+	"protocol/SERVICE_DATA.md",
 	"SERVICE_DATA_DEPRECATED.md",
-	"BROADCAST_PROTOCOL.md",
-	"UART_PROTOCOL.md",
-	"MESH_PROTOCOL.md",
-	"IPC.md",
+	"protocol/BROADCAST_PROTOCOL.md",
+	"protocol/UART_PROTOCOL.md",
+	"protocol/MESH_PROTOCOL.md",
+	"protocol/IPC.md",
 	"MESH.md",
 	"BLUETOOTH.md",
 	"MICROAPP.md",
-	"ASSET_FILTER_STORE.md"
 ]]
 
 fontPath = DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"

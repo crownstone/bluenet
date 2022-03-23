@@ -5,7 +5,7 @@
 
 Each IPC RAM item will have the following data:
 
-![IPC item](../docs/diagrams/ipc_item_packet.png)
+![IPC item](../diagrams/ipc_item_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -38,7 +38,7 @@ Each packet will be 24 bytes or smaller.
 The bootloader can communicate with the bluenet firmware through a struct at a fixed location in RAM that sets e.g. 
 version information. This can be read over the air as well.
 
-![Bootloader info packet](../docs/diagrams/bootloader_info.png)
+![Bootloader info packet](../diagrams/bootloader_info.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------

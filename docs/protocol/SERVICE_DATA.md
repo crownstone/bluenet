@@ -3,7 +3,7 @@
 
 The service data contains the state of the Crownstone.
 
-This only documents the latest service data protocol. The old versions are kept up in a separate [document](SERVICE_DATA_DEPRECATED.md).
+This only documents the latest service data protocol. The old versions are kept up in a separate [document](../SERVICE_DATA_DEPRECATED.md).
 
 # Service data header
 The first byte of the service data determines how to parse the remaining bytes.
@@ -17,7 +17,7 @@ uint 8[] | Data |  | Remaining data, length depends on type.
 
 Type | Packet
 ---- | ---
-0-5  | Deprecated, see this [document](SERVICE_DATA_DEPRECATED.md)
+0-5  | Deprecated, see this [document](../SERVICE_DATA_DEPRECATED.md)
 6    | [Device type + data](#device-type-and-setup-service-data). Advertised when in setup mode.
 7    | [Device type + data](#device-type-and-encrypted-service-data). Advertised when in normal mode.
 

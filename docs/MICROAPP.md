@@ -177,7 +177,7 @@ In the microapp code this is available through the `Wire` class.
 
 ## Microapp upload protocol
 
-The protocol to upload microapps can be found in the [protocol](PROTOCOL.md) doc.
+The protocol to upload microapps can be found in the [protocol](protocol/PROTOCOL.md) doc.
 
 ## Microapp binary format
 

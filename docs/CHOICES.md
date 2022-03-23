@@ -110,7 +110,7 @@ On the other hand, the state of less Crownstones will fit in a message, so if to
 
 Assumption: the crownstones clocks are synchronized (on the second). This should be the case when the clocks are regularly (daily?) set by the phone via the mesh.
 
-The proposal is to add timestamps to [state items](PROTOCOL.md#state-mesh-item) on the mesh message, as well as timestamps to the [advertisement](PROTOCOL.md#scan-response-servicedata-packet).
+The proposal is to add timestamps to [state items](protocol/PROTOCOL.md#state-mesh-item) on the mesh message, as well as timestamps to the [advertisement](protocol/PROTOCOL.md#scan-response-servicedata-packet).
 
 The advertised timestamp can be used to synchronize phones (they know their offset with the crownstones).
 
