@@ -146,6 +146,7 @@ void jumpToAddress(uintptr_t address) {
 	void* ptr = (void*)address;
 	LOGi("Jump to address: %p", ptr);
 	goto* ptr;
+	LOGi("Shouldn't end up here");
 #endif
 }
 
@@ -166,7 +167,7 @@ void goIntoMicroapp(void* p) {
 	microappCallbackDummy();
 #else
 	coroutine_args_t* coargs = (coroutine_args_t*)p;
-	LOGi("Call main: %p", coargs->entry);
+	LOGi("Within coroutine, call main: %p", coargs->entry);
 	jumpToAddress(coargs->entry);
 #endif
 	// The coroutine should never return. Incorrectly written microapp!
@@ -179,10 +180,7 @@ void goIntoMicroapp(void* p) {
  * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
-MicroappController::MicroappController()
-		: EventListener()
-		, _callCounter(0)
-		, _microappIsScanning(false) {
+MicroappController::MicroappController() : EventListener(), _callCounter(0), _microappIsScanning(false) {
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -192,6 +190,8 @@ MicroappController::MicroappController()
 	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		_bleIsr[i].id = 0;
 	}
+
+	LOGi("Microapp end is at %p", g_RAM_MICROAPP_END);
 }
 
 /*
@@ -235,6 +235,21 @@ cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr
 	return ERR_SUCCESS;
 }
 
+/**
+ * Clear memory. Should be done in ResetHandler, but we don't want to rely on it.
+ *
+ * TODO: If this is actually necessary, also check if .data is actually properly copied.
+ * TODO: This should be initialized per microapp.
+ */
+uint16_t MicroappController::initMemory(uint8_t appIndex) {
+	LOGi("Init memory: clear 0x%p to 0x%p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
+	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
+		uint32_t* const val = (uint32_t*)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
+		*val                = 0;
+	}
+	return ERR_SUCCESS;
+}
+
 /*
  * Gets the first instruction for the microapp (this is written in its header). We correct for thumb and check its
  * boundaries. Then we call it from a coroutine context and expect it to yield.
@@ -243,6 +258,8 @@ cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr
  */
 void MicroappController::callApp(uint8_t appIndex) {
 	LOGi("Call microapp #%i", appIndex);
+
+	initMemory(appIndex);
 
 	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
 	LOGi("Microapp: start at %p", address);
@@ -316,7 +333,7 @@ bool MicroappController::retrieveCommand() {
 			 incomingMessage->cmd,
 			 incomingMessage->interruptCmd);
 	}
-	MicroappCommandHandler & microappCommandHandler = MicroappCommandHandler::getInstance();
+	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
 	microappCommandHandler.handleMicroappCommand(incomingMessage);
 	bool callAgain = !stopAfterMicroappCommand(incomingMessage);
 	if (!callAgain) {
@@ -329,7 +346,7 @@ bool MicroappController::retrieveCommand() {
  * A GPIO callback towards the microapp.
  */
 void MicroappController::softInterruptGpio(uint8_t pin) {
-	MicroappCommandHandler & microappCommandHandler = MicroappCommandHandler::getInstance();
+	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
 	if (microappCommandHandler.softInterruptInProgress()) {
 		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
 		return;
@@ -358,7 +375,7 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 	}
 #endif
 
-	MicroappCommandHandler & microappCommandHandler = MicroappCommandHandler::getInstance();
+	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
 	if (microappCommandHandler.softInterruptInProgress()) {
 		LOGv("Callback in progress, ignore scanned device event");
 		return;
@@ -602,4 +619,3 @@ void MicroappController::handleEvent(event_t& event) {
 		default: break;
 	}
 }
-

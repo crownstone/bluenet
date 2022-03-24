@@ -33,7 +33,7 @@ private:
 	 * TODO: Find a way in which we can also remove this state variable from this handler class. Perhaps an
 	 * EVT_MICROAPP_EMPTY_INTERRUPT_SLOTS_AVAILABLE event.
 	 */
-	int8_t _emptyInterruptSlots;
+	int8_t _emptyInterruptSlots = MICROAPP_MAX_MESH_MESSAGES_BUFFERED;
 
 	/**
 	 * Buffer received mesh messages.

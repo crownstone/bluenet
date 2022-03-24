@@ -182,10 +182,16 @@ enum MicroappBleEventType {
 	BleEventDisconnected  = 0x03,
 };
 
+/**
+ * A single buffer (can be either input or output).
+ */
 struct __attribute__((packed)) io_buffer_t {
 	uint8_t payload[MAX_PAYLOAD];
 };
 
+/**
+ * Combined input and output buffer.
+ */
 struct __attribute__((packed)) bluenet_io_buffer_t {
 	io_buffer_t microapp2bluenet;
 	io_buffer_t bluenet2microapp;
@@ -362,12 +368,14 @@ static_assert(sizeof(microapp_mesh_read_available_cmd_t) <= MAX_PAYLOAD);
 
 /**
  * Struct for microapp mesh read commands
+ *
+ * stoneId 0 is for broadcasted messages
  */
 struct __attribute__((packed)) microapp_mesh_read_cmd_t {
 	microapp_mesh_cmd_t mesh_header;
-	uint8_t stoneId;                                  // Target stone ID, or 0 for broadcast.
-	uint8_t messageSize;                              // Actual message size.
-	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];  // Message buffer.
+	uint8_t stoneId;
+	uint8_t dlen;
+	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
 };
 
 static_assert(sizeof(microapp_mesh_read_cmd_t) <= MAX_PAYLOAD);

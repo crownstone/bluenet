@@ -28,10 +28,8 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-
 MicroappCommandHandler::MicroappCommandHandler()
-		: EventListener()
-		, _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
+		: EventListener(), _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
 
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -51,7 +49,7 @@ int MicroappCommandHandler::interruptToDigitalPin(int interrupt) {
  * for new interrupts. If there are no slots left, we don't bother sending them a new interrupt.
  */
 bool MicroappCommandHandler::softInterruptInProgress() {
-	return _emptyInterruptSlots > 0;
+	return _emptyInterruptSlots < 1;
 }
 
 /*
@@ -465,14 +463,14 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
 			LOGi("Start scanning");
-			MicroappController & controller = MicroappController::getInstance();
+			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(true);
 			ble_cmd->header.ack = true;
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
 			LOGi("Stop scanning");
-			MicroappController & controller = MicroappController::getInstance();
+			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(false);
 			ble_cmd->header.ack = true;
 			break;
@@ -599,13 +597,13 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			auto message = _meshMessageBuffer.pop();
 
 			// TODO: This assumes nothing will overwrite the buffer
-			cmd->stoneId     = message.stoneId;
-			cmd->messageSize = message.messageSize;
+			cmd->stoneId = message.stoneId;
+			cmd->dlen    = message.messageSize;
 			if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
 				LOGi("Message with wrong size in buffer");
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			memcpy(cmd->message, message.message, message.messageSize);
+			memcpy(cmd->data, message.message, message.messageSize);
 
 			// TODO: One might want to call callMicroapp here (at least once).
 			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
@@ -646,7 +644,6 @@ void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
 	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
 	_meshMessageBuffer.push(bufferedMessage);
 }
-
 
 /**
  * Listen to events from bluenet in which the implement buffers those events and their contents on the bluenet side.

@@ -191,6 +191,11 @@ public:
 	void setIpcRam();
 
 	/**
+	 * Initialize memory.
+	 */
+	uint16_t initMemory(uint8_t appIndex);
+
+	/**
 	 * Actually run the app.
 	 */
 	void callApp(uint8_t appIndex);
@@ -209,5 +214,4 @@ public:
 	 * Receive events (for example for i2c)
 	 */
 	void handleEvent(event_t& event);
-
 };

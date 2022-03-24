@@ -82,10 +82,11 @@ void startHFClock() {
 
 	// Start the external high frequency crystal
 	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+	NRF_CLOCK->TASKS_HFCLKSTART    = 1;
 
 	// Wait for the external oscillator to start up
-	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {
+	}
 	LOGd("HF clock started");
 }
 
@@ -163,38 +164,39 @@ void on_exit(void) {
 	LOGf("PROGRAM TERMINATED");
 }
 
-
 void handleZeroCrossing() {
 	PWM::getInstance().onZeroCrossingInterrupt();
 }
 
 /************************************************* cs_Crownstone impl *************************************************/
 
-Crownstone::Crownstone(boards_config_t& board) :
-	_boardsConfig(board),
+Crownstone::Crownstone(boards_config_t& board)
+		: _boardsConfig(board)
+		,
 #if BUILD_MEM_USAGE_TEST == 1
-	_memTest(board),
+		_memTest(board)
+		,
 #endif
-	_mainTimerId(NULL),
-	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
-{
+		_mainTimerId(NULL)
+		, _operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED) {
 	// TODO: can be replaced by: APP_TIMER_DEF(_mainTimerId); Though that makes _mainTimerId a static variable.
-	_mainTimerData = { {0} };
-	_mainTimerId = &_mainTimerData;
+	_mainTimerData = {{0}};
+	_mainTimerId   = &_mainTimerData;
 
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 
-	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
+	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as
+	// well.
 	this->listen();
-	_stack = &Stack::getInstance();
-	_bleCentral = &BleCentral::getInstance();
+	_stack             = &Stack::getInstance();
+	_bleCentral        = &BleCentral::getInstance();
 	_crownstoneCentral = new CrownstoneCentral();
-	_advertiser = &Advertiser::getInstance();
-	_timer = &Timer::getInstance();
-	_storage = &Storage::getInstance();
-	_state = &State::getInstance();
-	_commandHandler = &CommandHandler::getInstance();
-	_factoryReset = &FactoryReset::getInstance();
+	_advertiser        = &Advertiser::getInstance();
+	_timer             = &Timer::getInstance();
+	_storage           = &Storage::getInstance();
+	_state             = &State::getInstance();
+	_commandHandler    = &CommandHandler::getInstance();
+	_factoryReset      = &FactoryReset::getInstance();
 
 	_scanner = &Scanner::getInstance();
 #if BUILD_MESHING == 1
@@ -206,7 +208,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		_temperatureGuard = &TemperatureGuard::getInstance();
-		_powerSampler = &PowerSampling::getInstance();
+		_powerSampler     = &PowerSampling::getInstance();
 	}
 
 #if BUILD_TWI == 1
@@ -371,7 +373,7 @@ void Crownstone::initDrivers1() {
 		// Set switch state to on, as that's the most likely and preferred state of the switch.
 		TYPIFY(STATE_SWITCH_STATE) switchState;
 		switchState.state.dimmer = 0;
-		switchState.state.relay = 1;
+		switchState.state.relay  = 1;
 		_state->set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 	}
 
@@ -384,7 +386,6 @@ void Crownstone::initDrivers1() {
 	LOGi(FMT_INIT "encryption");
 	ConnectionEncryption::getInstance().init();
 	KeysAndAccess::getInstance().init();
-
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		LOGi(FMT_INIT "switch");
@@ -552,12 +553,17 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
 			cs_result_t result;
-			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_with_counter_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
+			CommandHandler::getInstance().handleCommand(
+					CS_CONNECTION_PROTOCOL_VERSION,
+					CTRL_CMD_GOTO_DFU,
+					cs_data_t(),
+					cmd_source_with_counter_t(CS_CMD_SOURCE_INTERNAL),
+					ADMIN,
+					result);
 			_advertiser->setNormalTxPower();
 			break;
 		}
-		default:
-			_advertiser->setNormalTxPower();
+		default: _advertiser->setNormalTxPower();
 	}
 
 	// Enable AES encryption.
@@ -588,7 +594,7 @@ void Crownstone::setName() {
 	_advertiser->setDeviceName(name);
 }
 
-void Crownstone::startOperationMode(const OperationMode & mode) {
+void Crownstone::startOperationMode(const OperationMode& mode) {
 	// TODO: should only be needed in normal mode.
 	_behaviourStore.listen();
 	_presenceHandler.init();
@@ -740,11 +746,11 @@ void Crownstone::increaseResetCounter() {
 
 void Crownstone::tick() {
 	updateHeapStats();
-	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
+	if (_tickCount % (60 * 1000 / TICK_INTERVAL_MS) == 0) {
 		printLoadStats();
 	}
 
-	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
+	if (_tickCount % (500 / TICK_INTERVAL_MS) == 0) {
 		TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
 		_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
 	}
@@ -789,7 +795,7 @@ void Crownstone::run() {
 	}
 }
 
-void Crownstone::handleEvent(event_t & event) {
+void Crownstone::handleEvent(event_t& event) {
 
 	switch (event.type) {
 		case CS_TYPE::EVT_STORAGE_INITIALIZED:
@@ -833,7 +839,7 @@ void Crownstone::handleEvent(event_t & event) {
 			}
 			minFree = SCHED_QUEUE_SIZE - app_sched_queue_utilization_get();
 			memcpy(event.result.buf.data, &minFree, sizeof(minFree));
-			event.result.dataSize = sizeof(minFree);
+			event.result.dataSize   = sizeof(minFree);
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
@@ -844,7 +850,7 @@ void Crownstone::handleEvent(event_t & event) {
 				break;
 			}
 			memcpy(event.result.buf.data, &_resetReason, sizeof(_resetReason));
-			event.result.dataSize = sizeof(_resetReason);
+			event.result.dataSize   = sizeof(_resetReason);
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
@@ -863,7 +869,7 @@ void Crownstone::handleEvent(event_t & event) {
 			gpregret.index = index;
 			gpregret.value = _gpregret[index];
 			memcpy(event.result.buf.data, &(gpregret), sizeof(gpregret));
-			event.result.dataSize = sizeof(gpregret);
+			event.result.dataSize   = sizeof(gpregret);
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
@@ -926,8 +932,8 @@ void printBootloaderInfo() {
 	bluenet_ipc_bootloader_data_t bootloaderData;
 	uint8_t size = sizeof(bootloaderData);
 	uint8_t dataSize;
-	uint8_t *buf = (uint8_t*)&bootloaderData;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
+	uint8_t* buf = (uint8_t*)&bootloaderData;
+	int retCode  = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
 	if (retCode != IPC_RET_SUCCESS) {
 		LOGw("No IPC data found, error = %i", retCode);
 		return;
@@ -937,14 +943,14 @@ void printBootloaderInfo() {
 		return;
 	}
 	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
-			bootloaderData.protocol,
-			bootloaderData.dfu_version,
-			bootloaderData.build_type);
+		 bootloaderData.protocol,
+		 bootloaderData.dfu_version,
+		 bootloaderData.build_type);
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
-			bootloaderData.major,
-			bootloaderData.minor,
-			bootloaderData.patch,
-			bootloaderData.prerelease);
+		 bootloaderData.major,
+		 bootloaderData.minor,
+		 bootloaderData.patch,
+		 bootloaderData.prerelease);
 }
 
 /**********************************************************************************************************************
@@ -956,7 +962,9 @@ void printBootloaderInfo() {
 
 int main() {
 	// this enabled the hard float, without it, we get a hardfault
-	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
+	SCB->CPACR |= (3UL << 20) | (3UL << 22);
+	__DSB();
+	__ISB();
 
 	atexit(on_exit);
 
