@@ -69,12 +69,17 @@ jobs:
       - name: Finish up
         run: |
           echo "🍏 This job's status is ${{ job.status }}."
-	markdown-link-check:
-		runs-on: ubuntu-latest
-		steps:
-		- uses: actions/checkout@master
-		- uses: gaurav-nelson/github-action-markdown-link-check@v1
-		  with:
-		    use-quiet-mode: 'yes'
-		    folder-path: 'docs/'
-		    max-depth: -1
+  markdown-link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@master
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+        folder-path: 'docs/'
+        max-depth: -1
+      - name: Finish up
+        run: |
+          echo "🍏 This job's status is ${{ job.status }}."
