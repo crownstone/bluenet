@@ -78,8 +78,8 @@ jobs:
       - uses: gaurav-nelson/github-action-markdown-link-check@v1
         with:
           use-quiet-mode: 'yes'
-        folder-path: 'docs/'
-        max-depth: -1
+          folder-path: 'docs/'
+          max-depth: -1
       - name: Finish up
         run: |
           echo "🍏 This job's status is ${{ job.status }}."
