@@ -472,7 +472,10 @@ void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 			break;
 		}
 		case Operation::READ: {
-			ble_central_read_result_t result = {.retCode = retCode, .data = cs_data_t()};
+			ble_central_read_result_t result = {
+					.retCode = retCode,
+					.data    = cs_data_t(),
+			};
 			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 			break;
 		}
