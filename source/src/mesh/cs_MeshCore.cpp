@@ -76,9 +76,15 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 	_log(SERIAL_DEBUG, false, "cs_mesh_write_cb handle=%u retCode=%u data=", handle, retCode);
 	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
 	switch (retCode) {
-		case ERR_SUCCESS:
-		case ERR_SUCCESS_NO_CHANGE: return NRF_SUCCESS;
-		default: return retCode;
+		case ERR_SUCCESS: {
+			[[fallthrough]];
+		}
+		case ERR_SUCCESS_NO_CHANGE: {
+			return NRF_SUCCESS;
+		}
+		default: {
+			return retCode;
+		}
 	}
 }
 
@@ -89,8 +95,12 @@ static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_s
 	_log(SERIAL_DEBUG, false, "cs_mesh_read_cb handle=%u retCode=%u data=", handle, retCode);
 	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
 	switch (retCode) {
-		case ERR_SUCCESS: return NRF_SUCCESS;
-		default: return retCode;
+		case ERR_SUCCESS: {
+			return NRF_SUCCESS;
+		}
+		default: {
+			return retCode;
+		}
 	}
 }
 
@@ -100,8 +110,12 @@ static uint32_t cs_mesh_erase_cb(uint16_t handle) {
 	cs_ret_code_t retCode = State::getInstance().remove(type, 0);
 	LOGd("cs_mesh_erase_cb handle=%u retCode=%u", handle, retCode);
 	switch (retCode) {
-		case ERR_SUCCESS: return NRF_SUCCESS;
-		default: return retCode;
+		case ERR_SUCCESS: {
+			return NRF_SUCCESS;
+		}
+		default: {
+			return retCode;
+		}
 	}
 }
 #endif  // MESH_PERSISTENT_STORAGE == 2
