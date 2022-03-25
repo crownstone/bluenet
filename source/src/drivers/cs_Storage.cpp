@@ -680,11 +680,6 @@ void Storage::initSearch() {
 	_currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
-// ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, bool & result) {
-//	fds_record_desc_t record_desc;
-//	return exists(file_id, recordKey, record_desc, result);
-//}
-
 /**
  * Check if a record exists.
  * Warns when it's found multiple times, but doesn't delete them. That would require to make a copy of the first found
