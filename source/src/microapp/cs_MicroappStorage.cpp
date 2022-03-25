@@ -19,7 +19,7 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
-#include <microapp/cs_MicroappProtocol.h>
+#include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
@@ -71,6 +71,7 @@ MicroappStorage::MicroappStorage() {
 cs_ret_code_t MicroappStorage::init() {
 	uint32_t nrfCode;
 	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, nullptr);
+	LOGMicroappInfo("init addr=0x%08X", nrf_microapp_storage.start_addr);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			// * @retval  NRF_SUCCESS         If initialization was successful.

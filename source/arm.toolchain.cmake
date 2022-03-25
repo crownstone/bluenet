@@ -159,8 +159,13 @@ ENDFOREACH()
 
 # Only from nRF52 onwards we have a coprocessor for floating point operations
 IF(NRF_DEVICE_FAMILY MATCHES NRF52)
+	MESSAGE(STATUS "Enable hardware floating point support")
 	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -mcpu=cortex-m4")
 	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -mfloat-abi=hard -mfpu=fpv4-sp-d16")
+	
+	# The following is disabled due to size constraints, don't use %f in plain-text logging
+	MESSAGE(STATUS "Plain-text log (printf) will not support floats due to size limitations")
+	#SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -u _printf_float")
 ELSE()
 	MESSAGE(STATUS "Unknown hardware support for floating point ops")
 ENDIF()
