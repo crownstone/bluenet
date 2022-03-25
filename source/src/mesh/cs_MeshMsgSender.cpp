@@ -141,15 +141,8 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(
 		case CS_CMD_SOURCE_TYPE_ENUM: {
 			switch (source.source.id) {
 				case CS_CMD_SOURCE_CONNECTION: {
-					//				case CS_CMD_SOURCE_UART: {
 					LOGMeshModelInfo("Source connection: set high transmission count");
 					transmissions = CS_MESH_RELIABILITY_HIGH;
-					// Keep using unreliable for now, as reliable will be handled 1 by 1 instead of interleaved.
-					//					LOGMeshModelInfo("Source connection or uart: use acked msg");
-					//					item.reliable = true;
-					//					item.numIds = 1;
-					//					item.metaData.transmissionsOrTimeout = 0;
-					//					item.stoneIdsPtr = (stone_id_t*) &(switchItem->id);
 					break;
 				}
 				default: break;
