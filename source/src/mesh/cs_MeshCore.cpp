@@ -39,6 +39,8 @@ extern "C" {
 #error "Mesh key size doesn't match encryption key size"
 #endif
 
+#define ENABLE_MESH_PROVISIONING 0
+
 static void meshEventHandler(const nrf_mesh_evt_t* p_evt);
 
 /*
@@ -503,21 +505,30 @@ uint16_t MeshCore::getUnicastAddress() {
 	return _ownAddress;
 }
 
+void MeshCore::provision() {
+#if ENABLE_MESH_PROVISIONING == 1
+	uint32_t retCode;
+	static const uint8_t static_auth_data[NRF_MESH_KEY_SIZE] = STATIC_AUTH_DATA;
+	mesh_provisionee_start_params_t prov_start_params;
+	prov_start_params.p_static_data    = static_auth_data;
+	prov_start_params.prov_complete_cb = provisioning_complete_cb;
+	prov_start_params.prov_device_identification_start_cb = device_identification_start_cb;
+	prov_start_params.prov_device_identification_stop_cb = NULL;
+	prov_start_params.prov_abort_cb = provisioning_aborted_cb;
+	prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
+	prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Server example";
+	retCode = mesh_provisionee_prov_start(&prov_start_params);
+	APP_ERROR_CHECK(retCode);
+#endif
+}
+
 void MeshCore::start() {
 	uint32_t retCode;
-	//	if (!_isProvisioned) {
-	//		static const uint8_t static_auth_data[NRF_MESH_KEY_SIZE] = STATIC_AUTH_DATA;
-	//		mesh_provisionee_start_params_t prov_start_params;
-	//		prov_start_params.p_static_data    = static_auth_data;
-	//		prov_start_params.prov_complete_cb = provisioning_complete_cb;
-	//		prov_start_params.prov_device_identification_start_cb = device_identification_start_cb;
-	//		prov_start_params.prov_device_identification_stop_cb = NULL;
-	//		prov_start_params.prov_abort_cb = provisioning_aborted_cb;
-	////		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
-	//		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Server example";
-	//		retCode = mesh_provisionee_prov_start(&prov_start_params);
-	//		APP_ERROR_CHECK(retCode);
-	//	}
+#if ENABLE_MESH_PROVISIONING == 1
+	if (!_isProvisioned) {
+		provision();
+	}
+#endif
 	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
 	_log(SERIAL_DEBUG, false, "Device UUID: ");
@@ -680,9 +691,6 @@ void MeshCore::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
 			TYPIFY(EVT_STORAGE_WRITE_DONE)* evtData = (TYPIFY(EVT_STORAGE_WRITE_DONE)*)event.data;
 			switch (evtData->type) {
-					//			case CS_TYPE::STATE_MESH_IV_INDEX: {
-					//				break;
-					//			}
 				case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5: {
 					TYPIFY(STATE_MESH_SEQ_NUMBER_V5) seqNumber;
 					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER_V5, &seqNumber, sizeof(seqNumber));
