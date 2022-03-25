@@ -329,13 +329,20 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			executeStateIntentionUpdate(newValue, source);
 			return;
 		}
-		case CS_SWITCH_CMD_VAL_BEHAVIOUR: overrideState.reset(); break;
-		case CS_SWITCH_CMD_VAL_SMART_ON: overrideState = value; break;
-		default:
+		case CS_SWITCH_CMD_VAL_BEHAVIOUR: {
+			overrideState.reset();
+			break;
+		}
+		case CS_SWITCH_CMD_VAL_SMART_ON: {
+			overrideState = value;
+			break;
+		}
+		default: {
 			if (value <= CS_SWITCH_CMD_VAL_FULLY_ON) {
 				overrideState = value;
 			}
 			break;
+		}
 	}
 
 	// Don't allow override reset in updateState, it has just been requested to be set to `value`
