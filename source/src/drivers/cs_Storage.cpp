@@ -148,9 +148,6 @@ cs_ret_code_t Storage::read(cs_state_data_t& stateData) {
 		if (csRetCode == ERR_SUCCESS) {
 			done = true;
 		}
-		//		if (done) {
-		//			break;
-		//		}
 	}
 	if (done) {
 		return ERR_SUCCESS;
@@ -189,9 +186,6 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t& stateData) {
 		if (csRetCode == ERR_SUCCESS) {
 			done = true;
 		}
-		//		if (done) {
-		//			break;
-		//		}
 	}
 	if (done) {
 		return ERR_SUCCESS;
