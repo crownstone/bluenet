@@ -697,7 +697,6 @@ ret_code_t Storage::exists(cs_file_id_t fileId, uint16_t recordKey, fds_record_d
 	while (fds_record_find(fileId, recordKey, &record_desc, &_findToken) == NRF_SUCCESS) {
 		if (result) {
 			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
-			//			fds_record_delete(&record_desc);
 		}
 		if (!result) {
 			result = true;
