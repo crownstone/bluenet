@@ -743,20 +743,41 @@ bool Storage::isBusy() {
 }
 
 /**
- * Returns cs_ret_code_t given a ret_code_t from FDS.
+ * Returns cs_ret_code_t given a ret_code_t from FDS. Note how some different return codes are mapped to the same error
+ * code.
  */
 cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
 	switch (code) {
-		case NRF_SUCCESS: return ERR_SUCCESS;
-		case FDS_ERR_NOT_FOUND: return ERR_NOT_FOUND;
-		case FDS_ERR_NOT_INITIALIZED: return ERR_NOT_INITIALIZED;
-		case FDS_ERR_NO_SPACE_IN_FLASH: return ERR_NO_SPACE;
-		case FDS_ERR_NO_SPACE_IN_QUEUES:
-		case FDS_ERR_BUSY: return ERR_BUSY;
-		case FDS_ERR_UNALIGNED_ADDR:
-		case FDS_ERR_INVALID_ARG:
-		case FDS_ERR_NULL_ARG: return ERR_WRONG_PARAMETER;
-		default: return ERR_UNSPECIFIED;
+		case NRF_SUCCESS: {
+			return ERR_SUCCESS;
+		}
+		case FDS_ERR_NOT_FOUND: {
+			return ERR_NOT_FOUND;
+		}
+		case FDS_ERR_NOT_INITIALIZED: {
+			return ERR_NOT_INITIALIZED;
+		}
+		case FDS_ERR_NO_SPACE_IN_FLASH: {
+			return ERR_NO_SPACE;
+		}
+		case FDS_ERR_NO_SPACE_IN_QUEUES: {
+			[[fallthrough]];
+		}
+		case FDS_ERR_BUSY: {
+			return ERR_BUSY;
+		}
+		case FDS_ERR_UNALIGNED_ADDR: {
+			[[fallthrough]];
+		}
+		case FDS_ERR_INVALID_ARG: {
+			[[fallthrough]];
+		}
+		case FDS_ERR_NULL_ARG: {
+			return ERR_WRONG_PARAMETER;
+		}
+		default: {
+			return ERR_UNSPECIFIED;
+		}
 	}
 }
 
