@@ -104,12 +104,12 @@ private:
 	 * To throttle the ticks themselves.
 	 */
 	uint8_t _tickCounter;
-	
+
 	/**
 	 * Maps digital pins to interrupts.
 	 */
 	int digitalPinToInterrupt(int pin);
-	
+
 	/**
 	 * Flag to indicate whether to forward scanned devices to microapp.
 	 */
@@ -160,7 +160,7 @@ protected:
 	 * Get incoming microapp buffer (from coargs).
 	 */
 	uint8_t* getInputMicroappBuffer();
-	
+
 	/**
 	 * Get outgoing microapp buffer (from coargs).
 	 */

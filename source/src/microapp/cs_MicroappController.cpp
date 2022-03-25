@@ -437,7 +437,7 @@ void MicroappController::softInterrupt() {
 	microapp_cmd_t* outgoingCommand = reinterpret_cast<microapp_cmd_t*>(outputBuffer);
 
 	if (_softInterruptCounter == MAX_CALLBACKS_WITHIN_A_TICK - 1) {
-		LOGi("Last callback (next one in next tick)");
+		LOGv("Last callback (next one in next tick)");
 	}
 
 	if (_softInterruptCounter == MAX_CALLBACKS_WITHIN_A_TICK) {

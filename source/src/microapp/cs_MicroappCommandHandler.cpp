@@ -116,9 +116,8 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
-			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGv("Soft interrupt end for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			// Empty slots cannot be used, it is old info from the interrupt's starting state
+			LOGv("Soft interrupt end for %i", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
@@ -147,13 +146,13 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 
 cs_ret_code_t MicroappCommandHandler::handleMicroappLogCommand(microapp_log_cmd_t* command) {
 
-	if (command->length == 0) {
-		LOGi("Incorrect length for log message");
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
 	__attribute__((unused)) bool newLine = false;
 	if (command->option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
 		newLine = true;
+	}
+	if (command->length == 0) {
+		_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", "");
+		return ERR_SUCCESS;
 	}
 	switch (command->type) {
 		case CS_MICROAPP_COMMAND_LOG_CHAR: {
@@ -551,8 +550,11 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			TYPIFY(CMD_SEND_MESH_MSG) eventData;
 			bool broadcast = (cmd->stoneId == 0);
 			if (!broadcast) {
+				LOGi("Send mesh message to %i", cmd->stoneId);
 				eventData.idCount   = 1;
 				eventData.targetIds = &(cmd->stoneId);
+			} else {
+				LOGi("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
 			eventData.flags.flags.reliable    = !broadcast;
@@ -578,6 +580,11 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 
 			// TODO: This assumes nothing will overwrite the buffer
 			cmd->available = !_meshMessageBuffer.empty();
+			if (cmd->available) {
+				LOGi("Available mesh messages");
+			} else {
+				LOGv("No mesh messages available");
+			}
 
 			// TODO: One might want to call callMicroapp here (at least once).
 			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
@@ -595,6 +602,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			}
 
 			auto message = _meshMessageBuffer.pop();
+			LOGi("Pop message for microapp");
 
 			// TODO: This assumes nothing will overwrite the buffer
 			cmd->stoneId = message.stoneId;
@@ -624,10 +632,13 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
  * TODO: This should actually be implemented differently.
  */
 void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
+
+#ifdef FILTER_MESH_MESSAGES
 	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
+		LOGi("Mesh message received, but not for microapp");
 		return;
 	}
-
+#endif
 	if (_meshMessageBuffer.full()) {
 		LOGi("Dropping message, buffer is full");
 		return;
@@ -638,6 +649,7 @@ void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
 		return;
 	}
 
+	LOGi("Mesh message received, store in buffer");
 	microapp_buffered_mesh_message_t bufferedMessage;
 	bufferedMessage.stoneId     = event.srcAddress;
 	bufferedMessage.messageSize = event.msg.len;
