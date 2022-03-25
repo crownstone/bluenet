@@ -108,53 +108,140 @@ static uint32_t cs_mesh_erase_cb(uint16_t handle) {
 
 static void meshEventHandler(const nrf_mesh_evt_t* p_evt) {
 	switch (p_evt->type) {
-		case NRF_MESH_EVT_MESSAGE_RECEIVED:
+		case NRF_MESH_EVT_MESSAGE_RECEIVED: {
 			LOGMeshVerbose("NRF_MESH_EVT_MESSAGE_RECEIVED");
-			_log(SERIAL_VERY_VERBOSE, false, "src=%u data:", p_evt->params.message.p_metadata->source);
+			_log(SERIAL_VERY_VERBOSE, false, "src=%u data: {", p_evt->params.message.p_metadata->source);
 			_logArray(SERIAL_VERY_VERBOSE, true, p_evt->params.message.p_buffer, p_evt->params.message.length);
 			break;
-		case NRF_MESH_EVT_TX_COMPLETE: LOGMeshVerbose("NRF_MESH_EVT_TX_COMPLETE"); break;
-		case NRF_MESH_EVT_IV_UPDATE_NOTIFICATION: LOGMeshVerbose("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION"); break;
-		case NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION: LOGMeshVerbose("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION"); break;
-		case NRF_MESH_EVT_NET_BEACON_RECEIVED: LOGMeshVerbose("NRF_MESH_EVT_NET_BEACON_RECEIVED"); break;
-		case NRF_MESH_EVT_HB_MESSAGE_RECEIVED: LOGMeshVerbose("NRF_MESH_EVT_HB_MESSAGE_RECEIVED"); break;
-		case NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE: LOGMeshVerbose("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE"); break;
-		case NRF_MESH_EVT_DFU_REQ_RELAY: LOGMeshVerbose("NRF_MESH_EVT_DFU_REQ_SOURCE"); break;
-		case NRF_MESH_EVT_DFU_REQ_SOURCE: LOGMeshVerbose("NRF_MESH_EVT_DFU_REQ_SOURCE"); break;
-		case NRF_MESH_EVT_DFU_START: LOGMeshVerbose("NRF_MESH_EVT_DFU_START"); break;
-		case NRF_MESH_EVT_DFU_END: LOGMeshVerbose("NRF_MESH_EVT_DFU_END"); break;
-		case NRF_MESH_EVT_DFU_BANK_AVAILABLE: LOGMeshVerbose("NRF_MESH_EVT_DFU_BANK_AVAILABLE"); break;
-		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED: LOGMeshVerbose("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED"); break;
-		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH:
+		}
+		case NRF_MESH_EVT_TX_COMPLETE: {
+			LOGMeshVerbose("NRF_MESH_EVT_TX_COMPLETE");
+			break;
+		}
+		case NRF_MESH_EVT_IV_UPDATE_NOTIFICATION: {
+			LOGMeshVerbose("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
+			break;
+		}
+		case NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION: {
+			LOGMeshVerbose("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
+			break;
+		}
+		case NRF_MESH_EVT_NET_BEACON_RECEIVED: {
+			LOGMeshVerbose("NRF_MESH_EVT_NET_BEACON_RECEIVED");
+			break;
+		}
+		case NRF_MESH_EVT_HB_MESSAGE_RECEIVED: {
+			LOGMeshVerbose("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
+			break;
+		}
+		case NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE: {
+			LOGMeshVerbose("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_REQ_RELAY: {
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_REQ_SOURCE");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_REQ_SOURCE: {
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_REQ_SOURCE");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_START: {
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_START");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_END: {
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_END");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_BANK_AVAILABLE: {
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED: {
+			LOGMeshVerbose("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
+			break;
+		}
+		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH: {
 			LOGMeshVerbose("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
 			break;
-		case NRF_MESH_EVT_FLASH_STABLE:
+		}
+		case NRF_MESH_EVT_FLASH_STABLE: {
 			LOGMeshVerbose("NRF_MESH_EVT_FLASH_STABLE");
 			MeshCore::getInstance().factoryResetDone();
 			break;
-		case NRF_MESH_EVT_RX_FAILED: LOGMeshVerbose("NRF_MESH_EVT_RX_FAILED"); break;
-		case NRF_MESH_EVT_SAR_FAILED: LOGMeshVerbose("NRF_MESH_EVT_SAR_FAILED"); break;
-		case NRF_MESH_EVT_FLASH_FAILED: LOGMeshVerbose("NRF_MESH_EVT_FLASH_FAILED"); break;
-		case NRF_MESH_EVT_CONFIG_STABLE: LOGMeshVerbose("NRF_MESH_EVT_CONFIG_STABLE"); break;
-		case NRF_MESH_EVT_CONFIG_STORAGE_FAILURE: LOGMeshVerbose("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE"); break;
-		case NRF_MESH_EVT_CONFIG_LOAD_FAILURE: LOGMeshVerbose("NRF_MESH_EVT_CONFIG_LOAD_FAILURE"); break;
-		case NRF_MESH_EVT_LPN_FRIEND_OFFER: LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_OFFER"); break;
-		case NRF_MESH_EVT_LPN_FRIEND_UPDATE: LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_UPDATE"); break;
-		case NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT: LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT"); break;
-		case NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE: LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE"); break;
-		case NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED: LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED"); break;
-		case NRF_MESH_EVT_FRIENDSHIP_TERMINATED: LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_TERMINATED"); break;
+		}
+		case NRF_MESH_EVT_RX_FAILED: {
+			LOGMeshVerbose("NRF_MESH_EVT_RX_FAILED");
+			break;
+		}
+		case NRF_MESH_EVT_SAR_FAILED: {
+			LOGMeshVerbose("NRF_MESH_EVT_SAR_FAILED");
+			break;
+		}
+		case NRF_MESH_EVT_FLASH_FAILED: {
+			LOGMeshVerbose("NRF_MESH_EVT_FLASH_FAILED");
+			break;
+		}
+		case NRF_MESH_EVT_CONFIG_STABLE: {
+			LOGMeshVerbose("NRF_MESH_EVT_CONFIG_STABLE");
+			break;
+		}
+		case NRF_MESH_EVT_CONFIG_STORAGE_FAILURE: {
+			LOGMeshVerbose("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
+			break;
+		}
+		case NRF_MESH_EVT_CONFIG_LOAD_FAILURE: {
+			LOGMeshVerbose("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
+			break;
+		}
+		case NRF_MESH_EVT_LPN_FRIEND_OFFER: {
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_OFFER");
+			break;
+		}
+		case NRF_MESH_EVT_LPN_FRIEND_UPDATE: {
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
+			break;
+		}
+		case NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT: {
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
+			break;
+		}
+		case NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE: {
+			LOGMeshVerbose("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
+			break;
+		}
+		case NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED: {
+			LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
+			break;
+		}
+		case NRF_MESH_EVT_FRIENDSHIP_TERMINATED: {
+			LOGMeshVerbose("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
+			break;
+		}
 		case NRF_MESH_EVT_DISABLED: {
 			LOGMeshVerbose("NRF_MESH_EVT_DISABLED");
 			event_t event(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY);
 			event.dispatch();
 			break;
 		}
-		case NRF_MESH_EVT_PROXY_STOPPED: LOGMeshVerbose("NRF_MESH_EVT_PROXY_STOPPED"); break;
-		case NRF_MESH_EVT_FRIEND_REQUEST: LOGMeshVerbose("NRF_MESH_EVT_FRIEND_REQUEST"); break;
+		case NRF_MESH_EVT_PROXY_STOPPED: {
+			LOGMeshVerbose("NRF_MESH_EVT_PROXY_STOPPED");
+			break;
+		}
+		case NRF_MESH_EVT_FRIEND_REQUEST: {
+			LOGMeshVerbose("NRF_MESH_EVT_FRIEND_REQUEST");
+			break;
+		}
 #if MESH_SDK_VERSION_MAJOR > 4
-		case NRF_MESH_EVT_ENABLED: LOGMeshVerbose("NRF_MESH_EVT_ENABLED"); break;
-		case NRF_MESH_EVT_READY_TO_POWER_OFF: LOGMeshVerbose("NRF_MESH_EVT_READY_TO_POWER_OFF"); break;
+		case NRF_MESH_EVT_ENABLED: {
+			LOGMeshVerbose("NRF_MESH_EVT_ENABLED");
+			break;
+		}
+		case NRF_MESH_EVT_READY_TO_POWER_OFF: {
+			LOGMeshVerbose("NRF_MESH_EVT_READY_TO_POWER_OFF");
+			break;
+		}
 #endif
 	}
 }
