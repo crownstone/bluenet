@@ -535,7 +535,8 @@ cs_ret_code_t MeshCore::stop() {
 	}
 
 	// Scanner doesn't stop immediately, but will quickly timeout.
-	// See https://devzone.nordicsemi.com/f/nordic-q-a/43301/nrf_mesh_disable-function-changed-since-sdk-for-mesh-v3-1-0
+	// See
+	// https://devzone.nordicsemi.com/f/nordic-q-a/43301/nrf_mesh_disable-function-changed-since-sdk-for-mesh-v3-1-0
 	//	[2020-12-21 14:08:39.941] <info> app: stop
 	//	[2020-12-21 14:08:39.944] <debug> nrf_sdh_soc: SoC event: 0x7.
 	//	[2020-12-21 14:08:39.947] <debug> nrf_sdh_soc: SoC event: 0x8.
@@ -615,7 +616,8 @@ bool MeshCore::isFlashValid() {
 
 void MeshCore::getFlashPages(void*& startAddress, void*& endAddress) {
 	// By default, all pages are below the recovery page.
-	// Unless one of these is defined:  ACCESS_FLASH_AREA_LOCATION, DSM_FLASH_AREA_LOCATION, NET_FLASH_AREA_LOCATION.
+	// Unless one of these is defined:  ACCESS_FLASH_AREA_LOCATION, DSM_FLASH_AREA_LOCATION,
+	// NET_FLASH_AREA_LOCATION.
 	void* recoveryPage          = flash_manager_defrag_calc_recovery_page();
 	const unsigned int numPages = (2 + ACCESS_FLASH_PAGE_COUNT + DSM_FLASH_PAGE_COUNT);
 	LOGd("flash manager recovery page = 0x%p numPages=%u", recoveryPage, numPages);
