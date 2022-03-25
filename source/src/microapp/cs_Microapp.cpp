@@ -23,7 +23,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <microapp/cs_Microapp.h>
-#include <microapp/cs_MicroappProtocol.h>
+#include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
@@ -45,8 +45,8 @@ void Microapp::init() {
 	storage.init();
 
 	// Set callback handler in IPC ram
-	MicroappProtocol & protocol = MicroappProtocol::getInstance();
-	protocol.setIpcRam();
+	MicroappController & controller = MicroappController::getInstance();
+	controller.setIpcRam();
 
 	loadApps();
 
@@ -162,7 +162,7 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
-	MicroappProtocol & protocol = MicroappProtocol::getInstance();
+	MicroappController & protocol = MicroappController::getInstance();
 	protocol.callApp(index);
 	return ERR_SUCCESS;
 }
@@ -219,10 +219,10 @@ bool Microapp::canRunApp(uint8_t index) {
 }
 
 void Microapp::tick() {
-	MicroappProtocol & protocol = MicroappProtocol::getInstance();
+	MicroappController & controller = MicroappController::getInstance();
 	for (uint8_t i = 0; i < MAX_MICROAPPS; ++i) {
 		if (canRunApp(i)) {
-			protocol.tickMicroapp(i);
+			controller.tickMicroapp(i);
 		}
 	}
 }
