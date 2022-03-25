@@ -718,6 +718,9 @@ void Storage::clearBusy(uint16_t recordKey) {
 	}
 }
 
+/*
+ * The C++ implemention for isBusy would use std::find, but this has 400 bytes overhead.
+ */
 bool Storage::isBusy(uint16_t recordKey) {
 	if (_collectingGarbage || _removingFile || _performingFactoryReset) {
 		LOGw("Busy: gc=%u rm_file=%u factoryReset=%u", _collectingGarbage, _removingFile, _performingFactoryReset);
@@ -730,8 +733,6 @@ bool Storage::isBusy(uint16_t recordKey) {
 		}
 	}
 	return false;
-	// This costs us 400B or so, not really worth it..
-	//	return (std::find(_busy_record_keys.begin(), _busy_record_keys.end(), recordKey) != _busy_record_keys.end());
 }
 
 bool Storage::isBusy() {
