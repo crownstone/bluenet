@@ -166,10 +166,14 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t& stateData) {
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
 	uint16_t fileId    = FILE_KEEP_FOREVER;
-	if (stateData.type != CS_TYPE::STATE_RESET_COUNTER || stateData.id != 0 || !isValidRecordKey(recordKey)
-		|| !isValidFileId(fileId)) {
+	// clang-format off
+	if (stateData.type != CS_TYPE::STATE_RESET_COUNTER
+			|| stateData.id != 0
+			|| !isValidRecordKey(recordKey)
+			|| !isValidFileId(fileId)) {
 		return ERR_WRONG_PARAMETER;
 	}
+	// clang-format on
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
