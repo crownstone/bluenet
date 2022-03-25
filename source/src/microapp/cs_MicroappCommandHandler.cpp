@@ -301,7 +301,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_p
 	switch (opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
 			gpio.pull = 1;
-			// fall-through is on purpose
+			[[ fallthrough ]];
 		case CS_MICROAPP_COMMAND_PIN_READ: {
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
 			switch (val) {
