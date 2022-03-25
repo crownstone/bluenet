@@ -41,6 +41,8 @@ NRF_BLE_GQ_DEF(m_ble_gatt_queue, NRF_SDH_BLE_PERIPHERAL_LINK_COUNT, NRF_BLE_GQ_Q
 BleCentral::BleCentral() {
 	_discoveryModule.discovery_in_progress = false;
 	_discoveryModule.conn_handle           = BLE_CONN_HANDLE_INVALID;
+	_discoveryInit.evt_handler             = NULL;
+	_discoveryInit.p_gatt_queue            = NULL;
 	_queue                                 = &m_ble_gatt_queue;
 }
 #endif
@@ -278,8 +280,8 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 			// A bug prevents this event from ever firing. It is fixed in SDK 16.0.0.
 			// Instead, we should be done when the number of registered uuids equals the number of received
 			// BLE_DB_DISCOVERY_COMPLETE + BLE_DB_DISCOVERY_SRV_NOT_FOUND events. See
-			// https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module We
-			// apply a similar patch to the SDK.
+			// https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module
+			// We apply a similar patch to the SDK.
 			LOGBleCentralInfo("Discovery done");
 
 			// According to the doc, the "services" struct is only for internal usage.
