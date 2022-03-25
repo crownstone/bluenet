@@ -60,8 +60,6 @@ public:
 		}
 		for (adc_buffer_id_t i = 0; i < ADC_BUFFER_COUNT; ++i) {
 			adc_buffer_t* buf = (adc_buffer_t*) malloc(sizeof(adc_buffer_t));
-
-//			adc_sample_value_t* buf = (adc_sample_value_t*) malloc(sizeof(adc_sample_value_t) * ADC_BUFFER_SAMPLE_COUNT);
 			if (buf == nullptr) {
 				LOGw("No space to allocate buf");
 				// TODO: free all buffers?
@@ -138,8 +136,7 @@ public:
 	 * @return                                   Particular value
 	 */
 	adc_sample_value_t getValue(adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id) {
-		// TODO: value_id is unsigned, always true, maybe check for it being unsigned?
-		// assert(value_id >= 0, "value id should be positive");
+		static_assert(std::is_unsigned<adc_sample_value_id_t>::value, "value id should be unsigned");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
 
 		adc_sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
@@ -157,8 +154,7 @@ public:
 	 * @param[in] value                          Value to be written to the buffer
 	 */
 	void setValue(adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id, adc_sample_value_t value) {
-		// TODO: value_id is unsigned, always true, maybe check for it being unsigned?
-		//assert(value_id >= 0, "value id should be positive");
+		static_assert(std::is_unsigned<adc_sample_value_id_t>::value, "value id should be unsigned");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
 
 		adc_sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
