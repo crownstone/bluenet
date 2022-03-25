@@ -342,16 +342,23 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 	cs_ret_code_t retCode = updateState(false, source);
 
 	switch (retCode) {
-		case ERR_SUCCESS:
-		case ERR_SUCCESS_NO_CHANGE:
-		case ERR_NOT_POWERED: break;
-		default:
+		case ERR_SUCCESS: {
+			[[fallthrough]];
+		}
+		case ERR_SUCCESS_NO_CHANGE: {
+			[[fallthrough]];
+		}
+		case ERR_NOT_POWERED: {
+			break;
+		}
+		default: {
 			// Only when the dimmer isn't powered yet, we want to keep the given overrideState,
 			// because it should be set once the dimmer is powered.
 			// In all other cases, we want to copy the current intensity, so that the intensity
 			// doesn't change when some configuration is changed.
 			LOGSwitchAggregatorDebug("Copy current intensity to overrideState");
 			overrideState = smartSwitch.getCurrentIntensity();
+		}
 	}
 
 	addToSwitchHistory(
