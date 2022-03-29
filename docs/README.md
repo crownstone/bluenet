@@ -92,7 +92,6 @@ Nordic also has a [SDK](https://www.nordicsemi.com/Products/Development-software
 |----|----|----|
 |Getting started|||
 ||[INSTALL](INSTALL.md)|Describes how to install and get started with Bluenet firmware. The main document for getting started.|
-||[INTEGRATION](development_environment/INTEGRATION.md)|Describes how to get started with integrating and interacting with Bluenet via the REST API or your own app or hardware.|
 |Hardware|||
 ||[HARDWARE_VERSION](HARDWARE_VERSION.md)|Describes how to read the hardware version of the Crownstone from the device information service.|
 ||[RESOURCE_ALLOCATION](RESOURCE_ALLOCATION.md)|Describes which pins of the nRF52832 are currently used for which function.|
@@ -135,8 +134,7 @@ Finally, some of the documentation pages that are deprecated are gathered.
 |Category|File name|Description|
 |----|----|----|
 |Deprecated|||
-||[INSTALL_LEGACY](INSTALL_LEGACY.md)|Replaced by the new [INSTALL](INSTALL.md) page.|
-||[SERVICE_DATA_DEPRECATED](SERVICE_DATA_DEPRECATED.md)|Replaced by the new [SERVICE_DATA](protocol/SERVICE_DATA.md) page.|
+||[SERVICE_DATA_LEGACY](./protocol/SERVICE_DATA_LEGACY.md)|Replaced by the new [SERVICE_DATA](protocol/SERVICE_DATA.md) page.|
 
 ## Dictionary and Acronyms
 |Term|Description|
