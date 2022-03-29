@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SOURCE_DIR="@WORKSPACE_DIR@/source"
+
+VERSION=$(sed -n 2p "$SOURCE_DIR/VERSION")
+echo "Current version: $VERSION"
+
+VERSION=$(( $VERSION + 1 ))
+
+echo "Write new version: $VERSION"
+sed -i "2s/.*/$VERSION/" "$SOURCE_DIR/VERSION"

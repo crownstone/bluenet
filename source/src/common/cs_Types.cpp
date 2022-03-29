@@ -258,6 +258,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_GPIO_WRITE:
 	case CS_TYPE::EVT_GPIO_READ:
 	case CS_TYPE::EVT_GPIO_UPDATE:
+	case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -766,6 +767,8 @@ size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_GPIO_READ));
 	case CS_TYPE::EVT_GPIO_UPDATE:
 		return sizeof(TYPIFY(EVT_GPIO_UPDATE));
+	case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT:
+		return sizeof(TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT));
 	} // end switch
 
 	// should never happen
@@ -1004,6 +1007,7 @@ bool hasMultipleIds(CS_TYPE const & type) {
 	case CS_TYPE::EVT_GPIO_WRITE:
 	case CS_TYPE::EVT_GPIO_READ:
 	case CS_TYPE::EVT_GPIO_UPDATE:
+	case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
@@ -1275,6 +1279,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::EVT_GPIO_WRITE:
 	case CS_TYPE::EVT_GPIO_READ:
 	case CS_TYPE::EVT_GPIO_UPDATE:
+	case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT:
 		return true;
 	}
 	// should not reach this
@@ -1530,6 +1535,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_GPIO_WRITE:
 	case CS_TYPE::EVT_GPIO_READ:
 	case CS_TYPE::EVT_GPIO_UPDATE:
+	case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1785,6 +1791,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_GPIO_WRITE:
 	case CS_TYPE::EVT_GPIO_READ:
 	case CS_TYPE::EVT_GPIO_UPDATE:
+	case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT:
 		return NO_ONE;
 	}
 	return NO_ONE;
