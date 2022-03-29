@@ -311,7 +311,7 @@ private:
 	 */
 	int _criticalRegionEntered = 0;
 
-	cs_ret_code_t initSaadc(const adc_config_t & config);
+	cs_ret_code_t initSaadc();
 
 	/**
 	 * Configure a channel.

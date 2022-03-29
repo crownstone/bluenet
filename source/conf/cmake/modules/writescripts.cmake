@@ -63,3 +63,23 @@ message(STATUS "Generate debug-bootloader.sh script")
 configure_file(${TEMPLATE_DIR}/debug-bootloader.sh.in tmp/debug-bootloader.sh)
 file(COPY tmp/debug-bootloader.sh DESTINATION . FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
+set(CONF_DIR ${DEFAULT_MODULES_PATH}/../..)
+message(STATUS "Generate minicom.sh script")
+configure_file(${TEMPLATE_DIR}/minicom.sh.in tmp/minicom.sh)
+file(COPY tmp/minicom.sh DESTINATION . FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+
+set(CONF_DIR ${DEFAULT_MODULES_PATH}/../..)
+message(STATUS "Generate gdb-server.sh script")
+configure_file(${TEMPLATE_DIR}/gdb-server.sh.in tmp/gdb-server.sh)
+file(COPY tmp/gdb-server.sh DESTINATION . FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+
+set(CONF_DIR ${DEFAULT_MODULES_PATH}/../..)
+message(STATUS "Generate rtt-client.sh script")
+configure_file(${TEMPLATE_DIR}/rtt-client.sh.in tmp/rtt-client.sh)
+file(COPY tmp/rtt-client.sh DESTINATION . FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+
+set(CONF_DIR ${DEFAULT_MODULES_PATH}/../..)
+message(STATUS "Generate increment-application-version.sh script")
+configure_file(${TEMPLATE_DIR}/increment-application-version.sh.in tmp/increment-application-version.sh)
+file(COPY tmp/increment-application-version.sh DESTINATION . FILE_PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+

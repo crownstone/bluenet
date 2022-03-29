@@ -36,17 +36,11 @@ struct cs_data_t {
  * Variable length data encapsulation in terms of length and pointer to data.
  */
 struct cs_const_data_t {
-	const uint8_t* data = nullptr;      /** < Pointer to data. */
-	cs_buffer_size_t len = 0;      /** < Length of data. */
+	const uint8_t* data  = nullptr; /** < Pointer to data. */
+	cs_buffer_size_t len = 0;       /** < Length of data. */
 
-	cs_const_data_t():
-		data(nullptr),
-		len(0)
-	{}
-	cs_const_data_t(const uint8_t* buf, cs_buffer_size_t size):
-		data(buf),
-		len(size)
-	{}
+	cs_const_data_t() : data(nullptr), len(0) {}
+	cs_const_data_t(const uint8_t* buf, cs_buffer_size_t size) : data(buf), len(size) {}
 };
 
 struct cs_result_t {
@@ -69,8 +63,8 @@ struct cs_result_t {
 	 */
 	cs_buffer_size_t dataSize = 0;
 
-	cs_result_t() :                         buf() {}
-	cs_result_t(cs_data_t buf) :            buf(buf) {}
+	cs_result_t() : buf() {}
+	cs_result_t(cs_data_t buf) : buf(buf) {}
 	cs_result_t(cs_ret_code_t returnCode) : returnCode(returnCode), buf() {}
 };
 
@@ -82,10 +76,10 @@ struct cs_result_t {
  * https://devzone.nordicsemi.com/f/nordic-q-a/2084/gap-address-types
  */
 enum CS_ADDRESS_TYPE {
-	CS_ADDRESS_TYPE_PUBLIC                        = 0,    // Public (registered) static address.
-	CS_ADDRESS_TYPE_RANDOM_STATIC                 = 1,    // Random static address (can only change at boot).
-	CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE     = 2,    // Random resolvable address (can change at any moment).
-	CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE = 3,    // Random address (can change at any moment).
+	CS_ADDRESS_TYPE_PUBLIC                        = 0,     // Public (registered) static address.
+	CS_ADDRESS_TYPE_RANDOM_STATIC                 = 1,     // Random static address (can only change at boot).
+	CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE     = 2,     // Random resolvable address (can change at any moment).
+	CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE = 3,     // Random address (can change at any moment).
 	CS_ADDRESS_TYPE_ANONYMOUS                     = 0x7F,  // No address is advertised.
 };
 
@@ -153,8 +147,10 @@ struct __attribute__((__packed__)) mesh_control_command_packet_t {
  * How reliable a mesh message should be.
  *
  * For now, the associated number is the number of times the message gets sent.
+ *
+ * The highest number 10 = 0b1010, hence only four bits are used.
  */
-enum cs_mesh_msg_reliability {
+enum cs_mesh_msg_reliability : uint8_t {
 	CS_MESH_RELIABILITY_INVALID = 0,
 	CS_MESH_RELIABILITY_LOWEST  = 1,
 	CS_MESH_RELIABILITY_LOW     = 3,
@@ -174,14 +170,15 @@ enum cs_mesh_msg_urgency {
 
 /**
  * Struct to communicate a mesh message.
- * type            Type of message.
- * flags           How to send the message.
- * reliability     Timeout in seconds for acked messages, number of transmission for unacked messages. Use 0 for the default value.
- * urgency         How quick the message should be sent.
- * idCount         Number of IDs, for targeted messages.
- * targetIds       Pointer to array with targeted stone IDs.
- * size            Size of the payload.
- * payload         The payload.
+ * - type            Type of message.
+ * - flags           How to send the message.
+ * - reliability     Timeout in seconds for acked messages, number of transmission for unacked messages. Use 0 for the
+ *                   default value.
+ * - urgency         How quick the message should be sent.
+ * - idCount         Number of IDs, for targeted messages.
+ * - targetIds       Pointer to array with targeted stone IDs.
+ * - size            Size of the payload.
+ * - payload         The payload.
  */
 struct cs_mesh_msg_t {
 	cs_mesh_model_msg_type_t type;
@@ -203,12 +200,11 @@ struct state_external_stone_t {
 	service_data_encrypted_t data;
 };
 
-
 struct ble_connected_t {
-	uint16_t  connectionHandle;
-	uint8_t   advertisementHandle; // Advertisement handle that stopped advertising.
-	cs_data_t advertisementBuffer; // Buffer that's no longer in use.
-	cs_data_t scanResponseBuffer;  // Buffer that's no longer in use.
+	uint16_t connectionHandle;
+	uint8_t advertisementHandle;    // Advertisement handle that stopped advertising.
+	cs_data_t advertisementBuffer;  // Buffer that's no longer in use.
+	cs_data_t scanResponseBuffer;   // Buffer that's no longer in use.
 };
 
 /**
@@ -240,13 +236,13 @@ struct __attribute__((__packed__)) adv_background_parsed_v1_t {
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 };
 
-enum class PresenceMutation: uint8_t {
-    NothingChanged              ,
-    Online                      , // when no previous PresenceStateDescription was available but now it is
-    Offline                     , // when a previous PresenceStateDescription was available but now it isn't
-    LastUserExitSphere          ,
-    FirstUserEnterSphere        ,
-    OccupiedRoomsMaskChanged    ,
+enum class PresenceMutation : uint8_t {
+	NothingChanged,
+	Online,   // when no previous PresenceStateDescription was available but now it is
+	Offline,  // when a previous PresenceStateDescription was available but now it isn't
+	LastUserExitSphere,
+	FirstUserEnterSphere,
+	OccupiedRoomsMaskChanged,
 };
 
 struct profile_location_t {

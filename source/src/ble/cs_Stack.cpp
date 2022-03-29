@@ -149,8 +149,10 @@ void Stack::initRadio() {
 			break;
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps. RAM_R1_BASE should be: %p", ram_start);
+			[[fallthrough]];
 		case NRF_ERROR_INVALID_LENGTH:
 			LOGe("RAM, invalid length");
+			[[fallthrough]];
 		default:
 			APP_ERROR_HANDLER(nrfCode);
 	}
@@ -167,11 +169,14 @@ void Stack::initRadio() {
 			break;
 		case NRF_ERROR_INVALID_STATE:
 			LOGe("BLE: invalid radio state");
+			[[fallthrough]];
 		case NRF_ERROR_INVALID_ADDR:
 			LOGe("BLE: invalid memory address");
+			[[fallthrough]];
 		case NRF_ERROR_NO_MEM:
 			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
 			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
+			[[fallthrough]];
 		default:
 			// Crash.
 			APP_ERROR_HANDLER(nrfCode);
@@ -537,7 +542,7 @@ void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-void csStackOnScan(void * p_event_data, uint16_t event_size) {
+void csStackOnScan(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	cs_stack_scan_t* scanEvent = (cs_stack_scan_t*)p_event_data;
 	scanEvent->advReport.data.p_data = scanEvent->data;
 	const ble_gap_evt_adv_report_t* advReport = &(scanEvent->advReport);
@@ -602,16 +607,20 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 				case NRF_ERROR_INVALID_ADDR:
 					// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				case NRF_ERROR_INVALID_PARAM:
 					// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied. See @ref ble_gap_scan_params_t.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				case NRF_ERROR_NOT_SUPPORTED:
 					// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported parameters supplied. See @ref ble_gap_scan_params_t.
 					// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				case NRF_ERROR_INVALID_LENGTH:
 					// * @retval ::NRF_ERROR_INVALID_LENGTH The provided buffer length is invalid. See @ref BLE_GAP_SCAN_BUFFER_MIN.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				default:
 					// Crash
 					APP_ERROR_HANDLER(nrfCode);
@@ -621,7 +630,7 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 	}
 }
 
-static void connection_keep_alive_timeout(void* p_context) {
+static void connection_keep_alive_timeout([[maybe_unused]] void* p_context) {
 	LOGw("connection keep alive timeout!");
 	Stack::getInstance().disconnect();
 }
@@ -684,7 +693,7 @@ void Stack::onMemoryRequest(uint16_t connectionHandle) {
 	}
 }
 
-void Stack::onMemoryRelease(uint16_t connectionHandle) {
+void Stack::onMemoryRelease([[maybe_unused]] uint16_t connectionHandle) {
 	// No need to do anything
 }
 

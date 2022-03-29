@@ -47,11 +47,11 @@ extern "C" {
 /**
  * Scheduled SOC event handler callback.
  */
-void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+void crownstone_soc_evt_handler_decoupled(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	SocHandler::handleEventDecoupled(*reinterpret_cast<uint32_t*>(p_event_data));
 }
 
-void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
+void crownstone_soc_evt_handler(uint32_t evt_id, [[maybe_unused]] void * p_context) {
 	SocHandler::handleEvent(evt_id);
 }
 
@@ -62,11 +62,11 @@ NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, cr
 /**
  * Scheduled BLE event handler callback.
  */
-void crownstone_sdh_ble_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+void crownstone_sdh_ble_evt_handler_decoupled(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	BleHandler::handleEventDecoupled(reinterpret_cast<const ble_evt_t*>(p_event_data));
 }
 
-void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_context) {
+void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, [[maybe_unused]] void * p_context) {
 	BleHandler::handleEvent(p_ble_evt);
 }
 
@@ -76,7 +76,7 @@ void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_contex
  */
 NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_evt_handler, NULL);
 
-static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context) {
+static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, [[maybe_unused]] void * p_context) {
 	SdhStateHandler::handleEvent(state);
 }
 
@@ -113,13 +113,13 @@ NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRI
 
 #if BUILD_MESHING == 1
 // From: ble_softdevice_support.c
-void mesh_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+void mesh_soc_evt_handler_decoupled(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	LOGInterruptLevel("mesh_soc_evt_handler_decoupled int=%u", CsUtils::getInterruptLevel());
 	uint32_t evt_id = *(uint32_t*)p_event_data;
 	nrf_mesh_on_sd_evt(evt_id);
 }
 
-static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
+static void mesh_soc_evt_handler(uint32_t evt_id, [[maybe_unused]] void * p_context) {
 	LOGInterruptLevel("mesh_soc_evt_handler int=%u", CsUtils::getInterruptLevel());
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
@@ -137,7 +137,7 @@ NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_h
 /**
  * Scheduled FDS event handler callback.
  */
-void fds_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+void fds_evt_handler_decoupled(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	LOGInterruptLevel("fds_evt_handler_decoupled int=%u", CsUtils::getInterruptLevel());
 	Storage::getInstance().handleFileStorageEvent(reinterpret_cast<const fds_evt_t*>(p_event_data));
 }
@@ -171,8 +171,9 @@ void SocHandler::handleEvent(uint32_t event) {
 			// Only works when we reset as well?
 			// Only works when softdevice handler dispatch model is interrupt?
 			GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
-			// Fall through
+			[[fallthrough]];
 		case NRF_EVT_FLASH_OPERATION_SUCCESS:
+			[[fallthrough]];
 		case NRF_EVT_FLASH_OPERATION_ERROR: {
 //			uint32_t gpregret_id = 0;
 //			uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
@@ -191,8 +192,11 @@ void SocHandler::handleEvent(uint32_t event) {
 			break;
 		}
 		case NRF_EVT_RADIO_BLOCKED:
+			[[fallthrough]];
 		case NRF_EVT_RADIO_CANCELED:
+			[[fallthrough]];
 		case NRF_EVT_RADIO_SESSION_IDLE:
+			[[fallthrough]];
 		case NRF_EVT_RADIO_SESSION_CLOSED:
 			break;
 		default: {
@@ -260,16 +264,27 @@ void BleHandler::handleEvent(const ble_evt_t* event) {
 			break;
 		}
 		case BLE_GAP_EVT_RSSI_CHANGED:
+			[[fallthrough]];
 		case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
+			[[fallthrough]];
 		case BLE_GAP_EVT_CONNECTED:
+			[[fallthrough]];
 		case BLE_GAP_EVT_DISCONNECTED:
+			[[fallthrough]];
 		case BLE_GAP_EVT_PASSKEY_DISPLAY:
+			[[fallthrough]];
 		case BLE_GAP_EVT_TIMEOUT:
+			[[fallthrough]];
 		case BLE_EVT_USER_MEM_REQUEST:
+			[[fallthrough]];
 		case BLE_EVT_USER_MEM_RELEASE:
+			[[fallthrough]];
 		case BLE_GATTS_EVT_WRITE:
+			[[fallthrough]];
 		case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+			[[fallthrough]];
 		case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+			[[fallthrough]];
 		default: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 			uint32_t retVal = app_sched_event_put(event, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_decoupled);
@@ -288,7 +303,8 @@ void BleHandler::handleEventDecoupled(const ble_evt_t* event) {
 	Stack::getInstance().onBleEvent(event);
 }
 
-void BleHandler::handlePhyRequest(uint16_t connectionHandle, const ble_gap_evt_phy_update_request_t& request) {
+void BleHandler::handlePhyRequest(uint16_t connectionHandle,
+		[[maybe_unused]] const ble_gap_evt_phy_update_request_t& request) {
 	ble_gap_phys_t phys;
 	phys.rx_phys = BLE_GAP_PHY_AUTO;
 	phys.tx_phys = BLE_GAP_PHY_AUTO;
@@ -314,18 +330,22 @@ void BleHandler::handlePhyRequest(uint16_t connectionHandle, const ble_gap_evt_p
 		case NRF_ERROR_INVALID_ADDR:
 			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
+			[[fallthrough]];
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
 			// This shouldn't happen: crash.
+			[[fallthrough]];
 		case NRF_ERROR_NOT_SUPPORTED:
 			// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
 			// This shouldn't happen: crash.
+			[[fallthrough]];
 		default:
 			APP_ERROR_HANDLER(nrfCode);
 	}
 }
 
-void BleHandler::handleDataLengthRequest(uint16_t connectionHandle, const ble_gap_evt_data_length_update_request_t& request) {
+void BleHandler::handleDataLengthRequest(uint16_t connectionHandle,
+		[[maybe_unused]] const ble_gap_evt_data_length_update_request_t& request) {
 	uint32_t nrfCode = sd_ble_gap_data_length_update(connectionHandle, NULL, NULL);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
@@ -349,24 +369,29 @@ void BleHandler::handleDataLengthRequest(uint16_t connectionHandle, const ble_ga
 		case NRF_ERROR_INVALID_ADDR:
 			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
+			[[fallthrough]];
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameters supplied.
 			// This shouldn't happen: crash
+			[[fallthrough]];
 		case NRF_ERROR_NOT_SUPPORTED:
 			// * @retval ::NRF_ERROR_NOT_SUPPORTED The requested parameters are not supported by the SoftDevice. Inspect
 			// *                                   p_dl_limitation to see which parameter is not supported.
 			// This shouldn't happen: crash
+			[[fallthrough]];
 		case NRF_ERROR_RESOURCES:
 			// * @retval ::NRF_ERROR_RESOURCES The connection event length configured for this link is not sufficient for the requested parameters.
 			// *                               Use @ref sd_ble_cfg_set with @ref BLE_CONN_CFG_GAP to increase the connection event length.
 			// *                               Inspect p_dl_limitation to see where the limitation is.
 			// This shouldn't happen: crash
+			[[fallthrough]];
 		default:
 			APP_ERROR_HANDLER(nrfCode);
 	}
 }
 
-void BleHandler::handleMtuRequest(uint16_t connectionHandle, const ble_gatts_evt_exchange_mtu_request_t& request) {
+void BleHandler::handleMtuRequest(uint16_t connectionHandle,
+		[[maybe_unused]] const ble_gatts_evt_exchange_mtu_request_t& request) {
 //	uint32_t nrfCode = sd_ble_gatts_exchange_mtu_reply(connectionHandle, BLE_GATT_ATT_MTU_DEFAULT);
 	uint32_t nrfCode = sd_ble_gatts_exchange_mtu_reply(connectionHandle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
 	switch (nrfCode) {
@@ -388,6 +413,7 @@ void BleHandler::handleMtuRequest(uint16_t connectionHandle, const ble_gatts_evt
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid Server RX MTU size supplied.
 			// This shouldn't happen, crash.
+			[[fallthrough]];
 		default:
 			APP_ERROR_HANDLER(nrfCode);
 	}

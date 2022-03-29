@@ -1,0 +1,52 @@
+
+Bluenet details in memory:
+
+Flash
+--------------------------
+Start address | Size    | Total
+${APPLICATION_START_ADDRESS}       | ${APPLICATION_LENGTH} | ${TOTAL_AMOUNT_FLASH}
+
+RAM
+--------------------------
+RAM base      | Size    | Total
+${RAM_R1_BASE}    | ${RAM_APPLICATION_AMOUNT} | ${TOTAL_AMOUNT_RAM}
+
+Bootloader
+--------------------------
+Start address | Size
+${BOOTLOADER_START_ADDRESS}    | ${BOOTLOADER_LENGTH}
+
+Microapps
+--------------------------
+Start address | Size
+${FLASH_MICROAPP_BASE}       | ${FLASH_MICROAPP_LENGTH}
+
+Configuration
+
+Modules (1 is enabled, 0 is disabled)
+---------------------------
+Microapp support            ${BUILD_MICROAPP_SUPPORT}
+Mesh                        ${BUILD_MESHING}
+GPIO                        ${BUILD_GPIOTE}
+TWI/I2C                     ${BUILD_TWI}
+Mesh topology research      ${BUILD_MESH_TOPOLOGY_RESEARCH}
+Closest Crownstone tracker  ${BUILD_CLOSEST_CROWNSTONE_TRACKER}
+Memory usage test           ${BUILD_MEM_USAGE_TEST}
+
+Mesh configuration
+---------------------------
+Compilation included        ${BUILD_MESHING}
+Enabled                     ${MESHING}
+Active scanning             ${MESH_SCANNER}
+Filtering scans             ${MESH_SCANNER_FILTERED}
+Persistence location        ${MESH_PERSISTENT_STORAGE}
+
+Other config
+---------------------------
+TX power (dBm)              ${TX_POWER}
+Boot delay (ms)             ${BOOT_DELAY}
+Max chip temperature (°C)   ${MAX_CHIP_TEMP}
+Connection timeout (ms)     ${CONNECTION_ALIVE_TIMEOUT}
+Advertisement interval (ms) ${ADVERTISEMENT_INTERVAL}
+
+

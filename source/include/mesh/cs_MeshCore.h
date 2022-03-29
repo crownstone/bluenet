@@ -57,6 +57,11 @@ public:
 	void registerScanCallback(const callback_scan_t& closure);
 
 	/**
+	 * Do the provisioning.
+	 */
+	void provision();
+
+	/**
 	 * Whether flash pages have valid data.
 	 *
 	 * If not, the pages should be erased.
