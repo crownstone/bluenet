@@ -181,11 +181,11 @@ uint 24 | Sunset | 3 | Seconds after midnight that the sun sets.
 
 ![Set time flags](../diagrams/broadcast_set_time_flags.png)
 
-Bit | Name |  Description
---- | --- | ---
-0 | Timestamp valid | Whether the provided timestamp is valid.
-1 | Sunrise and sunset valid | Whether the provided sunrise and sunset are valid.
-2-7 | Reserved | Reserved for future use, should be 0 for now.
+Bit | Name | Length in bits | Description
+--- | --- | --- | ---
+0 | Timestamp valid | 1 |Whether the provided timestamp is valid.
+1 | Sunrise and sunset valid| 1 | Whether the provided sunrise and sunset are valid.
+2-7 | Reserved | 6 |Reserved for future use, should be 0 for now.
 
 
 ##### Behaviour settings
