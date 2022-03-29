@@ -121,6 +121,8 @@ set(BOOTLOADER "_bootloader_.hex")
 #######################################################################################################################
 
 include(crownstone.src)
+include(crownstone-application.src)
+include(crownstone-platform.src)
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
