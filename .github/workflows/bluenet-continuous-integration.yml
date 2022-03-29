@@ -79,6 +79,7 @@ jobs:
         with:
           use-quiet-mode: 'yes'
           folder-path: 'docs/'
+          config-file: 'docs/mlc_config.json'
           max-depth: -1
       - name: Finish up
         run: |

@@ -34,3 +34,5 @@ markdown-link-check ./development_environment/CONTINUOUS_INTEGRATION.md
 # recursive, quiet
 find . -name \*.md -print0 | xargs -0 -n1 markdown-link-check -q
 ```
+
+There are a small amount of configurtion options found in `/docs/mlc_config.json`.
