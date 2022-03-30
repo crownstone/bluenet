@@ -16,7 +16,7 @@
 #include <stdint.h>
 #include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
 
-namespace MemorySecion {
+namespace MemorySection {
 
 enum class MemoryType : uint8_t { 
     Flash = 0,
