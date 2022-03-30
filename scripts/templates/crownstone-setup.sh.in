@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Setup an individual Crownstone. This requires a configuration file with keys, etc.
+../../tools/csutil/csutil @KEYS_JSON_FILE@ setup @MAC_ADDRESS@ @SETUP_CONFIG_FILE@

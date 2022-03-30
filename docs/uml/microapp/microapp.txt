@@ -1,0 +1,122 @@
+@startuml
+
+@startuml
+
+participant "Scheduler"                       as sched
+database "Microapp stack"                     as appstack
+participant "Bluenet"                         as fw
+participant "Bluenet microapp thread"         as fw_app
+participant "Microapp"                        as app
+
+note across
+Aruino program looks like:
+
+	void setup() {
+
+	}
+
+	void loop() {
+		digitalWrite(13, HIGH);
+		int powerUsage = getPowerUsage();
+		delay(3);
+	}
+end note
+
+== Setup ==
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+
+fw_app -> app:
+app -> app: no message to handle
+app -> app: setup()
+app -> fw_app: msg: setup done
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+
+fw -> fw: handle command setup done
+
+
+== Loop ==
+fw -> fw_app: longjmp(microapp)
+activate appstack
+
+fw_app -> app:
+app -> app: no message to handle
+app -> app: loop()
+app -> app: digitalWrite(13, HIGH)
+app -> fw_app: msg: set pin 13 1
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+
+fw -> fw: handle command: set pin 13 1
+
+
+== Command with return ==
+fw -> fw_app: longjmp(microapp)
+activate appstack
+
+fw_app -> app:
+app -> app: no message to handle
+app -> app: getPowerUsage()
+app -> fw_app: msg: get power usage
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+
+fw -> fw: handle command: get power usage
+
+fw -> fw_app: longjmp(microapp)
+activate appstack
+
+fw_app -> app: msg: result power usage
+app -> app: handle message: result power usage
+
+
+== Delay ==
+app -> app: delay(3)
+app -> fw_app:
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: no command to handle
+fw -> sched:
+ 
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app:
+app -> app: no message to handle
+app -> app: wait for 2 more ticks
+app -> fw_app:
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: no command to handle
+fw -> sched:
+
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app:
+app -> app: no message to handle
+app -> app: wait for 1 more tick
+app -> fw_app:
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: no command to handle
+fw -> sched:
+
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app:
+app -> app: no message to handle
+app -> app: }
+app -> fw_app: msg: end of loop
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: handle commmand end of loop
+fw -> sched:
+
+
+
+@enduml
+

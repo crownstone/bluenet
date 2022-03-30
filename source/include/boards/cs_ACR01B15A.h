@@ -11,9 +11,14 @@
 #include <cfg/cs_DeviceTypes.h>
 
 /**
- * This prototype is based on the nRF52840 (in contrast with the ACR01B13B above which is based on the nRF52833).
+ * This prototype of the Crownstone Built-in Two is based on the nRF52840. This in contrast with the ACR01B13B which is based on the nRF52833.
+ *
+ * TODO: Configuration values like offsets have to be populated. Now they are set to default values.
  */
 void asACR01B15A(boards_config_t* config) {
+
+	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
+
 	config->pinDimmer                          = GetGpioPin(1, 13);  // Gate-N
 	config->pinEnableDimmer                    = GetGpioPin(1, 14);  // Gate-P
 
@@ -57,8 +62,6 @@ void asACR01B15A(boards_config_t* config) {
 	config->flags.canTryDimmingOnBoot          = true;
 	config->flags.canDimOnWarmBoot             = true;
 	config->flags.dimmerOnWhenPinsFloat        = false;
-
-	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_TWO;
 
 	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
 	config->voltageAdcRangeMilliVolt           = 1800;

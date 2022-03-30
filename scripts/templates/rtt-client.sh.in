@@ -1,0 +1,3 @@
+#!/bin/sh
+
+JLinkRTTClient -RTTTelnetPort @RTT_PORT@

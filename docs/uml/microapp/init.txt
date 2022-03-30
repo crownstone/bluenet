@@ -1,0 +1,41 @@
+@startuml
+
+@startuml
+
+database "Microapp stack"                  as appstack
+participant "Bluenet"                         as fw
+participant "Bluenet microapp thread"         as fw_app
+participant "Microapp"                        as app
+
+== Initialization ==
+fw -> fw: Write callback to IPC ram
+
+fw -> fw_app: Set stack microapp.
+activate appstack
+fw_app -> app: Call microapp start address.
+
+app -> app: main(): init global variables.
+app -> app: Write callback, write buf, read buf to IPC ram.
+app -> app: Read bluenet callback from IPC ram.
+app -> fw_app: Call bluenet callback.
+fw_app -> fw: Set stack bluenet.
+deactivate appstack
+
+fw -> fw: Read microapp data from IPC ram.
+
+fw -> fw: setjmp(microapp)
+fw -> fw: setjmp(bluenet)
+
+fw -> fw: longjmp(microapp)
+fw -> fw_app: Set stack microapp
+activate appstack
+
+fw_app -> app: Call microapp callback.
+app -> app: setup()
+app -> fw_app: Call bluenet callback(setup done).
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: Handle command setup done.
+
+@enduml
+

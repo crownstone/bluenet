@@ -234,6 +234,12 @@ NRF_DEVICE_FAMILY=NRF52
 # The device series
 NRF_DEVICE_SERIES=NRF52_SERIES
 
+# The total amount of flash for the nRF52832-QFAA (512 kB)
+TOTAL_AMOUNT_FLASH=0x80000
+
+# The total amount of ram for the nRF52832-QFAA (64 kB)
+TOTAL_AMOUNT_RAM=0x10000
+
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF5_DIR=
 

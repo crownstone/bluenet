@@ -407,6 +407,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_DFU_TRANSPORT_RESULT,                    // DFU operation result.   See MeshDfuTransport.h
 	EVT_MESH_DFU_TRANSPORT_RESPONSE,                  // DFU operation response. See MeshDfuTransport.h
 
+	EVT_MICROAPP_BLE_FILTER_INIT,                     // Microapp specific initialization of BLE filter
+
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 
 	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
@@ -710,6 +712,8 @@ typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 // DFU
 typedef cs_ret_code_t TYPIFY(EVT_MESH_DFU_TRANSPORT_RESULT);
 typedef MeshDfuTransportResponse TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE);
+
+typedef cs_microapp_filter_init_t TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

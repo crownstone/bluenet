@@ -1,0 +1,3 @@
+#!/bin/sh
+
+../../tools/csutil/csutil @KEYS_JSON_FILE@ factory_reset @MAC_ADDRESS@ emptyFile

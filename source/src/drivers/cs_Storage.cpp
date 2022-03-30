@@ -5,8 +5,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
-#include <climits>
 #include <common/cs_Handlers.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
@@ -15,6 +13,8 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <util/cs_BleError.h>
+
+#include <climits>
 
 #define LOGStorageInit LOGi
 #define LOGStorageInfo LOGi
@@ -63,7 +63,7 @@ void Storage::setErrorCallback(cs_storage_error_callback_t callback) {
 	_errorCallback = callback;
 }
 
-cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
+cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t& id) {
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
@@ -81,7 +81,7 @@ cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
 	return retVal;
 }
 
-cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t & id) {
+cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t& id) {
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
@@ -101,7 +101,7 @@ cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t & id) {
 	return retVal;
 }
 
-cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t & fileId) {
+cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t& fileId) {
 	if (!isValidRecordKey(recordKey)) {
 		return ERR_WRONG_PARAMETER;
 	}
@@ -119,18 +119,16 @@ cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t & fileId) {
 	return ERR_NOT_FOUND;
 }
 
-
-
 /**
  * Iterate over all records, so that in case of duplicates, the last written record will be used to read.
  */
-cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
+cs_ret_code_t Storage::read(cs_state_data_t& stateData) {
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
-	uint16_t fileId = getFileId(stateData.id);
+	uint16_t fileId    = getFileId(stateData.id);
 	if (!isValidRecordKey(recordKey) || !isValidFileId(fileId)) {
 		return ERR_WRONG_PARAMETER;
 	}
@@ -139,7 +137,7 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	}
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
-	bool done = false;
+	bool done               = false;
 	LOGStorageDebug("Read record key=%u file=%u", recordKey, fileId);
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
@@ -150,9 +148,6 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 		if (csRetCode == ERR_SUCCESS) {
 			done = true;
 		}
-//		if (done) {
-//			break;
-//		}
 	}
 	if (done) {
 		return ERR_SUCCESS;
@@ -163,23 +158,28 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	return csRetCode;
 }
 
-cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
+cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t& stateData) {
 	// Code copied from read() with only fileId changed.
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
-	uint16_t fileId = FILE_KEEP_FOREVER;
-	if (stateData.type != CS_TYPE::STATE_RESET_COUNTER || stateData.id != 0 || !isValidRecordKey(recordKey) || !isValidFileId(fileId)) {
+	uint16_t fileId    = FILE_KEEP_FOREVER;
+	// clang-format off
+	if (stateData.type != CS_TYPE::STATE_RESET_COUNTER
+			|| stateData.id != 0
+			|| !isValidRecordKey(recordKey)
+			|| !isValidFileId(fileId)) {
 		return ERR_WRONG_PARAMETER;
 	}
+	// clang-format on
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
-	bool done = false;
+	bool done               = false;
 	LOGStorageDebug("Read record %u file=%u", recordKey, fileId);
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
@@ -190,9 +190,6 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 		if (csRetCode == ERR_SUCCESS) {
 			done = true;
 		}
-//		if (done) {
-//			break;
-//		}
 	}
 	if (done) {
 		return ERR_SUCCESS;
@@ -203,7 +200,7 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 	return csRetCode;
 }
 
-cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
+cs_ret_code_t Storage::readFirst(cs_state_data_t& stateData) {
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
@@ -221,8 +218,7 @@ cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
 	return retVal;
 }
 
-
-cs_ret_code_t Storage::readNext(cs_state_data_t & stateData) {
+cs_ret_code_t Storage::readNext(cs_state_data_t& stateData) {
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
@@ -245,7 +241,7 @@ cs_ret_code_t Storage::readNext(cs_state_data_t & stateData) {
 /**
  * Simply reads the next valid record of given key.
  */
-cs_ret_code_t Storage::readNextInternal(uint16_t recordKey, uint16_t & fileId, uint8_t* buf, uint16_t size) {
+cs_ret_code_t Storage::readNextInternal(uint16_t recordKey, uint16_t& fileId, uint8_t* buf, uint16_t size) {
 	if (!isValidRecordKey(recordKey)) {
 		return ERR_WRONG_PARAMETER;
 	}
@@ -260,42 +256,41 @@ cs_ret_code_t Storage::readNextInternal(uint16_t recordKey, uint16_t & fileId, u
 	return csRetCode;
 }
 
-cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t & fileId) {
+cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t& fileId) {
 	fds_flash_record_t flashRecord;
 	ret_code_t fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
 	switch (fdsRetCode) {
-	case NRF_SUCCESS: {
-		cs_ret_code_t csRetCode = ERR_SUCCESS;
-		LOGStorageVerbose("Opened record id=%u addr=%p", flashRecord.p_header->record_id, recordDesc.p_record);
-		size_t flashSize = flashRecord.p_header->length_words << 2; // Size is in bytes, each word is 4B.
-		if (flashSize != getPaddedSize(size)) {
-			LOGe("stored size = %u ram size = %u", flashSize, size);
-			// TODO: remove this record?
-			csRetCode = ERR_WRONG_PAYLOAD_LENGTH;
+		case NRF_SUCCESS: {
+			cs_ret_code_t csRetCode = ERR_SUCCESS;
+			LOGStorageVerbose("Opened record id=%u addr=%p", flashRecord.p_header->record_id, recordDesc.p_record);
+			size_t flashSize = flashRecord.p_header->length_words << 2;  // Size is in bytes, each word is 4B.
+			if (flashSize != getPaddedSize(size)) {
+				LOGe("stored size = %u ram size = %u", flashSize, size);
+				// TODO: remove this record?
+				csRetCode = ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			else {
+				fileId = flashRecord.p_header->file_id;
+				memcpy(buf, flashRecord.p_data, size);
+			}
+			if (fds_record_close(&recordDesc) != NRF_SUCCESS) {
+				// TODO: How to handle the close error? Maybe reboot?
+				LOGe("Error on closing record err=%u", fdsRetCode);
+			}
+			return csRetCode;
+			break;
 		}
-		else {
-			fileId = flashRecord.p_header->file_id;
-			memcpy(buf, flashRecord.p_data, size);
-		}
-		if (fds_record_close(&recordDesc) != NRF_SUCCESS) {
-			// TODO: How to handle the close error? Maybe reboot?
-			LOGe("Error on closing record err=%u", fdsRetCode);
-		}
-		return csRetCode;
-		break;
-	}
-	case FDS_ERR_CRC_CHECK_FAILED:
-		LOGw("CRC check failed addr=%p", recordDesc.p_record);
-		// TODO: remove record.
-		break;
-	case FDS_ERR_NOT_FOUND:
-	default:
-		LOGw("Unhandled open error: %u", fdsRetCode);
+		case FDS_ERR_CRC_CHECK_FAILED:
+			LOGw("CRC check failed addr=%p", recordDesc.p_record);
+			// TODO: remove record.
+			break;
+		case FDS_ERR_NOT_FOUND:
+		default: LOGw("Unhandled open error: %u", fdsRetCode);
 	}
 	return getErrorCode(fdsRetCode);
 }
 
-cs_ret_code_t Storage::write(const cs_state_data_t & stateData) {
+cs_ret_code_t Storage::write(const cs_state_data_t& stateData) {
 	return getErrorCode(writeInternal(stateData));
 }
 
@@ -303,13 +298,13 @@ cs_ret_code_t Storage::write(const cs_state_data_t & stateData) {
  * When the space is exhausted, write requests return the error FDS_ERR_NO_SPACE_IN_FLASH, and you must
  * run garbage collection and wait for completion before repeating the call to the write function.
  */
-ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
+ret_code_t Storage::writeInternal(const cs_state_data_t& stateData) {
 	if (!_initialized) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
-	uint16_t fileId = getFileId(stateData.id);
+	uint16_t fileId    = getFileId(stateData.id);
 	if (!isValidRecordKey(recordKey) || !isValidFileId(fileId)) {
 		return ERR_WRONG_PARAMETER;
 	}
@@ -320,9 +315,9 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	fds_record_desc_t recordDesc;
 	ret_code_t fdsRetCode;
 
-	record.file_id           = fileId;
-	record.key               = recordKey;
-	record.data.p_data       = stateData.value;
+	record.file_id     = fileId;
+	record.key         = recordKey;
+	record.data.p_data = stateData.value;
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(stateData.size) >> 2;
@@ -330,7 +325,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	LOGStorageVerbose("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool recordExists = false;
-	fdsRetCode = exists(fileId, recordKey, recordDesc, recordExists);
+	fdsRetCode        = exists(fileId, recordKey, recordDesc, recordExists);
 	if (recordExists) {
 		LOGStorageVerbose("Update key=%u file=%u ptr=%p", record.key, record.file_id, record.data.p_data);
 		fdsRetCode = fds_record_update(&recordDesc, &record);
@@ -357,10 +352,8 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 			break;
 		}
 		case FDS_ERR_NO_SPACE_IN_QUEUES:
-		case FDS_ERR_BUSY:
-			break;
-		default:
-			LOGw("Unhandled write error: %u", fdsRetCode);
+		case FDS_ERR_BUSY: break;
+		default: LOGw("Unhandled write error: %u", fdsRetCode);
 	}
 	return fdsRetCode;
 }
@@ -371,7 +364,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
-	uint16_t fileId = getFileId(id);
+	uint16_t fileId    = getFileId(id);
 	if (!isValidRecordKey(recordKey) || !isValidFileId(fileId)) {
 		return ERR_WRONG_PARAMETER;
 	}
@@ -470,27 +463,37 @@ cs_ret_code_t Storage::continueFactoryReset() {
 	LOGStorageVerbose("continueFactoryReset");
 	fds_record_desc_t recordDesc;
 	fds_flash_record_t flashRecord;
-	ret_code_t fdsRetCode ;
+	ret_code_t fdsRetCode;
 	while (fds_record_iterate(&recordDesc, &_findToken) == NRF_SUCCESS) {
 		bool remove = false;
-		fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
+		fdsRetCode  = fds_record_open(&recordDesc, &flashRecord);
 		switch (fdsRetCode) {
 			case NRF_SUCCESS: {
-				uint16_t fileId = flashRecord.p_header->file_id;
+				uint16_t fileId    = flashRecord.p_header->file_id;
 				uint16_t recordKey = flashRecord.p_header->record_key;
 				if (fds_record_close(&recordDesc) != NRF_SUCCESS) {
 					// TODO: How to handle the close error? Maybe reboot?
 					LOGe("Error on closing record");
 				}
-				CS_TYPE type = toCsType(recordKey);
+				CS_TYPE type     = toCsType(recordKey);
 				cs_state_id_t id = getStateId(fileId);
 
 				remove = removeOnFactoryReset(type, id);
 				if (!remove) {
-					LOGStorageVerbose("skip record type=%u id=%u recordKey=%u fileId=%u", to_underlying_type(type), id, recordKey, fileId);
+					LOGStorageVerbose(
+							"skip record type=%u id=%u recordKey=%u fileId=%u",
+							to_underlying_type(type),
+							id,
+							recordKey,
+							fileId);
 				}
 				else {
-					LOGStorageVerbose("remove record type=%u id=%u recordKey=%u fileId=%u", to_underlying_type(type), id, recordKey, fileId);
+					LOGStorageVerbose(
+							"remove record type=%u id=%u recordKey=%u fileId=%u",
+							to_underlying_type(type),
+							id,
+							recordKey,
+							fileId);
 				}
 				break;
 			}
@@ -499,19 +502,14 @@ cs_ret_code_t Storage::continueFactoryReset() {
 				remove = true;
 				break;
 			case FDS_ERR_NOT_FOUND:
-			default:
-				LOGw("Unhandled open error: %u", fdsRetCode);
-				return getErrorCode(fdsRetCode);
+			default: LOGw("Unhandled open error: %u", fdsRetCode); return getErrorCode(fdsRetCode);
 		}
 		if (remove) {
 			fdsRetCode = fds_record_delete(&recordDesc);
 			switch (fdsRetCode) {
-				case NRF_SUCCESS:
-					return ERR_SUCCESS;
-				case FDS_ERR_NO_SPACE_IN_QUEUES:
-					return ERR_BUSY;
-				default:
-					return getErrorCode(fdsRetCode);
+				case NRF_SUCCESS: return ERR_SUCCESS;
+				case FDS_ERR_NO_SPACE_IN_QUEUES: return ERR_BUSY;
+				default: return getErrorCode(fdsRetCode);
 			}
 		}
 	}
@@ -563,14 +561,14 @@ cs_ret_code_t Storage::eraseAllPages() {
 		return ERR_NOT_AVAILABLE;
 	}
 	// The function fds_flash_end_addr() is available in patched SDKs
-	uint32_t endAddr = fds_flash_end_addr();
+	uint32_t endAddr        = fds_flash_end_addr();
 	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
 	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
-	uint32_t startAddr = endAddr - flashSizeBytes;
+	uint32_t startAddr      = endAddr - flashSizeBytes;
 
 	// Check if pages are already erased.
 	unsigned int* startAddrPointer = (unsigned int*)startAddr;
-	bool isErased = true;
+	bool isErased                  = true;
 	for (uint32_t i = 0; i < flashSizeWords; ++i) {
 		if (startAddrPointer[i] != 0xFFFFFFFF) {
 			isErased = false;
@@ -583,25 +581,25 @@ cs_ret_code_t Storage::eraseAllPages() {
 		return ERR_NOT_AVAILABLE;
 	}
 
-	return erasePages(CS_TYPE::EVT_STORAGE_PAGES_ERASED, (void *)startAddr, (void *)endAddr);
+	return erasePages(CS_TYPE::EVT_STORAGE_PAGES_ERASED, (void*)startAddr, (void*)endAddr);
 }
 
-cs_ret_code_t Storage::erasePages(const CS_TYPE doneEvent, void * startAddressPtr, void * endAddressPtr) {
+cs_ret_code_t Storage::erasePages(const CS_TYPE doneEvent, void* startAddressPtr, void* endAddressPtr) {
 	if (_initialized || isErasingPages()) {
 		return ERR_NOT_AVAILABLE;
 	}
-	unsigned int startAddr = (unsigned int)startAddressPtr;
-	unsigned int endAddr = (unsigned int)endAddressPtr;
+	unsigned int startAddr      = (unsigned int)startAddressPtr;
+	unsigned int endAddr        = (unsigned int)endAddressPtr;
 	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
-	unsigned int startPage = startAddr / pageSize;
-	unsigned int endPage = endAddr / pageSize;
+	unsigned int startPage      = startAddr / pageSize;
+	unsigned int endPage        = endAddr / pageSize;
 	if (startPage > endPage) {
 		APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);
 	}
 
 	LOGw("Erase flash pages: [0x%p - 0x%p) or [%u - %u)", startAddr, endAddr, startPage, endPage);
-	_erasePage = startPage;
-	_eraseEndPage = endPage;
+	_erasePage      = startPage;
+	_eraseEndPage   = endPage;
 	_eraseDoneEvent = doneEvent;
 	eraseNextPage();
 	return ERR_SUCCESS;
@@ -641,9 +639,9 @@ void Storage::eraseNextPage() {
  */
 uint8_t* Storage::allocate(size16_t& size) {
 	// TODO Bart 2019-12-12 Can also use new with align, according to arend.
-	size16_t flashSize = getPaddedSize(size);
+	size16_t flashSize   = getPaddedSize(size);
 	size16_t paddingSize = flashSize - size;
-	uint8_t* ptr = (uint8_t*) malloc(sizeof(uint8_t) * flashSize);
+	uint8_t* ptr         = (uint8_t*)malloc(sizeof(uint8_t) * flashSize);
 	memset(ptr + size, 0xFF, paddingSize);
 	size = flashSize;
 	return ptr;
@@ -686,24 +684,18 @@ void Storage::initSearch() {
 	_currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
-//ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, bool & result) {
-//	fds_record_desc_t record_desc;
-//	return exists(file_id, recordKey, record_desc, result);
-//}
-
 /**
  * Check if a record exists.
  * Warns when it's found multiple times, but doesn't delete them. That would require to make a copy of the first found
  * record_desc.
  * Returns the last found record.
  */
-ret_code_t Storage::exists(cs_file_id_t fileId, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result) {
+ret_code_t Storage::exists(cs_file_id_t fileId, uint16_t recordKey, fds_record_desc_t& record_desc, bool& result) {
 	initSearch();
 	result = false;
 	while (fds_record_find(fileId, recordKey, &record_desc, &_findToken) == NRF_SUCCESS) {
 		if (result) {
 			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
-//			fds_record_delete(&record_desc);
 		}
 		if (!result) {
 			result = true;
@@ -725,6 +717,9 @@ void Storage::clearBusy(uint16_t recordKey) {
 	}
 }
 
+/*
+ * The C++ implemention for isBusy would use std::find, but this has 400 bytes overhead.
+ */
 bool Storage::isBusy(uint16_t recordKey) {
 	if (_collectingGarbage || _removingFile || _performingFactoryReset) {
 		LOGw("Busy: gc=%u rm_file=%u factoryReset=%u", _collectingGarbage, _removingFile, _performingFactoryReset);
@@ -737,139 +732,175 @@ bool Storage::isBusy(uint16_t recordKey) {
 		}
 	}
 	return false;
-	// This costs us 400B or so, not really worth it..
-//	return (std::find(_busy_record_keys.begin(), _busy_record_keys.end(), recordKey) != _busy_record_keys.end());
 }
 
 bool Storage::isBusy() {
 	if (_collectingGarbage || _removingFile || _performingFactoryReset || !_busyRecordKeys.empty()) {
-		LOGw("Busy: gc=%u rm_file=%u factoryReset=%u records=%u", _collectingGarbage, _removingFile, _performingFactoryReset, _busyRecordKeys.size());
+		LOGw("Busy: gc=%u rm_file=%u factoryReset=%u records=%u",
+			 _collectingGarbage,
+			 _removingFile,
+			 _performingFactoryReset,
+			 _busyRecordKeys.size());
 		return true;
 	}
 	return false;
 }
 
 /**
- * Returns cs_ret_code_t given a ret_code_t from FDS.
+ * Returns cs_ret_code_t given a ret_code_t from FDS. Note how some different return codes are mapped to the same error
+ * code.
  */
 cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
 	switch (code) {
-	case NRF_SUCCESS:
-		return ERR_SUCCESS;
-	case FDS_ERR_NOT_FOUND:
-		return ERR_NOT_FOUND;
-	case FDS_ERR_NOT_INITIALIZED:
-		return ERR_NOT_INITIALIZED;
-	case FDS_ERR_NO_SPACE_IN_FLASH:
-		return ERR_NO_SPACE;
-	case FDS_ERR_NO_SPACE_IN_QUEUES:
-	case FDS_ERR_BUSY:
-		return ERR_BUSY;
-	case FDS_ERR_UNALIGNED_ADDR:
-	case FDS_ERR_INVALID_ARG:
-	case FDS_ERR_NULL_ARG:
-		return ERR_WRONG_PARAMETER;
-	default:
-		return ERR_UNSPECIFIED;
+		case NRF_SUCCESS: {
+			return ERR_SUCCESS;
+		}
+		case FDS_ERR_NOT_FOUND: {
+			return ERR_NOT_FOUND;
+		}
+		case FDS_ERR_NOT_INITIALIZED: {
+			return ERR_NOT_INITIALIZED;
+		}
+		case FDS_ERR_NO_SPACE_IN_FLASH: {
+			return ERR_NO_SPACE;
+		}
+		case FDS_ERR_NO_SPACE_IN_QUEUES: {
+			[[fallthrough]];
+		}
+		case FDS_ERR_BUSY: {
+			return ERR_BUSY;
+		}
+		case FDS_ERR_UNALIGNED_ADDR: {
+			[[fallthrough]];
+		}
+		case FDS_ERR_INVALID_ARG: {
+			[[fallthrough]];
+		}
+		case FDS_ERR_NULL_ARG: {
+			return ERR_WRONG_PARAMETER;
+		}
+		default: {
+			return ERR_UNSPECIFIED;
+		}
 	}
 }
 
-void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
+void Storage::handleWriteEvent(fds_evt_t const* p_fds_evt) {
 	clearBusy(p_fds_evt->write.record_key);
 	TYPIFY(EVT_STORAGE_WRITE_DONE) eventData;
 	eventData.type = CS_TYPE(p_fds_evt->write.record_key);
-	eventData.id = getStateId(p_fds_evt->write.file_id);
+	eventData.id   = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
-	case NRF_SUCCESS: {
-		LOGStorageWrite("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
-		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &eventData, sizeof(eventData));
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	default:
-		LOGw("Write FDSerror=%u key=%u file=%u", p_fds_evt->result, p_fds_evt->write.record_key, p_fds_evt->write.file_id);
-		if (_errorCallback) {
-			_errorCallback(CS_STORAGE_OP_WRITE, eventData.type, eventData.id);
+		case NRF_SUCCESS: {
+			LOGStorageWrite(
+					"Write done, key=%u file=%u type=%u id=%u",
+					p_fds_evt->del.record_key,
+					p_fds_evt->del.file_id,
+					to_underlying_type(eventData.type),
+					eventData.id);
+			event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &eventData, sizeof(eventData));
+			EventDispatcher::getInstance().dispatch(event);
+			break;
 		}
-		else {
-			LOGw("Unhandled");
-		}
-		break;
+		default:
+			LOGw("Write FDSerror=%u key=%u file=%u",
+				 p_fds_evt->result,
+				 p_fds_evt->write.record_key,
+				 p_fds_evt->write.file_id);
+			if (_errorCallback) {
+				_errorCallback(CS_STORAGE_OP_WRITE, eventData.type, eventData.id);
+			}
+			else {
+				LOGw("Unhandled");
+			}
+			break;
 	}
 }
 
-void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
+void Storage::handleRemoveRecordEvent(fds_evt_t const* p_fds_evt) {
 	clearBusy(p_fds_evt->del.record_key);
 	TYPIFY(EVT_STORAGE_REMOVE_DONE) eventData;
 	eventData.type = toCsType(p_fds_evt->del.record_key);
-	eventData.id = getStateId(p_fds_evt->del.file_id);
+	eventData.id   = getStateId(p_fds_evt->del.file_id);
 	switch (p_fds_evt->result) {
-	case NRF_SUCCESS: {
-		LOGStorageInfo("Remove done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
-		if (_performingFactoryReset) {
-			continueFactoryReset();
+		case NRF_SUCCESS: {
+			LOGStorageInfo(
+					"Remove done, key=%u file=%u type=%u id=%u",
+					p_fds_evt->del.record_key,
+					p_fds_evt->del.file_id,
+					to_underlying_type(eventData.type),
+					eventData.id);
+			if (_performingFactoryReset) {
+				continueFactoryReset();
+			}
+			else {
+				event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &eventData, sizeof(eventData));
+				EventDispatcher::getInstance().dispatch(event);
+			}
+			break;
 		}
-		else {
-			event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &eventData, sizeof(eventData));
-			EventDispatcher::getInstance().dispatch(event);
-		}
-		break;
-	}
-	default:
-		LOGw("Remove FDSerror=%u key=%u file=%u", p_fds_evt->result, p_fds_evt->del.record_key, p_fds_evt->del.file_id);
-		if (_errorCallback) {
-			_errorCallback(CS_STORAGE_OP_REMOVE, eventData.type, eventData.id);
-		}
-		else {
-			LOGw("Unhandled");
-		}
+		default:
+			LOGw("Remove FDSerror=%u key=%u file=%u",
+				 p_fds_evt->result,
+				 p_fds_evt->del.record_key,
+				 p_fds_evt->del.file_id);
+			if (_errorCallback) {
+				_errorCallback(CS_STORAGE_OP_REMOVE, eventData.type, eventData.id);
+			}
+			else {
+				LOGw("Unhandled");
+			}
 	}
 }
 
-void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
-	_removingFile = false;
+void Storage::handleRemoveFileEvent(fds_evt_t const* p_fds_evt) {
+	_removingFile    = false;
 	cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
-	case NRF_SUCCESS: {
-		LOGStorageInfo("Remove file done, file=%u id=%u", p_fds_evt->del.file_id, id);
-		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE, &id, sizeof(id));
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	default:
-		LOGw("Remove FDSerror=%u file=%u", p_fds_evt->result, p_fds_evt->del.file_id);
-		if (_errorCallback) {
-			_errorCallback(CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id);
+		case NRF_SUCCESS: {
+			LOGStorageInfo("Remove file done, file=%u id=%u", p_fds_evt->del.file_id, id);
+			event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE, &id, sizeof(id));
+			EventDispatcher::getInstance().dispatch(event);
+			break;
 		}
-		else {
-			LOGw("Unhandled");
+		default: {
+			LOGw("Remove FDSerror=%u file=%u", p_fds_evt->result, p_fds_evt->del.file_id);
+			if (_errorCallback) {
+				_errorCallback(CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id);
+			}
+			else {
+				LOGw("Unhandled");
+			}
 		}
 	}
 }
 
-void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
+void Storage::handleGarbageCollectionEvent(fds_evt_t const* p_fds_evt) {
 	_collectingGarbage = false;
 	switch (p_fds_evt->result) {
-	case NRF_SUCCESS: {
-		LOGStorageInfo("Garbage collection successful");
-		if (_performingFactoryReset) {
-			_performingFactoryReset = false;
-			event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE);
-			EventDispatcher::getInstance().dispatch(resetEvent);
-			return;
+		case NRF_SUCCESS: {
+			LOGStorageInfo("Garbage collection successful");
+			if (_performingFactoryReset) {
+				_performingFactoryReset = false;
+				event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE);
+				EventDispatcher::getInstance().dispatch(resetEvent);
+				return;
+			}
+			event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
+			EventDispatcher::getInstance().dispatch(event);
+			break;
 		}
-		event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	case FDS_ERR_OPERATION_TIMEOUT:
-		LOGw("Garbage collection timeout");
-	default:
-		if (_errorCallback) {
-			_errorCallback(CS_STORAGE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0);
+		case FDS_ERR_OPERATION_TIMEOUT: {
+			LOGw("Garbage collection timeout");
+			[[fallthrough]];
 		}
-		else {
-			LOGw("Unhandled GC error: %u", p_fds_evt->result);
+		default: {
+			if (_errorCallback) {
+				_errorCallback(CS_STORAGE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0);
+			}
+			else {
+				LOGw("Unhandled GC error: %u", p_fds_evt->result);
+			}
 		}
 	}
 }
@@ -881,7 +912,7 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
  *   write { record_id, file_id, record_key, is_record_updated },
  *   del { record_id, file_id, record_key }
  */
-void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
+void Storage::handleFileStorageEvent(fds_evt_t const* p_fds_evt) {
 	LOGStorageVerbose("FS: res=%u evt=%u", p_fds_evt->result, p_fds_evt->id);
 	if (_performingFactoryReset && p_fds_evt->result != NRF_SUCCESS) {
 		LOGw("Stopped factory reset process");
@@ -902,19 +933,25 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 			}
 			break;
 		}
-		case FDS_EVT_WRITE:
-		case FDS_EVT_UPDATE:
+		case FDS_EVT_WRITE: {
+			[[fallthrough]];
+		}
+		case FDS_EVT_UPDATE: {
 			handleWriteEvent(p_fds_evt);
 			break;
-		case FDS_EVT_DEL_RECORD:
+		}
+		case FDS_EVT_DEL_RECORD: {
 			handleRemoveRecordEvent(p_fds_evt);
 			break;
-		case FDS_EVT_DEL_FILE:
+		}
+		case FDS_EVT_DEL_FILE: {
 			handleRemoveFileEvent(p_fds_evt);
 			break;
-		case FDS_EVT_GC:
+		}
+		case FDS_EVT_GC: {
 			handleGarbageCollectionEvent(p_fds_evt);
 			break;
+		}
 	}
 }
 
