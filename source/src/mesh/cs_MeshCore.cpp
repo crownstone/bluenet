@@ -35,6 +35,10 @@ extern "C" {
 #include "utils.h"
 }
 
+#define LOGMeshCoreDebug LOGvv
+#define LOGMeshCoreInfo LOGvv
+#define LOGMeshCoreWarn LOGvv
+
 #if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
 #error "Mesh key size doesn't match encryption key size"
 #endif
