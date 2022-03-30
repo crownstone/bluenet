@@ -8,6 +8,7 @@
 #include <dfu/cs_FirmwareSections.h>
 #include <logging/cs_Logger.h>
 #include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
+#include <cfg/cs_MemoryLayout.h>
 
 // -------------- callback for F Storage --------------
 
@@ -20,31 +21,33 @@ void firmwareReaderFsEventHandler(nrf_fstorage_evt_t * p_evt)  {
 
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bluenet>() {
-	return {g_APPLICATION_START_ADDRESS,
-			g_APPLICATION_START_ADDRESS + g_APPLICATION_LENGTH};
+	return {MemorySection::bluenet._start, MemorySection::bluenet._end};
 }
 
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::MicroApp>() {
-	return {g_FLASH_MICROAPP_BASE,
-			g_FLASH_MICROAPP_BASE + static_cast<uint32_t>((CS_FLASH_PAGE_SIZE * g_FLASH_MICROAPP_PAGES) - 1)};
+	return {MemorySection::microapp._start, MemorySection::microapp._start};
 }
 
-// TODO(Arend): is this correct?
 template<>
 const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bootloader>() {
-	return {0x00071000,
-			0x00071000 + CODE_PAGE_SIZE};
+	return {MemorySection::bootloader._start, MemorySection::bootloader._start};
 }
 
 template<>
-const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>() {
-//extern int __start_mbr_params_page, __stop_mbr_params_page;
-//static const uint32_t start_mbr_params_page = static_cast<uint32_t>(__start_mbr_params_page);
-//static const uint32_t stop_mbr_params_page = static_cast<uint32_t>(__stop_mbr_params_page);
-	return {0x00000000,
-			0x00001000};
+const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>() {
+	return {MemorySection::bootloaderSettings._start, MemorySection::bootloaderSettings._start};
 }
+
+
+//template<>
+//const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>() {
+////extern int __start_mbr_params_page, __stop_mbr_params_page;
+////static const uint32_t start_mbr_params_page = static_cast<uint32_t>(__start_mbr_params_page);
+////static const uint32_t stop_mbr_params_page = static_cast<uint32_t>(__stop_mbr_params_page);
+//	return {0x00000000,
+//			0x00001000};
+//}
 
 
 //template<>
@@ -54,11 +57,7 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Mbr>()
 //			0x00001000};
 //}
 
-template<>
-const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>() {
-	return {BOOTLOADER_SETTINGS_ADDRESS,
-			BOOTLOADER_SETTINGS_ADDRESS + CODE_PAGE_SIZE};
-}
+
 
 // --------------------------------------------------------------------------------
 // -------------------- Memory region definitions for fstorage --------------------
@@ -93,13 +92,13 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBootloader) = {
 
 // ------- MBR -------
 
-NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
-		.p_api        = &nrf_fstorage_sd,
-		.p_flash_info = nullptr,
-		.evt_handler  = firmwareReaderFsEventHandler,
-		.start_addr   = getFirmwareSectionLocation<FirmwareSection::Mbr>()._start,
-		.end_addr     = getFirmwareSectionLocation<FirmwareSection::Mbr>()._end,
-};
+//NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
+//		.p_api        = &nrf_fstorage_sd,
+//		.p_flash_info = nullptr,
+//		.evt_handler  = firmwareReaderFsEventHandler,
+//		.start_addr   = getFirmwareSectionLocation<FirmwareSection::Mbr>()._start,
+//		.end_addr     = getFirmwareSectionLocation<FirmwareSection::Mbr>()._end,
+//};
 
 //NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceIpc) = {
 //		.evt_handler = firmwareReaderFsEventHandler,
@@ -127,7 +126,7 @@ const FirmwareSectionInfo getFirmwareSectionInfo(FirmwareSection section) {
 		case FirmwareSection::Bluenet: return getFirmwareSectionInfo<FirmwareSection::Bluenet>();
 		case FirmwareSection::MicroApp: return getFirmwareSectionInfo<FirmwareSection::MicroApp>();
 		case FirmwareSection::Bootloader: return getFirmwareSectionInfo<FirmwareSection::Bootloader>();
-		case FirmwareSection::Mbr: return getFirmwareSectionInfo<FirmwareSection::Mbr>();
+//		case FirmwareSection::Mbr: return getFirmwareSectionInfo<FirmwareSection::Mbr>();
 //		case FirmwareSection::Ipc: return getFirmwareSectionInfo<FirmwareSection::Ipc>();
 		case FirmwareSection::BootloaderSettings: return getFirmwareSectionInfo<FirmwareSection::BootloaderSettings>();
 		default: return getFirmwareSectionInfo();
@@ -152,12 +151,12 @@ const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Bootloader>() 
 	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceBootloader,
 			._addr        = getFirmwareSectionLocation<FirmwareSection::Bootloader>()};
 }
-
-template<>
-const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>() {
-	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceMbr,
-			._addr        = getFirmwareSectionLocation<FirmwareSection::Mbr>()};
-}
+//
+//template<>
+//const FirmwareSectionInfo getFirmwareSectionInfo<FirmwareSection::Mbr>() {
+//	return FirmwareSectionInfo{._fStoragePtr = &firmwareReaderFsInstanceMbr,
+//			._addr        = getFirmwareSectionLocation<FirmwareSection::Mbr>()};
+//}
 
 
 //template<>

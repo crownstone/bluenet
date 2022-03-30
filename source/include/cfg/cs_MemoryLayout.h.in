@@ -35,60 +35,60 @@ struct MemorySection {
 
 const MemorySection bootloader { 
     ._start = ${BOOTLOADER_START_ADDRESS},
-    _end = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
-    _size = ${BOOTLOADER_LENGTH},
-    _type = MemoryType::Flash,
+    ._end = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
+    ._size = ${BOOTLOADER_LENGTH},
+    ._type = MemoryType::Flash,
 };
 
 const MemorySection bootloaderSettings { 
     ._start = ${BOOTLOADER_SETINGS_ADDRESS},
-    _end = 0x00,
-    _size = 0x00,
-    _type = MemoryType::Flash,
+    ._end = 0x00,
+    ._size = 0x00,
+    ._type = MemoryType::Flash,
 
     // bootloader settings backup address: ${BOOTLOADER_SETTINGS_BACKUP_ADDRESS}
 };
 
 const MemorySection bluenet { 
     ._start = ${APPLICATION_START_ADDRESS},
-    _end = ${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH},
-    _size = ${APPLICATION_LENGTH},
-    _type = MemoryType::Flash,
+    ._end = ${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH},
+    ._size = ${APPLICATION_LENGTH},
+    ._type = MemoryType::Flash,
 };
 
 const MemorySection microapp { 
     ._start = ${FLASH_MICROAPP_BASE},
-    _end = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE,
-    _size = ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE,
-    _type = MemoryType::Flash,
+    ._end = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE,
+    ._size = ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE,
+    ._type = MemoryType::Flash,
 };
 
 // const MemorySection fds { 
 //     ._start = 0x00,
-//     _end = 0x00,
-//     _size = 0x00,
-//     _type = MemoryType::Flash,
+//     ._end = 0x00,
+//     ._size = 0x00,
+//     ._type = MemoryType::Flash,
 // };
 
 // const MemorySection ipc { 
 //     ._start = 0x00,
-//     _end = 0x00,
-//     _size = ${RAM_BLUENET_IPC_LENGTH},
-//     _type = MemoryType::Ram,
+//     ._end = 0x00,
+//     ._size = ${RAM_BLUENET_IPC_LENGTH},
+//     ._type = MemoryType::Ram,
 // };
 
 // const MemorySection softdevice { 
 //     ._start = 0x00,
-//     _end = 0x00,
-//     _size = 0x00,
-//     _type = MemoryType::Flash,
+//     ._end = 0x00,
+//     ._size = 0x00,
+//     ._type = MemoryType::Flash,
 // };
 
 // const MemorySection mbr { 
 //     ._start = 0x00,
-//     _end = 0x00,
-//     _size = CODE_PAGE_SIZE,
-//     _type = MemoryType::Flash,
+//     ._end = 0x00,
+//     ._size = CODE_PAGE_SIZE,
+//     ._type = MemoryType::Flash,
 // };
 
 
@@ -96,9 +96,9 @@ const MemorySection microapp {
 
 // const MemorySection flash { 
 //     ._start = 0x00,
-//     _end = 0x00,
-//     _size = 0x00,
-//     _type = MemoryType::Flash,
+//     ._end = 0x00,
+//     ._size = 0x00,
+//     ._type = MemoryType::Flash,
 
 //     // total: ${TOTAL_AMOUNT_FLASH}
 //     // size: ${APPLICATION_START_ADDRESS}
@@ -106,9 +106,9 @@ const MemorySection microapp {
 
 // const MemorySection ram { 
 //     ._start = ${RAM_R1_BASE},
-//     _end = 0x00,
-//     _size = ${RAM_APPLICATION_AMOUNT},
-//     _type = MemoryType::Ram,
+//     ._end = 0x00,
+//     ._size = ${RAM_APPLICATION_AMOUNT},
+//     ._type = MemoryType::Ram,
 //     // total: ${TOTAL_AMOUNT_RAM}
 // };
 
