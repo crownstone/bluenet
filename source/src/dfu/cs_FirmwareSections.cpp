@@ -66,33 +66,40 @@ const FirmwareSectionLocation getFirmwareSectionLocation<FirmwareSection::Bootlo
 
 // ------- Bluenet -------
 NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBluenet) = {
-		.evt_handler = firmwareReaderFsEventHandler,
-		.start_addr  = getFirmwareSectionLocation<FirmwareSection::Bluenet>()._start,
-		.end_addr    = getFirmwareSectionLocation<FirmwareSection::Bluenet>()._end,
+		.p_api        = &nrf_fstorage_sd,
+		.p_flash_info = nullptr,
+		.evt_handler  = firmwareReaderFsEventHandler,
+		.start_addr   = getFirmwareSectionLocation<FirmwareSection::Bluenet>()._start,
+		.end_addr     = getFirmwareSectionLocation<FirmwareSection::Bluenet>()._end,
 };
 
 // ------- MicroApp -------
 NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMicroApp) = {
-		.evt_handler = firmwareReaderFsEventHandler,
-		.start_addr  = getFirmwareSectionLocation<FirmwareSection::MicroApp>()._start,
-		.end_addr    = getFirmwareSectionLocation<FirmwareSection::MicroApp>()._end,
+		.p_api        = &nrf_fstorage_sd,
+		.p_flash_info = nullptr,
+		.evt_handler  = firmwareReaderFsEventHandler,
+		.start_addr   = getFirmwareSectionLocation<FirmwareSection::MicroApp>()._start,
+		.end_addr     = getFirmwareSectionLocation<FirmwareSection::MicroApp>()._end,
 };
 
 // ------- Bootloader -------
 NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBootloader) = {
-		.evt_handler = firmwareReaderFsEventHandler,
-		.start_addr  = getFirmwareSectionLocation<FirmwareSection::Bootloader>()._start,
-		.end_addr    = getFirmwareSectionLocation<FirmwareSection::Bootloader>()._end,
+		.p_api        = &nrf_fstorage_sd,
+		.p_flash_info = nullptr,
+		.evt_handler  = firmwareReaderFsEventHandler,
+		.start_addr   = getFirmwareSectionLocation<FirmwareSection::Bootloader>()._start,
+		.end_addr     = getFirmwareSectionLocation<FirmwareSection::Bootloader>()._end,
 };
 
 // ------- MBR -------
 
 NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
-		.evt_handler = firmwareReaderFsEventHandler,
-		.start_addr  = getFirmwareSectionLocation<FirmwareSection::Mbr>()._start,
-		.end_addr    = getFirmwareSectionLocation<FirmwareSection::Mbr>()._end,
+		.p_api        = &nrf_fstorage_sd,
+		.p_flash_info = nullptr,
+		.evt_handler  = firmwareReaderFsEventHandler,
+		.start_addr   = getFirmwareSectionLocation<FirmwareSection::Mbr>()._start,
+		.end_addr     = getFirmwareSectionLocation<FirmwareSection::Mbr>()._end,
 };
-
 
 //NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceIpc) = {
 //		.evt_handler = firmwareReaderFsEventHandler,
@@ -105,11 +112,12 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceMbr) = {
 // ------- BootloaderSettings -------
 
 NRF_FSTORAGE_DEF(nrf_fstorage_t firmwareReaderFsInstanceBootloaderSettings) = {
-		.evt_handler = firmwareReaderFsEventHandler,
-		.start_addr  = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()._start,
-		.end_addr    = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()._end,
+		.p_api        = &nrf_fstorage_sd,
+		.p_flash_info = nullptr,
+		.evt_handler  = firmwareReaderFsEventHandler,
+		.start_addr   = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()._start,
+		.end_addr     = getFirmwareSectionLocation<FirmwareSection::BootloaderSettings>()._end,
 };
-
 
 // specializations that implement getFirmwareSectionInfo
 
