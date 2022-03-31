@@ -16,8 +16,6 @@
 #include <stdint.h>
 #include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
 
-namespace MemorySection {
-
 enum class MemoryType : uint8_t { 
     Flash = 0,
     Ram = 1,
@@ -32,6 +30,8 @@ struct MemorySection {
 
 // ----------------------------------------------------------------------
 
+namespace Globals {
+namespace MemorySections {
 
 const MemorySection bootloader { 
     ._start = ${BOOTLOADER_START_ADDRESS},
@@ -113,4 +113,5 @@ const MemorySection microapp {
 // };
 
 
-} // namespace MemorySection
+} // namespace MemorySections
+} // namespace Globals

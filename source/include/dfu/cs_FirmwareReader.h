@@ -17,8 +17,6 @@
  */
 class FirmwareReader : public EventListener {
 public:
-
-
 	FirmwareReader();
 
 	/**
@@ -26,10 +24,11 @@ public:
 	 */
 	uint32_t read(uint32_t startIndex, uint32_t size, void* data_out, FirmwareSection section);
 
-
+	/**
+	 * Initializes the static fstorage objects in allocated in cs_FirmwareSections.
+	 */
 	cs_ret_code_t init();
 
-protected:
 private:
 
 	/**
