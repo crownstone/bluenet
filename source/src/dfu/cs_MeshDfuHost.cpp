@@ -116,6 +116,8 @@ void MeshDfuHost::handleEvent(event_t& event) {
 
 	_timeOutRoutine.handleEvent(event);
 
+	// DEBUG
+	// this is solely to initiate a copyFirmwareTo call after boot time-out.
 	if (event.type == CS_TYPE::EVT_TICK) {
 		if (CsMath::Decrease(ticks_until_start) == 1) {
 			LOGMeshDfuHostDebug("starting dfu process");
@@ -125,6 +127,7 @@ void MeshDfuHost::handleEvent(event_t& event) {
 			LOGMeshDfuHostDebug("tick counting: %u ", ticks_until_start);
 		}
 	}
+	// DEBUG END
 }
 
 bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
@@ -135,6 +138,11 @@ bool MeshDfuHost::copyFirmwareTo(device_address_t target) {
 
 	if (!ableToLaunchDfu()) {
 		LOGMeshDfuHostWarn("+++ no init packet available");
+		return false;
+	}
+
+	if(_phaseCurrent != Phase::Idle) {
+		LOGMeshDfuHostWarn("+++ copyFirmwareTo called but not  MeshDfuHost is not idle");
 		return false;
 	}
 
