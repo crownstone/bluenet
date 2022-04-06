@@ -63,13 +63,11 @@ extern "C" {
 #include <util/cs_Syscalls.h>
 }
 
-
-/****************************************************** Preamble *******************************************************/ 
+/****************************************************** Preamble *****************************************************/
 
 cs_ram_stats_t Crownstone::_ramStats;
 
-
-/****************************************** Global functions ******************************************/
+/*********************************************** Global functions ****************************************************/
 
 /**
  * Start the 32 MHz external oscillator.
@@ -146,7 +144,7 @@ void overwrite_hardware_version() {
  */
 void enableNfcPins() {
 	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+		nrf_nvmc_write_word((uint32_t) & (NRF_UICR->NFCPINS), 0);
 	}
 }
 
@@ -171,23 +169,18 @@ void handleZeroCrossing() {
 /************************************************* cs_Crownstone impl *************************************************/
 
 Crownstone::Crownstone(boards_config_t& board)
-		: _boardsConfig(board)
-		,
+	: _boardsConfig(board)
 #if BUILD_MEM_USAGE_TEST == 1
-		_memTest(board)
-		,
+	, _memTest(board)
 #endif
-		_mainTimerId(NULL)
-		, _operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED) {
+{
 	// TODO: can be replaced by: APP_TIMER_DEF(_mainTimerId); Though that makes _mainTimerId a static variable.
-	_mainTimerData = {{0}};
-	_mainTimerId   = &_mainTimerData;
+	_mainTimerId = &_mainTimerData;
 
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 
-	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as
-	// well.
-	this->listen();
+	listen();
+
 	_stack             = &Stack::getInstance();
 	_bleCentral        = &BleCentral::getInstance();
 	_crownstoneCentral = new CrownstoneCentral();
@@ -197,8 +190,8 @@ Crownstone::Crownstone(boards_config_t& board)
 	_state             = &State::getInstance();
 	_commandHandler    = &CommandHandler::getInstance();
 	_factoryReset      = &FactoryReset::getInstance();
+	_scanner           = &Scanner::getInstance();
 
-	_scanner = &Scanner::getInstance();
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
@@ -223,11 +216,16 @@ Crownstone::Crownstone(boards_config_t& board)
 };
 
 std::vector<Component*> Crownstone::getChildren() {
+	LOGd("inspecting children of Crownstone object");
 	return {
-		&_switchAggregator,
-		&_presenceHandler,
-		&_behaviourStore,
-		// TODO: add others (when necessary for weak dependences)
+			&_switchAggregator,
+			&_presenceHandler,
+			&_behaviourStore,
+			_crownstoneCentral,
+#if BUILD_P2P_DFU == 1
+			&_meshDfuHost,
+#endif
+			// (add others when necessary for weak dependences)
 	};
 }
 
@@ -236,14 +234,14 @@ void Crownstone::init(uint16_t step) {
 	updateMinStackEnd();
 	printLoadStats();
 	switch (step) {
-	case 0: {
-		init0();
-		break;
-	}
-	case 1: {
-		init1();
-		break;
-	}
+		case 0: {
+			init0();
+			break;
+		}
+		case 1: {
+			init1();
+			break;
+		}
 	}
 }
 
@@ -289,14 +287,14 @@ void Crownstone::init1() {
 
 void Crownstone::initDrivers(uint16_t step) {
 	switch (step) {
-	case 0: {
-		initDrivers0();
-		break;
-	}
-	case 1: {
-		initDrivers1();
-		break;
-	}
+		case 0: {
+			initDrivers0();
+			break;
+		}
+		case 1: {
+			initDrivers1();
+			break;
+		}
 	}
 }
 
@@ -354,11 +352,12 @@ void Crownstone::initDrivers1() {
 
 	// Store reset reason.
 	sd_power_reset_reason_get(&_resetReason);
-	LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", _resetReason,
-			(_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
-			(_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
-			(_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
-			(_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+	LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u",
+		 _resetReason,
+		 (_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+		 (_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+		 (_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+		 (_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
 
 	// Store gpregret.
 	_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
@@ -435,7 +434,7 @@ void Crownstone::configure() {
 	_stack->initRadio();
 
 	// Don't do garbage collection now, it will block reading flash.
-//	_storage->garbageCollect();
+	//	_storage->garbageCollect();
 
 	increaseResetCounter();
 
@@ -475,31 +474,27 @@ void Crownstone::createService(const ServiceEvent event) {
 			_crownstoneService = new CrownstoneService();
 			_stack->addService(_crownstoneService);
 			break;
-		default:
-			LOGe("Unknown creation event");
+		default: LOGe("Unknown creation event");
 	}
 }
 
-void Crownstone::switchMode(const OperationMode & newMode) {
+void Crownstone::switchMode(const OperationMode& newMode) {
 
 	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
 	LOGd("Switch to mode: %s", operationModeName(newMode));
 
 	switch (_oldOperationMode) {
-		case OperationMode::OPERATION_MODE_UNINITIALIZED:
-			break;
+		case OperationMode::OPERATION_MODE_UNINITIALIZED: break;
 		case OperationMode::OPERATION_MODE_DFU:
 		case OperationMode::OPERATION_MODE_NORMAL:
 		case OperationMode::OPERATION_MODE_SETUP:
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGe("Only switching from UNINITIALIZED to another mode is supported");
 			break;
-		default:
-			LOGe("Unknown mode %i!", newMode);
-			return;
+		default: LOGe("Unknown mode %i!", newMode); return;
 	}
 
-//	_stack->halt();
+	//	_stack->halt();
 
 	// Remove services that belong to the current operation mode.
 	// This is not done... It is impossible to remove services in the SoftDevice.
@@ -529,12 +524,12 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	// Loop through all services added to the stack and create the characteristics.
 	_stack->createCharacteristics();
 
-//	_stack->resume();
+	//	_stack->resume();
 
 	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
 			LOGd("Configure setup mode");
-//			_advertiser->changeToLowTxPower();
+			//			_advertiser->changeToLowTxPower();
 			_advertiser->setNormalTxPower();
 			break;
 		}
@@ -572,7 +567,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 		_stack->setAesEncrypted(true);
 	}
 
-//	_operationMode = newMode;
+	//	_operationMode = newMode;
 }
 
 void Crownstone::setName() {
@@ -601,6 +596,7 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 
 	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
+			LOGi("Start OPERATION_MODE_NORMAL");
 			_scanner->init();
 			_scanner->setStack(_stack);
 
@@ -609,6 +605,7 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 				_mesh->init(_boardsConfig);
 			}
 #endif
+
 			RC5::getInstance().init();
 
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
@@ -622,10 +619,14 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 			_meshTopology.init();
 
 			_assetFiltering.init();
-
+#if BUILD_P2P_DFU == 1
+			_firmwareReader.init();
+			_meshDfuHost.init();
+#endif
 			break;
 		}
 		case OperationMode::OPERATION_MODE_SETUP: {
+			LOGi("Start OPERATION_MODE_SETUP");
 			// In setup mode, we want to listen for incoming UART commands,
 			// so that the programmer can use UART to test it.
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
@@ -682,13 +683,13 @@ void Crownstone::startUp() {
 	// During other operation modes, most of the crownstone's functionality is disabled.
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
 		_systemTime.listen();
-		
+
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 
 		_trackedDevices.init();
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
-			uint16_t delay = RNG::getInstance().getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+			uint16_t delay = RNG::getInstance().getRandom16() / 6;  // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 
@@ -716,6 +717,15 @@ void Crownstone::startUp() {
 	_log(SERIAL_INFO, false, "Address: ");
 	CsUtils::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 	LOGi("Address id=%u type=%u", address.addr_id_peer, address.addr_type);
+
+	// Plain text log.
+	CLOGi("\r\nAddress: %X:%X:%X:%X:%X:%X",
+		  address.addr[5],
+		  address.addr[4],
+		  address.addr[3],
+		  address.addr[2],
+		  address.addr[1],
+		  address.addr[0]);
 
 	_state->startWritesToFlash();
 
@@ -812,15 +822,15 @@ void Crownstone::handleEvent(event_t& event) {
 			 * The following commented out code could be used once FDS has been fixed.
 			 * For now, we use GPREGRET to remember and do it next boot.
 			 */
-//			cs_ret_code_t retCode = _storage->init();
-//			if (retCode != ERR_SUCCESS) {
-//				LOGf("Storage init failed after page erase");
-//				// Only option left is to reboot and see if things work out next time.
-//				APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
-//			}
-//
-//			_setStateValuesAfterStorageRecover = true;
-//			// Wait for storage initialized event.
+			//			cs_ret_code_t retCode = _storage->init();
+			//			if (retCode != ERR_SUCCESS) {
+			//				LOGf("Storage init failed after page erase");
+			//				// Only option left is to reboot and see if things work out next time.
+			//				APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
+			//			}
+			//
+			//			_setStateValuesAfterStorageRecover = true;
+			//			// Wait for storage initialized event.
 			GpRegRet::setFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
 			sd_nvic_SystemReset();
 			break;
@@ -880,33 +890,32 @@ void Crownstone::handleEvent(event_t& event) {
 				break;
 			}
 			memcpy(event.result.buf.data, &_ramStats, sizeof(_ramStats));
-			event.result.dataSize = sizeof(_ramStats);
+			event.result.dataSize   = sizeof(_ramStats);
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		default:
-			LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
+		default: LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
 	}
 
 	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {
-	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
+	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled =
+	// *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
 	// 		// 12-sep-2019 TODO: implement
 	// 		LOGw("TODO ibeacon enabled=%i", enabled);
 	// 		break;
 	// 	}
-
 }
 
 void Crownstone::updateHeapStats() {
 	// Don't have to do much, _sbrk() is the best place to keep up the heap end.
-	_ramStats.maxHeapEnd = (uint32_t)getHeapEndMax();
-	_ramStats.minFree = _ramStats.minStackEnd - _ramStats.maxHeapEnd;
+	_ramStats.maxHeapEnd   = (uint32_t)getHeapEndMax();
+	_ramStats.minFree      = _ramStats.minStackEnd - _ramStats.maxHeapEnd;
 	_ramStats.numSbrkFails = getSbrkNumFails();
 }
 
 void Crownstone::updateMinStackEnd() {
 	void* stackPointer;
-	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	asm("mov %0, sp" : "=r"(stackPointer) : :);
 	if ((uint32_t)stackPointer < _ramStats.minStackEnd) {
 		_ramStats.minStackEnd = (uint32_t)stackPointer;
 	}
@@ -914,16 +923,21 @@ void Crownstone::updateMinStackEnd() {
 
 void Crownstone::printLoadStats() {
 	// Log ram usage.
-	uint8_t *heapPointer = (uint8_t*)malloc(1);
+	uint8_t* heapPointer = (uint8_t*)malloc(1);
 	void* stackPointer;
-	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	asm("mov %0, sp" : "=r"(stackPointer) : :);
 	LOGd("Memory heap=%p, stack=%p", heapPointer, (uint8_t*)stackPointer);
 	free(heapPointer);
 
-	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
+	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u",
+		 (uint32_t)getHeapEnd(),
+		 _ramStats.maxHeapEnd,
+		 _ramStats.minStackEnd,
+		 _ramStats.minFree,
+		 _ramStats.numSbrkFails);
 
 	// Log scheduler usage.
-	__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
+	__attribute__((unused)) uint16_t maxUsed     = app_sched_queue_utilization_get();
 	__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();
 	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
@@ -986,7 +1000,7 @@ int main() {
 		enableNfcPins();
 	}
 
-//	if (IS_CROWNSTONE(board.deviceType)) {
+	//	if (IS_CROWNSTONE(board.deviceType)) {
 	// Turn dimmer off.
 	if (board.pinDimmer != PIN_NONE) {
 		nrf_gpio_cfg_output(board.pinDimmer);
@@ -1012,7 +1026,7 @@ int main() {
 		nrf_gpio_cfg_output(board.pinRelayOn);
 		nrf_gpio_pin_clear(board.pinRelayOn);
 	}
-//	}
+	//	}
 
 	if (board.flags.enableUart) {
 		initUart(board.pinRx, board.pinTx);
@@ -1028,22 +1042,21 @@ int main() {
 
 	printBootloaderInfo();
 
-
-//	// Make a "clicker"
-//	nrf_delay_ms(1000);
-//	nrf_gpio_pin_set(board.pinGpioRelayOn);
-//	nrf_delay_ms(RELAY_HIGH_DURATION);
-//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
-//	while (true) {
-//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
-//		nrf_gpio_pin_set(board.pinGpioRelayOff);
-//		nrf_delay_ms(RELAY_HIGH_DURATION);
-//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
-//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
-//		nrf_gpio_pin_set(board.pinGpioRelayOn);
-//		nrf_delay_ms(RELAY_HIGH_DURATION);
-//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
-//	}
+	//	// Make a "clicker"
+	//	nrf_delay_ms(1000);
+	//	nrf_gpio_pin_set(board.pinGpioRelayOn);
+	//	nrf_delay_ms(RELAY_HIGH_DURATION);
+	//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
+	//	while (true) {
+	//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
+	//		nrf_gpio_pin_set(board.pinGpioRelayOff);
+	//		nrf_delay_ms(RELAY_HIGH_DURATION);
+	//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
+	//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
+	//		nrf_gpio_pin_set(board.pinGpioRelayOn);
+	//		nrf_delay_ms(RELAY_HIGH_DURATION);
+	//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
+	//	}
 
 	Crownstone crownstone(board);
 

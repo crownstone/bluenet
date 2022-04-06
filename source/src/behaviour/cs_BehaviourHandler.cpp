@@ -21,8 +21,8 @@
 #include <test/cs_Test.h>
 
 
-#define LOGBehaviourHandlerDebug LOGnone
-#define LOGBehaviourHandlerVerbose LOGnone
+#define LOGBehaviourHandlerDebug LOGvv
+#define LOGBehaviourHandlerVerbose LOGvv
 
 cs_ret_code_t BehaviourHandler::init() {
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
@@ -71,6 +71,9 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
 			auto request = CS_TYPE_CAST(EVT_MESH_SYNC_REQUEST_OUTGOING, evt.data);
 			request->bits.behaviourSettings = onBehaviourSettingsOutgoingSyncRequest();
+			if(request->bits.behaviourSettings ) {
+				LOGBehaviourHandlerDebug("Requesting behaviour synchronization");
+			}
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {

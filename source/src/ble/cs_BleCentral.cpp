@@ -16,8 +16,8 @@
 #include <structs/buffer/cs_EncryptionBuffer.h>
 
 #define LOGBleCentralInfo LOGi
-#define LOGBleCentralDebug LOGvv
-#define LogLevelBleCentralDebug SERIAL_VERY_VERBOSE
+#define LOGBleCentralDebug LOGd
+#define LogLevelBleCentralDebug SERIAL_DEBUG
 
 const uint16_t WRITE_OVERHEAD      = 3;
 const uint16_t LONG_WRITE_OVERHEAD = 5;
@@ -74,7 +74,7 @@ void BleCentral::init() {
 
 cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 
@@ -156,7 +156,7 @@ cs_ret_code_t BleCentral::connectWithClearance(const device_address_t& address, 
 
 cs_ret_code_t BleCentral::disconnect() {
 	if (isBusy()) {
-		LOGBleCentralInfo("Cancel current operation");
+		LOGBleCentralInfo("Cancel current operation (%u)", static_cast<uint8_t>(_currentOperation));
 		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 
@@ -203,7 +203,7 @@ bool BleCentral::isBusy() {
 
 cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 	if (!isConnected()) {
@@ -214,7 +214,7 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 	uint32_t nrfCode = NRF_SUCCESS;
 	for (uint8_t i = 0; i < uuidCount; ++i) {
 		ble_uuid_t uuid = uuids[i].getUuid();
-		nrfCode         = ble_db_discovery_evt_register(&uuid);
+		nrfCode = ble_db_discovery_evt_register(&uuid); // TODO(20220111): if discover is called several times, prevent re-registration?
 		switch (nrfCode) {
 			case NRF_SUCCESS: break;
 			case NRF_ERROR_NO_MEM: {
@@ -239,8 +239,7 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 	switch (event.evt_type) {
 		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGBleCentralDebug(
-					"Discovery found service uuid=0x%04X type=%u characteristicCount=%u",
+			LOGBleCentralDebug("Discovery found service uuid=0x%04X type=%u characteristicCount=%u",
 					event.params.discovered_db.srv_uuid.uuid,
 					event.params.discovered_db.srv_uuid.type,
 					event.params.discovered_db.char_count);
@@ -255,10 +254,19 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 
 			// Send an event for each characteristic
 			for (uint8_t i = 0; i < event.params.discovered_db.char_count; ++i) {
-				packet.uuid        = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
-				packet.valueHandle = event.params.discovered_db.charateristics[i].characteristic.handle_value;
-				packet.cccdHandle  = event.params.discovered_db.charateristics[i].cccd_handle;
+
+				auto db_char_entry = event.params.discovered_db.charateristics[i];
+
+				packet.uuid = UUID(db_char_entry.characteristic.uuid);
+				packet.valueHandle = db_char_entry.characteristic.handle_value;
+				packet.cccdHandle = db_char_entry.cccd_handle;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
+
+				LOGBleCentralDebug("   char {uuid: 0x%04x, valHandle: 0x%04X, cccdHandle: 0x%04X }",
+						db_char_entry.characteristic.uuid.uuid,
+						db_char_entry.characteristic.handle_value,
+						db_char_entry.cccd_handle);
+
 				eventOut.dispatch();
 			}
 
@@ -312,6 +320,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 
 cs_data_t BleCentral::requestWriteBuffer() {
 	if (isBusy()) {
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return cs_data_t();
 	}
 	uint16_t maxWriteSize = 256;
@@ -320,7 +329,7 @@ cs_data_t BleCentral::requestWriteBuffer() {
 
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 
@@ -349,7 +358,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 		memmove(_buf.data, data, len);
 	}
 	else {
-		LOGBleCentralDebug("Skip copy");
+		LOGBleCentralDebug("Skip copy (optimized)");
 	}
 
 	if (len > _mtu - WRITE_OVERHEAD) {
@@ -429,7 +438,7 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 
 cs_ret_code_t BleCentral::read(uint16_t handle) {
 	if (isBusy()) {
-		LOGBleCentralInfo("Busy");
+		LOGBleCentralInfo("Busy (%u)", static_cast<uint8_t>(_currentOperation));
 		return ERR_BUSY;
 	}
 
@@ -489,6 +498,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 
 	// Handle error first.
 	if (_currentOperation != operation) {
+		bool shouldReturn = false;
+
 		switch (_currentOperation) {
 			case Operation::NONE: {
 				break;
@@ -498,7 +509,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::CONNECT: {
 				// Ignore data, finalize with error instead.
@@ -506,7 +518,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::DISCONNECT: {
 				// Keep on waiting for the disconnect event.
@@ -518,7 +531,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::READ: {
 				// Ignore data, finalize with error instead.
@@ -526,7 +540,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
 			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
@@ -534,8 +549,22 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
-				return;
+				shouldReturn = true;
+				break;
 			}
+		}
+
+		// TODO Arend@Bart (30-12-2021): I've added this because the early returns forgot to send
+		// disconnect events. Maybe it's worth simplifying this by putting the follow-up switch statement
+		// in an else clause?
+		if(operation == Operation::DISCONNECT) {
+			LOGBleCentralDebug("Dispatch disconnect event");
+			event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
+			disconnectEvent.dispatch();
+		}
+
+		if(shouldReturn) {
+			return;
 		}
 	}
 
@@ -620,6 +649,7 @@ void BleCentral::onConnect(uint16_t connectionHandle, const ble_gap_evt_connecte
 		// Wait for MTU response.
 	}
 	else {
+		// TODO(04-01-2022): @Bart is it correct that success is returned here?
 		LOGw("Failed MTU request nrfCode=%u", nrfCode);
 		finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
 	}
@@ -642,7 +672,7 @@ void BleCentral::onDisconnect(const ble_gap_evt_disconnected_t& event) {
 		return;
 	}
 	// TODO: reconnect on certain errors (for example BLE_HCI_CONN_FAILED_TO_BE_ESTABLISHED).
-	LOGBleCentralInfo("Disconnected reason=%u", event.reason);
+	LOGBleCentralInfo("Disconnected reason=0x%X", event.reason);
 
 	// Disconnected, reset state.
 	_connectionHandle = BLE_CONN_HANDLE_INVALID;

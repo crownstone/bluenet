@@ -22,6 +22,8 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
+#include <dfu/cs_MeshDfuConstants.h>
+
 #include <localisation/cs_TrackableEvent.h>
 
 #include <time/cs_TimeSyncMessage.h>
@@ -402,6 +404,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_GPIO_READ,                                    // GPIO, read value (directly)
 	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
 
+	EVT_MESH_DFU_TRANSPORT_RESULT,                    // DFU operation result.   See MeshDfuTransport.h
+	EVT_MESH_DFU_TRANSPORT_RESPONSE,                  // DFU operation response. See MeshDfuTransport.h
+
 	EVT_MICROAPP_BLE_FILTER_INIT,                     // Microapp specific initialization of BLE filter
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
@@ -702,6 +707,11 @@ typedef cs_gpio_init_t TYPIFY(EVT_GPIO_INIT);
 typedef cs_gpio_write_t TYPIFY(EVT_GPIO_WRITE);
 typedef cs_gpio_read_t TYPIFY(EVT_GPIO_READ);
 typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
+
+
+// DFU
+typedef cs_ret_code_t TYPIFY(EVT_MESH_DFU_TRANSPORT_RESULT);
+typedef MeshDfuTransportResponse TYPIFY(EVT_MESH_DFU_TRANSPORT_RESPONSE);
 
 typedef cs_microapp_filter_init_t TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT);
 

@@ -9,6 +9,7 @@
 
 #include <ble/cs_UUID.h>
 #include <events/cs_EventListener.h>
+#include <common/cs_Component.h>
 
 /**
  * Class to connect to another crownstone, and write control commands.
@@ -23,7 +24,7 @@
  * - The CharacteristicReadBuffer to decrypt read data to.
  * - The CharacteristicWriteBuffer to construct control packets.
  */
-class CrownstoneCentral: EventListener {
+class CrownstoneCentral: EventListener, public Component {
 public:
 	/**
 	 * Initializes the class:

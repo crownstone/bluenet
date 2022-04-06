@@ -11,8 +11,10 @@
 #include <events/cs_EventDispatcher.h>
 #include <uart/cs_UartHandler.h>
 
-#define LOGAdvertiserDebug LOGvv
 #define LOGAdvertiserVerbose LOGvv
+#define LOGAdvertiserDebug LOGvv
+#define LOGAdvertiserInfo LOGvv
+#define LOGAdvertiserWarn LOGw
 
 Advertiser::Advertiser() {
 	_stack = &(Stack::getInstance());
@@ -25,14 +27,14 @@ Advertiser::Advertiser() {
 }
 
 void Advertiser::init() {
-	LOGd("init");
+	LOGAdvertiserDebug("init");
 	if (_isInitialized) {
-		LOGw("Already initialized");
+		LOGAdvertiserWarn("Already initialized");
 		return;
 	}
 	// Can't update device name when radio is not initialized (error 0x3001 == BLE_ERROR_NOT_ENABLED).
 	if (!_stack->checkCondition(Stack::C_RADIO_INITIALIZED, true)) {
-		LOGw("Radio not initialized");
+		LOGAdvertiserWarn("Radio not initialized");
 		return;
 	}
 
@@ -59,9 +61,9 @@ void Advertiser::configureAdvertisementParameters() {
 }
 
 void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
-	LOGd("Set advertising interval %u", advertisingInterval);
+	LOGAdvertiserDebug("Set advertising interval %u", advertisingInterval);
 	if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
-		LOGw("Invalid advertising interval %u", advertisingInterval);
+		LOGAdvertiserWarn("Invalid advertising interval %u", advertisingInterval);
 		return;
 	}
 	_advertisingInterval = advertisingInterval;
@@ -75,7 +77,7 @@ void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
 }
 
 void Advertiser::setDeviceName(const std::string& deviceName) {
-	LOGd("Set device name to %s", deviceName.c_str());
+	LOGAdvertiserDebug("Set device name to %s", deviceName.c_str());
 	_deviceName = deviceName; // REVIEW: shouldn't this also be guarded by the if statement below?
 
 	if (!_isInitialized) {
@@ -98,7 +100,7 @@ void Advertiser::setDeviceName(const std::string& deviceName) {
 	 * @retval ::NRF_ERROR_FORBIDDEN Device name is not writable.
 	 */
 	if (nrfCode != NRF_SUCCESS) {
-		LOGw("Failed to set device name: nrfCode=%u", nrfCode);
+		LOGAdvertiserWarn("Failed to set device name: nrfCode=%u", nrfCode);
 		return;
 	}
 }
@@ -114,7 +116,7 @@ void Advertiser::setTxPower(int8_t powerDBm) {
 			// accepted values
 			break;
 		default:
-			LOGw("Invalid TX power: %i", powerDBm);
+			LOGAdvertiserWarn("Invalid TX power: %i", powerDBm);
 			// other values are not accepted
 			return;
 	}
@@ -140,16 +142,16 @@ void Advertiser::setNormalTxPower() {
 
 void Advertiser::updateTxPower() {
 	if (!_isInitialized) {
-		LOGw("Not initialized");
+		LOGAdvertiserWarn("Not initialized");
 		return;
 	}
 
 	if (_advHandle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
-		LOGw("Invalid handle");
+		LOGAdvertiserWarn("Invalid handle");
 		return;
 	}
 
-	LOGi("Update TX power to %i for handle %u", _txPower, _advHandle);
+	LOGAdvertiserInfo("Update TX power to %i for handle %u", _txPower, _advHandle);
 	uint32_t nrfCode = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _advHandle, _txPower);
 	/**
 	 * @retval ::NRF_SUCCESS Successfully changed the transmit power.
@@ -158,7 +160,7 @@ void Advertiser::updateTxPower() {
 	 * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
 	 */
 	if (nrfCode != NRF_SUCCESS) {
-		LOGw("Failed to set TX power: nrfCode=%u", nrfCode);
+		LOGAdvertiserWarn("Failed to set TX power: nrfCode=%u", nrfCode);
 		return;
 	}
 }
@@ -183,7 +185,7 @@ void Advertiser::configureAdvertisement(ServiceData& serviceData, bool asScanRes
 }
 
 void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanResponse) {
-	LOGd("Set service data");
+	LOGAdvertiserDebug("Set service data");
 
 	_serviceData = &serviceData;
 
@@ -212,7 +214,7 @@ void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanRespo
 	advData->p_service_data_array = &_crownstoneServiceData;
 	advData->service_data_count = 1;
 
-	LOGd("Add service data UUID %04X", _crownstoneServiceData.service_uuid);
+	LOGAdvertiserDebug("Add service data UUID %04X", _crownstoneServiceData.service_uuid);
 	// 1 byte AD LEN, 1 byte AD TYPE, 2 bytes UUID, N bytes payload.
 	advertisementDataSize += 2 + sizeof(_crownstoneServiceData.service_uuid) + _crownstoneServiceData.data.size;
 
@@ -225,15 +227,15 @@ void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanRespo
 		bytesLeft = 0;
 	}
 
-	LOGd("Max name length = %u", bytesLeft);
+	LOGAdvertiserDebug("Max name length = %u", bytesLeft);
 	uint8_t nameLength = _deviceName.length();
 	nameLength = std::min(bytesLeft, nameLength);
 
 	if (nameLength == 0) {
-		LOGw("Advertisement too large for a name.");
+		LOGAdvertiserWarn("Advertisement too large for a name.");
 		advData->name_type = BLE_ADVDATA_NO_NAME;
 	}
-	LOGd("Set name to length %u", nameLength);
+	LOGAdvertiserDebug("Set name to length %u", nameLength);
 	advData->short_name_len = nameLength;
 
 	if (!allocateAdvertisementDataBuffers(asScanResponse)) {
@@ -249,7 +251,7 @@ void Advertiser::setAdvertisementData(ServiceData& serviceData, bool asScanRespo
 }
 
 void Advertiser::setAdvertisementData(IBeacon& beacon, bool asScanResponse) {
-	LOGd("Set iBeacon data");
+	LOGAdvertiserDebug("Set iBeacon data");
 
 	ble_advdata_t* advData = &_configAdvertisementData;
 	if (asScanResponse) {
@@ -294,10 +296,10 @@ void Advertiser::setAdvertisementData(IBeacon& beacon, bool asScanResponse) {
 
 
 void Advertiser::startAdvertising() {
-	LOGd("Start advertising");
+	LOGAdvertiserDebug("Start advertising");
 	_wantAdvertising = true;
 	if (!_isInitialized) {
-		LOGw("Not initialized");
+		LOGAdvertiserWarn("Not initialized");
 		return;
 	}
 	if (_advertising) {
@@ -335,7 +337,7 @@ void Advertiser::startAdvertising() {
 	 * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
 	 */
 	if (nrfCode != NRF_SUCCESS) {
-		LOGw("Configure advertisement failed: nrfCode=%u", nrfCode);
+		LOGAdvertiserWarn("Configure advertisement failed: nrfCode=%u", nrfCode);
 		printAdvertisement();
 		return;
 	}
@@ -373,7 +375,7 @@ void Advertiser::startAdvertising() {
 	 */
 	if (nrfCode != NRF_SUCCESS) {
 		// TODO: keep track of failed start?
-		LOGw("Start advertising failed: nrfCode=%u", nrfCode);
+		LOGAdvertiserWarn("Start advertising failed: nrfCode=%u", nrfCode);
 		return;
 	}
 
@@ -383,10 +385,10 @@ void Advertiser::startAdvertising() {
 }
 
 void Advertiser::stopAdvertising() {
-	LOGd("Stop advertising");
+	LOGAdvertiserDebug("Stop advertising");
 	_wantAdvertising = false;
 	if (!_isInitialized) {
-		LOGw("Not initialized");
+		LOGAdvertiserWarn("Not initialized");
 		return;
 	}
 	if (!_advertising) {
@@ -408,7 +410,7 @@ void Advertiser::stopAdvertising() {
 	 * @retval ::NRF_ERROR_INVALID_STATE The advertising handle is not advertising.
 	 */
 	if (nrfCode != NRF_SUCCESS) {
-		LOGw("Stop advertising failed: nrfCode=%u", nrfCode);
+		LOGAdvertiserWarn("Stop advertising failed: nrfCode=%u", nrfCode);
 		return;
 	}
 
@@ -430,14 +432,14 @@ void Advertiser::updateAdvertisementParams() {
 		return;
 	}
 	if (!_isInitialized) {
-		LOGw("Not initialized");
+		LOGAdvertiserWarn("Not initialized");
 		return;
 	}
 
 	if (_stack->isScanning()) {
 		// REVIEW change log and remove comment?
 		// Skip while scanning or we will get invalid state results when stopping/starting advertisement.
-		LOGw("Updating while scanning");
+		LOGAdvertiserWarn("Updating while scanning");
 	}
 
 	bool connectable = _wantConnectable;
@@ -479,7 +481,7 @@ void Advertiser::setNonConnectableAdvParams() {
 
 void Advertiser::updateAdvertisementData() {
 	if (!_isInitialized) {
-		LOGw("Not initialized");
+		LOGAdvertiserWarn("Not initialized");
 		return;
 	}
 	uint32_t nrfCode;
@@ -502,7 +504,7 @@ void Advertiser::updateAdvertisementData() {
 		 *                                 long and its length cannot be encoded with one octet.
 		 */
 		if (nrfCode != NRF_SUCCESS) {
-			LOGw("Encode advertisement data failed: nrfCode=%u", nrfCode);
+			LOGAdvertiserWarn("Encode advertisement data failed: nrfCode=%u", nrfCode);
 			return;
 		}
 	}
@@ -520,7 +522,7 @@ void Advertiser::updateAdvertisementData() {
 		 *                                 long and its length cannot be encoded with one octet.
 		 */
 		if (nrfCode != NRF_SUCCESS) {
-			LOGw("Encode scan response failed: nrfCode=%u", nrfCode);
+			LOGAdvertiserWarn("Encode scan response failed: nrfCode=%u", nrfCode);
 			return;
 		}
 	}
@@ -554,7 +556,7 @@ void Advertiser::updateAdvertisementData() {
 		 * @retval ::BLE_ERROR_GAP_UUID_LIST_MISMATCH Invalid UUID list supplied.
 		 */
 		if (nrfCode != NRF_SUCCESS) {
-			LOGw("Set advertisement data failed: nrfCode=%u", nrfCode);
+			LOGAdvertiserWarn("Set advertisement data failed: nrfCode=%u", nrfCode);
 			return;
 		}
 		// First mark previous buffer as no longer in use, in case it's the same buffer as the one we use now.
@@ -590,7 +592,7 @@ bool Advertiser::allocateAdvertisementDataBuffers(bool scanResponse) {
 			if (bufferPointers[i + offset] == nullptr) {
 				// Out of memory, this shouldn't happen.
 				// Instead of complicated deallocating, we just return false.
-				LOGw("Could not allocate advertisement data buffer");
+				LOGAdvertiserWarn("Could not allocate advertisement data buffer");
 				return false;
 			}
 		}
@@ -606,7 +608,7 @@ uint8_t* Advertiser::getAdvertisementBuffer(bool scanResponse) {
 			return _advertisementDataBuffers[i + offset];
 		}
 	}
-	LOGw("getAdvertisementBuffer: no free buffer");
+	LOGAdvertiserWarn("getAdvertisementBuffer: no free buffer");
 	return nullptr;
 }
 
@@ -631,7 +633,7 @@ void Advertiser::markAdvertisementBuffer(const uint8_t* buffer, bool inUse, bool
 			return;
 		}
 	}
-	LOGw("Buffer not found: %p", buffer);
+	LOGAdvertiserWarn("Buffer not found: %p", buffer);
 }
 
 
@@ -639,7 +641,7 @@ void Advertiser::markAdvertisementBuffer(const uint8_t* buffer, bool inUse, bool
 
 
 void Advertiser::printAdvertisement() {
-	LOGd("_adv_handle=%u", _advHandle);
+	LOGAdvertiserDebug("_adv_handle=%u", _advHandle);
 
 	_log(SERIAL_DEBUG, false, "adv_data len=%u data: ", _advData.adv_data.len);
 	_logArray(SERIAL_DEBUG, true, _advData.adv_data.p_data, _advData.adv_data.len);
@@ -647,8 +649,8 @@ void Advertiser::printAdvertisement() {
 	_log(SERIAL_DEBUG, false, "scan_rsp_data len=%u data: ", _advData.scan_rsp_data.len);
 	_logArray(SERIAL_DEBUG, true, _advData.scan_rsp_data.p_data, _advData.scan_rsp_data.len);
 
-	LOGd("type=%u", _advParams.properties.type);
-	LOGd("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
+	LOGAdvertiserDebug("type=%u", _advParams.properties.type);
+	LOGAdvertiserDebug("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
 			_advParams.channel_mask[0],
 			_advParams.channel_mask[1],
 			_advParams.channel_mask[2],
@@ -715,7 +717,7 @@ void Advertiser::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST: {
 			onConnectOutgoing();
-			if (event.result.returnCode == ERR_EVENT_UNHANDLED) {
+			if (event.result.returnCode == ERR_UNHANDLED) {
 				event.result.returnCode = ERR_SUCCESS;
 			}
 			break;

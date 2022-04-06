@@ -20,7 +20,7 @@
 #include <util/cs_Utils.h>
 
 #define LOGCsCentralInfo LOGi
-#define LOGCsCentralDebug LOGvv
+#define LOGCsCentralDebug LOGd
 #define LogLevelCsCentralDebug SERIAL_VERY_VERBOSE
 
 cs_ret_code_t CrownstoneCentral::init() {
@@ -31,10 +31,13 @@ cs_ret_code_t CrownstoneCentral::init() {
 	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DEVICE_INFO].fromShortUuid(BLE_UUID_DEVICE_INFORMATION_SERVICE);
 	retCode |= _serviceUuids[ServiceIndex::SERVICE_INDEX_DFU].fromShortUuid(0xFE59); // DFU service
 	if (retCode != ERR_SUCCESS) {
+		LOGe("Crownstone Central failed init: %d", retCode);
 		return retCode;
 	}
 	reset();
 	listen();
+
+	LOGCsCentralDebug("Crownstone central initialized");
 	return ERR_SUCCESS;
 }
 
@@ -57,7 +60,7 @@ void CrownstoneCentral::resetNotifactionMergerState() {
 
 cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return ERR_BUSY;
 	}
 
@@ -90,7 +93,7 @@ cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs)
 
 cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return ERR_BUSY;
 	}
 
@@ -107,7 +110,7 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 
 cs_ret_code_t CrownstoneCentral::disconnect() {
 	if (isBusy()) {
-		LOGCsCentralInfo("Cancel current operation");
+		LOGCsCentralInfo("Canceling current operation. Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 	// No need to set current operation: BleCentral will block any other operations for us.
@@ -118,7 +121,7 @@ cs_ret_code_t CrownstoneCentral::disconnect() {
 
 cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return ERR_BUSY;
 	}
 
@@ -164,6 +167,7 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 
 cs_data_t CrownstoneCentral::requestWriteBuffer() {
 	if (isBusy()) {
+		LOGCsCentralInfo("Busy: operation %u, step %u, mode %u", _currentOperation, _currentStep, _opMode);
 		return cs_data_t();
 	}
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
@@ -398,6 +402,7 @@ void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 }
 
 void CrownstoneCentral::onDisconnect() {
+	LOGCsCentralDebug("Crownstone Central onDisconnect");
 	reset();
 	finalizeOperation(_currentOperation, ERR_CANCELED);
 }

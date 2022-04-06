@@ -18,6 +18,10 @@
 //#include <util/cs_BleError.h>
 //#include <util/cs_Utils.h>
 
+#define LOGMeshDebug LOGvv
+#define LOGMeshInfo LOGvv
+
+
 Mesh::Mesh() {
 	_core = &(MeshCore::getInstance());
 }
@@ -40,7 +44,7 @@ bool Mesh::checkFlashValid() {
 }
 
 cs_ret_code_t Mesh::init(const boards_config_t& board) {
-	LOGi("init");
+	LOGMeshInfo("init");
 	_msgHandler.init();
 	_core->registerModelInitCallback([&]() -> void {
 		initModels();
@@ -65,7 +69,7 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 }
 
 void Mesh::initModels() {
-	LOGi("Initializing and adding models");
+	LOGMeshInfo("Initializing and adding models");
 	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
 		_msgHandler.handleMsg(msg, nullptr);
 	});
@@ -96,13 +100,13 @@ void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 
 void Mesh::start() {
 	if (_enabled) {
-		LOGi("start");
+		LOGMeshInfo("start");
 		_core->start();
 	}
 }
 
 cs_ret_code_t Mesh::stop() {
-	LOGi("stop");
+	LOGMeshInfo("stop");
 	return _core->stop();
 }
 
@@ -160,7 +164,7 @@ void Mesh::handleEvent(event_t & event) {
 			// An outgoing connection is made, stop listening to mesh,
 			// so that the softdevice has time to listen for advertisements.
 			cs_ret_code_t retCode = stop();
-			if (event.result.returnCode == ERR_EVENT_UNHANDLED || event.result.returnCode == ERR_SUCCESS) {
+			if (event.result.returnCode == ERR_UNHANDLED || event.result.returnCode == ERR_SUCCESS) {
 				event.result.returnCode = retCode;
 			}
 			break;
@@ -201,7 +205,7 @@ void Mesh::onTick(uint32_t tickCount) {
 				_synced = !requestSync(false);
 
 				if (!_synced) {
-					LOGi("Sync failed");
+					LOGMeshInfo("Sync failed");
 					event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
 					syncFailEvent.dispatch();
 
@@ -240,7 +244,7 @@ bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, &syncRequest, sizeof(syncRequest));
 	event.dispatch();
 
-	LOGd("requestSync bitmask=%u", syncRequest.bitmask);
+	LOGMeshDebug("requestSync bitmask=%u", syncRequest.bitmask);
 
 	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh) {
 		// bitmask == 0 implies sync is unnecessary 

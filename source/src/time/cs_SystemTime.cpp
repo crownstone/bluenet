@@ -113,7 +113,7 @@ constexpr uint32_t SystemTime::debugSyncTimeMessagePeriodMs() {
 void SystemTime::init() {
 	initDebug();
 
-	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
+	syncTimeCoroutine._action = syncTimeCoroutineAction;
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 
@@ -510,7 +510,7 @@ bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_sou
 
 void SystemTime::initDebug() {
 #ifdef DEBUG_SYSTEM_TIME
-	debugSyncTimeCoroutine.action = [](){
+	debugSyncTimeCoroutine._action = [](){
 		LOGd("debug sync time");
 		publishSyncMessageForTesting();
 		return Coroutine::delayMs(debugSyncTimeMessagePeriodMs());

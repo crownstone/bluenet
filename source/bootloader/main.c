@@ -70,6 +70,9 @@
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 
+#ifdef BUILD_P2P_DFU
+#include "nrf_dfu_settings.h"
+#endif
 
 static void on_error(void)
 {
@@ -106,30 +109,114 @@ void app_error_handler_bare(uint32_t error_code)
     on_error();
 }
 
+#ifdef BUILD_P2P_DFU
+
+static bool micro_app_page_cleared = false;
+
+void on_clear_micro_app_page_complete(void* p_buf) {
+	micro_app_page_cleared = true;
+}
+
+static void clear_micro_app_page() {
+	const uint32_t microapp_page_start = 0x69000;
+////	ret_code_t err_code                =
+	nrf_dfu_flash_erase(microapp_page_start, 1, on_clear_micro_app_page_complete);
+}
+
+uint8_t init_cmd_buffer[INIT_COMMAND_MAX_SIZE] = {0};
+uint8_t validationbytes[3][16] = {{48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70},
+							   {70, 69, 68, 67, 66, 65, 57, 56, 55, 54, 53, 52, 51, 50, 49, 48},
+							   {48, 70, 49, 69, 50, 68, 51, 67, 52, 66, 53, 65, 54, 57, 55, 56}}; // 1,2,3... in ascii
+bool init_cmd_write_started = false;
+
+static void write_init_packet_to_micro_app_page(uint8_t offset_index) {
+	if (!micro_app_page_cleared) {
+		return;
+	}
+
+	if(init_cmd_write_started) {
+		// only write once.
+		return;
+	}
+
+	// fill buffer with the offset to increase memrd readibility
+	memset(init_cmd_buffer, 1+offset_index, INIT_COMMAND_MAX_SIZE);
+
+	NRF_LOG_HEXDUMP_INFO(s_dfu_settings.init_command, 128);
+
+	const uint32_t microapp_page_start     = 0x69000;
+	const uint32_t offset_size = 0x80; // INIT_COMMAND_MAX_SIZE; // offset is for debug: every phase gets moved a bit to see where the init packet is complete.
+	const uint32_t validation_int = 0xAEAEAEAE;
+
+	// (s_dfu_settings is defined external in nrf_dfu_settings.h)
+	// it contains:
+	//	.init_command;          /**< Buffer for storing the init command. */
+	//	.progress.command_size; /**< The size of the current init command stored in the DFU settings. */
+//	const uint32_t init_packet_size = s_dfu_settings.progress.command_size;
+
+	// copy dfu init page content to single buffer before writing
+	memcpy(&init_cmd_buffer[0], &s_dfu_settings.progress.command_size, 4);
+	memcpy(&init_cmd_buffer[4], &validation_int, 4);
+	memcpy(&init_cmd_buffer[8], &s_dfu_settings.init_command, s_dfu_settings.progress.command_size);
+
+	//memcpy(&init_cmd_buffer, validationbytes[offset_index], init_packet_size);
+
+	// write the buffer to flash
+	ret_code_t flash_write_status = nrf_dfu_flash_store(
+			microapp_page_start + offset_index * offset_size , init_cmd_buffer, offset_size, NULL);
+	init_cmd_write_started = flash_write_status == NRF_SUCCESS;
+}
+
+#endif
+
 /**
  * @brief Function notifies certain events in DFU process.
  */
 static void dfu_observer(nrf_dfu_evt_type_t evt_type)
 {
-    switch (evt_type)
-    {
-        case NRF_DFU_EVT_DFU_FAILED:
-        case NRF_DFU_EVT_DFU_ABORTED:
-        case NRF_DFU_EVT_DFU_INITIALIZED:
+	// TODO: print nrf_dfu_validation_init_cmd_present() in the various events
 //            bsp_board_init(BSP_INIT_LEDS);
 //            bsp_board_led_on(BSP_BOARD_LED_0);
 //            bsp_board_led_on(BSP_BOARD_LED_1);
 //            bsp_board_led_off(BSP_BOARD_LED_2);
-            break;
-        case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
 //            bsp_board_led_off(BSP_BOARD_LED_1);
 //            bsp_board_led_on(BSP_BOARD_LED_2);
+
+#ifdef BUILD_P2P_DFU
+    static int callcount = 0;
+#endif
+    switch (evt_type)
+    {
+        case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
+        case NRF_DFU_EVT_TRANSPORT_DEACTIVATED:
+        case NRF_DFU_EVT_DFU_FAILED:
+        case NRF_DFU_EVT_DFU_ABORTED:
             break;
-        case NRF_DFU_EVT_DFU_STARTED:
+		// ---------------------------------------
+#ifdef BUILD_P2P_DFU
+        case NRF_DFU_EVT_DFU_INITIALIZED: {
+            clear_micro_app_page();
             break;
+        }
+        case NRF_DFU_EVT_DFU_STARTED: {
+//          write_init_packet_to_micro_app_page(0);
+            break;
+        }
+        case NRF_DFU_EVT_OBJECT_RECEIVED: {
+            write_init_packet_to_micro_app_page(callcount);
+            callcount++;
+            break;
+        }
+        case NRF_DFU_EVT_DFU_COMPLETED: {
+//          write_init_packet_to_micro_app_page(2);
+            break;
+        }
+#endif
         default:
             break;
     }
+
+
 }
 
 /**

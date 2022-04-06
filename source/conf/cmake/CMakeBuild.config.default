@@ -109,6 +109,9 @@ BUILD_CLOSEST_CROWNSTONE_TRACKER=0
 # Enables memory usage testing
 BUILD_MEM_USAGE_TEST=0
 
+# Enable P2P DFU
+BUILD_P2P_DFU=0
+
 # Compile the mesh code.
 BUILD_MESHING=1
 

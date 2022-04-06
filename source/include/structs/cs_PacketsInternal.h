@@ -49,7 +49,7 @@ struct cs_result_t {
 	 *
 	 * Should be set by the handler.
 	 */
-	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
+	cs_ret_code_t returnCode = ERR_UNHANDLED;
 
 	/**
 	 * Buffer to put the result data in (can be nullptr).
