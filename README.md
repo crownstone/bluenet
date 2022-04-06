@@ -88,20 +88,25 @@ There are many ways to help us!
 <!-- CONTRIBUTORS:START -->
 | [<img src="https://avatars.githubusercontent.com/u/2011969" width="110px;"/><br /><sub>Bart van Vliet</sub>](https://github.com/vliedel) | [<img src="https://avatars.githubusercontent.com/u/2161587" width="110px;"/><br /><sub>Dominik Egger</sub>](https://github.com/eggerdo) | [<img src="https://avatars.githubusercontent.com/u/1428585" width="110px;"/><br /><sub>Anne van Rossum</sub>](https://github.com/mrquincle) | [<img src="https://avatars.githubusercontent.com/u/5363277" width="110px;"/><br /><sub>Alex de Mulder</sub>](https://github.com/AlexDM0) | [<img src="https://avatars.githubusercontent.com/u/4710354" width="110px;"/><br /><sub>Marc Hulscher</sub>](https://github.com/marciwi) | [<img src="https://avatars2.githubusercontent.com/u/10497648" width="110px;"/><br /><sub>Christian Haas</sub>](https://github.com/chaasfr) 
 | :---: | :---: | :---: | :---: | :---: | :---: | 
-| [<img src="https://avatars2.githubusercontent.com/u/1262780" width="110px;"/><br /><sub><strong>Peet van Tooren</strong></sub>](https://github.com/kurkesmurfer) | [<img src="https://avatars2.githubusercontent.com/u/54843547" width="110px;"/><br /><sub><strong>Arend de Jonge</strong></sub>](https://github.com/ArrowAcrobatics) | [<img src="https://avatars1.githubusercontent.com/u/29002449" width="110px;"/><br /><sub><strong>Naveen Chakravarthy</strong></sub>](https://github.com/naveenspace7) | [<img src="https://avatars2.githubusercontent.com/u/43705966" width="110px;"/><br /><sub><strong>Aniket Samant</strong></sub>](https://github.com/asamant) |
+| [<img src="https://avatars2.githubusercontent.com/u/1262780" width="110px;"/><br /><sub><strong>Peet van Tooren</strong></sub>](https://github.com/kurkesmurfer) | [<img src="https://avatars2.githubusercontent.com/u/54843547" width="110px;"/><br /><sub><strong>Arend de Jonge</strong></sub>](https://github.com/ArrowAcrobatics) | [<img src="https://avatars1.githubusercontent.com/u/29002449" width="110px;"/><br /><sub><strong>Naveen Chakravarthy</strong></sub>](https://github.com/naveenspace7) | [<img src="https://avatars2.githubusercontent.com/u/43705966" width="110px;"/><br /><sub><strong>Aniket Samant</strong></sub>](https://github.com/asamant) | [<img src="https://avatars.githubusercontent.com/u/33815914" width="110px;"/><br /><sub><strong>Merijn Plagge</strong></sub>](https://github.com/mPlagge) | [<img src="https://avatars.githubusercontent.com/u/23376251" width="110px;"/><br /><sub><strong>Martijn van der Marel</strong></sub>](https://github.com/martijnvandermarel) 
 <!-- CONTRIBUTORS:END -->
 
 # Copyrights
 
-Copyrights belong to the team of Crownstone B.V. and are provided under a noncontagious open-source license:
+Copyrights belong to the team of Crownstone B.V.:
 
 * Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas, Naveen Chakravarthy, Aniket Samant, Arend de Jonge
 * Creation date: 27 Jan. 2014
-* Triple-licensed: LGPL v3+, Apache, MIT
 * Crownstone B.V., https://crownstone.rocks
 * Stationsplein 45 d1.118, 3013 AK Rotterdam, The Netherlands
 
-This code is built on the shoulders of giants. Our special thanks go to Christopher Mason for the initial C++ code base at [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf) and Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductor) for the meshing functionality ([OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh)) and Nordic Semiconductor for the beautiful SoftDevices they have developed. The code of Mason falls under the same triple license. The code by Nordic falls under the license from Nordic (and that code is not part of this repository).
+## Open-source license
+
+This firmware is provided under a noncontagious open-source license towards the open-source community. It's available under three open-source licenses:
+ 
+* License: LGPL v3+, Apache, MIT
+
+Our special thanks go to Christopher Mason for the initial C++ code base at [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf) and Nordic Semiconductor for the beautiful SoftDevices they have developed. The code of Mason falls under the same triple license. The code by Nordic falls under the license from Nordic (see their repositories).
 
 <p align="center">
   <a href="http://www.gnu.org/licenses/lgpl-3.0">
@@ -114,3 +119,13 @@ This code is built on the shoulders of giants. Our special thanks go to Christop
     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0" />
   </a>
 </p>
+
+## Commercial license
+
+This firmware can also be provided under a commercial license. If you are not an open-source developer or are not planning to release adaptations to the code under one or multiple of the mentioned licenses, contact us to obtain a commercial license.
+
+* License: Crownstone commercial license
+
+# Contact
+
+For any question contact us at <https://crownstone.rocks/contact/> or on our discord server through <https://crownstone.rocks/forum/>.
