@@ -10,10 +10,6 @@
 
 #include <logging/cs_Logger.h>
 
-//#include <nrf_assert.h>
-//#include <components/libraries/crypto/nrf_crypto.h>
-//#include <components/libraries/crypto/nrf_crypto_hash.h>
-
 #define LOGFirmwareReaderDebug LOGd
 #define LOGFirmwareReaderInfo LOGi
 
@@ -30,8 +26,8 @@ uint32_t FirmwareReader::initFStorage(FirmwareSection sect) {
 	LOGFirmwareReaderInfo(
 			"initializing fstorage pointer: 0x%X, section: [0x%08X - 0x%08X]",
 			sectionInfo._fStoragePtr,
-			sectionInfo._addr._start,
-			sectionInfo._addr._end);
+			sectionInfo._section._start,
+			sectionInfo._section._end);
 
 	return nrf_fstorage_init(sectionInfo._fStoragePtr, &nrf_fstorage_sd, nullptr);
 }
@@ -61,11 +57,11 @@ uint32_t FirmwareReader::read(uint32_t startIndex, uint32_t size, void* data_out
 
 	auto firmwareSectionInfo = getFirmwareSectionInfo(section);
 
-	[[maybe_unused]] uint32_t readAddress = firmwareSectionInfo._addr._start + startIndex;
+	[[maybe_unused]] uint32_t readAddress = firmwareSectionInfo._section._start + startIndex;
 	// TODO: add boundary check
 
 	uint32_t nrfCode = nrf_fstorage_read(
-			firmwareSectionInfo._fStoragePtr, firmwareSectionInfo._addr._start + startIndex, data_out, size);
+			firmwareSectionInfo._fStoragePtr, firmwareSectionInfo._section._start + startIndex, data_out, size);
 
 	LOGFirmwareReaderDebug("reading %u bytes from address: 0x%x", size, readAddress);
 

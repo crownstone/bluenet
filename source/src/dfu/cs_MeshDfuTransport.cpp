@@ -316,7 +316,7 @@ cs_ret_code_t MeshDfuTransport::_parseResult(cs_const_data_t evtData) {
 		case RES_CODE::OperationFailed:       return ERR_OPERATION_FAILED;
 
 		case RES_CODE::ExtendedError: {
-			uint8_t errcode = evtData.len >=3 ? evtData.data[3] : 0;
+			[[maybe_unused]] uint8_t errcode = evtData.len >=3 ? evtData.data[3] : 0;
 
 			LOGMeshDfuTransportWarn("Dfu Transport extended error: %u",
 						MeshDfuConstants::DfuTransportBle::EXT_ERROR_CODE(errcode));

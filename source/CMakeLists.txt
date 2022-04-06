@@ -77,6 +77,9 @@ math(EXPR SWO_PORT       "${GDB_PORT}+1")
 math(EXPR TELNET_PORT    "${GDB_PORT}+2")
 math(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
+set(BOOTLOADER_SETINGS_ADDRESS "0x7F00")
+set( BOOTLOADER_SETTINGS_BACKUP_ADDRESS "0x7E00")
+
 #######################################################################################################################
 # Show variables
 #######################################################################################################################
@@ -242,6 +245,20 @@ if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 	)
 endif()
 
+
+# auto generate .h sources
+
+message(STATUS "Generate cs_MemoryLayout.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_MemoryLayout.h")
+
+message(STATUS "Configure cs_StaticConfig.h file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
+
+message(STATUS "Configure cs_config.h file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
+
+# auto generate .cpp sources
+
 message(STATUS "Configure cs_Git.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp")
@@ -250,11 +267,6 @@ message(STATUS "Configure cs_AutoConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
-message(STATUS "Configure cs_StaticConfig.h file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
-
-message(STATUS "Configure cs_config.h file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
 
 message(STATUS "Configure nrf_symbols.ld file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
@@ -587,12 +599,12 @@ add_custom_target(write_bootloader_settings
 	)
 
 add_custom_target(read_bootloader_settings
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x7F00" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${BOOTLOADER_SETINGS_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Read bootloader settings from remote target board"
 	)
 
 add_custom_target(read_bootloader_settings_backup
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x7E00" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${BOOTLOADER_SETTINGS_BACKUP_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Read bootloader settings from remote target board"
 	)
 
