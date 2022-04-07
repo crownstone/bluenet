@@ -1,71 +1,3 @@
-## top level flow
-
-```mermaid
-flowchart TD;
-    subgraph Phases
-        %% style
-        classDef blue fill:#2374f7,stroke:#000,stroke-width:2px,color:#fff
-        classDef red fill:#bf3a15,stroke:#000,stroke-width:2px,color:#fff
-        classDef green fill:#0d9116,stroke:#000,stroke-width:2px,color:#fff
-
-
-        %% Phases (corresponding to the MeshDfuHost::Phase enum)
-        N[None]
-        I0[Idle]:::blue
-        I1[Idle]:::blue
-
-        M[TargetTriggerDfuMode]:::green
-        W[WaitForTargetReboot]:::green
-        C[ConnectTargetInDfuMode]:::green
-        D[DiscoverDfuCharacteristics]:::green
-        P[TargetPreparing]:::green
-        T[TargetInitializing]:::green
-        U[TargetUpdating]:::green
-        V[TargetVerifying]:::green
-        
-        A0[Aborting]:::red
-        A1[Aborting]:::red
-        A2[Aborting]:::red
-        
-        %% transitions
-        _i(["init()"])
-        _c(["copyFirmwareTo()"])
-
-        A0 -->|reset process| I0
-
-        N --> _i -->|success| I0
-        _i -->|fail| N
-
-        I0 --> _c -->|success| C
-        _c -->|fail| I0
-        
-        C -->|fail| A1
-        C -->|success| D
-
-        D --> D_COMPLETE_1(["completeDiscoverDfuCharacteristics()"])
-        D_COMPLETE_1{dfu mode?} -->|yes| P
-        D_COMPLETE_1 -->|no| D_COMPLETE_2
-        D_COMPLETE_2{retry dfu?} -->|no| A2
-        D_COMPLETE_2 -->|"yes (first time)"| M
-
-        M -->|fail| A2
-        M -->|dfu command sent| W
-
-        W -->|timeout or receive advertisment| C
-
-        P --> T
-        P -->|failed enabling notifications| A2
-        
-        T --> U
-        T -->|failed streaming init packet| A2
-        
-        U --> V
-        U -->|failed streaming firmware| A2
-
-        V -->|success/done| I1
-        V --> A2
-    end
-```
 
 
 ## phases
@@ -189,20 +121,6 @@ flowchart TD;
 
 ```mermaid
 flowchart TD;
-    subgraph A[Aborting]
-        direction LR
-        A_S[start]
-        A_C[complete]
-        
-        A_S --> A_DIS(["disconnect()"])
-        A_DIS -->A_AB[ERR_WAIT_FOR_SUCCESS]-->|EVT_BLE_CENTRAL_DISCONNECTED| A_C
-        A_AB -->|timeout| A_C
-        A_DIS --> A_EL[else] -->|EVT_TICK| A_C
-    end
-```
-
-```mermaid
-flowchart TD;
     subgraph T[TargetInitializing]
         direction LR
         A_S[start]
@@ -223,5 +141,20 @@ flowchart TD;
         A_S --> T_CMDS
         T_CMDS --> A_C & A_A
 
+    end
+```
+
+
+```mermaid
+flowchart TD;
+    subgraph A[Aborting]
+        direction LR
+        A_S[start]
+        A_C[complete]
+        
+        A_S --> A_DIS(["disconnect()"])
+        A_DIS -->A_AB[ERR_WAIT_FOR_SUCCESS]-->|EVT_BLE_CENTRAL_DISCONNECTED| A_C
+        A_AB -->|timeout| A_C
+        A_DIS --> A_EL[else] -->|EVT_TICK| A_C
     end
 ```
