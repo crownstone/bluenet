@@ -161,18 +161,6 @@ flowchart TD;
         M_S[start]
         M_C[complete]
         M_A[abort]
-
-        
-    end
-```
-
-```mermaid
-flowchart TD;
-    subgraph M["TargetTriggerDfuMode"]
-        direction LR
-        M_S[start]
-        M_C[complete]
-        M_A[abort]
         M_CON(["connect()"])
         M_V(["verifyDisconnect()"])
         M_COM(["sendDufCommand()"])
@@ -196,5 +184,44 @@ flowchart TD;
         M_CCC -->|no| M_C
         
         
+    end
+```
+
+```mermaid
+flowchart TD;
+    subgraph A[Aborting]
+        direction LR
+        A_S[start]
+        A_C[complete]
+        
+        A_S --> A_DIS(["disconnect()"])
+        A_DIS -->A_AB[ERR_WAIT_FOR_SUCCESS]-->|EVT_BLE_CENTRAL_DISCONNECTED| A_C
+        A_AB -->|timeout| A_C
+        A_DIS --> A_EL[else] -->|EVT_TICK| A_C
+    end
+```
+
+```mermaid
+flowchart TD;
+    subgraph T[TargetInitializing]
+        direction LR
+        A_S[start]
+        A_C[complete]
+        A_A[abort]
+
+        subgraph T_CMDS[commands]
+            direction TB
+            A_CMD_SEL(["transport.selectCommand()"])
+            A_CMD_CRE(["transport.createCommand()"])
+            A_STR(["stream() init packet"])
+            A_CMD_SEL -->|EVT_MESH_DFU_TRANSPORT_RESPONSE| A_CMD_CRE
+            A_CMD_CRE -->|EVT_MESH_DFU_TRANSPORT_RESULT| A_STR
+
+            A_STR --> A_STR
+        end
+
+        A_S --> T_CMDS
+        T_CMDS --> A_C & A_A
+
     end
 ```
