@@ -158,3 +158,8 @@ flowchart TD;
         A_DIS --> A_EL[else] -->|EVT_TICK| A_C
     end
 ```
+
+## Todo
+
+TargetUpdating
+TargetVerifying
