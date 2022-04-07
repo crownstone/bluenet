@@ -93,8 +93,6 @@ flowchart TD;
         M_RET -->|retry count-=1| M_S
         M_RET -->|retry count == 0| M_A
     end
-
-    M -->M_COMPLETE([completeConnectTargetInDfuMode]) --> D
 ```
 
 ```mermaid
@@ -131,8 +129,11 @@ flowchart TD;
         direction LR
         W_S[start]
         W_C[complete]
-        W_A[abort]
+        W_CHE(["checkScan()"])
 
-        W_S --> W_C & W_A
+        W_S -->|timeout| W_C
+        W_S -->|EVT_DEVICE_SCANNED| W_CHE
+        W_CHE --> W_O{recognize}-->|target device| W_C
+        W_O -->|other devices| W_S 
     end
 ```
