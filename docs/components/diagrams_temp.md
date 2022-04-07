@@ -2,74 +2,69 @@
 
 ```mermaid
 flowchart TD;
-    %% style
-    classDef blue fill:#2374f7,stroke:#000,stroke-width:2px,color:#fff
-    classDef red fill:#bf3a15,stroke:#000,stroke-width:2px,color:#fff
-    classDef green fill:#0d9116,stroke:#000,stroke-width:2px,color:#fff
+    subgraph Phases
+        %% style
+        classDef blue fill:#2374f7,stroke:#000,stroke-width:2px,color:#fff
+        classDef red fill:#bf3a15,stroke:#000,stroke-width:2px,color:#fff
+        classDef green fill:#0d9116,stroke:#000,stroke-width:2px,color:#fff
 
 
-    %% Phases corresponding to the MeshDfuHost::Phase enum
-    N[None]
-    I0[Idle]:::blue
-    I1[Idle]:::blue
+        %% Phases (corresponding to the MeshDfuHost::Phase enum)
+        N[None]
+        I0[Idle]:::blue
+        I1[Idle]:::blue
 
-    M[TargetTriggerDfuMode]:::green
-    W[WaitForTargetReboot]:::green
-    C[ConnectTargetInDfuMode]:::green
-    D[DiscoverDfuCharacteristics]:::green
-    P[TargetPreparing]:::green
-    T[TargetInitializing]:::green
-    U[TargetUpdating]:::green
-    V[TargetVerifying]:::green
-    
-    A0[Aborting]:::red
-    A1[Aborting]:::red
-    A2[Aborting]:::red
-    %%A3[Aborting]:::red
-    %%A4[Aborting]:::red
-    %%A5[Aborting]:::red
-    
-    %% function calls and branches
-    _i(["init()"])
-    _c(["copyFirmwareTo()"])
+        M[TargetTriggerDfuMode]:::green
+        W[WaitForTargetReboot]:::green
+        C[ConnectTargetInDfuMode]:::green
+        D[DiscoverDfuCharacteristics]:::green
+        P[TargetPreparing]:::green
+        T[TargetInitializing]:::green
+        U[TargetUpdating]:::green
+        V[TargetVerifying]:::green
+        
+        A0[Aborting]:::red
+        A1[Aborting]:::red
+        A2[Aborting]:::red
+        
+        %% transitions
+        _i(["init()"])
+        _c(["copyFirmwareTo()"])
 
-    %% transitions
-    A0 -->|reset process| I0
+        A0 -->|reset process| I0
 
+        N --> _i -->|success| I0
+        _i -->|fail| N
 
-    N --> _i -->|success| I0
-    _i -->|fail| N
+        I0 --> _c -->|success| C
+        _c -->|fail| I0
+        
+        C -->|fail| A1
+        C -->|success| D
 
-    I0 --> _c -->|success| C
-    _c -->|fail| I0
-    
-    C -->|fail| A1
-    C -->|success| D
-    
+        D --> D_COMPLETE_1(["completeDiscoverDfuCharacteristics()"])
+        D_COMPLETE_1{dfu mode?} -->|yes| P
+        D_COMPLETE_1 -->|no| D_COMPLETE_2
+        D_COMPLETE_2{retry dfu?} -->|no| A2
+        D_COMPLETE_2 -->|"yes (first time)"| M
 
-    D --> D_COMPLETE_1(["completeDiscoverDfuCharacteristics()"])
-    D_COMPLETE_1{dfu mode?} -->|yes| P
-    D_COMPLETE_1 -->|no| D_COMPLETE_2
-    D_COMPLETE_2{retry dfu?} -->|no| A2
-    D_COMPLETE_2 -->|"yes (first time)"| M
-    
+        M -->|fail| A2
+        M -->|dfu command sent| W
 
-    M -->|fail| A2
-    M -->|dfu command sent| W
+        W -->|timeout or receive advertisment| C
 
-    W -->|timeout or receive advertisment| C
+        P --> T
+        P -->|failed enabling notifications| A2
+        
+        T --> U
+        T -->|failed streaming init packet| A2
+        
+        U --> V
+        U -->|failed streaming firmware| A2
 
-    P --> T
-    P -->|failed enableing notifications| A2
-    
-    T --> U
-    T -->|failed streaming init packet| A2
-    
-    U --> V
-    U -->|failed streaming firmware| A2
-
-    V -->|success/done| I1
-    V --> A2
+        V -->|success/done| I1
+        V --> A2
+    end
 ```
 
 
@@ -138,23 +133,68 @@ flowchart TD;
     end
 ```
 
-```
+```mermaid
 flowchart TD;
     subgraph P[TargetPreparing]
         direction LR
-        W_S[start]
-        W_C[complete]
-        W_A[abort]
+        P_S[start]
+        P_C[complete]
+        P_A[abort]
 
-        W_S -->|timeout| W_A
-        W_S --> W_E(["enableNotifications()"])
-        W_E -->|EVT_BLE_CENTRAL_WRITE_RESULT| W_CON(["continue()"])
-        W_E -->|not ERR_WAIT_FOR_SUCCESS| W_A
+        P_S -->|timeout| P_A
+        P_S --> P_E(["enableNotifications()"])
+        P_E -->|EVT_BLE_CENTRAL_WRITE_RESULT| P_CON(["continue()"])
+        P_E -->|not ERR_WAIT_FOR_SUCCESS| P_A
 
-        W_CON -->|not ERR_SUCCESS| W_A
-        W_CON --> W_PRE(["transport.prepare()"])
-        W_PRE -->|EVT_MESH_DFU_TRANSPORT_RESULT| W_C
-        W_PRE -->|not ERR_SUCCESS| W_A
+        P_CON -->|not ERR_SUCCESS| P_A
+        P_CON --> P_PRE(["transport.prepare()"])
+        P_PRE -->|EVT_MESH_DFU_TRANSPORT_RESULT| P_C
+        P_PRE -->|not ERR_SUCCESS| P_A
 
+    end
+```
+
+```mermaid
+flowchart TD;
+    subgraph M["TargetTriggerDfuMode"]
+        direction LR
+        M_S[start]
+        M_C[complete]
+        M_A[abort]
+
+        
+    end
+```
+
+```mermaid
+flowchart TD;
+    subgraph M["TargetTriggerDfuMode"]
+        direction LR
+        M_S[start]
+        M_C[complete]
+        M_A[abort]
+        M_CON(["connect()"])
+        M_V(["verifyDisconnect()"])
+        M_COM(["sendDufCommand()"])
+        M_RET{retries left?} 
+        M_CCC{connected?}
+
+        M_S -->|retries -= 1| M_RET
+        M_RET -->|no| M_A
+        M_RET -->|yes| M_CON
+
+        M_CON -->|EVT_CS_CENTRAL_CONNECT_RESULT| M_COM
+        M_CON -->|timeout| M_S
+
+        M_COM -->|not connected or ble busy: sleep| M_S
+        M_COM -->|timeout| M_A
+        M_COM -->|EVT_BLE_CENTRAL_DISCONNECTED| M_V
+
+        M_V --> M_CCC
+        M_V -->|timeout| M_A
+        M_CCC -->|yes| M_V
+        M_CCC -->|no| M_C
+        
+        
     end
 ```
