@@ -137,3 +137,23 @@ flowchart TD;
         W_O -->|other devices| W_S 
     end
 ```
+
+```
+flowchart TD;
+    subgraph P[TargetPreparing]
+        direction LR
+        W_S[start]
+        W_C[complete]
+        W_A[abort]
+
+        W_S --> W_E(["enableNotifications()"])
+        W_E -->|EVT_BLE_CENTRAL_WRITE_RESULT| W_CON(["continue()"])
+        W_E -->|not ERR_WAIT_FOR_SUCCESS| W_A
+
+        W_CON -->|not ERR_SUCCESS| W_A
+        W_CON --> W_PRE(["transport.prepare()"])
+        W_PRE -->|EVT_MESH_DFU_TRANSPORT_RESULT| W_C
+        W_PRE -->|not ERR_SUCCESS| W_A
+
+    end
+```
