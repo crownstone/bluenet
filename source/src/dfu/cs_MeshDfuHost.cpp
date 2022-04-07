@@ -530,6 +530,7 @@ bool MeshDfuHost::startPhaseTargetPreparing() {
 	LOGMeshDfuHostDebug("+++ startPhaseTargetPreparing");
 
 	setEventCallback(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, &MeshDfuHost::continuePhaseTargetPreparing);
+	setTimeoutCallback(&MeshDfuHost::abort);
 	cs_ret_code_t ret = _meshDfuTransport.enableNotifications(true);
 
 	// TODO: retry?

@@ -146,6 +146,7 @@ flowchart TD;
         W_C[complete]
         W_A[abort]
 
+        W_S -->|timeout| W_A
         W_S --> W_E(["enableNotifications()"])
         W_E -->|EVT_BLE_CENTRAL_WRITE_RESULT| W_CON(["continue()"])
         W_E -->|not ERR_WAIT_FOR_SUCCESS| W_A
