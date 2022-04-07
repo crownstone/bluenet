@@ -1,52 +1,81 @@
-# Peer to peer firmware updates
-
-This component enables crownstones to update their peers on command.
-Currently it doesn't synchronize or do version checking except for checks
-that the bootloader already executes.
-
-
-# Testing
-
-```mermaid
-sequenceDiagram
-    participant L as laptop
-    participant H as cs-host
-    participant T as cs-target
-    L->>L: build targets
-    L->>H: erase
-    L->>T: erase
-    
-    L->>T: load bootloader with logs + master firmware (version X)
-    T->>T: reboot (prints version X)
-    L->>H: load bootloader no logs + p2p dfu feature firmware (version Y)
-    H->>H: reboot (prints version Y)
-
-    H->>T: dfu
-    T->>T: on error: bootloader prints
-    T->>T: on success: reboots (prints version Y)
-```
-
-# Process
-
-This is an in depth flow chart of the dfu process.
+## top level flow
 
 ```mermaid
 flowchart TD;
+    %% style
+    classDef blue fill:#2374f7,stroke:#000,stroke-width:2px,color:#fff
+    classDef red fill:#bf3a15,stroke:#000,stroke-width:2px,color:#fff
+    classDef green fill:#0d9116,stroke:#000,stroke-width:2px,color:#fff
+
+
     %% Phases corresponding to the MeshDfuHost::Phase enum
     N[None]
-    I[Idle]
+    I0[Idle]:::blue
+    I1[Idle]:::blue
+
+    M[TargetTriggerDfuMode]:::green
+    W[WaitForTargetReboot]:::green
+    C[ConnectTargetInDfuMode]:::green
+    D[DiscoverDfuCharacteristics]:::green
+    P[TargetPreparing]:::green
+    T[TargetInitializing]:::green
+    U[TargetUpdating]:::green
+    V[TargetVerifying]:::green
+    
+    A0[Aborting]:::red
+    A1[Aborting]:::red
+    A2[Aborting]:::red
+    %%A3[Aborting]:::red
+    %%A4[Aborting]:::red
+    %%A5[Aborting]:::red
     
     %% function calls and branches
     _i(["init()"])
     _c(["copyFirmwareTo()"])
 
     %% transitions
-    N --> _i -->|success| I
+    A0 -->|reset process| I0
+
+
+    N --> _i -->|success| I0
     _i -->|fail| N
 
-    I --> _c -->|success| M
-    _c -->|fail| I
+    I0 --> _c -->|success| C
+    _c -->|fail| I0
+    
+    C -->|fail| A1
+    C -->|success| D
+    
 
+    D --> D_COMPLETE_1(["completeDiscoverDfuCharacteristics()"])
+    D_COMPLETE_1{dfu mode?} -->|yes| P
+    D_COMPLETE_1 -->|no| D_COMPLETE_2
+    D_COMPLETE_2{retry dfu?} -->|no| A2
+    D_COMPLETE_2 -->|"yes (first time)"| M
+    
+
+    M -->|fail| A2
+    M -->|dfu command sent| W
+
+    W -->|timeout or receive advertisment| C
+
+    P --> T
+    P -->|failed enableing notifications| A2
+    
+    T --> U
+    T -->|failed streaming init packet| A2
+    
+    U --> V
+    U -->|failed streaming firmware| A2
+
+    V -->|success/done| I1
+    V --> A2
+```
+
+
+## phases
+```mermaid
+flowchart TD;
     subgraph M["ConnectTargetInDfuMode"]
         direction LR
         M_S[start]
@@ -66,7 +95,10 @@ flowchart TD;
     end
 
     M -->M_COMPLETE([completeConnectTargetInDfuMode]) --> D
+```
 
+```mermaid
+flowchart TD;
     subgraph D["DiscoverDfuCharacteristics"]
         direction LR
         D_S[start]
@@ -90,12 +122,11 @@ flowchart TD;
         D_CHE -->|yes| D_C
         D_CHE -->|no| D_BTD --> D_C
     end
+```
 
-    D --> D_COMPLETE([completeDiscoverDfuCharacteristics])
-    %% D_COMPLETE -->|target is in dfu mode| preparing
-    %% D_COMPLETE -->|not tried dfu| trigger dfu
-    %% D_COMPLETE -->|else| abort 
 
+```mermaid
+flowchart TD;
     subgraph W["WaitForTargetReboot"]
         direction LR
         W_S[start]
@@ -104,5 +135,4 @@ flowchart TD;
 
         W_S --> W_C & W_A
     end
-
 ```
