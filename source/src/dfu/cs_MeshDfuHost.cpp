@@ -491,7 +491,7 @@ void MeshDfuHost::onDiscoveryResult(event_t& event) {
 		return;
 	}
 
-	if (!_meshDfuTransport.isTargetInDfuMode() && !_triedDfuCommand) {
+	if (!_meshDfuTransport.isTargetInDfuMode()) {
 		LOGMeshDfuHostDebug("+++ dfu mode verification failed, disconnecting and retrying");
 		// we'll need to reconnect as crownstone central
 
