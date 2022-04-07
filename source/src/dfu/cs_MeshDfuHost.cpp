@@ -627,7 +627,10 @@ void MeshDfuHost::targetInitializingStreamInitPacket(event_t& event) {
 	stream();
 }
 
-void MeshDfuHost::targetInitializingExecute(event_t& event) {}
+void MeshDfuHost::targetInitializingExecute(event_t& event) {
+	// TODO: this will need to be in the next phase as stream() will completePhase().
+	// _meshDfuTransport._execute();
+}
 
 MeshDfuHost::Phase MeshDfuHost::completePhaseTargetInitializing() {
 	LOGMeshDfuHostDebug("+++ completePhaseTargetInitializing");
