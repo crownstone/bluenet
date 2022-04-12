@@ -31,6 +31,7 @@ Notes on the diagram:
 - setting both devices in the same sphere is necessary
 - using a DFU tool to load version Y on the host crownstone is necessary. (It places the dfu init packet in the correct location so that bluenet can execute the dfu process.)
 - it is not necessary to enable bootloader logging on the host, but nice to have during testing.
+- Make sure that version Y is not identical to X.
 
 
 # Process

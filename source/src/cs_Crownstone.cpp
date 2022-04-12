@@ -96,7 +96,7 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_config(pinRx, pinTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
 
-	LOGi("Welcome to Bluenet!");
+	LOGi("Hi! Welcome to Bluenet!");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
 	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
