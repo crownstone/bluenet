@@ -12,19 +12,26 @@ sequenceDiagram
     participant L as laptop
     participant H as cs-host
     participant T as cs-target
-    L->>L: build targets
-    L->>H: erase
-    L->>T: erase
+    L->>L: build fw: version X<br>(master + bootloader logging )
+    L->>H: erase, flash, setup
+    H->>H: reboot<br>(prints version X)
+    L->>T: erase, flash, setup
+    T->>T: reboot<br>(prints version X)
     
-    L->>T: load bootloader with logs + master firmware (version X)
-    T->>T: reboot (prints version X)
-    L->>H: load bootloader no logs + p2p dfu feature firmware (version Y)
-    H->>H: reboot (prints version Y)
+    L->>L: build fw: version Y<br>host + bootloader logging
+    L->>H: DFU version Y
+    H->>H: reboot<br>(prints version Y)
 
-    H->>T: dfu
-    T->>T: on error: bootloader prints
-    T->>T: on success: reboots (prints version Y)
+    H->>T: DFU
+    T->>T: on error: print<br>(bootloader errors)
+    T->>T: on success: reboots<br>(prints version Y)
 ```
+
+Notes on the diagram:
+- setting both devices in the same sphere is necessary
+- using a DFU tool to load version Y on the host crownstone is necessary. (It places the dfu init packet in the correct location so that bluenet can execute the dfu process.)
+- it is not necessary to enable bootloader logging on the host, but nice to have during testing.
+
 
 # Process
 
