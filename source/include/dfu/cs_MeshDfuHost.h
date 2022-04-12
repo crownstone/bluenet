@@ -516,6 +516,9 @@ private:
 public:
 	/**
 	 * Checks _expectedEvent and calls the callback if it matches and is non-null.
+	 * If so, call the _onExpectedEvent callback.
+	 *
+	 * After that, handle timeout routine.
 	 */
 	virtual void handleEvent(event_t & event) override;
 };
