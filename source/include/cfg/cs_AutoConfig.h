@@ -34,10 +34,6 @@ extern uint32_t g_DEFAULT_HARDWARE_BOARD;
 
 extern uint8_t g_MICROAPP_NUMBER;
 
-extern uint32_t g_RAM_MICROAPP_BASE;
-
-extern uint32_t g_RAM_MICROAPP_AMOUNT;
-
 extern int8_t g_MAX_CHIP_TEMPERATURE;
 
 extern uint16_t g_BOOT_DELAY;

@@ -22,8 +22,8 @@ enum MemoryType {
 };
 
 struct MemorySection {
-	uint32_t _start;
-	uint32_t _end;
+	uintptr_t _start;
+	uintptr_t _end;
 	uint32_t _size;
 	enum MemoryType _type;
 };
@@ -31,7 +31,7 @@ struct MemorySection {
 _Static_assert(
 		BOOTLOADER_SETTINGS_ADDRESS == ${CS_BOOTLOADER_SETTINGS_ADDRESS}, "Bootloader settings address mismatch");
 
-const struct MemorySection bootloaderMemorySection = {
+const struct MemorySection bootloaderFlashSection = {
 		._start = ${BOOTLOADER_START_ADDRESS},
 		._end   = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
 		._size  = ${BOOTLOADER_LENGTH},
@@ -43,7 +43,7 @@ const struct MemorySection bootloaderMemorySection = {
  * The size of the settings page can also be found in components/libraries/bootloader/dfu/nrf_dfu_types.h:
  *     BOOTLOADER_SETTINGS_PAGE_SIZE = CODE_PAGE_SIZE
  */
-const struct MemorySection bootloaderSettingsMemorySection = {
+const struct MemorySection bootloaderSettingsFlashSection = {
 		// The size of bootloader settings is at minimum one page: CODE_PAGE_SIZE
 		._start = ${CS_BOOTLOADER_SETTINGS_ADDRESS},
 		._end   = ${CS_BOOTLOADER_SETTINGS_ADDRESS} + CODE_PAGE_SIZE,
@@ -52,7 +52,7 @@ const struct MemorySection bootloaderSettingsMemorySection = {
 		// bootloader settings backup address: ${BOOTLOADER_SETTINGS_BACKUP_ADDRESS}
 };
 
-const struct MemorySection bluenetMemorySection = {
+const struct MemorySection bluenetFlashSection = {
 		._start = ${APPLICATION_START_ADDRESS},
 		._end   = ${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH},
 		._size  = ${APPLICATION_LENGTH},
@@ -63,13 +63,12 @@ const struct MemorySection bluenetMemorySection = {
  * The start and end is about the entire section for all microapps. Use _size / g_MICROAPP_NUMBER to get back to the
  * individual size for a microapp.
  */
-const struct MemorySection microappMemorySection = {
+const struct MemorySection microappFlashSection = {
 		._start = ${FLASH_MICROAPP_BASE},
 		._end   = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_NUMBER},
 		._size  = ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_NUMBER},
 		._type  = MT_Flash,
 };
-
 
 // const struct MemorySection fds {
 //     ._start = 0x00,
@@ -78,12 +77,21 @@ const struct MemorySection microappMemorySection = {
 //     ._type = MT_Flash,
 // };
 
-// const struct MemorySection ipc {
-//     ._start = 0x00,
-//     ._end = 0x00,
-//     ._size = ${RAM_BLUENET_IPC_LENGTH},
-//     ._type = MT_Ram,
-// };
+const struct MemorySection ipcRamSection = {
+		// Values should match the ones in generic_gcc_nrf52.ld
+		._start = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH},
+		._end   = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT},
+		._size  = ${RAM_BLUENET_IPC_LENGTH},
+		._type  = MT_Ram,
+};
+
+const struct MemorySection microappRamSection = {
+		._start = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH}
+				  - (${RAM_MICROAPP_AMOUNT} * ${MICROAPP_NUMBER}),
+		._end  = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH},
+		._size = ${RAM_MICROAPP_AMOUNT} * ${MICROAPP_NUMBER},
+		._type = MT_Ram,
+};
 
 // const struct MemorySection softdevice {
 //     ._start = 0x00,
