@@ -32,9 +32,7 @@ extern uint32_t g_HARDWARE_BOARD_ADDRESS;
 
 extern uint32_t g_DEFAULT_HARDWARE_BOARD;
 
-extern uint32_t g_FLASH_MICROAPP_BASE;
-
-extern uint8_t g_FLASH_MICROAPP_PAGES;
+extern uint8_t g_MICROAPP_NUMBER;
 
 extern uint32_t g_RAM_MICROAPP_BASE;
 

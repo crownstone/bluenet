@@ -10,6 +10,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_MemoryLayout.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
@@ -60,8 +61,8 @@ static void fs_evt_handler(nrf_fstorage_evt_t* event) {
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 NRF_FSTORAGE_DEF(nrf_fstorage_t nrf_microapp_storage) = {
 		.evt_handler = fs_evt_handler,
-		.start_addr  = g_FLASH_MICROAPP_BASE,
-		.end_addr    = g_FLASH_MICROAPP_BASE + (CS_FLASH_PAGE_SIZE * g_FLASH_MICROAPP_PAGES) - 1,
+		.start_addr  = microappMemorySection._start,
+		.end_addr    = microappMemorySection._end,
 };
 #pragma GCC diagnostic pop
 

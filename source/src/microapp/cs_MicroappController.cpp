@@ -219,13 +219,19 @@ void MicroappController::setIpcRam() {
 	LOGi("Set ram data for microapp, retCode=%u", retCode);
 }
 
+#include <cfg/cs_MemoryLayout.h>
+
 /*
  * Checks flash boundaries (for single microapp).
  */
 cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr_t address) {
-	uintptr_t memoryMicroappOffset = (g_FLASH_MICROAPP_PAGES * 0x1000) * appIndex;
-	uintptr_t addressLow           = g_FLASH_MICROAPP_BASE + memoryMicroappOffset;
-	uintptr_t addressHigh          = addressLow + g_FLASH_MICROAPP_PAGES * 0x1000;
+	if(appIndex >= g_MICROAPP_NUMBER) {
+		return ERR_UNSAFE;
+	}
+	uint32_t microappSize = microappMemorySection._size / g_MICROAPP_NUMBER;
+	uintptr_t memoryMicroappOffset = microappSize * appIndex;
+	uintptr_t addressLow           = microappMemorySection._start + memoryMicroappOffset;
+	uintptr_t addressHigh          = addressLow + microappSize;
 	if (address < addressLow) {
 		return ERR_UNSAFE;
 	}

@@ -266,6 +266,7 @@ BOOTLOADER_LENGTH=0x8000
 #BOOTLOADER_LENGTH=0xD000
 
 # This setting is defined in nrf_dfu_types.h. Here we predefine it so it is available to the wider code base.
+# This is the bootloader settings address for the nRF52832-QFAA.
 CS_BOOTLOADER_SETTINGS_ADDRESS=0x7F000
 
 # Has to match values in: bootloader/secure_bootloader_gcc_nrf52.ld
@@ -505,10 +506,13 @@ AUTO_ENABLE_MICROAPP_ON_BOOT=0
 # The start of microapps in flash
 FLASH_MICROAPP_BASE=0x69000
 
-# The number of pages for microapps (each page is 0x1000 / 4096 bytes)
+# The number of pages for a single microapp (each page is 0x1000 / 4096 bytes)
 FLASH_MICROAPP_PAGES=2
 
-# The amount of RAM it is allowed to use (microapp is placed before IPC ram, and grows down).
+# The number of microapps supported
+MICROAPP_NUMBER=1
+
+# The amount of RAM a single microapp is allowed to use (before IPC ram, and grows down).
 RAM_MICROAPP_AMOUNT=0x800
 
 # Default location of file with keys to setup Crownstone
