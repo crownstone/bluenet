@@ -18,7 +18,7 @@ The global layout of the the flash is shown below:
 | 0x00026000 | App / Bluenet | 54
 | 0x0005C000 | Free | 13
 | 0x00069000 | Microapp | 4
-| 0x0006D000 | IPC page | 1
+| 0x0006D000 | P2P DFU | 1
 | 0x0006E000 | Reserved for FDS expansion | 4
 | 0x00072000 | FDS | 4
 | 0x00076000 | Bootloader | 7
