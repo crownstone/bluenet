@@ -16,100 +16,99 @@
 #include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
 #include <stdint.h>
 
-enum class MemoryType : uint8_t {
-	Flash = 0,
-	Ram   = 1,
+enum MemoryType {
+	MT_Flash = 0,
+	MT_Ram   = 1,
 };
 
 struct MemorySection {
 	uint32_t _start;
 	uint32_t _end;
 	uint32_t _size;
-	MemoryType _type;
+	enum MemoryType _type;
 };
 
-// ----------------------------------------------------------------------
+_Static_assert(
+		BOOTLOADER_SETTINGS_ADDRESS == ${CS_BOOTLOADER_SETTINGS_ADDRESS}, "Bootloader settings address mismatch");
 
-namespace Globals {
-namespace MemorySections {
-
-const MemorySection bootloader = {
+const struct MemorySection bootloader = {
 		._start = ${BOOTLOADER_START_ADDRESS},
 		._end   = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
 		._size  = ${BOOTLOADER_LENGTH},
-		._type  = MemoryType::Flash,
+		._type  = MT_Flash,
 };
 
-const MemorySection bootloaderSettings = {
+/**
+ *
+ * The size of the settings page can also be found in components/libraries/bootloader/dfu/nrf_dfu_types.h:
+ *     BOOTLOADER_SETTINGS_PAGE_SIZE = CODE_PAGE_SIZE
+ */
+const struct MemorySection bootloaderSettings = {
 		// The size of bootloader settings is at minimum one page: CODE_PAGE_SIZE
-		._start = ${BOOTLOADER_SETTINGS_ADDRESS},
-		._end   = ${BOOTLOADER_SETTINGS_ADDRESS} + CODE_PAGE_SIZE,
+		._start = ${CS_BOOTLOADER_SETTINGS_ADDRESS},
+		._end   = ${CS_BOOTLOADER_SETTINGS_ADDRESS} + CODE_PAGE_SIZE,
 		._size  = CODE_PAGE_SIZE,
-		._type  = MemoryType::Flash,
+		._type  = MT_Flash,
 		// bootloader settings backup address: ${BOOTLOADER_SETTINGS_BACKUP_ADDRESS}
 };
 
-const MemorySection bluenet = {
+const struct MemorySection bluenet = {
 		._start = ${APPLICATION_START_ADDRESS},
 		._end   = ${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH},
 		._size  = ${APPLICATION_LENGTH},
-		._type  = MemoryType::Flash,
+		._type  = MT_Flash,
 };
 
-const MemorySection microapp = {
+const struct MemorySection microapp = {
 		._start = ${FLASH_MICROAPP_BASE},
 		._end   = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE,
 		._size  = ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE,
-		._type  = MemoryType::Flash,
+		._type  = MT_Flash,
 };
 
-// const MemorySection fds {
+// const struct MemorySection fds {
 //     ._start = 0x00,
 //     ._end = 0x00,
 //     ._size = 0x00,
-//     ._type = MemoryType::Flash,
+//     ._type = MT_Flash,
 // };
 
-// const MemorySection ipc {
+// const struct MemorySection ipc {
 //     ._start = 0x00,
 //     ._end = 0x00,
 //     ._size = ${RAM_BLUENET_IPC_LENGTH},
-//     ._type = MemoryType::Ram,
+//     ._type = MT_Ram,
 // };
 
-// const MemorySection softdevice {
+// const struct MemorySection softdevice {
 //     ._start = 0x00,
 //     ._end = 0x00,
 //     ._size = 0x00,
-//     ._type = MemoryType::Flash,
+//     ._type = MT_Flash,
 // };
 
-// const MemorySection mbr {
+// const struct MemorySection mbr {
 //     ._start = 0x00,
 //     ._end = 0x00,
 //     ._size = CODE_PAGE_SIZE,
-//     ._type = MemoryType::Flash,
+//     ._type = MT_Flash,
 // };
 
-// ----------------------------------------------------------------------
-
-// const MemorySection flash {
+// const struct MemorySection flash {
 //     ._start = 0x00,
 //     ._end = 0x00,
 //     ._size = 0x00,
-//     ._type = MemoryType::Flash,
+//     ._type = MT_Flash,
 
 //     // total: ${TOTAL_AMOUNT_FLASH}
 //     // size: ${APPLICATION_START_ADDRESS}
 // };
 
-// const MemorySection ram {
+// const struct MemorySection ram {
 //     ._start = ${RAM_R1_BASE},
 //     ._end = 0x00,
 //     ._size = ${RAM_APPLICATION_AMOUNT},
-//     ._type = MemoryType::Ram,
+//     ._type = MT_Ram,
 //     // total: ${TOTAL_AMOUNT_RAM}
 // };
 
-}  // namespace MemorySections
-}  // namespace Globals
