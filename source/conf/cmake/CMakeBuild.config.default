@@ -225,8 +225,9 @@ NRF_DEVICE=NRF52832_XXAA
 # The device type without specific hardware series suffix
 NRF_DEVICE_TYPE=NRF52832
 
-# The device family
-NRF_DEVICE_FAMILY=NRF52
+# The device family 
+# This HAS TO BE REMOVED!! The SDK will interpret it automatically as an NRF52832
+# NRF_DEVICE_FAMILY=NRF52
 
 # The device series
 NRF_DEVICE_SERIES=NRF52_SERIES
@@ -264,6 +265,8 @@ BOOTLOADER_LENGTH=0x8000
 #BOOTLOADER_START_ADDRESS=0x00071000
 #BOOTLOADER_LENGTH=0xD000
 
+# This setting is defined in nrf_dfu_types.h. Here we predefine it so it is available to the wider code base.
+CS_BOOTLOADER_SETTINGS_ADDRESS=0x7F000
 
 # Has to match values in: bootloader/secure_bootloader_gcc_nrf52.ld
 # 0x00080000 - BOOTLOADER_START_ADDRESS - 1000 - 1000 = 6000

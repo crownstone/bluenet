@@ -9,16 +9,6 @@
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_AutoConfig.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "nrf52.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 /*
 	----------------------
 	| GENERAL | PCB      |
