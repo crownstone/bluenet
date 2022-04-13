@@ -77,9 +77,6 @@ math(EXPR SWO_PORT       "${GDB_PORT}+1")
 math(EXPR TELNET_PORT    "${GDB_PORT}+2")
 math(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
-set(BOOTLOADER_SETINGS_ADDRESS "0x7F00")
-set( BOOTLOADER_SETTINGS_BACKUP_ADDRESS "0x7E00")
-
 #######################################################################################################################
 # Show variables
 #######################################################################################################################
