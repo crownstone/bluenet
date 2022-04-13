@@ -272,6 +272,18 @@ CS_BOOTLOADER_SETTINGS_ADDRESS=0x7F000
 # 0x00080000 - BOOTLOADER_START_ADDRESS - 1000 - 1000 = 6000
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 
+# Number of flash pages for FDS to use.
+# - 1 page for GC
+# - 1 page for config
+# - 1 page for behaviour
+# - 1 page for sure
+CS_FDS_VIRTUAL_PAGES=4
+
+# Size of virual page in words
+CS_FDS_VIRTUAL_PAGE_SIZE=1024
+
+# The number of pages reserved for other purposes in between FDS and the bootloader
+CS_FDS_VIRTUAL_PAGES_RESERVED=0
 
 ## UICR
 

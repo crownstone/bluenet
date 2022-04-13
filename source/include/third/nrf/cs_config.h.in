@@ -1,5 +1,5 @@
 /*
- * Will be fed from cmake and needs to be source from app_config.h
+ * Will be fed from cmake and needs to be sourced from app_config.h
  */
 
 #pragma once
@@ -17,3 +17,10 @@
 #define MESH_PERSISTENT_STORAGE                  @MESH_PERSISTENT_STORAGE@
 
 #define ATTR_TABLE_SIZE                          @ATTR_TABLE_SIZE@
+
+#define CS_FDS_VIRTUAL_PAGES                     @CS_FDS_VIRTUAL_PAGES@
+
+#define CS_FDS_VIRTUAL_PAGE_SIZE                 @CS_FDS_VIRTUAL_PAGE_SIZE@
+
+#define CS_FDS_VIRTUAL_PAGES_RESERVED            @CS_FDS_VIRTUAL_PAGES_RESERVED@
+

@@ -70,12 +70,14 @@ const struct MemorySection microappFlashSection = {
 		._type  = MT_Flash,
 };
 
-// const struct MemorySection fds {
-//     ._start = 0x00,
-//     ._end = 0x00,
-//     ._size = 0x00,
-//     ._type = MT_Flash,
-// };
+const struct MemorySection fdsFlashSection = {
+		// Values should match the ones in components/libraries/fds/fds.c
+		._start = ${BOOTLOADER_START_ADDRESS}
+				  - (${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED}) * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._end  = ${BOOTLOADER_START_ADDRESS} - (${CS_FDS_VIRTUAL_PAGES_RESERVED} * ${CS_FDS_VIRTUAL_PAGE_SIZE}),
+		._size = ${CS_FDS_VIRTUAL_PAGES} * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._type = MT_Flash,
+};
 
 const struct MemorySection ipcRamSection = {
 		// Values should match the ones in generic_gcc_nrf52.ld

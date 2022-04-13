@@ -40,17 +40,9 @@
 #define NRF_SDH_DISPATCH_MODEL 1
 
 #define FDS_ENABLED 1
-/**
- * Number of flash pages for FDS to use.
- * One page for GC
- * One page for config
- * One page for behaviour
- * One page for sure
- */
-#define FDS_VIRTUAL_PAGES 4
-// Virtual page size in words.
-#define FDS_VIRTUAL_PAGE_SIZE 1024
-#define FDS_VIRTUAL_PAGES_RESERVED 0
+#define FDS_VIRTUAL_PAGES CS_FDS_VIRTUAL_PAGES
+#define FDS_VIRTUAL_PAGE_SIZE CS_FDS_VIRTUAL_PAGE_SIZE
+#define FDS_VIRTUAL_PAGES_RESERVED CS_FDS_VIRTUAL_PAGES_RESERVED
 #define FDS_OP_QUEUE_SIZE 4
 #define FDS_CRC_CHECK_ON_READ 1
 #define FDS_MAX_USERS 2
