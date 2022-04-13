@@ -225,9 +225,8 @@ NRF_DEVICE=NRF52832_XXAA
 # The device type without specific hardware series suffix
 NRF_DEVICE_TYPE=NRF52832
 
-# The device family 
-# This HAS TO BE REMOVED!! The SDK will interpret it automatically as an NRF52832
-# NRF_DEVICE_FAMILY=NRF52
+# The device family
+NRF_DEVICE_FAMILY=NRF52
 
 # The device series
 NRF_DEVICE_SERIES=NRF52_SERIES
