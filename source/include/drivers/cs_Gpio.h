@@ -12,6 +12,10 @@
 #include <events/cs_EventListener.h>
 #include <vector>
 
+#define TOTAL_PIN_COUNT GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT
+
+typedef uint8_t pin_t;
+
 enum GpioDirection { INPUT = 1, OUTPUT = 2, SENSE = 3 };
 
 enum GpioPullResistor { NONE = 0, UP = 1, DOWN = 2 };
@@ -19,7 +23,6 @@ enum GpioPullResistor { NONE = 0, UP = 1, DOWN = 2 };
 enum GpioPolarity { HITOLO = 1, LOTOHI = 2, TOGGLE = 3 };
 
 typedef struct pin_info_t {
-	uint8_t pin;
 	bool event;
 	uint8_t direction;
 } pin_info_t;
@@ -32,13 +35,13 @@ public:
 	static Gpio& getInstance();
 
 	//! Initialize (from cs_Crownstone as driver)
-	void init(const boards_config_t & board);
+	void init(const boards_config_t* board);
 
 	//! Handle incoming events
 	void handleEvent(event_t & event);
 
 	//! Register event (from event handler)
-	void registerEvent(uint8_t pin);
+	void registerEvent(pin_t pin);
 private:
 
 	//! Constructor
@@ -53,8 +56,17 @@ private:
 	//! Get regular ticks to send events
 	void tick();
 
-	//! Map from virtual pins to physical pins
-	std::vector<pin_info_t> _pins;
+	//! Array of virtual pin info
+	pin_info_t _pins[TOTAL_PIN_COUNT];
+
+	//! Return whether pin exists on board
+	bool pinExists(uint8_t pin_index);
+
+	//! Return physical pin from virtual pin index
+	pin_t getPin(uint8_t pin_index);
+
+	//! Return whether pin is a LED
+	bool isLedPin(uint8_t pin_index);
 
 	//! Configure pin
 	void configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity);
@@ -67,5 +79,8 @@ private:
 
 	//! Initialized flag
 	bool _initialized;
+
+	//! Board configuration
+	const boards_config_t* _boardConfig;
 
 };

@@ -195,13 +195,6 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 }
 
 /*
- * Get from digital pin to interrupt. See also interruptToDigitalPin.
- */
-int MicroappController::digitalPinToInterrupt(int pin) {
-	return pin + 1;
-}
-
-/*
  * Set the microappCallback in the IPC ram data bank. At a later time it can be used by the microapp to find the
  * address of microappCallback to call back into the bluenet code.
  */
@@ -348,17 +341,16 @@ bool MicroappController::retrieveCommand() {
 void MicroappController::softInterruptGpio(uint8_t pin) {
 	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
 	if (microappCommandHandler.softInterruptInProgress()) {
-		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
+		LOGi("Interrupt in progress, ignore pin %i event", pin);
 		return;
 	}
 	// Write pin command into the buffer.
-	uint8_t* payload         = sharedState.io_buffer->bluenet2microapp.payload;
-	microapp_pin_cmd_t* cmd  = reinterpret_cast<microapp_pin_cmd_t*>(payload);
+	uint8_t* outputBuffer         = getOutputMicroappBuffer();
+	microapp_pin_cmd_t* cmd  = reinterpret_cast<microapp_pin_cmd_t*>(outputBuffer);
 	cmd->header.interruptCmd = CS_MICROAPP_COMMAND_PIN;
 	cmd->header.ack          = false;
-	cmd->header.id           = digitalPinToInterrupt(pin);
-	cmd->pin                 = digitalPinToInterrupt(pin);
-	cmd->value               = CS_MICROAPP_COMMAND_VALUE_CHANGE;
+	cmd->header.id           = pin;
+	cmd->pin                 = pin;
 	// Resume microapp so it can pick up this command.
 	LOGi("GPIO interrupt on virtual pin %i", cmd->pin);
 	softInterrupt();
@@ -441,6 +433,7 @@ void MicroappController::softInterrupt() {
 	}
 
 	if (_softInterruptCounter == MAX_CALLBACKS_WITHIN_A_TICK) {
+		LOGv("Not doing another callback");
 		return;
 	}
 	_softInterruptCounter++;
@@ -510,6 +503,7 @@ bool MicroappController::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 	bool stop       = true;
 	switch (command) {
 		case CS_MICROAPP_COMMAND_PIN:
+		case CS_MICROAPP_COMMAND_SWITCH_DIMMER:
 		case CS_MICROAPP_COMMAND_LOG:
 		case CS_MICROAPP_COMMAND_SERVICE_DATA:
 		case CS_MICROAPP_COMMAND_TWI:

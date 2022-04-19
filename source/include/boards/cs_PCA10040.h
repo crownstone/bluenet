@@ -43,7 +43,7 @@
  * The voltageMultiplier and currentMultiplier values are set to 0.0 which disables checks with respect to sampling.
  */
 void asPca10040(boards_config_t* config) {
-	config->pinDimmer                          = 17;
+	config->pinDimmer                          = 20;
 //	config->pinEnableDimmer                    = 22;
 	config->pinRelayOn                         = 11;
 	config->pinRelayOff                        = 12;
@@ -58,9 +58,6 @@ void asPca10040(boards_config_t* config) {
 	config->pinRx                              = 8;
 	config->pinTx                              = 6;
 
-	config->pinLed[LED2]                       = 19;
-	config->pinLed[LED3]                       = 20;
-
 	config->pinGpio[0]                         = 27;  // Also SCL
 	config->pinGpio[1]                         = 26;  // Also SDA
 	config->pinGpio[2]                         = 25;
@@ -71,10 +68,10 @@ void asPca10040(boards_config_t* config) {
 	config->pinButton[2]                       = 15;
 	config->pinButton[3]                       = 16;
 
-//	config->pinLed[0]                          = 17; // Already used as dimmer
+	config->pinLed[0]                          = 17;
 	config->pinLed[1]                          = 18;
 	config->pinLed[2]                          = 19;
-	config->pinLed[3]                          = 20;
+//	config->pinLed[3]                          = 20; // Already used as dimmer
 
 	config->flags.dimmerInverted               = true;
 	config->flags.enableUart                   = true;

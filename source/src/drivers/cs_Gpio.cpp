@@ -21,98 +21,91 @@ Gpio::Gpio(): EventListener() {
  * can actually control these from other modules. We limit here the number of pins that can be controlled to not be
  * accidentally driving the relay or the IGBTs.
  */
-void Gpio::init(const boards_config_t & board) {
-	if (g_GPIO_PIN1_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinGpio[g_GPIO_PIN1_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_GPIO_PIN2_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinGpio[g_GPIO_PIN2_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_GPIO_PIN3_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinGpio[g_GPIO_PIN3_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_GPIO_PIN4_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinGpio[g_GPIO_PIN4_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
+void Gpio::init(const boards_config_t* board) {
 
-	// Buttons can be reached as GPIO 5-8 as well
-	if (g_BUTTON1_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinButton[g_BUTTON1_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
+	int activePins = 0;
+	for (int i = 0; i < GPIO_INDEX_COUNT; i++) {
+		_pins[i].event = false;
+		if (board->pinGpio[i] != PIN_NONE) {
+			activePins++;
+		}
 	}
-	if (g_BUTTON2_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinButton[g_BUTTON2_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
+	for (int i = 0; i < BUTTON_COUNT; i++) {
+		_pins[GPIO_INDEX_COUNT + i].event = false;
+		if (board->pinButton[i] != PIN_NONE) {
+			activePins++;
+		}
 	}
-	if (g_BUTTON3_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinButton[g_BUTTON3_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_BUTTON4_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinButton[g_BUTTON4_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	
-	// Leds can be reached as GPIO as well
-	if (g_LED1_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinLed[g_LED1_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_LED2_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinLed[g_LED2_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_LED3_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinLed[g_LED3_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
-	}
-	if (g_LED4_INDEX != -1) {
-		pin_info_t pin_info;
-		pin_info.pin = board.pinLed[g_LED4_INDEX];
-		pin_info.event = false;
-		_pins.push_back(pin_info);
+	for (int i = 0; i < LED_COUNT; i++) {
+		_pins[GPIO_INDEX_COUNT + BUTTON_COUNT + i].event = false;
+		if (board->pinLed[i] != PIN_NONE) {
+			activePins++;
+		}
 	}
 
 	_initialized = true;
-	LOGi("Configured %i GPIO pins", _pins.size());
+	_boardConfig = board;
+	LOGi("Configured %i GPIO pins", activePins);
+}
+
+bool Gpio::pinExists(uint8_t pin_index) {
+	if (!_initialized) {
+		LOGi("GPIO driver not initialized");
+		return false;
+	}
+	if (pin_index >= TOTAL_PIN_COUNT) {
+		LOGi("Pin index %i out of max pin range (max %i)", pin_index, TOTAL_PIN_COUNT);
+		return false;
+	}
+	if (pin_index < GPIO_INDEX_COUNT) {
+		if (_boardConfig->pinGpio[pin_index] != PIN_NONE) {
+			return true;
+		}
+	}
+	else if (pin_index < GPIO_INDEX_COUNT + BUTTON_COUNT) {
+		if (_boardConfig->pinButton[pin_index - GPIO_INDEX_COUNT] != PIN_NONE) {
+			return true;
+		}
+	}
+	else {
+		if (_boardConfig->pinLed[pin_index - GPIO_INDEX_COUNT - BUTTON_COUNT] != PIN_NONE) {
+			return true;
+		}
+	}
+	LOGi("Pin index %i not defined for this board", pin_index);
+	return false;
+}
+
+pin_t Gpio::getPin(uint8_t pin_index) {
+
+	if (!pinExists(pin_index)) {
+		return PIN_NONE;
+	}
+	if (pin_index < GPIO_INDEX_COUNT) {
+		return _boardConfig->pinGpio[pin_index];
+	}
+	else if (pin_index < GPIO_INDEX_COUNT + BUTTON_COUNT) {
+		return _boardConfig->pinButton[pin_index - GPIO_INDEX_COUNT];
+	}
+	else {
+		return _boardConfig->pinLed[pin_index - GPIO_INDEX_COUNT - BUTTON_COUNT];
+	}
+}
+
+bool Gpio::isLedPin(uint8_t pin_index) {
+	if (!pinExists(pin_index)) {
+		return false;
+	}
+	else {
+		return (pin_index >= GPIO_INDEX_COUNT + BUTTON_COUNT);
+	}
 }
 
 void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity) {
-	if (pin_index >= _pins.size()) {
-		LOGi("Pin index %i does not exist (max %i)", pin_index, _pins.size());
-		return;
-	}
 
-	uint32_t pin = _pins[pin_index].pin;
-
-	if (pin == 0xFF) {
-		LOGi("Pin index %i is not connected", pin_index);
+	pin_t pin = getPin(pin_index);
+	if (pin == PIN_NONE) {
+		LOGi("Can't configure pin with pin index %i", pin_index);
 		return;
 	}
 
@@ -195,59 +188,74 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
  * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
  */
 void Gpio::write(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
-	if (pin_index >= _pins.size()) {
-		LOGi("Pin index does not exist");
+
+	pin_t pin = getPin(pin_index);
+	if (pin == PIN_NONE) {
+		LOGi("Can't write pin with pin index %i", pin_index);
 		return;
 	}
 
-	// to lazy to store writeable flag with each pin, can be done for buttons e.g.
-	uint32_t pin = _pins[pin_index].pin;
-
 	// TODO: limit length
 	for (int i = 0; i < length; ++i) {
-		LOGi("Write value %i to pin %i", buf[i], pin);
+		// Invert value to write if leds are inverted
+		if (isLedPin(pin_index) && _boardConfig->flags.ledInverted) {
+			buf[i] = !buf[i];
+		}
+		LOGi("Write value %i to pin %i (pin index %i)", buf[i], pin, pin_index);
 		nrf_gpio_pin_write(pin, buf[i]);
 	}
 }
 
 void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
-	if (pin_index >= _pins.size()) {
-		LOGi("Pin index does not exist");
+
+	pin_t pin = getPin(pin_index);
+	if (pin == PIN_NONE) {
+		LOGi("Can't read pin with pin index %i", pin_index);
 		return;
 	}
-
-	// to lazy to store readeable flag with each pin, can be done for buttons e.g.
-	uint32_t pin = _pins[pin_index].pin;
 
 	// TODO: limit length
 	for (int i = 0; i < length; ++i) {
 		buf[i] = nrf_gpio_pin_read(pin);
-		LOGi("Read value %i from pin %i", buf[i], pin);
+		LOGi("Read value %i from pin %i (pin index %i)", buf[i], pin, pin_index);
 	}
 }
 
 /*
  * Called from interrupt service routine, only write which pin is fired and return immediately.
  */
-void Gpio::registerEvent(uint8_t pin) {
+void Gpio::registerEvent(pin_t pin) {
+
 	LOGd("GPIO event on pin %i", pin);
-	for (uint8_t i = 0; i < _pins.size(); ++i) {
-		if (_pins[i].pin == pin) {
+	for (uint8_t i = 0; i < GPIO_INDEX_COUNT; ++i) {
+		if (_boardConfig->pinGpio[i] == pin) {
 			_pins[i].event = true;
-			break;
+			return;
+		}
+	}
+	for (uint8_t i = 0; i < BUTTON_COUNT; ++i) {
+		if (_boardConfig->pinButton[i] == pin) {
+			_pins[GPIO_INDEX_COUNT + i].event = true;
+			return;
+		}
+	}
+	for (uint8_t i = 0; i < LED_COUNT; ++i) {
+		if (_boardConfig->pinLed[i] == pin) {
+			_pins[GPIO_INDEX_COUNT + BUTTON_COUNT + i].event = true;
+			return;
 		}
 	}
 }
 
 void Gpio::tick() {
-	for (uint8_t i = 0; i < _pins.size(); ++i) {
+	for (uint8_t i = 0; i < TOTAL_PIN_COUNT; ++i) {
 		if (_pins[i].event) {
 			_pins[i].event = false;
 			TYPIFY(EVT_GPIO_UPDATE) gpio;
 			// we send back the pin index, not the pin number
 			gpio.pin_index = i;
 			gpio.length = 0;
-			LOGd("Send GPIO event on pin %i at index %i", _pins[i].pin, gpio.pin_index);
+			LOGd("Send GPIO event at index %i", gpio.pin_index);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);
 		}
