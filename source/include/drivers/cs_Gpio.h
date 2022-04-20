@@ -35,7 +35,7 @@ public:
 	static Gpio& getInstance();
 
 	//! Initialize (from cs_Crownstone as driver)
-	void init(const boards_config_t* board);
+	void init(const boards_config_t & board);
 
 	//! Handle incoming events
 	void handleEvent(event_t & event);

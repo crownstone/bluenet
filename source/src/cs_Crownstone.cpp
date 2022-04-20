@@ -421,7 +421,7 @@ void Crownstone::initDrivers1() {
 #endif
 
 #if BUILD_GPIOTE == 1
-	_gpio->init(&_boardsConfig);
+	_gpio->init(_boardsConfig);
 #else
 	LOGi("Init: Gpio module NOT enabled");
 #endif

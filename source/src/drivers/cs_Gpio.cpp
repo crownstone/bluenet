@@ -21,30 +21,30 @@ Gpio::Gpio(): EventListener() {
  * can actually control these from other modules. We limit here the number of pins that can be controlled to not be
  * accidentally driving the relay or the IGBTs.
  */
-void Gpio::init(const boards_config_t* board) {
+void Gpio::init(const boards_config_t & board) {
 
 	int activePins = 0;
 	for (int i = 0; i < GPIO_INDEX_COUNT; i++) {
 		_pins[i].event = false;
-		if (board->pinGpio[i] != PIN_NONE) {
+		if (board.pinGpio[i] != PIN_NONE) {
 			activePins++;
 		}
 	}
 	for (int i = 0; i < BUTTON_COUNT; i++) {
 		_pins[GPIO_INDEX_COUNT + i].event = false;
-		if (board->pinButton[i] != PIN_NONE) {
+		if (board.pinButton[i] != PIN_NONE) {
 			activePins++;
 		}
 	}
 	for (int i = 0; i < LED_COUNT; i++) {
 		_pins[GPIO_INDEX_COUNT + BUTTON_COUNT + i].event = false;
-		if (board->pinLed[i] != PIN_NONE) {
+		if (board.pinLed[i] != PIN_NONE) {
 			activePins++;
 		}
 	}
 
 	_initialized = true;
-	_boardConfig = board;
+	_boardConfig = &board;
 	LOGi("Configured %i GPIO pins", activePins);
 }
 
