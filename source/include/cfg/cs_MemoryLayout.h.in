@@ -64,13 +64,13 @@ const struct MemorySection freeFlashSection = {
 };
 
 /**
- * The start and end is about the entire section for all microapps. Use _size / g_MICROAPP_NUMBER to get back to the
+ * The start and end is about the entire section for all microapps. Use _size / g_MICROAPP_COUNT to get back to the
  * individual size for a microapp.
  */
 const struct MemorySection microappFlashSection = {
 		._start = @FLASH_MICROAPP_BASE@,
-		._end   = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_NUMBER@,
-		._size  = @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_NUMBER@,
+		._end   = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@,
+		._size  = @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@,
 		._type  = MT_Flash,
 };
 
@@ -78,8 +78,8 @@ const struct MemorySection microappFlashSection = {
  * A single page after the microapp pages for DFU update procedures from one Crownstone to the next.
  */
 const struct MemorySection p2pDfuFlashSection = {
-		._start = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_NUMBER@,
-		._end = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_NUMBER@ + CODE_PAGE_SIZE,
+		._start = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@,
+		._end = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@ + CODE_PAGE_SIZE,
 		._size = CODE_PAGE_SIZE,
 		._type = MT_Flash,
 };
@@ -177,16 +177,16 @@ const struct MemorySection softdeviceRamSection = {
 const struct MemorySection bluenetRamSection = {
 		._start = @RAM_R1_BASE@,
 		._end   = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@
-				- (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_NUMBER@),
-		._size = @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@ - (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_NUMBER@),
+				- (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@),
+		._size = @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@ - (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@),
 		._type = MT_Ram,
 };
 
 const struct MemorySection microappRamSection = {
 		._start = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@
-				  - (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_NUMBER@),
+				  - (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@),
 		._end  = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@,
-		._size = @RAM_MICROAPP_AMOUNT@ * @MICROAPP_NUMBER@,
+		._size = @RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@,
 		._type = MT_Ram,
 };
 

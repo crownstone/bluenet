@@ -224,10 +224,10 @@ void MicroappController::setIpcRam() {
  * Checks flash boundaries (for single microapp).
  */
 cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr_t address) {
-	if (appIndex >= g_MICROAPP_NUMBER) {
+	if (appIndex >= g_MICROAPP_COUNT) {
 		return ERR_UNSAFE;
 	}
-	uint32_t microappSize          = microappFlashSection._size / g_MICROAPP_NUMBER;
+	uint32_t microappSize          = microappFlashSection._size / g_MICROAPP_COUNT;
 	uintptr_t memoryMicroappOffset = microappSize * appIndex;
 	uintptr_t addressLow           = microappFlashSection._start + memoryMicroappOffset;
 	uintptr_t addressHigh          = addressLow + microappSize;

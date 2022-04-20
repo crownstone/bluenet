@@ -32,7 +32,7 @@ extern uint32_t g_HARDWARE_BOARD_ADDRESS;
 
 extern uint32_t g_DEFAULT_HARDWARE_BOARD;
 
-extern uint8_t g_MICROAPP_NUMBER;
+extern uint8_t g_MICROAPP_COUNT;
 
 extern int8_t g_MAX_CHIP_TEMPERATURE;
 
