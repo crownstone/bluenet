@@ -196,3 +196,37 @@ This paradigm ensures that changing a header does not break any upward dependenc
 
 ### Auto generated files
 Always use the `@ONLY` option when using `configure_file(..)`. This increases grep-ability of the codebase and makes for clearer template files for bash scripts.
+
+### Config values
+Some config values are defined both in code and in config files. These are statically checked to be equal during compilation. For these variables, the config file variable name is leading and should be used where possible.
+
+E.g. the memory locations of some firmware blobs:
+
+
+The config defines the leading variable name.
+```
+./config/nrf52840/CMakeBuild.config
+
+# This setting is defined in nrf_dfu_types.h. Here we predefine it so it is available to the wider code base.
+# This is the mbr settings address for the nRF52840-QFAA.
+CS_BOOTLOADER_SETTINGS_ADDRESS=0xFF000
+```
+
+In other files, this name is used.
+```
+./source/CMakeLists.txt
+
+add_custom_target(read_bootloader_settings
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${BOOTLOADER_SETINGS_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMENT "Read bootloader settings from remote target board"
+	)
+```
+
+The relevant source file statically asserts the equality.
+```
+./source/include/cfg/cs_MemoryLayout.h.in:
+
+_Static_assert(
+		BOOTLOADER_SETTINGS_ADDRESS == @CS_BOOTLOADER_SETTINGS_ADDRESS@, "Bootloader settings address mismatch");
+```
+

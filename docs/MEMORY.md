@@ -11,26 +11,22 @@ This document describes the flash memory layout, and how to add more data to sto
 The global layout of the the flash is shown below:
 
 
-| Start address | What | Nr of pages
-| ------------- |:-------------:| -----:|
-| 0x00000000 | MBR | 1
-| 0x00001000 | SD | 37
-| 0x00026000 | App / Bluenet | 54
-| 0x0005C000 | Free | 13
-| 0x00069000 | Microapp | 4
-| 0x0006D000 | P2P DFU | 1
-| 0x0006E000 | Reserved for FDS expansion | 4
-| 0x00072000 | FDS | 4
-| 0x00076000 | Bootloader | 7
-| 0x0007D000 | Reserved for bootloader expansion | 1
-| 0x0007E000 | MBR settings | 1
-| 0x0007F000 | Bootloader settings | 1
+| Start address | What | Nr of pages | Config 
+| ------------- |:-------------:| -----:|:-----|
+| 0x00000000 | MBR | 1 | fixed 
+| 0x00001000 | SD | 37 | location: fixed <br> size: implicit
+| 0x00026000 | App / Bluenet | 54 | APPLICATION_START_ADDRESS<br> APPLICATION_LENGTH
+| 0x0005C000 | Free | 13 | implicit
+| 0x00069000 | Microapp | 4 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES 
+| 0x0006D000 | P2P DFU | 1 | location: implicit<br> size: fixed
+| 0x0006E000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
+| 0x00072000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
+| 0x00076000 | Bootloader | 7 | CS_BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
+| 0x0007D000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
+| 0x0007E000 | MBR settings | 1 | CS_MBR_PARAMS_PAGE_ADDRESS <br> size: fixed
+| 0x0007F000 | Bootloader settings | 1 | CS_BOOTLOADER_SETTINGS_ADDRESS <br> size: fixed
 | | **Total** | 128
 
-
-The bootloader start address is defined in the _CMakeBuild.config_ as `BOOTLOADER_START_ADDRESS`.
-
-The application start address is defined in the _CMakeBuild.config_ as `APPLICATION_START_ADDRESS`.
 
 The firmware size + free size is about 268kB. For a dual bank bootloader, this means that the firmware can be 132kB max.
 
