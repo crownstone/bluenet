@@ -8,6 +8,8 @@ import argparse
 import os
 
 from crownstone_uart import CrownstoneUart
+from crownstone_uart.topics.SystemTopics import SystemTopics
+from crownstone_uart.core.UartEventBus import UartEventBus
 
 from bluenet_logs import BluenetLogs
 
@@ -35,6 +37,11 @@ argParser.add_argument('--verbose',
                        dest="verbose",
                        action='store_true',
                        help='Show verbose output')
+argParser.add_argument('--raw',
+                       '-r',
+                       dest="raw",
+                       action='store_true',
+                       help='Show raw output (may result in interleaved print statements)')
 args = argParser.parse_args()
 
 if args.verbose:
@@ -47,8 +54,23 @@ print(f"Listening for logs on port {args.device}, and using \"{logStringsFileNam
 # Init bluenet logs, it will listen to events from the Crownstone lib.
 bluenetLogs = BluenetLogs()
 
+
 # Set the dir containing the bluenet source code files.
 bluenetLogs.setLogStringsFile(logStringsFileName)
+
+
+
+class RawMessagePrinter():
+    def __init__(self):
+        UartEventBus.subscribe(SystemTopics.uartNewData, self.onDataReceived)
+
+    def onDataReceived(self, dat):
+        print(dat.decode('utf-8'), end='', flush=True)
+
+if args.raw:
+    rawprinter = RawMessagePrinter()
+
+
 
 # Init the Crownstone UART lib.
 uart = CrownstoneUart()
