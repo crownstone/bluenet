@@ -596,7 +596,7 @@ add_custom_target(write_bootloader_settings
 	)
 
 add_custom_target(read_bootloader_settings
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${CS_BOOTLOADER_SETINGS_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${CS_BOOTLOADER_SETTINGS_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Read bootloader settings from remote target board"
 	)
 
