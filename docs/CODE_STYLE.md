@@ -192,3 +192,7 @@ If a class, struct or function etc., say `class someclass{};` is defined in `oth
 This paradigm ensures that changing a header does not break any upward dependencies increases awareness of dependencies and make them easier to analyse.    
 
 
+## CMake
+
+### Auto generated files
+Always use the `@ONLY` option when using `configure_file(..)`. This increases grep-ability of the codebase and makes for clearer template files for bash scripts.
