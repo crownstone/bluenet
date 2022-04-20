@@ -104,8 +104,6 @@ enum CommandMicroapp {
 };
 
 enum CommandMicroappPin {
-	// CS_MICROAPP_COMMAND_PIN_SWITCH  = 0x00,  // Virtual pin
-	// CS_MICROAPP_COMMAND_PIN_DIMMER  = 0x00,  // same one
 	CS_MICROAPP_COMMAND_PIN_GPIO0   = 0x00,  // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO1   = 0x01,  // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO2   = 0x02,  // GPIO pin on connector
@@ -263,12 +261,14 @@ static_assert(sizeof(microapp_pin_cmd_t) == MICROAPP_PIN_CMD_SIZE_HEADER);
 static_assert(sizeof(microapp_pin_cmd_t) <= MAX_PAYLOAD);
 
 /*
- * Struct for controlling the dimmer and switch
+ * Struct for commands relating to the dimmer and switch
+ * Opcode indicates whether command relates to dimmer or switch
+ * Value is a binary value if controlling the switch, or else an unsigned 8-bit intensity value
  */
 struct __attribute__((packed)) microapp_dimmer_switch_cmd_t {
 	microapp_cmd_t header;
-	uint8_t opcode; // CommandMicroappDimmerSwitchOpcode
-	uint8_t value;  // CommandMicroappSwitchValue or an uint8_t intensity value
+	uint8_t opcode;
+	uint8_t value;
 };
 
 /*
