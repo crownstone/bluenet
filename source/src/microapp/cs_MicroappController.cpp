@@ -11,6 +11,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_MemoryLayout.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
@@ -191,14 +192,14 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 		_bleIsr[i].id = 0;
 	}
 
-	LOGi("Microapp end is at %p", g_RAM_MICROAPP_END);
+	LOGi("Microapp end is at %p", microappRamSection._end);
 }
 
 /*
  * Get from digital pin to interrupt. See also interruptToDigitalPin.
  */
 int MicroappController::digitalPinToInterrupt(int pin) {
-	return pin + 1;
+	return pin;
 }
 
 /*
@@ -223,9 +224,13 @@ void MicroappController::setIpcRam() {
  * Checks flash boundaries (for single microapp).
  */
 cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr_t address) {
-	uintptr_t memoryMicroappOffset = (g_FLASH_MICROAPP_PAGES * 0x1000) * appIndex;
-	uintptr_t addressLow           = g_FLASH_MICROAPP_BASE + memoryMicroappOffset;
-	uintptr_t addressHigh          = addressLow + g_FLASH_MICROAPP_PAGES * 0x1000;
+	if (appIndex >= g_MICROAPP_COUNT) {
+		return ERR_UNSAFE;
+	}
+	uint32_t microappSize          = microappFlashSection._size / g_MICROAPP_COUNT;
+	uintptr_t memoryMicroappOffset = microappSize * appIndex;
+	uintptr_t addressLow           = microappFlashSection._start + memoryMicroappOffset;
+	uintptr_t addressHigh          = addressLow + microappSize;
 	if (address < addressLow) {
 		return ERR_UNSAFE;
 	}
@@ -242,9 +247,9 @@ cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr
  * TODO: This should be initialized per microapp.
  */
 uint16_t MicroappController::initMemory(uint8_t appIndex) {
-	LOGi("Init memory: clear 0x%p to 0x%p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
-	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
-		uint32_t* const val = (uint32_t*)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
+	LOGi("Init memory: clear 0x%p to 0x%p", microappRamSection._start, microappRamSection._end);
+	for (uint32_t i = 0; i < microappRamSection._size; ++i) {
+		uint32_t* const val = (uint32_t*)(uintptr_t)(microappRamSection._start + i);
 		*val                = 0;
 	}
 	return ERR_SUCCESS;
@@ -352,13 +357,12 @@ void MicroappController::softInterruptGpio(uint8_t pin) {
 		return;
 	}
 	// Write pin command into the buffer.
-	uint8_t* payload         = sharedState.io_buffer->bluenet2microapp.payload;
-	microapp_pin_cmd_t* cmd  = reinterpret_cast<microapp_pin_cmd_t*>(payload);
+	uint8_t* outputBuffer    = getOutputMicroappBuffer();
+	microapp_pin_cmd_t* cmd  = reinterpret_cast<microapp_pin_cmd_t*>(outputBuffer);
 	cmd->header.interruptCmd = CS_MICROAPP_COMMAND_PIN;
 	cmd->header.ack          = false;
 	cmd->header.id           = digitalPinToInterrupt(pin);
 	cmd->pin                 = digitalPinToInterrupt(pin);
-	cmd->value               = CS_MICROAPP_COMMAND_VALUE_CHANGE;
 	// Resume microapp so it can pick up this command.
 	LOGi("GPIO interrupt on virtual pin %i", cmd->pin);
 	softInterrupt();
@@ -441,6 +445,7 @@ void MicroappController::softInterrupt() {
 	}
 
 	if (_softInterruptCounter == MAX_CALLBACKS_WITHIN_A_TICK) {
+		LOGv("Not doing another callback");
 		return;
 	}
 	_softInterruptCounter++;
@@ -510,6 +515,7 @@ bool MicroappController::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 	bool stop       = true;
 	switch (command) {
 		case CS_MICROAPP_COMMAND_PIN:
+		case CS_MICROAPP_COMMAND_SWITCH_DIMMER:
 		case CS_MICROAPP_COMMAND_LOG:
 		case CS_MICROAPP_COMMAND_SERVICE_DATA:
 		case CS_MICROAPP_COMMAND_TWI:

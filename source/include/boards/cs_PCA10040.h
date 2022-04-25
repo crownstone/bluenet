@@ -43,26 +43,18 @@
  * The voltageMultiplier and currentMultiplier values are set to 0.0 which disables checks with respect to sampling.
  */
 void asPca10040(boards_config_t* config) {
-	config->pinDimmer                          = 17;
-//	config->pinEnableDimmer                    = 22;
+	config->pinDimmer                          = 20;
 	config->pinRelayOn                         = 11;
 	config->pinRelayOff                        = 12;
 	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(3);
 	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(4);
-//	config->pinAinZeroRef                      = GpioToAin(28);
-//	config->pinAinVoltage[GAIN_MIDDLE]         = GpioToAin(29);
-//	config->pinAinCurrent[GAIN_MIDDLE]         = GpioToAin(30);
-//	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(31);
 	config->pinAinDimmerTemp                   = GpioToAin(2);
 
 	config->pinRx                              = 8;
 	config->pinTx                              = 6;
 
-	config->pinLed[LED2]                       = 19;
-	config->pinLed[LED3]                       = 20;
-
-	config->pinGpio[0]                         = 27;  // Also SCL
-	config->pinGpio[1]                         = 26;  // Also SDA
+	config->pinGpio[0]                         = 27;
+	config->pinGpio[1]                         = 26;
 	config->pinGpio[2]                         = 25;
 	config->pinGpio[3]                         = 24;
 
@@ -71,10 +63,11 @@ void asPca10040(boards_config_t* config) {
 	config->pinButton[2]                       = 15;
 	config->pinButton[3]                       = 16;
 
-//	config->pinLed[0]                          = 17; // Already used as dimmer
+	// The fourth LED is used to indicate the state of the dimmer
+	config->pinLed[0]                          = 17;
 	config->pinLed[1]                          = 18;
 	config->pinLed[2]                          = 19;
-	config->pinLed[3]                          = 20;
+	config->pinLed[3]                          = PIN_NONE;
 
 	config->flags.dimmerInverted               = true;
 	config->flags.enableUart                   = true;
@@ -82,9 +75,6 @@ void asPca10040(boards_config_t* config) {
 	config->flags.ledInverted                  = true;
 	config->flags.dimmerTempInverted           = false;
 	config->flags.usesNfcPins                  = false;
-//	config->flags.canTryDimmingOnBoot          = false;
-//	config->flags.canDimOnWarmBoot             = false;
-//	config->flags.dimmerOnWhenPinsFloat        = true;
 
 	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
