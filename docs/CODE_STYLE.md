@@ -109,14 +109,26 @@ In source files additional information can be given about particular implementat
  */
 ```
 
-Within the function bodies themselves, abstain from comments unless absolutely necessary. If comments are required, write them on a line preceding the code. Do not write comments on the same line as the code.
+### Struct comments
+
+Just add your comments to just before the struct definition. Do not sprinkle code with oneliner comments per field. 
+
+### General
+
+Within the function bodies themselves, abstain from comments unless absolutely necessary. If comments are required, write them on a line preceding the code. Do **not** write comments on the same line as the code.
 
 ```
 // Always write comments on a separate line. 
 bool result = false;
 ```
 
+### Get rid of TODOs
+
 Don't sprinkle the code with many TODOs, use them only when absolutely necessary.
+
+### Get rid of commented code
+
+If code is commented it should be deleted. If you want to preserve code for posterity find other means to do so.
 
 ## Various
 
