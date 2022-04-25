@@ -8,7 +8,7 @@ SortIncludes: true
 IncludeBlocks: Regroup
 AlignTrailingComments: true
 
-###### brackets ######
+###### Brackets ######
 
 AlignAfterOpenBracket: AlwaysBreak
 
@@ -16,7 +16,7 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   BeforeElse: true
 
-###### parameter lists ######
+###### Parameter lists ######
 
 AllowAllParametersOfDeclarationOnNextLine: true
 BinPackArguments: false
@@ -37,6 +37,9 @@ ColumnLimit: 120
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 KeepEmptyLinesAtTheStartOfBlocks: true
+
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
 
 UseTab: ForContinuationAndIndentation
 TabWidth: 4

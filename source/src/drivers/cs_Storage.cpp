@@ -567,7 +567,7 @@ cs_ret_code_t Storage::eraseAllPages() {
 	uint32_t startAddr      = endAddr - flashSizeBytes;
 
 	// Check if pages are already erased.
-	unsigned int* startAddrPointer = (unsigned int*)startAddr;
+	uint32_t* startAddrPointer = (uint32_t*)startAddr;
 	bool isErased                  = true;
 	for (uint32_t i = 0; i < flashSizeWords; ++i) {
 		if (startAddrPointer[i] != 0xFFFFFFFF) {
@@ -588,11 +588,11 @@ cs_ret_code_t Storage::erasePages(const CS_TYPE doneEvent, void* startAddressPtr
 	if (_initialized || isErasingPages()) {
 		return ERR_NOT_AVAILABLE;
 	}
-	unsigned int startAddr      = (unsigned int)startAddressPtr;
-	unsigned int endAddr        = (unsigned int)endAddressPtr;
-	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
-	unsigned int startPage      = startAddr / pageSize;
-	unsigned int endPage        = endAddr / pageSize;
+	uint32_t startAddr      = (uint32_t)startAddressPtr;
+	uint32_t endAddr        = (uint32_t)endAddressPtr;
+	uint32_t const pageSize = NRF_FICR->CODEPAGESIZE;
+	uint32_t startPage      = startAddr / pageSize;
+	uint32_t endPage        = endAddr / pageSize;
 	if (startPage > endPage) {
 		APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);
 	}
