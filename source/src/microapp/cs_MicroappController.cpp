@@ -195,6 +195,13 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 }
 
 /*
+ * Get from digital pin to interrupt. See also interruptToDigitalPin.
+ */
+int MicroappController::digitalPinToInterrupt(int pin) {
+	return pin;
+}
+
+/*
  * Set the microappCallback in the IPC ram data bank. At a later time it can be used by the microapp to find the
  * address of microappCallback to call back into the bluenet code.
  */
@@ -341,16 +348,16 @@ bool MicroappController::retrieveCommand() {
 void MicroappController::softInterruptGpio(uint8_t pin) {
 	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
 	if (microappCommandHandler.softInterruptInProgress()) {
-		LOGi("Interrupt in progress, ignore pin %i event", pin);
+		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
 		return;
 	}
 	// Write pin command into the buffer.
-	uint8_t* outputBuffer         = getOutputMicroappBuffer();
+	uint8_t* outputBuffer    = getOutputMicroappBuffer();
 	microapp_pin_cmd_t* cmd  = reinterpret_cast<microapp_pin_cmd_t*>(outputBuffer);
 	cmd->header.interruptCmd = CS_MICROAPP_COMMAND_PIN;
 	cmd->header.ack          = false;
-	cmd->header.id           = pin;
-	cmd->pin                 = pin;
+	cmd->header.id           = digitalPinToInterrupt(pin);
+	cmd->pin                 = digitalPinToInterrupt(pin);
 	// Resume microapp so it can pick up this command.
 	LOGi("GPIO interrupt on virtual pin %i", cmd->pin);
 	softInterrupt();

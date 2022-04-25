@@ -110,6 +110,11 @@ private:
 	 */
 	bool _microappIsScanning;
 
+	/**
+	 * Maps digital pins to interrupts.
+	 */
+	int digitalPinToInterrupt(int pin);
+
 protected:
 	/**
 	 * Call the loop function (internally).
