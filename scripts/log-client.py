@@ -62,13 +62,17 @@ bluenetLogs.setLogStringsFile(logStringsFileName)
 # stub raw message printer that hooks into the uart event bus and prints immediately.
 class RawMessagePrinter():
     def __init__(self):
-        UartEventBus.subscribe(SystemTopics.uartNewData, self.onDataReceived)
+        try:
+            UartEventBus.subscribe(SystemTopics.uartNewData, self.onDataReceived)
+            print("printing raw data enabled")
+        except AttributeError as e:
+            print("Failed enabling raw data printer. Are your crownstone python libs up to date?")
 
     def onDataReceived(self, dat):
         print(dat.decode('utf-8'), end='', flush=True)
 
 if args.raw:
-    print("printing raw data enabled")
+    
     rawprinter = RawMessagePrinter()
 
 
