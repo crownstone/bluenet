@@ -50,7 +50,6 @@
 #include <string.h>
 
 #include "cs_GpRegRetConfig.h"
-//#include "boards.h"
 #include "nrf_mbr.h"
 #include "nrf_bootloader.h"
 #include "nrf_bootloader_app_start.h"
@@ -69,7 +68,7 @@
 #include "nrf_nvmc.h"
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
-
+#include "cfg/cs_MemoryLayout.h"
 
 static void on_error(void)
 {

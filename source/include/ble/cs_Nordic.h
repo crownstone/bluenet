@@ -44,6 +44,10 @@ typedef uint32_t ret_code_t;
 #include <nrf_sdh_ble.h>
 #include <nrf_sdh_soc.h>
 #include <nrf_sdm.h>
+
+// legacy, should be replaced by nrfx_comp.h (see below)
+#include <nrf_comp.h>
+
 // legacy #include <nrf_drv_uart.h>
 #include <nrfx_glue.h>
 //#include <nordic_common.h>
