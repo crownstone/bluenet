@@ -10,6 +10,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_Boards.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
@@ -32,16 +33,6 @@ MicroappCommandHandler::MicroappCommandHandler()
 		: EventListener(), _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
 
 	EventDispatcher::getInstance().addListener(this);
-}
-
-/*
- * Get from interrupt to digital pin.
- *
- * We have one virtual device at location 0, so we just decrement the pin number by one to map to the array in the
- * GPIO module. A generalized mapping would define a map for each interrupt to each digital pin for the microapp.
- */
-int MicroappCommandHandler::interruptToDigitalPin(int interrupt) {
-	return interrupt - 1;
 }
 
 /*
@@ -72,6 +63,11 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			LOGd("Microapp pin command");
 			microapp_pin_cmd_t* pin_cmd = reinterpret_cast<microapp_pin_cmd_t*>(cmd);
 			return handleMicroappPinCommand(pin_cmd);
+		}
+		case CS_MICROAPP_COMMAND_SWITCH_DIMMER: {
+			LOGd("Microapp switch dimmer command");
+			microapp_dimmer_switch_cmd_t* dimmer_switch_cmd = reinterpret_cast<microapp_dimmer_switch_cmd_t*>(cmd);
+			return handleMicroappDimmerSwitchCommand(dimmer_switch_cmd);
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
 			LOGd("Microapp service data command");
@@ -106,18 +102,18 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
 			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGv("Soft interrupt received for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			LOGd("Soft interrupt received for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
 			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGv("Soft interrupt error for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			LOGd("Soft interrupt error for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
 			// Empty slots cannot be used, it is old info from the interrupt's starting state
-			LOGv("Soft interrupt end for %i", (int)cmd->id);
+			LOGd("Soft interrupt end for %i", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
@@ -229,66 +225,15 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappDelayCommand(microapp_delay_
 
 cs_ret_code_t MicroappCommandHandler::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	switch (pin) {
-		case CS_MICROAPP_COMMAND_PIN_SWITCH: {  // same as DIMMER
-			return handleMicroappPinSwitchCommand(pin_cmd);
-		}
-		case CS_MICROAPP_COMMAND_PIN_GPIO1:
-		case CS_MICROAPP_COMMAND_PIN_GPIO2:
-		case CS_MICROAPP_COMMAND_PIN_GPIO3:
-		case CS_MICROAPP_COMMAND_PIN_GPIO4:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON1:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON2:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON3:
-		case CS_MICROAPP_COMMAND_PIN_BUTTON4:
-		case CS_MICROAPP_COMMAND_PIN_LED1:
-		case CS_MICROAPP_COMMAND_PIN_LED2:
-		case CS_MICROAPP_COMMAND_PIN_LED3:
-		case CS_MICROAPP_COMMAND_PIN_LED4: {
-			CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
-			pin_cmd->pin                      = interruptToDigitalPin(pin_cmd->pin);
-			switch (opcode1) {
-				case CS_MICROAPP_COMMAND_PIN_MODE: return handleMicroappPinSetModeCommand(pin_cmd);
-				case CS_MICROAPP_COMMAND_PIN_ACTION: return handleMicroappPinActionCommand(pin_cmd);
-				default: LOGw("Unknown opcode1"); return ERR_UNKNOWN_OP_CODE;
-			}
-			break;
-		}
-		default: {
-			LOGw("Unknown pin: %i", pin_cmd->pin);
-			return ERR_UNKNOWN_TYPE;
-		}
+	if (pin > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
+		LOGw("Pin %i out of range", pin); return ERR_UNKNOWN_TYPE;
 	}
-}
-
-cs_ret_code_t MicroappCommandHandler::handleMicroappPinSwitchCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	switch (mode) {
-		case CS_MICROAPP_COMMAND_PIN_WRITE: {
-			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_VALUE_OFF: {
-					LOGi("Turn switch off");
-					event_t event(CS_TYPE::CMD_SWITCH_OFF);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_VALUE_ON: {
-					LOGi("Turn switch on");
-					event_t event(CS_TYPE::CMD_SWITCH_ON);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				default: {
-					LOGw("Unknown switch command");
-					return ERR_UNKNOWN_TYPE;
-				}
-			}
-			break;
-		}
-		default: LOGw("Unknown pin mode / opcode: %u", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
+	CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
+	switch (opcode1) {
+		case CS_MICROAPP_COMMAND_PIN_MODE: return handleMicroappPinSetModeCommand(pin_cmd);
+		case CS_MICROAPP_COMMAND_PIN_ACTION: return handleMicroappPinActionCommand(pin_cmd);
+		default: LOGw("Unknown opcode1"); return ERR_UNKNOWN_OP_CODE;
 	}
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
@@ -332,14 +277,14 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_p
 			EventDispatcher::getInstance().dispatch(event);
 			break;
 		}
-		default: LOGw("Unknown mode"); return ERR_UNKNOWN_TYPE;
+		default: LOGw("Unknown opcode2: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
 	}
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappCommandHandler::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	LOGd("Clear, set or configure pin %i", pin);
+	LOGd("Read or write pin %i", pin);
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	switch (opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
@@ -367,16 +312,58 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinActionCommand(microapp_pi
 					EventDispatcher::getInstance().dispatch(event);
 					break;
 				}
+				default: LOGw("Unknown microapp pin value command"); return ERR_UNKNOWN_TYPE;
+			}
+			break;
+		}
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP: // undefined, can only be used with opcode1 CS_MICROAPP_COMMAND_PIN_MODE
+			LOGw("Input pullup undefined as a pin action command"); return ERR_UNSPECIFIED;
+		case CS_MICROAPP_COMMAND_PIN_READ: {
+			// TODO; (note that we do not handle event handler registration here but in SetMode above
+			LOGw("Reading pins via the microapp is not implemented yet"); return ERR_NOT_IMPLEMENTED;
+		}
+		default: LOGw("Unknown opcode2: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MicroappCommandHandler::handleMicroappDimmerSwitchCommand(microapp_dimmer_switch_cmd_t* dim_switch_cmd) {
+	CommandMicroappDimmerSwitchOpcode opcode = (CommandMicroappDimmerSwitchOpcode)dim_switch_cmd->opcode;
+	switch (opcode) {
+		case CS_MICROAPP_COMMAND_SWITCH: {
+			CommandMicroappSwitchValue val = (CommandMicroappSwitchValue)dim_switch_cmd->value;
+			switch (val) {
+				case CS_MICROAPP_COMMAND_SWITCH_OFF: {
+					LOGi("Turn switch off");
+					event_t event(CS_TYPE::CMD_SWITCH_OFF);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_SWITCH_ON: {
+					LOGi("Turn switch on");
+					event_t event(CS_TYPE::CMD_SWITCH_ON);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_SWITCH_TOGGLE: {
+					LOGi("Toggle switch");
+					event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
 				default: LOGw("Unknown switch command"); return ERR_UNKNOWN_TYPE;
 			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
-		case CS_MICROAPP_COMMAND_PIN_READ: {
-			// TODO; (note that we do not handle event handler registration here but in SetMode above
+		case CS_MICROAPP_COMMAND_DIMMER: {
+			LOGi("Set dimmer to %i", dim_switch_cmd->value);
+			TYPIFY(CMD_SET_DIMMER) eventData;
+			eventData = dim_switch_cmd->value;
+			event_t event(CS_TYPE::CMD_SET_DIMMER, &eventData, sizeof(eventData));
+			event.dispatch();
 			break;
 		}
-		default: LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
+		default: LOGw("Unknown opcode: %i", opcode); return ERR_UNKNOWN_OP_CODE;
 	}
 	return ERR_SUCCESS;
 }

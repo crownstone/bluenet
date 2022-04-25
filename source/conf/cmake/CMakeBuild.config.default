@@ -267,11 +267,33 @@ BOOTLOADER_LENGTH=0x8000
 #BOOTLOADER_START_ADDRESS=0x00071000
 #BOOTLOADER_LENGTH=0xD000
 
+# This setting is defined in nrf_dfu_types.h. Here we predefine it so it is available to the wider code base.
+# This is the bootloader settings address for the nRF52832-QFAA.
+CS_BOOTLOADER_SETTINGS_ADDRESS=0x7F000
+
+# This setting is defined in nrf_dfu_types.h. Here we predefine it so it is available to the wider code base.
+# This is the mbr settings address for the nRF52832-QFAA.
+CS_MBR_PARAMS_PAGE_ADDRESS=0x7E000
 
 # Has to match values in: bootloader/secure_bootloader_gcc_nrf52.ld
 # 0x00080000 - BOOTLOADER_START_ADDRESS - 1000 - 1000 = 6000
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 
+# Number of flash pages for FDS to use.
+# - 1 page for GC
+# - 1 page for config
+# - 1 page for behaviour
+# - 1 page for sure
+CS_FDS_VIRTUAL_PAGES=4
+
+# Size of virual page in words
+CS_FDS_VIRTUAL_PAGE_SIZE=1024
+
+# The number of pages reserved before FDS for possible FDS expansion in the future
+CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE=4
+
+# The number of pages reserved for other purposes after FDS and just before the bootloader
+CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER=0
 
 ## UICR
 
@@ -505,10 +527,13 @@ AUTO_ENABLE_MICROAPP_ON_BOOT=0
 # The start of microapps in flash
 FLASH_MICROAPP_BASE=0x69000
 
-# The number of pages for microapps (each page is 0x1000 / 4096 bytes)
+# The number of pages for a single microapp (each page is 0x1000 / 4096 bytes)
 FLASH_MICROAPP_PAGES=2
 
-# The amount of RAM it is allowed to use (microapp is placed before IPC ram, and grows down).
+# The number of microapps supported
+MICROAPP_COUNT=1
+
+# The amount of RAM a single microapp is allowed to use (before IPC ram, and grows down).
 RAM_MICROAPP_AMOUNT=0x800
 
 # Default location of file with keys to setup Crownstone

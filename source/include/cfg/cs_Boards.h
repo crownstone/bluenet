@@ -27,9 +27,9 @@ extern "C" {
 #include <stdint.h>
 
 /**
- *  We use part of the UICR to store information about the hardware board. So the firmware is independent on the
- *  hardware board (we don't need to know the board at compile time). Instead the firmware reads the hardware board
- *  type at runtime from the UICR and assigns the
+ * We use part of the UICR to store information about the hardware board. So the firmware is independent on the
+ * hardware board (we don't need to know the board at compile time). Instead the firmware reads the hardware board
+ * type at runtime from the UICR and assigns the
  */
 
 

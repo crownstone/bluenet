@@ -34,16 +34,8 @@ uint32_t g_HARDWARE_BOARD_ADDRESS = @HARDWARE_BOARD_ADDRESS@;
 // The default hardware board
 uint32_t g_DEFAULT_HARDWARE_BOARD = @DEFAULT_HARDWARE_BOARD@;
 
-// Start of flash for microapps
-uint32_t g_FLASH_MICROAPP_BASE = @FLASH_MICROAPP_BASE@;
-
-// Number of pages
-uint8_t g_FLASH_MICROAPP_PAGES = @FLASH_MICROAPP_PAGES@;
-
-// Microapp ram is located before IPC ram.
-uint32_t g_RAM_MICROAPP_BASE = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - (@RAM_BLUENET_IPC_LENGTH@ + @RAM_MICROAPP_AMOUNT@);
-
-uint32_t g_RAM_MICROAPP_AMOUNT = @RAM_MICROAPP_AMOUNT@;
+// Number of microapps supported
+uint8_t g_MICROAPP_COUNT = @MICROAPP_COUNT@;
 
 int8_t g_MAX_CHIP_TEMPERATURE = @MAX_CHIP_TEMP@;
 
