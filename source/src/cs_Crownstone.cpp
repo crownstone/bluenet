@@ -44,6 +44,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <drivers/cs_Uicr.h>
 #include <drivers/cs_Watchdog.h>
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_RC5.h>
@@ -130,33 +131,12 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
  * the runtime always tries to overwrite it with the (let's hope) proper state.
  */
 void overwrite_hardware_version() {
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("Write board type into UICR");
-		nrf_nvmc_write_word(g_HARDWARE_BOARD_ADDRESS, g_DEFAULT_HARDWARE_BOARD);
-	}
+	writeHardwareBoard();
 	LOGd("Board: %p", hardwareBoard);
 }
 
-/** Enable NFC pins to be used as GPIO.
- *
- * Warning: this is stored in UICR, so it's persistent.
- * Warning: NFC pins leak a bit of current when not at same voltage level.
- */
-void enableNfcPins() {
-	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
-	}
-}
-
 void printNfcPins() {
-	uint32_t val = NRF_UICR->NFCPINS;
-	if (val == 0) {
-		LOGd("NFC pins enabled (%p)", val);
-	}
-	else {
-		LOGd("NFC pins disabled (%p)", val);
-	}
+	LOGd("NFC pins used as gpio: %u", isNfcPinsUsedAsGpio());
 }
 
 void on_exit(void) {
@@ -974,7 +954,7 @@ int main() {
 	// Init GPIO pins early in the process!
 
 	if (board.flags.usesNfcPins) {
-		enableNfcPins();
+		enableNfcPinsAsGpio();
 	}
 
 //	if (IS_CROWNSTONE(board.deviceType)) {

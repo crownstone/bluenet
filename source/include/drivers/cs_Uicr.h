@@ -15,6 +15,35 @@ extern "C" {
 #include <protocol/cs_Typedefs.h>
 
 /**
+ * Get the hardware board from UICR, or the default board if none is set in UICR.
+ */
+uint32_t getHardwareBoard();
+
+/**
+ * Write the default hardware board to UICR if none is written yet..
+ *
+ * In the past, the hardware board was not written to UICR. Instead, the board was compiled into the firmware,
+ * and each product had their own different firmware.
+ * This function is made to transition from that solution to a single firmware with board in UICR.
+ * We only have to make sure that each product once runs a firmware that writes the correct hardware board to UICR..
+ */
+void writeHardwareBoard();
+
+/**
+ * Enable NFC pins to be used as GPIO.
+ *
+ * This is stored in UICR, so it's persistent.
+ * NFC pins leak a bit of current when not at same voltage level.
+ */
+void enableNfcPinsAsGpio();
+
+/**
+ * Returns true when the NFC pins can be used as GPIO.
+ */
+bool canUseNfcPinsAsGpio();
+
+
+/**
  * Read the UICR data from UICR.
  *
  * @param[out] uicrData                The struct to read to.

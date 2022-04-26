@@ -12,6 +12,33 @@
 #include <stdint.h>
 
 
+uint32_t getHardwareBoard() {
+	uint32_t hardwareBoard = *((uint32_t*)g_HARDWARE_BOARD_ADDRESS);
+	if (hardwareBoard == 0xFFFFFFFF) {
+		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
+	}
+	return hardwareBoard;
+}
+
+void writeHardwareBoard() {
+	uint32_t hardwareBoard = *((uint32_t*)g_HARDWARE_BOARD_ADDRESS);
+	if (hardwareBoard == 0xFFFFFFFF) {
+		LOGw("Write board type into UICR");
+		nrf_nvmc_write_word(g_HARDWARE_BOARD_ADDRESS, g_DEFAULT_HARDWARE_BOARD);
+	}
+}
+
+void enableNfcPinsAsGpio() {
+	if (NRF_UICR->NFCPINS != 0) {
+		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+	}
+}
+
+bool canUseNfcPinsAsGpio() {
+	return NRF_UICR->NFCPINS;
+}
+
+
 /**
  * Checks whether a value can be written to UICR.
  *

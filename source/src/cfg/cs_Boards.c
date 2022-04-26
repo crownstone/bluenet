@@ -52,6 +52,7 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <boards/cs_BoardMap.h>
 #include <protocol/cs_UicrPacket.h>
+#include <drivers/cs_Uicr.h>
 
 /**
  * Initialize conservatively (as if given pins are not present).
@@ -142,10 +143,7 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor) {
 
 cs_ret_code_t configure_board(boards_config_t* config) {
 
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
-	}
+	uint32_t hardwareBoard = getHardwareBoard();
 
 	init(config);
 

@@ -32,7 +32,7 @@ extern "C" {
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One, 7 Builtin Two
+	  |  |  |--------------  Product Type, see cs_DeviceTypes.h: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
 */
@@ -51,14 +51,9 @@ extern "C" {
  */
 static inline const char* get_hardware_version() {
 
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
-	}
+	uint32_t hardwareBoard = getHardwareBoard();
 
 	// Can't use LOGe here, as the bootloader also uses this file.
-//	LOGi("UICR");
-//	CsUtils::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
 
 	switch (hardwareBoard) {
 		// CROWNSTONE BUILTINS
