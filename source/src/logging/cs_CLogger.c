@@ -62,6 +62,9 @@ void cs_clog(bool addNewLine, const char* fmt, ...) {
 		else {
 			++fmt;
 		}
+		if (*fmt == 0) {
+			break;
+		}
 		switch (*fmt) {
 			case 'd':
 			case 'i': {
