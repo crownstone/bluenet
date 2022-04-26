@@ -242,8 +242,9 @@ if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 	)
 endif()
 
+# calculate some values that are to be used in the auto-generated files below
 
-# auto generate .h sources
+# auto-generate header files
 
 message(STATUS "Generate cs_MemoryLayout.h")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_MemoryLayout.h" @ONLY)
@@ -254,7 +255,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
 
-# auto generate .cpp sources
+# auto-generate source files
 
 message(STATUS "Configure cs_Git.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
@@ -264,6 +265,7 @@ message(STATUS "Configure cs_AutoConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
+# auto-generate linker files
 
 message(STATUS "Configure nrf_symbols.ld file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)

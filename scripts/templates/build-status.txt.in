@@ -3,13 +3,16 @@ Bluenet details in memory:
 
 Flash
 --------------------------
-Start address | Size    | Total
-${APPLICATION_START_ADDRESS}       | ${APPLICATION_LENGTH} | ${TOTAL_AMOUNT_FLASH}
+Start address | What               | Size
+0x00000000    | MBR + SoftDevice   | ${APPLICATION_START_ADDRESS}
+${APPLICATION_START_ADDRESS}    | bluenet (max size) | ${APPLICATION_MAX_LENGTH}
+
+Total: ${TOTAL_AMOUNT_FLASH}
 
 RAM
 --------------------------
 RAM base      | Size    | Total
-${RAM_R1_BASE}    | ${RAM_APPLICATION_AMOUNT} | ${TOTAL_AMOUNT_RAM}
+${RAM_R1_BASE}    | ${RAM_APPLICATION_AMOUNT}  | ${TOTAL_AMOUNT_RAM}
 
 Bootloader
 --------------------------
