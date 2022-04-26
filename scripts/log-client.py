@@ -45,11 +45,16 @@ argParser.add_argument('--verbose',
                        dest="verbose",
                        action='store_true',
                        help='Show verbose output')
+argParser.add_argument('--noise',
+                       '-r',
+                       dest="noise",
+                       action='store_true',
+                       help='Show uart noise output (plaintext data may be eaten by the binary protocol if containing one of: @~\\)')
 argParser.add_argument('--raw',
                        '-r',
                        dest="raw",
                        action='store_true',
-                       help='Show raw output (may result in interleaved print statements)')
+                       help='Show raw output (may result in interleaved print statements) (overrides the --noise option when both are set)')
 args = argParser.parse_args()
 
 if args.verbose:
@@ -67,22 +72,32 @@ bluenetLogs = BluenetLogs()
 bluenetLogs.setLogStringsFile(logStringsFileName)
 
 
-# stub raw message printer that hooks into the uart event bus and prints immediately.
-class RawMessagePrinter():
+# stub message printer that hooks into the uart event bus when necessary and prints immediately.
+class AuxMessagePrinter():
     def __init__(self):
-        try:
-            UartEventBus.subscribe(SystemTopics.uartRawData, self.onDataReceived)
-            print("printing raw data enabled")
-        except AttributeError as e:
-            print("Failed enabling raw data printer. Are your crownstone python libs up to date?")
+        if args.raw:
+            try:
+                UartEventBus.subscribe(SystemTopics.uartRawData, self.onRawDataReceived)
+                print("printing raw data enabled")
+            except AttributeError as e:
+                print("Failed enabling raw data printer. Are your crownstone python libs up to date?")
+        
+        elif args.noise:
+            try:
+                UartEventBus.subscribe(SystemTopics.uartNoiseData, self.onNoiseDataReceived)
+                print("printing raw data enabled")
+            except AttributeError as e:
+                print("Failed enabling noise data printer. Are your crownstone python libs up to date?")
 
-    def onDataReceived(self, dat):
+    def onRawDataReceived(self, dat):
         print(dat.decode('utf-8'), end='', flush=True)
 
-if args.raw:
-    
-    rawprinter = RawMessagePrinter()
+    def onNoiseDataReceived(self, dat):
+        print(dat.decode('utf-8'), end='', flush=True)
 
+
+# make an instance 
+auxprinter = AuxMessagePrinter()
 
 
 # Init the Crownstone UART lib.
