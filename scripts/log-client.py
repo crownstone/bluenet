@@ -63,7 +63,7 @@ bluenetLogs.setLogStringsFile(logStringsFileName)
 class RawMessagePrinter():
     def __init__(self):
         try:
-            UartEventBus.subscribe(SystemTopics.uartNewData, self.onDataReceived)
+            UartEventBus.subscribe(SystemTopics.uartRawData, self.onDataReceived)
             print("printing raw data enabled")
         except AttributeError as e:
             print("Failed enabling raw data printer. Are your crownstone python libs up to date?")
