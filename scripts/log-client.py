@@ -15,6 +15,14 @@ from bluenet_logs import BluenetLogs
 
 import logging
 
+try:
+    from pkg_resources import packaging
+    bluenet_logs_version_compat = "1.1.3"
+    if packaging.version.parse(BluenetLogs.__version__) < packaging.version.parse(bluenet_logs_version_compat):
+        print("Update BluenetLogs. There's a newer version available!")
+except ImportError:
+    print("Couldn't check version. Install pkg_resources for that");
+
 defaultLogStringsFile = os.path.abspath(f"{os.path.dirname(os.path.abspath(__file__))}/../build/default/extracted_logs.json")
 
 argParser = argparse.ArgumentParser(description="Client to show binary logs")
