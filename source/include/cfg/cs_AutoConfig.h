@@ -29,16 +29,6 @@ extern uint32_t g_RAM_R1_BASE;
 
 extern uint32_t g_RAM_APPLICATION_AMOUNT;
 
-extern uint32_t g_HARDWARE_BOARD_ADDRESS;
-
-extern uint32_t g_UICR_ADDRESS_FAMILY_MARKET_TYPE;
-
-extern uint32_t g_UICR_ADDRESS_MAJOR_MINOR_PATCH;
-
-extern uint32_t g_UICR_ADDRESS_PROD_DATE_HOUSING;
-
-extern uint32_t g_DEFAULT_HARDWARE_BOARD;
-
 extern uint8_t g_MICROAPP_COUNT;
 
 extern int8_t g_MAX_CHIP_TEMPERATURE;

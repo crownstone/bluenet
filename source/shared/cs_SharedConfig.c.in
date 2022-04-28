@@ -1,0 +1,24 @@
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Apr 28, 2022
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
+#include <cs_SharedConfig.h>
+#include <cfg/cs_Boards.h>
+
+// The address of where to write the hardware board type (it is a UICR register)
+uint32_t g_HARDWARE_BOARD_ADDRESS = @HARDWARE_BOARD_ADDRESS@;
+
+// The address of where to write the product family, market, and type (it is a UICR register)
+uint32_t g_FAMILY_MARKET_TYPE_ADDRESS = @FAMILY_MARKET_TYPE_ADDRESS@;
+
+// The address of where to write the hardware version major, minor, and patch (it is a UICR register)
+uint32_t g_MAJOR_MINOR_PATCH_ADDRESS = @MAJOR_MINOR_PATCH_ADDRESS@;
+
+// The address of where to write the production date and housing type (it is a UICR register)
+uint32_t g_PROD_DATE_HOUSING_ADDRESS = @PROD_DATE_HOUSING_ADDRESS@;
+
+// The default hardware board
+uint32_t g_DEFAULT_HARDWARE_BOARD = @DEFAULT_HARDWARE_BOARD@;

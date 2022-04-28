@@ -132,7 +132,7 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
  */
 void overwrite_hardware_version() {
 	writeHardwareBoard();
-	LOGd("Board: %p", hardwareBoard);
+	LOGd("Board: %p", getHardwareBoard());
 }
 
 void printNfcPins() {

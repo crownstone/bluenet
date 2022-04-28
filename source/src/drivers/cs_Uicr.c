@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cfg/cs_AutoConfig.h>
+#include <cs_SharedConfig.h>
 #include <drivers/cs_Uicr.h>
 #include <nrf_nvmc.h>
 #include <protocol/cs_ErrorCodes.h>
@@ -125,18 +125,18 @@ void clearUicr() {
 
 cs_ret_code_t getUicr(cs_uicr_data_t* uicrData) {
 	uicrData->board                       = *((uint32_t*)g_HARDWARE_BOARD_ADDRESS);
-	uicrData->productRegionFamily.asInt   = *((uint32_t*)g_UICR_ADDRESS_FAMILY_MARKET_TYPE);
-	uicrData->majorMinorPatch.asInt       = *((uint32_t*)g_UICR_ADDRESS_MAJOR_MINOR_PATCH);
-	uicrData->productionDateHousing.asInt = *((uint32_t*)g_UICR_ADDRESS_PROD_DATE_HOUSING);
+	uicrData->productRegionFamily.asInt   = *((uint32_t*)g_FAMILY_MARKET_TYPE_ADDRESS);
+	uicrData->majorMinorPatch.asInt       = *((uint32_t*)g_MAJOR_MINOR_PATCH_ADDRESS);
+	uicrData->productionDateHousing.asInt = *((uint32_t*)g_PROD_DATE_HOUSING_ADDRESS);
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t setUicr(const cs_uicr_data_t* uicrData, bool overwrite) {
 	// First check if every field can be written to UICR, we don't want a partial write.
 	if (!canSetUicrField(uicrData->board, g_HARDWARE_BOARD_ADDRESS)
-			|| !canSetUicrField(uicrData->productRegionFamily.asInt, g_UICR_ADDRESS_FAMILY_MARKET_TYPE)
-			|| !canSetUicrField(uicrData->majorMinorPatch.asInt, g_UICR_ADDRESS_MAJOR_MINOR_PATCH)
-			|| !canSetUicrField(uicrData->productionDateHousing.asInt, g_UICR_ADDRESS_PROD_DATE_HOUSING)) {
+			|| !canSetUicrField(uicrData->productRegionFamily.asInt, g_FAMILY_MARKET_TYPE_ADDRESS)
+			|| !canSetUicrField(uicrData->majorMinorPatch.asInt, g_MAJOR_MINOR_PATCH_ADDRESS)
+			|| !canSetUicrField(uicrData->productionDateHousing.asInt, g_PROD_DATE_HOUSING_ADDRESS)) {
 		if (!overwrite) {
 			return ERR_ALREADY_EXISTS;
 		}
@@ -145,8 +145,8 @@ cs_ret_code_t setUicr(const cs_uicr_data_t* uicrData, bool overwrite) {
 
 	// Write all fields.
 	setUicrField(uicrData->board, g_HARDWARE_BOARD_ADDRESS);
-	setUicrField(uicrData->productRegionFamily.asInt, g_UICR_ADDRESS_FAMILY_MARKET_TYPE);
-	setUicrField(uicrData->majorMinorPatch.asInt, g_UICR_ADDRESS_MAJOR_MINOR_PATCH);
-	setUicrField(uicrData->productionDateHousing.asInt, g_UICR_ADDRESS_PROD_DATE_HOUSING);
+	setUicrField(uicrData->productRegionFamily.asInt, g_FAMILY_MARKET_TYPE_ADDRESS);
+	setUicrField(uicrData->majorMinorPatch.asInt, g_MAJOR_MINOR_PATCH_ADDRESS);
+	setUicrField(uicrData->productionDateHousing.asInt, g_PROD_DATE_HOUSING_ADDRESS);
 	return ERR_SUCCESS;
 }

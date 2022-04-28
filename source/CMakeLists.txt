@@ -264,6 +264,9 @@ message(STATUS "Configure cs_AutoConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
+message(STATUS "Configure cs_SharedConfig.c file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c" @ONLY)
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
 
 message(STATUS "Configure nrf_symbols.ld file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)

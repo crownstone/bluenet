@@ -339,6 +339,10 @@ message(STATUS "bootloader: Configure cs_BootloaderConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c" @ONLY)
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 
+message(STATUS "bootloader: Configure cs_SharedConfig.cpp file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c" @ONLY)
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c")
+
 message(STATUS "bootloader: Configure cs_config.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h" @ONLY)
 
