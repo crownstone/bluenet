@@ -1,7 +1,7 @@
 
 Bluenet details in memory:
 
-Flash
+Flash (Application)
 --------------------------
 Start address | Size    | Total
 ${APPLICATION_START_ADDRESS}       | ${APPLICATION_LENGTH} | ${TOTAL_AMOUNT_FLASH}

@@ -28,42 +28,39 @@ const MemorySection getMemorySection() {
 // specializations computing the address values of the known firmware sections
 
 template <>
+const MemorySection getMemorySection<FirmwareSection::Mbr>() {
+	return softdeviceFlashSection;
+}
+
+template <>
 const MemorySection getMemorySection<FirmwareSection::Bluenet>() {
-	return Globals::MemorySections::bluenet;
+	return bluenetFlashSection;
 }
 
 template <>
 const MemorySection getMemorySection<FirmwareSection::MicroApp>() {
-	return Globals::MemorySections::microapp;
+	return microappFlashSection;
+}
+
+template <>
+const MemorySection getMemorySection<FirmwareSection::Ipc>() {
+	return p2pDfuFlashSection;
+}
+
+template <>
+const MemorySection getMemorySection<FirmwareSection::Fds>() {
+	return fdsFlashSection;
 }
 
 template <>
 const MemorySection getMemorySection<FirmwareSection::Bootloader>() {
-	return Globals::MemorySections::bootloader;
+	return bootloaderFlashSection;
 }
 
 template <>
 const MemorySection getMemorySection<FirmwareSection::BootloaderSettings>() {
-	return Globals::MemorySections::bootloaderSettings;
+	return bootloaderSettingsFlashSection;
 }
-
-//template<>
-//const MemorySection getFirmwareSectionLocation<FirmwareSection::Mbr>() {
-////extern int __start_mbr_params_page, __stop_mbr_params_page;
-////static const uint32_t start_mbr_params_page = static_cast<uint32_t>(__start_mbr_params_page);
-////static const uint32_t stop_mbr_params_page = static_cast<uint32_t>(__stop_mbr_params_page);
-//	return {0x00000000,
-//			0x00001000};
-//}
-
-
-//template<>
-//const MemorySection getFirmwareSectionLocation<FirmwareSection::Ipc>() {
-//// TODO: WARNING THIS IS CURRENTLY SET TO THE MICROAPP PAGE DURING DEVELOPMENT
-//	return {0x00069000,
-//			0x00001000};
-//}
-
 
 
 // --------------------------------------------------------------------------------

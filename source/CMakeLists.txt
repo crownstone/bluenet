@@ -249,7 +249,7 @@ endif()
 # auto generate .h sources
 
 message(STATUS "Generate cs_MemoryLayout.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_MemoryLayout.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_MemoryLayout.h" @ONLY)
 
 message(STATUS "Configure cs_StaticConfig.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
@@ -599,12 +599,12 @@ add_custom_target(write_bootloader_settings
 	)
 
 add_custom_target(read_bootloader_settings
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${BOOTLOADER_SETINGS_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${CS_BOOTLOADER_SETTINGS_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Read bootloader settings from remote target board"
 	)
 
 add_custom_target(read_bootloader_settings_backup
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${BOOTLOADER_SETTINGS_BACKUP_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=${CS_BOOTLOADER_SETTINGS_BACKUP_ADDRESS}" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Read bootloader settings from remote target board"
 	)
 

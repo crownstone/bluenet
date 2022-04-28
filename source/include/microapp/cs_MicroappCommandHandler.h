@@ -70,11 +70,6 @@ protected:
 	cs_ret_code_t handleMicroappPinCommand(microapp_pin_cmd_t* cmd);
 
 	/**
-	 * Handle microapp pin switching commands.
-	 */
-	cs_ret_code_t handleMicroappPinSwitchCommand(microapp_pin_cmd_t* cmd);
-
-	/**
 	 * Handle microapp pin commands for setting pin modes.
 	 */
 	cs_ret_code_t handleMicroappPinSetModeCommand(microapp_pin_cmd_t* cmd);
@@ -83,6 +78,11 @@ protected:
 	 * Handle microapp pin commands for reading and writing pins.
 	 */
 	cs_ret_code_t handleMicroappPinActionCommand(microapp_pin_cmd_t* cmd);
+
+	/**
+	 * Handle microapp dimmer and switch commands.
+	 */
+	cs_ret_code_t handleMicroappDimmerSwitchCommand(microapp_dimmer_switch_cmd_t* cmd);
 
 	/**
 	 * Handle microapp commands for advertising microapp state in service data.
