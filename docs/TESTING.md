@@ -42,7 +42,7 @@ Next, overload the IGBTs:
 - Plug in a light (so you can see when the dimmer turns off).
 - Additionally, plug in a load of 300W.
 - [ ] Check if the relay turns on immediately.
-- [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`10` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - Disable switch lock.
 - [ ] Check if you can't turn on the dimmer anymore.
 - [ ] Check if you can't turn off the relay anymore.
@@ -56,7 +56,7 @@ Now repeat the process below a couple of times with 300W and a couple of times w
 - Enable switch lock.
 - Plug in the load.
 - [ ] Check if the relay turns on immediately.
-- [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`10` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - Disable switch lock.
 
 Now try it in setup mode:
@@ -66,7 +66,7 @@ Now try it in setup mode:
 - Turn dimmer on.
 - Plug in a load of 300W or more.
 - [ ] Check if the relay turns on immediately.
-- [ ] Check if it reports the correct error state (`10` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`10` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - [ ] Check if you can't turn on the dimmer anymore.
 - [ ] Check if you can't turn off the relay anymore.
 - Factory reset the crownstone.
@@ -90,7 +90,7 @@ The default chip temperature threshold is set in the `CMakeBuild.config.default`
 Now it should heat up (you should see the chip temperature rise) and turn off within an hour.
 
 - [ ] Check if it turns off.
-- [ ] Check if it reports the correct error state (`100` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`100` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - Disable switch lock.
 - [ ] Check if you can't turn on the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
@@ -102,7 +102,7 @@ Repeat the process a few times:
 - Reset the error state (or reset the crownstone).
 - Turn relay on.
 - [ ] Check if it turns off.
-- [ ] Check if it reports the correct error state (`100` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`100` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - [ ] Check if you can't turn on the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
 
@@ -114,7 +114,7 @@ Now try it in setup mode:
 - Enable dimming.
 - Turn relay on.
 - [ ] Check if it turns off.
-- [ ] Check if it reports the correct error state (`100` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`100` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - [ ] Check if you can't turn on the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
 
@@ -140,7 +140,7 @@ Now overload the dimmer:
 Now it should heat up (you should see the chip temperature rise) and turn the relay on within 15 minutes. If this doesn't happen, try with a load of 400W, or else 500W.
 
 - [ ] Check if the relay turns on.
-- [ ] Check if it reports the correct error state (`1000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`1000` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - Disable switch lock.
 - [ ] Check if you can't turn off the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
@@ -162,7 +162,7 @@ If one of the IGBTs failed, it will be always on or always off. The former case 
 - Enable switch lock.
 - Plug in load of 300W.
 - [ ] Check if the relay turns on immediately.
-- [ ] Check if it reports the correct error state (`10000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`10000` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - Disable switch lock.
 - [ ] Check if you can't turn off the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
@@ -176,7 +176,7 @@ Now try it in setup mode:
 - Turn relay off.
 - Plug in load of 300W.
 - [ ] Check if the relay turns on immediately.
-- [ ] Check if it reports the correct error state (`10000` according to the [protocol](PROTOCOL.md#state_error_bitmask)).
+- [ ] Check if it reports the correct error state (`10000` according to the [protocol](protocol/PROTOCOL.md#state_error_bitmask)).
 - [ ] Check if you can't turn off the relay anymore.
 - [ ] Check if you can't turn on the dimmer anymore.
 

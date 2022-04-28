@@ -7,19 +7,19 @@ To add support for particular functionality, you'll need to touch a few files. W
 3. Add your own files to the build system.
 4. Add compiler flags (if necessary)
 
-If you actually have to include new source files, use `BUILD_X`. If you only set parameters without the need for additional source files, only add the configuration option, but skip the rest of this tutorial. You only need to follow the [tutorial to add a configuration option](/docs/tutorials/ADD_CONFIGURATION_OPTION.md).
+If you actually have to include new source files, use `BUILD_X`. If you only set parameters without the need for additional source files, only add the configuration option, but skip the rest of this tutorial. You only need to follow the [tutorial to add a configuration option](ADD_CONFIGURATION_OPTION.md).
 
 ## Add configuration options
 
-In [CMakeBuild.config.default](/source/conf/cmake/CMakeBuild.config.default) add an option, say `BUILD_TWI = 0` (the default is off for a new function). 
+In [CMakeBuild.config.default](../../source/conf/cmake/CMakeBuild.config.default) add an option, say `BUILD_TWI = 0` (the default is off for a new function). 
 
-In your own local configuration file, e.g. [CMakeBuild.overwrite.config](/config/default/CMakeBuild.overwrite.config), set `BUILD_TWI = 1`.
+In your own local configuration file, e.g. `/config/default/CMakeBuild.overwrite.config`, set `BUILD_TWI = 1`.
 
 
 ## Add Nordic files
 
 Very likely you will need additional files to be compiled. Use the files with the `nrfx_` prefix (the other ones are old and will be phased out in the end). 
-The location where you can specify where this is done is in [source/CMakeLists.txt](/source/CMakeLists.txt) (note, it is **not** in the root `/CMakeList.txt` file). 
+The location where you can specify where this is done is in [source/CMakeLists.txt](../../source/CMakeLists.txt) (note, it is **not** in the root `/CMakeList.txt` file). 
 
 ```
 IF (BUILD_TWI)
@@ -31,7 +31,7 @@ ENDIF()
 
 ## Add your own new files
 
-The code you have written and which interfaces with the Nordic code also has to be included. This is through [crownstone.src.cmake](/source/conf/cmake/crownstone.src.cmake).
+The code you have written and which interfaces with the Nordic code also has to be included. This is through [crownstone.src.cmake](../../source/conf/cmake/crownstone.src.cmake).
 
 ```
 IF (BUILD_TWI)
@@ -41,7 +41,7 @@ ENDIF()
 
 ## Add compiler flags
 
-Optionally, in [crownstone.defs.cmake](/source/conf/cmake/crownstone.defs.cmake) add a compiler flag so the cross-compiler (or even the precompiler) is aware of the new functionality.
+Optionally, in [crownstone.defs.cmake](../../source/conf/cmake/crownstone.defs.cmake) add a compiler flag so the cross-compiler (or even the precompiler) is aware of the new functionality.
 Of course, only do this if necessary.
 
 ```
@@ -51,7 +51,7 @@ ADD_DEFINITIONS("-DBUILD_TWI=${BUILD_TWI}")
 
 # What's next?
 
-Now you can start coding. See e.g. [this tutorial](/docs/tutorials/ADD_NEW_COMMAND.md) on how to add a **command** or **event types**. One of the first things you will see if you browse the code is
+Now you can start coding. See e.g. [this tutorial](ADD_NEW_COMMAND.md) on how to add a **command** or **event types**. One of the first things you will see if you browse the code is
 that there is an event bus, so we'll quickly review this here. 
 
 ## Event bus

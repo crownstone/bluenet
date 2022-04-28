@@ -1,7 +1,7 @@
 # Core utility
 
 There are a couple of tools that will replace the Android or iOS app to flash new firmware to devices in bootloader
-mode. Those can be found on [https://github.com/NordicSemiconductor/](github).
+mode. Those can be found on [github](https://github.com/NordicSemiconductor/).
 
 Clone first the core utility:
 

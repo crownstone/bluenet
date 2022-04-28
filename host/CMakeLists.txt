@@ -13,7 +13,9 @@ set(CMAKE_CXX_FLAGS          "${DEFAULT_CXX_FLAGS}"             CACHE STRING "C+
 set(CMAKE_C_FLAGS            "${DEFAULT_C_FLAGS}"               CACHE STRING "C flags" FORCE)
 set(CMAKE_C_AND_CXX_FLAGS    "${DEFAULT_C_AND_CXX_FLAGS}"       CACHE STRING "C and C++ flags")
 
+set(CMAKE_BLUENET_SOURCE_DIR_MOCK ${CMAKE_CURRENT_SOURCE_DIR}/../mock/source)
 set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
+
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
 if(HOST_TARGET)
@@ -26,6 +28,7 @@ endif()
 
 add_compile_definitions("NRF52832_XXAA")
 
+# add paths to our custom cmake modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
@@ -43,9 +46,6 @@ load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
 # These should come from a CMakeBuild.config.default file
 add_compile_definitions("SERIAL_VERBOSITY=${SERIAL_VERBOSITY}")
 
-# On debug print all these macros
-#message(STATUS "Config list: ${CONFIG_LIST}")
-
 message(STATUS "Configure cs_Git.cpp file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_BLUENET_BINARY_DIR}/src/cfg/cs_Git.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_BLUENET_BINARY_DIR}/src/cfg/cs_Git.cpp")
@@ -60,42 +60,68 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h")
 
-include_directories( "../source/include" "include" "${CMAKE_BLUENET_BINARY_DIR}/include")
 
+##################################
+# Get all includes from crownstone
+##################################
+
+# these includes don't have the
+include_directories("include" "${CMAKE_BLUENET_BINARY_DIR}/include")
+
+# add include directories relative to the CMAKE_BLUENET_SOURCE_DIR here:
+set(HOST_INCLUDE_DIRS "include")
+
+LIST(APPEND HOST_INCLUDE_DIRS "include/third")
+LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf")
+LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
+
+# loop over all host includes, adding them and adding a mock include with higher priority.
+foreach(cs_include_dir ${HOST_INCLUDE_DIRS})
+	# add the normal include so that everything that isn't mocked doesn't need explicit mocking.
+	message(STATUS "Add include directory: " ${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir})
+	include_directories("${CMAKE_BLUENET_SOURCE_DIR}/${cs_include_dir}")
+	
+	# Add mock include with higher prio.
+	# Override header files by adding a mock file in the exact same relative location in the mock folder.
+	message(STATUS "Add mock include directory: " ${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir})
+	include_directories(BEFORE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir}")
+endforeach()
+
+
+##############################
 # Get all includes from nordic
+##############################
+
 include(nordic.src)
-
-set(THIRD_PARTY_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third")
-set(THIRD_PARTY_NRF_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf")
-set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
-
-message(STATUS "Include path: ${THIRD_PARTY_INCLUDE_PATH}")
-message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
-message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
-
-include_directories(${THIRD_PARTY_INCLUDE_PATH})
-include_directories(${THIRD_PARTY_NRF_INCLUDE_PATH})
-include_directories(${THIRD_PARTY_NRF_SDK_INCLUDE_PATH})
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
+#################################################
+# Include crownstone application and mock sources
+#################################################
+
+# Source directory
+set(SOURCE_DIR "../source/src")
+
+include(crownstone-application.src)
+include(crownstone-platform-mock.src)
+
+###############################
+# register test files for ctest
+###############################
+
 enable_testing()
 
-set(TEST_SOURCE_DIR "test")
+# util function to reduce verbosity
+function(add_crownstone_test testname)
+add_executable(${testname} ${FOLDER_SOURCE} "test/${testname}.cpp")
+add_test(NAME ${testname} COMMAND ${testname})
+install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+endfunction()
 
-# Extra source files
-list(APPEND TEST_SOURCE_FILES "src/nrf_stubs.c")
-
-set(TEST test_InterleavedBuffer)
-add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
-add_test(NAME ${TEST} COMMAND ${TEST})
-install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
-
-list(APPEND TEST_SOURCE_FILES "../source/src/util/cs_BitmaskVarSize.cpp")
-
-set(TEST test_BitmaskVarSize)
-add_executable(${TEST} ${TEST_SOURCE_FILES} "test/${TEST}.cpp")
-add_test(NAME ${TEST} COMMAND ${TEST})
-install(TARGETS ${TEST} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
-
-
+# actual test definitions
+add_crownstone_test(test_InterleavedBuffer)
+add_crownstone_test(test_HashFletcher32)
+add_crownstone_test(test_BitmaskVarSize)
+add_crownstone_test(test_SystemTimeSync)
+add_crownstone_test(test_EventDispatcher)

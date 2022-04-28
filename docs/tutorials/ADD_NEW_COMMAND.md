@@ -1,9 +1,9 @@
 # Add a new command
 
-The command types can be found in the [Protocol specification](/docs/PROTOCOL.md#command_types) document. To add a new 
+The command types can be found in the [Protocol specification](../protocol/PROTOCOL.md#command_types) document. To add a new 
 command, expand the list in the documentation itself with a new type.
 
-The list of commands can be found in [cs_CommandTypes.h](/source/include/protocol/cs_CommandTypes.h). They are numbered
+The list of commands can be found in [cs_CommandTypes.h](../../source/include/protocol/cs_CommandTypes.h). They are numbered
 
 ```
 enum CommandHandlerTypes {
@@ -27,11 +27,11 @@ the data is obtained directly from RAM, on `CTRL_CMD_GET_UICR_DATA` it is obtain
 `CTRL_CMD_RESET` a `resetDelayed` function is called which calls `Timer::getInstance().start`, on
 `CTRL_CMD_SET_TIME` the `SystemTime::setTime()` is directly called. Such a hard coupling is strongly 
 **discouraged**. Use the event bus instead! If you are including header files to the 
-[cs_CommandHandler.cpp](/source/src/processing/cs_CommandHandler.cpp) you're likely doing something wrong.
+[cs_CommandHandler.cpp](../../source/src/processing/cs_CommandHandler.cpp) you're likely doing something wrong.
 
 ## Data types
 
-There is a large list of types in [cs_Types.h](/source/include/common/cs_Types.h). There are three classes:
+There is a large list of types in [cs_Types.h](../../source/include/common/cs_Types.h). There are three classes:
 
 1. State types
 2. Event types
@@ -39,8 +39,8 @@ There is a large list of types in [cs_Types.h](/source/include/common/cs_Types.h
 
 For example, when adding only a new `State type` you don't necessarily have to add a different type of payload to the 
 protocol. There is a 
-[state_set_packet](/docs/PROTOCOL.md#state_set_packet) and a 
-[state_get_packet](/docs/PROTOCOL.md#state_get_packet) with a variable size payload.
+[state_set_packet](../protocol/PROTOCOL.md#state_set_packet) and a 
+[state_get_packet](../protocol/PROTOCOL.md#state_get_packet) with a variable size payload.
 
 If you do not want to have it stored as a state variable in `cs_State`, or if there are other reasons to define a 
 custom command, you have to add it to `CS_TYPE`. 
@@ -63,7 +63,7 @@ protocol. The `CS_TYPE` can be seen as a something that allows you to:
 * Have a `getUserAcccessLevelSet(CS_TYPE)` function to indicate GET access level for this type.
 * Have a `setUserAcccessLevelSet(CS_TYPE)` function to indicate SET access level for this type.
 
-There are also further options that allow you to specify in [csStateData.cpp](/source/src/storage/cs_StateData.cpp)
+There are also further options that allow you to specify in [csStateData.cpp](../../source/src/storage/cs_StateData.cpp)
 matters on (persistent) storage. You will have to indicate for non-state data (such as commands) that they are NOT
 meant to be stored. This class allows you to:
 
@@ -77,7 +77,7 @@ event. Moreover, by specifying them as an `enum class` you will get compiler war
 in one of the large switch statements. Never add a `default` clause to those switch statements. Then we would not have
 those compiler warnings anymore to prevent such mistakes.
 
-The struct for the command you create can be specified in [cs_Packets.h](/source/include/protocol/cs_Packets.h). An
+The struct for the command you create can be specified in [cs_Packets.h](../../source/include/protocol/cs_Packets.h). An
 example is:
 
 ```
@@ -91,7 +91,7 @@ You see that the struct is `packed`, important! Moreover, it is of fixed size. A
 ## Communication
 
 To add the new command to the part of the code where the BLE messages arrive, or more specific, where the command
-messages arrive, navigate to [cs_CommandHandler.cpp](/source/src/processing/cs_CommandHandler.cpp). There is the
+messages arrive, navigate to [cs_CommandHandler.cpp](../../source/src/processing/cs_CommandHandler.cpp). There is the
 `handleCommand` function that can be expanded.
 
 You will have to do several things:
@@ -129,8 +129,8 @@ For this you will need to use notifications.
 
 ## Notifications
 
-The [CrownstoneService](/source/src/services/cs_CrownstoneService.cpp) is where the characteristics are defined. See
-also the protocol [document](/docs/PROTOCOL.md#crownstone-service). The `_controlCharacteristic` is the characteristic that 
+The [CrownstoneService](../../source/src/services/cs_CrownstoneService.cpp) is where the characteristics are defined. See
+also the protocol [document](../protocol/PROTOCOL.md#crownstone-service). The `_controlCharacteristic` is the characteristic that 
 is used to send the new command (of above) to the Crownstone. If you inspect the code you see that it sets `setNotifies(false)`. It has a different
 characteristic to communicate results back, the `_resultCharacteristic`. This has `setNotifies(true)`.
 
@@ -156,5 +156,5 @@ Note that on a write, for a while the `result.buf.data` buffer in `_resultPacket
 call, this can overwrite what's in that buffer through a second call to `handleCommand()`.
 
 Currently, for asynchronous communication it is only used when `CS_TYPE::EVT_SETUP_DONE` is received in 
-[CrownstoneService](/source/src/services/cs_CrownstoneService.cpp). Then it writes
+[CrownstoneService](../../source/src/services/cs_CrownstoneService.cpp). Then it writes
 `writeResult(CTRL_CMD_SETUP, result)` with `cs_result_t result(ERR_SUCCESS)`.

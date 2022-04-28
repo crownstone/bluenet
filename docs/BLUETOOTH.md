@@ -6,12 +6,12 @@ the aspects to it that are important for hardware running the bluenet firmware.
 
 There are seven ways the Bluetooth LE radio is used in bluenet.
 
-1. **Receive connection commands**. To get commands from a smartphone (or hub) through a connection, see the [connection protocol](PROTOCOL.md).
-2. **Receive connectionless commands**. To receive (mostly by smartphone) broadcasted Bluetooth LE advertisements, see the [broadcast protocol](BROADCAST_PROTOCOL.md).
+1. **Receive connection commands**. To get commands from a smartphone (or hub) through a connection, see the [connection protocol](protocol/PROTOCOL.md).
+2. **Receive connectionless commands**. To receive (mostly by smartphone) broadcasted Bluetooth LE advertisements, see the [broadcast protocol](protocol/BROADCAST_PROTOCOL.md).
 3. **Receive connectionless presence**. To receive any type of Bluetooth LE advertisement, for in-network presence detection and in-network localization (not yet documented).
-4. **Send connectionless state**. To broadcast data from bluenet about the state of the device towards smartphones etc., see the [service data protocol](SERVICE_DATA.md).
+4. **Send connectionless state**. To broadcast data from bluenet about the state of the device towards smartphones etc., see the [service data protocol](protocol/SERVICE_DATA.md).
 5. **Send connectionless presence**. To broadcast anchor information for indoor localization in the form of iBeacon messages, see [localization](LOCALIZATION.md).
-6. **Send and receive over mesh**. To communicate with other bluenet devices using Bluetooth Mesh, see the [mesh overview](MESH.md) and [mesh protocol](MESH_PROTOCOL.md) documents.
+6. **Send and receive over mesh**. To communicate with other bluenet devices using Bluetooth Mesh, see the [mesh overview](MESH.md) and [mesh protocol](protocol/MESH_PROTOCOL.md) documents.
 7. **Send connection commands**. To set up a connection to other Crownstones or other Bluetooth LE devices (not yet documented).
 
 ### Bluetooth LE packet
@@ -95,7 +95,7 @@ uint8 | AD contents | N | Advertisement data contents (max 29 bytes)
 
 ## Receive connectionless presence
 
-The format for advertisement payload packets can be found in the [protocol doc](../docs/PROTOCOL.md#advertisements).
+The format for advertisement payload packets can be found in the [protocol doc](protocol/PROTOCOL.md#advertisements).
 The more or less standardized iBeacon format is used for this, which is a couple of well-defined AD structures (see
 also section above).
 

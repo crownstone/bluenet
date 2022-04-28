@@ -24,13 +24,13 @@ Crownstones are equipped with Bluetooth LE to communicate with each other, (smar
 ||[BLUETOOTH](BLUETOOTH.md)|Describes the Bluetooth LE protocol, including the structure of Bluetooth LE packets for both connected and connectionless messages.|
 ||[MESH](MESH.md)|Describes the Bluetooth LE mesh protocol, including mesh packet structure.|
 |Bluenet layer|||
-||[PROTOCOL](PROTOCOL.md)|Describes the Bluenet protocol on top of the Bluetooth LE protocol in [BLUETOOTH](BLUETOOTH.md). It covers encryption, advertisements, services, and data structures of Bluenet Bluetooth LE communication.|
-||[BROADCAST_PROTOCOL](BROADCAST_PROTOCOL.md)|Describes the Bluenet protocol specifically for (background and command) broadcasts from phone to Crownstones.|
-||[MESH_PROTOCOL](MESH_PROTOCOL.md)|Describes the types of Bluenet mesh packets and their structure.|
-||[SERVICE_DATA](SERVICE_DATA.md)|Describes the types of service data packets and their structure. The service data contains the state of the Crownstone which is broadcasted over advertisements (see [PROTOCOL](PROTOCOL.md))|
+||[PROTOCOL](protocol/PROTOCOL.md)|Describes the Bluenet protocol on top of the Bluetooth LE protocol in [BLUETOOTH](BLUETOOTH.md). It covers encryption, advertisements, services, and data structures of Bluenet Bluetooth LE communication.|
+||[BROADCAST_PROTOCOL](protocol/BROADCAST_PROTOCOL.md)|Describes the Bluenet protocol specifically for (background and command) broadcasts from phone to Crownstones.|
+||[MESH_PROTOCOL](protocol/MESH_PROTOCOL.md)|Describes the types of Bluenet mesh packets and their structure.|
+||[SERVICE_DATA](protocol/SERVICE_DATA.md)|Describes the types of service data packets and their structure. The service data contains the state of the Crownstone which is broadcasted over advertisements (see [PROTOCOL](protocol/PROTOCOL.md))|
 |Asset filtering|||
-||[ASSET_FILTERING](ASSET_FILTERING.md)|Describes the methods of filtering advertisements to get only those of devices of interest (assets).|
-||[CUCKOO_FILTER](CUCKOO_FILTER.md)|Describes asset filtering by the use of Cuckoo filters.|
+||[ASSET_FILTERING](protocol/ASSET_FILTERING.md)|Describes the methods of filtering advertisements to get only those of devices of interest (assets).|
+||[CUCKOO_FILTER](protocol/CUCKOO_FILTER.md)|Describes asset filtering by the use of Cuckoo filters.|
 
 ## Localization
 Through the received signal strength of Bluetooth LE transmissions by the Crownstones, smartphones can (after calibration) localize themselves within the Crownstone sphere.
@@ -61,22 +61,22 @@ The Crownstone has UART capability which can be used to communicate with a Crown
 |Category|File name|Description|
 |----|----|----|
 |UART protocol|||
-||[UART_PROTOCOL](UART_PROTOCOL.md)|Describes the types of UART messages and their structure.|
+||[UART_PROTOCOL](protocol/UART_PROTOCOL.md)|Describes the types of UART messages and their structure.|
 
 ## Miscellaneous functions
 Some of the more internal functions of Bluenet are gathered here. This includes low-level functions such as the bootloader, IPC, memory and logging but also high-level functions such as behaviour, setup, security and safety. Also included are microapps, which are an application layer on top of Bluenet.
 |Category|File name|Description|
 |----|----|----|
 |Internal processes|||
-||[IPC](IPC.md)|Describes the RAM allocation protocol for inter-process communication (IPC). |
+||[IPC](development_environment/IPC.md)|Describes the RAM allocation protocol for inter-process communication (IPC). |
 ||[BOOTLOADER](BOOTLOADER.md)|Describes the two possible bootloaders for the Crownstone, the 'secure bootloader' and the 'mesh bootloader'.|
 ||[MEMORY](MEMORY.md)|Documents memory layout and decisions regarding memory on the Crownstones.|
 ||[FIRMWARE_SPECS](FIRMWARE_SPECS.md)|Describes various firmware features of Bluenet.|
 ||[LOGGING](LOGGING.md)|Describes logging methods of Bluenet, over UART and RTT.|
-||[BEHAVIOUR](BEHAVIOUR.md)|Describes the methods of setting and retrieving behaviour on the Crownstone.|
+||[BEHAVIOUR](protocol/BEHAVIOUR.md)|Describes the methods of setting and retrieving behaviour on the Crownstone.|
 ||[SETUP](SETUP.md)|Describes the functionality of the Crownstone while in setup mode.|
 |Safety and security|||
-||[SECURITY](SECURITY.md)|Describes security features of Bluenet.|
+||[SECURITY](development_environment/SECURITY.md)|Describes security features of Bluenet.|
 ||[SOFTFUSES](SOFTFUSES.md)|Describes software-implemented safety features of Bluenet.|
 |Microapp|||
 ||[MICROAPP](MICROAPP.md)|Documents the microapp functionality of bluenet, which is a way of running Arduino-like applications on top of Bluenet.|
@@ -85,32 +85,30 @@ Some of the more internal functions of Bluenet are gathered here. This includes 
 ## Development tools and resources
 Getting started with Bluenet requires getting your hands dirty with the Crownstone hardware. The documentation related to working with the Crownstone hardware, including install guide and some useful tips, tricks and tool documentation for developers is gathered here.
 
-As for hardware, at the core of the Crownstones lies the [nRF52832](https://www.nordicsemi.com/products/nrf52832) SoC by [Nordic Semiconductors](nordicsemi.com). The [PCA10040 development board](https://www.nordicsemi.com/Products/Development-hardware/nRF52-DK) can be used to test without using the (high-power!) Crownstones themselves.
+As for hardware, at the core of the Crownstones lies the [nRF52832](https://www.nordicsemi.com/products/nrf52832) SoC by [Nordic Semiconductors](https://www.nordicsemi.com). The [PCA10040 development board](https://www.nordicsemi.com/Products/Development-hardware/nRF52-DK) can be used to test without using the (high-power!) Crownstones themselves.
 Nordic also has a [SDK](https://www.nordicsemi.com/Products/Development-software/nRF5-SDK) for working with the nRF5 SoCs.
 
 |Category|File name|Description|
 |----|----|----|
 |Getting started|||
 ||[INSTALL](INSTALL.md)|Describes how to install and get started with Bluenet firmware. The main document for getting started.|
-||[INTEGRATION](INTEGRATION.md)|Describes how to get started with integrating and interacting with Bluenet via the REST API or your own app or hardware.|
 |Hardware|||
 ||[HARDWARE_VERSION](HARDWARE_VERSION.md)|Describes how to read the hardware version of the Crownstone from the device information service.|
 ||[RESOURCE_ALLOCATION](RESOURCE_ALLOCATION.md)|Describes which pins of the nRF52832 are currently used for which function.|
 |Developer tools and guides|||
-||[FOR_DEVS_UPGRADE_TO_SDK15](FOR_DEVS_UPGRADE_TO_SDK15.md)|Describes how to migrate to the [Nordic SDK15](https://www.nordicsemi.com/Products/Development-software/nRF5-SDK).|
-||[BUILD_SYSTEM](BUILD_SYSTEM.md)|Describes the CMake build system of Bluenet.|
-||[COLLECT_DEBUG_DATA_AT_HOME](COLLECT_DEBUG_DATA_AT_HOME.md)|A guide for debugging a production Crownstone system.|
+||[BUILD_SYSTEM](development_environment/BUILD_SYSTEM.md)|Describes the CMake build system of Bluenet.|
+||[COLLECT_DEBUG_DATA_AT_HOME](development_environment/COLLECT_DEBUG_DATA_AT_HOME.md)|A guide for debugging a production Crownstone system.|
 ||[NORDIC_TOOLS](NORDIC_TOOLS.md)|Describes how to install Nordic tools such as `nrfconnect-core` and `nrfconnect-programmer` which allows for programming the nRF52832.|
 ||[NRF_ERROR_CODES](NRF_ERROR_CODES.md)|Combines NRF error codes for developer convenience.|
-||[IDE](IDE.md)|Describes CMake settings for working with Bluenet in the CLion IDE.|
+||[IDE](development_environment/IDE.md)|Describes CMake settings for working with Bluenet in the CLion IDE.|
 
 ## Development process
 Some documentation pages are aimed at contributors to the Bluenet firmware and describe for example conventions on code style and naming, the release process, and testing.
 |Category|File name|Description|
 |----|----|----|
 |Conventions|||
-||[DEVELOPER_GUIDE](DEVELOPER_GUIDE.md)|Describes guidelines on dynamic memory allocation and libraries.|
-||[CODE_STYLE](CODE_STYLE.md)|Describes code style conventions, including naming and commenting.|
+||[DEVELOPER_GUIDE](development_environment/DEVELOPER_GUIDE.md)|Describes guidelines on dynamic memory allocation and libraries.|
+||[CODE_STYLE](development_environment/CODE_STYLE.md)|Describes code style conventions, including naming and commenting.|
 ||[PRODUCT_NAMING](PRODUCT_NAMING.md)|Describes product naming protocol.|
 |Firmware releases|||
 ||[RELEASE_PROCESS](RELEASE_PROCESS.md)|Describes the release process for the Bluenet application.|
@@ -126,7 +124,7 @@ Some documentation pages are aimed at contributors to the Bluenet firmware and d
 ||[TODO](TODO.md)|A list of todos for the Bluenet developers.|
 |Tutorials|||
 ||[ADD_BOARD](ADD_BOARD.md)|Tutorial on how to adapt Bluenet when using a new board, such as a new development board or a new Crownstone version.|
-||[ADD_NEW_COMMAND](tutorials/ADD_NEW_COMMAND.md)|Tutorial on how to add a new command to the command types specified in [PROTOCOL](PROTOCOL.md).|
+||[ADD_NEW_COMMAND](tutorials/ADD_NEW_COMMAND.md)|Tutorial on how to add a new command to the command types specified in [PROTOCOL](protocol/PROTOCOL.md).|
 ||[ADD_BUILD_SUPPORT](tutorials/ADD_BUILD_SUPPORT.md)|Tutorial on how to build Bluenet code after (or before) developing new functionality.|
 ||[ADD_CONFIGURATION_OPTION](tutorials/ADD_CONFIGURATION_OPTION.md)|Tutorial on how to add a configuration option to the Bluenet code.|
 
@@ -135,8 +133,7 @@ Finally, some of the documentation pages that are deprecated are gathered.
 |Category|File name|Description|
 |----|----|----|
 |Deprecated|||
-||[INSTALL_LEGACY](INSTALL_LEGACY.md)|Replaced by the new [INSTALL](INSTALL.md) page.|
-||[SERVICE_DATA_DEPRECATED](SERVICE_DATA_DEPRECATED.md)|Replaced by the new [SERVICE_DATA](SERVICE_DATA.md) page.|
+||[SERVICE_DATA_LEGACY](./protocol/SERVICE_DATA_LEGACY.md)|Replaced by the new [SERVICE_DATA](protocol/SERVICE_DATA.md) page.|
 
 ## Dictionary and Acronyms
 |Term|Description|
@@ -150,7 +147,7 @@ Finally, some of the documentation pages that are deprecated are gathered.
 |Cuckoo filter|A filter for filtering out uninteresting BLE devices. [More information](https://en.wikipedia.org/wiki/Cuckoo_filter).|
 |DFU|Device Firmware Update.|
 |iBeacon|A protocol designed by Apple for Bluetooth LE advertisements generally used in Bluenet for user localization.|
-|IPC|Inter-process communication. The way for different processes (bootloader, application, microapp) to communicate with each other. [More information](IPC.md).|
+|IPC|Inter-process communication. The way for different processes (bootloader, application, microapp) to communicate with each other. [More information](development_environment/IPC.md).|
 |J-Link|A debug probe that can be used with the nRF52832. [More information](https://www.segger.com/products/debug-probes/j-link/).|
 |Mesh (Bluetooth LE)|A Bluetooth LE standard which allows for many-to-many communication. [More information](https://en.wikipedia.org/wiki/Bluetooth_mesh_networking).|
 |Microapp|An application layer on top of Bluenet. [More information](MICROAPP.md).|

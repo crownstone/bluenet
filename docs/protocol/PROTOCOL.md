@@ -73,7 +73,7 @@ We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_oper
 
 The nonce is a combination of 2 pieces: the session nonce and the packet nonce
 
-![Nonce](../docs/diagrams/nonce.png)
+![Nonce](../diagrams/nonce.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -87,7 +87,7 @@ The session data is [ECB encrypted](#aes-128-ecb-encryption) with the basic key,
 After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
 The session nonce and validation key will be different each time you connect.
 
-![Session data](../docs/diagrams/session-data.png)
+![Session data](../diagrams/session-data.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -108,7 +108,7 @@ After subscribing, notified data will be sent as [multipart notifications](#mult
 
 When data is sent via notifications, it will be done via multiple notification packets.
 
-![Multipart notification packet](../docs/diagrams/multipart-notification-packet.png)
+![Multipart notification packet](../diagrams/multipart-notification-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -121,7 +121,7 @@ Once you received the last packet, you should concatenate all data parts to get 
 
 Unlike the name suggests, only the payload of this packet is encrypted. The header is used to determine how to decrypt the payload.
 
-![Encrypted packet](../docs/diagrams/encrypted-packet.png)
+![Encrypted packet](../diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -131,7 +131,7 @@ uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determi
 
 #### Encrypted payload
 
-![Encrypted payload](../docs/diagrams/encrypted-payload.png)
+![Encrypted payload](../diagrams/encrypted-payload.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -146,7 +146,7 @@ uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
 # Advertisements
 By default, [iBeacon advertisements](#ibeacon-advertisement-packet) will be broadcast  at a regular interval.
-On top of that, [advertisements with service data](#service-data-advertisement) are also broadcasted at regular interval. The [service data](SERVICE-DATA.md) contains useful info about the state of the Crownstone.
+On top of that, [advertisements with service data](#service-data-advertisement) are also broadcasted at regular interval. The [service data](SERVICE_DATA.md) contains useful info about the state of the Crownstone.
 
 The iBeacon advertisements have a different MAC address, since these advertisements need to have the connectable flag to be unset.
 The advertisements with service data will use the original MAC address, and will have the connectable flag set.
@@ -157,7 +157,7 @@ To calculate the MAC address used for iBeacon advertisements, simply subtract 1 
 
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
 
-![iBeacon packet](../docs/diagrams/ibeacon-packet.png)
+![iBeacon packet](../diagrams/ibeacon-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -177,7 +177,7 @@ int8 | TX power | 1 | Received signal strength at 1 meter.
 ### Service data advertisement
 This packet contains the state of the Crownstone.
 
-![Service data packet](../docs/diagrams/service-data-packet.png)
+![Service data packet](../diagrams/service-data-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -271,7 +271,7 @@ Index:
 
 __If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.__
 
-![Control packet](../docs/diagrams/control-packet.png)
+![Control packet](../diagrams/control-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -331,7 +331,7 @@ Type nr | Type name | Payload type | Result payload | Description | A     | M   
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour-debug-packet) | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register-tracked-device-packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
 71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked-device-heartbeat-packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST_PROTOCOL.md#background-broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered, or it was timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
-72 | Get presence | - | [Presence packet](#presence_packet) | Get the current location of each profile. | x | x
+72 | Get presence | - | [Presence packet](#presence-packet) | Get the current location of each profile. | x | x
 80 | Get uptime | - | uint32 | Time in seconds since boot. | x
 81 | Get ADC restarts | - | [ADC restarts packet](#adc-restarts-packet) | **Firmware debug.** Number of ADC restarts since boot. | x
 82 | Get switch history | - | [Switch history packet](#switch-history-packet) | **Firmware debug.** A history of why the switch state has changed. | x
@@ -356,7 +356,7 @@ Type nr | Type name | Payload type | Result payload | Description | A     | M   
 
 #### Setup packet
 
-![Setup packet](../docs/diagrams/setup-packet.png)
+![Setup packet](../diagrams/setup-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -377,7 +377,7 @@ uint16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should 
 
 #### Switch command value
 
-![Switch command](../docs/diagrams/switch-command.png)
+![Switch command](../diagrams/switch-command.png)
 
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
@@ -453,9 +453,9 @@ Value | Name | Description
 
 ##### UICR data packet
 
-This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](PRODUCT_NAMING.md).
+This packet is meant for developers. For more information, see [Naming](../PRODUCT_NAMING.md).
 
-![UICR data packet](../docs/diagrams/uicr_data_packet.png)
+![UICR data packet](../diagrams/uicr_data_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -476,7 +476,7 @@ uint8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 
 ##### Ibeacon config ID packet
 
-![Ibeacon config ID packet](../docs/diagrams/ibeacon_config_id_packet.png)
+![Ibeacon config ID packet](../diagrams/ibeacon_config_id_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -490,7 +490,7 @@ uint16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be
 
 ##### Sun time packet
 
-![Sun time packet](../docs/diagrams/set_sun_time_packet.png)
+![Sun time packet](../diagrams/set_sun_time_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -500,7 +500,7 @@ uint32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below
 
 ##### Multi switch packet
 
-![Multi switch list](../docs/diagrams/multi_switch_packet.png)
+![Multi switch list](../diagrams/multi_switch_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -509,7 +509,7 @@ uint8 | Count | 1 | Number of valid entries.
 
 ##### Multi switch entry
 
-![Multi switch short entry](../docs/diagrams/multi_switch_entry_packet.png)
+![Multi switch short entry](../diagrams/multi_switch_entry_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -544,7 +544,7 @@ Current white list:
 - Lock switch
 - Allow dimming
 
-![Command packet](../docs/diagrams/command-mesh-packet.png)
+![Command packet](../diagrams/command-mesh-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -598,7 +598,7 @@ uint64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupie
 
 #### Behaviour debug packet
 
-![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
+![Behaviour debug packet](../diagrams/behaviour_debug_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -721,7 +721,7 @@ Value | Name| Description
 
 #### Power samples result packet
 background broadcast
-![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
+![Power samples result packet](../diagrams/power_samples_result_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -739,7 +739,7 @@ int16[] | Samples | 2 | List of samples.
 
 #### Register tracked device packet
 
-![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
+![Register tracked device packet](../diagrams/register_tracked_device_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -754,7 +754,7 @@ uint16 | Time to live | 2 | Time in minutes after which the device token will be
 
 #### Tracked device heartbeat packet
 
-![Tracked device heartbeat packet](../docs/diagrams/tracked_device_heartbeat_packet.png)
+![Tracked device heartbeat packet](../diagrams/tracked_device_heartbeat_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -774,7 +774,7 @@ uint8 | App index | 1 | Index of the microapp on this Crownstone.
 
 #### Microapp upload packet
 
-![Microapp upload packet](../docs/diagrams/microapp_upload_packet.png)
+![Microapp upload packet](../diagrams/microapp_upload_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -792,7 +792,7 @@ If the stored data does not match, you will get ERR_WRITE_DISABLED, meaning you 
 
 #### Microapp info packet
 
-![Microapp info packet](../docs/diagrams/microapp_info_packet.png)
+![Microapp info packet](../diagrams/microapp_info_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -815,7 +815,7 @@ uint8 | Minor | 1 | Minor version: higher minor means more features.
 
 #### Microapp status packet
 
-![Microapp status packet](../docs/diagrams/microapp_status_packet.png)
+![Microapp status packet](../diagrams/microapp_status_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -846,7 +846,7 @@ Bit  | Name     | Description
 
 __If encryption is enabled, this packet will be encrypted using any of the keys where the box is checked.__
 
-![Result packet](../docs/diagrams/result-packet.png)
+![Result packet](../diagrams/result-packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -977,7 +977,7 @@ Type nr | Type name | Payload type | Payload description | A   | M   | B
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
-![Switch state packet](../docs/diagrams/switch_state_packet.png)
+![Switch state packet](../diagrams/switch_state_packet.png)
 
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
@@ -986,7 +986,7 @@ uint8 | Dimmer | 7 | Value of the dimmer, where 100 if fully on, 0 is OFF, dimme
 
 ##### Behaviour settings
 
-![Behaviour settings packet](../docs/diagrams/behaviour_settings_packet.png)
+![Behaviour settings packet](../diagrams/behaviour_settings_packet.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -995,7 +995,7 @@ uint32 | [Flags](#behaviour-settings-flags) | 4 | Flags.
 
 ##### Behaviour settings flags
 
-![Behaviour settings flags](../docs/diagrams/behaviour_settings_flags.png)
+![Behaviour settings flags](../diagrams/behaviour_settings_flags.png)
 
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
