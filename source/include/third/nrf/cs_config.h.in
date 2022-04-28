@@ -4,23 +4,23 @@
 
 #pragma once
 
-#define CS_SERIAL_NRF_LOG_PIN_TX                 @CS_SERIAL_NRF_LOG_PIN_TX@
+#define CS_SERIAL_NRF_LOG_PIN_TX                 ${CS_SERIAL_NRF_LOG_PIN_TX}
 
-#define MAX_NUM_VS_SERVICES                      @MAX_NUM_VS_SERVICES@
+#define MAX_NUM_VS_SERVICES                      ${MAX_NUM_VS_SERVICES}
 
-#define MESHING                                  @MESHING@
+#define MESHING                                  ${MESHING}
 
-#define MESH_SCANNER                             @MESH_SCANNER@
+#define MESH_SCANNER                             ${MESH_SCANNER}
 
-#define MESH_SCANNER_FILTERED                    @MESH_SCANNER_FILTERED@
+#define MESH_SCANNER_FILTERED                    ${MESH_SCANNER_FILTERED}
 
-#define MESH_PERSISTENT_STORAGE                  @MESH_PERSISTENT_STORAGE@
+#define MESH_PERSISTENT_STORAGE                  ${MESH_PERSISTENT_STORAGE}
 
-#define ATTR_TABLE_SIZE                          @ATTR_TABLE_SIZE@
+#define ATTR_TABLE_SIZE                          ${ATTR_TABLE_SIZE}
 
-#define CS_FDS_VIRTUAL_PAGES                     @CS_FDS_VIRTUAL_PAGES@
+#define CS_FDS_VIRTUAL_PAGES                     ${CS_FDS_VIRTUAL_PAGES}
 
-#define CS_FDS_VIRTUAL_PAGE_SIZE                 @CS_FDS_VIRTUAL_PAGE_SIZE@
+#define CS_FDS_VIRTUAL_PAGE_SIZE                 ${CS_FDS_VIRTUAL_PAGE_SIZE}
 
-#define CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER      @CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER@
+#define CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER      ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}
 
