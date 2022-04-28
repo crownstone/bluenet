@@ -244,31 +244,33 @@ if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 	)
 endif()
 
+# calculate some values that are to be used in the auto-generated files below
 
-# auto generate .h sources
+# auto-generate header files
 
 message(STATUS "Generate cs_MemoryLayout.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_MemoryLayout.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shared/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_MemoryLayout.h")
 
 message(STATUS "Configure cs_StaticConfig.h file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h")
 
 message(STATUS "Configure cs_config.h file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h")
 
-# auto generate .cpp sources
+# auto-generate source files
 
 message(STATUS "Configure cs_Git.cpp file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp")
 
 message(STATUS "Configure cs_AutoConfig.cpp file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
+# auto-generate linker files
 
 message(STATUS "Configure nrf_symbols.ld file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf)
@@ -432,6 +434,13 @@ add_custom_target(uart_client
 add_custom_target(uart_binary_client
 	COMMAND ${CMAKE_COMMAND} -E echo "** UART binary client, keep running in separate shell"
 	COMMAND ./log-client.sh
+	DEPENDS write_runtime_config
+	COMMENT "UART client, runs in background"
+	)
+
+add_custom_target(uart_raw_binary_client
+	COMMAND ${CMAKE_COMMAND} -E echo "** UART raw+binary client, keep running in separate shell"
+	COMMAND ./log-client.sh -r
 	DEPENDS write_runtime_config
 	COMMENT "UART client, runs in background"
 	)
