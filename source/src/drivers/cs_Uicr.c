@@ -5,8 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cs_Uicr.h>
-#include <nrf52.h>
+#include <cfg/cs_AutoConfig.h>
+#include <drivers/cs_Uicr.h>
+#include <nrf_nvmc.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,7 +24,6 @@ uint32_t getHardwareBoard() {
 void writeHardwareBoard() {
 	uint32_t hardwareBoard = *((uint32_t*)g_HARDWARE_BOARD_ADDRESS);
 	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("Write board type into UICR");
 		nrf_nvmc_write_word(g_HARDWARE_BOARD_ADDRESS, g_DEFAULT_HARDWARE_BOARD);
 	}
 }

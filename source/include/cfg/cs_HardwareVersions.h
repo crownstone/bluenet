@@ -8,6 +8,7 @@
 
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_AutoConfig.h>
+#include <drivers/cs_Uicr.h>
 #include <protocol/cs_UicrPacket.h>
 
 #ifdef __cplusplus
@@ -99,10 +100,11 @@ static inline const char* get_hardware_version() {
 	}
 }
 
+// The string is always 11 chars, add 1 byte for the null terminator.
+static char versionString[12];
+
 static inline const char* get_hardware_version_from_uicr(const cs_uicr_data_t* uicrData) {
-	// The string is always 11 chars, add 1 byte for the null terminator.
 	// Since you can't specify a max width, just use modulo to limit it.
-	char versionString[12];
 	sprintf(versionString, "%u%02u%02u%02u%02u%02u",
 			uicrData->productRegionFamily.fields.productFamily % 10,
 			uicrData->productRegionFamily.fields.region % 100,

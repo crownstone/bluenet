@@ -13,6 +13,8 @@ extern "C" {
 
 #include <protocol/cs_UicrPacket.h>
 #include <protocol/cs_Typedefs.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 /**
  * Get the hardware board from UICR, or the default board if none is set in UICR.

@@ -60,7 +60,6 @@
 #include <util/cs_Utils.h>
 
 extern "C" {
-#include <nrf_nvmc.h>
 #include <util/cs_Syscalls.h>
 }
 
@@ -136,7 +135,7 @@ void overwrite_hardware_version() {
 }
 
 void printNfcPins() {
-	LOGd("NFC pins used as gpio: %u", isNfcPinsUsedAsGpio());
+	LOGd("NFC pins used as gpio: %u", canUseNfcPinsAsGpio());
 }
 
 void on_exit(void) {
