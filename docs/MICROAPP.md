@@ -1,6 +1,6 @@
 # Microapps
 
-The protocol has to be designed yet. Currently, there are a few functions implemented with a hint of a protocol. At 
+The protocol has to be designed yet. Currently, there are a few functions implemented with a hint of a protocol. At
 the microapp code side this will be completely hidden for the user, hence this protocol definition has to be seen as
 a definition for someone who wants to understand how the microapp code maps to bluenet functionality. However, for
 certain functions there are user-facing results.
@@ -18,7 +18,7 @@ and describes everything on a level that would allow someone to write their own 
 
 ## User-facing definitions
 
-An implementation of a microapp can be found [here](https://github.com/mrquincle/crownstone-bluenet-module). It has 
+An implementation of a microapp can be found [here](https://github.com/mrquincle/crownstone-bluenet-module). It has
 a so-called `.ino` file with Arduino-like syntax:
 
 ```
@@ -49,7 +49,7 @@ The microapp code will then resume 1000 seconds later.
 
 ## Microapp SDK protocol
 
-The protocol itself is implemented on both sides, at the bluenet side in the `microapp_callback` function and at the 
+The protocol itself is implemented on both sides, at the bluenet side in the `microapp_callback` function and at the
 microapp side in for example the `main.c` code. Here we are only concerned in the bluenet side.
 
 The function has the following syntax and is called like this:
@@ -99,12 +99,12 @@ uint8[] | Data    | 28     | Maximum string / array size
 In the case of a string the last byte is set to 0 on the bluenet side (null-terminated), just an additional precaution.
 Note that we never rely on null-termination anyway (we always send along length as well).
 
-The opcode is called `port` on the microapp side (for this command). The same objects and functions are 
+The opcode is called `port` on the microapp side (for this command). The same objects and functions are
 called to write to the logs as to write the service data for example.
 
 ### Delay
 
-The delay function accepts a delay in milliseconds. A delay less than one second will be 
+The delay function accepts a delay in milliseconds. A delay less than one second will be
 ignored. This is a function that requires a pointer to the coroutine argument which is used in `yield`.
 
 ![Microapp delay](../docs/diagrams/microapp_delay.png)
@@ -119,7 +119,7 @@ The coroutine arguments with which `loop` is called are passed through, so we ca
 
 ### Pin
 
-The pin command is defined for virtual pins. Currently the relay is set to pin number 0. The dimmer as well.
+The pin command is defined for virtual pins.
 
 ![Microapp pin](../docs/diagrams/microapp_pin.png)
 
@@ -133,10 +133,21 @@ uint8   | Value    | 1      | Value to write
 uint8   | Ack      | 1      | Acknowledgment
 uint32  | Callback | 4      | Address of callback (on receiving a GPIO interrupt)
 
-The value to write is an on/off value for digitalWrites. It is an 8-bits analog value for analogWrites. This is useful for writing a value to the dimmer for example.
+The value to write is an on/off value for digitalWrites. It is an 8-bits analog value for analogWrites.
 For a pin mode command the value can be e.g. change, rising, or falling.
 
 The acknowledgment setting is not used yet.
+
+### Dimmer / Switch
+![Microapp dimmer switch](../docs/diagrams/microapp_dimmer_switch.png)
+
+The dimmer / switch command is used to control the dimmer and switch.
+
+Type    | Name     | Length | Description
+---     | ---      | ---    | ---
+uint8   | Command  | 1      | Dimmer/Switch command (`CS_MICROAPP_COMMAND_SWITCH_DIMMER`)
+uint8   | Opcode   | 1      | `CS_MICROAPP_COMMAND_SWITCH` or `CS_MICROAPP_COMMAND_DIMMER` for controlling the switch or the dimmer respectively.
+uint8   | Value    | 1      | Value to write. Binary (0 = off, 1 = on) for the switch, or an 8-bit intensity value for the dimmer.
 
 ### Service data
 
@@ -202,8 +213,8 @@ void MicroApp::callLoop(int & cntr, int & skip) {
 	...
 ```
 
-You see that a function `loop_local` will be called (later on) with as arguments `_coargs`. This function will be 
-called using a different stack from the main program! You can check this by logging the stack pointer as shown in 
+You see that a function `loop_local` will be called (later on) with as arguments `_coargs`. This function will be
+called using a different stack from the main program! You can check this by logging the stack pointer as shown in
 the following possible implementation of a `loop_local` function.
 
 ```
@@ -224,12 +235,12 @@ void loop_local(void *p) {
 ```
 
 The `loop_local` function either just returns or "yields" with `yield` and the coroutine struct as argument. When it
-yields it will return to the main bluenet program. Due to the fact that we use a separate stack we do not need to 
+yields it will return to the main bluenet program. Due to the fact that we use a separate stack we do not need to
 worry about stack corruption. We just jump back exactly where we were (implementation detail: in `start` or `next`).
 
 ### The loop function
 
-The actual loop function jumps to microapp code and back through function pointers stored by the microapp and the 
+The actual loop function jumps to microapp code and back through function pointers stored by the microapp and the
 bluenet code in `IPC_RAM_DATA`. In the end it ends up in `microapp_callback`. Here we can `yield` as long as we have
 preserved the pointer to the `coargs` struct. In the microapp code we store this pointer on each call and put it in
 the payload if we callback with the delay opcode.

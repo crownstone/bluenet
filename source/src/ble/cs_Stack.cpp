@@ -176,6 +176,7 @@ void Stack::initRadio() {
 		case NRF_ERROR_NO_MEM:
 			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
 			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
+			LOGe("Do not forget to adjust RAM_APPLICATION_AMOUNT as well");
 			[[fallthrough]];
 		default:
 			// Crash.

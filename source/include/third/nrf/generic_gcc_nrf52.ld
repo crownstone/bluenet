@@ -10,45 +10,27 @@ GROUP(-lgcc -lc -lnosys)
 INCLUDE "nrf_symbols.ld"
 
 /**
- * See S132_nrf52_6.0.0_release_notes.pdf.
- *
- * Combined MBR and softdevice requirements:
- *   FLASH: 152.00 kB (0x26000 bytes)
- *   RAM:     5.54 kB (0x01628 bytes), but depending on the configuration when sd_ble_enable() is called
- *
- * Note that this information is from the perspective of the application to be compiled.
- *   So, we start where the SoftDevice ends... At 0x26000.
- *   Total memory is 512 kB, so the size available to the application is 0x80000 - 0x26000 = 0x5A000.
- *
- * According to nrf_sd_ble debug information RAM start location can be adjusted to 0x200020B0 and the RAM size
- * for the application to 0xDF50
- *
- * RAM (rwx) :  ORIGIN = 0x20002430, LENGTH = 0xdad0
- *
- * The size of the application memory has to be: bootloader start address minus start address application:
- *   0x76000 - 0x26000 = 0x50000
- *
- * Use to be without bootloader
- *   FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x5A000
- *
- * Update the sections using a recent flash_placement.xml file...
+ * See the release notes for the SDK and Softdevices. It is rather cumbersome to calculate within
+ * CMake. Hence, we calculate here and in cs_MemoryLayout.h.in the same values.
  */
 
-RAM_BLUENET_IPC_START = (RAM_R1_BASE + RAM_APPLICATION_AMOUNT - RAM_BLUENET_IPC_LENGTH);
+/* Start of entire RAM memory section */
+RAM_START = RAM_R1_BASE;
 
+/* Calculate backwards from the end of RAM such that there's RAM_BLUENET_IPC_LENGTH available for IPC */
+RAM_BLUENET_IPC_START = (RAM_START + RAM_APPLICATION_AMOUNT - RAM_BLUENET_IPC_LENGTH);
+
+/* Calculate backwards from that for RAM for the microapps */
 RAM_MICROAPP_START = (RAM_BLUENET_IPC_START - RAM_MICROAPP_AMOUNT);
 
-RAM_START = RAM_R1_BASE;
-/* RAM_START = (RAM_MICROAPP_START - RAM_APPLICATION_AMOUNT); */
+/* Total RAM available for bluenet is the entire RAM minus the IPC section and the microapp section */
 RAM_LENGTH = (RAM_APPLICATION_AMOUNT - (RAM_BLUENET_IPC_LENGTH + RAM_MICROAPP_AMOUNT));
-
-
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = APPLICATION_START_ADDRESS, LENGTH = APPLICATION_LENGTH
+  FLASH (rx) : ORIGIN = APPLICATION_START_ADDRESS, LENGTH = APPLICATION_MAX_LENGTH
   RAM (rwx) :  ORIGIN = RAM_START, LENGTH = RAM_LENGTH
-  RAM_BLUENET_IPC (rwx): ORIGIN = (RAM_R1_BASE + RAM_APPLICATION_AMOUNT - RAM_BLUENET_IPC_LENGTH), LENGTH = RAM_BLUENET_IPC_LENGTH
+  RAM_BLUENET_IPC (rwx): ORIGIN = RAM_BLUENET_IPC_START, LENGTH = RAM_BLUENET_IPC_LENGTH
   CORE_BL_RAM (rw) :     ORIGIN = 0x2000fd00, LENGTH = 0x300
   UICR_BOOTADDR (r) :    ORIGIN = 0x10001014, LENGTH = 0x04
   UICR_MBRPARAMADDR (r): ORIGIN = 0x10001018, LENGTH = 0x04

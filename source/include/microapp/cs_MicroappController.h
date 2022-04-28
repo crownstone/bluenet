@@ -106,14 +106,14 @@ private:
 	uint8_t _tickCounter;
 
 	/**
-	 * Maps digital pins to interrupts.
-	 */
-	int digitalPinToInterrupt(int pin);
-
-	/**
 	 * Flag to indicate whether to forward scanned devices to microapp.
 	 */
 	bool _microappIsScanning;
+
+	/**
+	 * Maps digital pins to interrupts.
+	 */
+	int digitalPinToInterrupt(int pin);
 
 protected:
 	/**

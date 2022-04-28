@@ -88,35 +88,40 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_LOG                     = 0x01,
 	CS_MICROAPP_COMMAND_DELAY                   = 0x02,
 	CS_MICROAPP_COMMAND_PIN                     = 0x03,
-	CS_MICROAPP_COMMAND_SERVICE_DATA            = 0x04,
-	CS_MICROAPP_COMMAND_TWI                     = 0x05,
-	CS_MICROAPP_COMMAND_BLE                     = 0x06,
-	CS_MICROAPP_COMMAND_POWER_USAGE             = 0x07,
-	CS_MICROAPP_COMMAND_PRESENCE                = 0x08,
-	CS_MICROAPP_COMMAND_MESH                    = 0x09,
-	CS_MICROAPP_COMMAND_SETUP_END               = 0x0A,
-	CS_MICROAPP_COMMAND_LOOP_END                = 0x0B,
-	CS_MICROAPP_COMMAND_BLE_DEVICE              = 0x0C,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED = 0x0D,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END      = 0x0E,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR    = 0x0F,
+	CS_MICROAPP_COMMAND_SWITCH_DIMMER           = 0x04,
+	CS_MICROAPP_COMMAND_SERVICE_DATA            = 0x05,
+	CS_MICROAPP_COMMAND_TWI                     = 0x06,
+	CS_MICROAPP_COMMAND_BLE                     = 0x07,
+	CS_MICROAPP_COMMAND_POWER_USAGE             = 0x08,
+	CS_MICROAPP_COMMAND_PRESENCE                = 0x09,
+	CS_MICROAPP_COMMAND_MESH                    = 0x0A,
+	CS_MICROAPP_COMMAND_SETUP_END               = 0x0B,
+	CS_MICROAPP_COMMAND_LOOP_END                = 0x0C,
+	CS_MICROAPP_COMMAND_BLE_DEVICE              = 0x0D,
+	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED = 0x0E,
+	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END      = 0x0F,
+	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR    = 0x10,
 };
 
 enum CommandMicroappPin {
-	CS_MICROAPP_COMMAND_PIN_SWITCH  = 0x00,  // Virtual pin
-	CS_MICROAPP_COMMAND_PIN_DIMMER  = 0x00,  // same one
-	CS_MICROAPP_COMMAND_PIN_GPIO1   = 0x01,  // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_GPIO2   = 0x02,  // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_GPIO3   = 0x03,  // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_GPIO4   = 0x04,  // GPIO pin on connector
-	CS_MICROAPP_COMMAND_PIN_BUTTON1 = 0x05,  // BUTTON1
-	CS_MICROAPP_COMMAND_PIN_BUTTON2 = 0x06,  // BUTTON2
-	CS_MICROAPP_COMMAND_PIN_BUTTON3 = 0x07,  // BUTTON3
-	CS_MICROAPP_COMMAND_PIN_BUTTON4 = 0x08,  // BUTTON4
-	CS_MICROAPP_COMMAND_PIN_LED1    = 0x09,  // LED1
-	CS_MICROAPP_COMMAND_PIN_LED2    = 0x0a,  // LED2
-	CS_MICROAPP_COMMAND_PIN_LED3    = 0x0b,  // LED3
-	CS_MICROAPP_COMMAND_PIN_LED4    = 0x0c,  // LED4
+	CS_MICROAPP_COMMAND_PIN_GPIO0   = 0x00,
+	CS_MICROAPP_COMMAND_PIN_GPIO1   = 0x01,
+	CS_MICROAPP_COMMAND_PIN_GPIO2   = 0x02,
+	CS_MICROAPP_COMMAND_PIN_GPIO3   = 0x03,
+	CS_MICROAPP_COMMAND_PIN_GPIO4   = 0x04,
+	CS_MICROAPP_COMMAND_PIN_GPIO5   = 0x05,
+	CS_MICROAPP_COMMAND_PIN_GPIO6   = 0x06,
+	CS_MICROAPP_COMMAND_PIN_GPIO7   = 0x07,
+	CS_MICROAPP_COMMAND_PIN_GPIO8   = 0x08,
+	CS_MICROAPP_COMMAND_PIN_GPIO9   = 0x09,
+	CS_MICROAPP_COMMAND_PIN_BUTTON1 = 0x0A,
+	CS_MICROAPP_COMMAND_PIN_BUTTON2 = 0x0B,
+	CS_MICROAPP_COMMAND_PIN_BUTTON3 = 0x0C,
+	CS_MICROAPP_COMMAND_PIN_BUTTON4 = 0x0D,
+	CS_MICROAPP_COMMAND_PIN_LED1    = 0x0E,
+	CS_MICROAPP_COMMAND_PIN_LED2    = 0x0F,
+	CS_MICROAPP_COMMAND_PIN_LED3    = 0x10,
+	CS_MICROAPP_COMMAND_PIN_LED4    = 0x11,
 };
 
 enum CommandMicroappPinOpcode1 {
@@ -127,8 +132,7 @@ enum CommandMicroappPinOpcode1 {
 enum CommandMicroappPinOpcode2 {
 	CS_MICROAPP_COMMAND_PIN_READ         = 0x01,
 	CS_MICROAPP_COMMAND_PIN_WRITE        = 0x02,
-	CS_MICROAPP_COMMAND_PIN_TOGGLE       = 0x03,
-	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP = 0x04,
+	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP = 0x03,
 };
 
 enum CommandMicroappPinValue {
@@ -137,6 +141,17 @@ enum CommandMicroappPinValue {
 	CS_MICROAPP_COMMAND_VALUE_CHANGE  = 0x02,
 	CS_MICROAPP_COMMAND_VALUE_RISING  = 0x03,
 	CS_MICROAPP_COMMAND_VALUE_FALLING = 0x04,
+};
+
+enum CommandMicroappDimmerSwitchOpcode {
+	CS_MICROAPP_COMMAND_SWITCH = 0x00,
+	CS_MICROAPP_COMMAND_DIMMER = 0x01,
+};
+
+enum CommandMicroappSwitchValue {
+	CS_MICROAPP_COMMAND_SWITCH_OFF    = 0x00,
+	CS_MICROAPP_COMMAND_SWITCH_ON     = 0x01,
+	CS_MICROAPP_COMMAND_SWITCH_TOGGLE = 0x02,
 };
 
 enum CommandMicroappLog {
@@ -244,6 +259,17 @@ struct __attribute__((packed)) microapp_pin_cmd_t {
 
 static_assert(sizeof(microapp_pin_cmd_t) == MICROAPP_PIN_CMD_SIZE_HEADER);
 static_assert(sizeof(microapp_pin_cmd_t) <= MAX_PAYLOAD);
+
+/*
+ * Struct for commands relating to the dimmer and switch
+ * Opcode indicates whether command relates to dimmer or switch
+ * Value is a binary value if controlling the switch, or else an unsigned 8-bit intensity value
+ */
+struct __attribute__((packed)) microapp_dimmer_switch_cmd_t {
+	microapp_cmd_t header;
+	uint8_t opcode;
+	uint8_t value;
+};
 
 /*
  * Struct with data to implement delay command through coroutines.

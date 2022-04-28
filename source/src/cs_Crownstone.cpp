@@ -64,7 +64,7 @@ extern "C" {
 }
 
 
-/****************************************************** Preamble *******************************************************/ 
+/****************************************************** Preamble *******************************************************/
 
 cs_ram_stats_t Crownstone::_ramStats;
 
@@ -682,7 +682,7 @@ void Crownstone::startUp() {
 	// During other operation modes, most of the crownstone's functionality is disabled.
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
 		_systemTime.listen();
-		
+
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 
 		_trackedDevices.init();

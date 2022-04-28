@@ -43,7 +43,11 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp, comp_eve
 	config.threshold = threshold;
 	config.speed_mode = NRF_COMP_SP_MODE_Low; // Delay of 0.6us
 	config.hyst = NRF_COMP_HYST_NoHyst; // Not used in single ended mode, use thresholds instead.
+#if defined(NRF52840_XXAA) || defined(NRF52840_XXAA_ENGA)
+	// None of the NRF52 devices have a functional ISOURCE. It has been removed for the NRF52840. Not a real fix no.
+#else
 	config.isource = NRF_COMP_ISOURCE_Off; // Should be off in our case and due to PAN 84
+#endif
 	config.interrupt_priority = APP_IRQ_PRIORITY_LOW;
 
 	switch (ainPin) {

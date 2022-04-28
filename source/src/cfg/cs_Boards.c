@@ -33,6 +33,7 @@
  *    - ACR01B15A, the Crownstone Built-in Two
  */
 
+#include <ble/cs_Nordic.h>
 #include <boards/cs_ACR01B10B.h>
 #include <boards/cs_ACR01B10D.h>
 #include <boards/cs_ACR01B11A.h>
@@ -49,7 +50,6 @@
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
 #include <nrf_error.h>
-#include <nrf52.h>
 #include <protocol/cs_ErrorCodes.h>
 
 /**
