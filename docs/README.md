@@ -96,7 +96,6 @@ Nordic also has a [SDK](https://www.nordicsemi.com/Products/Development-software
 ||[HARDWARE_VERSION](HARDWARE_VERSION.md)|Describes how to read the hardware version of the Crownstone from the device information service.|
 ||[RESOURCE_ALLOCATION](RESOURCE_ALLOCATION.md)|Describes which pins of the nRF52832 are currently used for which function.|
 |Developer tools and guides|||
-||[FOR_DEVS_UPGRADE_TO_SDK15](FOR_DEVS_UPGRADE_TO_SDK15.md)|Describes how to migrate to the [Nordic SDK15](https://www.nordicsemi.com/Products/Development-software/nRF5-SDK).|
 ||[BUILD_SYSTEM](development_environment/BUILD_SYSTEM.md)|Describes the CMake build system of Bluenet.|
 ||[COLLECT_DEBUG_DATA_AT_HOME](development_environment/COLLECT_DEBUG_DATA_AT_HOME.md)|A guide for debugging a production Crownstone system.|
 ||[NORDIC_TOOLS](NORDIC_TOOLS.md)|Describes how to install Nordic tools such as `nrfconnect-core` and `nrfconnect-programmer` which allows for programming the nRF52832.|
