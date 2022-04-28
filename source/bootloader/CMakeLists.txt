@@ -341,6 +341,10 @@ list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c
 message(STATUS "bootloader: Configure cs_config.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h")
 
+message(STATUS "bootloader: Generate cs_MemoryLayout.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/bootloader/cs_MemoryLayout.h")
+
+
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${GENERATED_SOURCES})
 
 # Setting properties like this does not work, perhaps CMake finds it difficult to find the right compiler

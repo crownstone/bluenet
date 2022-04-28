@@ -246,7 +246,7 @@ endif()
 # auto generate .h sources
 
 message(STATUS "Generate cs_MemoryLayout.h")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_MemoryLayout.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shared/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_MemoryLayout.h")
 
 message(STATUS "Configure cs_StaticConfig.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h")
