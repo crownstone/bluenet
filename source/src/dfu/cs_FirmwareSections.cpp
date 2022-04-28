@@ -8,7 +8,7 @@
 #include <dfu/cs_FirmwareSections.h>
 #include <logging/cs_Logger.h>
 #include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
-#include <cfg/cs_MemoryLayout.h>
+#include <cs_MemoryLayout.h>
 
 
 

@@ -10,7 +10,7 @@
 
 
 #include <cfg/cs_AutoConfig.h>
-#include <cfg/cs_MemoryLayout.h>
+#include <cs_MemoryLayout.h>
 #include <util/cs_Store.h>
 
 #include <nrf_fstorage_sd.h>

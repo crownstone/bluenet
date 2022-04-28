@@ -296,7 +296,7 @@ set(THIRD_PARTY_NRF_INCLUDE_PATH "include/third/nrf")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
 set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
-target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
+target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/shared")
 
 # Save intermediate files, these are used for binary logging.
 target_compile_options(${PROJECT_NAME} PRIVATE -save-temps=obj)

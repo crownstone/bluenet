@@ -11,7 +11,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
-#include <cfg/cs_MemoryLayout.h>
+#include <cs_MemoryLayout.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
