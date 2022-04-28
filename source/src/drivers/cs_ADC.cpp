@@ -50,13 +50,13 @@
 
 
 // Called by app scheduler, from saadc interrupt.
-void adc_done(void * p_event_data, uint16_t event_size) {
+void adc_done(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	adc_buffer_id_t* bufIndex = (adc_buffer_id_t*)p_event_data;
 	ADC::getInstance()._handleAdcDone(*bufIndex);
 }
 
 // Called by app scheduler, from saadc interrupt.
-void adc_restart(void * p_event_data, uint16_t event_size) {
+void adc_restart([[maybe_unused]] void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	ADC::getInstance()._restart();
 }
 
@@ -150,7 +150,7 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	);
 
 	// Config adc
-	cs_ret_code_t retCode = initSaadc(config);
+	cs_ret_code_t retCode = initSaadc();
 	if (retCode != ERR_SUCCESS) {
 		APP_ERROR_HANDLER(NRF_ERROR_INTERNAL);
 	}
@@ -171,7 +171,7 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 }
 
 
-cs_ret_code_t ADC::initSaadc(const adc_config_t & config) {
+cs_ret_code_t ADC::initSaadc() {
 	// NRF52_PAN_74
 	nrf_saadc_disable();
 

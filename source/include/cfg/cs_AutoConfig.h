@@ -39,13 +39,7 @@ extern uint32_t g_UICR_ADDRESS_PROD_DATE_HOUSING;
 
 extern uint32_t g_DEFAULT_HARDWARE_BOARD;
 
-extern uint32_t g_FLASH_MICROAPP_BASE;
-
-extern uint8_t g_FLASH_MICROAPP_PAGES;
-
-extern uint32_t g_RAM_MICROAPP_BASE;
-
-extern uint32_t g_RAM_MICROAPP_AMOUNT;
+extern uint8_t g_MICROAPP_COUNT;
 
 extern int8_t g_MAX_CHIP_TEMPERATURE;
 

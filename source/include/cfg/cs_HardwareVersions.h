@@ -11,16 +11,16 @@
 #include <drivers/cs_Uicr.h>
 #include <protocol/cs_UicrPacket.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "nrf52.h"
-#include "string.h"
-
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+//
+//#include "nrf52.h"
+//#include "string.h"
+//
+//#ifdef __cplusplus
+//}
+//#endif
 
 /*
 	----------------------

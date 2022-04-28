@@ -33,6 +33,7 @@
  *    - ACR01B15A, the Crownstone Built-in Two
  */
 
+#include <ble/cs_Nordic.h>
 #include <boards/cs_ACR01B10B.h>
 #include <boards/cs_ACR01B10D.h>
 #include <boards/cs_ACR01B11A.h>
@@ -43,12 +44,12 @@
 #include <boards/cs_ACR01B2G.h>
 #include <boards/cs_GuideStone.h>
 #include <boards/cs_PCA10040.h>
+#include <boards/cs_PCA10056.h>
 #include <boards/cs_UsbDongle.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
 #include <nrf_error.h>
-#include <nrf52.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <boards/cs_BoardMap.h>
 #include <protocol/cs_UicrPacket.h>
@@ -190,8 +191,13 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 
 		case PCA10036:
 		case PCA10040:
+			asPca10040(config);
+			break;
 		case PCA10056:
+			asPca10056(config);
+			break;
 		case PCA10100:
+			// should not be
 			asPca10040(config);
 			break;
 		case CS_USB_DONGLE:

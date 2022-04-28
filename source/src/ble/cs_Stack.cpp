@@ -149,8 +149,10 @@ void Stack::initRadio() {
 			break;
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps. RAM_R1_BASE should be: %p", ram_start);
+			[[fallthrough]];
 		case NRF_ERROR_INVALID_LENGTH:
 			LOGe("RAM, invalid length");
+			[[fallthrough]];
 		default:
 			APP_ERROR_HANDLER(nrfCode);
 	}
@@ -167,11 +169,15 @@ void Stack::initRadio() {
 			break;
 		case NRF_ERROR_INVALID_STATE:
 			LOGe("BLE: invalid radio state");
+			[[fallthrough]];
 		case NRF_ERROR_INVALID_ADDR:
 			LOGe("BLE: invalid memory address");
+			[[fallthrough]];
 		case NRF_ERROR_NO_MEM:
 			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
 			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
+			LOGe("Do not forget to adjust RAM_APPLICATION_AMOUNT as well");
+			[[fallthrough]];
 		default:
 			// Crash.
 			APP_ERROR_HANDLER(nrfCode);
@@ -519,32 +525,25 @@ struct cs_stack_scan_t {
 	uint8_t data[31]; // Same size as _scanBuffer
 };
 
+/*
+ * When meshing is enabled, this function will not be used but the scanner in the mesh is used.
+ */
 void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 	scanned_device_t scan;
 	memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
 	scan.resolvedPrivateAddress = advReport->peer_addr.addr_id_peer;
 	scan.addressType = advReport->peer_addr.addr_type;
 	scan.rssi = advReport->rssi;
+	scan.setId = advReport->set_id;
 	scan.channel = advReport->ch_index;
 	scan.dataSize = advReport->data.len;
 	scan.data = advReport->data.p_data;
 
-//	uint16_t type = *((uint16_t*)&(advReport->type));
-//	const uint8_t* addr = scan.address;
-//	const uint8_t* p = scan.data;
-//	if (p[0] == 0x15 && p[1] == 0x16 && p[2] == 0x01 && p[3] == 0xC0 && p[4] == 0x05) {
-////		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
-////		if (advReport->peer_addr.addr_type == BLE_GAP_ADDR_TYPE_PUBLIC && addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-////		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-//		LOGi("Stack scan: address=%02X:%02X:%02X:%02X:%02X:%02X addrType=%u type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], advReport->peer_addr.addr_type, type, scan.rssi, scan.channel);
-//		LOGi("  adv_type=%u len=%u data=", type, scan.dataSize);
-//		CsUtils::printArray(scan.data, scan.dataSize);
-//	}
 	event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-void csStackOnScan(void * p_event_data, uint16_t event_size) {
+void csStackOnScan(void * p_event_data, [[maybe_unused]] uint16_t event_size) {
 	cs_stack_scan_t* scanEvent = (cs_stack_scan_t*)p_event_data;
 	scanEvent->advReport.data.p_data = scanEvent->data;
 	const ble_gap_evt_adv_report_t* advReport = &(scanEvent->advReport);
@@ -609,16 +608,20 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 				case NRF_ERROR_INVALID_ADDR:
 					// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				case NRF_ERROR_INVALID_PARAM:
 					// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied. See @ref ble_gap_scan_params_t.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				case NRF_ERROR_NOT_SUPPORTED:
 					// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported parameters supplied. See @ref ble_gap_scan_params_t.
 					// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				case NRF_ERROR_INVALID_LENGTH:
 					// * @retval ::NRF_ERROR_INVALID_LENGTH The provided buffer length is invalid. See @ref BLE_GAP_SCAN_BUFFER_MIN.
 					// This shouldn't happen: crash.
+					[[fallthrough]];
 				default:
 					// Crash
 					APP_ERROR_HANDLER(nrfCode);
@@ -628,7 +631,7 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 	}
 }
 
-static void connection_keep_alive_timeout(void* p_context) {
+static void connection_keep_alive_timeout([[maybe_unused]] void* p_context) {
 	LOGw("connection keep alive timeout!");
 	Stack::getInstance().disconnect();
 }
@@ -691,7 +694,7 @@ void Stack::onMemoryRequest(uint16_t connectionHandle) {
 	}
 }
 
-void Stack::onMemoryRelease(uint16_t connectionHandle) {
+void Stack::onMemoryRelease([[maybe_unused]] uint16_t connectionHandle) {
 	// No need to do anything
 }
 

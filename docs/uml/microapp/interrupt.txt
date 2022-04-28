@@ -1,0 +1,67 @@
+@startuml
+
+@startuml
+
+participant "Scheduler"                       as sched
+database "Microapp stack"                     as appstack
+participant "Bluenet"                         as fw
+participant "Bluenet microapp thread"         as fw_app
+participant "Microapp"                        as app
+
+== Interrupt during delay ==
+app -> app: delay(3)
+app -> fw_app:
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> sched:
+
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app:
+app -> app: no message to handle
+app -> app: wait for 2 more ticks
+app -> fw_app:
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: no command to handle
+fw -> sched:
+
+sched -> fw: gpio toggle
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app: msg: interrupt gpio toggle
+app -> app: handle message: interrupt pin 5 toggle
+app -> app: onInterrupt(pin 5 toggle)
+app -> fw_app
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> sched: return
+
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app:
+app -> app: no message to handle
+app -> app: wait for 1 more tick
+app -> fw_app:
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: no command to handle
+fw -> sched:
+
+sched -> fw: tick
+fw -> fw_app: longjmp(microapp)
+activate appstack
+fw_app -> app:
+app -> app: no message to handle
+app -> app: }
+app -> fw_app: msg: end of loop
+fw_app -> fw: longjmp(bluenet)
+deactivate appstack
+fw -> fw: handle commmand end of loop
+fw -> sched:
+
+
+@enduml
+

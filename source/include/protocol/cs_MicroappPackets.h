@@ -25,11 +25,11 @@ constexpr uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
 /**
  * Protocol version of the communication between the user and the firmware: the microapp command and result packets.
  */
-constexpr uint8_t MICROAPP_PROTOCOL = 0;
+constexpr uint8_t MICROAPP_PROTOCOL = 1;
 
 constexpr uint8_t MICROAPP_SDK_MAJOR = 0;
 
-constexpr uint8_t MICROAPP_SDK_MINOR = 1;
+constexpr uint8_t MICROAPP_SDK_MINOR = 2;
 
 constexpr uint16_t CS_FLASH_PAGE_SIZE = 0x1000; // Size of 1 flash page.
 

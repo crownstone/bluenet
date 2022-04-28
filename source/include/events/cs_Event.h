@@ -11,6 +11,18 @@
 
 #include <cstdint>
 
+/**
+ * An event which can be sent over the event bus. The event bus is synchronous.
+ *
+ * There is no possibility to send a mere uint8_t or other primitive data type. Everything is passed by pointer. Hence,
+ * first create a local variable on the stack, then point to it.
+ *
+ *    uint8_t data = 1;
+ *    event_t event(CS_TYPE::EVT_XXX, &data, sizeof(data));
+ *
+ * There is no memory allocation or deallocation happening in this class. The caller is responsible for this. If you
+ * use the stack, make sure you dispatch the event when the data on the stack is still valid.
+ */
 class event_t {
 public:
 	event_t(CS_TYPE type, void * data, size16_t size, const cmd_source_with_counter_t& source, const cs_result_t& result) :

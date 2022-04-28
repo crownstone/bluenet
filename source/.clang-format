@@ -4,10 +4,11 @@ Language: Cpp
 
 ###### Source file preamble and comments ######
 
-IncludeBlocks: Preserve
+SortIncludes: true
+IncludeBlocks: Regroup
 AlignTrailingComments: true
 
-###### brackets ######
+###### Brackets ######
 
 AlignAfterOpenBracket: AlwaysBreak
 
@@ -15,7 +16,7 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   BeforeElse: true
 
-###### parameter lists ######
+###### Parameter lists ######
 
 AllowAllParametersOfDeclarationOnNextLine: true
 BinPackArguments: false
@@ -37,10 +38,14 @@ AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+
 UseTab: ForContinuationAndIndentation
 TabWidth: 4
 IndentWidth: 4
 ContinuationIndentWidth: 8
 AccessModifierOffset: -4
+ConstructorInitializerIndentWidth: 8
 
 ...

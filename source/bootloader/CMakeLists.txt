@@ -221,10 +221,13 @@ ELSE()
 	ELSE()
 		MESSAGE(STATUS "bootloader: SERIAL log disabled")
 	ENDIF()
-	
+
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/bootloader")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/shared")
+
+	# Add include folder for generated header files of parent project
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_CURRENT_BINARY_DIR}/../include")
 	
 	# SDK config
 	#LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/examples/dfu/secure_bootloader/pca10040_ble_debug/config")
