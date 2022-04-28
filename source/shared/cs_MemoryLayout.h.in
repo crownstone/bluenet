@@ -35,6 +35,8 @@ _Static_assert(
 
 _Static_assert(NRF_MBR_PARAMS_PAGE_ADDRESS == ${CS_MBR_PARAMS_PAGE_ADDRESS}, "MBR param page address mismatch");
 
+_Static_assert(${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} == ${FLASH_MICROAPP_BASE}, "Incorrect application max length");
+
 /**
  * The SoftDevice and the MBR come together in a Nordic SoftDevice image. Hence, this includes the MBR page.
  */
@@ -46,22 +48,13 @@ const struct MemorySection softdeviceFlashSection = {
 };
 
 /**
- * The bluenet application itself.
+ * The maximal size of the bluenet application. It's not containing the actual size of the application. The latter
+ * would require us to compile twice.
  */
 const struct MemorySection bluenetFlashSection = {
 		._start = ${APPLICATION_START_ADDRESS},
-		._end   = ${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH},
-		._size  = ${APPLICATION_LENGTH},
-		._type  = MT_Flash,
-};
-
-/**
- * This is a part of flash that is not used by anything.
- */
-const struct MemorySection freeFlashSection = {
-		._start = ${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH},
-		._end   = ${FLASH_MICROAPP_BASE},
-		._size  = ${FLASH_MICROAPP_BASE} - (${APPLICATION_START_ADDRESS} + ${APPLICATION_LENGTH}),
+		._end   = ${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH},
+		._size  = ${APPLICATION_MAX_LENGTH},
 		._type  = MT_Flash,
 };
 
