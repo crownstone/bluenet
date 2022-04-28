@@ -11,18 +11,17 @@ DOCS_DIR = "../docs/"
 DIR = "diagrams/"
 GEN_DIR = DOCS_DIR + DIR
 FILENAMES = [DOCS_DIR + F for F in [
-	"PROTOCOL.md",
-	"BEHAVIOUR.md",
-	"SERVICE_DATA.md",
-	"SERVICE_DATA_DEPRECATED.md",
-	"BROADCAST_PROTOCOL.md",
-	"UART_PROTOCOL.md",
-	"MESH_PROTOCOL.md",
-	"IPC.md",
+	"protocol/PROTOCOL.md",
+	"protocol/BEHAVIOUR.md",
+	"protocol/SERVICE_DATA.md",
+	"protocol/SERVICE_DATA_LEGACY.md",
+	"protocol/BROADCAST_PROTOCOL.md",
+	"protocol/UART_PROTOCOL.md",
+	"protocol/MESH_PROTOCOL.md",
+	"protocol/IPC.md",
 	"MESH.md",
 	"BLUETOOTH.md",
 	"MICROAPP.md",
-	"ASSET_FILTER_STORE.md"
 ]]
 
 fontPath = DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
@@ -450,66 +449,71 @@ def parseFile(textFilename):
 
 		matches = patternTableHeader.findall(line)
 		if len(matches):
-			#print "foundTableHeader: " + matches[0]
-			lengthInBits = (matches[0] == "in bits")
+			lengthInBits = (matches[0][1] == "in bits")
 			foundTableHeader = True
+			print ("foundTableHeader: ", matches[0][0])
 
 		matches = patternFileName.findall(line)
 		if len(matches):
 			filename = GEN_DIR + matches[0]
+			print("patternFileName =", filename)
 
 	# End of file
 	if (foundTableLines):
 		# Draw last table
 		drawVarList(varList, filename, lengthInBits)
 
-if not os.path.exists(GEN_DIR):
-	print("Make dir " + GEN_DIR)
-	os.makedirs(GEN_DIR)
 
-pygame.init()
-pygame.display.init()
+if __name__ == "__main__":
+	if not os.path.exists(GEN_DIR):
+		print("Make dir " + GEN_DIR)
+		os.makedirs(GEN_DIR)
 
-#myFont = pygame.font.SysFont("monospace", 15)
-fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
-fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
+	pygame.init()
+	pygame.display.init()
 
-# Regex patterns
+	#myFont = pygame.font.SysFont("monospace", 15)
+	fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
+	fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
 
-# Matches: "![Session data](../docs/diagrams/session-data.png)"
-# Backrefs:
-#   0: "session-data.png"
-patternFileNameString = "\\(" + DOCS_DIR + DIR + "([^\\)]+)\\)"
-patternFileName = re.compile(patternFileNameString)
+	# Regex patterns
 
-# Matches: "Type | Name | Length | Description" or "Type | Name | Length in bits | Description"
-# Backrefs:
-#   0: "in bits"
-patternTableHeader = re.compile("Type +\\| +Name +\\| +Length (in bits)? *\\| +Description")
+	# Matches: "![Session data](../docs/diagrams/session-data.png)"
+	# Matches: "![Session data](../diagrams/session-data.png)"
+	# Backrefs:
+	#   0: "session-data.png"
+	patternFileNameString = "\\(.*" + DIR + "([^\\)]+)\\)"
+	patternFileName = re.compile(patternFileNameString)
+	print("image filename regex: ", patternFileNameString)
 
-# Matches: "uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets."
-# Backrefs:
-#   0: "Session nonce"
-#   1: "5"
-patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
+	# Matches: "Type | Name | Length | Description" or "Type | Name | Length in bits | Description"
+	# Backrefs:
+	#   0: "in bits"
+	patternTableHeader = re.compile("(Bit|Type) \\| +Name +\\| +Length (in bits)? *\\| +Description")
 
-# Matches: "[Encrypted payload](#encrypted-payload)"
-# Backrefs:
-#   0: "Encrypted payload"
-patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
+	# Matches: "uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets."
+	# Backrefs:
+	#   0: "Session nonce"
+	#   1: "5"
+	patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
 
-for filename in FILENAMES:
-	print(filename)
-	parseFile(filename)
-	
+	# Matches: "[Encrypted payload](#encrypted-payload)"
+	# Backrefs:
+	#   0: "Encrypted payload"
+	patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
-# pygame.display.flip()
+	for filename in FILENAMES:
+		print(filename)
+		parseFile(filename)
+		
 
-# done = False
-# while not done:
-# 	for event in pygame.event.get(): # User did something
-# 		if event.type == pygame.QUIT: # If user clicked close
-# 			done=True # Flag that we are done so we exit this loop
+	# pygame.display.flip()
 
-pygame.quit()
+	# done = False
+	# while not done:
+	# 	for event in pygame.event.get(): # User did something
+	# 		if event.type == pygame.QUIT: # If user clicked close
+	# 			done=True # Flag that we are done so we exit this loop
+
+	pygame.quit()
 

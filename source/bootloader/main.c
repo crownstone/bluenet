@@ -68,7 +68,7 @@
 #include "nrf_nvmc.h"
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
-#include "cfg/cs_MemoryLayout.h"
+#include "bootloader/cs_MemoryLayout.h"
 
 static void on_error(void)
 {

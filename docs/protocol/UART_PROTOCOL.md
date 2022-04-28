@@ -14,7 +14,7 @@ Every byte in the UART message that equals one of the special characters will be
 
 Every UART message is wrapped.
 
-![UART wrapper](../docs/diagrams/uart_wrapper.png)
+![UART wrapper](../diagrams/uart_wrapper.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -40,7 +40,7 @@ Type | Payload | Description
 
 Although the name suggests this is encrypted, only the `encrypted data` is actually encrypted. The other fields are unencrypted, but required for the encryption.
 
-![Encrypted UART message](../docs/diagrams/encrypted_uart_msg.png)
+![Encrypted UART message](../diagrams/encrypted_uart_msg.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -50,7 +50,7 @@ uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#aes-128-ctr-
 
 ### Encrypted data
 
-![Encrypted data](../docs/diagrams/uart_encrypted_data.png)
+![Encrypted data](../diagrams/uart_encrypted_data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -62,7 +62,7 @@ uint8[] | Padding      | N | Padding to make this whole packet size a multiple o
 
 ### UART message
 
-![UART message](../docs/diagrams/uart_msg.png)
+![UART message](../diagrams/uart_msg.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -89,7 +89,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 2     | Heartbeat                     | Optional  | [Heartbeat](#heartbeat-packet) | Used to know whether the UART connection is alive. You can mix encrypted and unencrypted heartbeat commands. With current implementation though, each time you send an unencrypted heartbeat, the hub service data flag `UART alive encrypted` will be false until an encrypted heartbeat is sent.
 3     | Status                        | Optional  | [Status](#user-status-packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone (in reverse byte order compared to string representation).
-10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control-packet) | Send a control command.
+10    | Control command               | Yes       | [Control msg](PROTOCOL.md#control-packet) | Send a control command.
 11    | Hub data reply                | Optional  | [Hub data reply](#hub-data-reply) | Only after receiving `Hub data`, reply with this command. This data will be relayed to the device (phone) connected via BLE.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
 50001 | Enable mesh                   | Never     | uint8  | Enable/disable mesh.
@@ -127,7 +127,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 2     | Heartbeat                     | Optional  | -      | Heartbeat reply. Will be encrypted if the command was encrypted too.
 3     | Status                        | Never     | [Status](#crownstone-status-packet) | Status reply.
 4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
-10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result-packet) | Result of a control command.
+10    | Control result                | Yes       | [Result packet](PROTOCOL.md#result-packet) | Result of a control command.
 11    | Hub data reply ack            | Optional  | -      | Simply an acknowledgement that the hub data reply was received by the crownstone. Will be encrypted if the command was encrypted too.
 9900  | Parsing failed                | Never     | -      | Your command was probably formatted incorrectly, is too large, has an invalid data type, or you don't have the required access level.
 9901  | Error reply                   | Never     | [Status](#crownstone-status-packet) | Your command was probably not encrypted while it should have been.
@@ -135,16 +135,16 @@ Type  | Type name                     | Encrypted | Data   | Description
 9903  | Decryption failed             | Never     | -      | Decryption failed due to missing or wrong key.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
 10001 | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
-10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service-data-header) | Service data of this Crownstone.
+10002 | Service data                  | Yes       | [Service data with device type](SERVICE_DATA.md#service-data-header) | Service data of this Crownstone.
 10004 | Presence change               | Yes       | [Presence change packet](#presence-change-packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
 10007 | Hub data                      | Optional  | uint8 [] | As requested via control command `Hub data`. Make sure you reply with the `Hub data reply` uart command.
-10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#encrypted-data) | State of other Crownstones in the mesh (unencrypted).
+10102 | Mesh state msg                | Yes       | [Service data without device type](SERVICE_DATA.md#encrypted-data) | State of other Crownstones in the mesh (unencrypted).
 10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh-state-part-0) | Part of the state of other Crownstones in the mesh.
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh-state-part-1) | Part of the state of other Crownstones in the mesh.
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh-result-packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
-10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result-packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
+10106 | Mesh ack all                  | Yes       | [Mesh ack all result](PROTOCOL.md#result-packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | Deprecated.
 10108 | Asset MAC report              | Yes       | [Asset MAC report](#asset-mac-report) | Report of an asset a Crownstone on the mesh has seen.
 10111 | RSSI between stones report    | Yes       | [RSSI between stones report](#rssi-between-stones-report) | A report of the RSSI between 2 Crownstones.
@@ -152,13 +152,13 @@ Type  | Type name                     | Encrypted | Data   | Description
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
-40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
-40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
+40103 | Mesh cmd time                 | Yes       | [Time](MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
+40110 | Mesh profile location         | Yes       | [Profile location](MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
 40111 | Mesh set behaviour settings   | Yes       | [Behaviour settings](PROTOCOL.md#behaviour-settings) | Received command to set behaviour settings from the mesh.
-40112 | Mesh tracked device register  | Yes       | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Received command to register a tracked device from the mesh.
-40113 | Mesh tracked device token     | Yes       | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Received command to set the token of a tracked device from the mesh.
-40114 | Mesh sync request             | Yes       | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Received a sync request from the mesh.
-40120 | Mesh tracked device heartbeat | Yes       | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Received heartbeat command of a tracked device from the mesh.
+40112 | Mesh tracked device register  | Yes       | [Tracked device register](MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Received command to register a tracked device from the mesh.
+40113 | Mesh tracked device token     | Yes       | [Tracked device token](MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Received command to set the token of a tracked device from the mesh.
+40114 | Mesh sync request             | Yes       | [Sync request](MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Received a sync request from the mesh.
+40120 | Mesh tracked device heartbeat | Yes       | [Tracked device heartbeat](MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Received heartbeat command of a tracked device from the mesh.
 50000 | Advertising enabled           | Never     | uint8  | Whether advertising is enabled.
 50001 | Mesh enabled                  | Never     | uint8  | Whether mesh is enabled.
 50002 | Stone ID                      | Never     | uint8  | The stone ID of this crownstone.
@@ -316,7 +316,7 @@ uint8 | Report number | 1 | Number that is increased by 1 each time the receiver
 
 The log header should contain enough info to find the log string from the source code.
 
-![Binary log header](../docs/diagrams/binary_log_header.png)
+![Binary log header](../diagrams/binary_log_header.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -339,7 +339,7 @@ The binary log packet consists of a header and arguments. The header is used to 
 
 For example, if the format string is `"%s is %u"` then the first argument is interpreted as a string, which replaces the `%s`. While the second arguement is interpreted as an unsigned integer, that replaces the `%u`.
 
-![Binary log packet](../docs/diagrams/binary_log_packet.png)
+![Binary log packet](../diagrams/binary_log_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -356,7 +356,7 @@ uint8[] | Payload | N | The argument data.
 
 ### Binary log array packet
 
-![Binary log array packet](../docs/diagrams/binary_log_array_packet.png)
+![Binary log array packet](../diagrams/binary_log_array_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -381,7 +381,7 @@ Value | Name | Description
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Stone ID | 1 | ID of the stone.
-[Result packet](../docs/PROTOCOL.md#result-packet) | Result | N | The result.
+[Result packet](PROTOCOL.md#result-packet) | Result | N | The result.
 
 
 ### Mesh state part 0
@@ -389,7 +389,7 @@ uint8 | Stone ID | 1 | ID of the stone.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Stone ID | 1 | ID of the stone.
-[Mesh msg state 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | State | 7 | The state.
+[Mesh msg state 0](MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | State | 7 | The state.
 
 
 ### Mesh state part 1
@@ -397,7 +397,7 @@ uint8 | Stone ID | 1 | ID of the stone.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Stone ID | 1 | ID of the stone.
-[Mesh msg state 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | State | 7 | The state.
+[Mesh msg state 1](MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | State | 7 | The state.
 
 
 

@@ -3,12 +3,12 @@
 
 The service data contains the state of the Crownstone.
 
-This only documents the latest service data protocol. The old versions are kept up in a separate [document](SERVICE_DATA_DEPRECATED.md).
+This only documents the latest service data protocol. The old versions are kept up in a separate [document](SERVICE_DATA_LEGACY.md).
 
 # Service data header
 The first byte of the service data determines how to parse the remaining bytes.
 
-![Scan response service data](../docs/diagrams/scan-response-service-data.png)
+![Scan response service data](../diagrams/scan-response-service-data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -17,7 +17,7 @@ uint 8[] | Data |  | Remaining data, length depends on type.
 
 Type | Packet
 ---- | ---
-0-5  | Deprecated, see this [document](SERVICE_DATA_DEPRECATED.md)
+0-5  | Deprecated, see this [document](SERVICE_DATA_LEGACY.md)
 6    | [Device type + data](#device-type-and-setup-service-data). Advertised when in setup mode.
 7    | [Device type + data](#device-type-and-encrypted-service-data). Advertised when in normal mode.
 
@@ -26,7 +26,7 @@ Type | Packet
 # Device type and setup service data
 This packet contains the state info, it is unencrypted.
 
-![Setup service data](../docs/diagrams/service-data-setup-2.png)
+![Setup service data](../diagrams/service-data-setup-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -41,7 +41,7 @@ Type | Packet
 
 ## Setup state packet
 
-![Setup service data state](../docs/diagrams/service-data-device-type-and-setup.png)
+![Setup service data state](../diagrams/service-data-device-type-and-setup.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -61,7 +61,7 @@ uint 8 | Reserved | 4 | Reserved for future use, will be 0 for now.
 This packet contains the device type and encrypted data (if encryption is enabled), which is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic-Codebook-.28ECB.29) using the service data key.
 You can verify if you can decrypt the service data by checking if the validation is the correct value, and if the Crownstone ID remains the same after decryption (while the encrypted service data changes).
 
-![Device type and encrypted service data](../docs/diagrams/service-data-device-type-and-encrypted.png)
+![Device type and encrypted service data](../diagrams/service-data-device-type-and-encrypted.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -70,7 +70,7 @@ uint 8[] | [Encrypted data](#encrypted-data) | 16 | Encrypted data, see below.
 
 ## Encrypted data
 
-![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)
+![Encrypted service data](../diagrams/service-data-encrypted-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -94,7 +94,7 @@ Type | Packet
 
 The following type gives the latest state of the Crownstone.
 
-![Encrypted service data state](../docs/diagrams/service-data-encrypted-state-3.png)
+![Encrypted service data state](../diagrams/service-data-encrypted-state-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -113,7 +113,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 
 The following type only gets advertised in case there is an error. It will be interleaved with the state type.
 
-![Encrypted service data error](../docs/diagrams/service-data-encrypted-error-3.png)
+![Encrypted service data error](../diagrams/service-data-encrypted-error-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -129,7 +129,7 @@ int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to g
 
 The following type sends out the last known state of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external state](../docs/diagrams/service-data-encrypted-ext-state-3.png)
+![Encrypted service data external state](../diagrams/service-data-encrypted-ext-state-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -148,7 +148,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 
 The following type sends out the last known error of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external error](../docs/diagrams/service-data-encrypted-ext-error-3.png)
+![Encrypted service data external error](../diagrams/service-data-encrypted-ext-error-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -166,7 +166,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 The following type gives the latest state of the Crownstone.
 It's similar to the normal state, but replaces some less essential fields with other data.
 
-![Encrypted service data alternative state](../docs/diagrams/service-data-encrypted-alternative-state.png)
+![Encrypted service data alternative state](../diagrams/service-data-encrypted-alternative-state.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -184,7 +184,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 
 When a Crownstone dongle is set to hub mode, the hub state service data replaces the normal state.
 
-![Encrypted service data hub state](../docs/diagrams/service-data-encrypted-hub-state.png)
+![Encrypted service data hub state](../diagrams/service-data-encrypted-hub-state.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -212,7 +212,7 @@ Bit | Name |  Description
 
 When a microapp requests to advertise encrypted data, this packet will be interleaved with the Crownstone state packets.
 
-![Encrypted service data microapp](../docs/diagrams/service-data-encrypted-microapp.png)
+![Encrypted service data microapp](../diagrams/service-data-encrypted-microapp.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -237,7 +237,7 @@ Bit | Name |  Description
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
-![Switch State Packet](../docs/diagrams/switch_state_packet.png)
+![Switch State Packet](../diagrams/switch_state_packet.png)
 
 Bit | Name |  Description
 --- | --- | ---

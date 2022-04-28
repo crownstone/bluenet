@@ -1,3 +1,3 @@
 #!/bin/sh
 
-@WORKSPACE_DIR@/scripts/log-client.py -d @UART_DEVICE@ -l @CMAKE_CURRENT_BINARY_DIR@/extracted_logs.json
+@WORKSPACE_DIR@/scripts/log-client.py -d @UART_DEVICE@ -l @CMAKE_CURRENT_BINARY_DIR@/extracted_logs.json $@

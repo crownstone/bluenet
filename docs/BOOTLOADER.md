@@ -30,7 +30,7 @@ If it contains windows line-endings, remove them ([stackoverflow will do](https:
 
 Read more on the crypto backend at the [Infocenter](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/lib_crypto_backend_micro_ecc.html). 
 
-To flash the bootloader to the device, use instructions from the [INSTALL](https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md) document.
+To flash the bootloader to the device, use instructions from the [INSTALL](INSTALL.md) document.
 
     ./bluenet.sh -buB -t default
 
@@ -62,8 +62,8 @@ FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000
 
 There are currently actually **two** locations where you have to define the start of the bootloader.
 
-1. The [secure_bootloader_gcc_nrf52.ld](https://github.com/crownstone/bluenet/blob/master/bootloader/secure_bootloader_gcc_nrf52.ld) script in the `bootloader` directory (see above).
-2. The `CMakeBuild.config` file for the target you are building for. The default comes from [CMakeBuild.config.default](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default).
+1. The [secure_bootloader_gcc_nrf52.ld](../source/bootloader/secure_bootloader_gcc_nrf52.ld) script in the `bootloader` directory (see above).
+2. The `CMakeBuild.config` file for the target you are building for. The default comes from [CMakeBuild.config.default](../source/conf/cmake/CMakeBuild.config.default).
 
 To allow for the additional space for debugging, starting at 0x71000 up to (almost!) the end of FLASH should be sufficient (adds up to `0x7E000`). Note, it's not up to `0x7FFFF`.
 

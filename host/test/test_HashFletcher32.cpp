@@ -7,14 +7,16 @@
 
 
 #include <util/cs_Hash.h>
-#include <logging/cs_Logger.h>
+//#include <logging/cs_Logger.h>
 #include <iostream>
 
+
+
 //#undef LOGe
-//#define LOGe(X) do{std::cout << X << std::endl;}while(0)
+#define LOGe(X) do{std::cout << (X) << std::endl;}while(0)
 //
 //#undef LOGd
-//#define LOGd(X) do{std::cout << X << std::endl;}while(0)
+#define LOGd(X) do{std::cout << (X) << std::endl;}while(0)
 
 
 #define XSTR(x) STR(x)

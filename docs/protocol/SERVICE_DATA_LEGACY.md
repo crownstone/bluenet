@@ -6,7 +6,7 @@ The service data contains the state of the Crownstone.
 # Service data header
 The first byte of the service data determines how to parse the remaining bytes.
 
-![Scan response service data](../docs/diagrams/scan-response-service-data.png)
+![Scan response service data](../diagrams/scan-response-service-data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -26,7 +26,7 @@ Type | Packet
 This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic-Codebook-.28ECB.29) using the guest key.
 You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
-![Service data v1](../docs/diagrams/service-data-encrypted-v1.png)
+![Service data v1](../diagrams/service-data-encrypted-v1.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -58,7 +58,7 @@ Bit | Name |  Description
 This packet contains the state info. If encryption is enabled, it's encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic-Codebook-.28ECB.29) using the guest key.
 You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
-![Encrypted service data](../docs/diagrams/service-data-encrypted.png)
+![Encrypted service data](../diagrams/service-data-encrypted.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -78,7 +78,7 @@ Type | Packet
 
 The following type gives the latest state of the Crownstone.
 
-![Encrypted service data state](../docs/diagrams/service-data-encrypted-state.png)
+![Encrypted service data state](../diagrams/service-data-encrypted-state.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -96,7 +96,7 @@ uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validat
 
 The following type only gets advertised in case there is an error. It will be interleaved with the state type.
 
-![Encrypted service data error](../docs/diagrams/service-data-encrypted-error.png)
+![Encrypted service data error](../diagrams/service-data-encrypted-error.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -112,7 +112,7 @@ int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to g
 
 The following type sends out the last known state of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external state](../docs/diagrams/service-data-encrypted-ext-state.png)
+![Encrypted service data external state](../diagrams/service-data-encrypted-ext-state.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -130,7 +130,7 @@ uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validat
 
 The following type sends out the last known error of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external error](../docs/diagrams/service-data-encrypted-ext-error.png)
+![Encrypted service data external error](../diagrams/service-data-encrypted-ext-error.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -148,7 +148,7 @@ uint 16 | Validation | 2 | Value is always `0xFACE`. Can be used to help validat
 # Setup service data v3
 This packet contains the state info, it is unencrypted.
 
-![Setup service data](../docs/diagrams/service-data-setup.png)
+![Setup service data](../diagrams/service-data-setup.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -157,11 +157,11 @@ uint 8[] | Data | 15 | Data, see below.
 
 Type | Packet
 --- | ---
-0 | [State](setup-state-packet-v3).
+0 | [State](#setup-state-packet-v3).
 
 ## Setup state packet v3
 
-![Setup service data state](../docs/diagrams/service-data-setup-state.png)
+![Setup service data state](../diagrams/service-data-setup-state.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -181,7 +181,7 @@ uint 8 | Reserved | 4 | Reserved for future use.
 This packet contains the device type and the state info. If encryption is enabled, the state is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic-Codebook-.28ECB.29) using the guest key.
 You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
 
-![Device type and encrypted service data](../docs/diagrams/service-data-device-type-and-encrypted.png)
+![Device type and encrypted service data](../diagrams/service-data-device-type-and-encrypted.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -190,7 +190,7 @@ uint 8[] | Encrypted data | 16 | Encrypted data, see below.
 
 Encrypted data:
 
-![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)
+![Encrypted service data](../diagrams/service-data-encrypted-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -210,7 +210,7 @@ Type | Packet
 
 The following type gives the latest state of the Crownstone.
 
-![Encrypted service data state](../docs/diagrams/service-data-encrypted-state-2.png)
+![Encrypted service data state](../diagrams/service-data-encrypted-state-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -229,7 +229,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 
 The following type only gets advertised in case there is an error. It will be interleaved with the state type.
 
-![Encrypted service data error](../docs/diagrams/service-data-encrypted-error-2.png)
+![Encrypted service data error](../diagrams/service-data-encrypted-error-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -245,7 +245,7 @@ int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to g
 
 The following type sends out the last known state of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external state](../docs/diagrams/service-data-encrypted-ext-state-2.png)
+![Encrypted service data external state](../diagrams/service-data-encrypted-ext-state-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -264,7 +264,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 
 The following type sends out the last known error of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external error](../docs/diagrams/service-data-encrypted-ext-error-2.png)
+![Encrypted service data external error](../diagrams/service-data-encrypted-ext-error-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -284,7 +284,7 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
-![Switch State Packet](../docs/diagrams/switch_state_packet.png)
+![Switch State Packet](../diagrams/switch_state_packet.png)
 
 Bit | Name |  Description
 --- | --- | ---

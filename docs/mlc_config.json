@@ -1,0 +1,8 @@
+{
+    "aliveStatusCodes": [200, 206, 0],
+    "ignorePatterns": [
+    {
+      "pattern": "^https://docs.github.com/en/actions/hosting-your-own-runners/adding-self-hosted-runners"
+    }
+    ]
+}
