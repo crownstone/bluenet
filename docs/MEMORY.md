@@ -95,7 +95,7 @@ The global layout of the flash memory is shown below for the nRF52840:
 The microapp section is larger than on the nRF52832.
 
 The maximum size of the app is available as `APPLICATION_MAX_LENGTH`.
-For 54 + 141 pages this amounts to `(54 + 129) * 0x1000 = 0xB7000`.
+For 54 + 129 pages this amounts to `(54 + 129) * 0x1000 = 0xB7000`.
 This is about 732 kB. For a dual bank bootloader the firmware should than be 366 kB max so the old firmware can exist
 temporarily alongside the new firmware. This is possible on the nRF52840, but that doesn't mean that it's in use.
 The build will fail if the app binary will go beyond the address `FLASH_MICROAPP_BASE` (`0xDD000`).
