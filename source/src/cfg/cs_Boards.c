@@ -59,6 +59,7 @@
  * Initialize conservatively (as if given pins are not present).
  */
 void init(boards_config_t* config) {
+	config->hardwareBoard = 0;
 	config->pinDimmer = PIN_NONE;
 	config->pinEnableDimmer= PIN_NONE;
 	config->pinRelayOn = PIN_NONE;
@@ -210,6 +211,11 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 	}
 
 	config->hardwareBoard = hardwareBoard;
+
+	cs_uicr_data_t uicrData = getUicrData(hardwareBoard);
+
+	// Try to set uicr data, in case it's not set yet.
+	setUicr(&uicrData, false);
 
 	return ERR_SUCCESS;
 }
