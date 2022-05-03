@@ -50,15 +50,9 @@ The layout for RAM memory is shown below for the nRF52832:
 | 0x2000FF00 | IPC | 0x100 | 256 | 0.25
 | | **Total** | 0x10000 | 65536 | 64
 
-The start and end addresses are like this:
-
-| Start address | End address | What
-| ------------- | ----------- | ----
-| 0x20000000    | 0x20002A00  | Soft device.
-| 0x20002A00    |             | App heap start, grows up to stack.
-| 0x2000F6FF    |             | App stack start, grows down to heap.
-| 0x2000F700    | 0x2000FEFF  | Microapp stack, grows from `end` down to `start`.
-| 0x2000FF00    | 0x20010000  | IPC, fixed layout.
+The bluenet heap starts at `0x20002A00` and grows up to the bluenet stack.
+The stack starts at `0x2000F6FF` and grows down to the heap.
+The microapp stack grows down from `0x2000FEFF` to `0x2000F700`.
 
 In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/crownstone/bluenet/blob/master/source/bootloader/secure_bootloader_gcc_nrf52.ld)):
 
@@ -88,14 +82,14 @@ The global layout of the flash memory is shown below for the nRF52840:
 | 0x00001000 | SD | 37 | location: fixed <br> size: implicit
 | 0x00026000 | App / Bluenet | 54 | APPLICATION_START_ADDRESS<br> implicit
 | 0x0005C000 | Free | 129 | implicit
-| 0x00069000 | Microapp | 16 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
-| 0x0006D000 | P2P DFU | 1 | location: implicit<br> size: fixed
-| 0x0006E000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
-| 0x00072000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
-| 0x00076000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
-| 0x0007D000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
-| 0x0007E000 | MBR settings | 1 | CS_MBR_PARAMS_PAGE_ADDRESS <br> size: fixed
-| 0x0007F000 | Bootloader settings | 1 | CS_BOOTLOADER_SETTINGS_ADDRESS <br> size: fixed
+| 0x000DD000 | Microapp | 16 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
+| 0x000ED000 | P2P DFU | 1 | location: implicit<br> size: fixed
+| 0x000EE000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
+| 0x000F2000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
+| 0x000F6000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
+| 0x000FD000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
+| 0x000FE000 | MBR settings | 1 | CS_MBR_PARAMS_PAGE_ADDRESS <br> size: fixed
+| 0x000FF000 | Bootloader settings | 1 | CS_BOOTLOADER_SETTINGS_ADDRESS <br> size: fixed
 | | **Total** | 256
 
 The microapp section is larger than on the nRF52832.
@@ -114,8 +108,8 @@ The layout for RAM memory is shown below for the nRF52840:
 | ------------- |:----:| ----:| ----:| --------:|
 | 0x20000000 | SD | 0x2A00 | 10752 | 10.5
 | 0x20002A00 | App heap and stack | 0x3CD00 | 249088 | 243.25
-| 0x2000F700 | Microapp | 0x800 | 2048 | 2
-| 0x2000FF00 | IPC | 0x100 | 256 | 0.25
+| 0x2003F700 | Microapp | 0x800 | 2048 | 2
+| 0x2003FF00 | IPC | 0x100 | 256 | 0.25
 | | **Total** | 0x40000 | 262144 | 256
 
 # Miscellaneous
