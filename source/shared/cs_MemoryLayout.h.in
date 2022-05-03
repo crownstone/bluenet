@@ -10,6 +10,8 @@
  *
  * This file gathers the full memory layout of the bootloader, firmware and other components in order
  * to allow application layer introspection.
+ *
+ * This file is shared by bluenet and bootloader.
  */
 #pragma once
 
@@ -29,20 +31,19 @@ struct MemorySection {
 };
 
 _Static_assert(
-		BOOTLOADER_SETTINGS_ADDRESS == @CS_BOOTLOADER_SETTINGS_ADDRESS@, "Bootloader settings address mismatch");
+		BOOTLOADER_SETTINGS_ADDRESS == ${CS_BOOTLOADER_SETTINGS_ADDRESS}, "Bootloader settings address mismatch");
 
-_Static_assert(NRF_MBR_PARAMS_PAGE_ADDRESS == @CS_MBR_PARAMS_PAGE_ADDRESS@, "MBR param page address mismatch");
+_Static_assert(NRF_MBR_PARAMS_PAGE_ADDRESS == ${CS_MBR_PARAMS_PAGE_ADDRESS}, "MBR param page address mismatch");
 
-_Static_assert(@APPLICATION_START_ADDRESS@ + @APPLICATION_MAX_LENGTH@ == @FLASH_MICROAPP_BASE@, "Incorrect application max length");
-
+_Static_assert(${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} == ${FLASH_MICROAPP_BASE}, "Incorrect application max length");
 
 /**
  * The SoftDevice and the MBR come together in a Nordic SoftDevice image. Hence, this includes the MBR page.
  */
 const struct MemorySection softdeviceFlashSection = {
 		._start = 0x00,
-		._end   = @APPLICATION_START_ADDRESS@,
-		._size  = @APPLICATION_START_ADDRESS@,
+		._end   = ${APPLICATION_START_ADDRESS},
+		._size  = ${APPLICATION_START_ADDRESS},
 		._type  = MT_Flash,
 };
 
@@ -51,9 +52,9 @@ const struct MemorySection softdeviceFlashSection = {
  * would require us to compile twice.
  */
 const struct MemorySection bluenetFlashSection = {
-		._start = @APPLICATION_START_ADDRESS@,
-		._end   = @APPLICATION_START_ADDRESS@ + @APPLICATION_MAX_LENGTH@,
-		._size  = @APPLICATION_MAX_LENGTH@,
+		._start = ${APPLICATION_START_ADDRESS},
+		._end   = ${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH},
+		._size  = ${APPLICATION_MAX_LENGTH},
 		._type  = MT_Flash,
 };
 
@@ -62,9 +63,9 @@ const struct MemorySection bluenetFlashSection = {
  * individual size for a microapp.
  */
 const struct MemorySection microappFlashSection = {
-		._start = @FLASH_MICROAPP_BASE@,
-		._end   = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@,
-		._size  = @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@,
+		._start = ${FLASH_MICROAPP_BASE},
+		._end   = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_COUNT},
+		._size  = ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_COUNT},
 		._type  = MT_Flash,
 };
 
@@ -72,8 +73,8 @@ const struct MemorySection microappFlashSection = {
  * A single page after the microapp pages for DFU update procedures from one Crownstone to the next.
  */
 const struct MemorySection p2pDfuFlashSection = {
-		._start = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@,
-		._end = @FLASH_MICROAPP_BASE@ + @FLASH_MICROAPP_PAGES@ * CODE_PAGE_SIZE * @MICROAPP_COUNT@ + CODE_PAGE_SIZE,
+		._start = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_COUNT},
+		._end  = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_COUNT} + CODE_PAGE_SIZE,
 		._size = CODE_PAGE_SIZE,
 		._type = MT_Flash,
 };
@@ -84,14 +85,14 @@ const struct MemorySection p2pDfuFlashSection = {
  * The CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE reserves pages before FDS for possible expansion.
  */
 const struct MemorySection fdsExpansionFlashSection = {
-		._start = @BOOTLOADER_START_ADDRESS@
-				  - @CS_FDS_VIRTUAL_PAGES@
-							* -(@CS_FDS_VIRTUAL_PAGES@ + @CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER@
-								+ @CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE@),
-		._end = @BOOTLOADER_START_ADDRESS@
-				- (@CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER@ + @CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE@)
-						  * @CS_FDS_VIRTUAL_PAGE_SIZE@,
-		._size = @CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE@ * @CS_FDS_VIRTUAL_PAGE_SIZE@,
+		._start = ${BOOTLOADER_START_ADDRESS}
+				  - ${CS_FDS_VIRTUAL_PAGES}
+							* -(${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}
+								+ ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE}),
+		._end = ${BOOTLOADER_START_ADDRESS}
+				- (${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE})
+						  * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._size = ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE} * ${CS_FDS_VIRTUAL_PAGE_SIZE},
 		._type = MT_Flash,
 };
 
@@ -100,10 +101,10 @@ const struct MemorySection fdsExpansionFlashSection = {
  */
 const struct MemorySection fdsFlashSection = {
 		// Values should match the ones in components/libraries/fds/fds.c
-		._start = @BOOTLOADER_START_ADDRESS@
-				  - (@CS_FDS_VIRTUAL_PAGES@ + @CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER@) * @CS_FDS_VIRTUAL_PAGE_SIZE@,
-		._end  = @BOOTLOADER_START_ADDRESS@ - (@CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER@ * @CS_FDS_VIRTUAL_PAGE_SIZE@),
-		._size = @CS_FDS_VIRTUAL_PAGES@ * @CS_FDS_VIRTUAL_PAGE_SIZE@,
+		._start = ${BOOTLOADER_START_ADDRESS}
+				  - (${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}) * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._end  = ${BOOTLOADER_START_ADDRESS} - (${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER} * ${CS_FDS_VIRTUAL_PAGE_SIZE}),
+		._size = ${CS_FDS_VIRTUAL_PAGES} * ${CS_FDS_VIRTUAL_PAGE_SIZE},
 		._type = MT_Flash,
 };
 
@@ -112,9 +113,9 @@ const struct MemorySection fdsFlashSection = {
  * is required in the build process at a very early stage. The address has to be written in UICR for example.
  */
 const struct MemorySection bootloaderFlashSection = {
-		._start = @BOOTLOADER_START_ADDRESS@,
-		._end   = @BOOTLOADER_START_ADDRESS@ + @BOOTLOADER_LENGTH@,
-		._size  = @BOOTLOADER_LENGTH@,
+		._start = ${BOOTLOADER_START_ADDRESS},
+		._end   = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
+		._size  = ${BOOTLOADER_LENGTH},
 		._type  = MT_Flash,
 };
 
@@ -123,8 +124,8 @@ const struct MemorySection bootloaderFlashSection = {
  * upgradeability. For now just hardcoded to this 1 page.
  */
 const struct MemorySection bootloaderExpansionFlashSection = {
-		._start = @BOOTLOADER_START_ADDRESS@ + @BOOTLOADER_LENGTH@,
-		._end   = @BOOTLOADER_START_ADDRESS@ + @BOOTLOADER_LENGTH@ + CODE_PAGE_SIZE,
+		._start = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
+		._end   = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH} + CODE_PAGE_SIZE,
 		._size  = CODE_PAGE_SIZE,
 		._type  = MT_Flash,
 };
@@ -134,8 +135,8 @@ const struct MemorySection bootloaderExpansionFlashSection = {
  */
 const struct MemorySection mbrSettingsFlashSection = {
 		// The size of mbr settings is at minimum one page: CODE_PAGE_SIZE
-		._start = @CS_MBR_PARAMS_PAGE_ADDRESS@,
-		._end   = @CS_MBR_PARAMS_PAGE_ADDRESS@ + CODE_PAGE_SIZE,
+		._start = ${CS_MBR_PARAMS_PAGE_ADDRESS},
+		._end   = ${CS_MBR_PARAMS_PAGE_ADDRESS} + CODE_PAGE_SIZE,
 		._size  = CODE_PAGE_SIZE,
 		._type  = MT_Flash,
 };
@@ -148,11 +149,11 @@ const struct MemorySection mbrSettingsFlashSection = {
  */
 const struct MemorySection bootloaderSettingsFlashSection = {
 		// The size of bootloader settings is at minimum one page: CODE_PAGE_SIZE
-		._start = @CS_BOOTLOADER_SETTINGS_ADDRESS@,
-		._end   = @CS_BOOTLOADER_SETTINGS_ADDRESS@ + CODE_PAGE_SIZE,
+		._start = ${CS_BOOTLOADER_SETTINGS_ADDRESS},
+		._end   = ${CS_BOOTLOADER_SETTINGS_ADDRESS} + CODE_PAGE_SIZE,
 		._size  = CODE_PAGE_SIZE,
 		._type  = MT_Flash,
-		// bootloader settings backup address: @BOOTLOADER_SETTINGS_BACKUP_ADDRESS@
+		// bootloader settings backup address: ${BOOTLOADER_SETTINGS_BACKUP_ADDRESS}
 };
 
 /**
@@ -160,8 +161,8 @@ const struct MemorySection bootloaderSettingsFlashSection = {
  */
 const struct MemorySection softdeviceRamSection = {
 		._start = 0x00,
-		._end   = @RAM_R1_BASE@,
-		._size  = @RAM_R1_BASE@,
+		._end   = ${RAM_R1_BASE},
+		._size  = ${RAM_R1_BASE},
 		._type  = MT_Flash,
 };
 
@@ -169,26 +170,26 @@ const struct MemorySection softdeviceRamSection = {
  * The amount of memory available to bluenet (at the end there's memory set aside for the microapps and IPC).
  */
 const struct MemorySection bluenetRamSection = {
-		._start = @RAM_R1_BASE@,
-		._end   = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@
-				- (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@),
-		._size = @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@ - (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@),
+		._start = ${RAM_R1_BASE},
+		._end   = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH}
+				- (${RAM_MICROAPP_AMOUNT} * ${MICROAPP_COUNT}),
+		._size = ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH} - (${RAM_MICROAPP_AMOUNT} * ${MICROAPP_COUNT}),
 		._type = MT_Ram,
 };
 
 const struct MemorySection microappRamSection = {
-		._start = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@
-				  - (@RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@),
-		._end  = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@,
-		._size = @RAM_MICROAPP_AMOUNT@ * @MICROAPP_COUNT@,
+		._start = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH}
+				  - (${RAM_MICROAPP_AMOUNT} * ${MICROAPP_COUNT}),
+		._end  = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH},
+		._size = ${RAM_MICROAPP_AMOUNT} * ${MICROAPP_COUNT},
 		._type = MT_Ram,
 };
 
 const struct MemorySection ipcRamSection = {
 		// Values should match the ones in generic_gcc_nrf52.ld
-		._start = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@,
-		._end   = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@,
-		._size  = @RAM_BLUENET_IPC_LENGTH@,
+		._start = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH},
+		._end   = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT},
+		._size  = ${RAM_BLUENET_IPC_LENGTH},
 		._type  = MT_Ram,
 };
 
@@ -198,9 +199,8 @@ const struct MemorySection ipcRamSection = {
  */
 const struct MemorySection bootloaderRamSection = {
 		// Values should match the ones in bootloader/secure_bootloader_gcc_nrf52.ld
-		._start = @RAM_R1_BASE@ + @RAM_BOOTLOADER_START_OFFSET@,
-		._end   = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@,
-		._size  = @RAM_APPLICATION_AMOUNT@ - (@RAM_BOOTLOADER_START_OFFSET@ + @RAM_BLUENET_IPC_LENGTH@),
+		._start = ${RAM_R1_BASE} + ${RAM_BOOTLOADER_START_OFFSET},
+		._end   = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH},
+		._size  = ${RAM_APPLICATION_AMOUNT} - (${RAM_BOOTLOADER_START_OFFSET} + ${RAM_BLUENET_IPC_LENGTH}),
 		._type  = MT_Ram,
 };
-

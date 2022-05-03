@@ -294,7 +294,7 @@ This can be fixed by installing pip2, removing nrfutil from pip3, and installing
 ## Maintainers
 
 Not for everyday users, just for maintainers of this code base, there are more options.
-A few of the options are described in the [Build System](BUILD_SYSTEM.md) document.
+A few of the options are described in the [Build System](development_environment/BUILD_SYSTEM.md) document.
 
 There are a few other options which can be found as well by typing `make`, a space and then TAB. Some examples:
 

@@ -332,19 +332,23 @@ MESSAGE(STATUS "Set bootloader build type: ${BOOTLOADER_BUILD_TYPE}")
 message(STATUS "Bootloader version: ${BOOTLOADER_VERSION_MAJOR}")
 
 message(STATUS "bootloader: Configure nrf_symbols.ld file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
 
 message(STATUS "bootloader: Configure cs_BootloaderConfig.cpp file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 
 message(STATUS "bootloader: Configure cs_SharedConfig.cpp file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
 
 message(STATUS "bootloader: Configure cs_config.h file")
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h" @ONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h")
+
+message(STATUS "bootloader: Generate cs_MemoryLayout.h")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_MemoryLayout.h.in" "${CMAKE_CURRENT_BINARY_DIR}/bootloader/cs_MemoryLayout.h")
+
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${GENERATED_SOURCES})
 

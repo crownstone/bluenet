@@ -47,10 +47,10 @@ Hence, it is inverting (OUT is almost directly coupled to the gates of the IGBTs
 ## Files to be adjusted
 
 in order to add a new board you need to alter multiple files. These are:
-* [cs_Boards.h](../include/cfg/cs_Boards.h)
-* [cs_Boards.c](../src/cfg/cs_Boards.c)
-* [cs_HardwareVersions.h](../include/cfg/cs_HardwareVersions.h)
-* [CMakeBuild.config.default](../conf/cmake/CMakeBuild.config.default)
+* [cs_Boards.h](../source/include/cfg/cs_Boards.h)
+* [cs_Boards.c](../source/src/cfg/cs_Boards.c)
+* [cs_HardwareVersions.h](../source/include/cfg/cs_HardwareVersions.h)
+* [CMakeBuild.config.default](../source/conf/cmake/CMakeBuild.config.default)
 
 ### cs_Boards.h
 

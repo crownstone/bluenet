@@ -5,7 +5,7 @@ This only documents the latest protocol, older versions can be found in the git 
 
 ## Message types
 
-![Crownstone mesh message](../docs/diagrams/crownstone-mesh-message.png)
+![Crownstone mesh message](../diagrams/crownstone-mesh-message.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -44,7 +44,7 @@ id | name | Payload | Result data
 ## Packet descriptors
 
 #### cs_mesh_model_msg_test_t
-![Time](../docs/diagrams/mesh_message_test.png)
+![Time](../diagrams/mesh_message_test.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -53,7 +53,7 @@ uint8_t[3] | Dummy | 3 |
 
 
 #### cs_mesh_model_msg_time_t
-![Time](../docs/diagrams/mesh_message_time.png)
+![Time](../diagrams/mesh_message_time.png)
 
 When a Crownstone receives this message over the mesh, it will synchronize the whole mesh
 to the given value. Behaviour is identical to the [set time command](PROTOCOL.md#command-types)
@@ -65,7 +65,7 @@ uint32_t | Timestamp | 4 | posix time stamp
 
 #### cs_mesh_model_msg_profile_location_t
 
-![profile location](../docs/diagrams/mesh_profile_location.png)
+![profile location](../diagrams/mesh_profile_location.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -75,7 +75,7 @@ uint8_t | Location | 1 |
 
 #### cs_mesh_model_msg_state_0_t
 
-![model state 0](../docs/diagrams/mesh_model_state_0.png)
+![model state 0](../diagrams/mesh_model_state_0.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -88,7 +88,7 @@ uint16_t | Partial timestamp | 2 |
 
 #### cs_mesh_model_msg_state_1_t
 
-![model state 1](../docs/diagrams/mesh_model_state_1.png)
+![model state 1](../diagrams/mesh_model_state_1.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -99,7 +99,7 @@ uint16 | Partial timestamp | 2 |
 
 #### cs_mesh_model_msg_multi_switch_item_t
 
-![multi switch item](../docs/diagrams/mesh_multi_switch_item.png)
+![multi switch item](../diagrams/mesh_multi_switch_item.png)
 
 Type     | Name | Length | Description
 ---      | --- | --- | ---
@@ -111,7 +111,7 @@ cmd_source_with_counter_t | Source | 3 |
 
 #### cs_mesh_model_msg_device_register_t
 
-![register device](../docs/diagrams/mesh_register_device.png)
+![register device](../diagrams/mesh_register_device.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -125,7 +125,7 @@ uint8_t | Access level | 1 |
 
 #### cs_mesh_model_msg_device_token_t
 
-![device token](../docs/diagrams/mesh_device_token.png)
+![device token](../diagrams/mesh_device_token.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -136,7 +136,7 @@ uint16_t | TTL minutes | 2 |
 
 #### cs_mesh_model_msg_device_heartbeat_t
 
-![device heartbeat](../docs/diagrams/mesh_device_heartbeat.png)
+![device heartbeat](../diagrams/mesh_device_heartbeat.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -148,7 +148,7 @@ uint8_t | TTL minutes | 1 |
 
 #### cs_mesh_model_msg_device_list_size_t
 
-![device list](../docs/diagrams/mesh_device_list_size.png)
+![device list](../diagrams/mesh_device_list_size.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -157,7 +157,7 @@ uint8_t | List size | 1 | Size of tracked devices list.
 
 #### cs_mesh_model_msg_sync_request_t
 
-![sync request](../docs/diagrams/mesh_sync_request.png)
+![sync request](../diagrams/mesh_sync_request.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -178,7 +178,7 @@ Bit | Name |  Description
 
 #### cs_mesh_model_msg_state_set
 
-![state set](../docs/diagrams/mesh_state_set.png)
+![state set](../diagrams/mesh_state_set.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -188,7 +188,7 @@ uint8_t[] | Payload | N | Payload data, depends on state type.
 
 #### cs_mesh_model_msg_state_header_ext_t
 
-![state header](../docs/diagrams/mesh_state_header_ext.png)
+![state header](../diagrams/mesh_state_header_ext.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -199,7 +199,7 @@ uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 2=INTERNAL, 3=
 
 #### cs_mesh_model_msg_state_header_t
 
-![state header ext](../docs/diagrams/mesh_state_header.png)
+![state header ext](../diagrams/mesh_state_header.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
@@ -234,7 +234,7 @@ uint16_t | Command type | 2 | [Command type](PROTOCOL.md#command-types).
 
 #### high_resolution_time_stamp_t
 
-![High resolution time stamp](../docs/diagrams/high_resolution_time_stamp.png)
+![High resolution time stamp](../diagrams/high_resolution_time_stamp.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -243,7 +243,7 @@ uint16_t | posix_ms, version | 2 | bits 0-9: milliseconds passed since posix_s. 
 
 #### cs_mesh_model_msg_time_sync_message_t
 
-![Time sync message](../docs/diagrams/time_sync_message_t.png)
+![Time sync message](../diagrams/time_sync_message_t.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -268,7 +268,7 @@ uint32_t | Master CRC | 4 | [Master CRC](ASSET_FILTERING.md#master-crc).
 
 ### Asset MAC report
 
-![asset MAC report](../docs/diagrams/mesh_asset_report_mac.png)
+![asset MAC report](../diagrams/mesh_asset_report_mac.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -277,7 +277,7 @@ uint8[] | MAC | 6    | The MAC address of the asset.
 
 ### RSSI and channel
 
-![RSSI and channel packet](../docs/diagrams/rssi_and_channel_packet.png)
+![RSSI and channel packet](../diagrams/rssi_and_channel_packet.png)
 
 Type | Name | Length in bits | Description
 ---- | ---- | -------------- | -----------
@@ -286,7 +286,7 @@ uint8 | RSSI halved | 6      | RSSI / -2, or 0 if RSSI is positive.
 
 ### Asset ID report
 
-![Asset ID report](../docs/diagrams/mesh_asset_report_id.png)
+![Asset ID report](../diagrams/mesh_asset_report_id.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -318,7 +318,7 @@ uint8_t | Message number | 1 | Message number that increases by 1 each time this
 
 #### cs_mesh_model_msg_result
 
-![state set](../docs/diagrams/mesh_result.png)
+![state set](../diagrams/mesh_result.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -328,7 +328,7 @@ uint8_t[] | Payload | N | Payload data, depends on result type.
 
 #### cs_mesh_model_msg_result_header_t
 
-![result header](../docs/diagrams/mesh_result_header.png)
+![result header](../diagrams/mesh_result_header.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---

@@ -1,7 +1,7 @@
 # Mesh
 
 The bluenet firmware supports Bluetooth Mesh. On top of Bluetooth Mesh (spec, [pdf](https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=457092)) we have defined a protocol, which can be found
-[here](MESH_PROTOCOL.md).
+[here](protocol/MESH_PROTOCOL.md).
 
 Bluetooth mesh uses **flooding**. Each node broadcasts to all its neighbouring nodes. All authenticated network packets
 it receives (and that are not in the message cache) are retransmitted with a time-to-live (TTL) counter that is
@@ -141,7 +141,7 @@ uint8 | TransMIC | 32 | Transport Message Integrity Check (4 bytes)
 
 There are 64 bits for the message (8 bytes).
 
-The [protocol](MESH_PROTOCOL.md) uses one byte for the message type which leaves 7 bytes for contents to be communicated
+The [protocol](protocol/MESH_PROTOCOL.md) uses one byte for the message type which leaves 7 bytes for contents to be communicated
 over the mesh. Note that this not contain versioning. From the first byte starting with `11` we might use the remaining six to do versioning later on.
 
 ## Radio access
@@ -159,7 +159,7 @@ We use actually a clone of the implementation on the Bluetooth Mesh by Nordic (s
 radio for incoming advertisements. Active scanning means that the firmware asks for more information in the form of
 a **scan response request** and gets this information as a **scan response**.
 
-Over the course of time broadcasts of advertisements on iOS are moving more and more data into scan responses. First, when having apps running in the background, but this might be now the case for apps running in the foreground as well. This is why those **scan response requests** are important to send out. The details of this can be found in the [broadcast protocol](BROADCAST_PROTOCOL.md).
+Over the course of time broadcasts of advertisements on iOS are moving more and more data into scan responses. First, when having apps running in the background, but this might be now the case for apps running in the foreground as well. This is why those **scan response requests** are important to send out. The details of this can be found in the [broadcast protocol](protocol/BROADCAST_PROTOCOL.md).
 
 Similarly, it has **advertiser(s)** implemented as well. We do use both the ordinary advertiser in the nRF5 SDK and
 the advertiser in the mesh.
@@ -221,7 +221,7 @@ iBeacon major or minor updates.
 ## Background
 
 For more background on the data structures defined for our advertisements and scan responses see our
-[protocol](PROTOCOL.md) and [service data](SERVICE_DATA.md) documents. As a quick reminder these are the possible
+[protocol](protocol/PROTOCOL.md) and [service data](protocol/SERVICE_DATA.md) documents. As a quick reminder these are the possible
 data types for advertisement (AD) or scan response (SRD) payloads (see also [bluetooth sig](https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile/)):
 
 value | type

@@ -19,20 +19,20 @@ extern "C" {
 #endif
 
 // Microapp ram is located before IPC ram.
-const uintptr_t g_RAM_MICROAPP_END = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@;
+const uintptr_t g_RAM_MICROAPP_END = ${RAM_R1_BASE} + ${RAM_APPLICATION_AMOUNT} - ${RAM_BLUENET_IPC_LENGTH};
 
 /**
  * Buffer size that is used for characteristics that the user reads from.
  */
-const uint16_t g_CS_CHAR_READ_BUF_SIZE = @MASTER_BUFFER_SIZE@;
+const uint16_t g_CS_CHAR_READ_BUF_SIZE = ${MASTER_BUFFER_SIZE};
 
 /**
  * Buffer size that is used for characteristics that the user writes to.
  */
-const uint16_t g_CS_CHAR_WRITE_BUF_SIZE = @MASTER_BUFFER_SIZE@;
+const uint16_t g_CS_CHAR_WRITE_BUF_SIZE = ${MASTER_BUFFER_SIZE};
 
 
-const uint16_t g_ADVERTISEMENT_INTERVAL = @ADVERTISEMENT_INTERVAL@;
+const uint16_t g_ADVERTISEMENT_INTERVAL = ${ADVERTISEMENT_INTERVAL};
 
 
 #ifdef __cplusplus

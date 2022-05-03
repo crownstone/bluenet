@@ -59,7 +59,7 @@ There are also a bundle of more or less optional tools.
 One of the convenient optional tools from Nordic is the Nordic nrf connect tool.
 It reads out how the memory layout is implemented and displays this in a very nice way (see Figure).
 
-![Nordic Tools](images/pc_nordic_tools.png)
+![Nordic Tools](../images/pc_nordic_tools.png)
 
 You can enable the download of `nrfconnect` by:
 
