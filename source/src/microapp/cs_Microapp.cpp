@@ -99,7 +99,7 @@ void Microapp::loadState(uint8_t index) {
 /*
  * Validate the app.
  *
- * First return a possible error of an incorrect checksum. Only then return when there is no proper state information 
+ * First return a possible error of an incorrect checksum. Only then return when there is no proper state information
  * available. This means that it can be used when AUTO_ENABLE_MICROAPP_ON_BOOT is set.
  */
 cs_ret_code_t Microapp::validateApp(uint8_t index) {

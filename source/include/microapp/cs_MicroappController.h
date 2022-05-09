@@ -43,7 +43,7 @@ struct microapp_ble_isr_t {
  */
 struct watchdog_data_t {
 	uint8_t flags;
-	uint8_t appIndex;
+	uint8_t appRunning[MAX_MICROAPPS];
 };
 
 enum class MicroappWatchdogFlags {

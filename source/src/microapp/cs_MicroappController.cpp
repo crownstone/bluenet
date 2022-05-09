@@ -197,7 +197,9 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 
 	_watchdogData                               = new uint8_t[_watchdogDataLength];
 	((watchdog_data_t*)_watchdogData)->flags    = (uint8_t)MicroappWatchdogFlags::CS_WATCHDOG_MICROAPP_BUILD;
-	((watchdog_data_t*)_watchdogData)->appIndex = -1;
+	for (int i = 0; i < MAX_MICROAPPS; ++i) {
+		((watchdog_data_t*)_watchdogData)->appRunning[i] = 0;
+	}
 
 	LOGi("Microapp end is at %p", microappRamSection._end);
 }
@@ -277,7 +279,8 @@ bool MicroappController::watchdogTriggered(uint8_t appIndex) {
 	if (wdt->flags != (uint8_t)MicroappWatchdogFlags::CS_WATCHDOG_MICROAPP_BUILD) {
 		return false;
 	}
-	if (wdt->appIndex != appIndex) {
+	// check if microapp was running
+	if (wdt->appRunning[appIndex] == 1) {
 		return false;
 	}
 	return true;
@@ -294,7 +297,7 @@ void MicroappController::callApp(uint8_t appIndex) {
 
 	initMemory(appIndex);
 
-	((watchdog_data_t*)_watchdogData)->appIndex = appIndex;
+	((watchdog_data_t*)_watchdogData)->appRunning[appIndex] = 1;
 
 	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
 	LOGi("Microapp: start at %p", address);
