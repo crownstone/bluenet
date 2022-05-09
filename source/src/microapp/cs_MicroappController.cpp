@@ -16,6 +16,7 @@
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
 #include <drivers/cs_Storage.h>
+#include <drivers/cs_Watchdog.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
@@ -192,6 +193,12 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 		_bleIsr[i].id = 0;
 	}
 
+	_watchdogDataLength = sizeof(watchdog_data_t);
+
+	_watchdogData                               = new uint8_t[_watchdogDataLength];
+	((watchdog_data_t*)_watchdogData)->flags    = (uint8_t)MicroappWatchdogFlags::CS_WATCHDOG_MICROAPP_BUILD;
+	((watchdog_data_t*)_watchdogData)->appIndex = -1;
+
 	LOGi("Microapp end is at %p", microappRamSection._end);
 }
 
@@ -256,6 +263,27 @@ uint16_t MicroappController::initMemory(uint8_t appIndex) {
 }
 
 /*
+ * Get from RAM in IPC section information on watchdog being triggered or not.
+ */
+bool MicroappController::watchdogTriggered(uint8_t appIndex) {
+	uint8_t dataSize = sizeof(watchdog_data_t);
+	uint8_t data[dataSize];
+	Watchdog::getOperatingStateOfPreviousTimeout(data, dataSize);
+	LOGi("Watchdog data: %i %i", data[0], data[1]);
+	if (dataSize != sizeof(watchdog_data_t)) {
+		return false;
+	}
+	watchdog_data_t *wdt = (watchdog_data_t*)data;
+	if (wdt->flags != (uint8_t)MicroappWatchdogFlags::CS_WATCHDOG_MICROAPP_BUILD) {
+		return false;
+	}
+	if (wdt->appIndex != appIndex) {
+		return false;
+	}
+	return true;
+}
+
+/*
  * Gets the first instruction for the microapp (this is written in its header). We correct for thumb and check its
  * boundaries. Then we call it from a coroutine context and expect it to yield.
  *
@@ -265,6 +293,8 @@ void MicroappController::callApp(uint8_t appIndex) {
 	LOGi("Call microapp #%i", appIndex);
 
 	initMemory(appIndex);
+
+	((watchdog_data_t*)_watchdogData)->appIndex = appIndex;
 
 	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
 	LOGi("Microapp: start at %p", address);
@@ -476,11 +506,15 @@ void MicroappController::softInterrupt() {
 }
 
 /*
- * We resume the previously started coroutine.
+ * We resume the previously initialized or yielded coroutine.
+ * We set watchdog information just before the call to nextCoroutine() which is at the last spot before the microapp
+ * gets resumed.
  */
 void MicroappController::callMicroapp() {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
+	Watchdog::setOperatingStateToWriteOnTimeout(_watchdogData, _watchdogDataLength);
 	if (nextCoroutine()) {
+		Watchdog::clearOperatingStateToWriteOnTimeout();
 		return;
 	}
 #else
