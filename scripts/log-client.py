@@ -46,7 +46,7 @@ argParser.add_argument('--verbose',
                        action='store_true',
                        help='Show verbose output')
 argParser.add_argument('--noise',
-                       '-r',
+                       '-n',
                        dest="noise",
                        action='store_true',
                        help='Show uart noise output (plaintext data may be eaten by the binary protocol if containing one of: @~\\)')
