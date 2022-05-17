@@ -587,11 +587,19 @@ add_custom_target(increment_application_version
 set(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
 set(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
+if(NRF_DEVICE STREQUAL "NRF52832_XXAA")
+	set(NRFUTIL_FAMILY "NRF52")
+elseif(NRF_DEVICE STREQUAL "NRF52840_XXAA")
+	set(NRFUTIL_FAMILY "NRF52840")
+else()
+	message(FATAL "Do not know what family this is for the nrfutil utility")
+endif()
+
 add_custom_target(build_bootloader_settings
 	COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 	COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 	COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-	COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
+	COMMAND nrfutil settings generate --family ${NRFUTIL_FAMILY} --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
 	COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 	COMMENT "Create bootloader settings"
