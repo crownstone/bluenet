@@ -19,8 +19,8 @@ MEMORY
   FLASH (rx) : ORIGIN = BOOTLOADER_START_ADDRESS, LENGTH = BOOTLOADER_LENGTH
   RAM (rwx) :  ORIGIN = RAM_START, LENGTH = RAM_LENGTH
   RAM_BLUENET_IPC (rwx): ORIGIN = RAM_BLUENET_IPC_START, LENGTH = RAM_BLUENET_IPC_LENGTH
-  mbr_params_page (r) : ORIGIN = 0x0007E000, LENGTH = 0x1000
-  bootloader_settings_page (r) : ORIGIN = 0x0007F000, LENGTH = 0x1000
+  mbr_params_page (r) : ORIGIN = 0x000FE000, LENGTH = 0x1000
+  bootloader_settings_page (r) : ORIGIN = 0x000FF000, LENGTH = 0x1000
   uicr_mbr_params_page (r) : ORIGIN = 0x10001018, LENGTH = 0x4
   uicr_bootloader_start_address (r) : ORIGIN = 0x10001014, LENGTH = 0x4
 }
