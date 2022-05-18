@@ -10,6 +10,7 @@
 #include <cfg/cs_AutoConfig.h>
 #include <drivers/cs_Uicr.h>
 #include <protocol/cs_UicrPacket.h>
+#include <stdio.h>
 
 //#ifdef __cplusplus
 //extern "C" {
@@ -53,6 +54,8 @@
 static inline const char* get_hardware_version() {
 
 	uint32_t hardwareBoard = getHardwareBoard();
+
+	// TODO: get hardware version from UICR data.
 
 	// Can't use LOGe here, as the bootloader also uses this file.
 

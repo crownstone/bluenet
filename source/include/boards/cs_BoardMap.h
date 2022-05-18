@@ -7,16 +7,21 @@
 
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_DeviceTypes.h>
 #include <protocol/cs_UicrPacket.h>
 #include <stdint.h>
 
-cs_uicr_data_t getUicrData(uint32_t boardVersion) {
+static cs_uicr_data_t getUicrData(uint32_t boardVersion) {
 	cs_uicr_data_t data = {
 			.board = boardVersion,
-			.productRegionFamily.fields.reserved = 0xFF,
-			.majorMinorPatch.fields.reserved = 0xFF,
-			.productionDateHousing.fields.reserved = 0xFF,
+			.productRegionFamily = { .asInt = 0xFFFFFFFF },
+			.majorMinorPatch = { .asInt = 0xFFFFFFFF },
+			.productionDateHousing = { .asInt = 0xFFFFFFFF },
 	};
 	switch (boardVersion) {
 		case ACR01B1A: {
@@ -259,3 +264,6 @@ cs_uicr_data_t getUicrData(uint32_t boardVersion) {
 	return data;
 }
 
+#ifdef __cplusplus
+}
+#endif
