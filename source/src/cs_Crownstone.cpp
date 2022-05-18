@@ -141,22 +141,28 @@ void overwrite_hardware_version() {
 
 /** Enable NFC pins to be used as GPIO.
  *
- * Warning: this is stored in UICR, so it's persistent.
+ * The address 0x10001000 + 0x20C contains 32 bits of which the least significant bit can be either zero or one.
+ * If it is 1 the pins operates as NFC antenna pins. It configures the protection for NFC operation.
+ * If it is 0 the pins can be used as GPIO.
+ *
+ * Warning: This is stored in UICR, so it's persistent.
  * Warning: NFC pins leak a bit of current when not at same voltage level.
+ * Warning: This might already have been done by the bootloader (has the same function).
  */
-void enableNfcPins() {
-	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+void enableNfcPinsAsGpio() {
+	uint32_t nfcbit = NRF_UICR->NFCPINS & 0x1;
+	if (nfcbit != 0) {
+		nrf_nvmc_write_word((uint32_t) & (NRF_UICR->NFCPINS), 0xFFFFFFFE);
 	}
 }
 
 void printNfcPins() {
-	uint32_t val = NRF_UICR->NFCPINS;
-	if (val == 0) {
-		LOGd("NFC pins enabled (%p)", val);
+	uint32_t nfcbit = NRF_UICR->NFCPINS & 0x1;
+	if (nfcbit == 1) {
+		LOGd("NFC pins enabled as GPIO");
 	}
 	else {
-		LOGd("NFC pins disabled (%p)", val);
+		LOGd("NFC pins disabled as GPIO");
 	}
 }
 
@@ -198,7 +204,7 @@ Crownstone::Crownstone(boards_config_t& board)
 	_commandHandler    = &CommandHandler::getInstance();
 	_factoryReset      = &FactoryReset::getInstance();
 
-	_scanner = &Scanner::getInstance();
+	_scanner           = &Scanner::getInstance();
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
@@ -983,10 +989,10 @@ int main() {
 	// Init GPIO pins early in the process!
 
 	if (board.flags.usesNfcPins) {
-		enableNfcPins();
+		enableNfcPinsAsGpio();
 	}
 
-//	if (IS_CROWNSTONE(board.deviceType)) {
+	//	if (IS_CROWNSTONE(board.deviceType)) {
 	// Turn dimmer off.
 	if (board.pinDimmer != PIN_NONE) {
 		nrf_gpio_cfg_output(board.pinDimmer);
@@ -1012,7 +1018,7 @@ int main() {
 		nrf_gpio_cfg_output(board.pinRelayOn);
 		nrf_gpio_pin_clear(board.pinRelayOn);
 	}
-//	}
+	//	}
 
 	if (board.flags.enableUart) {
 		initUart(board.pinRx, board.pinTx);
