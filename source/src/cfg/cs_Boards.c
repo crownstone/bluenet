@@ -83,6 +83,7 @@ void init(boards_config_t* config) {
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;
 	config->flags.usesNfcPins                  = false;
+	config->flags.hasAccuratePowerMeasurement  = false;
 	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
 	config->flags.dimmerOnWhenPinsFloat        = true;
