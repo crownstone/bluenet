@@ -30,12 +30,12 @@ void writeHardwareBoard() {
 
 void enableNfcPinsAsGpio() {
 	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0xFFFFFFFE);
 	}
 }
 
 bool canUseNfcPinsAsGpio() {
-	return NRF_UICR->NFCPINS;
+	return NRF_UICR->NFCPINS & 1 == 0;
 }
 
 
