@@ -182,9 +182,9 @@ elseif(INSTRUCTION STREQUAL "WRITE_BINARY")
 	# chiperase includes UICR (but cannot be used in a sequence for bootloader, softdevice, and firmware)
 	#set(ERASE_OPTION "--chiperase") 
 	message(STATUS "Flashing ${BINARY} with erase option ${ERASE_OPTION}")
-	#message(STATUS "nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
+	message(STATUS "$> nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} --verify")
 	execute_process(
-		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} --verify
 		RESULT_VARIABLE status
 		OUTPUT_VARIABLE output
 		ERROR_VARIABLE error
