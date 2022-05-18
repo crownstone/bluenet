@@ -85,6 +85,8 @@ extern "C" {
 // Crownstone Plug One (first prototype of second edition of the plug)
 #define ACR01B11A            1505
 
+// Outlets
+#define CR01R02v4            1506
 
 #define PIN_NONE 0xFF
 

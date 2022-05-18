@@ -20,9 +20,12 @@
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One, 7 Builtin Two
+	  |  |  |--------------  Product Type
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
+	
+	Product type can be:
+	  1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One, 7 Builtin Two, 8 Outlet
 */
 
 /**
@@ -36,6 +39,8 @@
  *     - note, hardware patches come of course with a new UICR
  *   - in test and development it's easy to set/get UICR values (without firmware running)
  *     - we can check for firmware compatibility in the build system if there are multiple firmwares
+ *
+ * Do not use LOGx functions here! This function is also used by the bootloader.
  */
 static inline const char* get_hardware_version() {
 
@@ -44,17 +49,26 @@ static inline const char* get_hardware_version() {
 		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
 	}
 
-	// Can't use LOGe here, as the bootloader also uses this file.
-//	LOGi("UICR");
-//	CsUtils::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
-
 	switch (hardwareBoard) {
+		// CROWNSTONE PLUGS
+		case ACR01B2A: return "10102000100";
+		case ACR01B2B: return "10102000200";
+		case ACR01B2C: return "10102010000";
+		case ACR01B2E: return "10102010100";
+		case ACR01B2G: return "10102010300";
+
 		// CROWNSTONE BUILTINS
 		case ACR01B1A:  return "10103000100";
 		case ACR01B1B:  return "10103000200";
 		case ACR01B1C:  return "10103000300";
 		case ACR01B1D:  return "10103000400";
 		case ACR01B1E:  return "10103000500";
+
+		// GUIDESTONE
+		case GUIDESTONE: return "10104010000";
+
+		// CROWNSTONE USB DONGLE
+		case CS_USB_DONGLE: return "10105000000";
 
 		// CROWNSTONE BUILTIN ONES
 		case ACR01B10B: return "10106000000";
@@ -64,18 +78,8 @@ static inline const char* get_hardware_version() {
 		case ACR01B13B: return "10107000100";
 		case ACR01B15A: return "10107000200";
 
-		// CROWNSTONE PLUGS
-		case ACR01B2A: return "10102000100";
-		case ACR01B2B: return "10102000200";
-		case ACR01B2C: return "10102010000";
-		case ACR01B2E: return "10102010100";
-		case ACR01B2G: return "10102010300";
-
-		// GUIDESTONE
-		case GUIDESTONE: return "10104010000";
-
-		// CROWNSTONE USB DONGLE
-		case CS_USB_DONGLE: return "10105000000";
+		// OUTLETS
+		case CR01R02v4: return "10108000400";
 
 		// Nordic Boards
 		case PCA10036: return "PCA10036";
@@ -84,9 +88,6 @@ static inline const char* get_hardware_version() {
 		case PCA10056: return "PCA10056";
 
 		default: {
-			// Can't use LOGe here, as the bootloader also uses this file.
-//			LOGe("Failed to define version for hardware board");
-//			APP_ERROR_CHECK(1);
 			return "Unknown";
 		}
 	}

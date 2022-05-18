@@ -186,6 +186,9 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 		case ACR01B11A:
 			asACR01B11A(config);
 			break;
+		case CR01R02v4:
+			asCR01R02v4(config);
+			break;
 		case GUIDESTONE:
 			asGuidestone(config);
 			break;
