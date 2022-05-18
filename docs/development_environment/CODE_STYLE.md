@@ -82,6 +82,12 @@ Notes:
 - Use `uint16_t*` with no space in between (not `uint16_t *_data`). Do not declare multiple variables on one line (see below).
 - Assume C++ / g++ compiler in the sense that no `typedef` is required for the `struct` while still being able to pass it around as `func(a_packed_packet_t p)`.
 
+## Indents
+
+Indentation defaults can be found in <https://github.com/crownstone/bluenet/blob/master/source/.clang-format> as well:
+
+- Indent case statement within a switch block.
+
 ## Comments
 
 ### Function comments

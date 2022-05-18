@@ -122,21 +122,22 @@
 // <268435456=> 1000000 baud
 #define NRF_LOG_BACKEND_UART_BAUDRATE 61865984
 
-
 #define BLE_DB_DISCOVERY_ENABLED 1
 
 #define NRF_SDH_BLE_ENABLED 1
 #define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
 #define NRF_SDH_BLE_CENTRAL_LINK_COUNT 1
 
-// Though we can have 1 outgoing (central), and 1 incoming (peripheral) connection, we can't have them both at the same time, because we set total link count to 1.
-// This means we should stop connectable advertisements before connecting to a peripheral.
+// Though we can have 1 outgoing (central), and 1 incoming (peripheral) connection, we can't have them both at the same
+// time, because we set the total link count to 1. This means we should stop connectable advertisements before
+// connecting to a peripheral.
 #define NRF_SDH_BLE_TOTAL_LINK_COUNT 1
 
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh, see MESH_GATT_MTU_SIZE_MAX.
-//#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 72 // For microapps, we want a multiple of 4. Ok this doesn't make sense, as there's a L2CAP header of 3 bytes?
+// Advised by mesh, see MESH_GATT_MTU_SIZE_MAX.
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
+
 /**
  * For iOS, the absence of the service changed characteristic makes it always discover services.
  */
