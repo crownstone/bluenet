@@ -199,6 +199,7 @@ void Microapp::resetState(uint8_t index) {
 }
 
 void Microapp::resetTestState(uint8_t index) {
+	_states[index].watchdogTriggered = 0;
 	_states[index].checksumTest = MICROAPP_TEST_STATE_UNTESTED;
 	_states[index].memoryUsage = MICROAPP_TEST_STATE_UNTESTED;
 	_states[index].tryingFunction = MICROAPP_FUNCTION_NONE;
