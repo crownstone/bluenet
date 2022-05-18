@@ -5,7 +5,7 @@ E.g.:
 - This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
 - Commandline tools such as `python3 -m pip install clang-format` are also available.
 
-Investigate the `source/.clang-format` file for more formatting details, a few:
+Investigate the `source/.clang-format` (<https://github.com/crownstone/bluenet/blob/master/source/.clang-format>) file for more formatting details, a few:
 
 - align subsequent assignments on the `=` token
 - column limit at 120
@@ -17,6 +17,17 @@ Investigate the `source/.clang-format` file for more formatting details, a few:
 - no implicit cast operators
 - give names to functions
 - don't init structs like: { 9, true, 3 }
+
+# Role of formatter
+
+The current state of the code does not adhere to the formatter everywhere. The code will be cleaned up over time.
+The goal is to be able to run the formatter over each file without having it changing any whitespace.
+That means it is possible to concentrate on functional changes.
+Hence, always run the formatter before committing. Also, if the formatter makes something less readible, adjust the
+code slightly. Some examples of making it easier for the formatter:
+
+- Use curly brackets for each case in a switch block.
+- Do not add `/******** *******/` or other kind of decorations to delineate code sections.
 
 # Code
 
