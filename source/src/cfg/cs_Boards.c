@@ -46,6 +46,7 @@
 #include <boards/cs_PCA10040.h>
 #include <boards/cs_PCA10056.h>
 #include <boards/cs_UsbDongle.h>
+#include <boards/cs_CR01R02v4.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
