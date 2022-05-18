@@ -33,7 +33,6 @@
  *    - ACR01B15A, the Crownstone Built-in Two
  */
 
-#include <ble/cs_Nordic.h>
 #include <boards/cs_ACR01B10B.h>
 #include <boards/cs_ACR01B10D.h>
 #include <boards/cs_ACR01B11A.h>
@@ -49,7 +48,6 @@
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
-#include <nrf_error.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <boards/cs_BoardMap.h>
 #include <protocol/cs_UicrPacket.h>
@@ -145,9 +143,11 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor) {
 }
 
 cs_ret_code_t configure_board(boards_config_t* config) {
-
 	uint32_t hardwareBoard = getHardwareBoard();
+	return configure_board_from_hardware_board(hardwareBoard, config);
+}
 
+cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards_config_t* config) {
 	init(config);
 
 	switch(hardwareBoard) {
@@ -213,6 +213,7 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 
 	config->hardwareBoard = hardwareBoard;
 
+	// TODO: configure board from uicr instead of hardware board.
 	cs_uicr_data_t uicrData = getUicrData(hardwareBoard);
 
 	// Try to set uicr data, in case it's not set yet.
