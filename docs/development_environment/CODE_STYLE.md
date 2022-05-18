@@ -28,6 +28,8 @@ code slightly. Some examples of making it easier for the formatter:
 
 - Use curly brackets for each case in a switch block.
 - Do not add `/******** *******/` or other kind of decorations to delineate code sections.
+- Do not use trailing comments, they are a pain to align. Just explain code with comments before that code.
+- Remove code that is not in use. There should be no commented code. Eventually place it within a preprocessor clause, but be careful not to introduce code rot in case those preprocessor defines are never compiled for. Refer eventually in a comment to an older commit if a reference to unused code will be important in the future.
 
 # Code
 
