@@ -31,7 +31,7 @@
  *   + The second button is set to the touch sensor
  *
  * It's easy to test with a microapp. That doesn't require changing code in the firmware itself.
- * In a microapp first set GPIO1 (P1.00) to true and start listening to BUTTON2 (P0.08).
+ * In a microapp first set pinGpio[0] or (P1.00) to true and start listening to BUTTON2 (P0.08).
  *
  * The shutter is placed on pinGpio[1].
  *
@@ -42,12 +42,13 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinDimmer                       = PIN_NONE;
 	config->pinRelayOn                      = 12;
 	config->pinRelayOff                     = 11;
-	config->pinAinCurrent[GAIN_LOW]         = GpioToAin(0);
-	config->pinAinCurrent[GAIN_HIGH]        = GpioToAin(1);
-	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(6);
-	config->pinAinZeroRef                   = GpioToAin(3);
-	config->pinAinEarth                     = GpioToAin(5);
-	config->pinAinDimmerTemp                = PIN_NONE;
+	config->pinAinCurrent[GAIN_LOW]         = GpioToAin(2);
+	config->pinAinCurrent[GAIN_HIGH]        = GpioToAin(3);
+	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(30);
+	config->pinAinZeroRef                   = GpioToAin(5);
+	config->pinAinEarth                     = GpioToAin(29);
+	// config->pinAinDimmerTemp                = PIN_NONE;
+	config->pinAinDimmerTemp                = GpioToAin(4);
 
 	config->pinRx                           = 9;
 	config->pinTx                           = 10;
@@ -57,7 +58,7 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinGpio[2]                      = GetGpioPin(1, 8);
 	config->pinGpio[3]                      = GetGpioPin(1, 9);
 
-	config->pinButton[0]                    = 11;
+	config->pinButton[0]                    = PIN_NONE;
 	config->pinButton[1]                    = 8;
 	config->pinButton[2]                    = 24;
 	config->pinButton[3]                    = 25;

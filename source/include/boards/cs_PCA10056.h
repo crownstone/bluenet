@@ -63,6 +63,9 @@ void asPca10056(boards_config_t* config) {
 	config->pinButton[2]                    = 24;
 	config->pinButton[3]                    = 25;
 
+	// Overwrite GPIO 0 with the same one as outlet
+	config->pinGpio[0]                      = GetGpioPin(1, 0);
+
 	// The fourth LED is used to indicate the state of the dimmer
 	config->pinLed[0]                       = 13;
 	config->pinLed[1]                       = 14;
