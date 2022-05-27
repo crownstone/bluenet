@@ -223,6 +223,9 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 }
 
 cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_config_t* config) {
+	init(config);
+	config->hardwareBoard = uicrData->board;
+
 	switch (uicrData->productRegionFamily.fields.productType) {
 		case PRODUCT_DEV_BOARD:
 			asPca10040(config);
