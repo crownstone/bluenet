@@ -2,39 +2,45 @@
 
 Information and decisions with respect to memory on the Crownstone (both flash and ram).
 
-## Memory layout
+To manage flash, bluenet makes use of the persistent storage manager (`fstorage` and `fds`) from the Nordic SDK.
+
+## Memory layout on the nRF52832
+
+The nRF52832 QFAA variant has 512 kB flash and 64 kB RAM. An individual page is 4 kB (`0x1000` in hex), hence there is space for 128 pages.
+
+See the [default config file](https://github.com/crownstone/bluenet/blob/master/source/conf/cmake/CMakeBuild.config.default), the [default target file](https://github.com/crownstone/bluenet/blob/master/config/default/CMakeBuild.config), and the [bluenet linker file](https://github.com/crownstone/bluenet/blob/master/source/include/third/nrf/generic_gcc_nrf52.ld).
 
 ### Flash
 
-This document describes the flash memory layout, and how to add more data to store. Bluenet makes use of the Persistent storage manager from the Nordic SDK.
+The global layout of the flash memory is shown below for the nRF52832:
 
-The global layout of the the flash is shown below for the nRF52832:
-
-
-| Start address | What | Nr of pages | Config 
+| Start address | What | Nr of pages | Config
 | ------------- |:-------------:| -----:|:-----|
-| 0x00000000 | MBR | 1 | fixed 
+| 0x00000000 | MBR | 1 | fixed
 | 0x00001000 | SD | 37 | location: fixed <br> size: implicit
 | 0x00026000 | App / Bluenet | 54 | APPLICATION_START_ADDRESS<br> implicit
 | 0x0005C000 | Free | 13 | implicit
-| 0x00069000 | Microapp | 4 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES 
+| 0x00069000 | Microapp | 4 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
 | 0x0006D000 | P2P DFU | 1 | location: implicit<br> size: fixed
 | 0x0006E000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
 | 0x00072000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
-| 0x00076000 | Bootloader | 7 | CS_BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
+| 0x00076000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
 | 0x0007D000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
 | 0x0007E000 | MBR settings | 1 | CS_MBR_PARAMS_PAGE_ADDRESS <br> size: fixed
 | 0x0007F000 | Bootloader settings | 1 | CS_BOOTLOADER_SETTINGS_ADDRESS <br> size: fixed
 | | **Total** | 128
 
 
-The maximum size of the app (here 54 + 13 pages) is available as `APPLICATION_MAX_LENGTH`.
-
-The firmware size + free size is about 268kB. For a dual bank bootloader, this means that the firmware can be 132kB max.
+The maximum size of the app is available as `APPLICATION_MAX_LENGTH`.
+For 54 + 13 pages this amounts to `(54 + 13) * 0x1000 = 0x43000`.
+This is about 256 kB. For a dual bank bootloader the firmware should than be 132 kB max so the old firmware can exist
+temporarily alongside the new firmware. This has not been achievable for us since a while, so no dual bank setup is in
+use.
+The build will fail if the app binary will go beyond the address `FLASH_MICROAPP_BASE` (`0x69000`).
 
 ### RAM
 
-The amount of RAM in the nRF52832 is 64kB. See the [config file](https://github.com/crownstone/bluenet/blob/master/source/conf/cmake/CMakeBuild.config.default) and the [bluenet linker file](https://github.com/crownstone/bluenet/blob/master/source/include/third/nrf/generic_gcc_nrf52.ld).
+The layout for RAM memory is shown below for the nRF52832:
 
 | Start address | What | Size | Size | Size (kB)
 | ------------- |:----:| ----:| ----:| --------:|
@@ -44,84 +50,69 @@ The amount of RAM in the nRF52832 is 64kB. See the [config file](https://github.
 | 0x2000FF00 | IPC | 0x100 | 256 | 0.25
 | | **Total** | 0x10000 | 65536 | 64
 
-### RAM start and end addresses
-
-| Start address | End address | What
-| ------------- | ----------- | ----
-| 0x20000000    | 0x20002A00  | Soft device.
-| 0x20002A00    |             | App heap start, grows up to stack.
-| 0x2000F6FF    |             | App stack start, grows down to heap.
-| 0x2000F700    | 0x2000FEFF  | Microapp stack, grows from `end` down to `start`.
-| 0x2000FF00    | 0x20010000  | IPC, fixed layout.
-
-
-* TODO: There is a reference to `CORE_BL_RAM`. I suppose this is not actually used... If RAM has to be preserved for the bootloader, we have to move the IPC section below this part.
+The bluenet heap starts at `0x20002A00` and grows up to the bluenet stack.
+The stack starts at `0x2000F6FF` and grows down to the heap.
+The microapp stack grows down from `0x2000FEFF` to `0x2000F700`.
 
 In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/crownstone/bluenet/blob/master/source/bootloader/secure_bootloader_gcc_nrf52.ld)):
 
 | Start address | What | Size | Size | Size (kB)
 | ------------- |:-------------:| -----:| -----:| -----:|
 | 0x20000000 | SD + offset | 0x3118 | 12568 | 12.273
-| 0x20002A00 | Bootloader heap/stack | 0xCDE8 | 52712 | 51.477
-| 0x0000FE00 | IPC | 0x100 | 256 | 0.250
+| 0x20003118 | Bootloader heap/stack | 0xCDE8 | 52712 | 51.477
+| 0x0000FF00 | IPC | 0x100 | 256 | 0.250
 | | **Total** | 0x10000 | 65536 | 64
 
-## App data
+The offset is called `RAM_BOOTLOADER_START_OFFSET` and is of size `0x718`.
+When the bootloader is running there are no microapps, hence that part of RAM can be safely used.
 
-The app data is divided into pages of 0x1000 bytes large. The first page is used by the persistent storage manager, as swap. Bluenet has 3 pages: configuration, general, and state.
-Furthermore, one page can be used for the device manager.
+## Memory layout on the nRF52840
 
-![App data layout](../docs/diagrams/flash-memory-layout-app-data.png)
+The nRF52840 has 1 MB flash and 256 kB RAM. An individual page is 4 kB (`0x1000` in hex), hence there is space for 256 pages.
 
-The order is defined _cs_Storage.h_ (`ps_storage_id`) and _cs_Storage.cpp_ (`storage_config_t`).
+See the [default config file](https://github.com/crownstone/bluenet/blob/master/source/conf/cmake/CMakeBuild.config.default), the [nrf52840 target file](https://github.com/crownstone/bluenet/blob/master/config/nrf52840/CMakeBuild.config), and the [bluenet linker file](https://github.com/crownstone/bluenet/blob/master/source/include/third/nrf/generic_gcc_nrf52.ld).
 
-The app data can be read out with a script:
-```
-./scripts/printAppData.sh
-```
+### Flash
 
-### Adding a page
+The global layout of the flash memory is shown below for the nRF52840:
 
-Since the first entry in the `ps_storage_id` and `storage_config_t` gets the lowest address on flash, and since the app data grows downwards, **a new page should be added as first entry**.
-More specifically: the order is determined by the order in which `pstorage_register` is called. The first call gets the lowest address.
+| Start address | What | Nr of pages | Config
+| ------------- |:-------------:| -----:|:-----|
+| 0x00000000 | MBR | 1 | fixed
+| 0x00001000 | SD | 37 | location: fixed <br> size: implicit
+| 0x00026000 | App / Bluenet | 54 | APPLICATION_START_ADDRESS<br> implicit
+| 0x0005C000 | Free | 129 | implicit
+| 0x000DD000 | Microapp | 16 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
+| 0x000ED000 | P2P DFU | 1 | location: implicit<br> size: fixed
+| 0x000EE000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
+| 0x000F2000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
+| 0x000F6000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
+| 0x000FD000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
+| 0x000FE000 | MBR settings | 1 | CS_MBR_PARAMS_PAGE_ADDRESS <br> size: fixed
+| 0x000FF000 | Bootloader settings | 1 | CS_BOOTLOADER_SETTINGS_ADDRESS <br> size: fixed
+| | **Total** | 256
 
-The number of pages should be increased in the following places:
+The microapp section is larger than on the nRF52832.
 
-- `PSTORAGE_NUM_OF_PAGES` in _pstorage_platform.h_
-- `DFU_APP_DATA_CURRENT` in _dfu_types.h_ (in the bluenet bootloader code).
+The maximum size of the app is available as `APPLICATION_MAX_LENGTH`.
+For 54 + 129 pages this amounts to `(54 + 129) * 0x1000 = 0xB7000`.
+This is about 732 kB. For a dual bank bootloader the firmware should than be 366 kB max so the old firmware can exist
+temporarily alongside the new firmware. This is possible on the nRF52840, but that doesn't mean that it's in use.
+The build will fail if the app binary will go beyond the address `FLASH_MICROAPP_BASE` (`0xDD000`).
 
-Also add a new entry in _dfu_types.h_ of the bootloader: `DFU_APP_DATA_RESERVED_VX_X_X` and add code to handle this in _dfu_dual_bank.c_.
+### RAM
 
-To make sure that no data is already at the new page, a value  should be added to an existing page. If this value is the default value (0xFFFFFFFF), then the new page should be cleared. Afterwards, the value can be set, to mark that the new page can be used.
+The layout for RAM memory is shown below for the nRF52840:
 
+| Start address | What | Size | Size | Size (kB)
+| ------------- |:----:| ----:| ----:| --------:|
+| 0x20000000 | SD | 0x2A00 | 10752 | 10.5
+| 0x20002A00 | App heap and stack | 0x3CD00 | 249088 | 243.25
+| 0x2003F700 | Microapp | 0x800 | 2048 | 2
+| 0x2003FF00 | IPC | 0x100 | 256 | 0.25
+| | **Total** | 0x40000 | 262144 | 256
 
-### Swap page
+# Miscellaneous
 
-The swap page is used for clear and update commands.
-Since for a write, a pstorage_update is used, the following happens for each write:
-- swap page is cleared
-- data page is copied to swap
-- data page is cleared
-- swap is copied to data page, except with the new value
-
-This makes the current cyclic storage implementation useless for its purpose.
-
-### Blocks
-
-The page can be divided in several blocks. Only a whole block can be read or written at a time.
-
-> For example, if a module has a table with 10 entries, and each entry is 64 bytes in size, it can request 10 blocks with a block size of 64 bytes. The module can also request one block that is 640 bytes depending on how it would like to access or alter the memory in persistent memory. The first option is preferred when it is a single entry that needs to be updated often and doesn't impact the other entries. The second option is preferred when table entries are not changed individually but have a common point of loading and storing data. 
-
-Bluenet uses 1 big block per page, for flexibility of the stored data.
-
-A better way could be to use smaller blocks and have functions to deal with values that are larger than 1 block. But whether this is actually better than the big block is unclear. Since methods `pstorage_store()`, and `pstorage_update()` can write less than a block.
-Maybe a call to `pstorage_store()` uses the swap when size is less than the block size? --> Doesn't seem so from the diagram (on the _persistent storage manager_ page).
-
-### Queuing
-
-PStorage functions are asynchronous, but writes to flash can not happen simultaneously. This is why cs_Storage has a queue. This queue is also used to wait for high priority events to be done, like scanning and meshing.
-
-# Decisions
-
-Currently there is support for 255 mesh devices (this in contrast with 40 devices that we supported first).
-This increases RAM uses by around 1500 bytes.
+There is support for 255 mesh devices (this in contrast with 40 devices that we supported first).
+This increases RAM usage by around 1500 bytes.

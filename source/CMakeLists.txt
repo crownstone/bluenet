@@ -297,7 +297,7 @@ set(THIRD_PARTY_NRF_INCLUDE_PATH "include/third/nrf")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
 set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
-target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
+target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include""${CMAKE_CURRENT_BINARY_DIR}/shared")
 
 # Save intermediate files, these are used for binary logging.
 target_compile_options(${PROJECT_NAME} PRIVATE -save-temps=obj)
@@ -325,9 +325,6 @@ set(INCLUDE_ONLY_SECTIONS "")
 add_custom_command(OUTPUT ${PROJECT_NAME}.bin
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
 	COMMAND stat -t ${PROJECT_NAME}.bin | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
-	COMMAND ${CMAKE_COMMAND} -E echo ""
-	COMMAND ${CMAKE_COMMAND} -E echo "** Available size: 360kB, that is 512kB - softdevice - bootloader - app storage"
-	COMMAND ${CMAKE_COMMAND} -E echo "** Dual bank Size: 180kB = DFU_IMAGE_MAX_SIZE_BANKED"
 	DEPENDS
 		display_build_status
 		${PROJECT_NAME}
@@ -442,9 +439,9 @@ add_custom_target(uart_binary_client
 	COMMENT "UART client, runs in background"
 	)
 
-add_custom_target(uart_raw_binary_client
-	COMMAND ${CMAKE_COMMAND} -E echo "** UART raw+binary client, keep running in separate shell"
-	COMMAND ./log-client.sh -r
+add_custom_target(uart_combined_client
+	COMMAND ${CMAKE_COMMAND} -E echo "** UART plaintext and binary client, keep running in separate shell"
+	COMMAND ./log-client.sh -p
 	DEPENDS write_runtime_config
 	COMMENT "UART client, runs in background"
 	)
