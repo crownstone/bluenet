@@ -90,6 +90,19 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t*
 	return IPC_RET_SUCCESS;
 }
 
+/**
+ * Clear everything, even the index itself.
+ */
+enum IpcRetCode clearRamData(uint8_t index) {
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
+		return IPC_RET_INDEX_OUT_OF_BOUND;
+	}
+	m_bluenet_ipc_ram.item[index].index = 0;
+	m_bluenet_ipc_ram.item[index].dataSize = 0;
+	memset(m_bluenet_ipc_ram.item[index].data, 0, BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+	return IPC_RET_SUCCESS;
+}
+
 bluenet_ipc_ram_data_item_t *getRamStruct(uint8_t index) {
 	return &m_bluenet_ipc_ram.item[index];
 }

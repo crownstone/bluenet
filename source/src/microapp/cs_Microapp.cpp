@@ -194,12 +194,12 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 
 void Microapp::resetState(uint8_t index) {
 	memset(&(_states[index]), 0, sizeof(_states[0]));
+	_states[index].watchdogTriggered = 0;
 	_states[index].tryingFunction = MICROAPP_FUNCTION_NONE;
 	_states[index].failedFunction = MICROAPP_FUNCTION_NONE;
 }
 
 void Microapp::resetTestState(uint8_t index) {
-	_states[index].watchdogTriggered = 0;
 	_states[index].checksumTest = MICROAPP_TEST_STATE_UNTESTED;
 	_states[index].memoryUsage = MICROAPP_TEST_STATE_UNTESTED;
 	_states[index].tryingFunction = MICROAPP_FUNCTION_NONE;
@@ -357,6 +357,9 @@ cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
 //	_states[index].hasData = false;
 	resetState(index);
 	storeState(index);
+
+	MicroappController & controller = MicroappController::getInstance();
+	controller.watchdogClearState(index);
 	return retCode;
 }
 

@@ -65,6 +65,10 @@ void Watchdog::clearOperatingStateToWriteOnTimeout() {
 	_dataToWrite = false;
 }
 
+void Watchdog::clearOperatingStateOfPreviousTimeout() {
+	clearRamData(IPC_INDEX_WATCHDOG_INFO);
+}
+
 void Watchdog::getOperatingStateOfPreviousTimeout(uint8_t *data, uint8_t & dataSize) {
 	getRamData(IPC_INDEX_WATCHDOG_INFO, data, dataSize, &dataSize);
 }

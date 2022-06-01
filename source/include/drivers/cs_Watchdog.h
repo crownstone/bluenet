@@ -51,6 +51,11 @@ public:
 	 */
 	static void getOperatingStateOfPreviousTimeout(uint8_t* data, uint8_t& dataSize);
 
+	/**
+	 * Clear operating state of previous timeout.
+	 */
+	static void clearOperatingStateOfPreviousTimeout();
+
 	static uint8_t* getData();
 
 	static uint8_t getDataSize();

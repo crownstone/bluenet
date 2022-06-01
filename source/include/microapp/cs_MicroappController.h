@@ -48,7 +48,14 @@ struct watchdog_data_t {
 
 enum class MicroappWatchdogFlags {
 	CS_WATCHDOG_MICROAPP_BUILD = 1,
+	CS_WATCHDOG_MICROAPP_RUNNING = 2,
 };
+
+enum class MicroappWatchdogState {
+	CS_WATCHDOG_MICROAPP_NOT_RUNNING = 0,
+	CS_WATCHDOG_MICROAPP_RUNNING = 1,
+};
+
 
 /**
  * The class MicroappController has functionality to store a second app (and perhaps in the future even more apps) on
@@ -223,6 +230,11 @@ public:
 	 * Check if watchdog has been triggered.
 	 */
 	bool watchdogTriggered(uint8_t appIndex);
+
+	/**
+	 * Clear watchdog state of app.
+	 */
+	void watchdogClearState(uint8_t appIndex);
 
 	/**
 	 * Actually run the app.

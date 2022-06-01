@@ -106,6 +106,13 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, const uint8_t dataSize)
 enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t* dataSize);
 
 /**
+ * Clear everything, even the index itself.
+ *
+ * @param[in] index          Index of item.
+ */
+enum IpcRetCode clearRamData(uint8_t index);
+
+/**
  * Get the underlying complete data struct. Do not use if not truly necessary. Its implementation might change.
  */
 bluenet_ipc_ram_data_item_t* getRamStruct(uint8_t index);
