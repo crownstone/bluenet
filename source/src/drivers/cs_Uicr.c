@@ -35,7 +35,7 @@ void enableNfcPinsAsGpio() {
 }
 
 bool canUseNfcPinsAsGpio() {
-	return NRF_UICR->NFCPINS & 1 == 0;
+	return (NRF_UICR->NFCPINS & 1) == 0;
 }
 
 
