@@ -662,6 +662,35 @@ void UartHandler::handleEvent(event_t & event) {
 			writeMsg(UART_OPCODE_TX_PRESENCE_CHANGE, reinterpret_cast<uint8_t*>(state), sizeof(*state));
 			break;
 		}
+
+		// Events that trigger after a WAIT_FOR_SUCCESS result.
+		case CS_TYPE::EVT_SETUP_DONE: {
+			result_packet_header_t resultHeader(CTRL_CMD_SETUP, ERR_SUCCESS);
+			writeMsg(UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
+			break;
+		}
+		case CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT: {
+			TYPIFY(EVT_MICROAPP_UPLOAD_RESULT)* retCode = CS_TYPE_CAST(EVT_MICROAPP_UPLOAD_RESULT, event.data);
+			result_packet_header_t resultHeader(CTRL_CMD_MICROAPP_UPLOAD, *retCode);
+			writeMsg(UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
+			break;
+		}
+		case CS_TYPE::EVT_MICROAPP_ERASE_RESULT: {
+			TYPIFY(EVT_MICROAPP_ERASE_RESULT)* retCode = CS_TYPE_CAST(EVT_MICROAPP_ERASE_RESULT, event.data);
+			result_packet_header_t resultHeader(CTRL_CMD_MICROAPP_REMOVE, *retCode);
+			writeMsg(UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
+			break;
+		}
+		case CS_TYPE::EVT_HUB_DATA_REPLY: {
+			// TODO: do we even want this via uart?
+			TYPIFY(EVT_HUB_DATA_REPLY)* reply = reinterpret_cast<TYPIFY(EVT_HUB_DATA_REPLY)*>(event.data);
+			result_packet_header_t resultHeader(CTRL_CMD_HUB_DATA, reply->retCode, reply->data.len);
+			writeMsgStart(UART_OPCODE_TX_CONTROL_RESULT, sizeof(resultHeader) + reply->data.len);
+			writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
+			writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, reply->data.data, reply->data.len);
+			writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
+			break;
+		}
 		default:
 			break;
 	}
