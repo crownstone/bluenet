@@ -144,7 +144,15 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor) {
 
 cs_ret_code_t configure_board(boards_config_t* config) {
 	uint32_t hardwareBoard = getHardwareBoard();
-	return configure_board_from_hardware_board(hardwareBoard, config);
+//	return configure_board_from_hardware_board(hardwareBoard, config);
+
+	// Create UICR data from hardware board.
+	cs_uicr_data_t uicrData = getUicrData(hardwareBoard);
+
+	// Try to set uicr data, in case it's not set yet.
+	setUicr(&uicrData, false);
+
+	return configure_board_from_uicr(&uicrData, config);
 }
 
 cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards_config_t* config) {
@@ -212,12 +220,6 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 	}
 
 	config->hardwareBoard = hardwareBoard;
-
-	// TODO: configure board from uicr instead of hardware board.
-	cs_uicr_data_t uicrData = getUicrData(hardwareBoard);
-
-	// Try to set uicr data, in case it's not set yet.
-	setUicr(&uicrData, false);
 
 	return ERR_SUCCESS;
 }
