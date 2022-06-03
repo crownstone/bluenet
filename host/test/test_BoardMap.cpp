@@ -15,6 +15,12 @@
 #include <iostream>
 #include <cassert>
 
+/**
+ * Checks if the board config from hardware board is equal to the board config from UICR data.
+ * Also prints out the uicr data for valid boards, so it can be checked against what is out in the field.
+ * Does so for all non development boards, or the board given as argument.
+ */
+
 void printBoard(uint32_t board, cs_uicr_data_t& uicr) {
 	auto hardwareVersion = get_hardware_version_from_uicr(&uicr);
 
@@ -175,7 +181,6 @@ int main(int argc, char* argv[]) {
 	uint32_t board;
 	int result;
 	if (argc > 1) {
-//		std::cout << "Usage: " << argv[0] << " <board>" << std::endl;
 		std::string str(argv[1]);
 		board = std::stoul(str);
 		auto uicr = getUicrData(board);
