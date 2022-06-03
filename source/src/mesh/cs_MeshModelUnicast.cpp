@@ -243,7 +243,7 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 	switch (status) {
 		case ACCESS_RELIABLE_TRANSFER_SUCCESS: {
 			LOGi("reliable msg success");
-			MeshUtil::printQueueItem("", _queue[_queueIndexInProgress].metaData);
+			printMeshQueueItem("", _queue[_queueIndexInProgress].metaData);
 #if MESH_MODEL_TEST_MSG == 2
 			_acked++;
 			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
@@ -252,7 +252,7 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 		}
 		case ACCESS_RELIABLE_TRANSFER_TIMEOUT: {
 			LOGw("reliable msg timeout");
-			MeshUtil::printQueueItem("", _queue[_queueIndexInProgress].metaData);
+			printMeshQueueItem("", _queue[_queueIndexInProgress].metaData);
 #if MESH_MODEL_TEST_MSG == 2
 			_timedout++;
 			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
@@ -330,7 +330,7 @@ void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_t
 }
 
 cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("Unicast addToQueue", item.metaData);
+	printMeshQueueItem("Unicast addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
 	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
