@@ -25,33 +25,16 @@ static cs_uicr_data_t getUicrData(uint32_t boardVersion) {
 	};
 	switch (boardVersion) {
 		case ACR01B1A: {
-			return (cs_uicr_data_t) {
-				.board = boardVersion,
-				.productRegionFamily = {
-						.fields = {
-								.productType = PRODUCT_CROWNSTONE_BUILTIN_ZERO,
-								.region = 1,
-								.productFamily = 1,
-								.reserved = 0xFF
-						}
-				},
-				.majorMinorPatch = {
-						.fields = {
-								.patch = 0,
-								.minor = 1,
-								.major = 0,
-								.reserved = 0xFF
-						}
-				},
-				.productionDateHousing = {
-						.fields = {
-								.housing = 0,
-								.week = 0,
-								.year = 0,
-								.reserved = 0xFF
-						}
-				}
-			};
+			data.productRegionFamily.fields.productType = PRODUCT_CROWNSTONE_BUILTIN_ZERO;
+			data.productRegionFamily.fields.region = 1;
+			data.productRegionFamily.fields.productFamily = 1;
+			data.majorMinorPatch.fields.major = 0;
+			data.majorMinorPatch.fields.minor = 1;
+			data.majorMinorPatch.fields.patch = 0;
+			data.productionDateHousing.fields.housing = 0;
+			data.productionDateHousing.fields.week = 0;
+			data.productionDateHousing.fields.year = 0;
+			break;
 		}
 		case ACR01B1B: {
 			data.productRegionFamily.fields.productType = PRODUCT_CROWNSTONE_BUILTIN_ZERO;
