@@ -243,6 +243,7 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 							asACR01B2C(config);
 							return ERR_SUCCESS;
 						case 1:
+							[[fallthrough]];
 						case 3:
 							asACR01B2G(config);
 							return ERR_SUCCESS;
