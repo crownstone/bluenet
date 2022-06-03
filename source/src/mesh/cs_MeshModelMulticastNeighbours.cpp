@@ -136,7 +136,7 @@ cs_ret_code_t MeshModelMulticastNeighbours::sendMsg(const uint8_t* data, uint16_
 }
 
 cs_ret_code_t MeshModelMulticastNeighbours::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("Multicast addToQueue", item.metaData);
+	MeshUtil::printQueueItem("Multicast neighbours addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
 	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
