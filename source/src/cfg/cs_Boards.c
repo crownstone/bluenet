@@ -160,9 +160,13 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 
 	switch(hardwareBoard) {
 		case ACR01B1A:
+			__attribute__ ((fallthrough));
 		case ACR01B1B:
+			__attribute__ ((fallthrough));
 		case ACR01B1C:
+			__attribute__ ((fallthrough));
 		case ACR01B1D:
+			__attribute__ ((fallthrough));
 		case ACR01B1E:
 			asACR01B1D(config);
 			break;
@@ -183,12 +187,15 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 			break;
 
 		case ACR01B2A:
+			__attribute__ ((fallthrough));
 		case ACR01B2B:
+			__attribute__ ((fallthrough));
 		case ACR01B2C:
 			asACR01B2C(config);
 			break;
 
 		case ACR01B2E:
+			__attribute__ ((fallthrough));
 		case ACR01B2G:
 			asACR01B2G(config);
 			break;
@@ -200,6 +207,7 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 			break;
 
 		case PCA10036:
+			__attribute__ ((fallthrough));
 		case PCA10040:
 			asPca10040(config);
 			break;
@@ -243,6 +251,7 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 							asACR01B2C(config);
 							return ERR_SUCCESS;
 						case 1:
+							__attribute__ ((fallthrough));
 						case 3:
 							asACR01B2G(config);
 							return ERR_SUCCESS;
