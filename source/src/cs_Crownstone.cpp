@@ -132,7 +132,10 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
  */
 void overwrite_hardware_version() {
 	cs_ret_code_t retCode = writeHardwareBoard();
-	LOGd("Board: %p retCode=%u", getHardwareBoard(), retCode);
+	LOGd("Board: %p", getHardwareBoard());
+	if (retCode != ERR_SUCCESS) {
+		LOGe("Failed to write hardware board: retCode=%u", retCode);
+	}
 }
 
 void printNfcPins() {
