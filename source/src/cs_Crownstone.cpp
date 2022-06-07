@@ -131,8 +131,8 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
  * the runtime always tries to overwrite it with the (let's hope) proper state.
  */
 void overwrite_hardware_version() {
-	writeHardwareBoard();
-	LOGd("Board: %p", getHardwareBoard());
+	cs_ret_code_t retCode = writeHardwareBoard();
+	LOGd("Board: %p retCode=%u", getHardwareBoard(), retCode);
 }
 
 void printNfcPins() {
@@ -962,7 +962,10 @@ int main() {
 	// Init GPIO pins early in the process!
 
 	if (board.flags.usesNfcPins) {
-		enableNfcPinsAsGpio();
+		cs_ret_code_t retCode = enableNfcPinsAsGpio();
+		if (retCode != ERR_SUCCESS) {
+			// Not much we can do here.
+		}
 	}
 
 //	if (IS_CROWNSTONE(board.deviceType)) {

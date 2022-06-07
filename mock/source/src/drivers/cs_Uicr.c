@@ -9,11 +9,13 @@ uint32_t getHardwareBoard() {
 	return board;
 }
 
-void writeHardwareBoard() {
+cs_ret_code_t writeHardwareBoard() {
+	return ERR_SUCCESS;
 }
 
-void enableNfcPinsAsGpio() {
+cs_ret_code_t enableNfcPinsAsGpio() {
 	useNfcPinsAsGpio = true;
+	return ERR_SUCCESS;
 }
 
 bool canUseNfcPinsAsGpio() {

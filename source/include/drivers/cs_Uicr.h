@@ -27,17 +27,23 @@ uint32_t getHardwareBoard();
  * In the past, the hardware board was not written to UICR. Instead, the board was compiled into the firmware,
  * and each product had their own different firmware.
  * This function is made to transition from that solution to a single firmware with board in UICR.
- * We only have to make sure that each product once runs a firmware that writes the correct hardware board to UICR..
+ * We only have to make sure that each product once runs a firmware that writes the correct hardware board to UICR.
+ *
+ * @return     ERR_SUCCESS             On success.
+ * @return     ERR_WRONG_STATE         When the UICR is not writable (the softdevice locked the UICR)
  */
-void writeHardwareBoard();
+cs_ret_code_t writeHardwareBoard();
 
 /**
  * Enable NFC pins to be used as GPIO.
  *
  * This is stored in UICR, so it's persistent.
  * NFC pins leak a bit of current when not at same voltage level.
+ *
+ * @return     ERR_SUCCESS             On success.
+ * @return     ERR_WRONG_STATE         When the UICR is not writable (the softdevice locked the UICR)
  */
-void enableNfcPinsAsGpio();
+cs_ret_code_t enableNfcPinsAsGpio();
 
 /**
  * Returns true when the NFC pins can be used as GPIO.
@@ -63,6 +69,7 @@ cs_ret_code_t getUicr(cs_uicr_data_t* uicrData);
  *
  * @return     ERR_SUCCESS             On success.
  * @return     ERR_ALREADY_EXISTS      When something is written already. You will have to overwrite.
+ * @return     ERR_WRONG_STATE         When the UICR is not writable (the softdevice locked the UICR)..
  */
 cs_ret_code_t setUicr(const cs_uicr_data_t* uicrData, bool overwrite);
 

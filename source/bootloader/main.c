@@ -70,6 +70,7 @@
 #include "cs_BootloaderConfig.h"
 #include "bootloader/cs_MemoryLayout.h"
 #include "drivers/cs_Uicr.h"
+#include "protocol/cs_ErrorCodes.h"
 
 static void on_error(void)
 {
@@ -140,7 +141,10 @@ void cs_gpio_init(boards_config_t* board) {
 		// Enable NFC pins to be used as GPIO.
 		// Warning: this is stored in UICR, so it's persistent.
 		// Warning: NFC pins leak a bit of current when not at same voltage level.
-		enableNfcPinsAsGpio();
+		cs_ret_code_t retCode = enableNfcPinsAsGpio();
+		if (retCode != ERR_SUCCESS) {
+			// Not much we can do here.
+		}
 	}
 
 //	if (IS_CROWNSTONE(board->deviceType)) {
