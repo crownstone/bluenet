@@ -94,13 +94,13 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 
 
 	if (boardConfig->flags.hasAccuratePowerMeasurement) {
-		_powerDiffThresholdPart =          POWER_DIFF_THRESHOLD_PART;
-		_powerDiffThresholdMinMilliWatt =  POWER_DIFF_THRESHOLD_MIN_WATT * 1000.0f;
+		_powerDiffThresholdPart          = POWER_DIFF_THRESHOLD_PART;
+		_powerDiffThresholdMinMilliWatt  = POWER_DIFF_THRESHOLD_MIN_WATT * 1000.0f;
 		_negativePowerThresholdMilliWatt = NEGATIVE_POWER_THRESHOLD_WATT * 1000.0f;
 	}
 	else {
-		_powerDiffThresholdPart =          POWER_DIFF_THRESHOLD_PART_CS_ZERO;
-		_powerDiffThresholdMinMilliWatt =  POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO * 1000.0f;
+		_powerDiffThresholdPart          = POWER_DIFF_THRESHOLD_PART_CS_ZERO;
+		_powerDiffThresholdMinMilliWatt  = POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO * 1000.0f;
 		_negativePowerThresholdMilliWatt = NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO * 1000.0f;
 	}
 	LOGd("_powerDiffThresholdPart=%i _powerDiffThresholdMinMilliWatt=%i _negativePowerThresholdMilliWatt=%i", (int32_t)_powerDiffThresholdPart, (int32_t)_powerDiffThresholdMinMilliWatt, (int32_t)_negativePowerThresholdMilliWatt);
@@ -149,13 +149,13 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 	adc_config_t adcConfig;
 	adcConfig.channelCount = 2;
 	// TODO: there are now multiple voltage pins
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig->pinAinVoltage[GAIN_SINGLE];
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin            = boardConfig->pinAinVoltage[GAIN_SINGLE];
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig->voltageAdcRangeMilliVolt;
-	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig->pinAinCurrent[GAIN_SINGLE];
+	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin   = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin            = boardConfig->pinAinCurrent[GAIN_SINGLE];
 	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig->currentAdcRangeMilliVolt;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.samplingIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin   = boardConfig->pinAinZeroRef != PIN_NONE ? boardConfig->pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
+	adcConfig.samplingIntervalUs                           = CS_ADC_SAMPLE_INTERVAL_US;
 	_adc->init(adcConfig);
 
 	_adc->setDoneCallback(adc_done_callback);
