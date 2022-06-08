@@ -16,6 +16,14 @@
 #define LOGMeshTopologyDebug   LOGvv
 #define LOGMeshTopologyVerbose LOGvv
 
+/**
+ * Set this to true to make every crownstone in the sphere to send a noop message
+ * on every tick, and make every crownstone respond with a neighbor message with that rssi.
+ *
+ * (This gives the highest possible frequency trip wire)
+ */
+constexpr bool TripwireResearch = true;
+
 cs_ret_code_t MeshTopology::init() {
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
@@ -308,6 +316,18 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
 		result.returnCode = onStoneMacMsg(packet);
 	}
+
+	if constexpr (TripwireResearch) {
+		// immediately send noops as neighbor message over the mesh for low latency tripwire.
+		if(packet.type == CS_MESH_MODEL_TYPE_CMD_NOOP) {
+			neighbour_node_t node = {};
+			clearNeighbourRssi(node);
+			updateNeighbour(node, packet.srcAddress, packet.rssi, packet.channel);
+			sendNeighbourMessageOverMesh(node);
+		}
+	}
+
+
 	add(packet.srcAddress, packet.rssi, packet.channel);
 }
 
@@ -391,6 +411,12 @@ void MeshTopology::handleEvent(event_t &evt) {
 			if (*packet % (1000 / TICK_INTERVAL_MS) == 0) {
 				onTickSecond();
 			}
+
+			if constexpr(TripwireResearch) {
+				// send a noop at every tick for high frequency trip wire
+				sendNoop();
+			}
+
 			break;
 		}
 		case CS_TYPE::CMD_MESH_TOPO_GET_MAC: {
