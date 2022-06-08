@@ -42,21 +42,19 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinDimmer                       = PIN_NONE;
 	config->pinRelayOn                      = 12;
 	config->pinRelayOff                     = 11;
-	config->pinAinCurrent[GAIN_LOW]         = GpioToAin(2);
-	config->pinAinCurrent[GAIN_HIGH]        = GpioToAin(3);
+	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(3);
 	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(30);
-	config->pinAinZeroRef                   = GpioToAin(5);
-	config->pinAinEarth                     = GpioToAin(29);
+	config->pinAinZeroRef                   = GpioToAin(2);
 	// config->pinAinDimmerTemp                = PIN_NONE;
 	config->pinAinDimmerTemp                = GpioToAin(4);
 
-	config->pinRx                           = 9;
-	config->pinTx                           = 10;
+	config->pinRx                           = GetGpioPin(1, 8);
+	config->pinTx                           = GetGpioPin(1, 9);
 
-	config->pinGpio[0]                      = GetGpioPin(1, 0);
-	config->pinGpio[1]                      = GetGpioPin(1, 15);
-	config->pinGpio[2]                      = GetGpioPin(1, 8);
-	config->pinGpio[3]                      = GetGpioPin(1, 9);
+	config->pinGpio[0]                      = PIN_NONE;
+	config->pinGpio[1]                      = PIN_NONE;
+	config->pinGpio[2]                      = PIN_NONE;
+	config->pinGpio[3]                      = PIN_NONE;
 
 	config->pinButton[0]                    = PIN_NONE;
 	config->pinButton[1]                    = 8;
@@ -71,9 +69,9 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinFlash.dio[3]                 = 24;
 
 	// The fourth LED is used to indicate the state of the dimmer
-	config->pinLed[0]                       = 13;
-	config->pinLed[1]                       = 14;
-	config->pinLed[2]                       = 17;
+	config->pinLed[0]                       = PIN_NONE;
+	config->pinLed[1]                       = PIN_NONE;
+	config->pinLed[2]                       = PIN_NONE;
 	config->pinLed[3]                       = PIN_NONE;
 
 	config->flags.dimmerInverted            = false;
@@ -81,7 +79,7 @@ void asCR01R02v4(boards_config_t* config) {
 	config->flags.enableLeds                = true;
 	config->flags.ledInverted               = false;
 	config->flags.dimmerTempInverted        = false;
-	config->flags.usesNfcPins               = true;
+	config->flags.usesNfcPins               = false;
 
 	config->deviceType                      = DEVICE_CROWNSTONE_OUTLET;
 
