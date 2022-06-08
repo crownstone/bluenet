@@ -82,8 +82,11 @@ void CommandHandler::handleCommand(
 		) {
 
 	if (_awaitingCommandResult.type != CommandHandlerTypes::CTRL_CMD_NONE) {
-		LOGw("Received command while awaiting result of type %u. Return ERR_BUSY in the future.", _awaitingCommandResult.type);
+		LOGw("Received command while awaiting result of type %u. Return ERR_BUSY.", _awaitingCommandResult.type);
+		result.returnCode = ERR_BUSY;
+		return;
 	}
+
 	_handleCommand(protocolVersion, type, commandData, source, accessLevel, result);
 	if (result.returnCode == ERR_WAIT_FOR_SUCCESS) {
 		_awaitingCommandResult.type = type;
