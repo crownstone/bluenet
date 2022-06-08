@@ -80,6 +80,53 @@ void CommandHandler::handleCommand(
 		const EncryptionAccessLevel accessLevel,
 		cs_result_t & result
 		) {
+
+	if (_awaitingCommandResult.type != CommandHandlerTypes::CTRL_CMD_NONE) {
+		LOGw("Received command while awaiting result of type %u. Return ERR_BUSY in the future.", _awaitingCommandResult.type);
+	}
+	_handleCommand(protocolVersion, type, commandData, source, accessLevel, result);
+	if (result.returnCode == ERR_WAIT_FOR_SUCCESS) {
+		_awaitingCommandResult.type = type;
+		_awaitingCommandResult.source = source;
+	}
+}
+
+void CommandHandler::resolveAsyncCommand(cs_async_result_t* result) {
+	LOGd("Resolving async command: type=%u result=%u size=%u", result->commandType, result->resultCode, result->resultData.len);
+	if (result->commandType != _awaitingCommandResult.type) {
+		LOGw("Resolving different type: resolving=%u, awaiting=%u", result->commandType, _awaitingCommandResult.type);
+		return;
+	}
+	switch (_awaitingCommandResult.source.source.type) {
+		case CS_CMD_SOURCE_TYPE_UART: {
+			LOGd("Send to UART");
+			result_packet_header_t resultHeader(result->commandType, result->resultCode, result->resultData.len);
+			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_CONTROL_RESULT, sizeof(resultHeader) + result->resultData.len);
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, result->resultData.data, result->resultData.len);
+			UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
+			break;
+		}
+		default: {
+			LOGd("Send to BLE");
+			TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE)* eventOutData = result;
+			event_t eventOut(CS_TYPE::CMD_SEND_ASYNC_RESULT_TO_BLE, eventOutData, sizeof(TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE)));
+			eventOut.dispatch();
+			break;
+		}
+	}
+	// Reset the await.
+	_awaitingCommandResult.type = CTRL_CMD_NONE;
+}
+
+void CommandHandler::_handleCommand(
+		uint8_t protocolVersion,
+		const CommandHandlerTypes type,
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t & result
+		) {
 	if (protocolVersion != CS_CONNECTION_PROTOCOL_VERSION) {
 		LOGw("Wrong protocol: %u", protocolVersion);
 		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
@@ -219,6 +266,8 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_RESET_MESH_TOPOLOGY:
 			return dispatchEventForCommand(CS_TYPE::CMD_MESH_TOPO_RESET, commandData, source, result);
 
+		case CTRL_CMD_NONE:
+			[[fallthrough]];
 		case CTRL_CMD_UNKNOWN:
 			result.returnCode = ERR_UNKNOWN_TYPE;
 			return;
@@ -1039,6 +1088,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_FILTER_GET_SUMMARIES:
 		case CTRL_CMD_RESET_MESH_TOPOLOGY:
 			return ADMIN;
+		case CTRL_CMD_NONE:
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;
 	}
@@ -1081,6 +1131,11 @@ void CommandHandler::handleEvent(event_t & event) {
 				cmd->accessLevel,
 				event.result
 			);
+			break;
+		}
+		case CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND:{
+			auto result = reinterpret_cast<TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND)*>(event.data);
+			resolveAsyncCommand(result);
 			break;
 		}
 		default: {}

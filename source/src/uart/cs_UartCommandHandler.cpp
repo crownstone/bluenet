@@ -14,7 +14,7 @@
 #include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
 
-#define LOGUartCommandHandlerDebug LOGnone
+#define LOGUartCommandHandlerDebug LOGvv
 
 void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 			cs_data_t commandData,
@@ -235,12 +235,10 @@ void UartCommandHandler::handleCommandHubDataReply(cs_data_t commandData, const 
 		return;
 	}
 
-	TYPIFY(EVT_HUB_DATA_REPLY) evtData;
-	evtData.retCode = replyHeader->retCode;
-	evtData.data.data = commandData.data + sizeof(*replyHeader);
-	evtData.data.len  = commandData.len  - sizeof(*replyHeader);
-	event_t event(CS_TYPE::EVT_HUB_DATA_REPLY, &evtData, sizeof(evtData));
-	event.dispatch();
+	cs_data_t resultData = cs_data_t(commandData.data + sizeof(*replyHeader), commandData.len  - sizeof(*replyHeader));
+	TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_HUB_DATA, replyHeader->retCode, resultData);
+	event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
+	eventResult.dispatch();
 
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA_REPLY_ACK);
 }
