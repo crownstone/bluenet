@@ -88,6 +88,7 @@ void CommandHandler::handleCommand(
 	if (result.returnCode == ERR_WAIT_FOR_SUCCESS) {
 		_awaitingCommandResult.type = type;
 		_awaitingCommandResult.source = source;
+		_awaitingCommandResult.timeoutCountdown = ASYNC_COMMAND_TIMEOUT_MS / TICK_INTERVAL_MS;
 	}
 }
 
@@ -117,6 +118,7 @@ void CommandHandler::resolveAsyncCommand(cs_async_result_t* result) {
 	}
 	// Reset the await.
 	_awaitingCommandResult.type = CTRL_CMD_NONE;
+	_awaitingCommandResult.timeoutCountdown = 0;
 }
 
 void CommandHandler::_handleCommand(
@@ -1136,6 +1138,15 @@ void CommandHandler::handleEvent(event_t & event) {
 		case CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND:{
 			auto result = reinterpret_cast<TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND)*>(event.data);
 			resolveAsyncCommand(result);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			if (_awaitingCommandResult.timeoutCountdown) {
+				if (--_awaitingCommandResult.timeoutCountdown == 0) {
+					LOGw("Async command timed out: type=%u", _awaitingCommandResult.type);
+					_awaitingCommandResult.type = CTRL_CMD_NONE;
+				}
+			}
 			break;
 		}
 		default: {}

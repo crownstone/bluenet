@@ -77,9 +77,17 @@ private:
 	const boards_config_t* _boardConfig;
 
 	struct {
-		CommandHandlerTypes type = CTRL_CMD_NONE; // Set to CTRL_CMD_NONE for none.
+		// Control command type we are waiting for. Set to CTRL_CMD_NONE for none.
+		CommandHandlerTypes type = CTRL_CMD_NONE;
+
+		// Source of the command.
 		cmd_source_with_counter_t source;
+
+		// Number of ticks until timeout.
+		uint16_t timeoutCountdown;
 	} _awaitingCommandResult;
+
+	static const uint32_t ASYNC_COMMAND_TIMEOUT_MS = 10000;
 
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
