@@ -15,8 +15,49 @@
 #include <localisation/cs_MeshTopologyResearch.h>
 #endif
 
+/**
+ * Keeps track of the rssi distance of this crownstone to
+ * the crownstones in its direct environment.
+ *
+ * Several related commands are available over UART.
+ */
 class MeshTopology: EventListener {
 public:
+	/**
+	 * Initializes the class:
+	 * - Reads State.
+	 * - Allocates buffer.
+	 * - Starts listening for events.
+	 */
+	cs_ret_code_t init();
+
+	/**
+	 * Commands handled:
+	 *  - CMD_MESH_TOPO_GET_RSSI
+	 *  - CMD_MESH_TOPO_RESET
+	 *  - CMD_MESH_TOPO_GET_MAC
+	 *
+	 * Internal usage:
+	 *  - EVT_RECV_MESH_MSG
+	 *  - EVT_TICK
+	 */
+	void handleEvent(event_t &evt);
+
+	/**
+	 * Get the MAC address of a neighbouring crownstone.
+	 *
+	 * @param[in] stoneId    The stone ID of the crownstone.
+	 *
+	 * @return ERR_WAIT_FOR_SUCCESS    When the MAC address is requested. Wait for EVT_MESH_TOPO_MAC_RESULT.
+	 *                                 However, there will be no event if it times out.
+	 * @return ERR_NOT_FOUND           When the stone is not a known neighbour.
+	 */
+	cs_ret_code_t getMacAddress(stone_id_t stoneId);
+
+	// --------------------------------
+	// ---------- parameters ----------
+	// --------------------------------
+
 	/**
 	 * Maximum number of neighbours in the list.
 	 */
@@ -46,24 +87,6 @@ public:
 	 */
 	static constexpr uint16_t FAST_INTERVAL_TIMEOUT_SECONDS = 5 * 60;
 
-	/**
-	 * Initializes the class:
-	 * - Reads State.
-	 * - Allocates buffer.
-	 * - Starts listening for events.
-	 */
-	cs_ret_code_t init();
-
-	/**
-	 * Get the MAC address of a neighbouring crownstone.
-	 *
-	 * @param[in] stoneId    The stone ID of the crownstone.
-	 *
-	 * @return ERR_WAIT_FOR_SUCCESS    When the MAC address is requested. Wait for EVT_MESH_TOPO_MAC_RESULT.
-	 *                                 However, there will be no event if it times out.
-	 * @return ERR_NOT_FOUND           When the stone is not a known neighbour.
-	 */
-	cs_ret_code_t getMacAddress(stone_id_t stoneId);
 
 private:
 	static constexpr uint8_t INDEX_NOT_FOUND = 0xFF;
@@ -77,6 +100,11 @@ private:
 		int8_t rssiChannel39;
 		uint8_t lastSeenSecondsAgo;
 	};
+
+	// ---------------------------------------
+	// ---------- runtime variables ----------
+	// ---------------------------------------
+
 
 	/**
 	 * Stone ID of this crownstone, read on init.
@@ -118,6 +146,10 @@ private:
 	 */
 	uint8_t _msgCount = 0;
 
+	// -------------------------------------
+	// ---------- private methods ----------
+	// -------------------------------------
+
 	/**
 	 * Resets the stored topology.
 	 */
@@ -158,25 +190,24 @@ private:
 	 */
 	void sendRssiToUart(stone_id_t reveiverId, cs_mesh_model_msg_neighbour_rssi_t& packet);
 
-	// Event handlers
+	// ------------------------------------
+	// ---------- event handlers ----------
+	// ------------------------------------
+
 	void onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet);
+
 	cs_ret_code_t onStoneMacMsg(MeshMsgEvent& meshMsg);
+
 	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
+
 	void onTickSecond();
 
 	/**
-	 * Print all neighbours.
+	 * Prints all neighbours.
 	 */
 	void print();
 
-public:
-	/**
-	 * Internal usage.
-	 */
-	void handleEvent(event_t &evt);
-
 #if BUILD_MESH_TOPOLOGY_RESEARCH == 1
-private:
 	MeshTopologyResearch _research;
 #endif
 };
