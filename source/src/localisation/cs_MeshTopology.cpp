@@ -91,10 +91,7 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	uint8_t index = find(id);
 	if (index == INDEX_NOT_FOUND) {
 		if (_neighbourCount < MAX_NEIGHBOURS) {
-			// Init RSSI
-			_neighbours[_neighbourCount].rssiChannel37 = RSSI_INIT;
-			_neighbours[_neighbourCount].rssiChannel38 = RSSI_INIT;
-			_neighbours[_neighbourCount].rssiChannel39 = RSSI_INIT;
+			clearNeighbourRssi(_neighbours[_neighbourCount]);
 			updateNeighbour(_neighbours[_neighbourCount], id, rssi, channel);
 			_neighbourCount++;
 		}
@@ -126,6 +123,13 @@ void MeshTopology::updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t
 		}
 	}
 	node.lastSeenSecondsAgo = 0;
+}
+
+
+void MeshTopology::clearNeighbourRssi(neighbour_node_t& node) {
+	node.rssiChannel37 = RSSI_INIT;
+	node.rssiChannel38 = RSSI_INIT;
+	node.rssiChannel39 = RSSI_INIT;
 }
 
 uint8_t MeshTopology::find(stone_id_t id) {
@@ -195,7 +199,7 @@ void MeshTopology::sendNext() {
 	auto& node = _neighbours[_nextSendIndex];
 	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u", _nextSendIndex, node.id, node.lastSeenSecondsAgo);
 
-	sendNeighbourMessageOverMesh(node);
+	cs_mesh_model_msg_neighbour_rssi_t meshPayload = sendNeighbourMessageOverMesh(node);
 
 	// Also send over UART.
 	sendRssiToUart(_myId, meshPayload);
@@ -205,7 +209,7 @@ void MeshTopology::sendNext() {
 }
 
 
-void MeshTopology::sendNeighbourMessageOverMesh(neighbour_node_t& node) {
+cs_mesh_model_msg_neighbour_rssi_t MeshTopology::sendNeighbourMessageOverMesh(neighbour_node_t& node) {
 	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
 				.type = 0,
 				.neighbourId = node.id,
@@ -226,6 +230,8 @@ void MeshTopology::sendNeighbourMessageOverMesh(neighbour_node_t& node) {
 
 		event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		event.dispatch();
+
+		return meshPayload;
 }
 
 void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {

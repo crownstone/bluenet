@@ -165,6 +165,11 @@ private:
 	void updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel);
 
 	/**
+	 * sets the three rssi values to RSSI_INIT
+	 */
+	void clearNeighbourRssi(neighbour_node_t& node);
+
+	/**
 	 * Find a neighbour in the list.
 	 */
 	uint8_t find(stone_id_t id);
@@ -187,8 +192,10 @@ private:
 	/**
 	 * Sends a neighbour message for the given node over the mesh.
 	 * No checks are executed.
+	 *
+	 * Returns the message struct for convenience.
 	 */
-	void sendNeighbourMessageOverMesh(neighbour_node_t& node);
+	cs_mesh_model_msg_neighbour_rssi_t sendNeighbourMessageOverMesh(neighbour_node_t& node);
 
 	/**
 	 * Sends the RSSI to a neighbour over UART.
