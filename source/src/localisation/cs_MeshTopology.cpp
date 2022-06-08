@@ -195,32 +195,37 @@ void MeshTopology::sendNext() {
 	auto& node = _neighbours[_nextSendIndex];
 	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u", _nextSendIndex, node.id, node.lastSeenSecondsAgo);
 
-	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
-			.type = 0,
-			.neighbourId = node.id,
-			.rssiChannel37 = node.rssiChannel37,
-			.rssiChannel38 = node.rssiChannel38,
-			.rssiChannel39 = node.rssiChannel39,
-			.lastSeenSecondsAgo = node.lastSeenSecondsAgo,
-			.counter = _msgCount++
-	};
-
-	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = false;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
-	meshMsg.size = sizeof(meshPayload);
-
-	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-	event.dispatch();
+	sendNeighbourMessageOverMesh(node);
 
 	// Also send over UART.
 	sendRssiToUart(_myId, meshPayload);
 
 	// Send next item in the list next time.
 	_nextSendIndex++;
+}
+
+
+void MeshTopology::sendNeighbourMessageOverMesh(neighbour_node_t& node) {
+	cs_mesh_model_msg_neighbour_rssi_t meshPayload = {
+				.type = 0,
+				.neighbourId = node.id,
+				.rssiChannel37 = node.rssiChannel37,
+				.rssiChannel38 = node.rssiChannel38,
+				.rssiChannel39 = node.rssiChannel39,
+				.lastSeenSecondsAgo = node.lastSeenSecondsAgo,
+				.counter = _msgCount++
+		};
+
+		TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
+		meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
+		meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
+		meshMsg.urgency = CS_MESH_URGENCY_LOW;
+		meshMsg.flags.flags.noHops = false;
+		meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
+		meshMsg.size = sizeof(meshPayload);
+
+		event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		event.dispatch();
 }
 
 void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {

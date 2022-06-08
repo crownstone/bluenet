@@ -105,7 +105,6 @@ private:
 	// ---------- runtime variables ----------
 	// ---------------------------------------
 
-
 	/**
 	 * Stone ID of this crownstone, read on init.
 	 */
@@ -186,6 +185,12 @@ private:
 	void sendNext();
 
 	/**
+	 * Sends a neighbour message for the given node over the mesh.
+	 * No checks are executed.
+	 */
+	void sendNeighbourMessageOverMesh(neighbour_node_t& node);
+
+	/**
 	 * Sends the RSSI to a neighbour over UART.
 	 */
 	void sendRssiToUart(stone_id_t reveiverId, cs_mesh_model_msg_neighbour_rssi_t& packet);
@@ -198,8 +203,19 @@ private:
 
 	cs_ret_code_t onStoneMacMsg(MeshMsgEvent& meshMsg);
 
+	/**
+	 * Handles mesh messages:
+	 *  - CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI
+	 *  - CS_MESH_MODEL_TYPE_STONE_MAC
+	 *
+	 *  Also calls `add` if .hops == 0, regarless of the packet type.
+	 */
 	void onMeshMsg(MeshMsgEvent& packet, cs_result_t& result);
 
+	/**
+	 * neighbors are removed from the list when their individual countdown expires.
+	 * See TIMEOUT_SECONDS.
+	 */
 	void onTickSecond();
 
 	/**
