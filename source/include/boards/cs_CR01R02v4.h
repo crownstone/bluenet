@@ -44,6 +44,7 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinRelayOff                     = 11;
 	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(3);
 	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(30);
+	// Will become available as ref=ain0 (config.referencePin)
 	config->pinAinZeroRef                   = GpioToAin(2);
 	// config->pinAinDimmerTemp                = PIN_NONE;
 	config->pinAinDimmerTemp                = GpioToAin(4);
@@ -76,12 +77,12 @@ void asCR01R02v4(boards_config_t* config) {
 
 	config->flags.dimmerInverted            = false;
 	config->flags.enableUart                = true;
-	config->flags.enableLeds                = true;
+	config->flags.enableLeds                = false;
 	config->flags.ledInverted               = false;
 	config->flags.dimmerTempInverted        = false;
 	config->flags.usesNfcPins               = false;
 
-	config->deviceType                      = DEVICE_CROWNSTONE_OUTLET;
+	config->deviceType                      = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	// All values below are set to something rather than nothing, but are not truly in use.
 	config->voltageOffset[GAIN_SINGLE]      = 1000;
