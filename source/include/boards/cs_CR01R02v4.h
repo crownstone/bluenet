@@ -82,7 +82,7 @@ void asCR01R02v4(boards_config_t* config) {
 	config->flags.dimmerTempInverted        = false;
 	config->flags.usesNfcPins               = false;
 
-	config->deviceType                      = DEVICE_CROWNSTONE_BUILTIN_ONE;
+	config->deviceType                      = DEVICE_CROWNSTONE_OUTLET;
 
 	// All values below are set to something rather than nothing, but are not truly in use.
 	config->voltageOffset[GAIN_SINGLE]      = 1000;
