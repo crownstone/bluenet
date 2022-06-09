@@ -215,7 +215,7 @@ void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg
 }
 
 cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("MulticastAcked addToQueue", item.metaData);
+	printMeshQueueItem("MulticastAcked addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
 	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
@@ -379,7 +379,7 @@ void MeshModelMulticastAcked::checkDone() {
 	// Check acks.
 	if (_ackedStonesBitmask.isAllBitsSet()) {
 		LOGi("Received ack from all stones.");
-		MeshUtil::printQueueItem(" ", item.metaData);
+		printMeshQueueItem(" ", item.metaData);
 
 		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
@@ -395,7 +395,7 @@ void MeshModelMulticastAcked::checkDone() {
 	// Check for timeout.
 	if (_processCallsLeft == 0) {
 		LOGi("Timeout.");
-		MeshUtil::printQueueItem(" ", item.metaData);
+		printMeshQueueItem(" ", item.metaData);
 
 		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
 		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);

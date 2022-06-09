@@ -80,6 +80,12 @@ enum CommandHandlerTypes {
 	CTRL_CMD_FILTER_COMMIT               = 112,
 	CTRL_CMD_FILTER_GET_SUMMARIES        = 113,
 
+	// Internal usage.
+
+	// Used for a control command state.
+	CTRL_CMD_NONE                        = 0xFFFE,
+
+	// Used as default value when converting a number to this enum.
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
 
