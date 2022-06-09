@@ -59,12 +59,11 @@ void Dimmer::start() {
 	if (!_hasDimmer) {
 		return;
 	}
-	LOGd("start");
-	assert(_initialized == true, "Not initialized");
 	if (_started) {
 		return;
 	}
-	_started = true;
+	LOGd("start");
+	assert(_initialized == true, "Not initialized");
 
 	enable();
 
@@ -83,6 +82,8 @@ void Dimmer::start() {
 			PWM::getInstance().start(startDimmerOnZeroCrossing);
 			break;
 	}
+
+	_started = true;
 }
 
 bool Dimmer::set(uint8_t intensity, bool fade) {
