@@ -15,8 +15,6 @@
 #include <test/cs_Test.h>
 
 void Dimmer::init(const boards_config_t& board) {
-	initialized = true;
-
 	hardwareBoard = board.hardwareBoard;
 	pinEnableDimmer = board.pinEnableDimmer;
 	_hasDimmer = board.pinDimmer != PIN_NONE;
@@ -44,6 +42,8 @@ void Dimmer::init(const boards_config_t& board) {
 	pwmConfig.channels[0].inverted = board.flags.dimmerInverted;
 
 	PWM::getInstance().init(pwmConfig);
+
+	initialized = true;
 }
 
 bool Dimmer::hasDimmer() {
@@ -51,6 +51,9 @@ bool Dimmer::hasDimmer() {
 }
 
 void Dimmer::start() {
+	if (!_hasDimmer) {
+		return;
+	}
 	LOGd("start");
 	assert(initialized == true, "Not initialized");
 	if (started) {
@@ -78,6 +81,9 @@ void Dimmer::start() {
 }
 
 bool Dimmer::set(uint8_t intensity, bool fade) {
+	if (!_hasDimmer) {
+		return false;
+	}
 	LOGd("set %u fade=%u", intensity, fade);
 	assert(initialized == true, "Not initialized");
 	if (!enabled && intensity > 0) {
@@ -94,11 +100,17 @@ bool Dimmer::set(uint8_t intensity, bool fade) {
 }
 
 void Dimmer::setSoftOnSpeed(uint8_t speed) {
+	if (!_hasDimmer) {
+		return;
+	}
 	LOGd("setSoftOnSpeed %u", speed);
 	softOnfSpeed = speed;
 }
 
 void Dimmer::enable() {
+	if (!_hasDimmer) {
+		return;
+	}
 	LOGd("enable");
 	if (pinEnableDimmer != PIN_NONE) {
 		nrf_gpio_pin_set(pinEnableDimmer);
