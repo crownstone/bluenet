@@ -94,7 +94,6 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	if (id == 0 || id == _myId) {
 		return;
 	}
-//	auto compressedRssiData = compressRssi(rssi,channel);
 
 	uint8_t index = find(id);
 	if (index == INDEX_NOT_FOUND) {
@@ -318,7 +317,7 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 	}
 
 	if constexpr (TripwireResearch) {
-		// immediately send noops as neighbor message over the mesh for low latency tripwire.
+		LOGMeshTopologyVerbose("forward noop as neighbour mesh msg for tripwire");
 		if(packet.type == CS_MESH_MODEL_TYPE_CMD_NOOP) {
 			neighbour_node_t node = {};
 			clearNeighbourRssi(node);
@@ -413,7 +412,7 @@ void MeshTopology::handleEvent(event_t &evt) {
 			}
 
 			if constexpr(TripwireResearch) {
-				// send a noop at every tick for high frequency trip wire
+				LOGMeshTopologyVerbose("send a noop for tripwire");
 				sendNoop();
 			}
 
