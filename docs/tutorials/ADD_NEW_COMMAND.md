@@ -127,7 +127,16 @@ therefore not always be written immediately.
 
 For this you will need to use notifications.
 
-## Notifications
+## Asynchronous commands
+
+When your command is asynchronous, it should return `WAIT_FOR_SUCCESS`. This will block other commands from being processed, so it should not actually take that long.
+Once the command is done, dispatch the event `CMD_RESOLVE_ASYNC_CONTROL_COMMAND` with the result. The command handler cached the source and will decide whether to send the result via BLE or UART.
+
+An example of a command doing this is `CTRL_CMD_SETUP`. The Setup class starts writing to flash and returns `WAIT_FOR_SUCCESS`. Then it waits for the writes to be done. Once the writes are done, it resolves the control command.
+
+An example with data in the final result is the command `CTRL_CMD_HUB_DATA`. The data is sent to a hub via uart, and the user has to wait for the hub to reply via uart. Once the reply is received, the UartCommandHandler resolves the control command.
+
+## Background: implementation of result notifications
 
 The [CrownstoneService](../../source/src/services/cs_CrownstoneService.cpp) is where the characteristics are defined. See
 also the protocol [document](../protocol/PROTOCOL.md#crownstone-service). The `_controlCharacteristic` is the characteristic that 
@@ -154,7 +163,3 @@ the data you will have to access through `_resultPacketAccessor` or `readBuf.dat
 Note that on a write, for a while the `result.buf.data` buffer in `_resultPacketAccessor` will be available for the 
 `handleCommand()` function. If there is an incoming write while we are waiting for an asynchronous `writeResults`
 call, this can overwrite what's in that buffer through a second call to `handleCommand()`.
-
-Currently, for asynchronous communication it is only used when `CS_TYPE::EVT_SETUP_DONE` is received in 
-[CrownstoneService](../../source/src/services/cs_CrownstoneService.cpp). Then it writes
-`writeResult(CTRL_CMD_SETUP, result)` with `cs_result_t result(ERR_SUCCESS)`.

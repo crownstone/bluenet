@@ -43,7 +43,7 @@ enum SetupConfigBit {
  * Waits for all state variables to be written to flash.
  * Then sets the operation mode.
  * Waits for operation mode to be written to flash.
- * EVT_SETUP_DONE is sent.
+ * CMD_RESOLVE_ASYNC_CONTROL_COMMAND is sent.
  * Then, the device will reboot after some time.
  */
 class Setup : EventListener {
