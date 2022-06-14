@@ -31,15 +31,12 @@ void Watchdog::init() {
 	nrfx_wdt_config_t config;
 	config.behaviour = (nrf_wdt_behaviour_t)NRFX_WDT_CONFIG_BEHAVIOUR;
 	config.reload_value = CS_WATCHDOG_TIMEOUT_MS;
-#if NORDIC_SDK_VERSION >= 17
 	config.interrupt_priority = CS_WATCHDOG_PRIORITY;
-#endif
 	LOGi("Init watchdog with %u ms timeout", CS_WATCHDOG_TIMEOUT_MS);
 
 	uint32_t err_code;
 
 	err_code = nrfx_wdt_init(&config, &handleTimeout);
-//	err_code = nrfx_wdt_init(&config, NULL);
 	APP_ERROR_CHECK(err_code);
 
 	err_code = nrfx_wdt_channel_alloc(&_channelId);

@@ -180,7 +180,7 @@
 
 // <0=> Include WDT IRQ handling
 // <1=> Remove WDT IRQ handling
-#define NRFX_WDT_CONFIG_NO_IRQ 1
+#define NRFX_WDT_CONFIG_NO_IRQ 0
 
 // Enable TWI
 // Still TWI0_ENABLED rather than NRFX_TWI0_ENABLED which won't work
