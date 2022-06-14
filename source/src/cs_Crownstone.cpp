@@ -957,14 +957,10 @@ int main() {
 
 	// Init GPIO pins early in the process
 	if (board.flags.usesNfcPins) {
-<<<<<<< HEAD
-		enableNfcPinsAsGpio();
-=======
 		cs_ret_code_t retCode = enableNfcPinsAsGpio();
 		if (retCode != ERR_SUCCESS) {
 			// Not much we can do here.
 		}
->>>>>>> master
 	}
 
 	// Turn dimmer off.
