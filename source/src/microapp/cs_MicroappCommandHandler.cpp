@@ -542,11 +542,11 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			TYPIFY(CMD_SEND_MESH_MSG) eventData;
 			bool broadcast = (cmd->stoneId == 0);
 			if (!broadcast) {
-				LOGi("Send mesh message to %i", cmd->stoneId);
+				LOGv("Send mesh message to %i", cmd->stoneId);
 				eventData.idCount   = 1;
 				eventData.targetIds = &(cmd->stoneId);
 			} else {
-				LOGi("Broadcast mesh message");
+				LOGv("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
 			eventData.flags.flags.reliable    = !broadcast;
@@ -558,7 +558,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
 			event.dispatch();
 			if (event.result.returnCode != ERR_SUCCESS) {
-				LOGi("Failed to send message, return code: %u", event.result.returnCode);
+				LOGi("Failed to send mesh message, return code: %u", event.result.returnCode);
 				return event.result.returnCode;
 			}
 			break;
@@ -573,7 +573,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			// TODO: This assumes nothing will overwrite the buffer
 			cmd->available = !_meshMessageBuffer.empty();
 			if (cmd->available) {
-				LOGi("Available mesh messages");
+				LOGv("Available mesh messages");
 			} else {
 				LOGv("No mesh messages available");
 			}
@@ -594,7 +594,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			}
 
 			auto message = _meshMessageBuffer.pop();
-			LOGi("Pop message for microapp");
+			LOGv("Pop message for microapp");
 
 			// TODO: This assumes nothing will overwrite the buffer
 			cmd->stoneId = message.stoneId;
@@ -623,21 +623,24 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
  *
  * TODO: This should actually be implemented differently.
  */
+
+#define FILTER_MESH_MESSAGES
+
 void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
 
 #ifdef FILTER_MESH_MESSAGES
 	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		LOGi("Mesh message received, but not for microapp");
+		LOGd("Mesh message received, but not for microapp");
 		return;
 	}
 #endif
 	if (_meshMessageBuffer.full()) {
-		LOGd("Dropping message, buffer is full");
+		LOGi("Dropping message, buffer is full");
 		return;
 	}
 
 	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-		LOGd("Message is too large: %u", event.msg.len);
+		LOGi("Message is too large: %u", event.msg.len);
 		return;
 	}
 
