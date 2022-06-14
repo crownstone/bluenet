@@ -69,6 +69,8 @@
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 #include "bootloader/cs_MemoryLayout.h"
+#include "drivers/cs_Uicr.h"
+#include "protocol/cs_ErrorCodes.h"
 
 static void on_error(void)
 {

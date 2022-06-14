@@ -24,12 +24,6 @@ uint32_t g_RAM_R1_BASE = ${RAM_R1_BASE};
 
 uint32_t g_RAM_APPLICATION_AMOUNT = ${RAM_APPLICATION_AMOUNT};
 
-// The address of where to write the hardware board type (it is a UICR register)
-uint32_t g_HARDWARE_BOARD_ADDRESS = ${HARDWARE_BOARD_ADDRESS};
-
-// The default hardware board
-uint32_t g_DEFAULT_HARDWARE_BOARD = ${DEFAULT_HARDWARE_BOARD};
-
 // Number of microapps supported
 uint8_t g_MICROAPP_COUNT = ${MICROAPP_COUNT};
 

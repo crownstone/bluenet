@@ -53,6 +53,7 @@ void asACR01B13B(boards_config_t* config) {
 	config->flags.enableLeds                   = false;
 	config->flags.dimmerTempInverted           = true;
 	config->flags.usesNfcPins                  = true;
+	config->flags.hasAccuratePowerMeasurement  = true;
 	config->flags.canTryDimmingOnBoot          = true;
 	config->flags.canDimOnWarmBoot             = true;
 	config->flags.dimmerOnWhenPinsFloat        = true;

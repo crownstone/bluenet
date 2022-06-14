@@ -44,6 +44,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <drivers/cs_Uicr.h>
 #include <drivers/cs_Watchdog.h>
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_RC5.h>
@@ -59,7 +60,6 @@
 #include <util/cs_Utils.h>
 
 extern "C" {
-#include <nrf_nvmc.h>
 #include <util/cs_Syscalls.h>
 }
 
@@ -125,39 +125,15 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
  * the runtime always tries to overwrite it with the (let's hope) proper state.
  */
 void overwrite_hardware_version() {
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("Write board type into UICR");
-		nrf_nvmc_write_word(g_HARDWARE_BOARD_ADDRESS, g_DEFAULT_HARDWARE_BOARD);
-	}
-	LOGd("Board: %p", hardwareBoard);
-}
-
-/** Enable NFC pins to be used as GPIO.
- *
- * The address 0x10001000 + 0x20C contains 32 bits of which the least significant bit can be either zero or one.
- * If it is 1 the pins operates as NFC antenna pins. It configures the protection for NFC operation.
- * If it is 0 the pins can be used as GPIO.
- *
- * Warning: This is stored in UICR, so it's persistent.
- * Warning: NFC pins leak a bit of current when not at same voltage level.
- * Warning: This might already have been done by the bootloader (has the same function).
- */
-void enableNfcPinsAsGpio() {
-	uint32_t nfcbit = NRF_UICR->NFCPINS & 0x1;
-	if (nfcbit != 0) {
-		nrf_nvmc_write_word((uint32_t) & (NRF_UICR->NFCPINS), 0xFFFFFFFE);
+	cs_ret_code_t retCode = writeHardwareBoard();
+	LOGd("Board: %p", getHardwareBoard());
+	if (retCode != ERR_SUCCESS) {
+		LOGe("Failed to write hardware board: retCode=%u", retCode);
 	}
 }
 
 void printNfcPins() {
-	uint32_t nfcbit = NRF_UICR->NFCPINS & 0x1;
-	if (nfcbit == 1) {
-		LOGd("NFC pins enabled as GPIO");
-	}
-	else {
-		LOGd("NFC pins disabled as GPIO");
-	}
+	LOGd("NFC pins used as gpio: %u", canUseNfcPinsAsGpio());
 }
 
 void on_exit(void) {
@@ -981,7 +957,14 @@ int main() {
 
 	// Init GPIO pins early in the process
 	if (board.flags.usesNfcPins) {
+<<<<<<< HEAD
 		enableNfcPinsAsGpio();
+=======
+		cs_ret_code_t retCode = enableNfcPinsAsGpio();
+		if (retCode != ERR_SUCCESS) {
+			// Not much we can do here.
+		}
+>>>>>>> master
 	}
 
 	// Turn dimmer off.
