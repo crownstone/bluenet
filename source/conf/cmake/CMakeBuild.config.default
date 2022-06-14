@@ -300,8 +300,17 @@ UICR_DFU_INDEX=0
 # The second 4 bytes in the UICR (0x10001084) store the hardware board type.
 UICR_BOARD_INDEX=1
 
+# The UICR customer index that are used. Must match the UICR addresses (see in chip product spec sheet).
+UICR_INDEX_FAMILY_MARKET_TYPE=2
+UICR_INDEX_MAJOR_MINOR_PATCH=3
+UICR_INDEX_PROD_DATE_HOUSING=4
+
 # The address (in UICR) where the hardware board type is written and read
 HARDWARE_BOARD_ADDRESS=0x10001084
+FAMILY_MARKET_TYPE_ADDRESS=0x10001088
+MAJOR_MINOR_PATCH_ADDRESS=0x1000108C
+PROD_DATE_HOUSING_ADDRESS=0x10001090
+#FIRST_UNUSED_UICR_ADDRESS=0x10001094
 
 # Default configuration values (will be overruled after setup for example)
 SPHERE_ID=0
