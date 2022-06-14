@@ -133,22 +133,6 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
     }
 }
 
-/** Enable NFC pins to be used as GPIO.
- *
- * The address 0x10001000 + 0x20C contains 32 bits of which the least significant bit can be either zero or one.
- * If it is 1 the pins operates as NFC antenna pins. It configures the protection for NFC operation.
- * If it is 0 the pins can be used as GPIO.
- *
- * Warning: this is stored in UICR, so it's persistent.
- * Warning: NFC pins leak a bit of current when not at same voltage level.
- */
-void enableNfcPinsAsGpio() {
-	uint32_t nfcbit = NRF_UICR->NFCPINS & 0x1;
-	if (nfcbit != 0) {
-		nrf_nvmc_write_word((uint32_t) & (NRF_UICR->NFCPINS), 0xFFFFFFFE);
-	}
-}
-
 /**
  * Make sure all GPIO is initialized.
  */
