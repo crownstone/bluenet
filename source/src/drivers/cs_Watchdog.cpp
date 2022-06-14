@@ -14,20 +14,14 @@
 
 // ============== Static members ==============
 nrfx_wdt_channel_id Watchdog::_channelId;
-bool Watchdog::_dataToWrite;
-uint8_t Watchdog::_data[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
-uint8_t Watchdog::_dataSize;
 
+/*
+ * Can be used to write information towards the bootloader or the app across a warm boot.
+ */
 void handleTimeout() {
-	if (Watchdog::hasDataToWrite()) {
-		setRamData(IPC_INDEX_WATCHDOG_INFO, Watchdog::getData(), Watchdog::getDataSize());
-	}
 }
 
 void Watchdog::init() {
-	_dataToWrite = false;
-	_dataSize = 0;
-
 	nrfx_wdt_config_t config;
 	config.behaviour = (nrf_wdt_behaviour_t)NRFX_WDT_CONFIG_BEHAVIOUR;
 	config.reload_value = CS_WATCHDOG_TIMEOUT_MS;
@@ -53,13 +47,13 @@ void Watchdog::kick() {
 }
 
 void Watchdog::setOperatingStateToWriteOnTimeout(uint8_t* data, uint8_t dataSize) {
-	_dataSize = dataSize;
-	memcpy(_data, data, dataSize);
-	_dataToWrite = true;
+	LOGv("Set microapp as dirty");
+	setRamData(IPC_INDEX_WATCHDOG_INFO, data, dataSize);
 }
 
 void Watchdog::clearOperatingStateToWriteOnTimeout() {
-	_dataToWrite = false;
+	LOGv("Set microapp as clean");
+	clearRamData(IPC_INDEX_WATCHDOG_INFO);
 }
 
 void Watchdog::clearOperatingStateOfPreviousTimeout() {
@@ -67,17 +61,7 @@ void Watchdog::clearOperatingStateOfPreviousTimeout() {
 }
 
 void Watchdog::getOperatingStateOfPreviousTimeout(uint8_t *data, uint8_t & dataSize) {
+	LOGv("Get microapp state of previous timeout");
 	getRamData(IPC_INDEX_WATCHDOG_INFO, data, dataSize, &dataSize);
 }
 
-uint8_t* Watchdog::getData() {
-	return _data;
-}
-
-uint8_t Watchdog::getDataSize() {
-	return _dataSize;
-}
-
-bool Watchdog::hasDataToWrite() {
-	return _dataToWrite;
-}

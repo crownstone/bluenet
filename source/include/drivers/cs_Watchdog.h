@@ -35,8 +35,8 @@ public:
 	static void kick();
 
 	/**
-	 * We write an "operating state" towards the watchdog that can write this to some part of memory that is preserved
-	 * across reboots. This only happens when the watchdog is triggered.
+	 * We write an "operating state" towards the watchdog that will write this to some part of memory that is preserved
+	 * across reboots.
 	 * It is written to index IPC_INDEX_WATCHDOG_INFO in IPC RAM.
 	 */
 	static void setOperatingStateToWriteOnTimeout(uint8_t* data, uint8_t dataSize);
@@ -56,18 +56,6 @@ public:
 	 */
 	static void clearOperatingStateOfPreviousTimeout();
 
-	static uint8_t* getData();
-
-	static uint8_t getDataSize();
-
-	static bool hasDataToWrite();
-
 private:
 	static nrfx_wdt_channel_id _channelId;
-
-	static uint8_t _data[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
-
-	static uint8_t _dataSize;
-
-	static bool _dataToWrite;
 };
