@@ -46,6 +46,20 @@ void Gpio::init(const boards_config_t & board) {
 	_initialized = true;
 	_boardConfig = &board;
 	LOGi("Configured %i GPIO pins", activePins);
+
+	// Hardcoding for 3-phase current monitoring
+	for (int i = 0;  i < 6; ++i) {
+		configure(i, GpioDirection::OUTPUT, GpioPullResistor::GPR_NONE, GpioPolarity::GP_NONE);
+	}
+
+	uint8_t low = 0;
+	uint8_t high = 1;
+	write(0, low);
+	write(1, low);
+	write(2, high);
+	write(3, low);
+	write(4, low);
+	write(5, high);
 }
 
 bool Gpio::pinExists(uint8_t pin_index) {
@@ -111,7 +125,7 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 
 	nrf_gpio_pin_pull_t nrf_pull;
 	switch(pull) {
-		case GpioPullResistor::NONE:
+		case GpioPullResistor::GPR_NONE:
 			nrf_pull = NRF_GPIO_PIN_NOPULL;
 			LOGi("Set pin %i with index %i to use no pull-up", pin, pin_index);
 			break;
@@ -204,6 +218,25 @@ void Gpio::write(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
 		LOGi("Write value %i to pin %i (pin index %i)", buf[i], pin, pin_index);
 		nrf_gpio_pin_write(pin, buf[i]);
 	}
+}
+
+/*
+ * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
+ */
+void Gpio::write(uint8_t pin_index, uint8_t value) {
+
+	pin_t pin = getPin(pin_index);
+	if (pin == PIN_NONE) {
+		LOGi("Can't write pin with pin index %i", pin_index);
+		return;
+	}
+
+	// Invert value to write if leds are inverted
+	if (isLedPin(pin_index) && _boardConfig->flags.ledInverted) {
+		value = !value;
+	}
+	LOGi("Write value %i to pin %i (pin index %i)", value, pin, pin_index);
+	nrf_gpio_pin_write(pin, value);
 }
 
 void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {

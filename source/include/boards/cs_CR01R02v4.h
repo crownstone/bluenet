@@ -42,32 +42,27 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinDimmer                       = PIN_NONE;
 	config->pinRelayOn                      = 12;
 	config->pinRelayOff                     = 11;
-	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(3);
-	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(30);
+	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(5);
+	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(6); // 7
 	// Will become available as ref=ain0 (config.referencePin)
-	config->pinAinZeroRef                   = GpioToAin(2);
+	config->pinAinZeroRef                   = PIN_NONE;
 	// config->pinAinDimmerTemp                = PIN_NONE;
 	config->pinAinDimmerTemp                = GpioToAin(4);
 
-	config->pinRx                           = GetGpioPin(1, 8);
-	config->pinTx                           = GetGpioPin(1, 9);
+	config->pinRx                           = 3;
+	config->pinTx                           = 28;
 
-	config->pinGpio[0]                      = PIN_NONE;
-	config->pinGpio[1]                      = PIN_NONE;
-	config->pinGpio[2]                      = PIN_NONE;
-	config->pinGpio[3]                      = PIN_NONE;
+	config->pinGpio[0]                      = 17;
+	config->pinGpio[1]                      = 20;
+	config->pinGpio[2]                      = 13;
+	config->pinGpio[3]                      = 14;
+	config->pinGpio[4]                      = 6;
+	config->pinGpio[5]                      = 7;
 
 	config->pinButton[0]                    = PIN_NONE;
 	config->pinButton[1]                    = 8;
 	config->pinButton[2]                    = 24;
 	config->pinButton[3]                    = 25;
-
-	config->pinFlash.cs                     = 19;
-	config->pinFlash.clk                    = 20;
-	config->pinFlash.dio[0]                 = 21;
-	config->pinFlash.dio[1]                 = 22;
-	config->pinFlash.dio[2]                 = 23;
-	config->pinFlash.dio[3]                 = 24;
 
 	// The fourth LED is used to indicate the state of the dimmer
 	config->pinLed[0]                       = PIN_NONE;
@@ -85,9 +80,9 @@ void asCR01R02v4(boards_config_t* config) {
 	config->deviceType                      = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	// All values below are set to something rather than nothing, but are not truly in use.
-	config->voltageOffset[GAIN_SINGLE]      = 1000;
-	config->currentOffset[GAIN_LOW]         = 1000;
-	config->currentOffset[GAIN_HIGH]        = 1000;
+	config->voltageOffset[GAIN_SINGLE]      = 0;
+	config->currentOffset[GAIN_LOW]         = 0;
+	config->currentOffset[GAIN_HIGH]        = 0;
 	config->powerOffsetMilliWatt            = 0;
 
 	// ADC values [0, 4095] map to [0, 3.6V].

@@ -18,9 +18,9 @@ typedef uint8_t pin_t;
 
 enum GpioDirection { INPUT = 1, OUTPUT = 2, SENSE = 3 };
 
-enum GpioPullResistor { NONE = 0, UP = 1, DOWN = 2 };
+enum GpioPullResistor { GPR_NONE = 0, UP = 1, DOWN = 2 };
 
-enum GpioPolarity { HITOLO = 1, LOTOHI = 2, TOGGLE = 3 };
+enum GpioPolarity { GP_NONE = 0, HITOLO = 1, LOTOHI = 2, TOGGLE = 3 };
 
 typedef struct pin_info_t {
 	bool event;
@@ -73,6 +73,9 @@ private:
 
 	//! Write to pin
 	void write(uint8_t pin_index, uint8_t *buf, uint8_t & length);
+	
+	//! Write to pin, single value
+	void write(uint8_t pin_index, uint8_t value);
 
 	//! Read from pin
 	void read(uint8_t pin_index, uint8_t *buf, uint8_t & length);
