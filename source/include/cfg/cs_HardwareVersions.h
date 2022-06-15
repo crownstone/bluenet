@@ -62,11 +62,6 @@ static inline const char* get_hardware_version() {
 
 	// TODO: get hardware version from UICR data.
 
-<<<<<<< HEAD
-=======
-	// Can't use LOGe here, as the bootloader also uses this file.
-
->>>>>>> master
 	switch (hardwareBoard) {
 		// CROWNSTONE PLUGS
 		case ACR01B2A: return "10102000100";
