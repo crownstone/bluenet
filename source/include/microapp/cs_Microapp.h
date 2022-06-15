@@ -57,11 +57,6 @@ private:
 	 * App state is updated in this call, make sure to store the state afterwards.
 	 */
 	cs_ret_code_t validateApp(uint8_t index);
-	
-	/**
-	 * Handle watchdog info if available for app.
-	 */
-	cs_ret_code_t handleWatchdogInfo(uint8_t index);
 
 	/**
 	 * Enables app: checks sdk version.
@@ -93,7 +88,7 @@ private:
 	 * Checks app state and returns true if this app is allowed to run.
 	 */
 	bool canRunApp(uint8_t index);
-	
+
 	/**
 	 * To be called every tick.
 	 * Calls all microapps.

@@ -65,17 +65,9 @@ void Microapp::loadApps() {
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
 		retCode = validateApp(index);
-		if (retCode == ERR_SUCCESS) {
+		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT && retCode == ERR_SUCCESS) {
 			LOGMicroappInfo("Enable microapp %u", index);
 			enableApp(index);
-		}
-		if (retCode != ERR_SUCCESS && g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
-			if (_states[index].watchdogTriggered) {
-				LOGMicroappInfo("Sorry, watchdog trigger disabled app %u. Reenable to use", index);
-			} else {
-				LOGMicroappInfo("Enable microapp %u", index);
-				enableApp(index);
-			}
 		}
 		storeState(index);
 		startApp(index);
@@ -99,7 +91,7 @@ void Microapp::loadState(uint8_t index) {
 /*
  * Validate the app.
  *
- * First return a possible error of an incorrect checksum. Only then return when there is no proper state information
+ * First return a possible error of an incorrect checksum. Only then return when there is no proper state information 
  * available. This means that it can be used when AUTO_ENABLE_MICROAPP_ON_BOOT is set.
  */
 cs_ret_code_t Microapp::validateApp(uint8_t index) {
@@ -119,13 +111,6 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 		LOGMicroappInfo("Microapp %u has no data", index);
 		return ERR_WRONG_STATE;
 	}
-
-	retCode = handleWatchdogInfo(index);
-	if (retCode != ERR_SUCCESS) {
-		state.watchdogTriggered = 1;
-		LOGMicroappInfo("Microapp %u had the watchdog triggered", index);
-		return ERR_WRONG_STATE;
-	}
 	
 	microapp_binary_header_t appHeader;
 	storage.getAppHeader(index, appHeader);
@@ -143,15 +128,6 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	state.checksum = appHeader.checksum;
 	state.checksumHeader = appHeader.checksumHeader;
 	state.checksumTest = MICROAPP_TEST_STATE_PASSED;
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t Microapp::handleWatchdogInfo(uint8_t index) {
-	LOGMicroappInfo("Check if watchdog detected error for app %u", index);
-	MicroappController & controller = MicroappController::getInstance();
-	if (controller.watchdogTriggered(index)) {
-		return ERR_UNSAFE;
-	}
 	return ERR_SUCCESS;
 }
 
@@ -178,17 +154,16 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 cs_ret_code_t Microapp::startApp(uint8_t index) {
 	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
-		LOGMicroappInfo("Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u watchdogTrigger=%u failedFunction=%u",
+		LOGMicroappInfo("Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
 				_states[index].enabled,
 				_states[index].checksumTest,
 				_states[index].memoryUsage,
 				_states[index].bootTest,
-				_states[index].watchdogTriggered,
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
-	MicroappController & controller = MicroappController::getInstance();
-	controller.callApp(index);
+	MicroappController & protocol = MicroappController::getInstance();
+	protocol.callApp(index);
 	return ERR_SUCCESS;
 }
 
@@ -199,7 +174,6 @@ void Microapp::resetState(uint8_t index) {
 }
 
 void Microapp::resetTestState(uint8_t index) {
-	_states[index].watchdogTriggered = 0;
 	_states[index].checksumTest = MICROAPP_TEST_STATE_UNTESTED;
 	_states[index].memoryUsage = MICROAPP_TEST_STATE_UNTESTED;
 	_states[index].tryingFunction = MICROAPP_FUNCTION_NONE;
@@ -231,18 +205,16 @@ cs_ret_code_t Microapp::storeState(uint8_t index) {
  *   - There shouldn't be a failed function? TODO: Explain.
  */
 bool Microapp::canRunApp(uint8_t index) {
-	LOGMicroappVerbose("enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u watchdogTrigger=%u failedFunction=%u",
+	LOGMicroappVerbose("enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
 			_states[index].enabled,
 			_states[index].checksumTest,
 			_states[index].memoryUsage,
 			_states[index].bootTest,
-			_states[index].watchdogTriggered,
 			_states[index].failedFunction);
 	return _states[index].enabled &&
 			_states[index].checksumTest == MICROAPP_TEST_STATE_PASSED &&
 			_states[index].memoryUsage != 1 &&
 			_states[index].bootTest != MICROAPP_TEST_STATE_FAILED &&
-			_states[index].watchdogTriggered != 1 &&
 			_states[index].failedFunction == MICROAPP_FUNCTION_NONE;
 }
 

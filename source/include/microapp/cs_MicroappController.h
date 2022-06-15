@@ -37,20 +37,6 @@ struct microapp_ble_isr_t {
 };
 
 /**
- * Struct to store in IPC RAM for watchdog (will be preserved over boots).
- *
- * TODO: TO IMPLEMENT: array of appIndex
- */
-struct watchdog_data_t {
-	uint8_t flags;
-	uint8_t appRunning[MAX_MICROAPPS];
-};
-
-enum class MicroappWatchdogFlags {
-	CS_WATCHDOG_MICROAPP_BUILD = 1,
-};
-
-/**
  * The class MicroappController has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
  */
@@ -128,16 +114,6 @@ private:
 	 * Maps digital pins to interrupts.
 	 */
 	int digitalPinToInterrupt(int pin);
-
-	/**
-	 * Data to be stored by the watchdog.
-	 */
-	uint8_t* _watchdogData;
-
-	/**
-	 * Length of data.
-	 */
-	uint8_t _watchdogDataLength;
 
 protected:
 	/**
@@ -218,11 +194,6 @@ public:
 	 * Initialize memory.
 	 */
 	uint16_t initMemory(uint8_t appIndex);
-
-	/**
-	 * Check if watchdog has been triggered.
-	 */
-	bool watchdogTriggered(uint8_t appIndex);
 
 	/**
 	 * Actually run the app.
