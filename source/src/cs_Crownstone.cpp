@@ -314,6 +314,7 @@ void Crownstone::initDrivers0() {
 
 	cs_ret_code_t retCode = _storage->init();
 	if (retCode != ERR_SUCCESS) {
+		LOGi("No success. Erase pages");
 		// We can try to erase all pages.
 		retCode = _storage->eraseAllPages();
 		if (retCode != ERR_SUCCESS) {
@@ -324,6 +325,7 @@ void Crownstone::initDrivers0() {
 		return;
 	}
 	// Wait for storage initialized event.
+	LOGi("Success. Wait");
 }
 
 void Crownstone::initDrivers1() {

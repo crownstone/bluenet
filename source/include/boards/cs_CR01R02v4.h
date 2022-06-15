@@ -49,8 +49,11 @@ void asCR01R02v4(boards_config_t* config) {
 	// config->pinAinDimmerTemp                = PIN_NONE;
 	config->pinAinDimmerTemp                = GpioToAin(4);
 
-	config->pinRx                           = 3;
-	config->pinTx                           = 28;
+//	config->pinRx                           = 3;
+//	config->pinTx                           = 28;
+	
+	config->pinRx                           = 9;
+	config->pinTx                           = 10;
 
 	config->pinGpio[0]                      = 17;
 	config->pinGpio[1]                      = 20;
