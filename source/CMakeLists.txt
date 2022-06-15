@@ -267,6 +267,10 @@ message(STATUS "Configure cs_AutoConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
+message(STATUS "Configure cs_SharedConfig.c file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
+
 # auto-generate linker files
 
 message(STATUS "Configure nrf_symbols.ld file")
@@ -435,9 +439,9 @@ add_custom_target(uart_binary_client
 	COMMENT "UART client, runs in background"
 	)
 
-add_custom_target(uart_raw_binary_client
-	COMMAND ${CMAKE_COMMAND} -E echo "** UART raw+binary client, keep running in separate shell"
-	COMMAND ./log-client.sh -r
+add_custom_target(uart_combined_client
+	COMMAND ${CMAKE_COMMAND} -E echo "** UART plaintext and binary client, keep running in separate shell"
+	COMMAND ./log-client.sh -p
 	DEPENDS write_runtime_config
 	COMMENT "UART client, runs in background"
 	)

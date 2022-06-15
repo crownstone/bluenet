@@ -8,6 +8,20 @@
 
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_AutoConfig.h>
+#include <drivers/cs_Uicr.h>
+#include <protocol/cs_UicrPacket.h>
+#include <stdio.h>
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+//
+//#include "nrf52.h"
+//#include "string.h"
+//
+//#ifdef __cplusplus
+//}
+//#endif
 
 /*
 	----------------------
@@ -20,7 +34,7 @@
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type
+	  |  |  |--------------  Product Type, see also cs_DeviceTypes.h
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
 	
@@ -44,11 +58,15 @@
  */
 static inline const char* get_hardware_version() {
 
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
-	}
+	uint32_t hardwareBoard = getHardwareBoard();
 
+	// TODO: get hardware version from UICR data.
+
+<<<<<<< HEAD
+=======
+	// Can't use LOGe here, as the bootloader also uses this file.
+
+>>>>>>> master
 	switch (hardwareBoard) {
 		// CROWNSTONE PLUGS
 		case ACR01B2A: return "10102000100";
@@ -75,8 +93,8 @@ static inline const char* get_hardware_version() {
 		case ACR01B10D: return "10106000100";
 
 		// CROWNSTONE BUILTIN TWOS
-		case ACR01B13B: return "10107000100";
-		case ACR01B15A: return "10107000200";
+		case ACR01B13B: return "10108000100";
+		case ACR01B15A: return "10108000200";
 
 		// OUTLETS
 		case CR01R02v4: return "10108000400";
@@ -91,4 +109,19 @@ static inline const char* get_hardware_version() {
 			return "Unknown";
 		}
 	}
+}
+
+// The string is always 11 chars, add 1 byte for the null terminator.
+static char versionString[12];
+
+static inline const char* get_hardware_version_from_uicr(const cs_uicr_data_t* uicrData) {
+	// Since you can't specify a max width, just use modulo to limit it.
+	sprintf(versionString, "%u%02u%02u%02u%02u%02u",
+			uicrData->productRegionFamily.fields.productFamily % 10,
+			uicrData->productRegionFamily.fields.region % 100,
+			uicrData->productRegionFamily.fields.productType % 100,
+			uicrData->majorMinorPatch.fields.major % 100,
+			uicrData->majorMinorPatch.fields.minor % 100,
+			uicrData->majorMinorPatch.fields.patch % 100);
+	return versionString;
 }

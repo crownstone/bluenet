@@ -11,17 +11,3 @@
 #if TICK_INTERVAL_MS > MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS
 #error "TICK_INTERVAL_MS must not be larger than MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS"
 #endif
-
-namespace MeshUtil {
-
-void printQueueItem(const char* prefix, const cs_mesh_queue_item_meta_data_t& metaData) {
-	LOGMeshModelDebug("%s id=%u type=%u priority=%u transmissionsOrTimeout=%u",
-			prefix,
-			metaData.id,
-			metaData.type,
-			metaData.priority,
-			metaData.transmissionsOrTimeout
-	);
-}
-
-}

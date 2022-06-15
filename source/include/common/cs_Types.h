@@ -339,7 +339,6 @@ enum class CS_TYPE: uint16_t {
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
 	EVT_SESSION_DATA_SET,                             // Session data and setup key are generated. Data pointer has to point to memory that stays valid!
-	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
 	CMD_GET_SWITCH_HISTORY,                           // Get the switch command history.
@@ -356,8 +355,6 @@ enum class CS_TYPE: uint16_t {
 	CMD_MICROAPP_REMOVE,                              // Microapp control command.
 	CMD_MICROAPP_ENABLE,                              // Microapp control command.
 	CMD_MICROAPP_DISABLE,                             // Microapp control command.
-	EVT_MICROAPP_UPLOAD_RESULT,                       // Uploaded chunk has been written to flash, or failed to do so.
-	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
 	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.       See BleCentral::connect().
@@ -385,8 +382,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_CS_CENTRAL_READ_RESULT,
 	EVT_CS_CENTRAL_WRITE_RESULT,
 
-	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
-	
 	CMD_MESH_TOPO_GET_MAC,                            // Get the MAC address of a given stone ID.
 	EVT_MESH_TOPO_MAC_RESULT,                         // The resulting MAC address.
 	CMD_MESH_TOPO_RESET,                              // Reset the stored mesh topology.
@@ -403,6 +398,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
 
 	EVT_MICROAPP_BLE_FILTER_INIT,                     // Microapp specific initialization of BLE filter
+
+	CMD_RESOLVE_ASYNC_CONTROL_COMMAND,                // When a control command returned WAIT_FOR_SUCCESS, this event finalizes that control command.
+	CMD_SEND_ASYNC_RESULT_TO_BLE,                     // Sends the async result to the user via BLE.
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 
@@ -604,7 +602,6 @@ typedef  void TYPIFY(EVT_RELAY_FORCED_ON);
 typedef  control_command_packet_t TYPIFY(CMD_CONTROL_CMD);
 typedef  void TYPIFY(EVT_SCAN_STARTED);
 typedef  void TYPIFY(EVT_SCAN_STOPPED);
-typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_data_t TYPIFY(EVT_SESSION_DATA_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STATE_FACTORY_RESET_DONE);
@@ -678,15 +675,12 @@ typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_VALIDATE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
-typedef cs_ret_code_t TYPIFY(EVT_MICROAPP_UPLOAD_RESULT);
-typedef cs_ret_code_t TYPIFY(EVT_MICROAPP_ERASE_RESULT);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
-typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
 typedef stone_id_t TYPIFY(CMD_MESH_TOPO_GET_MAC);
 typedef mesh_topo_mac_result_t TYPIFY(EVT_MESH_TOPO_MAC_RESULT);
 typedef void TYPIFY(CMD_MESH_TOPO_RESET);
@@ -704,6 +698,8 @@ typedef cs_gpio_read_t TYPIFY(EVT_GPIO_READ);
 typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 
 typedef cs_microapp_filter_init_t TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT);
+typedef cs_async_result_t TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND);
+typedef cs_async_result_t TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

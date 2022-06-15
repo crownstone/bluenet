@@ -76,8 +76,35 @@ private:
 
 	const boards_config_t* _boardConfig;
 
+	struct {
+		// Control command type we are waiting for. Set to CTRL_CMD_NONE for none.
+		CommandHandlerTypes type = CTRL_CMD_NONE;
+
+		// Source of the command.
+		cmd_source_with_counter_t source;
+
+		// Number of ticks until timeout.
+		uint16_t timeoutCountdown;
+	} _awaitingCommandResult;
+
+	static const uint32_t ASYNC_COMMAND_TIMEOUT_MS = 10000;
+
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
+
+	/*
+	 * Same as handleCommand, allows us to check the result code.
+	 */
+	void _handleCommand(
+			uint8_t protocolVersion,
+			const CommandHandlerTypes type,
+			cs_data_t commandData,
+			const cmd_source_with_counter_t source,
+			const EncryptionAccessLevel accessLevel,
+			cs_result_t & result
+			);
+
+	void resolveAsyncCommand(cs_async_result_t* result);
 
 	void handleCmdNop                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdGotoDfu                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);

@@ -127,7 +127,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 2     | Heartbeat                     | Optional  | -      | Heartbeat reply. Will be encrypted if the command was encrypted too.
 3     | Status                        | Never     | [Status](#crownstone-status-packet) | Status reply.
 4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
-10    | Control result                | Yes       | [Result packet](PROTOCOL.md#result-packet) | Result of a control command.
+10    | Control result                | Yes       | [Result packet](PROTOCOL.md#result-packet) | Result of a control command. If the result code is WAIT_FOR_SUCCESS, a control result will be sent again later. You need to wait for this second reply before sending the next command.
 11    | Hub data reply ack            | Optional  | -      | Simply an acknowledgement that the hub data reply was received by the crownstone. Will be encrypted if the command was encrypted too.
 9900  | Parsing failed                | Never     | -      | Your command was probably formatted incorrectly, is too large, has an invalid data type, or you don't have the required access level.
 9901  | Error reply                   | Never     | [Status](#crownstone-status-packet) | Your command was probably not encrypted while it should have been.

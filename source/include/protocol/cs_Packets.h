@@ -13,6 +13,7 @@
 #include <protocol/cs_MicroappPackets.h>
 #include <protocol/cs_ServiceDataPackets.h>
 #include <protocol/cs_Typedefs.h>
+#include <protocol/cs_UicrPacket.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
 #include <cstdint>
@@ -440,37 +441,6 @@ struct __attribute__((packed)) cs_mesh_iv_index_v5_t {
 struct __attribute__((packed)) cs_mesh_seq_number_v5_t {
 	uint32_t next_block;
 	uint8_t synchro_index;
-};
-
-struct __attribute__((packed)) cs_uicr_data_t {
-	uint32_t board;
-
-	union __attribute__((packed)) {
-		struct __attribute__((packed)) {
-			uint8_t productType;
-			uint8_t region;
-			uint8_t productFamily;
-		} fields;
-		uint32_t asInt;
-	} productRegionFamily;
-
-	union __attribute__((packed)) {
-		struct __attribute__((packed)) {
-			uint8_t patch;
-			uint8_t minor;
-			uint8_t major;
-		} fields;
-		uint32_t asInt;
-	} majorMinorPatch;
-
-	union __attribute__((packed)) {
-		struct __attribute__((packed)) {
-			uint8_t housing;
-			uint8_t week;  // week number
-			uint8_t year;  // last 2 digits of the year
-		} fields;
-		uint32_t asInt;
-	} productionDateHousing;
 };
 
 struct __attribute__((packed)) cs_adc_restarts_t {

@@ -632,7 +632,7 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 }
 
 static void connection_keep_alive_timeout([[maybe_unused]] void* p_context) {
-	LOGw("connection keep alive timeout!");
+	LOGi("connection keep alive timeout!");
 	Stack::getInstance().disconnect();
 }
 

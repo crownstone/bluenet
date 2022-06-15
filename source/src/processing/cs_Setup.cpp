@@ -162,9 +162,11 @@ void Setup::setNormalMode() {
 
 void Setup::finalize() {
 	LOGi("Setup done... Reset crownstone");
-	// set char value
-	event_t event1(CS_TYPE::EVT_SETUP_DONE);
-	EventDispatcher::getInstance().dispatch(event1);
+
+	TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_SETUP, ERR_SUCCESS);
+	event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
+	eventResult.dispatch();
+
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));

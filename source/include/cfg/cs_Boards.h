@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 
+#include <protocol/cs_UicrPacket.h>
 #include <protocol/cs_Typedefs.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -244,6 +245,9 @@ typedef struct  {
 		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
 		bool usesNfcPins: 1;
 
+		// True if the Crownstone has a more accurate power measurement.
+		bool hasAccuratePowerMeasurement: 1;
+
 		// True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
 		// and a lower startup time of the dimmer circuit.
 		bool canTryDimmingOnBoot: 1;
@@ -356,6 +360,9 @@ typedef struct  {
  * @return                                       error value (NRF_SUCCESS or NRF_ERROR_INVALID_PARAM)
  */
 cs_ret_code_t configure_board(boards_config_t* p_config);
+
+cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards_config_t* config);
+cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_config_t* config);
 
 #ifdef __cplusplus
 }
