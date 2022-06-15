@@ -34,12 +34,12 @@
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type, see also cs_DeviceTypes.h
+	  |  |  |--------------  Product Type, see cs_DeviceTypes.h
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
 	
 	Product type can be:
-	  1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One, 7 Builtin Two, 8 Outlet
+	  1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 Dongle, 6 Builtin One, 7 Hub, 8 Builtin Two, 9 Plug One, 10 Outlet
 */
 
 /**

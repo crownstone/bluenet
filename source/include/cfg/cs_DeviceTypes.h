@@ -17,6 +17,7 @@
 #define PRODUCT_CROWNSTONE_HUB           7
 #define PRODUCT_CROWNSTONE_BUILTIN_TWO   8
 #define PRODUCT_CROWNSTONE_PLUG_ONE      9
+#define PRODUCT_CROWNSTONE_OUTLET       10
 
 // These are used for service data.
 #define DEVICE_UNDEF                   0

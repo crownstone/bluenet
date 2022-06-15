@@ -228,6 +228,18 @@ static cs_uicr_data_t getUicrData(uint32_t boardVersion) {
 			data.productionDateHousing.fields.year = 0;
 			break;
 		}
+		case CR01R02v4: {
+			data.productRegionFamily.fields.productType = PRODUCT_CROWNSTONE_OUTLET;
+			data.productRegionFamily.fields.region = 1;
+			data.productRegionFamily.fields.productFamily = 1;
+			data.majorMinorPatch.fields.major = 0;
+			data.majorMinorPatch.fields.minor = 0;
+			data.majorMinorPatch.fields.patch = 0;
+			data.productionDateHousing.fields.housing = 0;
+			data.productionDateHousing.fields.week = 0;
+			data.productionDateHousing.fields.year = 0;
+			break;
+		}
 		case PCA10036:
 		case PCA10040:
 		case PCA10056:

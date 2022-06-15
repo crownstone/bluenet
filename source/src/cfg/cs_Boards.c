@@ -307,6 +307,10 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 			asUsbDongle(config);
 			return ERR_SUCCESS;
 		}
+		case PRODUCT_CROWNSTONE_OUTLET: {
+			asCR01R02v4(config);
+			return ERR_SUCCESS;
+		}
 	}
 	return ERR_UNKNOWN_TYPE;
 }
