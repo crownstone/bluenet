@@ -158,7 +158,9 @@
 
 #define ENCRYPTION_KEY_LENGTH                    16 // 16 byte length, just like SOC_ECB_KEY_LENGTH
 
-#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
+#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V18
+
+//#define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
 // Python: d=0.1; x=range(0,1000); y=np.power(1.0 - d, x); y2=np.cumsum(y) * d; indices=np.where(y2 > 0.99); print(indices[0][0])

@@ -346,11 +346,11 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
 void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
-	adc_buffer_seq_nr_t seqNr = AdcBuffer::getInstance().getBuffer(bufIndex)->seqNr;
+	auto buffer = AdcBuffer::getInstance().getBuffer(bufIndex);
+	adc_buffer_seq_nr_t seqNr = buffer->seqNr;
 	LOGPowerSamplingVerbose("bufId=%u seqNr=%u", bufIndex, seqNr);
 	PS_TEST_PIN_TOGGLE
-
-
+	
 	if (!isConsecutiveBuf(seqNr, _lastBufSeqNr)) {
 		LOGw("buf skipped (prev=%u cur=%u)", _lastBufSeqNr, seqNr);
 		// Clear buffer queue, as these are no longer consecutive.
@@ -364,6 +364,16 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 		_bufferQueue.clear();
 		return;
 	}
+
+	uint8_t bufLen = AdcBuffer::getInstance().getBufferLength();
+	//_logArray(SERIAL_INFO, true, (uint8_t*)buffer->samples, bufLen);
+	_log(SERIAL_INFO, false, "Buffer\r\n");
+	_log(SERIAL_INFO, false, "ADCBUF %i ", bufIndex);
+	for (int i = 0; i < bufLen; i++) {
+		_log(SERIAL_INFO, false, "%i ", buffer->samples[i]);
+	}
+	LOGi(" ");
+
 
 	adc_buffer_id_t filteredBufIndex;
 	if (_bufferQueue.empty()) {

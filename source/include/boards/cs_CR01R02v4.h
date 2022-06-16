@@ -42,19 +42,16 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinDimmer                       = PIN_NONE;
 	config->pinRelayOn                      = 12;
 	config->pinRelayOff                     = 11;
-	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(5);
-	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(6); // 7
+	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(29);
+	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(30); // 31
 	// Will become available as ref=ain0 (config.referencePin)
 	config->pinAinZeroRef                   = PIN_NONE;
 	// config->pinAinDimmerTemp                = PIN_NONE;
-	config->pinAinDimmerTemp                = GpioToAin(4);
+	config->pinAinDimmerTemp                = GpioToAin(3);
 
-//	config->pinRx                           = 3;
-//	config->pinTx                           = 28;
+	config->pinRx                           = PIN_NONE;
+	config->pinTx                           = 28;
 	
-	config->pinRx                           = 9;
-	config->pinTx                           = 10;
-
 	config->pinGpio[0]                      = 17;
 	config->pinGpio[1]                      = 20;
 	config->pinGpio[2]                      = 13;
@@ -92,7 +89,7 @@ void asCR01R02v4(boards_config_t* config) {
 	config->voltageAdcRangeMilliVolt        = 3600;
 	config->currentAdcRangeMilliVolt        = 3600;
 
-	config->pwmTempVoltageThreshold         = 2.0;
+	config->pwmTempVoltageThreshold         = 3.6;
 	config->pwmTempVoltageThresholdDown     = 1.0;
 
 	config->minTxPower                      = -40;
