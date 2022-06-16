@@ -12,7 +12,7 @@
 #include <cstdarg>
 
 
-#ifdef DEBUG
+#ifdef DEBUG_TODO_CHANGE_BACK
 inline int cs_write_test(const char *str, ...) {
 	char buffer[128];
 	va_list ap;

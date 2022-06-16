@@ -29,20 +29,6 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-MicroappCommandHandler::MicroappCommandHandler()
-		: EventListener(), _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
-
-	EventDispatcher::getInstance().addListener(this);
-}
-
-/*
- * When getting returns from a soft interrupt they will update us on the number of slots available in the microapp
- * for new interrupts. If there are no slots left, we don't bother sending them a new interrupt.
- */
-bool MicroappCommandHandler::softInterruptInProgress() {
-	return _emptyInterruptSlots < 1;
-}
-
 /*
  * Forwards commands from the microapp to the relevant handler
  */
@@ -101,14 +87,18 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGd("Soft interrupt received for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
+			MicroappController& controller = MicroappController::getInstance();
+			controller.setEmptySoftInterrupts(emptyInterruptSlots);
+			LOGd("Soft interrupt received for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGd("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
+			MicroappController& controller = MicroappController::getInstance();
+			controller.setEmptySoftInterrupts(emptyInterruptSlots);
+			LOGd("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
@@ -443,14 +433,22 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 			LOGi("Set scan event callback handler");
 #if BUILD_MESHING == 0
 			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			// TODO: just return with ERR_NOT_AVAILABLE if nothing will happen anyway. Also for other scan_related commands
 #endif
-			TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT) ble;
-			ble.index = ble_cmd->id;
-			event_t event(CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT, &ble, sizeof(ble));
-			EventDispatcher::getInstance().dispatch(event);
-			bool success        = event.result.returnCode;
-			ble_cmd->header.ack = success;
-			return success ? ERR_SUCCESS : ERR_NO_SPACE;
+			// TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT) ble;
+			// ble.index = ble_cmd->id;
+			// event_t event(CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT, &ble, sizeof(ble));
+			// EventDispatcher::getInstance().dispatch(event);
+			// bool success        = event.result.returnCode;
+			// ble_cmd->header.ack = success;
+			// return success ? ERR_SUCCESS : ERR_NO_SPACE;
+
+			MicroappController& controller = MicroappController::getInstance();
+			// what is the difference between the header id and the ble id?
+			LOGi("Header id=%d, ble id=%d", ble_cmd->header.id, ble_cmd->id);
+			controller.registerSoftInterruptSlotBle(ble_cmd->id);
+			ble_cmd->header.ack = true;
+			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
 			LOGi("Start scanning");
@@ -525,6 +523,10 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPresenceCommand(microapp_pre
 }
 
 cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cmd_t* command) {
+#if BUILD_MESHING == 0
+	LOGi("Mesh is not built in bluenet, so mesh-related microapp functionalities are disabled.");
+	return ERR_NOT_AVAILABLE;
+#endif
 	switch (command->opcode) {
 		case CS_MICROAPP_COMMAND_MESH_SEND: {
 			auto cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(command);
@@ -563,53 +565,57 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
-			auto cmd = reinterpret_cast<microapp_mesh_read_available_cmd_t*>(command);
+		// case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
+		// 	auto cmd = reinterpret_cast<microapp_mesh_read_available_cmd_t*>(command);
 
-			if (!_meshMessageBuffer.isInitialized()) {
-				_meshMessageBuffer.init();
-			}
+		// 	if (!_meshMessageBuffer.isInitialized()) {
+		// 		_meshMessageBuffer.init();
+		// 	}
 
-			// TODO: This assumes nothing will overwrite the buffer
-			cmd->available = !_meshMessageBuffer.empty();
-			if (cmd->available) {
-				LOGv("Available mesh messages");
-			} else {
-				LOGv("No mesh messages available");
-			}
+		// 	// TODO: This assumes nothing will overwrite the buffer
+		// 	cmd->available = !_meshMessageBuffer.empty();
+		// 	if (cmd->available) {
+		// 		LOGv("Available mesh messages");
+		// 	} else {
+		// 		LOGv("No mesh messages available");
+		// 	}
 
-			// TODO: One might want to call callMicroapp here (at least once).
-			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
+		// 	// TODO: One might want to call callMicroapp here (at least once).
+		// 	// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
+		// 	break;
+		// }
+		// case CS_MICROAPP_COMMAND_MESH_READ: {
+		// 	auto cmd = reinterpret_cast<microapp_mesh_read_cmd_t*>(command);
+
+		// 	if (!_meshMessageBuffer.isInitialized()) {
+		// 		_meshMessageBuffer.init();
+		// 	}
+		// 	if (_meshMessageBuffer.empty()) {
+		// 		LOGi("No message in buffer");
+		// 		return ERR_WRONG_PAYLOAD_LENGTH;
+		// 	}
+
+		// 	auto message = _meshMessageBuffer.pop();
+		// 	LOGv("Pop message for microapp");
+
+		// 	// TODO: This assumes nothing will overwrite the buffer
+		// 	cmd->stoneId = message.stoneId;
+		// 	cmd->dlen    = message.messageSize;
+		// 	if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
+		// 		LOGi("Message with wrong size in buffer");
+		// 		return ERR_WRONG_PAYLOAD_LENGTH;
+		// 	}
+		// 	memcpy(cmd->data, message.message, message.messageSize);
+
+		// 	// TODO: One might want to call callMicroapp here (at least once).
+		// 	// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
+		// 	break;
+		// }
+		case CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER: {
+			MicroappController& controller = MicroappController::getInstance();
+			command->header.ack = controller.registerSoftInterruptSlotMesh(command->header.id);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_MESH_READ: {
-			auto cmd = reinterpret_cast<microapp_mesh_read_cmd_t*>(command);
-
-			if (!_meshMessageBuffer.isInitialized()) {
-				_meshMessageBuffer.init();
-			}
-			if (_meshMessageBuffer.empty()) {
-				LOGi("No message in buffer");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-
-			auto message = _meshMessageBuffer.pop();
-			LOGv("Pop message for microapp");
-
-			// TODO: This assumes nothing will overwrite the buffer
-			cmd->stoneId = message.stoneId;
-			cmd->dlen    = message.messageSize;
-			if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-				LOGi("Message with wrong size in buffer");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			memcpy(cmd->data, message.message, message.messageSize);
-
-			// TODO: One might want to call callMicroapp here (at least once).
-			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
-			break;
-		}
-
 		default: {
 			LOGi("Unknown microapp mesh command opcode: %u", command->opcode);
 			return ERR_UNKNOWN_OP_CODE;
@@ -624,33 +630,29 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
  * TODO: This should actually be implemented differently.
  */
 
-#define FILTER_MESH_MESSAGES
+// void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
 
-void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
+// 	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
+// 		LOGd("Mesh message received, but not for microapp");
+// 		return;
+// 	}
+// 	if (_meshMessageBuffer.full()) {
+// 		LOGi("Dropping message, buffer is full");
+// 		return;
+// 	}
 
-#ifdef FILTER_MESH_MESSAGES
-	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		LOGd("Mesh message received, but not for microapp");
-		return;
-	}
-#endif
-	if (_meshMessageBuffer.full()) {
-		LOGi("Dropping message, buffer is full");
-		return;
-	}
+// 	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
+// 		LOGi("Message is too large: %u", event.msg.len);
+// 		return;
+// 	}
 
-	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-		LOGi("Message is too large: %u", event.msg.len);
-		return;
-	}
-
-	LOGd("Mesh message received, store in buffer");
-	microapp_buffered_mesh_message_t bufferedMessage;
-	bufferedMessage.stoneId     = event.srcAddress;
-	bufferedMessage.messageSize = event.msg.len;
-	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
-	_meshMessageBuffer.push(bufferedMessage);
-}
+// 	LOGd("Mesh message received, store in buffer");
+// 	microapp_buffered_mesh_message_t bufferedMessage;
+// 	bufferedMessage.stoneId     = event.srcAddress;
+// 	bufferedMessage.messageSize = event.msg.len;
+// 	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
+// 	_meshMessageBuffer.push(bufferedMessage);
+// }
 
 /**
  * Listen to events from bluenet in which the implement buffers those events and their contents on the bluenet side.
@@ -658,13 +660,13 @@ void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
  * TODO: It might be better to use an interrupt and store the buffer on the microapp side. Compare the implementation
  * of EVT_RECV_MESH_MSG with EVT_DEVICE_SCANNED (in cs_MicroappCommandHandler.cpp).
  */
-void MicroappCommandHandler::handleEvent(event_t& event) {
-	switch (event.type) {
-		case CS_TYPE::EVT_RECV_MESH_MSG: {
-			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
-			onMeshMessage(*msg);
-			break;
-		}
-		default: break;
-	}
-}
+// void MicroappCommandHandler::handleEvent(event_t& event) {
+// 	switch (event.type) {
+// 		case CS_TYPE::EVT_RECV_MESH_MSG: {
+// 			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
+// 			onMeshMessage(*msg);
+// 			break;
+// 		}
+// 		default: break;
+// 	}
+// }

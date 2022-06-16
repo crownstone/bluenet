@@ -187,9 +187,8 @@ enum CommandMicroappBleOpcode {
 };
 
 enum CommandMicroappMeshOpcode {
-	CS_MICROAPP_COMMAND_MESH_SEND           = 0x00,
-	CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE = 0x01,
-	CS_MICROAPP_COMMAND_MESH_READ           = 0x02,
+	CS_MICROAPP_COMMAND_MESH_SEND             = 0x00,
+	CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER = 0x01,
 };
 
 enum MicroappBleEventType {
@@ -197,6 +196,7 @@ enum MicroappBleEventType {
 	BleEventConnected     = 0x02,
 	BleEventDisconnected  = 0x03,
 };
+
 
 /**
  * A single buffer (can be either input or output).
@@ -386,15 +386,8 @@ struct __attribute__((packed)) microapp_mesh_send_cmd_t {
 
 static_assert(sizeof(microapp_mesh_send_cmd_t) <= MAX_PAYLOAD);
 
-struct __attribute__((packed)) microapp_mesh_read_available_cmd_t {
-	struct microapp_mesh_cmd_t mesh_header;
-	uint8_t available;
-};
-
-static_assert(sizeof(microapp_mesh_read_available_cmd_t) <= MAX_PAYLOAD);
-
 /**
- * Struct for microapp mesh read commands
+ * Struct for microapp mesh read events
  *
  * stoneId 0 is for broadcasted messages
  */

@@ -187,10 +187,14 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 
 	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
 		_pinIsr[i].pin = 0;
+		_pinIsr[i].registered = false;
 	}
 	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		_bleIsr[i].id = 0;
+		_bleIsr[i].registered = false;
 	}
+	_meshIsr.id = 0;
+	_meshIsr.registered = false;
 
 	LOGi("Microapp end is at %p", microappRamSection._end);
 }
@@ -200,6 +204,10 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
  */
 int MicroappController::digitalPinToInterrupt(int pin) {
 	return pin;
+}
+
+bool MicroappController::softInterruptInProgress() {
+	return _emptySoftInterrupts < 1;
 }
 
 /*
@@ -351,8 +359,7 @@ bool MicroappController::retrieveCommand() {
  * A GPIO callback towards the microapp.
  */
 void MicroappController::softInterruptGpio(uint8_t pin) {
-	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
-	if (microappCommandHandler.softInterruptInProgress()) {
+	if (softInterruptInProgress()) {
 		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
 		return;
 	}
@@ -379,15 +386,10 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 	}
 #endif
 
-	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
-	if (microappCommandHandler.softInterruptInProgress()) {
+	if (softInterruptInProgress()) {
 		LOGv("Callback in progress, ignore scanned device event");
 		return;
 	}
-
-	// Write bluetooth device to buffer
-	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
-	microapp_ble_device_t* microappBleDevice = reinterpret_cast<microapp_ble_device_t*>(outputBuffer);
 
 	bool found                     = false;
 	uint8_t id                     = 0;
@@ -403,6 +405,10 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 		LOGw("No callback registered");
 		return;
 	}
+
+	// Write bluetooth device to buffer
+	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
+	microapp_ble_device_t* microappBleDevice = reinterpret_cast<microapp_ble_device_t*>(outputBuffer);
 
 	if (bluenetBleDevice->dataSize > sizeof(microappBleDevice->data)) {
 		LOGw("BLE advertisement data too large");
@@ -427,6 +433,32 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 	LOGv("Incoming advertisement written to %p", microappBleDevice);
 	softInterrupt();
 }
+
+void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
+	if (!_meshIsr.registered) {
+		LOGv("No callback registered");
+		return;
+	}
+
+	if (softInterruptInProgress()) {
+		LOGv("Callback in progress, ignore mesh event");
+		return;
+	}
+
+	// Write bluetooth device to buffer
+	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
+	microapp_mesh_read_cmd_t* microappMeshMsg = reinterpret_cast<microapp_mesh_read_cmd_t*>(outputBuffer);
+
+	// Write the isr id to the header so the microapp may know the source
+	microappMeshMsg->mesh_header.header.id = _meshIsr.id;
+
+	microappMeshMsg->stoneId = event->srcAddress;
+	microappMeshMsg->dlen = event->msg.len;
+	memcpy(microappMeshMsg->data, event->msg.data, event->msg.len);
+
+	softInterrupt();
+}
+
 
 /*
  * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the soft interrupt.
@@ -505,6 +537,14 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 		return;
 	}
 	softInterruptBle(dev);
+}
+
+void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
+	if (event->type != CS_MESH_MODEL_TYPE_MICROAPP) {
+		LOGd("Mesh message received, but not for microapp");
+		return;
+	}
+	softInterruptMesh(event);
 }
 
 bool MicroappController::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
@@ -588,8 +628,27 @@ bool MicroappController::registerSoftInterruptSlotBle(uint8_t id) {
 	return false;
 }
 
+/*
+ * Register the slot for a Mesh soft interrupt.
+ */
+bool MicroappController::registerSoftInterruptSlotMesh(uint8_t id) {
+	if (!_meshIsr.registered) {
+		_meshIsr.registered = true;
+		_meshIsr.id = id;
+		return true;
+	}
+	else { // already registered
+		LOGw("Could not register slot for Mesh events for the microapp %i", id);
+		return false;
+	}
+}
+
 void MicroappController::setScanning(bool scanning) {
 	_microappIsScanning = scanning;
+}
+
+void MicroappController::setEmptySoftInterrupts(uint8_t emptySoftInterrupts) {
+	_emptySoftInterrupts = emptySoftInterrupts;
 }
 
 /**
@@ -610,16 +669,22 @@ void MicroappController::handleEvent(event_t& event) {
 			softInterruptGpio(gpio->pin_index);
 			break;
 		}
+		// case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
+		// 	auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
+		// 	registerSoftInterruptSlotBle(ble->index);
+		// 	break;
+		// }
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
 			auto dev = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
 			onDeviceScanned(dev);
 			break;
 		}
-		case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
-			auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
-			registerSoftInterruptSlotBle(ble->index);
+		case CS_TYPE::EVT_RECV_MESH_MSG: {
+			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
+			onReceivedMeshMessage(msg);
 			break;
 		}
+
 		default: break;
 	}
 }
