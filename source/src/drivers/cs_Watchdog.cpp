@@ -38,8 +38,8 @@ void Watchdog::init() {
 
 	uint32_t err_code;
 
-	err_code = nrfx_wdt_init(&config, &handleTimeout);
-//	err_code = nrfx_wdt_init(&config, NULL);
+//	err_code = nrfx_wdt_init(&config, &handleTimeout);
+	err_code = nrfx_wdt_init(&config, NULL);
 	APP_ERROR_CHECK(err_code);
 
 	err_code = nrfx_wdt_channel_alloc(&_channelId);
