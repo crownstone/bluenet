@@ -126,7 +126,7 @@ private:
 	/**
 	 * Keeps track of how many empty soft interrupt slots are available on the microapp side
 	 */
-	uint8_t _emptySoftInterrupts;
+	uint8_t _emptySoftInterrupts = 1;
 
 	/**
 	 * Maps digital pins to interrupts.
@@ -241,6 +241,12 @@ public:
 	 * @param emptySoftInterrupts The new value
 	 */
 	void setEmptySoftInterrupts(uint8_t emptySoftInterrupts);
+
+	/**
+	 * Increment the number of empty softInterrupt slots
+	 * (can be called when a softInterrupt returns)
+	 */
+	void incrementEmptySoftInterrupts();
 
 	/**
 	 * Register slot for BLE soft interrupt.

@@ -90,7 +90,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setEmptySoftInterrupts(emptyInterruptSlots);
-			LOGd("Soft interrupt received for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
+			LOGi("Soft interrupt received for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
@@ -98,16 +98,18 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setEmptySoftInterrupts(emptyInterruptSlots);
-			LOGd("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
+			LOGi("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
-			// Empty slots cannot be used, it is old info from the interrupt's starting state
-			LOGd("Soft interrupt error for %i", (int)cmd->id);
+			MicroappController& controller = MicroappController::getInstance();
+			controller.incrementEmptySoftInterrupts();
+			LOGi("Soft interrupt returned with error for %i", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
-			// Empty slots cannot be used, it is old info from the interrupt's starting state
+			MicroappController& controller = MicroappController::getInstance();
+			controller.incrementEmptySoftInterrupts();
 			LOGd("Soft interrupt end for %i", (int)cmd->id);
 			break;
 		}
@@ -612,6 +614,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 		// 	break;
 		// }
 		case CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER: {
+			LOGi("Starting to scan for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
 			command->header.ack = controller.registerSoftInterruptSlotMesh(command->header.id);
 			break;

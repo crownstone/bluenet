@@ -441,13 +441,16 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	}
 
 	if (softInterruptInProgress()) {
-		LOGv("Callback in progress, ignore mesh event");
+		LOGi("SoftInterrupt in progress, ignore mesh event");
 		return;
 	}
 
 	// Write bluetooth device to buffer
 	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
 	microapp_mesh_read_cmd_t* microappMeshMsg = reinterpret_cast<microapp_mesh_read_cmd_t*>(outputBuffer);
+
+	// Add the type of softInterruptCmd
+	microappMeshMsg->mesh_header.header.interruptCmd = CS_MICROAPP_COMMAND_MESH;
 
 	// Write the isr id to the header so the microapp may know the source
 	microappMeshMsg->mesh_header.header.id = _meshIsr.id;
@@ -456,6 +459,7 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	microappMeshMsg->dlen = event->msg.len;
 	memcpy(microappMeshMsg->data, event->msg.data, event->msg.len);
 
+	LOGi("Incoming mesh message for microapp");
 	softInterrupt();
 }
 
@@ -633,6 +637,7 @@ bool MicroappController::registerSoftInterruptSlotBle(uint8_t id) {
  */
 bool MicroappController::registerSoftInterruptSlotMesh(uint8_t id) {
 	if (!_meshIsr.registered) {
+		LOGi("Registered a softInterrupt slot for mesh interrupts");
 		_meshIsr.registered = true;
 		_meshIsr.id = id;
 		return true;
@@ -649,6 +654,10 @@ void MicroappController::setScanning(bool scanning) {
 
 void MicroappController::setEmptySoftInterrupts(uint8_t emptySoftInterrupts) {
 	_emptySoftInterrupts = emptySoftInterrupts;
+}
+
+void MicroappController::incrementEmptySoftInterrupts() {
+	_emptySoftInterrupts++;
 }
 
 /**
