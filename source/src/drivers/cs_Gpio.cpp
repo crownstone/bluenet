@@ -56,7 +56,7 @@ void Gpio::init(const boards_config_t & board) {
 	uint8_t high = 1;
 	write(0, low);
 	write(1, low);
-	write(2, high);
+	write(2, low);
 	write(3, low);
 	write(4, low);
 	write(5, high);
