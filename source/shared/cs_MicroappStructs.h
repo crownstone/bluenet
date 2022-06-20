@@ -197,6 +197,14 @@ enum MicroappBleEventType {
 	BleEventDisconnected  = 0x03,
 };
 
+enum MicroappErrorTypes {
+	ERR_MICROAPP_SUCCESS                       =  0,
+	ERR_MICROAPP_SOFT_INTERRUPT_NOT_REGISTERED = -1,
+	ERR_MICROAPP_USER_ERROR                    = -2,
+	ERR_MICROAPP_UNKNOWN_PROTOCOL              = -3,
+	ERR_MICROAPP_NO_SPACE                      = -4,
+};
+
 
 /**
  * A single buffer (can be either input or output).

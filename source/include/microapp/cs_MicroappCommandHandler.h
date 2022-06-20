@@ -36,7 +36,7 @@ private:
 	// CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
 
 	/**
-	 * Maps interrupts to digital pins.
+	 * Maps interrupts to digital pins. See also MicroappController::digitalPinToInterrupt()
 	 */
 	int interruptToDigitalPin(int interrupt);
 

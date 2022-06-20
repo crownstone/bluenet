@@ -29,6 +29,10 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
+int MicroappCommandHandler::interruptToDigitalPin(int interrupt) {
+	return interrupt;
+}
+
 /*
  * Forwards commands from the microapp to the relevant handler
  */
@@ -90,7 +94,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setEmptySoftInterrupts(emptyInterruptSlots);
-			LOGi("Soft interrupt received for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
+			LOGv("Soft interrupt received (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
@@ -98,19 +102,19 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setEmptySoftInterrupts(emptyInterruptSlots);
-			LOGi("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, emptyInterruptSlots);
+			LOGi("Soft interrupt dropped (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
 			MicroappController& controller = MicroappController::getInstance();
 			controller.incrementEmptySoftInterrupts();
-			LOGi("Soft interrupt returned with error for %i", (int)cmd->id);
+			LOGi("Soft interrupt returned with error (id=%i)", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
 			MicroappController& controller = MicroappController::getInstance();
 			controller.incrementEmptySoftInterrupts();
-			LOGd("Soft interrupt end for %i", (int)cmd->id);
+			LOGv("Soft interrupt end (id=%i)", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
@@ -236,7 +240,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinCommand(microapp_pin_cmd_
 cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	TYPIFY(EVT_GPIO_INIT) gpio;
-	gpio.pin_index                    = pin;
+	gpio.pin_index                    = interruptToDigitalPin(pin);
 	gpio.pull                         = 0;
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
@@ -286,7 +290,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinActionCommand(microapp_pi
 	switch (opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
 			TYPIFY(EVT_GPIO_WRITE) gpio;
-			gpio.pin_index              = pin;
+			gpio.pin_index              = interruptToDigitalPin(pin);
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
 			switch (val) {
 				case CS_MICROAPP_COMMAND_VALUE_OFF: {
@@ -432,27 +436,22 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappTwiCommand(microapp_twi_cmd_
 cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			LOGi("Set scan event callback handler");
 #if BUILD_MESHING == 0
 			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-			// TODO: just return with ERR_NOT_AVAILABLE if nothing will happen anyway. Also for other scan_related commands
+			return ERR_NOT_AVAILABLE;
 #endif
-			// TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT) ble;
-			// ble.index = ble_cmd->id;
-			// event_t event(CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT, &ble, sizeof(ble));
-			// EventDispatcher::getInstance().dispatch(event);
-			// bool success        = event.result.returnCode;
-			// ble_cmd->header.ack = success;
-			// return success ? ERR_SUCCESS : ERR_NO_SPACE;
-
+			LOGi("Set scan event callback handler");
 			MicroappController& controller = MicroappController::getInstance();
 			// what is the difference between the header id and the ble id?
 			LOGi("Header id=%d, ble id=%d", ble_cmd->header.id, ble_cmd->id);
-			controller.registerSoftInterruptSlotBle(ble_cmd->id);
-			ble_cmd->header.ack = true;
+			ble_cmd->header.ack = controller.registerSoftInterruptSlotBle(ble_cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
+#if BUILD_MESHING == 0
+			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			return ERR_NOT_AVAILABLE;
+#endif
 			LOGi("Start scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(true);
@@ -460,6 +459,10 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
+#if BUILD_MESHING == 0
+			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			return ERR_NOT_AVAILABLE;
+#endif
 			LOGi("Stop scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(false);

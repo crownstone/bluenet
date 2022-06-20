@@ -200,7 +200,7 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 }
 
 /*
- * Get from digital pin to interrupt. See also interruptToDigitalPin.
+ * Get from digital pin to interrupt.
  */
 int MicroappController::digitalPinToInterrupt(int pin) {
 	return pin;
@@ -375,6 +375,8 @@ void MicroappController::softInterruptGpio(uint8_t pin) {
 	softInterrupt();
 }
 
+
+#define DEVELOPER_OPTION_THROTTLE_BY_RSSI
 /*
  * Communicate BLE message towards microapp.
  */
@@ -387,7 +389,7 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 #endif
 
 	if (softInterruptInProgress()) {
-		LOGv("Callback in progress, ignore scanned device event");
+		LOGi("Callback in progress, ignore scanned device event");
 		return;
 	}
 
@@ -590,7 +592,7 @@ bool MicroappController::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 	else {
 		if (++_callCounter % MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES == 0) {
 			_callCounter = 0;
-			LOGv("Stop because we've reached a max # of calls");
+			LOGi("Stop because we've reached a max # of calls");
 			return true;
 		}
 	}
@@ -621,14 +623,14 @@ bool MicroappController::registerSoftInterruptSlotBle(uint8_t id) {
 	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		if (!_bleIsr[i].registered) {
 			_bleIsr[i].registered = true;
-			_bleIsr[i].type       = BleEventDeviceScanned;
+			_bleIsr[i].type       = BleEventDeviceScanned; // TODO: change if more types
 			_bleIsr[i].id         = id;
-			LOGi("Registered slot %i for BLE events towards the microapp", id);
+			LOGi("Registered slot %i for BLE events towards the microapp (id=%d)", i, id);
 			return true;
 		}
 	}
 	// no empty slot available
-	LOGw("Could not register slot for BLE events for the microapp %i", id);
+	LOGw("Could not register slot for BLE events for the microapp (id=%i)", id);
 	return false;
 }
 
@@ -637,13 +639,13 @@ bool MicroappController::registerSoftInterruptSlotBle(uint8_t id) {
  */
 bool MicroappController::registerSoftInterruptSlotMesh(uint8_t id) {
 	if (!_meshIsr.registered) {
-		LOGi("Registered a softInterrupt slot for mesh interrupts");
+		LOGi("Registered the softInterrupt slot for mesh interrupts (id=%d)", id);
 		_meshIsr.registered = true;
 		_meshIsr.id = id;
 		return true;
 	}
 	else { // already registered
-		LOGw("Could not register slot for Mesh events for the microapp %i", id);
+		LOGw("Could not register slot for Mesh events for the microapp (id=%i)", id);
 		return false;
 	}
 }
