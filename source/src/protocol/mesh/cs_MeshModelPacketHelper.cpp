@@ -168,6 +168,8 @@ CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType) {
 			return CTRL_CMD_STATE_SET;
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
 			return CTRL_CMD_SET_IBEACON_CONFIG_ID;
+		case CS_MESH_MODEL_TYPE_MICROAPP:
+			return CTRL_CMD_NOP;
 		default:
 			return CTRL_CMD_UNKNOWN;
 	}
