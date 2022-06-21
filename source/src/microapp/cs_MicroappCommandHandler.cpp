@@ -567,52 +567,6 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			}
 			break;
 		}
-		// case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
-		// 	auto cmd = reinterpret_cast<microapp_mesh_read_available_cmd_t*>(command);
-
-		// 	if (!_meshMessageBuffer.isInitialized()) {
-		// 		_meshMessageBuffer.init();
-		// 	}
-
-		// 	// TODO: This assumes nothing will overwrite the buffer
-		// 	cmd->available = !_meshMessageBuffer.empty();
-		// 	if (cmd->available) {
-		// 		LOGv("Available mesh messages");
-		// 	} else {
-		// 		LOGv("No mesh messages available");
-		// 	}
-
-		// 	// TODO: One might want to call callMicroapp here (at least once).
-		// 	// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
-		// 	break;
-		// }
-		// case CS_MICROAPP_COMMAND_MESH_READ: {
-		// 	auto cmd = reinterpret_cast<microapp_mesh_read_cmd_t*>(command);
-
-		// 	if (!_meshMessageBuffer.isInitialized()) {
-		// 		_meshMessageBuffer.init();
-		// 	}
-		// 	if (_meshMessageBuffer.empty()) {
-		// 		LOGi("No message in buffer");
-		// 		return ERR_WRONG_PAYLOAD_LENGTH;
-		// 	}
-
-		// 	auto message = _meshMessageBuffer.pop();
-		// 	LOGv("Pop message for microapp");
-
-		// 	// TODO: This assumes nothing will overwrite the buffer
-		// 	cmd->stoneId = message.stoneId;
-		// 	cmd->dlen    = message.messageSize;
-		// 	if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-		// 		LOGi("Message with wrong size in buffer");
-		// 		return ERR_WRONG_PAYLOAD_LENGTH;
-		// 	}
-		// 	memcpy(cmd->data, message.message, message.messageSize);
-
-		// 	// TODO: One might want to call callMicroapp here (at least once).
-		// 	// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
-		// 	break;
-		// }
 		case CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER: {
 			LOGi("Starting to scan for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
@@ -626,50 +580,3 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 	}
 	return ERR_SUCCESS;
 }
-
-/*
- * Called upon receiving mesh message, places mesh message in a buffer on the bluenet side.
- *
- * TODO: This should actually be implemented differently.
- */
-
-// void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
-
-// 	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
-// 		LOGd("Mesh message received, but not for microapp");
-// 		return;
-// 	}
-// 	if (_meshMessageBuffer.full()) {
-// 		LOGi("Dropping message, buffer is full");
-// 		return;
-// 	}
-
-// 	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-// 		LOGi("Message is too large: %u", event.msg.len);
-// 		return;
-// 	}
-
-// 	LOGd("Mesh message received, store in buffer");
-// 	microapp_buffered_mesh_message_t bufferedMessage;
-// 	bufferedMessage.stoneId     = event.srcAddress;
-// 	bufferedMessage.messageSize = event.msg.len;
-// 	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
-// 	_meshMessageBuffer.push(bufferedMessage);
-// }
-
-/**
- * Listen to events from bluenet in which the implement buffers those events and their contents on the bluenet side.
- *
- * TODO: It might be better to use an interrupt and store the buffer on the microapp side. Compare the implementation
- * of EVT_RECV_MESH_MSG with EVT_DEVICE_SCANNED (in cs_MicroappCommandHandler.cpp).
- */
-// void MicroappCommandHandler::handleEvent(event_t& event) {
-// 	switch (event.type) {
-// 		case CS_TYPE::EVT_RECV_MESH_MSG: {
-// 			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
-// 			onMeshMessage(*msg);
-// 			break;
-// 		}
-// 		default: break;
-// 	}
-// }
