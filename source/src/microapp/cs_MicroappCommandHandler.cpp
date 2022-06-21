@@ -437,19 +437,16 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
 #if BUILD_MESHING == 0
-			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
 			return ERR_NOT_AVAILABLE;
 #endif
-			LOGi("Set scan event callback handler");
 			MicroappController& controller = MicroappController::getInstance();
-			// what is the difference between the header id and the ble id?
-			LOGi("Header id=%d, ble id=%d", ble_cmd->header.id, ble_cmd->id);
 			ble_cmd->header.ack = controller.registerSoftInterruptSlotBle(ble_cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
 #if BUILD_MESHING == 0
-			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
 			return ERR_NOT_AVAILABLE;
 #endif
 			LOGi("Start scanning");
@@ -460,7 +457,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
 #if BUILD_MESHING == 0
-			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
 			return ERR_NOT_AVAILABLE;
 #endif
 			LOGi("Stop scanning");

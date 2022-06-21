@@ -203,6 +203,7 @@ enum MicroappErrorTypes {
 	ERR_MICROAPP_USER_ERROR                    = -2,
 	ERR_MICROAPP_UNKNOWN_PROTOCOL              = -3,
 	ERR_MICROAPP_NO_SPACE                      = -4,
+	ERR_MICROAPP_NOT_IMPLEMENTED               = -5,
 };
 
 

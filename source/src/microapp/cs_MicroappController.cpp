@@ -360,7 +360,7 @@ bool MicroappController::retrieveCommand() {
  */
 void MicroappController::softInterruptGpio(uint8_t pin) {
 	if (softInterruptInProgress()) {
-		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
+		LOGi("Callback in progress, ignore virtual pin %i event", digitalPinToInterrupt(pin));
 		return;
 	}
 	// Write pin command into the buffer.
@@ -371,22 +371,19 @@ void MicroappController::softInterruptGpio(uint8_t pin) {
 	cmd->header.id           = digitalPinToInterrupt(pin);
 	cmd->pin                 = digitalPinToInterrupt(pin);
 	// Resume microapp so it can pick up this command.
-	LOGi("GPIO interrupt on virtual pin %i", cmd->pin);
+	LOGv("Incoming GPIO interrupt for microapp on virtual pin %i", cmd->pin);
 	softInterrupt();
 }
 
-
-#define DEVELOPER_OPTION_THROTTLE_BY_RSSI
 /*
  * Communicate BLE message towards microapp.
  */
 void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 
-#ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
+	// Throttle by rssi by default to limit number of scanned devices forwarded
 	if (bluenetBleDevice->rssi < -50) {
 		return;
 	}
-#endif
 
 	if (softInterruptInProgress()) {
 		LOGi("Callback in progress, ignore scanned device event");
@@ -432,7 +429,7 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 	microappBleDevice->dlen = bluenetBleDevice->dataSize;
 	memcpy(microappBleDevice->data, bluenetBleDevice->data, bluenetBleDevice->dataSize);
 
-	LOGv("Incoming advertisement written to %p", microappBleDevice);
+	LOGv("Incoming BLE scanned device for microapp (id=%d)", id);
 	softInterrupt();
 }
 
@@ -443,7 +440,7 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	}
 
 	if (softInterruptInProgress()) {
-		LOGi("SoftInterrupt in progress, ignore mesh event");
+		LOGi("Callback in progress, ignore mesh event");
 		return;
 	}
 
@@ -461,7 +458,7 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	microappMeshMsg->dlen = event->msg.len;
 	memcpy(microappMeshMsg->data, event->msg.data, event->msg.len);
 
-	LOGi("Incoming mesh message for microapp");
+	LOGv("Incoming mesh message for microapp (id=%d)", _meshIsr.id);
 	softInterrupt();
 }
 
@@ -539,7 +536,7 @@ void MicroappController::callMicroapp() {
  */
 void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	if (!_microappIsScanning) {
-		LOGv("Microapp not scanning, so not forwarding scanned device");
+		// Microapp not scanning, so not forwarding scanned device
 		return;
 	}
 	softInterruptBle(dev);
@@ -547,7 +544,7 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 
 void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 	if (event->type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		LOGd("Mesh message received, but not for microapp");
+		// Mesh message received, but not for microapp
 		return;
 	}
 	softInterruptMesh(event);
@@ -680,11 +677,6 @@ void MicroappController::handleEvent(event_t& event) {
 			softInterruptGpio(gpio->pin_index);
 			break;
 		}
-		// case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
-		// 	auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
-		// 	registerSoftInterruptSlotBle(ble->index);
-		// 	break;
-		// }
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
 			auto dev = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
 			onDeviceScanned(dev);
