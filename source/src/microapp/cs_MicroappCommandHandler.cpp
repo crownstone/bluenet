@@ -573,6 +573,15 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			command->header.ack = controller.registerSoftInterruptSlotMesh(command->header.id);
 			break;
 		}
+		case CS_MICROAPP_COMMAND_MESH_GET_INFO: {
+			LOGi("Microapp requesting mesh info");
+			TYPIFY(CONFIG_CROWNSTONE_ID) id;
+			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+			microapp_mesh_info_cmd_t* info_cmd = reinterpret_cast<microapp_mesh_info_cmd_t*>(command);
+			info_cmd->stoneId = id;
+			info_cmd->mesh_header.header.ack = true;
+			break;
+		}
 		default: {
 			LOGi("Unknown microapp mesh command opcode: %u", command->opcode);
 			return ERR_UNKNOWN_OP_CODE;
