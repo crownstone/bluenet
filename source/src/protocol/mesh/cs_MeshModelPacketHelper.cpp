@@ -158,9 +158,9 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 	return true;
 }
 
-bool isCtrlCmd(cs_mesh_model_msg_type_t meshtype) {
+bool isCtrlCmd(cs_mesh_model_msg_type_t meshType) {
 	switch (meshType) {
-		case CS_CS_MESH_MODEL_TYPE_CMD_TIME:
+		case CS_MESH_MODEL_TYPE_CMD_TIME:
 		case CS_MESH_MODEL_TYPE_STATE_SET:
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
 			return true;
