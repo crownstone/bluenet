@@ -105,10 +105,15 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			LOGd("Soft interrupt received for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
+		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
 			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGd("Soft interrupt error for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			LOGd("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
+			// Empty slots cannot be used, it is old info from the interrupt's starting state
+			LOGd("Soft interrupt error for %i", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
@@ -627,16 +632,16 @@ void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
 	}
 #endif
 	if (_meshMessageBuffer.full()) {
-		LOGi("Dropping message, buffer is full");
+		LOGd("Dropping message, buffer is full");
 		return;
 	}
 
 	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-		LOGi("Message is too large: %u", event.msg.len);
+		LOGd("Message is too large: %u", event.msg.len);
 		return;
 	}
 
-	LOGi("Mesh message received, store in buffer");
+	LOGd("Mesh message received, store in buffer");
 	microapp_buffered_mesh_message_t bufferedMessage;
 	bufferedMessage.stoneId     = event.srcAddress;
 	bufferedMessage.messageSize = event.msg.len;
