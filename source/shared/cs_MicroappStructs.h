@@ -199,12 +199,12 @@ enum MicroappBleEventType {
 };
 
 enum MicroappErrorTypes {
-	ERR_MICROAPP_SUCCESS                       =  0,
-	ERR_MICROAPP_SOFT_INTERRUPT_NOT_REGISTERED = -1,
-	ERR_MICROAPP_USER_ERROR                    = -2,
-	ERR_MICROAPP_UNKNOWN_PROTOCOL              = -3,
-	ERR_MICROAPP_NO_SPACE                      = -4,
-	ERR_MICROAPP_NOT_IMPLEMENTED               = -5,
+	ERR_MICROAPP_SUCCESS                       = 0x00,
+	ERR_MICROAPP_SOFT_INTERRUPT_NOT_REGISTERED = 0x01,
+	ERR_MICROAPP_USER_ERROR                    = 0x02,
+	ERR_MICROAPP_UNKNOWN_PROTOCOL              = 0x03,
+	ERR_MICROAPP_NO_SPACE                      = 0x04,
+	ERR_MICROAPP_NOT_IMPLEMENTED               = 0x05,
 };
 
 

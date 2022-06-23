@@ -105,13 +105,6 @@ protected:
 	 */
 	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_cmd_t* cmd);
 
-	/**
-	 * Handle a received mesh message.
-	 *
-	 * TODO: We don't want this.
-	 */
-	// void onMeshMessage(MeshMsgEvent event);
-
 public:
 	static MicroappCommandHandler& getInstance() {
 		static MicroappCommandHandler instance;

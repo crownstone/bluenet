@@ -60,6 +60,11 @@
  */
 #define DEVELOPER_OPTION_DISABLE_COROUTINE 0
 
+/*
+ * Enable throttling of BLE scanned devices by rssi.
+ */
+#define DEVELOPER_OPTION_THROTTLE_BY_RSSI
+
 extern "C" {
 
 /*
@@ -207,7 +212,7 @@ int MicroappController::digitalPinToInterrupt(int pin) {
 }
 
 bool MicroappController::softInterruptInProgress() {
-	return _emptySoftInterrupts < 1;
+	return _emptySoftInterruptSlots < 1;
 }
 
 /*
@@ -380,10 +385,12 @@ void MicroappController::softInterruptGpio(uint8_t pin) {
  */
 void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 
+#ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
 	// Throttle by rssi by default to limit number of scanned devices forwarded
 	if (bluenetBleDevice->rssi < -50) {
 		return;
 	}
+#endif
 
 	if (softInterruptInProgress()) {
 		LOGi("Callback in progress, ignore scanned device event");
@@ -651,12 +658,16 @@ void MicroappController::setScanning(bool scanning) {
 	_microappIsScanning = scanning;
 }
 
-void MicroappController::setEmptySoftInterrupts(uint8_t emptySoftInterrupts) {
-	_emptySoftInterrupts = emptySoftInterrupts;
+void MicroappController::setEmptySoftInterruptSlots(uint8_t emptySoftInterruptSlots) {
+	_emptySoftInterruptSlots = emptySoftInterruptSlots;
 }
 
-void MicroappController::incrementEmptySoftInterrupts() {
-	_emptySoftInterrupts++;
+void MicroappController::incrementEmptySoftInterruptSlots() {
+	// Make sure we don't overflow to zero in extreme cases
+	if (_emptySoftInterruptSlots == 0xFF) {
+		return;
+	}
+	_emptySoftInterruptSlots++;
 }
 
 /**

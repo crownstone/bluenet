@@ -64,8 +64,12 @@ private:
 
 	/**
 	 * Limit maximum number of to be registered service routines for the microapp.
+	 * There can be one registered isr per type of BLE event, of which there are for now 3
+	 * - device scanned
+	 * - device connected
+	 * - device disconnected
 	 */
-	static const uint8_t MICROAPP_MAX_BLE_ISR_COUNT = 4;
+	static const uint8_t MICROAPP_MAX_BLE_ISR_COUNT = 3;
 
 	/**
 	 * Limit the number of callbacks in a tick (if -1) there is no limit.
@@ -126,7 +130,7 @@ private:
 	/**
 	 * Keeps track of how many empty soft interrupt slots are available on the microapp side
 	 */
-	uint8_t _emptySoftInterrupts = 1;
+	uint8_t _emptySoftInterruptSlots = 1;
 
 	/**
 	 * Maps digital pins to interrupts. See also MicroappCommandHandler::interruptToDigitalPin()
@@ -194,6 +198,11 @@ protected:
 	 */
 	void onDeviceScanned(scanned_device_t* dev);
 
+	/**
+	 * Handle a received mesh message and determine whether to forward it to the microapp.
+	 *
+	 * @param event the EVT_RECV_MESH_MSG event data
+	 */
 	void onReceivedMeshMessage(MeshMsgEvent* event);
 
 	/**
@@ -238,15 +247,15 @@ public:
 	/**
 	 * Set the number of empty softInterrupt slots
 	 *
-	 * @param emptySoftInterrupts The new value
+	 * @param emptySoftInterruptSlots The new value
 	 */
-	void setEmptySoftInterrupts(uint8_t emptySoftInterrupts);
+	void setEmptySoftInterruptSlots(uint8_t emptySoftInterruptSlots);
 
 	/**
 	 * Increment the number of empty softInterrupt slots
 	 * (can be called when a softInterrupt returns)
 	 */
-	void incrementEmptySoftInterrupts();
+	void incrementEmptySoftInterruptSlots();
 
 	/**
 	 * Register slot for BLE soft interrupt.

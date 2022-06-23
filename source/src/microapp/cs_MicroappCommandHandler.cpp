@@ -93,7 +93,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
 			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
 			MicroappController& controller = MicroappController::getInstance();
-			controller.setEmptySoftInterrupts(emptyInterruptSlots);
+			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
 			LOGv("Soft interrupt received (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
@@ -101,19 +101,19 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
 			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
 			MicroappController& controller = MicroappController::getInstance();
-			controller.setEmptySoftInterrupts(emptyInterruptSlots);
+			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
 			LOGi("Soft interrupt dropped (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
 			MicroappController& controller = MicroappController::getInstance();
-			controller.incrementEmptySoftInterrupts();
+			controller.incrementEmptySoftInterruptSlots();
 			LOGi("Soft interrupt returned with error (id=%i)", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
 			MicroappController& controller = MicroappController::getInstance();
-			controller.incrementEmptySoftInterrupts();
+			controller.incrementEmptySoftInterruptSlots();
 			LOGv("Soft interrupt end (id=%i)", (int)cmd->id);
 			break;
 		}
