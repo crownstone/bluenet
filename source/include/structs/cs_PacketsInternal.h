@@ -68,6 +68,15 @@ struct cs_result_t {
 	cs_result_t(cs_ret_code_t returnCode) : returnCode(returnCode), buf() {}
 };
 
+struct cs_async_result_t {
+	CommandHandlerTypes commandType;
+	cs_ret_code_t resultCode;
+	cs_data_t resultData;
+
+	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode) : commandType(type), resultCode(resultCode), resultData() {}
+	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode, cs_data_t data) : commandType(type), resultCode(resultCode), resultData(data) {}
+};
+
 /**
  * Copy of BLE_GAP_ADDR_TYPES.
  *
@@ -343,11 +352,6 @@ struct adc_buffer_t {
 	 * Pointer to the samples.
 	 */
 	adc_sample_value_t* samples = nullptr;
-};
-
-struct hub_data_reply_t {
-	cs_ret_code_t retCode;
-	cs_data_t data;
 };
 
 struct microapp_advertise_request_t {

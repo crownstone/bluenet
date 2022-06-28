@@ -695,6 +695,13 @@ void MeshCore::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
 			TYPIFY(EVT_STORAGE_WRITE_DONE)* evtData = (TYPIFY(EVT_STORAGE_WRITE_DONE)*)event.data;
 			switch (evtData->type) {
+				case CS_TYPE::STATE_MESH_SEQ_NUMBER: {
+					TYPIFY(STATE_MESH_SEQ_NUMBER) seqNumber;
+					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER, &seqNumber, sizeof(seqNumber));
+					LOGi("net_state_ext_write_done seqNum=%u", seqNumber);
+					net_state_ext_write_done(MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD, &seqNumber, sizeof(seqNumber));
+					break;
+				}
 				case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5: {
 					TYPIFY(STATE_MESH_SEQ_NUMBER_V5) seqNumber;
 					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER_V5, &seqNumber, sizeof(seqNumber));

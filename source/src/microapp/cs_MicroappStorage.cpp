@@ -10,8 +10,8 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
-#include <cs_MemoryLayout.h>
 #include <common/cs_Types.h>
+#include <cs_MemoryLayout.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
@@ -193,8 +193,10 @@ void MicroappStorage::onFlashWritten(cs_ret_code_t retCode) {
 	if (retCode != ERR_SUCCESS) {
 		resetChunkVars();
 		LOGw("Failed to complete write to flash, dispatch event with result %u", retCode);
-		event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
-		event.dispatch();
+
+		TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_MICROAPP_UPLOAD, retCode);
+		event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
+		eventResult.dispatch();
 	}
 
 	retCode = writeNextChunkPart();
@@ -205,8 +207,9 @@ void MicroappStorage::onFlashWritten(cs_ret_code_t retCode) {
 
 	// Write is done or there was an error.
 	resetChunkVars();
-	event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
-	event.dispatch();
+	TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_MICROAPP_UPLOAD, retCode);
+	event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
+	eventResult.dispatch();
 }
 
 void MicroappStorage::resetChunkVars() {
@@ -378,8 +381,9 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t* evt) {
 		}
 		case NRF_FSTORAGE_EVT_ERASE_RESULT: {
 			LOGMicroappInfo("Flash erase result=%u addr=0x%08X len=%u", evt->result, evt->addr, evt->len);
-			event_t event(CS_TYPE::EVT_MICROAPP_ERASE_RESULT, &retCode, sizeof(retCode));
-			event.dispatch();
+			TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_MICROAPP_REMOVE, retCode);
+			event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
+			eventResult.dispatch();
 			break;
 		}
 		default: break;

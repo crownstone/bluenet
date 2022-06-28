@@ -270,6 +270,10 @@ message(STATUS "Configure cs_AutoConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
+message(STATUS "Configure cs_SharedConfig.c file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
+
 # auto-generate linker files
 
 message(STATUS "Configure nrf_symbols.ld file")
@@ -324,9 +328,6 @@ set(INCLUDE_ONLY_SECTIONS "")
 add_custom_command(OUTPUT ${PROJECT_NAME}.bin
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
 	COMMAND stat -t ${PROJECT_NAME}.bin | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
-	COMMAND ${CMAKE_COMMAND} -E echo ""
-	COMMAND ${CMAKE_COMMAND} -E echo "** Available size: 360kB, that is 512kB - softdevice - bootloader - app storage"
-	COMMAND ${CMAKE_COMMAND} -E echo "** Dual bank Size: 180kB = DFU_IMAGE_MAX_SIZE_BANKED"
 	DEPENDS
 		display_build_status
 		${PROJECT_NAME}
@@ -441,9 +442,9 @@ add_custom_target(uart_binary_client
 	COMMENT "UART client, runs in background"
 	)
 
-add_custom_target(uart_raw_binary_client
-	COMMAND ${CMAKE_COMMAND} -E echo "** UART raw+binary client, keep running in separate shell"
-	COMMAND ./log-client.sh -r
+add_custom_target(uart_combined_client
+	COMMAND ${CMAKE_COMMAND} -E echo "** UART plaintext and binary client, keep running in separate shell"
+	COMMAND ./log-client.sh -p
 	DEPENDS write_runtime_config
 	COMMENT "UART client, runs in background"
 	)

@@ -11,8 +11,8 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
-#include <cs_MemoryLayout.h>
 #include <common/cs_Types.h>
+#include <cs_MemoryLayout.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
 #include <drivers/cs_Storage.h>
@@ -307,7 +307,7 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 void MicroappController::tickMicroapp(uint8_t appIndex) {
 	bool callAgain = false;
 	_tickCounter++;
-	if (_tickCounter % MICROAPP_LOOP_FREQUENCY != 0) {
+	if (_tickCounter < MICROAPP_LOOP_FREQUENCY) {
 		return;
 	}
 	_tickCounter = 0;
@@ -369,7 +369,7 @@ void MicroappController::softInterruptGpio(uint8_t pin) {
 }
 
 /*
- * Communicate mesh message towards microapp.
+ * Communicate BLE message towards microapp.
  */
 void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 
@@ -453,26 +453,24 @@ void MicroappController::softInterrupt() {
 	outgoingCommand->ack                = CS_ACK_BLUENET_MICROAPP_REQUEST;
 	bool callAgain                      = false;
 	int8_t repeatCounter                = 0;
-	static int32_t softInterruptCounter = 0;
 	do {
 		LOGv("Call [%i,%i,%i], within interrupt %i",
-			 softInterruptCounter,
+			 _softInterruptCounter,
 			 repeatCounter,
 			 outgoingCommand->counter,
 			 outgoingCommand->interruptCmd);
 		callMicroapp();
 		bool acked = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK);
+		bool busy = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_BUSY);
 		if (acked) {
 			LOGv("Acked interrupt");
 		}
-		callAgain = retrieveCommand();
-		if (!acked) {
-			LOGv("Not acked... Next tick again");
-			callAgain = false;
+		if (busy) {
+			LOGv("Not acked, microapp is busy");
 		}
+		callAgain = retrieveCommand();
 		repeatCounter++;
 	} while (callAgain);
-	softInterruptCounter++;
 }
 
 /*
@@ -506,7 +504,6 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 		LOGv("Microapp not scanning, so not forwarding scanned device");
 		return;
 	}
-
 	softInterruptBle(dev);
 }
 
@@ -523,6 +520,7 @@ bool MicroappController::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
 		case CS_MICROAPP_COMMAND_POWER_USAGE:
 		case CS_MICROAPP_COMMAND_PRESENCE:
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED:
+		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED:
 		case CS_MICROAPP_COMMAND_MESH: {
 			stop = false;
 			break;

@@ -58,6 +58,12 @@ struct cs_mesh_queue_item_t {
 	cs_data_t msgPayload;
 };
 
-void printQueueItem(const char* prefix, const cs_mesh_queue_item_meta_data_t& metaData);
+#define printMeshQueueItem(modelName, meshQueueItemMetaData) \
+		LOGMeshModelDebug(modelName " id=%u type=%u priority=%u transmissionsOrTimeout=%u", \
+			meshQueueItemMetaData.id,                                                       \
+			meshQueueItemMetaData.type,                                                     \
+			meshQueueItemMetaData.priority,                                                 \
+			meshQueueItemMetaData.transmissionsOrTimeout                                    \
+	);
 
 }
