@@ -124,6 +124,6 @@ void Dimmer::enable() {
 	if (_pinEnableDimmer != PIN_NONE) {
 		LOGd("enable");
 		nrf_gpio_pin_set(_pinEnableDimmer);
-		_enabled = true;
 	}
+	_enabled = true;
 }
