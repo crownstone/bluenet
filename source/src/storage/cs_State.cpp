@@ -68,9 +68,14 @@ void State::init(boards_config_t* boardsConfig) {
 	setInitialized();
 }
 
-cs_ret_code_t State::get(const CS_TYPE type, void *value, const size16_t size) {
+cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size) {
 	cs_state_data_t data(type, (uint8_t*)value, size);
 	return get(data);
+}
+
+cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size, const PersistenceMode mode) {
+	cs_state_data_t data(type, (uint8_t*)value, size);
+	return get(data, mode);
 }
 
 bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
