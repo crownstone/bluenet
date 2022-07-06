@@ -77,7 +77,7 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 }
 
 void Setup::setWithCheck(const CS_TYPE& type, void *value, const size16_t size) {
-	cs_ret_code_t retCode = State::getInstance().set(type, value, size);
+	cs_ret_code_t retCode = State::getInstance().set(type, value, size, PersistenceMode::STRATEGY1);
 	LOGSetupDebug("setWithCheck %x=%x (res:%x)", type, *static_cast<uint8_t*>(value), retCode);
 	switch (retCode) {
 		case ERR_SUCCESS:
@@ -175,7 +175,7 @@ OperationMode Setup::getPersistedOperationMode() {
 	LOGSetupDebug("getPersistedOperationMode, reading state from flash");
 	TYPIFY(STATE_OPERATION_MODE) mode;
 
-	if (State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::FLASH)
+	if (State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1)
 		!= ERR_SUCCESS) {
 		LOGw("couldn't read STATE_OPERATION_MODE from flash");
 		return OperationMode::OPERATION_MODE_UNINITIALIZED;
