@@ -12,8 +12,7 @@
 #include <util/cs_Utils.h>
 
 
-#define LOGSetupDebug LOGd
-#define LOGSetupInfo LOGi
+#define LOGSetupDebug LOGnone
 
 Setup::Setup() {
 	listen();
@@ -72,7 +71,7 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 	switchState.state.relay = 1;
 	setWithCheck(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 
-	LOGi("Setup success, wait for storage");
+	LOGSetupInfo("Setup success, wait for storage");
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -148,7 +147,7 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 	LOGSetupDebug("setupdata successfullyStoredBitmask: %b", _successfullyStoredBitmask);
 
 	if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
-		LOGi("All state variables stored");
+		LOGSetupInfo("All state variables stored");
 		setNormalMode();
 	}
 	else {
@@ -157,13 +156,11 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 }
 
 void Setup::setNormalMode() {
-	LOGSetupDebug("setNormalMode");
-
 	// Set operation mode to normal mode
 	OperationMode operationMode = OperationMode::OPERATION_MODE_NORMAL;
 	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(operationMode);
 
-	LOGi("Setting mode to NORMAL: 0x%X", mode);
+	LOGSetupInfo("Setting mode to NORMAL: 0x%X", mode);
 	setWithCheck(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	// Switch relay on
@@ -205,7 +202,7 @@ void Setup::notifyResultAsync(ErrorCodesGeneral errCode) {
 }
 
 void Setup::finalizeSetNormalMode() {
-	LOGSetupInfo("Setup::finalize()");
+	LOGSetupInfo("finalizeSetNormalMode()");
 
 	if (getPersistedOperationMode() == OperationMode::OPERATION_MODE_NORMAL) {
 		notifyResultAsync(ERR_SUCCESS);
@@ -215,9 +212,9 @@ void Setup::finalizeSetNormalMode() {
 		if(_retryCount > 0) {
 			_retryCount--;
 			setNormalMode();
-		// for now continue with reset (will be considered setup mode)
 		} else {
 			// TODO: notifyResultAsync(ERR_WRONG_MODE);
+			// for now continue with reset (will be considered setup mode)
 			resetDelayed();
 		}
 	}
