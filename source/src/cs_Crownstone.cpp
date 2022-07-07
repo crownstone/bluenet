@@ -67,6 +67,8 @@ extern "C" {
 
 #define LOGCrownstoneDebug LOGd
 
+#define LOGCrownstoneDebug LOGd
+
 /****************************************************** Preamble *******************************************************/
 
 cs_ram_stats_t Crownstone::_ramStats;
