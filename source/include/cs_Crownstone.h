@@ -199,12 +199,22 @@ private:
 	 *   3. Storage.             Definitely after the stack has been initialized.
 	 *   4. State.               Storage should be initialized here.
 	 */
-	void initDrivers(uint16_t step);
+	void initDrivers0();
 
 	/**
 	 * The distinct driver init phases.
+	 *  - State
+	 *  - UartHandler
+	 *  - CommandHandler
+	 *  - FactoryReset handler
+	 *  - ConnectionEncryption
+	 *  - KeysAndAccess
+	 *  - SwitchAggregator
+	 *  - TemperatureGuard
+	 *  - PowerSampler
+	 *  - TWI
+	 *  - GPIO
 	 */
-	void initDrivers0();
 	void initDrivers1();
 
 	/** configure the crownstone. this will call the other configureXXX functions in turn

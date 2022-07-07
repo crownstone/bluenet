@@ -11,8 +11,12 @@
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
+
+#define LOGSetupDebug LOGnone
+#define LOGSetupInfo LOGi
+
 Setup::Setup() {
-	EventDispatcher::getInstance().addListener(this);
+	listen();
 }
 
 cs_ret_code_t Setup::handleCommand(cs_data_t data) {
@@ -68,12 +72,13 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 	switchState.state.relay = 1;
 	setWithCheck(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 
-	LOGi("Setup success, wait for storage");
+	LOGSetupInfo("Setup success, wait for storage");
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
 void Setup::setWithCheck(const CS_TYPE& type, void *value, const size16_t size) {
-	cs_ret_code_t retCode = State::getInstance().set(type, value, size);
+	cs_ret_code_t retCode = State::getInstance().set(type, value, size, PersistenceMode::STRATEGY1);
+	LOGSetupDebug("setWithCheck %x=%x (res:%x)", type, *static_cast<uint8_t*>(value), retCode);
 	switch (retCode) {
 		case ERR_SUCCESS:
 			break;
@@ -133,14 +138,17 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 	case CS_TYPE::STATE_OPERATION_MODE:
 		// Check, so that we don't finalize if operation mode was set for some other reason than setup.
 		if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
-			finalize();
+			finalizeSetNormalMode();
 		}
 		return;
 	default:
 		break;
 	}
+
+	LOGSetupDebug("setupdata successfullyStoredBitmask: %b", _successfullyStoredBitmask);
+
 	if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
-		LOGi("All state variables stored");
+		LOGSetupInfo("All state variables stored");
 		setNormalMode();
 	}
 	else {
@@ -152,38 +160,63 @@ void Setup::setNormalMode() {
 	// Set operation mode to normal mode
 	OperationMode operationMode = OperationMode::OPERATION_MODE_NORMAL;
 	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(operationMode);
-	LOGi("Set mode NORMAL: 0x%X", mode);
+
+	LOGSetupInfo("Setting mode to NORMAL: 0x%X", mode);
 	setWithCheck(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	// Switch relay on
 	event_t event(CS_TYPE::CMD_SWITCH_ON);
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
-void Setup::finalize() {
-	LOGi("Setup done... Reset crownstone");
-
-	TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_SETUP, ERR_SUCCESS);
-	event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
-	eventResult.dispatch();
-
-
+OperationMode Setup::getPersistedOperationMode() {
+	LOGSetupDebug("getPersistedOperationMode, reading state from flash");
 	TYPIFY(STATE_OPERATION_MODE) mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-	LOGd("New mode is 0x%X", mode);
-	OperationMode operationMode = static_cast<OperationMode>(mode);
-	LOGd("Operation mode: %s", operationModeName(operationMode));
-	if (!ValidMode(operationMode)) {
-		LOGe("Invalid operation mode: 0x%X", operationMode);
-		// for now continue with reset (will be considered setup mode)
+
+	if (State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1)
+		!= ERR_SUCCESS) {
+		LOGw("couldn't read STATE_OPERATION_MODE from flash");
+		return OperationMode::OPERATION_MODE_UNINITIALIZED;
 	}
 
-	// reset after 1000 ms
+	LOGSetupDebug("Operation mode: %s", operationModeName(static_cast<OperationMode>(mode)));
+	return getOperationMode(mode);
+}
+
+void Setup::resetDelayed() {
+	// reset after delay
 	reset_delayed_t resetDelayed;
 	resetDelayed.resetCode = CS_RESET_CODE_SOFT_RESET;
 	resetDelayed.delayMs = 1000;
-	event_t event2(CS_TYPE::CMD_RESET_DELAYED, &resetDelayed, sizeof(resetDelayed));
-	EventDispatcher::getInstance().dispatch(event2);
+
+	LOGSetupDebug("resetting in %d ms", resetDelayed.delayMs);
+	event_t resetEvent(CS_TYPE::CMD_RESET_DELAYED, &resetDelayed, sizeof(resetDelayed));
+	resetEvent.dispatch();
+}
+
+void Setup::notifyResultAsync(ErrorCodesGeneral errCode) {
+	TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_SETUP, errCode);
+	event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
+	eventResult.dispatch();
+}
+
+void Setup::finalizeSetNormalMode() {
+	LOGSetupInfo("finalizeSetNormalMode()");
+
+	if (getPersistedOperationMode() == OperationMode::OPERATION_MODE_NORMAL) {
+		notifyResultAsync(ERR_SUCCESS);
+		resetDelayed();
+	} else {
+		LOGe("Cannot finalize, operation mode must be NORMAL, retrying %d more times", _retryCount);
+		if(_retryCount > 0) {
+			_retryCount--;
+			setNormalMode();
+		} else {
+			// TODO: notifyResultAsync(ERR_WRONG_MODE);
+			// for now continue with reset (will be considered setup mode)
+			resetDelayed();
+		}
+	}
 }
 
 /**

@@ -65,6 +65,10 @@ extern "C" {
 
 /****************************************************** Preamble *****************************************************/
 
+#define LOGCrownstoneDebug LOGd
+
+/****************************************************** Preamble *******************************************************/
+
 cs_ram_stats_t Crownstone::_ramStats;
 
 /*********************************************** Global functions ****************************************************/
@@ -229,16 +233,19 @@ void Crownstone::init(uint16_t step) {
 
 void Crownstone::init0() {
 	LOGi(FMT_HEADER "init");
-	initDrivers(0);
+	initDrivers0();
 }
 
 void Crownstone::init1() {
-	initDrivers(1);
+	initDrivers1();
 	LOG_FLUSH();
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	LOGCrownstoneDebug("Persisted operation mode is 0x%X", mode);
+
 	_operationMode = getOperationMode(mode);
+	LOGCrownstoneDebug("Resolved operation mode is 0x%X", _operationMode);
 
 	//! configure the crownstone
 	LOGi(FMT_HEADER "configure");
@@ -267,18 +274,6 @@ void Crownstone::init1() {
 #endif
 }
 
-void Crownstone::initDrivers(uint16_t step) {
-	switch (step) {
-		case 0: {
-			initDrivers0();
-			break;
-		}
-		case 1: {
-			initDrivers1();
-			break;
-		}
-	}
-}
 
 void Crownstone::initDrivers0() {
 	LOGi("Init drivers");
