@@ -22,7 +22,7 @@ set(APPLICATION_SHORTHAND "crownstone")
 set(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Set the main file to use for this application
-set(MAIN_FILE "cs_Crownstone.cpp")
+set(MAIN_FILE "cs_main.cpp")
 
 # The directory with additional CMake files
 set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
