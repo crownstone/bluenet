@@ -13,6 +13,7 @@
 
 
 #define LOGSetupDebug LOGnone
+#define LOGSetupInfo LOGi
 
 Setup::Setup() {
 	listen();
