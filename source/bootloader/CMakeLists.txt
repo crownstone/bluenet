@@ -118,6 +118,8 @@ ELSE()
 	# Set the main file to use for this application
 	#SET(MAIN_FILE "${NRF5_DIR}/examples/dfu/secure_bootloader/main.c")
 	SET(MAIN_FILE "${CMAKE_SOURCE_DIR}/bootloader/main.c")
+	
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/cs_ipc_bootloader_status.c")
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dfu_public_key.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/cfg/cs_Boards.c")
