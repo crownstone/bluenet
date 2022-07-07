@@ -179,9 +179,7 @@ OperationMode Setup::getPersistedOperationMode() {
 		return OperationMode::OPERATION_MODE_UNINITIALIZED;
 	}
 
-	OperationMode operationMode = static_cast<OperationMode>(mode);
-
-	LOGSetupDebug("Operation mode: %s", operationModeName(operationMode));
+	LOGSetupDebug("Operation mode: %s", operationModeName(static_cast<OperationMode>(mode)));
 	return getOperationMode(mode);
 }
 
