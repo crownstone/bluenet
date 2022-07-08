@@ -192,7 +192,14 @@ endif()
 # Get firmware and bootloader version
 include(${DEFAULT_MODULES_PATH}/get_versions.cmake)
 get_version_info("${WORKSPACE_DIR}/source" FIRMWARE_VERSION FIRMWARE_DFU_VERSION FIRMWARE_RC_VERSION)
+message(STATUS "FIRMWARE_VERSION: ${FIRMWARE_VERSION}")
+message(STATUS "FIRMWARE_DFU_VERSION: ${FIRMWARE_DFU_VERSION}")
+message(STATUS "FIRMWARE_RC_VERSION: ${FIRMWARE_RC_VERSION}")
+
 get_version_info("${WORKSPACE_DIR}/source/bootloader" BOOTLOADER_VERSION BOOTLOADER_DFU_VERSION BOOTLOADER_RC_VERSION)
+message(STATUS "BOOTLOADER_VERSION: ${BOOTLOADER_VERSION}")
+message(STATUS "BOOTLOADER_DFU_VERSION: ${BOOTLOADER_DFU_VERSION}")
+message(STATUS "BOOTLOADER_RC_VERSION: ${BOOTLOADER_RC_VERSION}")
 
 # Create bootloader version as integers (DFU is already an integer, RC is treated separately, it's a string)
 string(REPLACE "-" ";" BOOTLOADER_WITHOUT_RC_LIST "${BOOTLOADER_VERSION}")
@@ -662,7 +669,7 @@ add_custom_target(generate_dfu_package_all
 	COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 	COMMAND bash -c "sha1sum dfu/${FIRMWARE_DFU_ZIP} | cut -f1 -d' ' > dfu/${FIRMWARE_DFU_ZIP}.sha1" VERBATIM
 	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMENT "Generate DFU package with Softdevice, bootloader, and application"
+	COMMENT "Generated DFU package with Softdevice, bootloader, and application"
 	DEPENDS extract_sd_id
 	)
 
@@ -684,7 +691,24 @@ add_custom_target(generate_dfu_package_application
 	COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 	COMMAND bash -c "sha1sum dfu/${APPLICATION_DFU_ZIP} | cut -f1 -d' ' > dfu/${APPLICATION_DFU_ZIP}.sha1" VERBATIM
 	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMENT "Generate DFU package with application only"
+	COMMENT "Generated DFU package with application only"
+	DEPENDS extract_sd_id
+	)
+
+add_custom_target(generate_dfu_package_application_debug
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package (without keyfile)"
+	COMMAND ${CMAKE_COMMAND} -E echo "     Application: ${PROJECT_NAME}.hex"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND bash -c "echo \"Softdevice id: $(cat softdevice_id)\"" VERBATIM
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip'" VERBATIM USES_TERMINAL
+	COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip" VERBATIM USES_TERMINAL
+	COMMAND ${CMAKE_COMMAND} -E make_directory dfu
+	COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip dfu/${APPLICATION_DFU_ZIP}
+	COMMAND bash -c "sha1sum dfu/${APPLICATION_DFU_ZIP} | cut -f1 -d' ' > dfu/${APPLICATION_DFU_ZIP}.sha1" VERBATIM
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMENT "Generated DFU package with application only"
 	DEPENDS extract_sd_id
 	)
 
