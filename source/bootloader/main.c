@@ -89,9 +89,11 @@ static void on_error(void)
     // To allow the buffer to be flushed by the host.
     nrf_delay_ms(100);
 #endif
+
 #ifdef NRF_DFU_DEBUG_VERSION
     NRF_BREAKPOINT_COND;
 #endif
+
     NVIC_SystemReset();
 }
 
