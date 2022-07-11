@@ -45,6 +45,7 @@
 #include <boards/cs_PCA10040.h>
 #include <boards/cs_PCA10056.h>
 #include <boards/cs_UsbDongle.h>
+#include <boards/cs_CR01R02v4.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
@@ -202,6 +203,9 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 		case ACR01B11A:
 			asACR01B11A(config);
 			break;
+		case CR01R02v4:
+			asCR01R02v4(config);
+			break;
 		case GUIDESTONE:
 			asGuidestone(config);
 			break;
@@ -301,6 +305,10 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 		}
 		case PRODUCT_CROWNSTONE_USB_DONGLE: {
 			asUsbDongle(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_OUTLET: {
+			asCR01R02v4(config);
 			return ERR_SUCCESS;
 		}
 	}

@@ -6,6 +6,15 @@
  */
 #pragma once
 
+/**
+ * TODO: For now formatting is turned off, but the actual configurations should be:
+ *   - loaded from one single file, CMakeBuild.config.default
+ *   - configured in files like include/cfg/cs_StaticConfig.h.in, shared/cs_MemoryLayout.h.in, etc.
+ * This would make the values easier accessible when required (configuration time, build time, bootloader, firmware).
+ */
+
+// clang-format off
+
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
 #define CS_CONNECTION_PROTOCOL_VERSION           5
@@ -300,4 +309,4 @@
 #define STATE_HUB_MODE_DEFAULT 0
 #endif
 
-
+// clang-format on
