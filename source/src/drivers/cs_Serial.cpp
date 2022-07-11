@@ -208,9 +208,6 @@ inline void _serial_write(uint8_t val) {
 #endif
 }
 
-/*
- * TODO: Remove the initialization check. It's used for every byte that's written.
- */
 void serial_write(uint8_t val) {
 #if SERIAL_VERBOSITY > SERIAL_READ_ONLY
 	if (!_initializedTx) {
