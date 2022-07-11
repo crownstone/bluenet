@@ -87,7 +87,7 @@ extern "C" {
 #define ACR01B11A            1505
 
 // Outlets
-#define CR01R02v4            1506
+#define CR01R02v4            1100
 
 #define PIN_NONE 0xFF
 
