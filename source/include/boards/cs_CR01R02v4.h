@@ -100,6 +100,6 @@ void asCR01R02v4(boards_config_t* config) {
 
 	config->minTxPower                      = -40;
 
-	config->scanWindowUs                    = 3 * config->scanIntervalUs / 4;
+	config->scanWindowUs                    = config->scanIntervalUs;
 	config->tapToToggleDefaultRssiThreshold = -35;
 }
