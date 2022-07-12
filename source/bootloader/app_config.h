@@ -39,7 +39,15 @@
  * 1 for mesh net state (NET_FLASH_PAGE_COUNT).
  * 1 for mesh defrag/garbage collection.
  */
-#define NRF_DFU_APP_DATA_AREA_SIZE ((8+1+4)*4096)
+#define NRF_DFU_APP_DATA_AREA_SIZE (0x1000 *                  \
+	(                                                         \
+		CS_FDS_VIRTUAL_PAGES +                                \
+		CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE +                \
+		CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER  +                \
+		(BUILD_MICROAPP_SUPPORT ? FLASH_MICROAPP_PAGES : 0) + \
+		(BUILD_P2P_DFU ? 1 : 0)                               \
+	))
+//#define NRF_DFU_APP_DATA_AREA_SIZE ((8+1+4)*0x1000)
 
 //! Device information service.
 #define BLE_DIS_ENABLED 1

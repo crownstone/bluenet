@@ -1,30 +1,30 @@
 
 Bluenet details in memory:
 
-Flash (Application)
---------------------------
+Flash
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Start address | What               | Size
+--------------|--------------------|-----------
 0x00000000    | MBR + SoftDevice   | ${APPLICATION_START_ADDRESS}
 ${APPLICATION_START_ADDRESS}    | bluenet (max size) | ${APPLICATION_MAX_LENGTH}
+${FLASH_MICROAPP_BASE}       | Microapps          | ${FLASH_MICROAPP_LENGTH}
+              | FDS pages etc      | 0xd000 (NRF_DFU_APP_DATA_AREA_SIZE)
+${BOOTLOADER_START_ADDRESS}       | Bootloader         | ${BOOTLOADER_LENGTH}
 
 Total: ${TOTAL_AMOUNT_FLASH}
 
+
 RAM
---------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 RAM base      | Size    | Total
+--------------|---------|--------
 ${RAM_R1_BASE}    | ${RAM_APPLICATION_AMOUNT}  | ${TOTAL_AMOUNT_RAM}
 
-Bootloader
---------------------------
-Start address | Size
-${BOOTLOADER_START_ADDRESS}    | ${BOOTLOADER_LENGTH}
-
-Microapps
---------------------------
-Start address | Size
-${FLASH_MICROAPP_BASE}       | ${FLASH_MICROAPP_LENGTH}
 
 Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Modules (1 is enabled, 0 is disabled)
 ---------------------------
