@@ -216,9 +216,15 @@ public:
 	/**
 	 * Set state to new value, via copy.
 	 *
-	 * @param[in] data            Data struct with state type, optional id, data, and size.
-	 * @param[in] mode            Indicates whether to set data in RAM, FLASH, or a combination of this.
-	 * @return                    Return code. Can be ERR_SUCCESS_NO_CHANGE.
+	 * @param[in] data                 Data struct with state type, optional id, data, and size.
+	 * @param[in] mode                 Indicates whether to set data in RAM, FLASH, or a combination of this.
+	 * @return ERR_SUCCESS             The data has been set, and (depending on mode) will be written to flash.
+	 *                                 There will be an event EVT_STORAGE_WRITE_DONE once it's actually written to flash.
+	 * @return ERR_SUCCESS_NO_CHANGE   The data did not change, and thus will NOT be written to flash.
+	 *                                 There will be NO event EVT_STORAGE_WRITE_DONE.
+	 *                                 Warning: when setDelayed() was used before set(), it can happen that this code is
+	 *                                 returned, while the data is not written to flash yet.
+	 * @return                         Other codes for errors.
 	 */
 	cs_ret_code_t set(const cs_state_data_t & data, PersistenceMode mode = PersistenceMode::STRATEGY1);
 

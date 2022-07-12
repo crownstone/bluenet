@@ -81,8 +81,10 @@ void Setup::setWithCheck(const CS_TYPE& type, void *value, const size16_t size) 
 	LOGSetupDebug("setWithCheck %x=%x (res:%x)", type, *static_cast<uint8_t*>(value), retCode);
 	switch (retCode) {
 		case ERR_SUCCESS:
+			// Wait for EVT_STORAGE_WRITE_DONE.
 			break;
 		case ERR_SUCCESS_NO_CHANGE:
+			// There will be no EVT_STORAGE_WRITE_DONE.
 			onStorageDone(type);
 			break;
 		default:
