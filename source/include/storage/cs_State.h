@@ -187,7 +187,6 @@ public:
 	 * Avoids having to create a temp every time you want to get a state variable.
 	 */
 	cs_ret_code_t get(const CS_TYPE type, void *value, size16_t size);
-	cs_ret_code_t get(const CS_TYPE type, void *value, size16_t size, const PersistenceMode mode);
 
 	/**
 	 * Shorthand for get() for boolean data types, and id 0.
@@ -234,7 +233,6 @@ public:
 	 * Avoids having to create a temp every time you want to set a state variable.
 	 */
 	cs_ret_code_t set(const CS_TYPE type, void *value, size16_t size);
-	cs_ret_code_t set(const CS_TYPE type, void *value, size16_t size, PersistenceMode mode);
 
 	/**
 	 * Set the state to a new value, but delay the write to flash.

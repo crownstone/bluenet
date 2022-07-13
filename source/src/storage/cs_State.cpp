@@ -73,11 +73,6 @@ cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size) {
 	return get(data);
 }
 
-cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size, const PersistenceMode mode) {
-	cs_state_data_t data(type, (uint8_t*)value, size);
-	return get(data, mode);
-}
-
 bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 	TYPIFY(CONFIG_MESH_ENABLED) enabled = false;
 	switch (type) {
@@ -101,11 +96,6 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
 	cs_state_data_t data(type, (uint8_t*)value, size);
 	return set(data);
-}
-
-cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size, PersistenceMode mode) {
-	cs_state_data_t data(type, (uint8_t*)value, size);
-	return set(data, mode);
 }
 
 cs_ret_code_t State::set(const cs_state_data_t & data, PersistenceMode mode) {

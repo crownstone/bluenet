@@ -62,9 +62,6 @@ public:
 private:
 	Setup();
 
-	// when mode is not persisted upon finalization, retry this number of times.
-	uint8_t _retryCount = 3;
-
 	// Used to check if all state variables are written to flash.
 	uint32_t _successfullyStoredBitmask = 0;
 
@@ -72,14 +69,17 @@ private:
 	void onStorageDone(const CS_TYPE& type);
 	void setNormalMode();
 
-	void notifyResultAsync(ErrorCodesGeneral errCode);
+	void resolveAsyncResult(ErrorCodesGeneral errCode);
 	void resetDelayed();
 
 	// returns the uncached operation mode, read directly from flash.
 	OperationMode getPersistedOperationMode();
+
 	/**
-	 * notify result on bluetooth
-	 * check if normal mode is properly persisted.
+	 * Finalize the setup.
+	 *
+	 * Check if operation mode on flash is normal.
+	 * Notify the result.
 	 */
-	void finalizeSetNormalMode();
+	void finalize();
 };

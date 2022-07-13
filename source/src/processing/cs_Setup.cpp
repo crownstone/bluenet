@@ -12,7 +12,7 @@
 #include <util/cs_Utils.h>
 
 
-#define LOGSetupDebug LOGnone
+#define LOGSetupDebug LOGvv
 #define LOGSetupInfo LOGi
 
 Setup::Setup() {
@@ -49,7 +49,7 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 	// Reset which types were successfully stored.
 	_successfullyStoredBitmask = 0;
 
-	LOGd("Store keys, mesh address, and other config data");
+	LOGSetupDebug("Store keys, IDs, and iBeacon config");
 	setWithCheck(CS_TYPE::CONFIG_CROWNSTONE_ID,    &(setupData->stoneId), sizeof(setupData->stoneId));
 	setWithCheck(CS_TYPE::CONFIG_SPHERE_ID,        &(setupData->sphereId), sizeof(setupData->sphereId));
 	setWithCheck(CS_TYPE::CONFIG_KEY_ADMIN,        &(setupData->adminKey), sizeof(setupData->adminKey));
@@ -77,84 +77,83 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 }
 
 void Setup::setWithCheck(const CS_TYPE& type, void *value, const size16_t size) {
-	cs_ret_code_t retCode = State::getInstance().set(type, value, size, PersistenceMode::STRATEGY1);
-	LOGSetupDebug("setWithCheck %x=%x (res:%x)", type, *static_cast<uint8_t*>(value), retCode);
+	cs_ret_code_t retCode = State::getInstance().set(type, value, size);
+	LOGSetupDebug("setWithCheck type=%u result=0x%X", type, retCode);
 	switch (retCode) {
-		case ERR_SUCCESS:
+		case ERR_SUCCESS: {
 			// Wait for EVT_STORAGE_WRITE_DONE.
 			break;
-		case ERR_SUCCESS_NO_CHANGE:
+		}
+		case ERR_SUCCESS_NO_CHANGE: {
 			// There will be no EVT_STORAGE_WRITE_DONE.
 			onStorageDone(type);
 			break;
-		default:
+		}
+		default: {
 			break;
+		}
 	}
 }
 
 void Setup::onStorageDone(const CS_TYPE& type) {
-	LOGd("storage done %u", to_underlying_type(type));
+	LOGd("Storage done type=%u", type);
 	switch (type) {
-	case CS_TYPE::CONFIG_CROWNSTONE_ID:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_STONE_ID);
-		break;
-	case CS_TYPE::CONFIG_SPHERE_ID:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SPHERE_ID);
-		break;
-	case CS_TYPE::CONFIG_KEY_ADMIN:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_ADMIN_KEY);
-		break;
-	case CS_TYPE::CONFIG_KEY_MEMBER:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MEMBER_KEY);
-		break;
-	case CS_TYPE::CONFIG_KEY_BASIC:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_BASIC_KEY);
-		break;
-	case CS_TYPE::CONFIG_KEY_SERVICE_DATA:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SERVICE_DATA_KEY);
-		break;
-	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_LOCALIZATION_KEY);
-		break;
-	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_DEVICE_KEY);
-		break;
-	case CS_TYPE::CONFIG_MESH_APP_KEY:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_APP_KEY);
-		break;
-	case CS_TYPE::CONFIG_MESH_NET_KEY:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_NET_KEY);
-		break;
-	case CS_TYPE::CONFIG_IBEACON_UUID:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_UUID);
-		break;
-	case CS_TYPE::CONFIG_IBEACON_MAJOR:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MAJOR);
-		break;
-	case CS_TYPE::CONFIG_IBEACON_MINOR:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MINOR);
-		break;
-	case CS_TYPE::STATE_SWITCH_STATE:
-		CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SWITCH);
-		break;
-	case CS_TYPE::STATE_OPERATION_MODE:
-		// Check, so that we don't finalize if operation mode was set for some other reason than setup.
-		if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
-			finalizeSetNormalMode();
-		}
-		return;
-	default:
-		break;
+		case CS_TYPE::CONFIG_CROWNSTONE_ID:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_STONE_ID);
+			break;
+		case CS_TYPE::CONFIG_SPHERE_ID:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SPHERE_ID);
+			break;
+		case CS_TYPE::CONFIG_KEY_ADMIN:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_ADMIN_KEY);
+			break;
+		case CS_TYPE::CONFIG_KEY_MEMBER:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MEMBER_KEY);
+			break;
+		case CS_TYPE::CONFIG_KEY_BASIC:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_BASIC_KEY);
+			break;
+		case CS_TYPE::CONFIG_KEY_SERVICE_DATA:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SERVICE_DATA_KEY);
+			break;
+		case CS_TYPE::CONFIG_KEY_LOCALIZATION:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_LOCALIZATION_KEY);
+			break;
+		case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_DEVICE_KEY);
+			break;
+		case CS_TYPE::CONFIG_MESH_APP_KEY:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_APP_KEY);
+			break;
+		case CS_TYPE::CONFIG_MESH_NET_KEY:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_NET_KEY);
+			break;
+		case CS_TYPE::CONFIG_IBEACON_UUID:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_UUID);
+			break;
+		case CS_TYPE::CONFIG_IBEACON_MAJOR:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MAJOR);
+			break;
+		case CS_TYPE::CONFIG_IBEACON_MINOR:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_IBEACON_MINOR);
+			break;
+		case CS_TYPE::STATE_SWITCH_STATE:
+			CsUtils::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SWITCH);
+			break;
+		case CS_TYPE::STATE_OPERATION_MODE:
+			// Check, so that we don't finalize if operation mode was set for some other reason than setup.
+			if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
+				finalize();
+			}
+			return;
+		default:
+			break;
 	}
 
-	LOGSetupDebug("setupdata successfullyStoredBitmask: %b", _successfullyStoredBitmask);
-
+	LOGd("StoredBitmask=%032b all=%032b", _successfullyStoredBitmask, SETUP_CONFIG_MASK_ALL);
 	if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
 		LOGSetupInfo("All state variables stored");
 		setNormalMode();
-	}
-	else {
-		LOGd("Stored: %u all=%u", _successfullyStoredBitmask, SETUP_CONFIG_MASK_ALL);
 	}
 }
 
@@ -169,20 +168,25 @@ void Setup::setNormalMode() {
 	// Switch relay on
 	event_t event(CS_TYPE::CMD_SWITCH_ON);
 	event.dispatch();
+
+	// Wait for operation mode to be written.
 }
 
 OperationMode Setup::getPersistedOperationMode() {
 	LOGSetupDebug("getPersistedOperationMode, reading state from flash");
 	TYPIFY(STATE_OPERATION_MODE) mode;
+	cs_state_data_t data(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
-	if (State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1)
-		!= ERR_SUCCESS) {
-		LOGw("couldn't read STATE_OPERATION_MODE from flash");
+	cs_ret_code_t retCode = State::getInstance().get(data, PersistenceMode::FLASH);
+	if (retCode != ERR_SUCCESS) {
+		LOGw("Couldn't read operation mode from flash: retCode=0x%X", retCode);
 		return OperationMode::OPERATION_MODE_UNINITIALIZED;
 	}
 
-	LOGSetupDebug("Operation mode: %s", operationModeName(static_cast<OperationMode>(mode)));
-	return getOperationMode(mode);
+	OperationMode operationMode = getOperationMode(mode);
+
+	LOGSetupDebug("Operation mode: read=0x%X converted=0x%X", mode, operationMode);
+	return operationMode;
 }
 
 void Setup::resetDelayed() {
@@ -191,33 +195,27 @@ void Setup::resetDelayed() {
 	resetDelayed.resetCode = CS_RESET_CODE_SOFT_RESET;
 	resetDelayed.delayMs = 1000;
 
-	LOGSetupDebug("resetting in %d ms", resetDelayed.delayMs);
+	LOGSetupDebug("Reset in %u ms", resetDelayed.delayMs);
 	event_t resetEvent(CS_TYPE::CMD_RESET_DELAYED, &resetDelayed, sizeof(resetDelayed));
 	resetEvent.dispatch();
 }
 
-void Setup::notifyResultAsync(ErrorCodesGeneral errCode) {
+void Setup::resolveAsyncResult(ErrorCodesGeneral errCode) {
 	TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_SETUP, errCode);
 	event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
 	eventResult.dispatch();
 }
 
-void Setup::finalizeSetNormalMode() {
-	LOGSetupInfo("finalizeSetNormalMode()");
+void Setup::finalize() {
+	LOGSetupInfo("Finalize");
 
 	if (getPersistedOperationMode() == OperationMode::OPERATION_MODE_NORMAL) {
-		notifyResultAsync(ERR_SUCCESS);
+		resolveAsyncResult(ERR_SUCCESS);
 		resetDelayed();
-	} else {
-		LOGe("Cannot finalize, operation mode must be NORMAL, retrying %d more times", _retryCount);
-		if(_retryCount > 0) {
-			_retryCount--;
-			setNormalMode();
-		} else {
-			// TODO: notifyResultAsync(ERR_WRONG_MODE);
-			// for now continue with reset (will be considered setup mode)
-			resetDelayed();
-		}
+	}
+	else {
+		LOGe("Cannot finalize, operation mode must be NORMAL");
+		resolveAsyncResult(ERR_CANCELED);
 	}
 }
 
