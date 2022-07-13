@@ -68,5 +68,18 @@ private:
 	void setWithCheck(const CS_TYPE& type, void *value, const size16_t size);
 	void onStorageDone(const CS_TYPE& type);
 	void setNormalMode();
+
+	void resolveAsyncResult(ErrorCodesGeneral errCode);
+	void resetDelayed();
+
+	// returns the uncached operation mode, read directly from flash.
+	OperationMode getPersistedOperationMode();
+
+	/**
+	 * Finalize the setup.
+	 *
+	 * Check if operation mode on flash is normal.
+	 * Notify the result.
+	 */
 	void finalize();
 };

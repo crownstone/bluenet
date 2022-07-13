@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 
+#include <protocol/cs_UicrPacket.h>
 #include <protocol/cs_Typedefs.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -85,6 +86,8 @@ extern "C" {
 // Crownstone Plug One (first prototype of second edition of the plug)
 #define ACR01B11A            1505
 
+// Outlets
+#define CR01R02v4            1100
 
 #define PIN_NONE 0xFF
 
@@ -190,6 +193,9 @@ typedef struct  {
 
 	// Analog input pin to read the dimmer temperature.
 	uint8_t pinAinDimmerTemp;
+	
+	// Analog input pin to measure EARTH
+	uint8_t pinAinEarth;
 
 	// GPIO pin to get zero-crossing information for current.
 	uint8_t pinCurrentZeroCrossing;
@@ -211,6 +217,12 @@ typedef struct  {
 
 	// GPIO pins of LEDs.
 	uint8_t pinLed[LED_COUNT];
+	
+	struct __attribute__((__packed__)) {
+		uint8_t cs;
+		uint8_t clk;
+		uint8_t dio[4];
+	} pinFlash;
 
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {
@@ -232,6 +244,9 @@ typedef struct  {
 
 		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
 		bool usesNfcPins: 1;
+
+		// True if the Crownstone has a more accurate power measurement.
+		bool hasAccuratePowerMeasurement: 1;
 
 		// True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
 		// and a lower startup time of the dimmer circuit.
@@ -345,6 +360,9 @@ typedef struct  {
  * @return                                       error value (NRF_SUCCESS or NRF_ERROR_INVALID_PARAM)
  */
 cs_ret_code_t configure_board(boards_config_t* p_config);
+
+cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards_config_t* config);
+cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_config_t* config);
 
 #ifdef __cplusplus
 }

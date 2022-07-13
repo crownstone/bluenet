@@ -68,7 +68,7 @@ void State::init(boards_config_t* boardsConfig) {
 	setInitialized();
 }
 
-cs_ret_code_t State::get(const CS_TYPE type, void *value, const size16_t size) {
+cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size) {
 	cs_state_data_t data(type, (uint8_t*)value, size);
 	return get(data);
 }
@@ -98,7 +98,7 @@ cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
 	return set(data);
 }
 
-cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
+cs_ret_code_t State::set(const cs_state_data_t & data, PersistenceMode mode) {
 	cs_ret_code_t retVal = setInternal(data, mode);
 	switch (retVal) {
 		case ERR_SUCCESS:
@@ -249,11 +249,10 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			break;
 		}
 		case PersistenceMode::FLASH: {
-			return ERR_NOT_AVAILABLE;
 			// By the time the data is written to flash, the data pointer might be invalid.
 			// There is also no guarantee that the data pointer is aligned.
-			//addId(type, id)
-			//return _storage->write(getFileId(type), data);
+			// A possible solution would be to copy the data, and release it on event EVT_STORAGE_WRITE_DONE.
+			return ERR_NOT_AVAILABLE;
 		}
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
@@ -273,7 +272,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					// fall-through
 					break;
 				default:
-					LOGe("PM not implemented");
+					LOGe("Persistence mode not implemented");
 					return ERR_NOT_IMPLEMENTED;
 			}
 			// we first store the data in RAM
@@ -285,6 +284,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					// Fall through.
 					break;
 				case ERR_SUCCESS_NO_CHANGE:
+					// TODO: maybe check if data in flash is indeed the same.
 					// No need to store in flash.
 					return ret_code;
 				default:
@@ -293,7 +293,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
-			if (ret_code == ERR_BUSY) {
+			if (ret_code == ERR_BUSY) { // TODO(AREND): this check is too narrow
 				return addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
 			}
 			break;
@@ -477,18 +477,8 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	}
 	cs_state_data_t ram_data = _ram_data_register[index_in_ram];
 	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X, ...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
-	cs_ret_code_t ret_code = _storage->write(ram_data);
-	switch (ret_code) {
-		case ERR_BUSY: {
-			return ERR_BUSY;
-		}
-		case ERR_NO_SPACE: {
-			// TODO: remove things from flash..
-			return ERR_NO_SPACE;
-		}
-		default:
-			return ret_code;
-	}
+
+	return _storage->write(ram_data);
 }
 
 cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t id) {

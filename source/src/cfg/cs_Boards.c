@@ -33,7 +33,6 @@
  *    - ACR01B15A, the Crownstone Built-in Two
  */
 
-#include <ble/cs_Nordic.h>
 #include <boards/cs_ACR01B10B.h>
 #include <boards/cs_ACR01B10D.h>
 #include <boards/cs_ACR01B11A.h>
@@ -46,16 +45,20 @@
 #include <boards/cs_PCA10040.h>
 #include <boards/cs_PCA10056.h>
 #include <boards/cs_UsbDongle.h>
+#include <boards/cs_CR01R02v4.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
-#include <nrf_error.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <boards/cs_BoardMap.h>
+#include <protocol/cs_UicrPacket.h>
+#include <drivers/cs_Uicr.h>
 
 /**
  * Initialize conservatively (as if given pins are not present).
  */
 void init(boards_config_t* config) {
+	config->hardwareBoard = 0;
 	config->pinDimmer = PIN_NONE;
 	config->pinEnableDimmer= PIN_NONE;
 	config->pinRelayOn = PIN_NONE;
@@ -79,6 +82,7 @@ void init(boards_config_t* config) {
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;
 	config->flags.usesNfcPins                  = false;
+	config->flags.hasAccuratePowerMeasurement  = false;
 	config->flags.canTryDimmingOnBoot          = false;
 	config->flags.canDimOnWarmBoot             = false;
 	config->flags.dimmerOnWhenPinsFloat        = true;
@@ -140,19 +144,30 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor) {
 }
 
 cs_ret_code_t configure_board(boards_config_t* config) {
+	uint32_t hardwareBoard = getHardwareBoard();
+//	return configure_board_from_hardware_board(hardwareBoard, config);
 
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
-	}
+	// Create UICR data from hardware board.
+	cs_uicr_data_t uicrData = getUicrData(hardwareBoard);
 
+	// Try to set uicr data, in case it's not set yet.
+	setUicr(&uicrData, false);
+
+	return configure_board_from_uicr(&uicrData, config);
+}
+
+cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards_config_t* config) {
 	init(config);
 
 	switch(hardwareBoard) {
 		case ACR01B1A:
+			__attribute__ ((fallthrough));
 		case ACR01B1B:
+			__attribute__ ((fallthrough));
 		case ACR01B1C:
+			__attribute__ ((fallthrough));
 		case ACR01B1D:
+			__attribute__ ((fallthrough));
 		case ACR01B1E:
 			asACR01B1D(config);
 			break;
@@ -173,23 +188,30 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 			break;
 
 		case ACR01B2A:
+			__attribute__ ((fallthrough));
 		case ACR01B2B:
+			__attribute__ ((fallthrough));
 		case ACR01B2C:
 			asACR01B2C(config);
 			break;
 
 		case ACR01B2E:
+			__attribute__ ((fallthrough));
 		case ACR01B2G:
 			asACR01B2G(config);
 			break;
 		case ACR01B11A:
 			asACR01B11A(config);
 			break;
+		case CR01R02v4:
+			asCR01R02v4(config);
+			break;
 		case GUIDESTONE:
 			asGuidestone(config);
 			break;
 
 		case PCA10036:
+			__attribute__ ((fallthrough));
 		case PCA10040:
 			asPca10040(config);
 			break;
@@ -212,4 +234,83 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 	config->hardwareBoard = hardwareBoard;
 
 	return ERR_SUCCESS;
+}
+
+cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_config_t* config) {
+	init(config);
+	config->hardwareBoard = uicrData->board;
+
+	switch (uicrData->productRegionFamily.fields.productType) {
+		case PRODUCT_DEV_BOARD:
+			asPca10040(config);
+			return ERR_SUCCESS;
+		case PRODUCT_CROWNSTONE_PLUG_ZERO: {
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+					asACR01B2C(config);
+					return ERR_SUCCESS;
+				case 1:
+					switch (uicrData->majorMinorPatch.fields.minor) {
+						case 0:
+							asACR01B2C(config);
+							return ERR_SUCCESS;
+						case 1:
+							__attribute__ ((fallthrough));
+						case 3:
+							asACR01B2G(config);
+							return ERR_SUCCESS;
+					}
+			}
+			break;
+		}
+		case PRODUCT_CROWNSTONE_PLUG_ONE: {
+			asACR01B11A(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_BUILTIN_ZERO: {
+			asACR01B1D(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_BUILTIN_ONE: {
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+					switch (uicrData->majorMinorPatch.fields.minor) {
+						case 0:
+							asACR01B10B(config);
+							return ERR_SUCCESS;
+						case 1:
+							asACR01B10D(config);
+							return ERR_SUCCESS;
+					}
+			}
+			break;
+		}
+		case PRODUCT_CROWNSTONE_BUILTIN_TWO: {
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+					switch (uicrData->majorMinorPatch.fields.minor) {
+						case 1:
+							asACR01B13B(config);
+							return ERR_SUCCESS;
+						case 2:
+							asACR01B15A(config);
+							return ERR_SUCCESS;
+					}
+			}
+			break;
+		}
+		case PRODUCT_GUIDESTONE: {
+			asGuidestone(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_USB_DONGLE: {
+			asUsbDongle(config);
+			return ERR_SUCCESS;
+		}
+		case PRODUCT_CROWNSTONE_OUTLET: {
+			asCR01R02v4(config);
+			return ERR_SUCCESS;
+		}
+	}
+	return ERR_UNKNOWN_TYPE;
 }

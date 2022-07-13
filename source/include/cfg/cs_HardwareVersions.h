@@ -8,6 +8,20 @@
 
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_AutoConfig.h>
+#include <drivers/cs_Uicr.h>
+#include <protocol/cs_UicrPacket.h>
+#include <stdio.h>
+
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+//
+//#include "nrf52.h"
+//#include "string.h"
+//
+//#ifdef __cplusplus
+//}
+//#endif
 
 /*
 	----------------------
@@ -20,9 +34,12 @@
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One, 7 Builtin Two
+	  |  |  |--------------  Product Type, see cs_DeviceTypes.h
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
+	
+	Product type can be:
+	  1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 Dongle, 6 Builtin One, 7 Hub, 8 Builtin Two, 9 Plug One, 10 Outlet
 */
 
 /**
@@ -36,34 +53,16 @@
  *     - note, hardware patches come of course with a new UICR
  *   - in test and development it's easy to set/get UICR values (without firmware running)
  *     - we can check for firmware compatibility in the build system if there are multiple firmwares
+ *
+ * Do not use LOGx functions here! This function is also used by the bootloader.
  */
 static inline const char* get_hardware_version() {
 
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
-	}
+	uint32_t hardwareBoard = getHardwareBoard();
 
-	// Can't use LOGe here, as the bootloader also uses this file.
-//	LOGi("UICR");
-//	CsUtils::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
+	// TODO: get hardware version from UICR data.
 
 	switch (hardwareBoard) {
-		// CROWNSTONE BUILTINS
-		case ACR01B1A:  return "10103000100";
-		case ACR01B1B:  return "10103000200";
-		case ACR01B1C:  return "10103000300";
-		case ACR01B1D:  return "10103000400";
-		case ACR01B1E:  return "10103000500";
-
-		// CROWNSTONE BUILTIN ONES
-		case ACR01B10B: return "10106000000";
-		case ACR01B10D: return "10106000100";
-
-		// CROWNSTONE BUILTIN TWOS
-		case ACR01B13B: return "10107000100";
-		case ACR01B15A: return "10107000200";
-
 		// CROWNSTONE PLUGS
 		case ACR01B2A: return "10102000100";
 		case ACR01B2B: return "10102000200";
@@ -71,11 +70,29 @@ static inline const char* get_hardware_version() {
 		case ACR01B2E: return "10102010100";
 		case ACR01B2G: return "10102010300";
 
+		// CROWNSTONE BUILTINS
+		case ACR01B1A:  return "10103000100";
+		case ACR01B1B:  return "10103000200";
+		case ACR01B1C:  return "10103000300";
+		case ACR01B1D:  return "10103000400";
+		case ACR01B1E:  return "10103000500";
+
 		// GUIDESTONE
 		case GUIDESTONE: return "10104010000";
 
 		// CROWNSTONE USB DONGLE
 		case CS_USB_DONGLE: return "10105000000";
+
+		// CROWNSTONE BUILTIN ONES
+		case ACR01B10B: return "10106000000";
+		case ACR01B10D: return "10106000100";
+
+		// CROWNSTONE BUILTIN TWOS
+		case ACR01B13B: return "10108000100";
+		case ACR01B15A: return "10108000200";
+
+		// OUTLETS
+		case CR01R02v4: return "10108000400";
 
 		// Nordic Boards
 		case PCA10036: return "PCA10036";
@@ -84,10 +101,22 @@ static inline const char* get_hardware_version() {
 		case PCA10056: return "PCA10056";
 
 		default: {
-			// Can't use LOGe here, as the bootloader also uses this file.
-//			LOGe("Failed to define version for hardware board");
-//			APP_ERROR_CHECK(1);
 			return "Unknown";
 		}
 	}
+}
+
+// The string is always 11 chars, add 1 byte for the null terminator.
+static char versionString[12];
+
+static inline const char* get_hardware_version_from_uicr(const cs_uicr_data_t* uicrData) {
+	// Since you can't specify a max width, just use modulo to limit it.
+	sprintf(versionString, "%u%02u%02u%02u%02u%02u",
+			uicrData->productRegionFamily.fields.productFamily % 10,
+			uicrData->productRegionFamily.fields.region % 100,
+			uicrData->productRegionFamily.fields.productType % 100,
+			uicrData->majorMinorPatch.fields.major % 100,
+			uicrData->majorMinorPatch.fields.minor % 100,
+			uicrData->majorMinorPatch.fields.patch % 100);
+	return versionString;
 }

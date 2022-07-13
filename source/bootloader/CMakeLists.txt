@@ -124,6 +124,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dev_info_service.c")
 	#LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/cs_IpcRamData.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/shared/ipc/cs_IpcRamData.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/drivers/cs_Uicr.c")
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
@@ -337,6 +338,10 @@ list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
 message(STATUS "bootloader: Configure cs_BootloaderConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
+
+message(STATUS "bootloader: Configure cs_SharedConfig.cpp file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
 
 message(STATUS "bootloader: Configure cs_config.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h")

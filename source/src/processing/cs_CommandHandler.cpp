@@ -11,6 +11,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_GpRegRet.h>
+#include <drivers/cs_Uicr.h>
 #include <logging/cs_Logger.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <ipc/cs_IpcRamData.h>
@@ -360,11 +361,7 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 	}
 
 	cs_uicr_data_t* uicrData = (cs_uicr_data_t*)result.buf.data;
-	uint8_t uicrIndex = UICR_BOARD_INDEX;
-	uicrData->board = NRF_UICR->CUSTOMER[uicrIndex++];
-	uicrData->productRegionFamily.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
-	uicrData->majorMinorPatch.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
-	uicrData->productionDateHousing.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
+	cs_ret_code_t returnCode = getUicr(uicrData);
 	LOGd("board=%u", uicrData->board);
 	LOGd("productType=%u region=%u productFamily=%u int=0x%X",
 			uicrData->productRegionFamily.fields.productType,
@@ -383,7 +380,7 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 			uicrData->productionDateHousing.asInt);
 
 	result.dataSize = sizeof(*uicrData);
-	result.returnCode = ERR_SUCCESS;
+	result.returnCode = returnCode;
 }
 
 void CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {

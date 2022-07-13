@@ -70,6 +70,10 @@ void Dimmer::start() {
 	TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING) startDimmerOnZeroCrossing;
 	State::getInstance().get(CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING, &startDimmerOnZeroCrossing, sizeof(startDimmerOnZeroCrossing));
 
+
+
+	// These boards only have DC, so no zero crossings.
+	// TODO: should this be a flag in the board config?
 	switch (_hardwareBoard) {
 		case PCA10036:
 		case PCA10040:
@@ -120,6 +124,6 @@ void Dimmer::enable() {
 	if (_pinEnableDimmer != PIN_NONE) {
 		LOGd("enable");
 		nrf_gpio_pin_set(_pinEnableDimmer);
-		_enabled = true;
 	}
+	_enabled = true;
 }
