@@ -24,13 +24,13 @@
 #error "TICK_INTERVAL_MS must not be larger than STATE_RETRY_STORE_DELAY_MS"
 #endif
 
-// Define to get debug logs.
-//#define CS_STATE_DEBUG_LOGS
+// Set to SERIAL_DEBUG to get debug logs for this class.
+#define LogLevelStateDebug SERIAL_VERY_VERBOSE
 
-#ifdef CS_STATE_DEBUG_LOGS
+#if LogLevelStateDebug <= SERIAL_DEBUG
 #define LOGStateDebug LOGd
 #else
-#define LOGStateDebug LOGnone
+#define LOGStateDebug LOGvv
 #endif
 
 void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
@@ -234,30 +234,22 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		return ERR_BUFFER_TOO_SMALL;
 	}
 	switch (mode) {
-		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
+		case PersistenceMode::NEITHER_RAM_NOR_FLASH: {
 			return ERR_NOT_AVAILABLE;
+		}
 		case PersistenceMode::RAM: {
-			ret_code = storeInRam(data);
-			switch (ret_code) {
-				case ERR_SUCCESS:
-				case ERR_SUCCESS_NO_CHANGE:
-					break;
-				default:
-					LOGw("Failed to store in RAM");
-			}
-			return ret_code;
-			break;
+			return storeInRam(data);
 		}
 		case PersistenceMode::FLASH: {
 			// By the time the data is written to flash, the data pointer might be invalid.
 			// There is also no guarantee that the data pointer is aligned.
-			// A possible solution would be to copy the data, and release it on event EVT_STORAGE_WRITE_DONE.
+			// A possible solution would be to copy the data, and release the copy on event EVT_STORAGE_WRITE_DONE.
 			return ERR_NOT_AVAILABLE;
 		}
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
 			switch (DefaultLocation(data.type)) {
-				case PersistenceMode::RAM:
+				case PersistenceMode::RAM: {
 					ret_code = storeInRam(data);
 					switch (ret_code) {
 						case ERR_SUCCESS:
@@ -267,29 +259,72 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 							LOGw("Failed to store in RAM");
 					}
 					return ret_code;
+				}
+				case PersistenceMode::FLASH: {
+					// Continue below.
 					break;
-				case PersistenceMode::FLASH:
-					// fall-through
-					break;
-				default:
+				}
+				default: {
 					LOGe("Persistence mode not implemented");
 					return ERR_NOT_IMPLEMENTED;
+				}
 			}
-			// we first store the data in RAM
+
+			// Default location is FLASH.
+			// First store the data in RAM.
 			size16_t index = 0;
 			ret_code = storeInRam(data, index);
 			LOGStateDebug("Item stored in RAM: %i", index);
 			switch (ret_code) {
-				case ERR_SUCCESS:
-					// Fall through.
+				case ERR_SUCCESS: {
+					// Continue below, to store in flash.
 					break;
-				case ERR_SUCCESS_NO_CHANGE:
-					// TODO: maybe check if data in flash is indeed the same.
-					// No need to store in flash.
-					return ret_code;
-				default:
+				}
+				case ERR_SUCCESS_NO_CHANGE: {
+					// Check if data in flash is indeed the same.
+					cs_state_data_t tempData(data.type, data.id, nullptr, data.size);
+					
+					// TODO: since we free immediately after, we don't get heap fragmentation, right?
+					allocate(tempData);
+					ret_code = _storage->read(tempData);
+					switch (ret_code) {
+						case ERR_SUCCESS: {
+							if (memcmp(data.value, tempData.value, data.size) == 0) {
+								// No need to store in flash.
+								free(tempData.value);
+								LOGStateDebug("Ram matches flash, no need to write to storage.");
+								return ERR_SUCCESS_NO_CHANGE;
+							}
+							LOGd("Ram mismatch with flash, write to storage after all: type=%u id=%u", data.type, data.id);
+							_log(LogLevelStateDebug, false, "Ram value: ");
+							_logArray(LogLevelStateDebug, true, data.value, data.size);
+							_log(LogLevelStateDebug, false, "Flash value: ");
+							_logArray(LogLevelStateDebug, true, tempData.value, tempData.size);
+							break;
+						}
+						case ERR_NOT_FOUND: {
+							ret_code = getDefaultValue(tempData);
+							if (ret_code == ERR_SUCCESS && memcmp(data.value, tempData.value, data.size) == 0) {
+								free(tempData.value);
+								LOGd("Skip storing default value.");
+								return ERR_SUCCESS_NO_CHANGE;
+							}
+							LOGd("State not found in flash, so write to storage: type=%u id=%u", data.type, data.id);
+							break;
+						}
+						default: {
+							LOGd("Could not read flash, so write to storage to be sure: type=%u id=%u", data.type, data.id);
+							break;
+						}
+					}
+					free(tempData.value);
+					// Continue below, to store in flash.
+					break;
+				}
+				default: {
 					LOGw("Failed to store in RAM");
 					return ret_code;
+				}
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
