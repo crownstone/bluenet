@@ -390,8 +390,12 @@ static uint32_t response_ext_err_payload_add(uint8_t * p_buffer, uint8_t result,
 
 static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_context)
 {
-    ASSERT(p_res);
+
+	NRF_LOG_DEBUG("p_res=0x%x, p_context=0x%x",p_res,p_context);
+	ASSERT(p_res);
     ASSERT(p_context);
+
+    NRF_LOG_DEBUG("ble dfu req callback (request: 0x%x)", p_res->request);
 
     uint8_t len = 0;
     uint8_t buffer[MAX_RESPONSE_LEN] = {0};
@@ -410,6 +414,8 @@ static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_co
         p_res->request = NRF_DFU_OP_CRC_GET;
     }
 
+    NRF_LOG_DEBUG("prepare response");
+
     len += response_prepare(buffer, p_res->request, p_res->result);
 
     if (p_res->result != NRF_DFU_RES_CODE_SUCCESS)
@@ -424,6 +430,8 @@ static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_co
         (void) response_send(buffer, len);
         return;
     }
+
+    NRF_LOG_DEBUG("switch for req type");
 
     switch (p_res->request)
     {
@@ -455,6 +463,7 @@ static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_co
         } break;
     }
 
+    NRF_LOG_DEBUG("send response");
     (void) response_send(buffer, len);
 }
 
@@ -1242,6 +1251,12 @@ uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception)
         {
             NRF_LOG_DEBUG("BLE transport shut down.");
         }
+    } else {
+    	if(p_exception == &ble_dfu_transport) {
+			NRF_LOG_DEBUG("skipping close, ble transport was exempt");
+    	} else if (!(m_flags & DFU_BLE_FLAG_INITIALIZED)) {
+    		NRF_LOG_DEBUG("skipping close, ble transport was not initialized yet");
+    	}
     }
 
     return err_code;

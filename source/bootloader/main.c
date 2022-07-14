@@ -167,7 +167,7 @@ void cs_check_gpregret() {
 	bool start_dfu = false;
 	uint32_t counter = gpregret & CS_GPREGRET_COUNTER_MASK;
 //	uint32_t flags = gpregret & (~CS_GPREGRET_RESET_COUNTER_MASK);
-	NRF_LOG_INFO("GPREGRET=%u counter=%u", gpregret, counter);
+	NRF_LOG_INFO("GPREGRET:{val=%u, counter=%u}", gpregret, counter);
 
 	if (gpregret == CS_GPREGRET_LEGACY_DFU_RESET) {
 		// Legacy value, set new dfu flag.
@@ -184,10 +184,6 @@ void cs_check_gpregret() {
 		start_dfu = true;
 	}
 	else {
-		// Increase counter, but maintain flags.
-//		counter += 1;
-//		gpregret = flags | counter;
-//		NRF_POWER->GPREGRET = gpregret;
 		NRF_POWER->GPREGRET = gpregret + 1;
 	}
 
@@ -196,12 +192,10 @@ void cs_check_gpregret() {
 		NRF_POWER->GPREGRET = BOOTLOADER_DFU_START;
 	}
 	gpregret = NRF_POWER->GPREGRET;
-	NRF_LOG_INFO("GPREGRET=%u", gpregret);
+	NRF_LOG_INFO("GPREGRET: {val=%u, counter=%u} (updated)", gpregret, counter);
 }
 
 void set_bootloader_info() {
-	NRF_LOG_INFO("Set bootloader info");
-	NRF_LOG_FLUSH();
 
 	bluenet_ipc_bootloader_data_t bootloader_data;
 	bootloader_data.protocol = g_BOOTLOADER_IPC_RAM_PROTOCOL;
@@ -211,8 +205,23 @@ void set_bootloader_info() {
 	bootloader_data.patch = g_BOOTLOADER_VERSION_PATCH;
 	bootloader_data.prerelease = g_BOOTLOADER_VERSION_PRERELEASE;
 	bootloader_data.build_type = g_BOOTLOADER_BUILD_TYPE;
-
 	uint8_t size = sizeof(bootloader_data);
+
+
+	NRF_LOG_INFO("Bootloader: {protocol=%d, dfu_version=%d, version=\"%d.%d.%d-%d\"}",
+		bootloader_data.protocol,
+		bootloader_data.dfu_version,
+		bootloader_data.major,
+		bootloader_data.minor,
+		bootloader_data.patch,
+		bootloader_data.prerelease
+	);
+	NRF_LOG_INFO("Environment: {build_type=%d, nordic_sdk=%d}",
+		bootloader_data.build_type,
+		NORDIC_SDK_VERSION
+	);
+	NRF_LOG_FLUSH();
+
 
 	// should not happen but we don't want asserts in the bootloader, so we just truncate the struct
 	if (size > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
@@ -222,6 +231,13 @@ void set_bootloader_info() {
 }
 
 void flash_protect() {
+	NRF_LOG_INFO("Flash Settings: {queue_size=%d, max_retries=%d, max_write_size=%d}",
+			NRF_FSTORAGE_SD_QUEUE_SIZE,
+			NRF_FSTORAGE_SD_MAX_RETRIES,
+			NRF_FSTORAGE_SD_MAX_WRITE_SIZE);
+
+	NRF_LOG_FLUSH();
+
 	// Protect MBR and bootloader code from being overwritten.
 #if NORDIC_SDK_VERSION == 15
 	uint32_t ret_val = nrf_bootloader_flash_protect(0, MBR_SIZE, false);
@@ -239,6 +255,18 @@ void flash_protect() {
 //	APP_ERROR_CHECK(ret_val);
 }
 
+
+void explain_reset_reason() {
+	NRF_LOG_INFO("Reset: {reason=%u}", NRF_POWER->RESETREAS);
+	// TODO: add debug string when debug is enabled.
+}
+
+void explain_memory_layout() {
+	NRF_LOG_INFO("MBR: {start=0x0, size=0x%x}", MBR_SIZE);
+	NRF_LOG_INFO("Bootloader: {start=0x%x, size=0x%x}", BOOTLOADER_START_ADDR, BOOTLOADER_SIZE);
+	NRF_LOG_INFO("Bootloader settings: {start=0x%x, size=0x%x}", BOOTLOADER_SETTINGS_ADDRESS, BOOTLOADER_SETTINGS_PAGE_SIZE);
+}
+
 /**@brief Function for application main entry. */
 int main(void)
 {
@@ -251,18 +279,12 @@ int main(void)
 	(void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 
-	NRF_LOG_INFO("Reset reason: %u", NRF_POWER->RESETREAS);
-
+	explain_reset_reason();
 	cs_check_gpregret();
-
-	NRF_LOG_INFO("Protect");
-	NRF_LOG_FLUSH();
-
 	flash_protect();
-
 	set_bootloader_info();
-
-	NRF_LOG_INFO("Init");
+	explain_memory_layout();
+	NRF_LOG_DEBUG("********************************");
 	NRF_LOG_FLUSH();
 
 	// Need to adjust dfu_enter_check().
