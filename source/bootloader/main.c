@@ -230,6 +230,9 @@ void set_bootloader_info() {
 	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)&bootloader_data, size);
 }
 
+/**
+ * Protect MBR and bootloader code from being overwritten.
+ */
 void flash_protect() {
 	NRF_LOG_INFO("Flash Settings: {queue_size=%d, max_retries=%d, max_write_size=%d}",
 			NRF_FSTORAGE_SD_QUEUE_SIZE,
@@ -238,7 +241,6 @@ void flash_protect() {
 
 	NRF_LOG_FLUSH();
 
-	// Protect MBR and bootloader code from being overwritten.
 #if NORDIC_SDK_VERSION == 15
 	uint32_t ret_val = nrf_bootloader_flash_protect(0, MBR_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
@@ -251,8 +253,6 @@ void flash_protect() {
 	APP_ERROR_CHECK(ret_val);
 #endif
 
-//	ret_val = nrf_bootloader_flash_protect(0, ALIGN_TO_PAGE(BOOTLOADER_START_ADDR + BOOTLOADER_SIZE), false);
-//	APP_ERROR_CHECK(ret_val);
 }
 
 
