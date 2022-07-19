@@ -303,17 +303,25 @@ struct __attribute__((packed)) adc_config_t {
 };
 
 /**
+ * @struct adc_channel_config_result_t
  * Result struct after configuring an ADC channel. Has all the info to put the sample values in context.
  *
  * Usage: Vpin = sampleVal / maxSampleValue * maxValueMilliVolt * 1000 + Vpinref
  *
- * pin:                 The AIN pin of this channel.
- * referencePin:        The AIN pin that was subtracted from the measured voltage on <pin>.
- * samplingIntervalUs:  The sampling interval in μs.
- * minValueMilliVolt:   Minimum of the measured voltage (Vpin - Vpinref) range, in mV.
- * maxValueMilliVolt:   Maximum of the measured voltage (Vpin - Vpinref) range, in mV.
- * minSampleValue:      Minimum of the sample value range.
- * maxSampleValue:      Maximum of the sample value range.
+ * @var adc_channel_config_result_t::pin
+ *   The AIN pin of this channel.
+ * @var adc_channel_config_result_t::referencePin
+ *   The AIN pin of which its voltage will be subtracted from the voltage measured on adc_channel_config_result_t::pin.
+ * @var adc_channel_config_result_t::samplingIntervalUs
+ *   The sampling interval in μs.
+ * @var adc_channel_config_result_t::minValueMilliVolt
+ *   Minimum of the measured voltage (Vpin - Vpinref) range, in mV.
+ * @var adc_channel_config_result_t::maxValueMilliVolt
+ *   Maximum of the measured voltage (Vpin - Vpinref) range, in mV.
+ * @var adc_channel_config_result_t::minSampleValue
+ *   Minimum of the sample value range.
+ * @var adc_channel_config_result_t::maxSampleValue
+ *   Maximum of the sample value range.
  */
 struct __attribute__((packed)) adc_channel_config_result_t {
 	adc_pin_id_t pin;
