@@ -1,0 +1,5 @@
+<map id="AssetFilterSyncer" name="AssetFilterSyncer">
+<area shape="rect" id="node1" title="Class that takes care of synchronizing the asset filters between crownstones." alt="" coords="57,80,192,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,32"/>
+</map>

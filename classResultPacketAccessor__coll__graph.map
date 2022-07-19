@@ -1,6 +1,5 @@
 <map id="ResultPacketAccessor&lt; PAYLOAD_SIZE &gt;" name="ResultPacketAccessor&lt; PAYLOAD_SIZE &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="5,213,161,255"/>
-<area shape="rect" id="node2" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="6,109,118,136"/>
-<area shape="rect" id="node3" href="$structresult__packet__t.html" title=" " alt="" coords="143,95,352,151"/>
-<area shape="rect" id="node4" href="$structresult__packet__header__t.html" title="Header of a result packet." alt="" coords="169,5,326,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="75,124,239,165"/>
+<area shape="rect" id="node2" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,20,125,47"/>
+<area shape="rect" id="node3" href="$structresult__packet__t.html" title=" " alt="" coords="150,5,351,61"/>
 </map>

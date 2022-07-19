@@ -1,8 +1,7 @@
 <map id="source/include/ble/cs_iBeacon.h" name="source/include/ble/cs_iBeacon.h">
-<area shape="rect" id="node1" title=" " alt="" coords="169,5,296,47"/>
-<area shape="rect" id="node2" href="$cs__Advertiser_8h_source.html" title=" " alt="" coords="5,95,132,136"/>
-<area shape="rect" id="node3" href="$cs__Crownstone_8h_source.html" title=" " alt="" coords="64,191,276,218"/>
-<area shape="rect" id="node4" href="$cs__TrackableParser_8h_source.html" title=" " alt="" coords="208,95,383,136"/>
-<area shape="rect" id="node5" href="$cs__MeshAdvertiser_8h_source.html" title=" " alt="" coords="407,95,555,136"/>
-<area shape="rect" id="node6" href="$cs__Mesh_8h_source.html" title=" " alt="" coords="409,184,552,225"/>
+<area shape="rect" id="node1" title="Universally Unique IDentifiers for BLE services and characteristics." alt="" coords="153,5,293,47"/>
+<area shape="rect" id="node2" href="$cs__Advertiser_8h_source.html" title=" " alt="" coords="45,95,185,136"/>
+<area shape="rect" id="node3" href="$cs__Crownstone_8h_source.html" title=" " alt="" coords="5,191,236,218"/>
+<area shape="rect" id="node4" href="$cs__MeshAdvertiser_8h_source.html" title=" " alt="" coords="261,95,423,136"/>
+<area shape="rect" id="node5" href="$cs__Mesh_8h_source.html" title=" " alt="" coords="264,184,420,225"/>
 </map>

@@ -1,5 +1,5 @@
 <map id="State" name="State">
-<area shape="rect" id="node1" title="Stores state values in RAM and/or FLASH." alt="" coords="93,80,146,107"/>
-<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="5,5,108,32"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener." alt="" coords="132,5,235,32"/>
+<area shape="rect" id="node1" title="Stores state values in RAM and/or FLASH." alt="" coords="114,80,170,107"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title="BaseClass." alt="" coords="5,5,135,32"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener." alt="" coords="159,5,269,32"/>
 </map>

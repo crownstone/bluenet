@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="5,5,84,32"/>
+<area shape="rect" id="node1" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,46,125,73"/>
+<area shape="rect" id="node2" href="$classControlPacketAccessor.html" title=" " alt="" coords="173,5,344,47"/>
+<area shape="rect" id="node3" href="$classResultPacketAccessor.html" title=" " alt="" coords="177,71,341,112"/>
 </map>

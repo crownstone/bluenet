@@ -1,12 +1,12 @@
 <map id="source/include/ble/cs_Service.h" name="source/include/ble/cs_Service.h">
-<area shape="rect" id="node1" title=" " alt="" coords="259,5,385,47"/>
-<area shape="rect" id="node2" href="$cs__Characteristic_8h.html" title=" " alt="" coords="253,95,391,136"/>
-<area shape="rect" id="node3" href="$cs__CrownstoneService_8h_source.html" title=" " alt="" coords="5,184,177,225"/>
-<area shape="rect" id="node5" href="$cs__SetupService_8h_source.html" title=" " alt="" coords="129,273,288,315"/>
-<area shape="rect" id="node6" href="$cs__DeviceInformationService_8h_source.html" title=" " alt="" coords="303,184,511,225"/>
-<area shape="rect" id="node7" href="$cs__Stack_8h.html" title=" " alt="" coords="537,184,664,225"/>
-<area shape="rect" id="node4" href="$cs__Crownstone_8h_source.html" title=" " alt="" coords="321,363,533,389"/>
-<area shape="rect" id="node8" href="$cs__Advertiser_8h_source.html" title=" " alt="" coords="364,273,491,315"/>
-<area shape="rect" id="node9" href="$cs__CommandHandler_8h_source.html" title=" " alt="" coords="515,273,689,315"/>
-<area shape="rect" id="node10" href="$cs__Scanner_8h_source.html" title=" " alt="" coords="713,273,886,315"/>
+<area shape="rect" id="node1" title="BLE service." alt="" coords="269,5,409,47"/>
+<area shape="rect" id="node2" href="$cs__Characteristic_8h.html" title="Bluetooth Low Energy characteristics." alt="" coords="264,95,413,136"/>
+<area shape="rect" id="node3" href="$cs__CrownstoneService_8h_source.html" title=" " alt="" coords="5,184,189,225"/>
+<area shape="rect" id="node5" href="$cs__SetupService_8h_source.html" title=" " alt="" coords="135,273,310,315"/>
+<area shape="rect" id="node6" href="$cs__DeviceInformationService_8h_source.html" title=" " alt="" coords="315,184,543,225"/>
+<area shape="rect" id="node7" href="$cs__Stack_8h.html" title="Manufacturing data." alt="" coords="571,184,711,225"/>
+<area shape="rect" id="node4" href="$cs__Crownstone_8h_source.html" title=" " alt="" coords="341,363,571,389"/>
+<area shape="rect" id="node8" href="$cs__Advertiser_8h_source.html" title=" " alt="" coords="386,273,526,315"/>
+<area shape="rect" id="node9" href="$cs__CommandHandler_8h_source.html" title=" " alt="" coords="550,273,741,315"/>
+<area shape="rect" id="node10" href="$cs__Scanner_8h_source.html" title=" " alt="" coords="765,273,955,315"/>
 </map>

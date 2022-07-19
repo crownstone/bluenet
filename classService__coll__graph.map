@@ -1,12 +1,12 @@
 <map id="Service" name="Service">
-<area shape="rect" id="node1" title="Service as defined in the GATT Specification." alt="" coords="1044,80,1111,107"/>
-<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="743,5,860,32"/>
-<area shape="rect" id="node3" href="$classtuple.html" title=" " alt="" coords="704,56,899,83"/>
-<area shape="rect" id="node4" title=" " alt="" coords="405,41,582,82"/>
-<area shape="rect" id="node5" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="773,107,829,133"/>
-<area shape="rect" id="node6" href="$classBaseClass.html" title=" " alt="" coords="435,107,552,133"/>
-<area shape="rect" id="node7" href="$classfixed__tuple.html" title=" " alt="" coords="392,158,595,199"/>
-<area shape="rect" id="node8" href="$classtuple.html" title=" " alt="" coords="216,165,343,192"/>
-<area shape="rect" id="node9" title=" " alt="" coords="5,165,167,192"/>
-<area shape="rect" id="node10" href="$classUUID.html" title="A Universally Unique IDentifier for BLE services and characteristics." alt="" coords="773,157,829,184"/>
+<area shape="rect" id="node1" title="Service as defined in the GATT Specification." alt="" coords="1016,80,1087,107"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="689,5,815,32"/>
+<area shape="rect" id="node3" href="$classtuple.html" title=" " alt="" coords="643,56,861,83"/>
+<area shape="rect" id="node4" title=" " alt="" coords="330,41,526,82"/>
+<area shape="rect" id="node5" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,107,781,133"/>
+<area shape="rect" id="node6" href="$classBaseClass.html" title=" " alt="" coords="365,107,491,133"/>
+<area shape="rect" id="node7" href="$classfixed__tuple.html" title=" " alt="" coords="327,158,529,199"/>
+<area shape="rect" id="node8" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,165,277,192"/>
+<area shape="rect" id="node9" title=" " alt="" coords="5,165,135,192"/>
+<area shape="rect" id="node10" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,157,780,184"/>
 </map>

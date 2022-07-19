@@ -1,5 +1,5 @@
 <map id="TwilightBehaviour" name="TwilightBehaviour">
-<area shape="rect" id="node1" title=" " alt="" coords="5,185,129,212"/>
-<area shape="rect" id="node2" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="27,109,107,136"/>
-<area shape="rect" id="node3" href="$classTimeOfDay.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="23,5,112,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,185,144,212"/>
+<area shape="rect" id="node2" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="31,109,119,136"/>
+<area shape="rect" id="node3" href="$classTimeOfDay.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="27,5,122,32"/>
 </map>

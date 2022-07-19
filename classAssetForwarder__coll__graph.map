@@ -1,0 +1,5 @@
+<map id="AssetForwarder" name="AssetForwarder">
+<area shape="rect" id="node1" title="AssetForwarder makes it possible for the AssetFiltering to merge mesh messages when they have very si..." alt="" coords="63,80,186,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,32"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="cs_mesh_model_msg_asset_report_mac_t" name="cs_mesh_model_msg_asset_report_mac_t">
+<area shape="rect" id="node1" title=" " alt="" coords="55,95,259,136"/>
+<area shape="rect" id="node2" href="$structrssi__and__channel__t.html" title=" " alt="" coords="5,5,152,32"/>
+<area shape="rect" id="node3" href="$structmac__address__t.html" title="MAC address struct, with some useful functions." alt="" coords="176,5,296,32"/>
+</map>

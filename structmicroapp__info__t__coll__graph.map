@@ -1,0 +1,6 @@
+<map id="microapp_info_t" name="microapp_info_t">
+<area shape="rect" id="node1" title="Packet with all info required to upload a microapp, and to see the status of already uploaded microap..." alt="" coords="131,184,257,211"/>
+<area shape="rect" id="node2" href="$structmicroapp__status__t.html" title="Status of a microapp." alt="" coords="63,95,205,121"/>
+<area shape="rect" id="node3" href="$structmicroapp__state__t.html" title="State of tests of a microapp, also stored in flash." alt="" coords="5,5,140,32"/>
+<area shape="rect" id="node4" href="$structmicroapp__sdk__version__t.html" title="SDK version: determines the API / protocol between microapp and firmware." alt="" coords="164,5,344,32"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="cs_mesh_msg_t" name="cs_mesh_msg_t">
+<area shape="rect" id="node1" title="Struct to communicate a mesh message." alt="" coords="33,109,160,136"/>
+<area shape="rect" id="node2" href="$unionmesh__control__command__packet__flags__t.html" title="Flags to determine how to send the mesh message." alt="" coords="5,5,188,47"/>
+</map>

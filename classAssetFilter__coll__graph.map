@@ -1,0 +1,4 @@
+<map id="AssetFilter" name="AssetFilter">
+<area shape="rect" id="node1" title="Class that contains all data required for an asset filter:" alt="" coords="16,80,107,107"/>
+<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,5,117,32"/>
+</map>

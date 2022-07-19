@@ -1,6 +1,5 @@
 <map id="ControlPacketAccessor&lt; PAYLOAD_SIZE &gt;" name="ControlPacketAccessor&lt; PAYLOAD_SIZE &gt;">
-<area shape="rect" id="node1" title=" " alt="" coords="40,213,200,255"/>
-<area shape="rect" id="node2" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,109,117,136"/>
-<area shape="rect" id="node3" href="$structcontrol__packet__t.html" title=" " alt="" coords="141,95,363,151"/>
-<area shape="rect" id="node4" href="$structcontrol__packet__header__t.html" title="Header of a control packet." alt="" coords="170,5,334,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="76,124,247,165"/>
+<area shape="rect" id="node2" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,20,125,47"/>
+<area shape="rect" id="node3" href="$structcontrol__packet__t.html" title=" " alt="" coords="150,5,365,61"/>
 </map>

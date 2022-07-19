@@ -1,10 +1,4 @@
 <map id="Advertiser" name="Advertiser">
-<area shape="rect" id="node1" title=" " alt="" coords="64,351,145,377"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,165,108,191"/>
-<area shape="rect" id="node8" href="$classServiceData.html" title=" " alt="" coords="64,261,159,288"/>
-<area shape="rect" id="node3" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="189,261,245,288"/>
-<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="135,165,253,191"/>
-<area shape="rect" id="node5" href="$classfixed__tuple.html" title=" " alt="" coords="277,157,479,199"/>
-<area shape="rect" id="node6" href="$classtuple.html" title=" " alt="" coords="315,81,441,108"/>
-<area shape="rect" id="node7" title=" " alt="" coords="297,5,459,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="16,80,105,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
 </map>

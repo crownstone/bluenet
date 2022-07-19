@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structcoargs.html" title=" " alt="" coords="5,5,67,32"/>
+<area shape="rect" id="node1" href="$classBaseClass.html" title=" " alt="" coords="5,5,132,32"/>
+<area shape="rect" id="node2" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="180,5,239,32"/>
 </map>

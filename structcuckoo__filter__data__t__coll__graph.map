@@ -1,0 +1,4 @@
+<map id="cuckoo_filter_data_t" name="cuckoo_filter_data_t">
+<area shape="rect" id="node1" title="Data content of the cuckoo filter." alt="" coords="40,95,193,121"/>
+<area shape="rect" id="node2" href="$structcuckoo__extended__fingerprint__t.html" title="Representation of an object (O) in this filter comprises of a fingerprint (F) and a the bucket index ..." alt="" coords="5,5,228,32"/>
+</map>

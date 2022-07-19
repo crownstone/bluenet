@@ -1,4 +1,4 @@
 <map id="Microapp" name="Microapp">
-<area shape="rect" id="node1" title="The class Microapp has functionality to store a second app (and perhaps in the future even more apps)..." alt="" coords="19,80,94,107"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,108,32"/>
+<area shape="rect" id="node1" title="Class that enables the feature to run microapps on the firmware." alt="" coords="19,80,102,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
 </map>

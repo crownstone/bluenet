@@ -1,0 +1,6 @@
+<map id="FilterInterface" name="FilterInterface">
+<area shape="rect" id="node1" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="115,5,227,32"/>
+<area shape="rect" id="node2" href="$classAssetFilter.html" title="Class that contains all data required for an asset filter:" alt="" coords="5,80,96,107"/>
+<area shape="rect" id="node3" href="$classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="120,80,221,107"/>
+<area shape="rect" id="node4" href="$classExactMatchFilter.html" title=" " alt="" coords="245,80,376,107"/>
+</map>

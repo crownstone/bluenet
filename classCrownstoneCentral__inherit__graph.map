@@ -1,0 +1,4 @@
+<map id="CrownstoneCentral" name="CrownstoneCentral">
+<area shape="rect" id="node1" title="Class to connect to another crownstone, and write control commands." alt="" coords="5,80,152,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="23,5,134,32"/>
+</map>

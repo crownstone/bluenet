@@ -1,4 +1,5 @@
 <map id="NearestCrownstoneTracker" name="NearestCrownstoneTracker">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,188,107"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="45,5,148,32"/>
+<area shape="rect" id="node1" title="This class implements the in&#45;mesh computation of which crownstone is nearest to a &#39;trackable&#39; device." alt="" coords="26,80,223,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,32"/>
 </map>

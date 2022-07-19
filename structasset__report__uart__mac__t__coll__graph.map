@@ -1,0 +1,4 @@
+<map id="asset_report_uart_mac_t" name="asset_report_uart_mac_t">
+<area shape="rect" id="node1" title="A packet that represents RSSI data about an asset received by a particular Crownstone." alt="" coords="5,95,188,121"/>
+<area shape="rect" id="node2" href="$structmac__address__t.html" title="MAC address struct, with some useful functions." alt="" coords="37,5,157,32"/>
+</map>

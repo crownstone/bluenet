@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['watchdog_1173',['Watchdog',['../classWatchdog.html',1,'']]]
+  ['varianceaggregator_1394',['VarianceAggregator',['../classVarianceAggregator.html',1,'']]]
 ];

@@ -1,0 +1,6 @@
+<map id="AssetAcceptedEvent" name="AssetAcceptedEvent">
+<area shape="rect" id="node1" title=" " alt="" coords="51,171,205,197"/>
+<area shape="rect" id="node2" href="$structscanned__device__t.html" title="Scanned device." alt="" coords="5,81,144,108"/>
+<area shape="rect" id="node3" href="$classAssetFilter.html" title="Class that contains all data required for an asset filter:" alt="" coords="168,81,259,108"/>
+<area shape="rect" id="node4" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="157,5,269,32"/>
+</map>

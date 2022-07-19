@@ -1,0 +1,6 @@
+<map id="cs_central_write_result_t" name="cs_central_write_result_t">
+<area shape="rect" id="node1" title="Result of writing a control command." alt="" coords="65,228,249,255"/>
+<area shape="rect" id="node2" href="$classResultPacketAccessor.html" title=" " alt="" coords="75,124,239,165"/>
+<area shape="rect" id="node3" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,20,125,47"/>
+<area shape="rect" id="node4" href="$structresult__packet__t.html" title=" " alt="" coords="150,5,351,61"/>
+</map>

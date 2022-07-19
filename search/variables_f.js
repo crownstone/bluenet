@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['taptotoggledefaultrssithreshold_1687',['tapToToggleDefaultRssiThreshold',['../structboards__config__t.html#a93d196fc825c09c0440b55a309fe6f75',1,'boards_config_t']]],
-  ['txpower_1688',['txPower',['../classIBeacon.html#a85b24ca2ac46d0447cdf5f1da7091aa9',1,'IBeacon']]]
+  ['user_5fdesc_5fmetadata_5fmd_1964',['user_desc_metadata_md',['../structCharacteristicInit.html#a63e28a7e0cfba2f9fdff2725053e2990',1,'CharacteristicInit']]],
+  ['uuid_1965',['uuid',['../classIBeacon.html#af9d7677aa603e5d15554fd49900d5f97',1,'IBeacon']]]
 ];
