@@ -1,8 +1,8 @@
 <map id="SwitchBehaviour" name="SwitchBehaviour">
-<area shape="rect" id="node1" title="Object that defines when a state transition should occur." alt="" coords="77,288,207,315"/>
-<area shape="rect" id="node2" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="29,199,117,225"/>
-<area shape="rect" id="node3" href="$classTimeOfDay.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="5,95,100,121"/>
-<area shape="rect" id="node4" href="$classPresenceCondition.html" title=" " alt="" coords="152,199,295,225"/>
-<area shape="rect" id="node5" href="$classPresencePredicate.html" title=" " alt="" coords="163,95,305,121"/>
-<area shape="rect" id="node6" href="$classPresenceStateDescription.html" title="Class that holds the presence of a profile." alt="" coords="139,5,329,32"/>
+<area shape="rect" id="node1" title="Object that defines when a state transition should occur." alt="" coords="77,284,207,309"/>
+<area shape="rect" id="node2" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="29,196,117,221"/>
+<area shape="rect" id="node3" href="$classTimeOfDay.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="5,93,100,119"/>
+<area shape="rect" id="node4" href="$classPresenceCondition.html" title=" " alt="" coords="152,196,295,221"/>
+<area shape="rect" id="node5" href="$classPresencePredicate.html" title=" " alt="" coords="163,93,305,119"/>
+<area shape="rect" id="node6" href="$classPresenceStateDescription.html" title="Class that holds the presence of a profile." alt="" coords="139,5,329,31"/>
 </map>

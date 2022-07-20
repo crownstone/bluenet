@@ -1,4 +1,4 @@
 <map id="set_ibeacon_config_id_packet_t" name="set_ibeacon_config_id_packet_t">
-<area shape="rect" id="node1" title=" " alt="" coords="29,95,164,136"/>
-<area shape="rect" id="node2" href="$structibeacon__config__id__packet__t.html" title="Packet to change ibeacon config ID." alt="" coords="5,5,188,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="33,93,179,133"/>
+<area shape="rect" id="node2" href="$structibeacon__config__id__packet__t.html" title="Packet to change ibeacon config ID." alt="" coords="5,5,207,31"/>
 </map>

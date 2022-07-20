@@ -1,5 +1,5 @@
 <map id="Characteristic&lt; buffer_ptr_t &gt;" name="Characteristic&lt; buffer_ptr_t &gt;">
-<area shape="rect" id="node1" title="This template implements the functions specific for a pointer to a buffer." alt="" coords="5,169,153,211"/>
-<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title=" " alt="" coords="5,80,153,121"/>
-<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="13,5,146,32"/>
+<area shape="rect" id="node1" title="This template implements the functions specific for a pointer to a buffer." alt="" coords="5,167,172,207"/>
+<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title=" " alt="" coords="7,79,170,119"/>
+<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="17,5,161,31"/>
 </map>

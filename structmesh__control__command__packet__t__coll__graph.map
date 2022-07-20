@@ -1,6 +1,6 @@
 <map id="mesh_control_command_packet_t" name="mesh_control_command_packet_t">
-<area shape="rect" id="node1" title="Mesh control command packet." alt="" coords="97,213,261,255"/>
-<area shape="rect" id="node2" href="$structcontrol__command__packet__t.html" title=" " alt="" coords="5,117,188,143"/>
-<area shape="rect" id="node3" href="$structmesh__control__command__packet__header__t.html" title="Mesh control command header packet." alt="" coords="212,109,376,151"/>
-<area shape="rect" id="node4" href="$unionmesh__control__command__packet__flags__t.html" title="Flags to determine how to send the mesh message." alt="" coords="212,5,376,47"/>
+<area shape="rect" id="node1" title="Mesh control command packet." alt="" coords="167,211,349,251"/>
+<area shape="rect" id="node2" href="$structmesh__control__command__packet__header__t.html" title="Mesh control command header packet." alt="" coords="5,108,188,148"/>
+<area shape="rect" id="node3" href="$unionmesh__control__command__packet__flags__t.html" title="Flags to determine how to send the mesh message." alt="" coords="5,5,188,45"/>
+<area shape="rect" id="node4" href="$structcontrol__command__packet__t.html" title=" " alt="" coords="212,115,413,141"/>
 </map>

@@ -1,5 +1,5 @@
 <map id="Characteristic&lt; T, typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value &gt;::type &gt;" name="Characteristic&lt; T, typename std::enable_if&lt; std::is_arithmetic&lt; T &gt;::value &gt;::type &gt;">
-<area shape="rect" id="node1" title="A characteristic for built&#45;in arithmetic types (int, float, etc)" alt="" coords="20,155,171,225"/>
-<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title="Characteristic of generic type T." alt="" coords="5,80,185,107"/>
-<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="29,5,162,32"/>
+<area shape="rect" id="node1" title="A characteristic for built&#45;in arithmetic types (int, float, etc)" alt="" coords="20,152,191,221"/>
+<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title="Characteristic of generic type T." alt="" coords="5,79,205,104"/>
+<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="33,5,177,31"/>
 </map>

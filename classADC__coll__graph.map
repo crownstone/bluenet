@@ -1,4 +1,4 @@
 <map id="ADC" name="ADC">
-<area shape="rect" id="node1" title="Analog&#45;Digital conversion." alt="" coords="31,80,82,107"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,108,32"/>
+<area shape="rect" id="node1" title="Analog&#45;Digital conversion." alt="" coords="35,79,86,104"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
 </map>

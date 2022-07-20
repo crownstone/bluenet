@@ -1,11 +1,12 @@
 <map id="CharacteristicBase" name="CharacteristicBase">
-<area shape="rect" id="node1" title="Non&#45;template base class for Characteristics." alt="" coords="5,78,149,105"/>
-<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title=" " alt="" coords="216,5,379,47"/>
-<area shape="rect" id="node4" href="$classCharacteristicGeneric.html" title=" " alt="" coords="216,71,379,112"/>
-<area shape="rect" id="node6" href="$classCharacteristicGeneric.html" title="Characteristic of generic type T." alt="" coords="197,162,397,189"/>
-<area shape="rect" id="node3" href="$classCharacteristic_3_01std_1_1string_01_4.html" title="A characteristic for strings." alt="" coords="469,5,616,47"/>
-<area shape="rect" id="node5" href="$classCharacteristic_3_01buffer__ptr__t_01_4.html" title="This template implements the functions specific for a pointer to a buffer." alt="" coords="459,71,626,112"/>
-<area shape="rect" id="node7" href="$classCharacteristic.html" title=" " alt="" coords="445,137,640,163"/>
-<area shape="rect" id="node8" href="$classCharacteristic.html" title="A default characteristic." alt="" coords="459,187,626,214"/>
-<area shape="rect" id="node9" href="$classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc)" alt="" coords="457,239,628,309"/>
+<area shape="rect" id="node1" title="Non&#45;template base class for Characteristics." alt="" coords="5,109,149,134"/>
+<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title=" " alt="" coords="216,5,379,45"/>
+<area shape="rect" id="node4" href="$classCharacteristicGeneric.html" title=" " alt="" coords="216,69,379,109"/>
+<area shape="rect" id="node6" href="$classCharacteristicGeneric.html" title=" " alt="" coords="216,133,379,173"/>
+<area shape="rect" id="node7" href="$classCharacteristicGeneric.html" title="Characteristic of generic type T." alt="" coords="197,198,397,223"/>
+<area shape="rect" id="node3" href="$classCharacteristic_3_01buffer__ptr__t_01_4.html" title="This template implements the functions specific for a pointer to a buffer." alt="" coords="459,5,626,45"/>
+<area shape="rect" id="node5" href="$classCharacteristic_3_01std_1_1string_01_4.html" title="A characteristic for strings." alt="" coords="469,69,616,109"/>
+<area shape="rect" id="node8" href="$classCharacteristic.html" title=" " alt="" coords="445,149,640,174"/>
+<area shape="rect" id="node9" href="$classCharacteristic.html" title="A default characteristic." alt="" coords="459,198,626,223"/>
+<area shape="rect" id="node10" href="$classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc)" alt="" coords="457,248,628,317"/>
 </map>

@@ -1,5 +1,5 @@
 <map id="service_data_encrypted_state_t" name="service_data_encrypted_state_t">
-<area shape="rect" id="node1" title="State of this crownstone." alt="" coords="69,109,229,151"/>
-<area shape="rect" id="node2" href="$unionservice__data__state__flags__t.html" title=" " alt="" coords="5,5,137,47"/>
-<area shape="rect" id="node3" href="$unionservice__data__state__extra__flags__t.html" title=" " alt="" coords="161,5,293,47"/>
+<area shape="rect" id="node1" title="State of this crownstone." alt="" coords="73,108,251,148"/>
+<area shape="rect" id="node2" href="$unionservice__data__state__flags__t.html" title=" " alt="" coords="5,5,151,45"/>
+<area shape="rect" id="node3" href="$unionservice__data__state__extra__flags__t.html" title=" " alt="" coords="175,5,320,45"/>
 </map>

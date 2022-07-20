@@ -1,4 +1,4 @@
 <map id="uart_msg_mesh_result_packet_header_t" name="uart_msg_mesh_result_packet_header_t">
-<area shape="rect" id="node1" title=" " alt="" coords="7,95,161,136"/>
-<area shape="rect" id="node2" href="$structresult__packet__header__t.html" title="Header of a result packet." alt="" coords="5,5,163,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="7,93,177,133"/>
+<area shape="rect" id="node2" href="$structresult__packet__header__t.html" title="Header of a result packet." alt="" coords="5,5,179,31"/>
 </map>

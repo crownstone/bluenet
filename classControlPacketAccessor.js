@@ -1,7 +1,6 @@
 var classControlPacketAccessor =
 [
     [ "assign", "classControlPacketAccessor.html#a41e6e1d27f8472499d4c5155793a9ba1", null ],
-    [ "checkInitialized", "classControlPacketAccessor.html#a0cf50e1b31a18b980e554510aa1f032e", null ],
     [ "getBufferSize", "classControlPacketAccessor.html#aa08d3c5819ac6e6b4ea0bef300c42430", null ],
     [ "getMaxPayloadSize", "classControlPacketAccessor.html#a6994110a2c60904776b60e1cff6e3858", null ],
     [ "getPayload", "classControlPacketAccessor.html#aadce5de419ad1ba6023fd3f9b30db273", null ],

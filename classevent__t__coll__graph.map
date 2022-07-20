@@ -1,7 +1,7 @@
 <map id="event_t" name="event_t">
-<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,..." alt="" coords="145,184,211,211"/>
-<area shape="rect" id="node2" href="$structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="5,95,191,121"/>
-<area shape="rect" id="node3" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="46,5,150,32"/>
-<area shape="rect" id="node4" href="$structcs__result__t.html" title=" " alt="" coords="215,95,301,121"/>
-<area shape="rect" id="node5" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="219,5,297,32"/>
+<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 9,..." alt="" coords="157,181,227,207"/>
+<area shape="rect" id="node2" href="$structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="5,93,208,119"/>
+<area shape="rect" id="node3" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="51,5,163,31"/>
+<area shape="rect" id="node4" href="$structcs__result__t.html" title=" " alt="" coords="233,93,325,119"/>
+<area shape="rect" id="node5" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="237,5,321,31"/>
 </map>

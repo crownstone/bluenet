@@ -1,6 +1,6 @@
 <map id="source/include" name="source/include">
 <area shape="rect" id="node3" href="dir_53302e2832eb7fcc3247e5894d9a74a8.html" title="ble" alt="" coords="1273,159,1345,207"/>
-<area shape="rect" id="edge3-headlabel" href="dir_000002_000004.html" title="11" alt="" coords="1355,182,1372,196"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000010_000001.html" title="11" alt="" coords="1355,182,1372,196"/>
 <area shape="rect" id="node2" href="dir_2820abba6a6ba4d9cca0b5d2e0577c23.html" title="behaviour" alt="" coords="2351,63,2438,111"/>
 <area shape="rect" id="node4" href="dir_337abcda26d724be7070df9dc61ba0e8.html" title="boards" alt="" coords="2255,63,2327,111"/>
 <area shape="rect" id="node5" href="dir_d1e413135be0ab0cb6d4d55e305cebc7.html" title="cfg" alt="" coords="2159,63,2231,111"/>
@@ -11,14 +11,14 @@
 <area shape="rect" id="node10" href="dir_45a26a1c0117791ac143fe41cc0f32f2.html" title="localisation" alt="" coords="1626,63,1723,111"/>
 <area shape="rect" id="node11" href="dir_b25cd48746385db9a78c677f87e228d3.html" title="logging" alt="" coords="1529,63,1601,111"/>
 <area shape="rect" id="node12" href="dir_c100836e6b4de4001dd42765c8976b85.html" title="mesh" alt="" coords="1433,63,1505,111"/>
-<area shape="rect" id="edge4-headlabel" href="dir_000013_000004.html" title="1" alt="" coords="1361,151,1370,166"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000013_000001.html" title="1" alt="" coords="1361,151,1370,166"/>
 <area shape="rect" id="node13" href="dir_35089e7b9295773053fce0d416083a1f.html" title="microapp" alt="" coords="1327,63,1409,111"/>
 <area shape="rect" id="node14" href="dir_95de7cd5a3cd330d8d48568605613825.html" title="presence" alt="" coords="1221,63,1302,111"/>
 <area shape="rect" id="node15" href="dir_0453aade1afb16a04fbd7a1d229831f4.html" title="processing" alt="" coords="1105,63,1197,111"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000016_000004.html" title="2" alt="" coords="1257,136,1266,151"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000018_000001.html" title="2" alt="" coords="1257,136,1266,151"/>
 <area shape="rect" id="node16" href="dir_b336e50c30dde46b9972cb7df7cdb246.html" title="protocol" alt="" coords="1005,63,1080,111"/>
 <area shape="rect" id="node17" href="dir_90a2d318c0b52fca95ec3d70ef578dc2.html" title="services" alt="" coords="905,63,981,111"/>
-<area shape="rect" id="edge2-headlabel" href="dir_000019_000004.html" title="6" alt="" coords="1252,157,1261,172"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000023_000001.html" title="6" alt="" coords="1252,157,1261,172"/>
 <area shape="rect" id="node18" href="dir_b426a3369296ae66227855fd9b71f443.html" title="storage" alt="" coords="808,63,880,111"/>
 <area shape="rect" id="node19" href="dir_b8dd8092513ccf82a8b0df99caadf6a0.html" title="structs" alt="" coords="712,63,784,111"/>
 <area shape="rect" id="node20" href="dir_c5fc552310f91332b5b0fcf04f2b29fd.html" title="switch" alt="" coords="616,63,688,111"/>

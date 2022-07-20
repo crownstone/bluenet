@@ -67,12 +67,13 @@ var hierarchy =
       [ "ResultPacketAccessor< PAYLOAD_SIZE >", "classResultPacketAccessor.html", null ]
     ] ],
     [ "CharacteristicBase", "classCharacteristicBase.html", [
-      [ "CharacteristicGeneric< std::string >", "classCharacteristicGeneric.html", [
-        [ "Characteristic< std::string >", "classCharacteristic_3_01std_1_1string_01_4.html", null ]
-      ] ],
       [ "CharacteristicGeneric< buffer_ptr_t >", "classCharacteristicGeneric.html", [
         [ "Characteristic< buffer_ptr_t >", "classCharacteristic_3_01buffer__ptr__t_01_4.html", null ]
       ] ],
+      [ "CharacteristicGeneric< std::string >", "classCharacteristicGeneric.html", [
+        [ "Characteristic< std::string >", "classCharacteristic_3_01std_1_1string_01_4.html", null ]
+      ] ],
+      [ "CharacteristicGeneric< uint32_t >", "classCharacteristicGeneric.html", null ],
       [ "CharacteristicGeneric< T >", "classCharacteristicGeneric.html", [
         [ "Characteristic< uint32_t >", "classCharacteristic.html", null ],
         [ "Characteristic< T, E >", "classCharacteristic.html", null ],
@@ -443,6 +444,7 @@ var hierarchy =
     [ "VarianceAggregator", "classVarianceAggregator.html", null ],
     [ "std::vector", null, [
       [ "tuple< CharacteristicBase * >", "classtuple.html", null ],
+      [ "tuple< Service * >", "classtuple.html", null ],
       [ "tuple< T >", "classtuple.html", [
         [ "fixed_tuple< Service *, MAX_SERVICE_COUNT >", "classfixed__tuple.html", null ],
         [ "fixed_tuple< T, capacity >", "classfixed__tuple.html", null ]

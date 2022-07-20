@@ -1,6 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="5,31,93,57"/>
-<area shape="rect" id="node2" href="$classSwitchBehaviour.html" title="Object that defines when a state transition should occur." alt="" coords="145,5,276,32"/>
-<area shape="rect" id="node4" href="$classTwilightBehaviour.html" title=" " alt="" coords="141,56,280,83"/>
-<area shape="rect" id="node3" href="$classExtendedSwitchBehaviour.html" title="A smart timer behaviour is a switch behaviour that is allowed to extend itself passed the until time ..." alt="" coords="328,5,520,32"/>
+<area shape="rect" id="node1" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="5,31,93,56"/>
+<area shape="rect" id="node2" href="$classSwitchBehaviour.html" title="Object that defines when a state transition should occur." alt="" coords="145,5,276,31"/>
+<area shape="rect" id="node4" href="$classTwilightBehaviour.html" title=" " alt="" coords="141,55,280,80"/>
+<area shape="rect" id="node3" href="$classExtendedSwitchBehaviour.html" title="A smart timer behaviour is a switch behaviour that is allowed to extend itself passed the until time ..." alt="" coords="328,5,520,31"/>
 </map>

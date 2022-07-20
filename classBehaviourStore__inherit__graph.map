@@ -1,5 +1,5 @@
 <map id="BehaviourStore" name="BehaviourStore">
-<area shape="rect" id="node1" title="Keeps track of the behaviours that are active on this crownstone." alt="" coords="63,80,186,107"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,32"/>
+<area shape="rect" id="node1" title="Keeps track of the behaviours that are active on this crownstone." alt="" coords="63,79,186,104"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
 </map>

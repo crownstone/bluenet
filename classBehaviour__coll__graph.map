@@ -1,4 +1,4 @@
 <map id="Behaviour" name="Behaviour">
-<area shape="rect" id="node1" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="9,109,97,136"/>
-<area shape="rect" id="node2" href="$classTimeOfDay.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="5,5,100,32"/>
+<area shape="rect" id="node1" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="9,108,97,133"/>
+<area shape="rect" id="node2" href="$classTimeOfDay.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Sep 24,..." alt="" coords="5,5,100,31"/>
 </map>

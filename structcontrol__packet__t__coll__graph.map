@@ -1,4 +1,4 @@
 <map id="control_packet_t&lt; N &gt;" name="control_packet_t&lt; N &gt;">
-<area shape="rect" id="node1" title="Control packet." alt="" coords="11,95,163,121"/>
-<area shape="rect" id="node2" href="$structcontrol__packet__header__t.html" title="Header of a control packet." alt="" coords="5,5,169,32"/>
+<area shape="rect" id="node1" title="Control packet." alt="" coords="11,93,181,119"/>
+<area shape="rect" id="node2" href="$structcontrol__packet__header__t.html" title="Header of a control packet." alt="" coords="5,5,187,31"/>
 </map>

@@ -1,7 +1,7 @@
 <map id="Stack" name="Stack">
-<area shape="rect" id="node1" title="nRF51822 specific implementation of the BLEStack" alt="" coords="61,261,119,288"/>
-<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="5,165,132,191"/>
-<area shape="rect" id="node3" href="$classfixed__tuple.html" title=" " alt="" coords="157,157,359,199"/>
-<area shape="rect" id="node4" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="211,81,305,108"/>
-<area shape="rect" id="node5" title=" " alt="" coords="193,5,323,32"/>
+<area shape="rect" id="node1" title="nRF51822 specific implementation of the BLEStack" alt="" coords="61,257,119,283"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="5,162,132,187"/>
+<area shape="rect" id="node3" href="$classfixed__tuple.html" title=" " alt="" coords="157,155,359,195"/>
+<area shape="rect" id="node4" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="211,80,305,105"/>
+<area shape="rect" id="node5" title=" " alt="" coords="193,5,323,31"/>
 </map>

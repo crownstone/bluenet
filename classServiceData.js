@@ -1,7 +1,6 @@
 var classServiceData =
 [
-    [ "ServiceData", "classServiceData.html#a9b86d2d5114aff479ab4fd08063fc453", null ],
-    [ "getArray", "classServiceData.html#a87cd8a976e4e055f34a4f12abda9b48b", null ],
+    [ "getArray", "classServiceData.html#a3d3e96d8a6b0274c0ce6c5d0231b3906", null ],
     [ "getArraySize", "classServiceData.html#a3af1bac68e252dafc6fb59b8e424f913", null ],
     [ "init", "classServiceData.html#a97da8ef01ca957f4e6dec57f48dbbe53", null ],
     [ "setDeviceType", "classServiceData.html#a151e67bed3e0997ff1c8b8d005e06e7f", null ],

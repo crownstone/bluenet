@@ -1,6 +1,6 @@
 var classStorage =
 [
-    [ "allocate", "classStorage.html#a0fe5c42f19de3b98885659d4ae40d853", null ],
+    [ "allocate", "classStorage.html#a8b309778c37a81296299edc45e3f1f74", null ],
     [ "eraseAllPages", "classStorage.html#abf8712e3516b8c402951b4c09313ed4d", null ],
     [ "erasePages", "classStorage.html#ac0be0a19866eaf63a653e37b002eb0d0", null ],
     [ "factoryReset", "classStorage.html#a24075dd8de7eacaed8382ae0969e6d72", null ],
@@ -10,8 +10,6 @@ var classStorage =
     [ "handleFileStorageEvent", "classStorage.html#aa6f80aa3da98c94041432f992fe18cf7", null ],
     [ "handleFlashOperationError", "classStorage.html#ad665b0e9ba881019d07479acdbda2a78", null ],
     [ "handleFlashOperationSuccess", "classStorage.html#acf5b7bf4d475ed3578c2017f9a79dbbe", null ],
-    [ "init", "classStorage.html#ab484853b0ad4d95f890399394ffa0d49", null ],
-    [ "isInitialized", "classStorage.html#a8f04f8d88cc9064b8ddfb8b84e15a5a7", null ],
     [ "read", "classStorage.html#a6cc71decf58d7c48b542093c09a3e3cc", null ],
     [ "readFirst", "classStorage.html#a7badd0c226f7e7c697f26925cef85cb3", null ],
     [ "readNext", "classStorage.html#a199c8b467084c584432d6425fb56090e", null ],

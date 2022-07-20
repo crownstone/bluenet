@@ -1,7 +1,7 @@
 <map id="CharacteristicGeneric&lt; T &gt;" name="CharacteristicGeneric&lt; T &gt;">
-<area shape="rect" id="node1" title="Characteristic of generic type T." alt="" coords="197,56,397,83"/>
-<area shape="rect" id="node3" href="$classCharacteristic.html" title=" " alt="" coords="445,5,640,32"/>
-<area shape="rect" id="node4" href="$classCharacteristic.html" title="A default characteristic." alt="" coords="459,56,626,83"/>
-<area shape="rect" id="node5" href="$classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc)" alt="" coords="457,107,628,178"/>
-<area shape="rect" id="node2" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="5,56,149,83"/>
+<area shape="rect" id="node1" title="Characteristic of generic type T." alt="" coords="197,55,397,80"/>
+<area shape="rect" id="node3" href="$classCharacteristic.html" title=" " alt="" coords="445,5,640,31"/>
+<area shape="rect" id="node4" href="$classCharacteristic.html" title="A default characteristic." alt="" coords="459,55,626,80"/>
+<area shape="rect" id="node5" href="$classCharacteristic_3_01T_00_01typename_01std_1_1enable__if_3_01std_1_1is__arithmetic_3_01T_01_4_1_1value_01_4_1_1type_01_4.html" title="A characteristic for built&#45;in arithmetic types (int, float, etc)" alt="" coords="457,105,628,174"/>
+<area shape="rect" id="node2" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="5,55,149,80"/>
 </map>

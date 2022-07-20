@@ -1,4 +1,4 @@
 <map id="cmd_source_with_counter_t" name="cmd_source_with_counter_t">
-<area shape="rect" id="node1" title="Struct that tells where a command originated from." alt="" coords="5,95,191,121"/>
-<area shape="rect" id="node2" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="46,5,150,32"/>
+<area shape="rect" id="node1" title="Struct that tells where a command originated from." alt="" coords="5,93,208,119"/>
+<area shape="rect" id="node2" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="51,5,163,31"/>
 </map>

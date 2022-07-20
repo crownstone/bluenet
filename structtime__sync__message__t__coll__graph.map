@@ -1,4 +1,4 @@
 <map id="time_sync_message_t" name="time_sync_message_t">
-<area shape="rect" id="node1" title="event sent over the internal event bus upon reception of new mesh time stamp msg." alt="" coords="5,109,159,136"/>
-<area shape="rect" id="node2" href="$structhigh__resolution__time__stamp__t.html" title="Versioned timestamp with milliseconds precision." alt="" coords="11,5,153,47"/>
+<area shape="rect" id="node1" title="event sent over the internal event bus upon reception of new mesh time stamp msg." alt="" coords="5,108,172,133"/>
+<area shape="rect" id="node2" href="$structhigh__resolution__time__stamp__t.html" title="Versioned timestamp with milliseconds precision." alt="" coords="9,5,168,45"/>
 </map>

@@ -1,7 +1,7 @@
 <map id="State" name="State">
-<area shape="rect" id="node1" title="Stores state values in RAM and/or FLASH." alt="" coords="243,95,299,121"/>
-<area shape="rect" id="node2" href="$classBaseClass.html" title="BaseClass." alt="" coords="5,5,135,32"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener." alt="" coords="159,5,269,32"/>
-<area shape="rect" id="node4" href="$classStorage.html" title="Class to store items persistently in flash (persistent) memory." alt="" coords="294,5,366,32"/>
-<area shape="rect" id="node5" href="$structboards__config__t.html" title="Board configuration." alt="" coords="390,5,515,32"/>
+<area shape="rect" id="node1" title="Stores state values in RAM and/or FLASH." alt="" coords="243,93,299,119"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title="BaseClass." alt="" coords="5,5,135,31"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener." alt="" coords="159,5,269,31"/>
+<area shape="rect" id="node4" href="$classStorage.html" title="Class to store items persistently in flash (persistent) memory." alt="" coords="294,5,366,31"/>
+<area shape="rect" id="node5" href="$structboards__config__t.html" title="Board configuration." alt="" coords="390,5,515,31"/>
 </map>

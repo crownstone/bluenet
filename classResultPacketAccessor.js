@@ -1,7 +1,6 @@
 var classResultPacketAccessor =
 [
     [ "assign", "classResultPacketAccessor.html#af75f8aba9814ccc107702da34957a13a", null ],
-    [ "checkInitialized", "classResultPacketAccessor.html#a930f765d209c703658291130ead1142d", null ],
     [ "getBufferSize", "classResultPacketAccessor.html#a2161b42a695fdf9206adbaf27f436319", null ],
     [ "getMaxPayloadSize", "classResultPacketAccessor.html#aec74a169d6749d1e8396ef33f5c54a0a", null ],
     [ "getPayload", "classResultPacketAccessor.html#a1c93b0c3231d793eec8ea5352088fd7b", null ],
@@ -14,7 +13,6 @@ var classResultPacketAccessor =
     [ "getType", "classResultPacketAccessor.html#a0acea91d7a188cc64ee78660e75f0917", null ],
     [ "isInitialized", "classResultPacketAccessor.html#a0604c5ca2c226f0237a183583e4cb15b", null ],
     [ "setPayload", "classResultPacketAccessor.html#a976fbf6b82d0b852c5377ee155256b45", null ],
-    [ "setPayloadSize", "classResultPacketAccessor.html#a0b376d44be5c6a590bef7cbc4950b81d", null ],
     [ "setProtocolVersion", "classResultPacketAccessor.html#a2d00a4c1b3f0fcdba9faef0636310e4f", null ],
     [ "setResult", "classResultPacketAccessor.html#a5bb8ce6e053bfceaee3f1f0eb4f2c48d", null ],
     [ "setType", "classResultPacketAccessor.html#a9f8fee56638d61e0f05bf9bbf3594b0a", null ],

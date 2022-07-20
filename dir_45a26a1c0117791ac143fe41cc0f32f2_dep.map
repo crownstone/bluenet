@@ -1,6 +1,4 @@
 <map id="source/include/localisation" name="source/include/localisation">
-<area shape="rect" id="node1" href="dir_45a26a1c0117791ac143fe41cc0f32f2.html" title="localisation" alt="" coords="27,52,114,100"/>
-<area shape="rect" id="node2" href="dir_53302e2832eb7fcc3247e5894d9a74a8.html" title="ble" alt="" coords="35,148,107,196"/>
-<area shape="rect" id="edge1-headlabel" href="dir_000010_000004.html" title="1" alt="" coords="75,122,83,137"/>
-<area shape="rect" id="clust1" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html" title="include" alt="" coords="16,16,125,111"/>
+<area shape="rect" id="node1" href="dir_45a26a1c0117791ac143fe41cc0f32f2.html" title="localisation" alt="" coords="27,52,125,100"/>
+<area shape="rect" id="clust1" href="dir_8ee1a5e78eaec319fe5d64075812fc61.html" title="include" alt="" coords="16,16,136,111"/>
 </map>

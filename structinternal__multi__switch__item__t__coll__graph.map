@@ -1,4 +1,4 @@
 <map id="internal_multi_switch_item_t" name="internal_multi_switch_item_t">
-<area shape="rect" id="node1" title="A single multi switch packet, with target id." alt="" coords="5,109,149,151"/>
-<area shape="rect" id="node2" href="$structinternal__multi__switch__item__cmd__t.html" title="A single multi switch command." alt="" coords="5,5,149,47"/>
+<area shape="rect" id="node1" title="A single multi switch packet, with target id." alt="" coords="5,108,168,148"/>
+<area shape="rect" id="node2" href="$structinternal__multi__switch__item__cmd__t.html" title="A single multi switch command." alt="" coords="5,5,168,45"/>
 </map>

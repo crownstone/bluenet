@@ -1,4 +1,4 @@
 <map id="adc_buffer_t" name="adc_buffer_t">
-<area shape="rect" id="node1" title="Struct communicated from the ADC class when it&#39;s done sampling a buffer." alt="" coords="27,109,121,136"/>
-<area shape="rect" id="node2" href="$structadc__channel__config__result__t.html" title="Result struct after configuring an ADC channel." alt="" coords="5,5,143,47"/>
+<area shape="rect" id="node1" title="Struct communicated from the ADC class when it&#39;s done sampling a buffer." alt="" coords="29,108,132,133"/>
+<area shape="rect" id="node2" href="$structadc__channel__config__result__t.html" title="Result struct after configuring an ADC channel." alt="" coords="5,5,156,45"/>
 </map>

@@ -1,4 +1,4 @@
 <map id="adc_config_t" name="adc_config_t">
-<area shape="rect" id="node1" title="Struct to configure the ADC." alt="" coords="31,95,127,121"/>
-<area shape="rect" id="node2" href="$structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="5,5,153,32"/>
+<area shape="rect" id="node1" title="Struct to configure the ADC." alt="" coords="35,93,139,119"/>
+<area shape="rect" id="node2" href="$structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="5,5,168,31"/>
 </map>

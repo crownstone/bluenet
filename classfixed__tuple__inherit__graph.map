@@ -1,5 +1,5 @@
 <map id="fixed_tuple&lt; T, capacity &gt;" name="fixed_tuple&lt; T, capacity &gt;">
-<area shape="rect" id="node1" title="A fixed tuple is a vector with a templated type and a reserved capacity." alt="" coords="5,155,177,181"/>
-<area shape="rect" id="node2" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="50,80,133,107"/>
-<area shape="rect" id="node3" title=" " alt="" coords="33,5,149,32"/>
+<area shape="rect" id="node1" title="A fixed tuple is a vector with a templated type and a reserved capacity." alt="" coords="5,152,201,177"/>
+<area shape="rect" id="node2" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="57,79,150,104"/>
+<area shape="rect" id="node3" title=" " alt="" coords="39,5,168,31"/>
 </map>

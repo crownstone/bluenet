@@ -1,5 +1,5 @@
 <map id="cs_mesh_model_msg_multi_switch_item_t" name="cs_mesh_model_msg_multi_switch_item_t">
-<area shape="rect" id="node1" title=" " alt="" coords="6,184,190,225"/>
-<area shape="rect" id="node2" href="$structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="5,95,191,121"/>
-<area shape="rect" id="node3" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="46,5,150,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,181,208,221"/>
+<area shape="rect" id="node2" href="$structcmd__source__with__counter__t.html" title="Struct that tells where a command originated from." alt="" coords="5,93,208,119"/>
+<area shape="rect" id="node3" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="51,5,163,31"/>
 </map>

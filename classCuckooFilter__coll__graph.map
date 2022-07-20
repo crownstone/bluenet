@@ -1,4 +1,4 @@
 <map id="CuckooFilter" name="CuckooFilter">
-<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="11,80,112,107"/>
-<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,5,117,32"/>
+<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="11,79,112,104"/>
+<area shape="rect" id="node2" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,5,117,31"/>
 </map>

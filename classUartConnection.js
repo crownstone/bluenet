@@ -1,9 +1,9 @@
 var classUartConnection =
 [
-    [ "getSelfStatus", "classUartConnection.html#a4087d1ab75d826f960f1eaeea2ebcb99", null ],
+    [ "getSelfStatus", "classUartConnection.html#a7cac21fa958111a954fb472bfdabf492", null ],
     [ "getSessionNonceRx", "classUartConnection.html#acfd3d474f6a4c73cb1449c1f8310d4a7", null ],
     [ "getSessionNonceTx", "classUartConnection.html#a97d7677da4b69d879bd923d4501e17ef", null ],
-    [ "getUserStatus", "classUartConnection.html#a8b77ab4a7b19ba8e31ae81ed54e4ad56", null ],
+    [ "getUserStatus", "classUartConnection.html#ab1fed3baf2a9f08ccf67f14e7bc84f68", null ],
     [ "init", "classUartConnection.html#a24d9bcd353c96ae6b5f4e3a826c492b5", null ],
     [ "isAlive", "classUartConnection.html#a5141fe8f8f88b129a07e0de60083f9e1", null ],
     [ "isEncryptedAlive", "classUartConnection.html#a205f7033e6424e875d1ca877f70bb820", null ],

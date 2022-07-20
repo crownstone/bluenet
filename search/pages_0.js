@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bluenet_1985',['Bluenet',['../index.html',1,'']]]
+  ['bluenet_0',['Bluenet',['../index.html',1,'']]]
 ];

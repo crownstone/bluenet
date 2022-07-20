@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['varianceaggregator_1394',['VarianceAggregator',['../classVarianceAggregator.html',1,'']]]
+  ['varianceaggregator_0',['VarianceAggregator',['../classVarianceAggregator.html',1,'']]]
 ];

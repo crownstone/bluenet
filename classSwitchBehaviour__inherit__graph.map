@@ -1,5 +1,5 @@
 <map id="SwitchBehaviour" name="SwitchBehaviour">
-<area shape="rect" id="node1" title="Object that defines when a state transition should occur." alt="" coords="33,80,153,107"/>
-<area shape="rect" id="node3" href="$classExtendedSwitchBehaviour.html" title="A smart timer behaviour is a switch behaviour that is allowed to extend itself passed the until time ..." alt="" coords="5,155,180,181"/>
-<area shape="rect" id="node2" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="53,5,133,32"/>
+<area shape="rect" id="node1" title="Object that defines when a state transition should occur." alt="" coords="36,79,167,104"/>
+<area shape="rect" id="node3" href="$classExtendedSwitchBehaviour.html" title="A smart timer behaviour is a switch behaviour that is allowed to extend itself passed the until time ..." alt="" coords="5,152,197,177"/>
+<area shape="rect" id="node2" href="$classBehaviour.html" title="Class to derrive behaviours from, centralizing common variables such as from and until times." alt="" coords="57,5,145,31"/>
 </map>

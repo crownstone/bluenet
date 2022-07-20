@@ -1,5 +1,5 @@
 <map id="PresenceHandler" name="PresenceHandler">
-<area shape="rect" id="node1" title="Keeps up all the locations each profile is present in." alt="" coords="59,80,191,107"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,32"/>
-<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,32"/>
+<area shape="rect" id="node1" title="Keeps up all the locations each profile is present in." alt="" coords="59,79,191,104"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,116,31"/>
+<area shape="rect" id="node3" href="$classComponent.html" title="Helper class to manage decoupling of components." alt="" coords="140,5,237,31"/>
 </map>

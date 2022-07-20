@@ -1,6 +1,6 @@
 var classBehaviourHandler =
 [
-    [ "getValue", "classBehaviourHandler.html#a1270448b94d610be54662a53022e52a5", null ],
+    [ "getValue", "classBehaviourHandler.html#a64be07171dc9255ebec2bf9db47e8211", null ],
     [ "handleEvent", "classBehaviourHandler.html#a6caf54df848964cd2cb32e3256c12023", null ],
     [ "init", "classBehaviourHandler.html#aced1112dc2134fbfb675f3b1507ccb3a", null ],
     [ "requiresAbsence", "classBehaviourHandler.html#a463664a1cde0ef30ce07e84feb51128d", null ],

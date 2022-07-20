@@ -1,4 +1,4 @@
 <map id="multi_switch_t" name="multi_switch_t">
-<area shape="rect" id="node1" title="Multi switch packet." alt="" coords="21,95,128,121"/>
-<area shape="rect" id="node2" href="$structmulti__switch__item__t.html" title="A single multi switch item." alt="" coords="5,5,144,32"/>
+<area shape="rect" id="node1" title="Multi switch packet." alt="" coords="24,93,141,119"/>
+<area shape="rect" id="node2" href="$structmulti__switch__item__t.html" title="A single multi switch item." alt="" coords="5,5,160,31"/>
 </map>

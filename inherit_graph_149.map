@@ -1,6 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,56,117,83"/>
-<area shape="rect" id="node2" href="$classAssetFilter.html" title="Class that contains all data required for an asset filter:" alt="" coords="185,5,276,32"/>
-<area shape="rect" id="node3" href="$classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="180,56,281,83"/>
-<area shape="rect" id="node4" href="$classExactMatchFilter.html" title=" " alt="" coords="165,107,296,133"/>
+<area shape="rect" id="node1" href="$classFilterInterface.html" title="Used in AssetFiltering as a generic way to query a filter for containment and assetId." alt="" coords="5,55,117,80"/>
+<area shape="rect" id="node2" href="$classAssetFilter.html" title="Class that contains all data required for an asset filter:" alt="" coords="185,5,276,31"/>
+<area shape="rect" id="node3" href="$classCuckooFilter.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: 02 Apr...." alt="" coords="180,55,281,80"/>
+<area shape="rect" id="node4" href="$classExactMatchFilter.html" title=" " alt="" coords="165,104,296,129"/>
 </map>

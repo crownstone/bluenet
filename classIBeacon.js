@@ -1,7 +1,6 @@
 var classIBeacon =
 [
     [ "IBeacon", "classIBeacon.html#a576235c307cfc279cc12d99cc0d85642", null ],
-    [ "getArray", "classIBeacon.html#a362c19ff340b09f14d0bbbfb373213be", null ],
     [ "getMajor", "classIBeacon.html#a400945236e910520e717216e6625170b", null ],
     [ "getMinor", "classIBeacon.html#a0bece282532a580ec61b17ba7b2558c2", null ],
     [ "getTxPower", "classIBeacon.html#aa55d5065a353628492d3b4e7664077c7", null ],

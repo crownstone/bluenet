@@ -1,14 +1,14 @@
 <map id="CharacteristicBase" name="CharacteristicBase">
-<area shape="rect" id="node1" title="Non&#45;template base class for Characteristics." alt="" coords="1193,191,1337,217"/>
-<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification." alt="" coords="1016,101,1087,128"/>
-<area shape="rect" id="node3" href="$classBaseClass.html" title=" " alt="" coords="689,5,815,32"/>
-<area shape="rect" id="node4" href="$classtuple.html" title=" " alt="" coords="643,56,861,83"/>
-<area shape="rect" id="node5" title=" " alt="" coords="330,45,526,86"/>
-<area shape="rect" id="node6" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,111,781,137"/>
-<area shape="rect" id="node7" href="$classBaseClass.html" title=" " alt="" coords="365,111,491,137"/>
-<area shape="rect" id="node8" href="$classfixed__tuple.html" title=" " alt="" coords="327,162,529,203"/>
-<area shape="rect" id="node9" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,169,277,196"/>
-<area shape="rect" id="node10" title=" " alt="" coords="5,169,135,196"/>
-<area shape="rect" id="node11" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,173,780,200"/>
-<area shape="rect" id="node12" href="$structStatus.html" title="Status of a Characteristic." alt="" coords="1020,252,1083,279"/>
+<area shape="rect" id="node1" title="Non&#45;template base class for Characteristics." alt="" coords="1193,69,1337,95"/>
+<area shape="rect" id="node2" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,5,780,31"/>
+<area shape="rect" id="node3" href="$classService.html" title="Service as defined in the GATT Specification." alt="" coords="1016,69,1087,95"/>
+<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="689,65,815,91"/>
+<area shape="rect" id="node5" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,115,781,140"/>
+<area shape="rect" id="node6" href="$classBaseClass.html" title=" " alt="" coords="365,57,491,83"/>
+<area shape="rect" id="node7" href="$classfixed__tuple.html" title=" " alt="" coords="327,107,529,147"/>
+<area shape="rect" id="node8" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,115,277,140"/>
+<area shape="rect" id="node9" title=" " alt="" coords="5,115,135,140"/>
+<area shape="rect" id="node10" href="$classtuple.html" title=" " alt="" coords="643,171,861,196"/>
+<area shape="rect" id="node11" title=" " alt="" coords="330,171,526,211"/>
+<area shape="rect" id="node12" href="$structStatus.html" title="Status of a Characteristic." alt="" coords="1020,119,1083,144"/>
 </map>

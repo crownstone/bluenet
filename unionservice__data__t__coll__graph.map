@@ -1,17 +1,17 @@
 <map id="service_data_t" name="service_data_t">
-<area shape="rect" id="node1" title="Service data." alt="" coords="911,202,1028,229"/>
-<area shape="rect" id="node2" href="$structservice__data__encrypted__t.html" title="This data is encrypted." alt="" coords="604,247,793,274"/>
-<area shape="rect" id="node3" href="$structservice__data__hub__state__t.html" title=" " alt="" coords="303,15,491,42"/>
-<area shape="rect" id="node14" href="$structservice__data__setup__t.html" title="Setup data." alt="" coords="619,134,779,161"/>
-<area shape="rect" id="node4" href="$unionservice__data__hub__state__flags__t.html" title=" " alt="" coords="5,5,181,47"/>
-<area shape="rect" id="node5" href="$structservice__data__encrypted__error__t.html" title="In case the crownstone has errors, this will be advertised next to the state." alt="" coords="308,328,485,369"/>
-<area shape="rect" id="node6" href="$unionservice__data__state__flags__t.html" title=" " alt="" coords="21,293,166,335"/>
-<area shape="rect" id="node9" href="$structservice__data__encrypted__alternative__state__t.html" title="State of this crownstone." alt="" coords="308,197,485,239"/>
-<area shape="rect" id="node10" href="$structservice__data__encrypted__ext__state__t.html" title="State of another crownstone." alt="" coords="308,393,485,435"/>
-<area shape="rect" id="node11" href="$structservice__data__encrypted__state__t.html" title="State of this crownstone." alt="" coords="308,459,485,500"/>
-<area shape="rect" id="node13" href="$structservice__data__encrypted__ext__error__t.html" title="Errors of another crownstone." alt="" coords="308,263,485,304"/>
-<area shape="rect" id="node15" href="$structservice__data__setup__state__t.html" title=" " alt="" coords="323,132,471,173"/>
-<area shape="rect" id="node7" href="$structservice__data__encrypted__microapp__t.html" title="Microapp data that will be encrypted." alt="" coords="308,67,485,108"/>
-<area shape="rect" id="node8" href="$unionservice__data__microapp__flags__t.html" title=" " alt="" coords="7,71,180,112"/>
-<area shape="rect" id="node12" href="$unionservice__data__state__extra__flags__t.html" title=" " alt="" coords="21,459,166,500"/>
+<area shape="rect" id="node1" title="Service data." alt="" coords="911,209,1028,234"/>
+<area shape="rect" id="node2" href="$structservice__data__encrypted__t.html" title="This data is encrypted." alt="" coords="604,233,793,258"/>
+<area shape="rect" id="node3" href="$structservice__data__encrypted__state__t.html" title="State of this crownstone." alt="" coords="308,385,485,425"/>
+<area shape="rect" id="node4" href="$unionservice__data__state__flags__t.html" title=" " alt="" coords="21,280,166,320"/>
+<area shape="rect" id="node6" href="$structservice__data__encrypted__error__t.html" title="In case the crownstone has errors, this will be advertised next to the state." alt="" coords="308,257,485,297"/>
+<area shape="rect" id="node7" href="$structservice__data__encrypted__ext__state__t.html" title="State of another crownstone." alt="" coords="308,321,485,361"/>
+<area shape="rect" id="node8" href="$structservice__data__encrypted__ext__error__t.html" title="Errors of another crownstone." alt="" coords="308,193,485,233"/>
+<area shape="rect" id="node9" href="$structservice__data__encrypted__alternative__state__t.html" title="State of this crownstone." alt="" coords="308,449,485,489"/>
+<area shape="rect" id="node15" href="$structservice__data__setup__state__t.html" title=" " alt="" coords="323,129,471,169"/>
+<area shape="rect" id="node5" href="$unionservice__data__state__extra__flags__t.html" title=" " alt="" coords="21,393,166,433"/>
+<area shape="rect" id="node10" href="$structservice__data__hub__state__t.html" title=" " alt="" coords="303,15,491,41"/>
+<area shape="rect" id="node14" href="$structservice__data__setup__t.html" title="Setup data." alt="" coords="619,151,779,177"/>
+<area shape="rect" id="node11" href="$unionservice__data__hub__state__flags__t.html" title=" " alt="" coords="5,5,181,45"/>
+<area shape="rect" id="node12" href="$structservice__data__encrypted__microapp__t.html" title="Microapp data that will be encrypted." alt="" coords="308,65,485,105"/>
+<area shape="rect" id="node13" href="$unionservice__data__microapp__flags__t.html" title=" " alt="" coords="7,69,180,109"/>
 </map>

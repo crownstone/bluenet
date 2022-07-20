@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classCharacteristicBuffer.html" title="CharacteristicBuffer is a byte array with header." alt="" coords="5,31,157,57"/>
-<area shape="rect" id="node2" href="$classCharacteristicReadBuffer.html" title=" " alt="" coords="206,5,391,32"/>
-<area shape="rect" id="node3" href="$classCharacteristicWriteBuffer.html" title=" " alt="" coords="205,56,392,83"/>
+<area shape="rect" id="node1" href="$classCharacteristicBuffer.html" title="CharacteristicBuffer is a byte array with header." alt="" coords="5,31,157,56"/>
+<area shape="rect" id="node2" href="$classCharacteristicReadBuffer.html" title=" " alt="" coords="206,5,391,31"/>
+<area shape="rect" id="node3" href="$classCharacteristicWriteBuffer.html" title=" " alt="" coords="205,55,392,80"/>
 </map>

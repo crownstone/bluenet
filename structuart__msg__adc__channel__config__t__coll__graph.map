@@ -1,4 +1,4 @@
 <map id="uart_msg_adc_channel_config_t" name="uart_msg_adc_channel_config_t">
-<area shape="rect" id="node1" title=" " alt="" coords="5,95,161,136"/>
-<area shape="rect" id="node2" href="$structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="9,5,157,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,93,176,133"/>
+<area shape="rect" id="node2" href="$structadc__channel__config__t.html" title="Struct to configure an ADC channel." alt="" coords="9,5,172,31"/>
 </map>

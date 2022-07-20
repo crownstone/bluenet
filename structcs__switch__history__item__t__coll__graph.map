@@ -1,5 +1,5 @@
 <map id="cs_switch_history_item_t" name="cs_switch_history_item_t">
-<area shape="rect" id="node1" title=" " alt="" coords="37,95,208,121"/>
-<area shape="rect" id="node2" href="$unionswitch__state__t.html" title="Switch state: combination of relay and dimmer state." alt="" coords="5,5,112,32"/>
-<area shape="rect" id="node3" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="136,5,240,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="39,93,226,119"/>
+<area shape="rect" id="node2" href="$unionswitch__state__t.html" title="Switch state: combination of relay and dimmer state." alt="" coords="5,5,121,31"/>
+<area shape="rect" id="node3" href="$structcmd__source__t.html" title="Struct that tells where a command originated from." alt="" coords="146,5,258,31"/>
 </map>
