@@ -1,12 +1,5 @@
 var NAVTREEINDEX1 =
 {
-"classCharacteristicBase.html#a85f8a2236ecd36fc1d5ca85746eb4f8c":[14,0,66,25],
-"classCharacteristicBase.html#a88528ef2c80767feeaea86dee0fd20c8":[14,0,66,44],
-"classCharacteristicBase.html#a8d988e8bd28ebfce714066f3f84b43a9":[14,0,66,6],
-"classCharacteristicBase.html#a8e451eb1012f21eabec092deda1b07b2":[14,0,66,40],
-"classCharacteristicBase.html#a8fe8ea90a4ebff6056992ffb0a67153b":[14,0,66,1],
-"classCharacteristicBase.html#a96a9c5745e8c113b35ac9c40887524d5":[14,0,66,8],
-"classCharacteristicBase.html#a9dfa18e6eb2b562b6e79239432b49ac6":[14,0,66,32],
 "classCharacteristicBase.html#aa3b54aca64e3c085dbfb9695ed683247":[14,0,66,7],
 "classCharacteristicBase.html#aafd21a41b34a247cfdd01f8f6ec4b913":[14,0,66,16],
 "classCharacteristicBase.html#ab5830659bf6cfafafff58b6130c4119d":[14,0,66,28],
@@ -249,5 +242,12 @@ var NAVTREEINDEX1 =
 "classDeviceInformationService.html#a54fddb05fcad0be07e782d69c463339a":[14,0,159,2],
 "classDeviceInformationService.html#aea9384085b0f6989edfd80884e2ad2fb":[14,0,159,1],
 "classDeviceInformationService.html#af13ec7c422220683c21553e14d904ec9":[14,0,159,0],
-"classDifferentialBuffer.html":[14,0,162]
+"classDifferentialBuffer.html":[14,0,162],
+"classDifferentialBuffer.html#a016744a27c53e885614dc138c7862f1a":[14,0,162,10],
+"classDifferentialBuffer.html#a0bbada50d35e1c20573732d5783035a2":[14,0,162,8],
+"classDifferentialBuffer.html#a0d29f5e68bd19e8d795af2528a36c711":[14,0,162,0],
+"classDifferentialBuffer.html#a10eda80e345a6e3989ab7bdee88dabd7":[14,0,162,5],
+"classDifferentialBuffer.html#a18fa5c3ad413a8b5678529c95f73728b":[14,0,162,19],
+"classDifferentialBuffer.html#a1af389bcbc553cbd05d549d5c4eeccf9":[14,0,162,17],
+"classDifferentialBuffer.html#a2c1e5e21184bdab40c83cb8aa583a777":[14,0,162,7]
 };

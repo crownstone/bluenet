@@ -1,12 +1,5 @@
 var NAVTREEINDEX9 =
 {
-"structcs__legacy__multi__switch__item__t.html#aeaacccd682e1ecd20ce0fbcdc2b8bd73":[14,0,111,2],
-"structcs__legacy__multi__switch__t.html":[14,0,112],
-"structcs__legacy__multi__switch__t.html#a2923fafb754d8f278cf2e9f54fa5efd1":[14,0,112,1],
-"structcs__legacy__multi__switch__t.html#a320573a8c6e7d1a0b66cf067bd31a25b":[14,0,112,0],
-"structcs__legacy__multi__switch__t.html#aeeb07f8a955262af0d5dc8b6719e32ab":[14,0,112,2],
-"structcs__mesh__iv__index__t.html":[14,0,113],
-"structcs__mesh__iv__index__t.html#a04ab9fa3b74411a1b612b27e1a03ee51":[14,0,113,0],
 "structcs__mesh__iv__index__t.html#aa9ae1a66a19edf26c912bf20a52ced4d":[14,0,113,1],
 "structcs__mesh__iv__index__v5__t.html":[14,0,114],
 "structcs__mesh__iv__index__v5__t.html#a20e770fddbab72a5e4cba9032d0bc994":[14,0,114,2],
@@ -249,5 +242,12 @@ var NAVTREEINDEX9 =
 "structencryption__nonce__t.html#af50c40c1b3ef5a078d02eb7c740acba9":[14,0,168,0],
 "structexact__match__filter__data__t.html":[14,0,173],
 "structexact__match__filter__data__t.html#a58aeed3c401876c240f926fd511a0354":[14,0,173,0],
-"structexact__match__filter__data__t.html#a75a3124b53f6fee8b616a11d994369a2":[14,0,173,1]
+"structexact__match__filter__data__t.html#a75a3124b53f6fee8b616a11d994369a2":[14,0,173,1],
+"structexact__match__filter__data__t.html#aa4a34da6a9ff775de4ca69096bc6fb5a":[14,0,173,2],
+"structfactory__reset__message__payload__t.html":[14,0,177],
+"structfactory__reset__message__payload__t.html#a3efc5f8bdaca99e7e0a453cf50946864":[14,0,177,0],
+"structfunc_1_1detail_1_1empty__struct.html":[14,0,1,0,1],
+"structfunc_1_1detail_1_1function__manager.html":[14,0,1,0,10],
+"structfunc_1_1detail_1_1function__manager.html#a5061795fc642c2a04bbd59dc51cc4552":[14,0,1,0,10,5],
+"structfunc_1_1detail_1_1function__manager.html#a55825ce9c959f5d61d0cab3072dda89a":[14,0,1,0,10,2]
 };

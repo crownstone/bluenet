@@ -1,12 +1,5 @@
 var NAVTREEINDEX7 =
 {
-"index.html#autotoc_md13":[8,0],
-"index.html#autotoc_md14":[8,1],
-"index.html#autotoc_md15":[9],
-"index.html#autotoc_md4":[0],
-"index.html#autotoc_md5":[1],
-"index.html#autotoc_md6":[2],
-"index.html#autotoc_md7":[3],
 "index.html#autotoc_md8":[4],
 "index.html#autotoc_md9":[5],
 "md_docs_FAQ.html":[11],
@@ -249,5 +242,12 @@ var NAVTREEINDEX7 =
 "structasset__filter__cmd__get__filter__summaries__ret__t.html":[14,0,18],
 "structasset__filter__cmd__get__filter__summaries__ret__t.html#a619bdb3136c42ec8625797b9ee889818":[14,0,18,2],
 "structasset__filter__cmd__get__filter__summaries__ret__t.html#a857883b5f7b38c838474d7c8b04fd979":[14,0,18,0],
-"structasset__filter__cmd__get__filter__summaries__ret__t.html#a8fab3681240e967c1726afe4e975c48c":[14,0,18,4]
+"structasset__filter__cmd__get__filter__summaries__ret__t.html#a8fab3681240e967c1726afe4e975c48c":[14,0,18,4],
+"structasset__filter__cmd__get__filter__summaries__ret__t.html#a9bc6bd21af8a339975bf1999e53b5651":[14,0,18,1],
+"structasset__filter__cmd__get__filter__summaries__ret__t.html#ae6ffded0e9be8c35662b34af88b09ff0":[14,0,18,3],
+"structasset__filter__cmd__remove__filter__t.html":[14,0,19],
+"structasset__filter__cmd__remove__filter__t.html#a101b0d9c503759709d9f23d6dae7316e":[14,0,19,0],
+"structasset__filter__cmd__remove__filter__t.html#aba6e1124d04150e5960d79ee35f64003":[14,0,19,1],
+"structasset__filter__cmd__upload__filter__t.html":[14,0,20],
+"structasset__filter__cmd__upload__filter__t.html#a47392e2f1ee4c5df34205c0e94cbb166":[14,0,20,4]
 };

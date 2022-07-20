@@ -1,12 +1,5 @@
 var NAVTREEINDEX11 =
 {
-"structservice__data__encrypted__alternative__state__t.html#a09b738fd83d7db778221f362752c0b5e":[14,0,286,8],
-"structservice__data__encrypted__alternative__state__t.html#a68b044376871530a2f25e7f4f467b920":[14,0,286,4],
-"structservice__data__encrypted__alternative__state__t.html#a7cc5a5494463c56c65d2381513d175ea":[14,0,286,3],
-"structservice__data__encrypted__alternative__state__t.html#a7d4e826784bbf7e8b81c703ec1e2e1ab":[14,0,286,5],
-"structservice__data__encrypted__alternative__state__t.html#a94b2472d0e9a532bac6f0155a3761236":[14,0,286,2],
-"structservice__data__encrypted__alternative__state__t.html#ab8791ddefb5ce85d671b0077706614fe":[14,0,286,6],
-"structservice__data__encrypted__alternative__state__t.html#acc6d80ca77fd052019ea79b074667442":[14,0,286,7],
 "structservice__data__encrypted__error__t.html":[14,0,287],
 "structservice__data__encrypted__error__t.html#a1528a23230db1f1f9021951d83fc4ed8":[14,0,287,2],
 "structservice__data__encrypted__error__t.html#a258f3e9e0148be38c9dc5b634656a77b":[14,0,287,5],
@@ -249,5 +242,12 @@ var NAVTREEINDEX11 =
 "unionservice__data__state__extra__flags__t.html":[14,0,298],
 "unionservice__data__state__extra__flags__t.html#a30cefef5a59f929c5781e37e33a4aa35":[14,0,298,0],
 "unionservice__data__state__extra__flags__t.html#a4fb2d17751dd618a3f2f109b0dd8f255":[14,0,298,1],
-"unionservice__data__state__extra__flags__t.html#a834cb7ef64776e1c63efa92470f92db9":[14,0,298,2]
+"unionservice__data__state__extra__flags__t.html#a834cb7ef64776e1c63efa92470f92db9":[14,0,298,2],
+"unionservice__data__state__flags__t.html":[14,0,299],
+"unionservice__data__state__flags__t.html#a038b5c483411dc8e4cd797d18194c8bb":[14,0,299,7],
+"unionservice__data__state__flags__t.html#a0bb70952e9d360aa6c25479b5118452c":[14,0,299,0],
+"unionservice__data__state__flags__t.html#a3b39fa463a6f22bc03a23e4093b2a8bc":[14,0,299,8],
+"unionservice__data__state__flags__t.html#a52e3519e506c32f78637cc0008e5d20c":[14,0,299,3],
+"unionservice__data__state__flags__t.html#a77761a3f561409d12654088c6cb890d5":[14,0,299,2],
+"unionservice__data__state__flags__t.html#a78e736992e31c67ef0279737dc162c0d":[14,0,299,5]
 };

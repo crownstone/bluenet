@@ -1,12 +1,5 @@
 var NAVTREEINDEX5 =
 {
-"classTestCrownstoneCentral.html#abc26057dc08801291fa847b54d32f918":[14,0,332,1],
-"classTestCrownstoneCentral.html#ad8df3e6a6b978cc0922f4ccd31a7125e":[14,0,332,8],
-"classTestCrownstoneCentral.html#af12a9dd3eaf69b6e906b422d01a7a948":[14,0,332,3],
-"classTime.html":[14,0,333],
-"classTime.html#a0e666e26d1eefb81181a725bc522b67c":[14,0,333,1],
-"classTime.html#a32b627d07d023f9e914ec092f8fb8190":[14,0,333,3],
-"classTime.html#a36b218f71e5d2df35930748d89791c17":[14,0,333,2],
 "classTime.html#a64ef71f30616f968569ea03662eb5966":[14,0,333,0],
 "classTime.html#acd695026fd7f36f0d5d7bcfd751bd7d9":[14,0,333,4],
 "classTimeOfDay.html":[14,0,335],
@@ -249,5 +242,12 @@ var NAVTREEINDEX5 =
 "cs__ISwitch_8h_source.html":[15,0,0,0,18,0],
 "cs__KeysAndAccess_8h_source.html":[15,0,0,0,6,2],
 "cs__Logger_8h_source.html":[15,0,0,0,9,1],
-"cs__Lollipop_8h_source.html":[15,0,0,0,24,12]
+"cs__Lollipop_8h_source.html":[15,0,0,0,24,12],
+"cs__Math_8h.html#a0018f2b40f14dcaa75e791b0bcfdc636":[13,0,1,4],
+"cs__Math_8h.html#a1382f723c89819f88a4390f30ffb81eb":[13,0,1,3],
+"cs__Math_8h.html#a75d586277e9b210dbc3dd9ddf4f80686":[13,0,1,6],
+"cs__Math_8h.html#a86a0cc52e59e983d5235875f1c224470":[13,0,1,2],
+"cs__Math_8h.html#a8866cee56c79a4b0ff285406188c49b8":[13,0,1,9],
+"cs__Math_8h.html#a89d3ec4106c35de11ee2eb2ea64b94ff":[13,0,1,1],
+"cs__Math_8h.html#aa9fb556bc8c3abca01879f5d81a4b394":[13,0,1,5]
 };

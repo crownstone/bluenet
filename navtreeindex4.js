@@ -1,12 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"classServiceData.html#a3af1bac68e252dafc6fb59b8e424f913":[14,0,301,2],
-"classServiceData.html#a42c4feca6db8ae656dd95e311fde3cf5":[14,0,301,10],
-"classServiceData.html#a436c4f42c201b6266f15d3c12b741be1":[14,0,301,6],
-"classServiceData.html#a4a75119d3fe3db8289f567fe5a7b9e0e":[14,0,301,8],
-"classServiceData.html#a87cd8a976e4e055f34a4f12abda9b48b":[14,0,301,1],
-"classServiceData.html#a97da8ef01ca957f4e6dec57f48dbbe53":[14,0,301,3],
-"classServiceData.html#a9ad423234dc85aaeae6612fb8b64b0c8":[14,0,301,9],
 "classServiceData.html#a9b86d2d5114aff479ab4fd08063fc453":[14,0,301,0],
 "classServiceData.html#ab35f62bdafc2cc35eff1dd5da380094d":[14,0,301,7],
 "classSetup.html":[14,0,304],
@@ -249,5 +242,12 @@ var NAVTREEINDEX4 =
 "classTestCrownstoneCentral.html#a67d724185dd4c233f095e062fd10e08d":[14,0,332,4],
 "classTestCrownstoneCentral.html#a70032a0ff5416eacbee94b65b9e63b75":[14,0,332,2],
 "classTestCrownstoneCentral.html#a824ba3e559f23b28260421754a595485":[14,0,332,0],
-"classTestCrownstoneCentral.html#a9d8d002bed2ae8c5b26d22b8670e76ec":[14,0,332,5]
+"classTestCrownstoneCentral.html#a9d8d002bed2ae8c5b26d22b8670e76ec":[14,0,332,5],
+"classTestCrownstoneCentral.html#abc26057dc08801291fa847b54d32f918":[14,0,332,1],
+"classTestCrownstoneCentral.html#ad8df3e6a6b978cc0922f4ccd31a7125e":[14,0,332,8],
+"classTestCrownstoneCentral.html#af12a9dd3eaf69b6e906b422d01a7a948":[14,0,332,3],
+"classTime.html":[14,0,333],
+"classTime.html#a0e666e26d1eefb81181a725bc522b67c":[14,0,333,1],
+"classTime.html#a32b627d07d023f9e914ec092f8fb8190":[14,0,333,3],
+"classTime.html#a36b218f71e5d2df35930748d89791c17":[14,0,333,2]
 };

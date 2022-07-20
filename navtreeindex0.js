@@ -1,12 +1,5 @@
 var NAVTREEINDEX0 =
 {
-"":[13,0,1],
-"":[13,0,3],
-"":[13,0,3,0],
-"":[13,0,8],
-"":[13,0,5],
-"":[13,0,6],
-"":[13,0,7],
 "Element_8h_source.html":[15,0,0,0,20,3],
 "Median_8h_source.html":[15,0,0,0,20,4],
 "SortMedian_8h_source.html":[15,0,0,0,20,6],
@@ -249,5 +242,12 @@ var NAVTREEINDEX0 =
 "classCharacteristicBase.html#a71717e809ee94da5c19f52962447092f":[14,0,66,4],
 "classCharacteristicBase.html#a737c67d425191b7b79916d071be45c03":[14,0,66,26],
 "classCharacteristicBase.html#a7bf7fa638a16f89d2fbff36687b35e51":[14,0,66,3],
-"classCharacteristicBase.html#a84a94b57b05eee209184c08e4a360e82":[14,0,66,30]
+"classCharacteristicBase.html#a84a94b57b05eee209184c08e4a360e82":[14,0,66,30],
+"classCharacteristicBase.html#a85f8a2236ecd36fc1d5ca85746eb4f8c":[14,0,66,25],
+"classCharacteristicBase.html#a88528ef2c80767feeaea86dee0fd20c8":[14,0,66,44],
+"classCharacteristicBase.html#a8d988e8bd28ebfce714066f3f84b43a9":[14,0,66,6],
+"classCharacteristicBase.html#a8e451eb1012f21eabec092deda1b07b2":[14,0,66,40],
+"classCharacteristicBase.html#a8fe8ea90a4ebff6056992ffb0a67153b":[14,0,66,1],
+"classCharacteristicBase.html#a96a9c5745e8c113b35ac9c40887524d5":[14,0,66,8],
+"classCharacteristicBase.html#a9dfa18e6eb2b562b6e79239432b49ac6":[14,0,66,32]
 };
