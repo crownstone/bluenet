@@ -77,14 +77,14 @@ The remaining part of this section is dedicated to explaining the protocol for w
 
 ![Microapp command](../docs/diagrams/microapp_command.png)
 
-Type    | Name    | Length  | Description
+Type | Name | Length | Description
 ---     | ---     | ---     | ---
 uint8[] | Header  | 6       | Includes command type
 uint8[] | Payload | 31      | Fields depending on command type
 
 ![Microapp header](../docs/diagrams/microapp_header.png)
 
-Type    | Name         | Length  | Description
+Type | Name | Length | Description
 ---     | ---          | ---     | ---
 uint8   | Command type | 1       | Type of command determining interpretation of rest of command
 uint8   | Id           | 1       | Id used for identifying the command
@@ -125,7 +125,7 @@ The logging function accepts a type such as char, int, string, an option and the
 
 ![Microapp log](../docs/diagrams/microapp_log.png)
 
-Type    | Name    | Length | Description
+Type | Name | Length | Description
 ---     | ---     | ---    | ---
 --      | Header  | 6      | Log command (`CS_MICROAPP_COMMAND_LOG`)
 uint8   | Type    | 1      | Type of value to be logged (char, int, string, array, float, double, uint, short)
@@ -144,7 +144,7 @@ ignored. This is a function that requires a pointer to the coroutine argument wh
 
 ![Microapp delay](../docs/diagrams/microapp_delay.png)
 
-Type    | Name    | Length | Description
+Type | Name | Length | Description
 ---     | ---     | ---    | ---
 --      | Header  | 6      | Sleep command (`CS_MICROAPP_COMMAND_DELAY`)
 uint16  | Period  | 2      | Period to sleep in milliseconds
@@ -158,7 +158,7 @@ The pin command is defined for virtual pins.
 
 ![Microapp pin](../docs/diagrams/microapp_pin.png)
 
-Type    | Name     | Length | Description
+Type | Name | Length | Description
 ---     | ---      | ---    | ---
 --      | Header   | 6      | Pin command (`CS_MICROAPP_COMMAND_PIN`)
 uint8   | Pin      | 1      | Pin index (virtual)
@@ -178,7 +178,7 @@ The acknowledgment setting is not used yet.
 
 The dimmer / switch command is used to control the dimmer and switch.
 
-Type    | Name     | Length | Description
+Type | Name | Length | Description
 ---     | ---      | ---    | ---
 --      | Header   | 6      | Dimmer/Switch command (`CS_MICROAPP_COMMAND_SWITCH_DIMMER`)
 uint8   | Opcode   | 1      | `CS_MICROAPP_COMMAND_SWITCH` or `CS_MICROAPP_COMMAND_DIMMER` for controlling the switch or the dimmer respectively.
@@ -190,7 +190,7 @@ The service data command can be used to write data to a service data struct.
 
 ![Microapp service data](../docs/diagrams/microapp_service_data.png)
 
-Type    | Name    | Length | Description
+Type | Name | Length | Description
 ---     | ---     | ---    | ---
 --      | Header  | 6      | Pin command (`CS_MICROAPP_COMMAND_SERVICE_DATA`)
 uint8   | Type    | 1      | Type of value to be logged (char, int, string, array, float, double, uint, short)
@@ -209,7 +209,7 @@ in that case.
 
 ![Microapp twi](../docs/diagrams/microapp_twi.png)
 
-Type    | Name     | Length | Description
+Type | Name | Length | Description
 ---     | ---      | ---    | ---
 --      | Header   | 6      | Twi command (`CS_MICROAPP_COMMAND_TWI`)
 uint8   | Address  | 1      | Target address
@@ -227,7 +227,7 @@ For Bluetooth Low Energy functionalities, for now there is support for scanning 
 
 ![Microapp ble](../docs/diagrams/microapp_ble.png)
 
-Type   | Name      | Length | Description
+Type | Name | Length | Description
 ---    | ---       | ---    | ---
 --     | Header    | 6      | Ble command (`CS_MICROAPP_COMMAND_BLE`)
 uint8  | Opcode    | 1      | Ble opcodes such as start, stop, set handler
@@ -238,7 +238,7 @@ For ble scanned devices, a different packet structure is used
 
 ![Microapp ble device](../docs/diagrams/microapp_ble_device.png)
 
-Type   | Name      | Length | Description
+Type | Name | Length | Description
 ---    | ---       | ---    | ---
 --     | Header    | 6      | Ble device command (`CS_MICROAPP_COMMAND_BLE_DEVICE`)
 uint8  | Type      | 1      | Type of scanned device
@@ -254,7 +254,7 @@ The power usage command can be used to read the measured power usage of the devi
 
 ![Microapp powerusage](../docs/diagrams/microapp_powerusage.png)
 
-Type   | Name       | Length | Description
+Type | Name | Length | Description
 ---    | ---        | ---    | ---
 --     | Header     | 6      | Power usage command (`CS_MICROAPP_COMMAND_POWER_USAGE`)
 int32  | PowerUsage | 4      | Power usage
@@ -265,7 +265,7 @@ The presence command can be used to request presence of profiles in the sphere.
 
 ![Microapp presence](../docs/diagrams/microapp_presence.png)
 
-Type   | Name      | Length | Description
+Type | Name | Length | Description
 ---    | ---       | ---    | ---
 --     | Header    | 6      | Presence command (`CS_MICROAPP_COMMAND_PRESENCE`)
 uint8  | ProfileId | 1      | Requested profile
@@ -277,7 +277,7 @@ The supported mesh functionalities at the moment include both sending and receiv
 
 ![Microapp mesh](../docs/diagrams/microapp_mesh.png)
 
-Type   | Name      | Length | Description
+Type | Name | Length | Description
 ---    | ---       | ---    | ---
 --     | Header    | 6      | Mesh command (`CS_MICROAPP_COMMAND_MESH`)
 uint8  | Opcode    | 1      | Type of mesh command (send, read, info)
@@ -289,9 +289,9 @@ uint8[] | Data     | 7      | 1 to 7 bytes (max mesh message payload length)
 
 For soft interrupts, the microapp has to acknowledge an interrupt from bluenet before handling the interrupt. This acknowledgement contains a field for the remaining number of interrupts that the microapp can process. Bluenet will keep this in mind and stop sending interrupts if the microapp is busy.
 
-![Microapp interrupts](../docs/diagrams/microapp_mesh.png)
+![Microapp interrupts](../docs/diagrams/microapp_interrupts.png)
 
-Type   | Name      | Length | Description
+Type | Name | Length | Description
 ---    | ---       | ---    | ---
 --     | Header    | 6      | Mesh command (`CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED` or `CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED`)
 uint8  | EmptyInterruptSlots | 1 | Number of empty slots for interrupts the microapp has
