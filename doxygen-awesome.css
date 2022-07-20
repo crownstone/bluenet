@@ -176,6 +176,7 @@ html {
 }
 
 @media (prefers-color-scheme: dark) {
+
     html:not(.light-mode) {
         color-scheme: dark;
 
@@ -2134,4 +2135,14 @@ a.anchorlink:hover {
 
 h2:hover a.anchorlink, h1:hover a.anchorlink, h3:hover a.anchorlink, h4:hover a.anchorlink  {
     display: inline-block;
+}
+
+html.dark-mode
+a[href$="#\gh-light-mode-only"] {
+    display: none;
+}
+
+html.light-mode
+a[href$="#\gh-dark-mode-only"] {
+    display: none;
 }
