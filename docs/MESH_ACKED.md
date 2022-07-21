@@ -1,17 +1,30 @@
-This shows the code flow when a mesh command is sent via UART to Crownstone 1.
-The mesh command orders Crownstone 1 to send an acked, single target, mesh message to Crownstone 2.
-The mesh message is a control command to print something ("hi") to UART.
-After Crownstone 2 printed the text, it sends a reply to Crownstone 1.
-Crownstone 1 then reports the result via UART.
+This document shows the code flow for acked mesh messages, based on an example command.
+
+Example case:
+- The user sends a mesh command via UART to Crownstone 1.
+- The mesh command orders Crownstone 1 to send an acked, single target, mesh message to Crownstone 2.
+- The mesh message is a control command to print something ("hi") to UART.
+- After Crownstone 2 printed the text, it sends a reply to Crownstone 1.
+- Crownstone 1 then reports the result via UART.
+
+The communication is as follows:
 
 ![Overview](uml/mesh/unicast_acked_overview.png)
 
 
+Now let's dive into the implementation.
+Each line shows the next function that is called, for simplification, we don't show the nesting of calls.
+Sometimes the most relevant function arguments are shown.
+When variables are set in the function, this is shown with `:=`.
+
 We start at the UART command handler of Crownstone 1:
 ```
 UartCommandHandler::handleCommandControl()
+
 CommandHandler::handleEvent(event.type = CMD_CONTROL_CMD)
+
 CommandHandler::handleCommand(type = CTRL_CMD_MESH_COMMAND)
+
 CommandHandler::handleCmdMeshCommand({
 	meshCtrlCmd = {
 		header = {
@@ -28,6 +41,7 @@ CommandHandler::handleCmdMeshCommand({
 })
 
 MeshMsgSender::handleSendMeshCommand()
+
 MeshMsgSender::addToQueue({
 	type    = CS_MESH_MODEL_TYPE_CTRL_CMD,
 	payload = {
@@ -35,12 +49,17 @@ MeshMsgSender::addToQueue({
 		payload = "hi"
 	}
 })
+
 MeshModelSelector::addToQueue()
+
 MeshModelUnicast::addToQueue()
+
 MeshModelUnicast::sendMsgFromQueue()
+
 MeshModelUnicast::sendMsg({
 	msg = [ CS_MESH_MODEL_TYPE_CTRL_CMD, CTRL_CMD_UART_MSG, "h", "i" ]
 })
+
 access_model_reliable_publish({
 	opcode  = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG,
 	message = [ CS_MESH_MODEL_TYPE_CTRL_CMD, CTRL_CMD_UART_MSG, "h", "i" ]
@@ -60,6 +79,7 @@ MeshModelUnicast::handleMsg({
 	opcode  = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG,
 	message = [ CS_MESH_MODEL_TYPE_CTRL_CMD, CTRL_CMD_UART_MSG, "h", "i" ]
 })
+
 MeshMsgHandler::handleMsg({
 	msg = {
 		opcode  = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG,
@@ -71,6 +91,7 @@ MeshMsgHandler::handleMsg({
 		dataSize = 0
 	}
 })
+
 MeshMsgHandler::handleControlCommand()
 	retCode      := CommandHandler::handleCmdUartMsg(commandData = "hi")
 	shortRetCode := MeshUtil::getShortenedRetCode(retCode)
@@ -78,10 +99,11 @@ MeshMsgHandler::handleControlCommand()
 	reply.buf    := [ CS_MESH_MODEL_TYPE_CTRL_CMD, shortRetCode, CTRL_CMD_UART_MSG ]
 
 
-Resuming in MeshModelUnicast::handleMsg
+// Resuming in MeshModelUnicast::handleMsg
 MeshModelUnicast::sendReply({
 	msg = [ CS_MESH_MODEL_TYPE_RESULT, CS_MESH_MODEL_TYPE_CTRL_CMD, shortRetCode, CTRL_CMD_UART_MSG ]
 })
+
 access_model_reply({
 	accessReplyMsg = {
 		opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY,
@@ -103,6 +125,7 @@ MeshModelUnicast::handleMsg({
 	opcode     = CS_MESH_MODEL_OPCODE_UNICAST_REPLY,
 	message    = [ CS_MESH_MODEL_TYPE_RESULT, CS_MESH_MODEL_TYPE_CTRL_CMD, shortRetCode, CTRL_CMD_UART_MSG ]
 })
+
 MeshMsgHandler::handleMsg({
 	msg = {
 		srcAddress = 2
@@ -111,21 +134,25 @@ MeshMsgHandler::handleMsg({
 	},
 	reply = NULL
 })
+
 MeshMsgHandler::handleResult(message, srcId = srcAddress)
 	resultHeader := {
 		stoneId = srcId
 		returnCode = MeshUtil::getInflatedRetCode(shortRetCode)
 		commandType = CTRL_CMD_UART_MSG
 	}
+
 sendResultToUart(resultHeader)
+
 UartHandler::writeMsg(UART_OPCODE_TX_MESH_RESULT, resultHeader)
 
-Resuming in MeshModelUnicast:handleMsg
+// Resuming in MeshModelUnicast:handleMsg
 MeshModelUnicast::checkDone()
 	ackResult := {
 		commandType = CTRL_CMD_UNKNOWN,
 		returnCode  = ERR_SUCCESS
 	}
+
 UartHandler::writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, ackResult)
 ```
 Because a different opcode is used for a reply, the mesh model knows to treat it differently.
