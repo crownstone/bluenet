@@ -832,9 +832,22 @@ void State::delayedStoreTick() {
 					}
 					ret_code = findInRam(it->type, it->id, index_in_ram);
 					if (ret_code == ERR_SUCCESS) {
-						ret_code = storeInFlash(index_in_ram);
-						if (ret_code == ERR_BUSY) {
-							keepItem = true;
+						// TODO: is this check worth the overhead?
+						cs_state_data_t ramData = _ram_data_register[index_in_ram];
+						cs_state_data_t tempData(ramData.type, ramData.id, nullptr, ramData.size);
+						bool matchingData = false;
+						if (allocate(tempData) == ERR_SUCCESS) {
+							if (_storage->read(tempData) == ERR_SUCCESS && memcmp(ramData.value, tempData.value, ramData.size) == 0) {
+								LOGd("Ram value matches flash value, so skip write. type=%u id=%u", ramData.type, ramData.id);
+								matchingData = true;
+							}
+							free(tempData.value);
+						}
+						if (!matchingData) {
+							ret_code = storeInFlash(index_in_ram);
+							if (ret_code == ERR_BUSY) {
+								keepItem = true;
+							}
 						}
 					}
 					break;
