@@ -4,10 +4,10 @@ The mesh message is a control command to print something ("hi") to UART.
 After Crownstone 2 printed the text, it sends a reply to Crownstone 1.
 Crownstone 1 then reports the result via UART.
 
+![Overview](uml/mesh/unicast_acked_overview.png)
 
 
-
-Crownstone 1
+We start at the UART command handler of Crownstone 1:
 ```
 UartCommandHandler::handleCommandControl()
 CommandHandler::handleEvent(event.type = CMD_CONTROL_CMD)
@@ -54,7 +54,7 @@ This is decided in the function `MeshMsgSender::handleSendMeshCommand`.
 
 
 
-Crownstone 2
+Now that the mesh message has been sent, Crownstone 2 receives the message:
 ```
 MeshModelUnicast::handleMsg({
 	opcode  = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG,
@@ -96,7 +96,7 @@ The handler has to set the reply, this can be anything.
 
 
 
-Crownstone 1
+Now that the reply has been sent, Crownstone 1 receives the reply:
 ```
 MeshModelUnicast::handleMsg({
 	srcAddress = 2,
