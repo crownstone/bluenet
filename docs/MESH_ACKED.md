@@ -9,8 +9,23 @@ Example case:
 
 The communication is as follows:
 
-![Overview](uml/mesh/unicast_acked_overview.png)
+<!-- Later when https://github.com/mermaid-js/mermaid/issues/3011 is fixed: %%{init: { 'sequence': {'messageAlign': 'left'} }}%% -->
 
+```mermaid
+sequenceDiagram
+  participant uart_a as "UART 1"
+  participant a as "Crownstone 1"
+  participant b as "Crownstone 2"
+  participant uart_b as "UART 2"
+
+  uart_a -> a : type = CTRL_CMD_MESH_COMMAND<br/>payload =<br/>    targetIds = [2]<br/>    flags = unicast & acked<br/>    type = CTRL_CMD_UART_MSG<br/>    data = "hi"
+  a -> b      : opcode = UNICAST_RELIABLE<br/>type = CS_MESH_MODEL_TYPE_CTRL_CMD<br/>payload =<br/>    ctrl_cmd = CTRL_CMD_UART_MSG<br/>    data = "hi"
+  b -> uart_b : "hi"
+  b -> a      : opcode = UNICAST_REPLY<br/>msg =<br/>    ctrl_cmd = CTRL_CMD_UART_MSG<br/>    result_code = SUCCESS
+  a -> uart_a : mesh_result =<br/>    stone_id = 2<br/>    ctrl_cmd = CTRL_CMD_UART_MSG<br/>    result_code = SUCCESS
+  a -> uart_a : mesh_ack_all =<br/>    ctrl_cmd = CTRL_CMD_UART_MSG<br/>    result_code = SUCCESS
+
+```
 
 Now let's dive into the implementation.
 Each line shows the next function that is called, for simplification, we don't show the nesting of calls.
