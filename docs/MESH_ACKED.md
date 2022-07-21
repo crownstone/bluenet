@@ -1,11 +1,12 @@
 This document shows the code flow for acked mesh messages, based on an example command.
+A lot of details are left out, so we can focus on how the ack/reply is implemented.
 
 Example case:
 - The user sends a mesh command via UART to Crownstone 1.
 - The mesh command orders Crownstone 1 to send an acked, single target, mesh message to Crownstone 2.
 - The mesh message is a control command to print something ("hi") to UART.
 - After Crownstone 2 printed the text, it sends a reply to Crownstone 1.
-- Crownstone 1 then reports the result via UART.
+- Crownstone 1 then reports the result via UART, with a `Mesh result` message, and a `Mesh ack all` message. See the [UART protocol](protocol/UART_PROTOCOL.md#rx-data-types-events-and-replies)
 
 The communication is as follows:
 
@@ -51,6 +52,7 @@ MeshMsgSender::addToQueue({
 })
 
 MeshModelSelector::addToQueue()
+// Selects the MeshModelUnicast based on the mesh message flags.
 
 MeshModelUnicast::addToQueue()
 
@@ -93,10 +95,11 @@ MeshMsgHandler::handleMsg({
 })
 
 MeshMsgHandler::handleControlCommand()
-	retCode      := CommandHandler::handleCmdUartMsg(commandData = "hi")
-	shortRetCode := MeshUtil::getShortenedRetCode(retCode)
-	reply.type   := CS_MESH_MODEL_TYPE_RESULT
-	reply.buf    := [ CS_MESH_MODEL_TYPE_CTRL_CMD, shortRetCode, CTRL_CMD_UART_MSG ]
+	retCode        := CommandHandler::handleCmdUartMsg(commandData = "hi")
+	shortRetCode   := MeshUtil::getShortenedRetCode(retCode)
+	reply.type     := CS_MESH_MODEL_TYPE_RESULT
+	reply.buf      := [ CS_MESH_MODEL_TYPE_CTRL_CMD, shortRetCode, CTRL_CMD_UART_MSG ]
+	reply.dataSize := 4
 
 
 // Resuming in MeshModelUnicast::handleMsg
@@ -111,8 +114,9 @@ access_model_reply({
 	}
 })
 ```
-When the reply is not NULL in the MeshMsgHandler::handleMsg function, a reply will be sent after the message has been handled.
+When the reply is not NULL in the `MeshMsgHandler::handleMsg` function, a reply will be sent after the message has been handled.
 The handler has to set the reply, this can be anything.
+The `reply` passed to `MeshMsgHandler::handleMsg` is initialized with type `CS_MESH_MODEL_TYPE_UNKNOWN` so that if no reply is set by the handler, no bogus mesh message will be sent.
 
 
 
