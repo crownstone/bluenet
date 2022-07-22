@@ -245,6 +245,8 @@ void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rs
 
 cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 	cs_mesh_model_msg_stone_mac_t packet = meshMsg.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
+	LOGMeshTopologyInfo("Receive MAC mesh msg: type=%u connectionProtocol=%u isReply=%u stoneId=%u, isRelayed=%u",
+			packet.type, packet.connectionProtocol, meshMsg.isReply, meshMsg.srcStoneId, meshMsg.isMaybeRelayed);
 	switch (packet.type) {
 		case 0: {
 			LOGMeshTopologyInfo("Reply to mac address request");
@@ -264,7 +266,7 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 			break;
 		}
 		case 1: {
-			LOGMeshTopologyInfo("Received mac address id=%u", meshMsg.srcAddress);
+			LOGMeshTopologyInfo("Received mac address id=%u", meshMsg.srcStoneId);
 			if (meshMsg.macAddressValid == false) {
 				LOGw("Missing MAC address");
 				break;
@@ -275,7 +277,7 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 				break;
 			}
 			TYPIFY(EVT_MESH_TOPO_MAC_RESULT) result;
-			result.stoneId = meshMsg.srcAddress;
+			result.stoneId = meshMsg.srcStoneId;
 			memcpy(result.macAddress, meshMsg.macAddress, sizeof(result.macAddress));
 			event_t event(CS_TYPE::EVT_MESH_TOPO_MAC_RESULT, &result, sizeof(result)); // TODO: add result code and connection protocol to event.
 			event.dispatch();
@@ -288,16 +290,16 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 	if (packet.type == CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI) {
 		cs_mesh_model_msg_neighbour_rssi_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI>();
-		onNeighbourRssi(packet.srcAddress, payload);
+		onNeighbourRssi(packet.srcStoneId, payload);
 	}
 
-	if (packet.hops != 0) {
+	if (packet.isMaybeRelayed) {
 		return;
 	}
 	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
 		result.returnCode = onStoneMacMsg(packet);
 	}
-	add(packet.srcAddress, packet.rssi, packet.channel);
+	add(packet.srcStoneId, packet.rssi, packet.channel);
 }
 
 void MeshTopology::onTickSecond() {

@@ -24,7 +24,7 @@ extern "C" {
 class MeshModelMulticastAcked {
 public:
 	/** Callback function definition. */
-	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply)> callback_msg_t;
+	typedef function<void(MeshMsgEvent& msg)> callback_msg_t;
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
@@ -164,7 +164,7 @@ private:
 	/**
 	 * Handle an ack message.
 	 */
-	void handleReply(MeshUtil::cs_mesh_received_msg_t & msg);
+	void handleReply(MeshMsgEvent& msg);
 
 	/**
 	 * Check if ack from every stone ID in the list has been received.

@@ -143,12 +143,12 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (ownMsg) {
 		return;
 	}
-	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
+	auto msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
 		// Handle the message, don't send a reply.
 		_replyReceived = true;
-		_msgCallback(msg, nullptr);
+		_msgCallback(msg);
 		checkDone();
 		return;
 	}
@@ -163,7 +163,8 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	};
 
 	// Handle the message, get the reply msg.
-	_msgCallback(msg, &reply);
+	msg.reply = &reply;
+	_msgCallback(msg);
 
 	// Send the reply.
 	if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
@@ -190,8 +191,9 @@ cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, 
 		setTtl(CS_MESH_DEFAULT_TTL, true);
 	}
 
+	_log(LogLevelMeshModelVerbose, false, "send reply msg=");
+	_logArray(LogLevelMeshModelVerbose, true, msg, msgSize);
 	uint32_t nrfCode = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
-	LOGMeshModelVerbose("send reply nrfCode=%u", nrfCode);
 
 	// Restore TTL
 	if (accessMsg->meta_data.ttl) {
@@ -298,7 +300,7 @@ void MeshModelUnicast::checkDone() {
 				CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type);
 				result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
 				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
-				LOGMeshModelDebug("all success");
+				LOGMeshModelDebug("Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
 				done = true;
 			}
 			break;
@@ -322,11 +324,11 @@ void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_t
 	resultHeader.resultHeader.returnCode = retCode;
 	resultHeader.stoneId = id;
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
-	LOGMeshModelDebug("failed id=%u", id);
+	LOGMeshModelDebug("Ack result: id=%u commandType=%u returnCode=%u", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
 
 	result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
-	LOGMeshModelDebug("all failed");
+	LOGMeshModelDebug("Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
 }
 
 cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {

@@ -17,31 +17,31 @@
 class MeshMsgHandler {
 public:
 	void init();
-	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply);
+	void handleMsg(MeshMsgEvent& msg);
 
 protected:
-	cs_ret_code_t handleTest(                    uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleAck(                     uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleCmdTime(                 uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleCmdNoop(                 uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleRssiPing(                MeshMsgEvent& evt);
-	cs_ret_code_t handleRssiData(                MeshMsgEvent& evt);
-	cs_ret_code_t handleTimeSync(                uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops);
-	cs_ret_code_t handleCmdMultiSwitch(          uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleState0(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
-	cs_ret_code_t handleState1(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
-	cs_ret_code_t handleProfileLocation(         uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceRegister(   uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceToken(      uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceHeartbeat(  uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceListSize(   uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleSyncRequest(             uint8_t* payload, size16_t payloadSize);
-	void handleStateSet(                         uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply);
-	void handleControlCommand(                   uint8_t* payload, size16_t payloadSize, mesh_reply_t* reply);
-	cs_ret_code_t handleResult(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
-	cs_ret_code_t handleSetIbeaconConfigId(      uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTest(                    MeshMsgEvent& msg);
+	cs_ret_code_t handleAck(                     MeshMsgEvent& msg);
+	cs_ret_code_t handleCmdTime(                 MeshMsgEvent& msg);
+	cs_ret_code_t handleCmdNoop(                 MeshMsgEvent& msg);
+	cs_ret_code_t handleRssiPing(                MeshMsgEvent& msg);
+	cs_ret_code_t handleRssiData(                MeshMsgEvent& msg);
+	cs_ret_code_t handleTimeSync(                MeshMsgEvent& msg);
+	cs_ret_code_t handleCmdMultiSwitch(          MeshMsgEvent& msg);
+	cs_ret_code_t handleState0(                  MeshMsgEvent& msg);
+	cs_ret_code_t handleState1(                  MeshMsgEvent& msg);
+	cs_ret_code_t handleProfileLocation(         MeshMsgEvent& msg);
+	cs_ret_code_t handleTrackedDeviceRegister(   MeshMsgEvent& msg);
+	cs_ret_code_t handleTrackedDeviceToken(      MeshMsgEvent& msg);
+	cs_ret_code_t handleTrackedDeviceHeartbeat(  MeshMsgEvent& msg);
+	cs_ret_code_t handleTrackedDeviceListSize(   MeshMsgEvent& msg);
+	cs_ret_code_t handleSyncRequest(             MeshMsgEvent& msg);
+	void handleStateSet(                         MeshMsgEvent& msg);
+	void handleControlCommand(                   MeshMsgEvent& msg);
+	cs_ret_code_t handleResult(                  MeshMsgEvent& msg);
+	cs_ret_code_t handleSetIbeaconConfigId(      MeshMsgEvent& msg);
 
-	cs_ret_code_t dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEvent& meshMshEvent);
+	cs_ret_code_t dispatchEventForMeshMsg(CS_TYPE evtType, MeshMsgEvent& msg);
 private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
 
@@ -81,7 +81,7 @@ private:
 	 * Check if all parts of a state are received.
 	 * Send an event if that's the case.
 	 */
-	void checkStateReceived(int8_t rssi, uint8_t ttl);
+	void checkStateReceived();
 
 	void replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code_t retCode, mesh_reply_t* reply);
 

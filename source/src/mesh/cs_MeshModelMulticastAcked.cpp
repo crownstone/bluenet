@@ -105,7 +105,7 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 		return;
 	}
 
-	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
+	auto msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 
 	switch (msg.opCode) {
 		case CS_MESH_MODEL_OPCODE_MULTICAST_REPLY: {
@@ -125,7 +125,8 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			};
 
 			// Handle the message, get the reply msg.
-			_msgCallback(msg, &reply);
+			msg.reply = &reply;
+			_msgCallback(msg);
 
 			// Send the reply.
 			if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
@@ -179,35 +180,33 @@ void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, co
 	LOGMeshModelDebug("Sent reply to id=%u", accessMsg->meta_data.src.value);
 }
 
-void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg) {
+void MeshModelMulticastAcked::handleReply(MeshMsgEvent& msg) {
 	if (_queueIndexInProgress == queue_index_none) {
 		return;
 	}
-
-	stone_id_t srcId = msg.srcAddress;
 
 	// Find stone ID in list of stone IDs.
 	auto item = _queue[_queueIndexInProgress];
 	uint16_t stoneIndex = 0xFFFF;
 	for (uint8_t i = 0; i < item.numIds; ++i) {
-		if (item.stoneIdsPtr[i] == srcId) {
+		if (item.stoneIdsPtr[i] == msg.srcStoneId) {
 			stoneIndex = i;
 			break;
 		}
 	}
 	if (stoneIndex == 0xFFFF) {
-		LOGMeshModelInfo("Stone id %u not in list", srcId);
+		LOGMeshModelInfo("Stone id %u not in list", msg.srcStoneId);
 		return;
 	}
 
 	// Check if stone ID has already been marked as acked, and thus already been handled.
 	if (_ackedStonesBitmask.isSet(stoneIndex)) {
-		LOGMeshModelVerbose("Already received ack from id %u", srcId);
+		LOGMeshModelVerbose("Already received ack from id %u", msg.srcStoneId);
 		return;
 	}
 
 	// Handle reply message.
-	_msgCallback(msg, nullptr);
+	_msgCallback(msg);
 
 	// Mark id as acked.
 	LOGMeshModelDebug("Set acked bit %u", stoneIndex);

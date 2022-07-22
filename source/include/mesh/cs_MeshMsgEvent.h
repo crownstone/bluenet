@@ -67,16 +67,24 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS> {
 
 class MeshMsgEvent {
 public:
-	cs_mesh_model_msg_type_t type;     // Type of message
-	cs_data_t msg;                     // Message payload
-	bool macAddressValid;              // True when the following MAC address is valid.
-	uint8_t macAddress[MAC_ADDRESS_LEN]; // MAC address of the relaying node, which is the src in case of 0 hops.
-	uint16_t srcAddress;               // Address of the original sender
-	uint8_t hops;                      // 0 hops means the msg was received directly from the original source.
-	int8_t rssi;                       // RSSI of the last hop
-	uint8_t channel;                   // Channel of the last hop
-	mesh_reply_t* reply = nullptr;     // If set, a reply is expected. Set the message type, write your payload to the buffer,
-	                                   // and set the data size to the size of the payload.
+	cs_mesh_model_msg_type_t type;       // Message type.
+	cs_data_t msg;                       // Message payload.
+
+	stone_id_t srcStoneId;               // Stone ID of the original sender.
+	bool macAddressValid;                // True when the following MAC address is valid.
+	uint8_t macAddress[MAC_ADDRESS_LEN]; // MAC address of the node from which this message was received, which is the source if not relayed.
+	int8_t rssi;                         // RSSI of the last hop, thus the RSSI to the source if not relayed.
+	uint8_t channel;                     // Channel of the last hop.
+
+	bool isMaybeRelayed;                 // Whether this message may have been relayed.
+	bool isReply;                        // Whether this message is a reply.
+
+	mesh_reply_t* reply = nullptr;       // If set, a reply is expected. Set the message type, write your payload to the buffer,
+	                                     // and set the data size to the size of the payload.
+
+	cs_mesh_model_opcode_t opCode;       // For debug prints only.
+	uint8_t ttl;                         // For debug prints only.
+
 
 	/**
 	 * Returns the message data of this event as the original

@@ -95,8 +95,7 @@ void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (ownMsg) {
 		return;
 	}
-	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
-
+	auto msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 	_msgCallback(msg);
 }
 

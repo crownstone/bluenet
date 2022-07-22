@@ -8,6 +8,7 @@
 #include <logging/cs_Logger.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshUtil.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
 namespace MeshUtil {
 
@@ -68,24 +69,49 @@ bool getMac(const nrf_mesh_rx_metadata_t* metaData, uint8_t* target) {
 	}
 }
 
-cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t& accessMsg) {
-	cs_mesh_received_msg_t msg;
-	msg.opCode = accessMsg.opcode.opcode;
-	msg.srcAddress = accessMsg.meta_data.src.value;
+MeshMsgEvent fromAccessMessageRX(const access_message_rx_t& accessMsg) {
+	MeshMsgEvent msg;
+	if (accessMsg.length < MESH_HEADER_SIZE) {
+		LOGw("Invalid mesh message of size %u", accessMsg.length);
+		msg.type = CS_MESH_MODEL_TYPE_UNKNOWN;
+		return msg;
+	}
+
+	msg.opCode = static_cast<cs_mesh_model_opcode_t>(accessMsg.opcode.opcode);
+	msg.type = MeshUtil::getType(accessMsg.p_data);
+	MeshUtil::getPayload((uint8_t*)accessMsg.p_data, accessMsg.length, msg.msg.data, msg.msg.len);
+
+	msg.srcStoneId = accessMsg.meta_data.src.value;
 	msg.macAddressValid = getMac(accessMsg.meta_data.p_core_metadata, msg.macAddress);
-	msg.msg = (uint8_t*)(accessMsg.p_data);
-	msg.msgSize = accessMsg.length;
 	msg.rssi = getRssi(accessMsg.meta_data.p_core_metadata);
+	msg.channel = getChannel(accessMsg.meta_data.p_core_metadata);
 
 	// When receiving a TTL:
 	// 0 = has not been relayed and will not be relayed
 	// 1 = may have been relayed, but will not be relayed
 	// 2 - 126 = may have been relayed and can be relayed
 	// 127 = has not been relayed and can be relayed
+	msg.ttl = accessMsg.meta_data.ttl;
 //	msg.hops = ACCESS_DEFAULT_TTL - accessMsg.meta_data.ttl;
-	msg.hops = accessMsg.meta_data.ttl;
+	msg.isMaybeRelayed = msg.ttl != 0;
 
-	msg.channel = getChannel(accessMsg.meta_data.p_core_metadata);
+
+	switch (accessMsg.opcode.opcode) {
+		case CS_MESH_MODEL_OPCODE_MSG:
+		case CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG:
+		case CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG:
+		case CS_MESH_MODEL_OPCODE_MULTICAST_NEIGHBOURS: {
+			msg.isReply = false;
+			break;
+		}
+		case CS_MESH_MODEL_OPCODE_UNICAST_REPLY:
+		case CS_MESH_MODEL_OPCODE_MULTICAST_REPLY: {
+			msg.isReply = true;
+			break;
+		}
+	}
+
+	msg.reply = nullptr;
 
 	return msg;
 }
