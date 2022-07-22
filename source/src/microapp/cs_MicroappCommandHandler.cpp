@@ -643,7 +643,7 @@ void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
 
 	LOGd("Mesh message received, store in buffer");
 	microapp_buffered_mesh_message_t bufferedMessage;
-	bufferedMessage.stoneId     = event.srcAddress;
+	bufferedMessage.stoneId     = event.srcStoneId;
 	bufferedMessage.messageSize = event.msg.len;
 	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
 	_meshMessageBuffer.push(bufferedMessage);
