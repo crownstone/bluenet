@@ -569,20 +569,18 @@ cs_ret_code_t MeshMsgHandler::handleResult(MeshMsgEvent& msg) {
 	uart_msg_mesh_result_packet_header_t resultHeader;
 	resultHeader.stoneId = msg.srcStoneId;
 	resultHeader.resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
-	resultHeader.resultHeader.payloadSize = resultData.len;
 
-	if (header->msgType == CS_MESH_MODEL_TYPE_CTRL_CMD && resultData.len == sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
-		auto ctrlMsgHeader = reinterpret_cast<cs_mesh_model_msg_ctrl_cmd_header_t*>(resultData.data);
-		resultHeader.resultHeader.commandType = static_cast<CommandHandlerTypes>(ctrlMsgHeader->cmdType);
-	}
-	else {
-		resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
-	}
+	resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(
+			msg.type,
+			msg.msg.data,
+			msg.msg.len
+	);
+
 	if (resultHeader.resultHeader.commandType == CTRL_CMD_UNKNOWN) {
 		LOGw("Unknown command type for msg type %u, did you add it to getCtrlCmdType()?", header->msgType);
 	}
 
-	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u commandType=%u retCode=%u data: ",
+	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u commandType=%u retCode=%u data=",
 			msg.srcStoneId,
 			header->msgType,
 			resultHeader.resultHeader.commandType,
@@ -608,6 +606,14 @@ cs_ret_code_t MeshMsgHandler::handleResult(MeshMsgEvent& msg) {
 		}
 		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
 			// The control command type is in the resultData, but it was already used to set the command type in the resultHeader.
+			// The remainder is payload data.
+			if (resultData.len >= sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
+				resultData.data += sizeof(cs_mesh_model_msg_ctrl_cmd_header_t);
+				resultData.len -= sizeof(cs_mesh_model_msg_ctrl_cmd_header_t);
+				sendResultToUart(resultHeader, resultData);
+				return ERR_SUCCESS;
+			}
+			LOGw("Wrong result data size: %u", resultData.len);
 			resultData.len = 0;
 			break;
 		}
@@ -637,7 +643,7 @@ void MeshMsgHandler::sendResultToUart(uart_msg_mesh_result_packet_header_t& resu
 	resultHeader.resultHeader.payloadSize = resultData.len;
 
 	_log(SERIAL_INFO, false, "Ack result: id=%u cmdType=%u retCode=%u data=", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-	_logArray(SERIAL_INFO, true, resultData.data, resultData.len);
+	_logArray(SERIAL_INFO, true, resultData.data, resultHeader.resultHeader.payloadSize);
 
 	// Send out result.
 	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);

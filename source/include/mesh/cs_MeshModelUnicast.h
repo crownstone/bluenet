@@ -180,5 +180,5 @@ private:
 	 */
 	cs_ret_code_t setTtl(uint8_t ttl, bool temp = false);
 
-	void sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode);
+	void sendFailedResultToUart(cs_unicast_queue_item_t& item, cs_ret_code_t retCode);
 };

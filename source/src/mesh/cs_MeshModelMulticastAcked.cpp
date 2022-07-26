@@ -109,9 +109,7 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 
 	switch (msg.opCode) {
 		case CS_MESH_MODEL_OPCODE_MULTICAST_REPLY: {
-//			if (!ownMsg) {
-				handleReply(msg);
-//			}
+			handleReply(msg);
 			return;
 		}
 		case CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG: {
@@ -373,19 +371,23 @@ void MeshModelMulticastAcked::checkDone() {
 	if (_queueIndexInProgress == queue_index_none) {
 		return;
 	}
-	auto item = _queue[_queueIndexInProgress];
+	auto& item = _queue[_queueIndexInProgress];
 
 	// Check acks.
 	if (_ackedStonesBitmask.isAllBitsSet()) {
 		LOGi("Received ack from all stones.");
 		printMeshQueueItem(" ", item.metaData);
 
-		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
-		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
+		cs_data_t payload =	MeshUtil::getPayload(item.msgPtr, item.msgSize);
 
+		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(
+				static_cast<cs_mesh_model_msg_type_t>(item.metaData.type),
+				payload.data,
+				payload.len
+		);
 		result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
+		LOGMeshModelInfo("Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
-		LOGMeshModelDebug("all success");
 
 		remQueueItem(_queueIndexInProgress);
 		_queueIndexInProgress = queue_index_none;
@@ -396,8 +398,13 @@ void MeshModelMulticastAcked::checkDone() {
 		LOGi("Timeout.");
 		printMeshQueueItem(" ", item.metaData);
 
-		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
-		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
+		cs_data_t payload =	MeshUtil::getPayload(item.msgPtr, item.msgSize);
+
+		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(
+				static_cast<cs_mesh_model_msg_type_t>(item.metaData.type),
+				payload.data,
+				payload.len
+		);
 
 		// Timeout all remaining stones.
 		uart_msg_mesh_result_packet_header_t resultHeader;

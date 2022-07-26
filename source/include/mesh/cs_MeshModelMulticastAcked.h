@@ -102,11 +102,6 @@ private:
 	 */
 	BitmaskVarSize _ackedStonesBitmask;
 
-//	/**
-//	 * Whether the current message has been handled by this stone yet.
-//	 */
-//	bool _handledSelf = false;
-
 	/**
 	 *
 	 */

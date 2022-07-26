@@ -324,6 +324,9 @@ cs_ret_code_t MeshMsgSender::remFromQueue(MeshUtil::cs_mesh_queue_item_t& item) 
 	return _selector->remFromQueue(item);
 }
 
+/**
+ * Note: when changing this function, make sure to also update MeshUtil::getCtrlCmdType()
+ */
 cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 		mesh_control_command_packet_t* command, const cmd_source_with_counter_t& source) {
 	LOGi("handleSendMeshCommand type=%u idCount=%u flags=%u timeoutOrTransmissions=%u",
