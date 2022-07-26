@@ -150,10 +150,6 @@ static void inactivity_timeout(void)
     bootloader_reset(true);
 }
 
-static void restartInactivityTimer() {
-	nrf_bootloader_dfu_inactivity_timer_restart(
-			NRF_BOOTLOADER_MS_TO_TICKS(NRF_BL_DFU_INACTIVITY_TIMEOUT_MS), inactivity_timeout);
-}
 
 /**@brief Function for handling DFU events.
  */
@@ -162,18 +158,17 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
     switch (evt_type)
     {
         case NRF_DFU_EVT_DFU_STARTED:
-        case NRF_DFU_EVT_OBJECT_RECEIVED: {
-            restartInactivityTimer();
+        case NRF_DFU_EVT_OBJECT_RECEIVED:
+            nrf_bootloader_dfu_inactivity_timer_restart(
+                        NRF_BOOTLOADER_MS_TO_TICKS(NRF_BL_DFU_INACTIVITY_TIMEOUT_MS),
+                        inactivity_timeout);
             break;
-        }
-        case NRF_DFU_EVT_DFU_COMPLETED: 
-        case NRF_DFU_EVT_DFU_ABORTED: {
+        case NRF_DFU_EVT_DFU_COMPLETED:
+        case NRF_DFU_EVT_DFU_ABORTED:
             bootloader_reset(true);
             break;
-        }
-        default: {
+        default:
             break;
-        }
     }
 
     if (m_user_observer)
@@ -423,7 +418,7 @@ static void postvalidate(void)
 
 ret_code_t nrf_bootloader_init(nrf_dfu_observer_t observer)
 {
-    NRF_LOG_DEBUG("nrf_bootloader_init");
+    NRF_LOG_DEBUG("In nrf_bootloader_init");
 
     ret_code_t                            ret_val;
     nrf_bootloader_fw_activation_result_t activation_result;
