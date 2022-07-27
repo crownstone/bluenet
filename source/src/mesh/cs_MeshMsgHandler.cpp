@@ -634,6 +634,7 @@ void MeshMsgHandler::replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code
 	if (reply->buf.len < sizeof(cs_mesh_model_msg_result_header_t)) {
 		return;
 	}
+	// TODO: we could save a byte by sending the same mesh message type (with a different payload) instead of a result mesh message.
 	cs_mesh_model_msg_result_header_t* packet = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
 	packet->msgType = type;
 	packet->retCode = MeshUtil::getShortenedRetCode(retCode);
