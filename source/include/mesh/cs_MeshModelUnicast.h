@@ -74,6 +74,7 @@ private:
 	struct __attribute__((__packed__)) cs_unicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
 		stone_id_t targetId;
+		cs_control_cmd_t controlCommand;
 		uint8_t msgSize;
 		uint8_t* msgPtr = nullptr;
 	};

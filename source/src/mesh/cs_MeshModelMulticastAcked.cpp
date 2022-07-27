@@ -180,6 +180,7 @@ void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, co
 
 void MeshModelMulticastAcked::handleReply(MeshMsgEvent& msg) {
 	if (_queueIndexInProgress == queue_index_none) {
+		LOGw("No index in progress");
 		return;
 	}
 
@@ -204,6 +205,7 @@ void MeshModelMulticastAcked::handleReply(MeshMsgEvent& msg) {
 	}
 
 	// Handle reply message.
+	msg.controlCommand = item.controlCommand;
 	_msgCallback(msg);
 
 	// Mark id as acked.
@@ -268,6 +270,7 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
 			it->numIds = item.numIds;
 			it->msgSize = msgSize;
+			it->controlCommand = item.controlCommand;
 
 			LOGMeshModelVerbose("added to ind=%u", index);
 			_logArray(LogLevelMeshModelVerbose, true, it->msgPtr, it->msgSize);
@@ -378,16 +381,15 @@ void MeshModelMulticastAcked::checkDone() {
 		LOGi("Received ack from all stones.");
 		printMeshQueueItem(" ", item.metaData);
 
-		cs_data_t payload =	MeshUtil::getPayload(item.msgPtr, item.msgSize);
-
-		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(
-				static_cast<cs_mesh_model_msg_type_t>(item.metaData.type),
-				payload.data,
-				payload.len
-		);
-		result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
-		LOGMeshModelInfo("Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
-		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		CommandHandlerTypes cmdType = static_cast<CommandHandlerTypes>(item.controlCommand);
+		if (cmdType == CTRL_CMD_UNKNOWN) {
+			LOGMeshModelDebug("Control command is unknown: don't send ack result");
+		}
+		else {
+			result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
+			LOGMeshModelInfo("Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		}
 
 		remQueueItem(_queueIndexInProgress);
 		_queueIndexInProgress = queue_index_none;
@@ -395,32 +397,30 @@ void MeshModelMulticastAcked::checkDone() {
 
 	// Check for timeout.
 	if (_processCallsLeft == 0) {
-		LOGi("Timeout.");
+		LOGi("Timeout");
 		printMeshQueueItem(" ", item.metaData);
 
-		cs_data_t payload =	MeshUtil::getPayload(item.msgPtr, item.msgSize);
-
-		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(
-				static_cast<cs_mesh_model_msg_type_t>(item.metaData.type),
-				payload.data,
-				payload.len
-		);
-
-		// Timeout all remaining stones.
-		uart_msg_mesh_result_packet_header_t resultHeader;
-		resultHeader.resultHeader.commandType = cmdType;
-		resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
-		for (uint8_t i = 0; i < item.numIds; ++i) {
-			if (!_ackedStonesBitmask.isSet(i)) {
-				resultHeader.stoneId = item.stoneIdsPtr[i];
-				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
-				LOGi("timeout id=%u", resultHeader.stoneId);
-			}
+		CommandHandlerTypes cmdType = static_cast<CommandHandlerTypes>(item.controlCommand);
+		if (cmdType == CTRL_CMD_UNKNOWN) {
+			LOGMeshModelDebug("Control command is unknown: don't send ack results");
 		}
+		else {
+			// Timeout all remaining stones.
+			uart_msg_mesh_result_packet_header_t resultHeader;
+			resultHeader.resultHeader.commandType = cmdType;
+			resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
+			for (uint8_t i = 0; i < item.numIds; ++i) {
+				if (!_ackedStonesBitmask.isSet(i)) {
+					resultHeader.stoneId = item.stoneIdsPtr[i];
+					LOGMeshModelInfo("Ack result: id=%u commandType=%u returnCode=%u", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+					UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+				}
+			}
 
-		result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
-		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
-		LOGMeshModelDebug("all timeout");
+			result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
+			LOGMeshModelInfo("Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		}
 
 		remQueueItem(_queueIndexInProgress);
 		_queueIndexInProgress = queue_index_none;

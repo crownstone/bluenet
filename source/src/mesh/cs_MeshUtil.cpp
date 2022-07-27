@@ -111,6 +111,7 @@ MeshMsgEvent fromAccessMessageRX(const access_message_rx_t& accessMsg) {
 		}
 	}
 
+	msg.controlCommand = CTRL_CMD_UNKNOWN;
 	msg.reply = nullptr;
 
 	return msg;

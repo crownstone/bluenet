@@ -79,6 +79,9 @@ public:
 	bool isMaybeRelayed;                 // Whether this message may have been relayed.
 	bool isReply;                        // Whether this message is a reply.
 
+	// When not CTRL_CMD_UNKNOWN and this message is a reply, this is the control command that caused the message to be sent that this message is a reply to.
+	cs_control_cmd_t controlCommand = CTRL_CMD_UNKNOWN;
+
 	mesh_reply_t* reply = nullptr;       // If set, a reply is expected. Set the message type, write your payload to the buffer,
 	                                     // and set the data size to the size of the payload.
 

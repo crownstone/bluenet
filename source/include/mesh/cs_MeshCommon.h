@@ -37,13 +37,14 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
  * Data is temporary, so has to be copied.
  */
 struct cs_mesh_queue_item_t {
-	cs_mesh_queue_item_meta_data_t metaData;
-	bool reliable = false;
-	bool broadcast = true;
-	bool noHop = false;
-	uint8_t numIds = 0;
-	stone_id_t* stoneIdsPtr = nullptr;
-	cs_data_t msgPayload;
+	cs_mesh_queue_item_meta_data_t metaData = {};
+	bool reliable                           = false;
+	bool broadcast                          = true;
+	bool noHop                              = false;
+	cs_control_cmd_t controlCommand         = CTRL_CMD_UNKNOWN;
+	uint8_t numIds                          = 0;
+	stone_id_t* stoneIdsPtr                 = nullptr;
+	cs_data_t msgPayload                    = {};
 };
 
 #define printMeshQueueItem(modelName, meshQueueItemMetaData) \

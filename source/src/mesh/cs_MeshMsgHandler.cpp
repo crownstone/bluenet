@@ -562,6 +562,16 @@ void MeshMsgHandler::handleControlCommand(MeshMsgEvent& msg) {
 }
 
 cs_ret_code_t MeshMsgHandler::handleResult(MeshMsgEvent& msg) {
+	if (!msg.isReply) {
+		LOGw("handleResult: message is not a reply");
+		return ERR_SUCCESS;
+	}
+
+	if (msg.controlCommand == CTRL_CMD_UNKNOWN) {
+		LOGw("handleResult: control command is unknown");
+		return ERR_SUCCESS;
+	}
+
 	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(msg.msg.data);
 	cs_data_t resultData(msg.msg.data + sizeof(*header), msg.msg.len - sizeof(*header));
 
@@ -570,15 +580,7 @@ cs_ret_code_t MeshMsgHandler::handleResult(MeshMsgEvent& msg) {
 	resultHeader.stoneId = msg.srcStoneId;
 	resultHeader.resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
 
-	resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(
-			msg.type,
-			msg.msg.data,
-			msg.msg.len
-	);
-
-	if (resultHeader.resultHeader.commandType == CTRL_CMD_UNKNOWN) {
-		LOGw("Unknown command type for msg type %u, did you add it to getCtrlCmdType()?", header->msgType);
-	}
+	resultHeader.resultHeader.commandType = msg.controlCommand;
 
 	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u commandType=%u retCode=%u data=",
 			msg.srcStoneId,

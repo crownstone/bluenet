@@ -73,7 +73,7 @@ private:
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
 		uint8_t numIds;
 		stone_id_t* stoneIdsPtr;
-
+		cs_control_cmd_t controlCommand;
 		uint8_t msgSize;
 		uint8_t* msgPtr = nullptr;
 	};

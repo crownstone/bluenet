@@ -159,41 +159,6 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 }
 
 
-/**
- * This implementation is sort of the inverse of MeshMsgSender::handleSendMeshCommand()
- */
-CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType, const uint8_t* payload, size16_t payloadSize) {
-	switch (meshType) {
-		case CS_MESH_MODEL_TYPE_CMD_TIME:
-			return CTRL_CMD_SET_TIME;
-		case CS_MESH_MODEL_TYPE_STATE_SET:
-			return CTRL_CMD_STATE_SET;
-		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
-			return CTRL_CMD_SET_IBEACON_CONFIG_ID;
-		case CS_MESH_MODEL_TYPE_CTRL_CMD: {
-			if (payloadSize < sizeof(cs_mesh_model_msg_ctrl_cmd_header_t)) {
-				break;
-			}
-			auto ctrlMsgHeader = reinterpret_cast<const cs_mesh_model_msg_ctrl_cmd_header_t*>(payload);
-			return static_cast<CommandHandlerTypes>(ctrlMsgHeader->cmdType);
-		}
-		case CS_MESH_MODEL_TYPE_RESULT: {
-			if (payloadSize < sizeof(cs_mesh_model_msg_result_header_t)) {
-				break;
-			}
-			auto resultHeader = reinterpret_cast<const cs_mesh_model_msg_result_header_t*>(payload);
-			return getCtrlCmdType(
-					static_cast<cs_mesh_model_msg_type_t>(resultHeader->msgType),
-					payload + sizeof(*resultHeader),
-					payloadSize - sizeof(*resultHeader)
-			);
-		}
-		default:
-			break;
-	}
-	return CTRL_CMD_UNKNOWN;
-}
-
 
 
 bool canShortenStateType(uint16_t type) {

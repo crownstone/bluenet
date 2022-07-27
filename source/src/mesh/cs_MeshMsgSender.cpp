@@ -324,9 +324,6 @@ cs_ret_code_t MeshMsgSender::remFromQueue(MeshUtil::cs_mesh_queue_item_t& item) 
 	return _selector->remFromQueue(item);
 }
 
-/**
- * Note: when changing this function, make sure to also update MeshUtil::getCtrlCmdType()
- */
 cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 		mesh_control_command_packet_t* command, const cmd_source_with_counter_t& source) {
 	LOGi("handleSendMeshCommand type=%u idCount=%u flags=%u timeoutOrTransmissions=%u",
@@ -340,9 +337,8 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 		 command->controlCommand.accessLevel,
 		 source.source.type,
 		 source.source.id);
-	for (uint8_t i = 0; i < command->header.idCount; ++i) {
-		LOGd("  id: %u", command->targetIds[i]);
-	}
+	_log(SERIAL_INFO, false, "  ids: ");
+	_logArray(SERIAL_INFO, true, command->targetIds, command->header.idCount);
 
 	MeshUtil::cs_mesh_queue_item_t item;
 
@@ -355,6 +351,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 	item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
 	item.reliable                        = command->header.flags.flags.reliable;
 	item.broadcast                       = command->header.flags.flags.broadcast;
+	item.controlCommand                  = command->controlCommand.type;
 	item.numIds                          = command->header.idCount;
 	item.stoneIdsPtr                     = command->targetIds;
 
