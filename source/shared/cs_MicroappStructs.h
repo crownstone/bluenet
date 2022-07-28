@@ -388,7 +388,7 @@ static_assert(sizeof(microapp_mesh_cmd_t) <= MAX_PAYLOAD);
  * Struct for header of microapp mesh send commands
  */
 struct __attribute__((packed)) microapp_mesh_send_cmd_t {
-	microapp_mesh_cmd_t mesh_header;
+	microapp_mesh_cmd_t meshHeader;
 	uint8_t stoneId;  //< Target stone ID, or 0 for broadcast.
 	uint8_t dlen;
 	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
@@ -402,7 +402,7 @@ static_assert(sizeof(microapp_mesh_send_cmd_t) <= MAX_PAYLOAD);
  * stoneId 0 is for broadcasted messages
  */
 struct __attribute__((packed)) microapp_mesh_read_cmd_t {
-	microapp_mesh_cmd_t mesh_header;
+	microapp_mesh_cmd_t meshHeader;
 	uint8_t stoneId;
 	uint8_t dlen;
 	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
@@ -416,7 +416,7 @@ static_assert(sizeof(microapp_mesh_read_cmd_t) <= MAX_PAYLOAD);
  * Can be expanded to include more mesh info
  */
 struct __attribute__((packed)) microapp_mesh_info_cmd_t {
-	microapp_mesh_cmd_t mesh_header;
+	microapp_mesh_cmd_t meshHeader;
 	uint8_t stoneId; //< Own stone id
 };
 

@@ -456,10 +456,10 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	microapp_mesh_read_cmd_t* microappMeshMsg = reinterpret_cast<microapp_mesh_read_cmd_t*>(outputBuffer);
 
 	// Add the type of softInterruptCmd
-	microappMeshMsg->mesh_header.header.interruptCmd = CS_MICROAPP_COMMAND_MESH;
+	microappMeshMsg->meshHeader.header.interruptCmd = CS_MICROAPP_COMMAND_MESH;
 
 	// Write the isr id to the header so the microapp may know the source
-	microappMeshMsg->mesh_header.header.id = _meshIsr.id;
+	microappMeshMsg->meshHeader.header.id = _meshIsr.id;
 
 	microappMeshMsg->stoneId = event->srcAddress;
 	microappMeshMsg->dlen = event->msg.len;
