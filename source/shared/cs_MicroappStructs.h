@@ -187,9 +187,9 @@ enum CommandMicroappBleOpcode {
 };
 
 enum CommandMicroappMeshOpcode {
-	CS_MICROAPP_COMMAND_MESH_SEND           = 0x00,
-	CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE = 0x01,
-	CS_MICROAPP_COMMAND_MESH_READ           = 0x02,
+	CS_MICROAPP_COMMAND_MESH_SEND             = 0x00,
+	CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER = 0x01,
+	CS_MICROAPP_COMMAND_MESH_GET_INFO         = 0x02,
 };
 
 enum MicroappBleEventType {
@@ -197,6 +197,16 @@ enum MicroappBleEventType {
 	BleEventConnected     = 0x02,
 	BleEventDisconnected  = 0x03,
 };
+
+enum MicroappErrorTypes {
+	ERR_MICROAPP_SUCCESS                       = 0x00,
+	ERR_MICROAPP_SOFT_INTERRUPT_NOT_REGISTERED = 0x01,
+	ERR_MICROAPP_USER_ERROR                    = 0x02,
+	ERR_MICROAPP_UNKNOWN_PROTOCOL              = 0x03,
+	ERR_MICROAPP_NO_SPACE                      = 0x04,
+	ERR_MICROAPP_NOT_IMPLEMENTED               = 0x05,
+};
+
 
 /**
  * A single buffer (can be either input or output).
@@ -378,7 +388,7 @@ static_assert(sizeof(microapp_mesh_cmd_t) <= MAX_PAYLOAD);
  * Struct for header of microapp mesh send commands
  */
 struct __attribute__((packed)) microapp_mesh_send_cmd_t {
-	struct microapp_mesh_cmd_t mesh_header;
+	microapp_mesh_cmd_t meshHeader;
 	uint8_t stoneId;  //< Target stone ID, or 0 for broadcast.
 	uint8_t dlen;
 	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
@@ -386,26 +396,31 @@ struct __attribute__((packed)) microapp_mesh_send_cmd_t {
 
 static_assert(sizeof(microapp_mesh_send_cmd_t) <= MAX_PAYLOAD);
 
-struct __attribute__((packed)) microapp_mesh_read_available_cmd_t {
-	struct microapp_mesh_cmd_t mesh_header;
-	uint8_t available;
-};
-
-static_assert(sizeof(microapp_mesh_read_available_cmd_t) <= MAX_PAYLOAD);
-
 /**
- * Struct for microapp mesh read commands
+ * Struct for microapp mesh read events
  *
  * stoneId 0 is for broadcasted messages
  */
 struct __attribute__((packed)) microapp_mesh_read_cmd_t {
-	microapp_mesh_cmd_t mesh_header;
+	microapp_mesh_cmd_t meshHeader;
 	uint8_t stoneId;
 	uint8_t dlen;
 	uint8_t data[MICROAPP_MAX_MESH_MESSAGE_SIZE];
 };
 
 static_assert(sizeof(microapp_mesh_read_cmd_t) <= MAX_PAYLOAD);
+
+/**
+ * Struct for microapp mesh info events
+ * E.g. used by microapp to get to know its own stone id
+ * Can be expanded to include more mesh info
+ */
+struct __attribute__((packed)) microapp_mesh_info_cmd_t {
+	microapp_mesh_cmd_t meshHeader;
+	uint8_t stoneId; //< Own stone id
+};
+
+static_assert(sizeof(microapp_mesh_info_cmd_t) <= MAX_PAYLOAD);
 
 /*
  * Struct for scanned ble devices sent to the microapp
