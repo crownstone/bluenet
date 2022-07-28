@@ -16,13 +16,26 @@
  */
 namespace MeshUtil {
 
-// Data needed in each model queue.
+/**
+ * Data needed in each model queue.
+ */
 struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
-	uint16_t id = 0; // ID that can freely be used to find similar items.
-	uint8_t type = CS_MESH_MODEL_TYPE_UNKNOWN; // Mesh msg type.
-//	stone_id_t targetId = 0;   // 0 for broadcast
-	uint8_t transmissionsOrTimeout : 6; // Timeout in seconds when reliable, else number of transmissions.
+	//! ID that can freely be used to find similar items.
+	uint16_t id = 0;
+
+	//! Mesh msg type.
+	uint8_t type = CS_MESH_MODEL_TYPE_UNKNOWN;
+
+	/**
+	 * Timeout in seconds when reliable, else number of transmissions.
+	 * Set to 0 to use the default value.
+	 */
+	uint8_t transmissionsOrTimeout : 6;
+
+	//! Whether this item has priority.
 	bool priority : 1;
+
+	//! Whether this message should be sent to direct neighbours only.
 	bool noHop : 1;
 
 	cs_mesh_queue_item_meta_data_t():
@@ -37,13 +50,32 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
  * Data is temporary, so has to be copied.
  */
 struct cs_mesh_queue_item_t {
+	//! Metadata
 	cs_mesh_queue_item_meta_data_t metaData = {};
+
+	//! Whether the message should be acked.
 	bool reliable                           = false;
+
+	//! Whether the message should be broadcasted.
 	bool broadcast                          = true;
+
+	//! Whether this message should be sent to direct neighbours only.
 	bool noHop                              = false;
+
+	/**
+	 * If this mesh message is sent because of a Mesh command, then set this field to the control command
+	 * payload of that mesh command.
+	 * It is used to send back the result of the mesh command.
+	 */
 	cs_control_cmd_t controlCommand         = CTRL_CMD_UNKNOWN;
+
+	//! Number of target stone IDs.
 	uint8_t numIds                          = 0;
+
+	//! Pointer to the list of stone IDs.
 	stone_id_t* stoneIdsPtr                 = nullptr;
+
+	//! The message payload.
 	cs_data_t msgPayload                    = {};
 };
 

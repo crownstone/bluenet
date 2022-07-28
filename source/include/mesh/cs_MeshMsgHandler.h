@@ -83,7 +83,13 @@ private:
 	 */
 	void checkStateReceived();
 
+	/**
+	 * Set the reply to a result message with given mesh message type and return code as payload.
+	 */
 	void replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code_t retCode, mesh_reply_t* reply);
 
+	/**
+	 * Send the given result to UART.
+	 */
 	void sendResultToUart(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData);
 };

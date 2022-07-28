@@ -5,9 +5,14 @@
 #pragma once
 
 struct mesh_reply_t {
-	cs_mesh_model_msg_type_t type;     // Type of message.
-	cs_data_t buf;                     // Buffer to write payload to.
-	uint8_t dataSize;                  // Size of the payload.
+	//! Type of message.
+	cs_mesh_model_msg_type_t type;
+
+	//! Buffer you can write your payload to (don't change the buf.len).
+	cs_data_t buf;
+
+	//! Size of your payload.
+	uint8_t dataSize;
 };
 
 template<cs_mesh_model_msg_type_t E>
@@ -67,27 +72,47 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS> {
 
 class MeshMsgEvent {
 public:
-	cs_mesh_model_msg_type_t type;       // Message type.
-	cs_data_t msg;                       // Message payload.
+	//! Message type.
+	cs_mesh_model_msg_type_t type;
 
-	stone_id_t srcStoneId;               // Stone ID of the original sender.
-	bool macAddressValid;                // True when the following MAC address is valid.
-	uint8_t macAddress[MAC_ADDRESS_LEN]; // MAC address of the node from which this message was received, which is the source if not relayed.
-	int8_t rssi;                         // RSSI of the last hop, thus the RSSI to the source if not relayed.
-	uint8_t channel;                     // Channel of the last hop.
+	//! Message payload.
+	cs_data_t msg;
 
-	bool isMaybeRelayed;                 // Whether this message may have been relayed.
-	bool isReply;                        // Whether this message is a reply.
+	//! Stone ID of the original sender.
+	stone_id_t srcStoneId;
 
-	// When not CTRL_CMD_UNKNOWN and this message is a reply, this is the control command that caused the message to be sent that this message is a reply to.
+	//! True when the following MAC address is valid.
+	bool macAddressValid;
+
+	//! MAC address of the node from which this message was received, which is the source if not relayed.
+	uint8_t macAddress[MAC_ADDRESS_LEN];
+
+	//! RSSI of the last hop, thus the RSSI to the source if not relayed.
+	int8_t rssi;
+
+	//! Channel of the last hop.
+	uint8_t channel;
+
+	//! Whether this message may have been relayed.
+	bool isMaybeRelayed;
+
+	//! Whether this message is a reply.
+	bool isReply;
+
+	//! When not CTRL_CMD_UNKNOWN and this message is a reply, this is the control command that caused the message to be sent that this message is a reply to.
 	cs_control_cmd_t controlCommand = CTRL_CMD_UNKNOWN;
 
-	mesh_reply_t* reply = nullptr;       // If set, a reply is expected. Set the message type, write your payload to the buffer,
-	                                     // and set the data size to the size of the payload.
+	/**
+	 * If set, a reply is expected. Set the message type, write your payload to the buffer,
+	 * and set the data size to the size of the payload.
+	 */
+	mesh_reply_t* reply = nullptr;
 
-	cs_mesh_model_opcode_t opCode;       // For debug prints only.
-	uint8_t ttl;                         // For debug prints only.
+	//! Mesh model opcode: internal usage only (debug).
+	cs_mesh_model_opcode_t opCode;
 
+	//! Current TTL: internal usage only (debug).
+	uint8_t ttl;
 
 	/**
 	 * Returns the message data of this event as the original
