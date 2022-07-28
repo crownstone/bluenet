@@ -23,8 +23,8 @@ struct coroutine_args_t {
  * Interrupt service routines for pins as registered by the microapp.
  */
 struct microapp_pin_isr_t {
-	uint8_t pin;
-	bool registered;
+	uint8_t pin = 0;
+	bool registered = false;
 };
 
 /**
@@ -32,16 +32,16 @@ struct microapp_pin_isr_t {
  */
 struct microapp_ble_isr_t {
 	MicroappBleEventType type;
-	uint8_t id;
-	bool registered;
+	uint8_t id = 0;
+	bool registered = false;
 };
 
 /**
  * Interrupt service routines for received mesh events as registered by the microapp.
  */
 struct microapp_mesh_isr_t {
-	uint8_t id;
-	bool registered;
+	uint8_t id = 0;
+	bool registered = false;
 };
 
 /**

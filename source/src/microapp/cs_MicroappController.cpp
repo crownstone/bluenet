@@ -190,17 +190,6 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
 
 	EventDispatcher::getInstance().addListener(this);
 
-	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
-		_pinIsr[i].pin = 0;
-		_pinIsr[i].registered = false;
-	}
-	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
-		_bleIsr[i].id = 0;
-		_bleIsr[i].registered = false;
-	}
-	_meshIsr.id = 0;
-	_meshIsr.registered = false;
-
 	LOGi("Microapp end is at %p", microappRamSection._end);
 }
 
