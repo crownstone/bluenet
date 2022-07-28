@@ -530,7 +530,10 @@ void MeshCore::start() {
 		provision();
 	}
 #endif
-//	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
+
+#if MESH_SDK_VERSION_MAJOR < 5
+	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
+#endif
 
 	_log(SERIAL_DEBUG, false, "Device UUID: ");
 	//	CsUtils::printArray(uuid, NRF_MESH_UUID_SIZE);
