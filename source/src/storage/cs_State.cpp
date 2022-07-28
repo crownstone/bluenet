@@ -73,11 +73,6 @@ cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size) {
 	return get(data);
 }
 
-cs_ret_code_t State::get(const CS_TYPE type, void *value, size16_t size, const PersistenceMode mode) {
-	cs_state_data_t data(type, (uint8_t*)value, size);
-	return get(data, mode);
-}
-
 bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 	TYPIFY(CONFIG_MESH_ENABLED) enabled = false;
 	switch (type) {
@@ -101,11 +96,6 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
 	cs_state_data_t data(type, (uint8_t*)value, size);
 	return set(data);
-}
-
-cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size, PersistenceMode mode) {
-	cs_state_data_t data(type, (uint8_t*)value, size);
-	return set(data, mode);
 }
 
 cs_ret_code_t State::set(const cs_state_data_t & data, PersistenceMode mode) {
@@ -259,11 +249,10 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			break;
 		}
 		case PersistenceMode::FLASH: {
-			return ERR_NOT_AVAILABLE;
 			// By the time the data is written to flash, the data pointer might be invalid.
 			// There is also no guarantee that the data pointer is aligned.
-			//addId(type, id)
-			//return _storage->write(getFileId(type), data);
+			// A possible solution would be to copy the data, and release it on event EVT_STORAGE_WRITE_DONE.
+			return ERR_NOT_AVAILABLE;
 		}
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
@@ -283,7 +272,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					// fall-through
 					break;
 				default:
-					LOGe("PM not implemented");
+					LOGe("Persistence mode not implemented");
 					return ERR_NOT_IMPLEMENTED;
 			}
 			// we first store the data in RAM
@@ -295,6 +284,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					// Fall through.
 					break;
 				case ERR_SUCCESS_NO_CHANGE:
+					// TODO: maybe check if data in flash is indeed the same.
 					// No need to store in flash.
 					return ret_code;
 				default:

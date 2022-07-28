@@ -5,7 +5,7 @@ E.g.:
 - This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
 - Commandline tools such as `python3 -m pip install clang-format` are also available.
 
-Investigate the `source/.clang-format` file for more formatting details, a few:
+Investigate the `source/.clang-format` (<https://github.com/crownstone/bluenet/blob/master/source/.clang-format>) file for more formatting details, a few:
 
 - align subsequent assignments on the `=` token
 - column limit at 120
@@ -17,6 +17,19 @@ Investigate the `source/.clang-format` file for more formatting details, a few:
 - no implicit cast operators
 - give names to functions
 - don't init structs like: { 9, true, 3 }
+
+# Role of formatter
+
+The current state of the code does not adhere to the formatter everywhere. The code will be cleaned up over time.
+The goal is to be able to run the formatter over each file without having it changing any whitespace.
+That means it is possible to concentrate on functional changes.
+Hence, always run the formatter before committing. Also, if the formatter makes something less readible, adjust the
+code slightly. Some examples of making it easier for the formatter:
+
+- Use curly brackets for each case in a switch block.
+- Do not add `/******** *******/` or other kind of decorations to delineate code sections.
+- Do not use trailing comments, they are a pain to align. Just explain code with comments before that code.
+- Remove code that is not in use. There should be no commented code. Eventually place it within a preprocessor clause, but be careful not to introduce code rot in case those preprocessor defines are never compiled for. Refer eventually in a comment to an older commit if a reference to unused code will be important in the future.
 
 # Code
 
@@ -82,6 +95,12 @@ Notes:
 - Use `uint16_t*` with no space in between (not `uint16_t *_data`). Do not declare multiple variables on one line (see below).
 - Assume C++ / g++ compiler in the sense that no `typedef` is required for the `struct` while still being able to pass it around as `func(a_packed_packet_t p)`.
 
+## Indents
+
+Indentation defaults can be found in <https://github.com/crownstone/bluenet/blob/master/source/.clang-format> as well:
+
+- Indent case statement within a switch block.
+
 ## Comments
 
 ### Function comments
@@ -111,7 +130,29 @@ In source files additional information can be given about particular implementat
 
 ### Struct comments
 
-Just add your comments to just before the struct definition. Do not sprinkle code with oneliner comments per field. 
+Just add your comments to just before the struct definition. Do not sprinkle code with oneliner comments per field.
+Comments per field will end up in doxygen at the right place with the following syntax:
+
+```
+/**
+ * @struct adc_channel_config_result_t
+ * Result struct after configuring an ADC channel. Has all the info to put the sample values in context.
+ *
+ * @var adc_channel_config_result_t::pin
+ *   The AIN pin of this channel.
+ */
+struct __attribute__((packed)) adc_channel_config_result_t {
+	adc_pin_id_t pin;
+};
+```
+
+There are a couple of reasons to write the comments not at the same line of the code:
+
++ The line length limitation is more easily maintained (we limit the number of columns to 120, see this doc).
++ The linter adjusts the alignment of all struct comments when a field name is extended. Hence, renaming spills over in whitespace changes on other lines.
++ Alignment across structs depends on the longest field name length per struct, hence it is different for each struct.
+
+These issues are prevented by writing the comments in the comment section before the struct. The only disadvantage is that doxygen requires repeating the struct name for each var.
 
 ### General
 

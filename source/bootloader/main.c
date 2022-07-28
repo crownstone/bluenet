@@ -106,7 +106,9 @@ void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p
 
 void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
 {
+	assert_info_t* assert_info_ptr = (assert_info_t*)info;
     NRF_LOG_ERROR("Received a fault! id: 0x%08x, pc: 0x%08x, info: 0x%08x", id, pc, info);
+    NRF_LOG_ERROR("%s:%d", assert_info_ptr->p_file_name, assert_info_ptr->line_num);
     on_error();
 }
 

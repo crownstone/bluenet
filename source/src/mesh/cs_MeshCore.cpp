@@ -83,13 +83,14 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 	_logArray(SERIAL_DEBUG, true, (uint8_t*)data_ptr, data_size);
 	switch (retCode) {
 		case ERR_SUCCESS: {
-			[[fallthrough]];
-		}
-		case ERR_SUCCESS_NO_CHANGE: {
 			return NRF_SUCCESS;
 		}
+		case ERR_SUCCESS_NO_CHANGE: {
+			// There will be no event EVT_STORAGE_WRITE_DONE.
+			return NRF_ERROR_INVALID_STATE;
+		}
 		default: {
-			return retCode;
+			return NRF_ERROR_INTERNAL;
 		}
 	}
 }

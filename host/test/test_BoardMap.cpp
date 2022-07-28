@@ -141,7 +141,7 @@ BoardConfigCompare compareBoardConfig(uint32_t board, cs_uicr_data_t& uicr) {
 		return BoardConfigCompare::NOT_FOUND;
 	}
 	if (!(ret1 && ret2)) {
-		std::cout << "ret1=" << ret1 << "ret2=" << ret2 << std::endl;
+		std::cout << "ret1=" << ret1 << ", ret2=" << ret2 << std::endl;
 		return BoardConfigCompare::DIFFERENT;
 	}
 

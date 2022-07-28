@@ -221,7 +221,13 @@ endif()
 # If you update the version of a .zip file, also update the md5 hash.
 # Get the hashes through `md5sum downloads/*`
 
-set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
+
+if(NRF5_SDK_REPOSITORY)
+    message("using custom nrf5 sdk repository: " ${NRF5_SDK_REPOSITORY})
+else()
+    set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
+    message("using default nrf5 sdk repository:" ${NRF5_SDK_REPOSITORY})
+endif()
 
 set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
 
@@ -239,7 +245,7 @@ else()
 endif()
 
 if(NORDIC_SDK_GIT_HASH)
-	message(STATUS "Will use git hash ${NORDIC_SDK_GIT_HASH} of repos ${NORDIC_SDK_REPOSITORY}")
+	message(STATUS "Will use git hash ${NORDIC_SDK_GIT_HASH} of repos ${NRF5_SDK_REPOSITORY}")
 	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_GIT_HASH})
 	set(NORDIC_SDK_GIT_TAG "${NORDIC_SDK_GIT_HASH}")
 	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_GIT_HASH}")
