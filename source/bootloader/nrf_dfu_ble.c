@@ -203,7 +203,7 @@ static uint32_t advertising_start(void)
         .primary_phy     = BLE_GAP_PHY_1MBPS,
     };
 
-    NRF_LOG_DEBUG("Advertising...");
+    //NRF_LOG_DEBUG("Advertising...");
 
 #if (NRF_DFU_BLE_REQUIRES_BONDS)
     ble_gap_irk_t empty_irk = {{0}};
@@ -281,7 +281,7 @@ static uint32_t service_changed_send(void)
 {
     uint32_t err_code;
 
-    NRF_LOG_DEBUG("Sending Service Changed indication");
+    //NRF_LOG_DEBUG("Sending Service Changed indication");
 
     err_code = sd_ble_gatts_sys_attr_set(m_conn_handle,
                                          m_peer_data.sys_serv_attr,
@@ -391,11 +391,11 @@ static uint32_t response_ext_err_payload_add(uint8_t * p_buffer, uint8_t result,
 static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_context)
 {
 
-	NRF_LOG_DEBUG("p_res=0x%x, p_context=0x%x",p_res,p_context);
+	//NRF_LOG_DEBUG("p_res=0x%x, p_context=0x%x",p_res,p_context);
 	ASSERT(p_res);
     ASSERT(p_context);
 
-    NRF_LOG_DEBUG("ble dfu req callback (request: 0x%x)", p_res->request);
+    //NRF_LOG_DEBUG("ble dfu req callback (request: 0x%x)", p_res->request);
 
     uint8_t len = 0;
     uint8_t buffer[MAX_RESPONSE_LEN] = {0};
@@ -414,7 +414,7 @@ static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_co
         p_res->request = NRF_DFU_OP_CRC_GET;
     }
 
-    NRF_LOG_DEBUG("prepare response");
+    //NRF_LOG_DEBUG("prepare response");
 
     len += response_prepare(buffer, p_res->request, p_res->result);
 
@@ -431,7 +431,7 @@ static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_co
         return;
     }
 
-    NRF_LOG_DEBUG("switch for req type");
+    //NRF_LOG_DEBUG("switch for req type %d", p_res->request);
 
     switch (p_res->request)
     {
@@ -463,7 +463,7 @@ static void ble_dfu_req_handler_callback(nrf_dfu_response_t * p_res, void * p_co
         } break;
     }
 
-    NRF_LOG_DEBUG("send response");
+    //NRF_LOG_DEBUG("send response");
     (void) response_send(buffer, len);
 }
 
@@ -510,7 +510,7 @@ static uint32_t on_ctrl_pt_write(ble_dfu_t * p_dfu, ble_gatts_evt_write_t const 
 
         case NRF_DFU_OP_RECEIPT_NOTIF_SET:
         {
-            NRF_LOG_DEBUG("Set receipt notif");
+            //NRF_LOG_DEBUG("Set receipt notif");
 
             m_pkt_notif_target     = uint16_decode(&(p_ble_write_evt->data[1]));
             m_pkt_notif_target_cnt = m_pkt_notif_target;
@@ -578,7 +578,7 @@ static bool on_rw_authorize_req(ble_dfu_t * p_dfu, ble_evt_t const * p_ble_evt)
 
 static void on_flash_write(void * p_buf)
 {
-    NRF_LOG_DEBUG("Freeing buffer %p", p_buf);
+    //NRF_LOG_DEBUG("Freeing buffer %p", p_buf);
     nrf_balloc_free(&m_buffer_pool, p_buf);
 }
 
@@ -606,8 +606,8 @@ static void on_write(ble_dfu_t * p_dfu, ble_evt_t const * p_ble_evt)
         return;
     }
 
-    NRF_LOG_DEBUG("Buffer %p acquired, len %d (%d)",
-                  p_balloc_buf, p_write_evt->len, MAX_DFU_PKT_LEN);
+    //NRF_LOG_DEBUG("Buffer %p acquired, len %d (%d)",
+//                  p_balloc_buf, p_write_evt->len, MAX_DFU_PKT_LEN);
 
     /* Copy payload into buffer. */
     memcpy(p_balloc_buf, p_write_evt->data, p_write_evt->len);
@@ -653,7 +653,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
     {
         case BLE_GAP_EVT_CONNECTED:
         {
-            NRF_LOG_DEBUG("Connected");
+            //NRF_LOG_DEBUG("Connected");
 
             m_conn_handle = p_gap->conn_handle;
 
@@ -723,8 +723,8 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                 mtu_reply = NRF_SDH_BLE_GATT_MAX_MTU_SIZE;
             }
 
-            NRF_LOG_DEBUG("Received BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST (request: %d, reply: %d).",
-                          mtu_requested, mtu_reply);
+            //NRF_LOG_DEBUG("Received BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST (request: %d, reply: %d).",
+//                          mtu_requested, mtu_reply);
 
             err_code = sd_ble_gatts_exchange_mtu_reply(m_conn_handle, mtu_reply);
             APP_ERROR_CHECK(err_code);
@@ -732,7 +732,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 #ifndef S112
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST.");
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST.");
 
             ble_gap_data_length_params_t const dlp =
             {
@@ -747,15 +747,15 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_DATA_LENGTH_UPDATE:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE (%u, max_rx_time %u).",
-                          p_gap->params.data_length_update.effective_params.max_rx_octets,
-                          p_gap->params.data_length_update.effective_params.max_rx_time_us);
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_DATA_LENGTH_UPDATE (%u, max_rx_time %u).",
+//                          p_gap->params.data_length_update.effective_params.max_rx_octets,
+//                          p_gap->params.data_length_update.effective_params.max_rx_time_us);
         } break;
 #endif
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_SEC_PARAMS_REQUEST");
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_SEC_PARAMS_REQUEST");
 
             uint16_t cccd;
             ble_gatts_value_t gatts_value =
@@ -769,7 +769,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                                               &gatts_value);
             APP_ERROR_CHECK(err_code);
 
-            NRF_LOG_DEBUG("CCCD for service changed is 0x%04x", cccd);
+            //NRF_LOG_DEBUG("CCCD for service changed is 0x%04x", cccd);
 
             err_code = sd_ble_gap_sec_params_reply(m_conn_handle,
                                                    BLE_GAP_SEC_STATUS_PAIRING_NOT_SUPP,
@@ -780,21 +780,21 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_CONN_PARAM_UPDATE:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_CONN_PARAM_UPDATE");
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_CONN_PARAM_UPDATE");
 
-            ble_gap_conn_params_t const * p_conn =
-                &p_gap->params.conn_param_update.conn_params;
+//            ble_gap_conn_params_t const * p_conn =
+//                &p_gap->params.conn_param_update.conn_params;
 
-            NRF_LOG_DEBUG("max_conn_interval: %d", p_conn->max_conn_interval);
-            NRF_LOG_DEBUG("min_conn_interval: %d", p_conn->min_conn_interval);
-            NRF_LOG_DEBUG("slave_latency: %d",     p_conn->slave_latency);
-            NRF_LOG_DEBUG("conn_sup_timeout: %d",  p_conn->conn_sup_timeout);
+            //NRF_LOG_DEBUG("max_conn_interval: %d", p_conn->max_conn_interval);
+            //NRF_LOG_DEBUG("min_conn_interval: %d", p_conn->min_conn_interval);
+            //NRF_LOG_DEBUG("slave_latency: %d",     p_conn->slave_latency);
+            //NRF_LOG_DEBUG("conn_sup_timeout: %d",  p_conn->conn_sup_timeout);
         } break;
 
 #ifndef S112
         case BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST");
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_CONN_PARAM_UPDATE_REQUEST");
 
             err_code = sd_ble_gap_conn_param_update(m_conn_handle,
                 &p_gap->params.conn_param_update_request.conn_params);
@@ -810,16 +810,16 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_PHY_UPDATE:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_PHY_UPDATE (RX:%d, TX:%d, status:%d)",
-                          p_gap->params.phy_update.rx_phy,
-                          p_gap->params.phy_update.tx_phy,
-                          p_gap->params.phy_update.status);
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_PHY_UPDATE (RX:%d, TX:%d, status:%d)",
+//                          p_gap->params.phy_update.rx_phy,
+//                          p_gap->params.phy_update.tx_phy,
+//                          p_gap->params.phy_update.status);
             break;
         }
 
         case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_PHY_UPDATE_REQUEST.");
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_PHY_UPDATE_REQUEST.");
 
             ble_gap_phys_t const phys =
             {
@@ -867,7 +867,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
         case BLE_GAP_EVT_SEC_INFO_REQUEST:
         {
-            NRF_LOG_DEBUG("Received BLE_GAP_EVT_SEC_INFO_REQUEST");
+            //NRF_LOG_DEBUG("Received BLE_GAP_EVT_SEC_INFO_REQUEST");
 
             ble_gap_enc_info_t * p_enc_info = NULL;
             ble_gap_irk_t      * p_id_info  = NULL;
@@ -895,7 +895,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
                 err_code = sd_ble_gatts_sys_attr_set(p_gap->conn_handle, NULL, 0, 0);
             #endif
             APP_ERROR_CHECK(err_code);
-            NRF_LOG_DEBUG("Finished handling conn sec update");
+            //NRF_LOG_DEBUG("Finished handling conn sec update");
         } break;
 
         default:
@@ -950,14 +950,14 @@ static uint32_t gap_params_init(void)
 
     if ((m_flags & DFU_BLE_FLAG_USE_ADV_NAME) != 0)
     {
-        NRF_LOG_DEBUG("Setting adv name: %s, length: %d", m_adv_name.name, m_adv_name.len);
+        //NRF_LOG_DEBUG("Setting adv name: %s, length: %d", m_adv_name.name, m_adv_name.len);
         device_name = m_adv_name.name;
         name_len    = m_adv_name.len;
     }
     else
 #endif
     {
-        NRF_LOG_DEBUG("Using default advertising name");
+        //NRF_LOG_DEBUG("Using default advertising name");
         device_name = (uint8_t const *)(NRF_DFU_BLE_ADV_NAME);
         name_len    = strlen(NRF_DFU_BLE_ADV_NAME);
     }
@@ -982,12 +982,12 @@ static uint32_t ble_stack_init()
     err_code = nrf_dfu_mbr_init_sd();
     VERIFY_SUCCESS(err_code);
 
-    NRF_LOG_DEBUG("Setting up vector table: 0x%08x", BOOTLOADER_START_ADDR);
+    //NRF_LOG_DEBUG("Setting up vector table: 0x%08x", BOOTLOADER_START_ADDR);
     err_code = sd_softdevice_vector_table_base_set(BOOTLOADER_START_ADDR);
     VERIFY_SUCCESS(err_code);
 #endif
 
-    NRF_LOG_DEBUG("Enabling SoftDevice.");
+    //NRF_LOG_DEBUG("Enabling SoftDevice.");
     err_code = nrf_sdh_enable_request();
     VERIFY_SUCCESS(err_code);
 
@@ -995,12 +995,12 @@ static uint32_t ble_stack_init()
     err_code = nrf_sdh_ble_app_ram_start_get(&ram_start);
     VERIFY_SUCCESS(err_code);
 
-    NRF_LOG_DEBUG("Configuring BLE stack.");
+    //NRF_LOG_DEBUG("Configuring BLE stack.");
     err_code = nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start);
     VERIFY_SUCCESS(err_code);
 
     /* Enable the BLE stack. */
-    NRF_LOG_DEBUG("Enabling the BLE stack.");
+    //NRF_LOG_DEBUG("Enabling the BLE stack.");
     return nrf_sdh_ble_enable(&ram_start);
 }
 
@@ -1161,7 +1161,7 @@ uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
         return err_code;
     }
 
-    NRF_LOG_DEBUG("Initializing BLE DFU transport");
+    //NRF_LOG_DEBUG("Initializing BLE DFU transport");
 
     m_observer = observer;
 
@@ -1175,7 +1175,7 @@ uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
     /* Copy out the peer data if bonds are required */
     if (nrf_dfu_settings_peer_data_is_valid())
     {
-        NRF_LOG_DEBUG("Copying peer data");
+        //NRF_LOG_DEBUG("Copying peer data");
 
         err_code = nrf_dfu_settings_peer_data_copy(&m_peer_data);
         UNUSED_RETURN_VALUE(err_code);
@@ -1196,7 +1196,7 @@ uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
     }
     else
     {
-        NRF_LOG_DEBUG("No advertising name found");
+        //NRF_LOG_DEBUG("No advertising name found");
     }
 #endif
 
@@ -1212,7 +1212,7 @@ uint32_t ble_dfu_transport_init(nrf_dfu_observer_t observer)
 
     m_flags |= DFU_BLE_FLAG_INITIALIZED;
 
-    NRF_LOG_DEBUG("BLE DFU transport initialized.");
+    //NRF_LOG_DEBUG("BLE DFU transport initialized.");
 
     return NRF_SUCCESS;
 }
@@ -1224,11 +1224,11 @@ uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception)
 
     if ((m_flags & DFU_BLE_FLAG_INITIALIZED) && (p_exception != &ble_dfu_transport))
     {
-        NRF_LOG_DEBUG("Shutting down BLE transport.");
+        //NRF_LOG_DEBUG("Shutting down BLE transport.");
 
         if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
         {
-            NRF_LOG_DEBUG("Disconnecting.");
+            //NRF_LOG_DEBUG("Disconnecting.");
 
             /* Set flag to prevent advertisement from starting */
             m_flags |= DFU_BLE_RESETTING_SOON;
@@ -1249,13 +1249,13 @@ uint32_t ble_dfu_transport_close(nrf_dfu_transport_t const * p_exception)
         err_code = nrf_sdh_disable_request();
         if (err_code == NRF_SUCCESS)
         {
-            NRF_LOG_DEBUG("BLE transport shut down.");
+            //NRF_LOG_DEBUG("BLE transport shut down.");
         }
     } else {
     	if(p_exception == &ble_dfu_transport) {
-			NRF_LOG_DEBUG("skipping close, ble transport was exempt");
+			//NRF_LOG_DEBUG("skipping close, ble transport was exempt");
     	} else if (!(m_flags & DFU_BLE_FLAG_INITIALIZED)) {
-    		NRF_LOG_DEBUG("skipping close, ble transport was not initialized yet");
+    		//NRF_LOG_DEBUG("skipping close, ble transport was not initialized yet");
     	}
     }
 
@@ -1268,11 +1268,11 @@ uint32_t ble_dfu_transport_disconnect(void)
 
     if (m_flags & DFU_BLE_FLAG_INITIALIZED)
     {
-        NRF_LOG_DEBUG("Disconnect from BLE peer.");
+        //NRF_LOG_DEBUG("Disconnect from BLE peer.");
 
         if (m_conn_handle != BLE_CONN_HANDLE_INVALID)
         {
-            NRF_LOG_DEBUG("Disconnecting.");
+            //NRF_LOG_DEBUG("Disconnecting.");
 
             /* Disconnect from the peer. */
             err_code = sd_ble_gap_disconnect(m_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
