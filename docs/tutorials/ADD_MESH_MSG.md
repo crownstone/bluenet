@@ -84,7 +84,7 @@ void Example::onMeshMsg(MeshMsgEvent& msg) {
 	}
 	auto payload = msg.getPacket<CS_MESH_MODEL_TYPE_EXAMPLE>();
 
-	if (!msg.isReply) {
+	if (msg.isReply) {
 		LOGi("Received reply: sum=%u", payload.sum);
 		return;
 	}
