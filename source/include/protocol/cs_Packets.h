@@ -240,9 +240,10 @@ enum SwitchCommandValue : uint8_t {
 	CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE     = 131,
 	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132,
 
-	CS_SWITCH_CMD_VAL_TOGGLE    = 253,  // Switch OFF when currently on, switch to SMART_ON when currently off.
-	CS_SWITCH_CMD_VAL_BEHAVIOUR = 254,  // Switch to the value according to behaviour rules.
-	CS_SWITCH_CMD_VAL_SMART_ON  = 255   // Switch on, the value will be determined by behaviour rules.
+	CS_SWITCH_CMD_VAL_PREFERRED_DIM_VALUE = 252,  // Switch on, the value will be determined by preferred dim value, or otherwise the next twilight value, or otherwise a default value.
+	CS_SWITCH_CMD_VAL_TOGGLE              = 253,  // Switch OFF when currently on, switch to SMART_ON when currently off.
+	CS_SWITCH_CMD_VAL_BEHAVIOUR           = 254,  // Switch to the value according to behaviour rules.
+	CS_SWITCH_CMD_VAL_SMART_ON            = 255   // Switch on, the value will be determined by behaviour rules.
 };
 
 /**
