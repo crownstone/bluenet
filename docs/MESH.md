@@ -144,10 +144,29 @@ There are 64 bits for the message (8 bytes).
 The [protocol](protocol/MESH_PROTOCOL.md) uses one byte for the message type which leaves 7 bytes for contents to be communicated
 over the mesh. Note that this not contain versioning. From the first byte starting with `11` we might use the remaining six to do versioning later on.
 
-## Radio access
+### Mesh model
+
+Bluetooth mesh has predefined "mesh models", which are similar to Bluetooth services. A model "defines a set of States, State Transitions, State Bindings, Messages, and other associated behaviors". An example of a predefined model would be the "generic on/off" model.
+
+### Group address
+
+In order to send a message to multiple nodes, a central device will add certain nodes to a group, by assigning a group address to those nodes.
+Each node can have multiple group addresses.
+Then, the destination address in the [mesh message](#mesh-message-packet) is set to a group address, and each node with that group address will handle the message.
+
+An example that is given is to add all lights in a room to a group, so you can turn them all on/off at the same time.
+
+
+## nRF implementation details
+
+### Radio access
 
 Underlying mesh as well as listening for or setting up Bluetooth connections, broadcasting Bluetooth LE advertisements,
 etc. is the same physical radio. Hence, we need **time multiplexing**.
+
+The nRF5 SDK for Mesh makes use of Soft Device time slot API. In short, it requests radio time to send mesh messages, and listen (scan) for incoming mesh messages.
+
+### Scanning
 
 The mesh stack implements a Bluetooth LE compliant **scanner**. This is enabled through:
 
@@ -160,6 +179,8 @@ radio for incoming advertisements. Active scanning means that the firmware asks 
 a **scan response request** and gets this information as a **scan response**.
 
 Over the course of time broadcasts of advertisements on iOS are moving more and more data into scan responses. First, when having apps running in the background, but this might be now the case for apps running in the foreground as well. This is why those **scan response requests** are important to send out. The details of this can be found in the [broadcast protocol](protocol/BROADCAST_PROTOCOL.md).
+
+### Advertising
 
 Similarly, it has **advertiser(s)** implemented as well. We do use both the ordinary advertiser in the nRF5 SDK and
 the advertiser in the mesh.
@@ -184,13 +205,16 @@ The `Advertiser` class defined in `cs_Advertiser.cpp` is responsible for broadca
 responses) with Crownstone service data. This advertiser sends out **connectable advertisements**. It is not possible
 to do that with the advertiser in the mesh SDK.
 
-## Self-provisioning
+
+## Bluenet specific
+
+### Self-provisioning
 
 Bluetooth mesh is quite complicated with respect to provisioning. The Crownstones already have a route to achieve
 keys. Hence, we require a way to use this out-of-band method to do the provisioning for mesh keys as well.
 
 In the Nordic code, the DSM (device state manager) is responsible for storing the encryption keys and addresses used
-by the mesh. We obtain keys etc from persistent memory and define an address as being identical to a Crownstone id.
+by the mesh. We obtain keys etc from persistent memory and define an address as being identical to a Crownstone ID.
 
 ```
 provisionSelf(uint16_t id)
@@ -202,9 +226,19 @@ limitation stems:
 * To send RSSI reports between two nodes we currently require 5 bytes, using `uint16_t` would push it to 7 bytes which would require us to drop or compression meta-info about the channel for example.
 * To send a multi-switch message (this only switches a single Crownstone though) we use 7 bytes. It allows to execute with a delay using a timestamp of 2 bytes and it specifies the source of the command (switchcraft, connection, internal, etc.) including a counter with 3 bytes. Going to `uint16_t` would require e.g. compression of the delay field (e.g. using the high bit to indicate two different time regimes).
 
-## Syncing
+### Models
+
+Currently, bluenet only has Crownstone specific models that all send the same [messages](protocol/MESH_PROTOCOL.md), but differ in whether they send reliable (acked) messages, whether they send unicast or broadcast messages, and the TTL with which they send the messages.
+
+### Group addresses
+
+The models that send and receive broadcast messages, assign a predefined group address to the Crownstone. This way, all crownstones can handle the message.
+
+### Synchronizing
 
 There is specific functionality built on top of Bluetooth Mesh, e.g. for the synchronization of a single clock.
+At boot, a Crownstone will send requests for synchronization. Once running, the synchronization happens at an interval.
+
 The configuration for this can be found in `cs_Config.h`:
 
 * How often time is sent into the mesh (50 seconds)
@@ -217,6 +251,7 @@ The configuration for this can be found in `cs_Config.h`:
 The synchronized clock is very convenient when thing have to happen more or less simultaneously in the network. Note
 that this clock is not mean to be synchronized on a subsecond resolution. It can for example be used to coordinate
 iBeacon major or minor updates.
+
 
 ## Background
 
