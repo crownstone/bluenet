@@ -418,7 +418,7 @@ static void postvalidate(void)
 
 ret_code_t nrf_bootloader_init(nrf_dfu_observer_t observer)
 {
-    NRF_LOG_DEBUG("In nrf_bootloader_init");
+//    NRF_LOG_DEBUG("In nrf_bootloader_init");
 
     ret_code_t                            ret_val;
     nrf_bootloader_fw_activation_result_t activation_result;

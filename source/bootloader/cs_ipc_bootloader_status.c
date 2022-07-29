@@ -37,7 +37,7 @@ static void write_init_packet_to_ipc_page();
 
 
 void dfu_observer(nrf_dfu_evt_type_t evt_type) {
-	NRF_LOG_DEBUG("crownstone dfu observer got event: %d", evt_type);
+//	NRF_LOG_DEBUG("crownstone dfu observer got event: %d", evt_type);
 	switch (evt_type) {
 		case NRF_DFU_EVT_DFU_INITIALIZED: {
 			cs_dfu_observer_on_dfu_initialized();
@@ -125,15 +125,15 @@ static void clear_ipc_page() {
 }
 
 static void write_init_packet_to_ipc_page() {
-	NRF_LOG_DEBUG("start write init packet to ipc page");
+//	NRF_LOG_DEBUG("start write init packet to ipc page");
 	if (!ipc_page_cleared) {
-		NRF_LOG_DEBUG("failed: page not cleared yet");
+//		NRF_LOG_DEBUG("failed: page not cleared yet");
 		return;
 	}
 
 	if(init_cmd_write_started) {
 		// only write once.
-		NRF_LOG_DEBUG("failed, already started");
+		NRF_LOG_WARNING("failed, already started");
 		return;
 	}
 
