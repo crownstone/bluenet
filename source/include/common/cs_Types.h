@@ -397,8 +397,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_GPIO_READ,                                    // GPIO, read value (directly)
 	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
 
-	EVT_MICROAPP_BLE_FILTER_INIT,                     // Microapp specific initialization of BLE filter
-
 	CMD_RESOLVE_ASYNC_CONTROL_COMMAND,                // When a control command returned WAIT_FOR_SUCCESS, this event finalizes that control command.
 	CMD_SEND_ASYNC_RESULT_TO_BLE,                     // Sends the async result to the user via BLE.
 
@@ -697,7 +695,6 @@ typedef cs_gpio_write_t TYPIFY(EVT_GPIO_WRITE);
 typedef cs_gpio_read_t TYPIFY(EVT_GPIO_READ);
 typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 
-typedef cs_microapp_filter_init_t TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT);
 typedef cs_async_result_t TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND);
 typedef cs_async_result_t TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE);
 

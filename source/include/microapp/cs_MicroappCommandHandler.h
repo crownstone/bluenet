@@ -1,39 +1,30 @@
 #pragma once
 
-#include <events/cs_EventListener.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 
-struct __attribute__((packed)) microapp_buffered_mesh_message_t {
-	stone_id_t stoneId;
-	uint8_t messageSize;
-	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];
-};
+// struct __attribute__((packed)) microapp_buffered_mesh_message_t {
+// 	stone_id_t stoneId;
+// 	uint8_t messageSize;
+// 	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];
+// };
 
 /**
  * The class MicroappCommandHandler has functionality to store a second app (and perhaps in the future even more apps)
  * on another part of the flash memory.
  */
-class MicroappCommandHandler : public EventListener {
+class MicroappCommandHandler {
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
-	MicroappCommandHandler();
+	MicroappCommandHandler(){};
 	MicroappCommandHandler(MicroappCommandHandler const&);
 	void operator=(MicroappCommandHandler const&);
 
 	/**
 	 * Max number of mesh messages that will be queued.
 	 */
-	const uint8_t MICROAPP_MAX_MESH_MESSAGES_BUFFERED = 3;
-
-	/**
-	 * Number of empty interrupt slots.
-	 *
-	 * TODO: Find a way in which we can also remove this state variable from this handler class. Perhaps an
-	 * EVT_MICROAPP_EMPTY_INTERRUPT_SLOTS_AVAILABLE event.
-	 */
-	int8_t _emptyInterruptSlots = MICROAPP_MAX_MESH_MESSAGES_BUFFERED;
+	// const uint8_t MICROAPP_MAX_MESH_MESSAGES_BUFFERED = 3;
 
 	/**
 	 * Buffer received mesh messages.
@@ -42,10 +33,10 @@ private:
 	 *
 	 * TODO: The buffer should not be stored on the bluenet side.
 	 */
-	CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
+	// CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
 
 	/**
-	 * Maps interrupts to digital pins.
+	 * Maps interrupts to digital pins. See also MicroappController::digitalPinToInterrupt()
 	 */
 	int interruptToDigitalPin(int interrupt);
 
@@ -114,13 +105,6 @@ protected:
 	 */
 	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_cmd_t* cmd);
 
-	/**
-	 * Handle a received mesh message.
-	 *
-	 * TODO: We don't want this.
-	 */
-	void onMeshMessage(MeshMsgEvent event);
-
 public:
 	static MicroappCommandHandler& getInstance() {
 		static MicroappCommandHandler instance;
@@ -128,19 +112,8 @@ public:
 	}
 
 	/**
-	 * Soft interrupt(s) are in progress.
-	 */
-	bool softInterruptInProgress();
-
-	/**
 	 * Handle commands from the microapp
 	 */
 	cs_ret_code_t handleMicroappCommand(microapp_cmd_t* cmd);
 
-	/**
-	 * Receive events (for now only for the locally stored buffer).
-	 *
-	 * TODO: Remove when buffer for mesh message is removed.
-	 */
-	void handleEvent(event_t& event);
 };

@@ -553,13 +553,6 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t* buf;
 };
 
-/**
- * Stores information on a filter as being expected by the microapp. Currently, only an index of the interrupt handler
- * where the BLE messages have to be delivered to is part of this struct.
- */
-struct __attribute__((packed)) cs_microapp_filter_init_t {
-	uint8_t index;
-};
 
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
 

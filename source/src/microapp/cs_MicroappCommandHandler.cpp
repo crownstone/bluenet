@@ -29,18 +29,8 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-MicroappCommandHandler::MicroappCommandHandler()
-		: EventListener(), _meshMessageBuffer(MICROAPP_MAX_MESH_MESSAGES_BUFFERED) {
-
-	EventDispatcher::getInstance().addListener(this);
-}
-
-/*
- * When getting returns from a soft interrupt they will update us on the number of slots available in the microapp
- * for new interrupts. If there are no slots left, we don't bother sending them a new interrupt.
- */
-bool MicroappCommandHandler::softInterruptInProgress() {
-	return _emptyInterruptSlots < 1;
+int MicroappCommandHandler::interruptToDigitalPin(int interrupt) {
+	return interrupt;
 }
 
 /*
@@ -101,24 +91,30 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGd("Soft interrupt received for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
+			MicroappController& controller = MicroappController::getInstance();
+			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
+			LOGv("Soft interrupt received (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			_emptyInterruptSlots                              = soft_interrupt_cmd->emptyInterruptSlots;
-			LOGd("Soft interrupt dropped for %i [slots=%i]", (int)cmd->id, _emptyInterruptSlots);
+			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
+			MicroappController& controller = MicroappController::getInstance();
+			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
+			LOGi("Soft interrupt dropped (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
-			// Empty slots cannot be used, it is old info from the interrupt's starting state
-			LOGd("Soft interrupt error for %i", (int)cmd->id);
+			MicroappController& controller = MicroappController::getInstance();
+			controller.incrementEmptySoftInterruptSlots();
+			LOGi("Soft interrupt returned with error (id=%i)", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
-			// Empty slots cannot be used, it is old info from the interrupt's starting state
-			LOGd("Soft interrupt end for %i", (int)cmd->id);
+			MicroappController& controller = MicroappController::getInstance();
+			controller.incrementEmptySoftInterruptSlots();
+			LOGv("Soft interrupt end (id=%i)", (int)cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SETUP_END: {
@@ -244,7 +240,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinCommand(microapp_pin_cmd_
 cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	TYPIFY(EVT_GPIO_INIT) gpio;
-	gpio.pin_index                    = pin;
+	gpio.pin_index                    = interruptToDigitalPin(pin);
 	gpio.pull                         = 0;
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
@@ -294,7 +290,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinActionCommand(microapp_pi
 	switch (opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
 			TYPIFY(EVT_GPIO_WRITE) gpio;
-			gpio.pin_index              = pin;
+			gpio.pin_index              = interruptToDigitalPin(pin);
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
 			switch (val) {
 				case CS_MICROAPP_COMMAND_VALUE_OFF: {
@@ -440,19 +436,19 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappTwiCommand(microapp_twi_cmd_
 cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
 	switch (ble_cmd->opcode) {
 		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
-			LOGi("Set scan event callback handler");
 #if BUILD_MESHING == 0
-			LOGi("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			return ERR_NOT_AVAILABLE;
 #endif
-			TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT) ble;
-			ble.index = ble_cmd->id;
-			event_t event(CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT, &ble, sizeof(ble));
-			EventDispatcher::getInstance().dispatch(event);
-			bool success        = event.result.returnCode;
-			ble_cmd->header.ack = success;
-			return success ? ERR_SUCCESS : ERR_NO_SPACE;
+			MicroappController& controller = MicroappController::getInstance();
+			ble_cmd->header.ack = controller.registerSoftInterruptSlotBle(ble_cmd->id);
+			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
+#if BUILD_MESHING == 0
+			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			return ERR_NOT_AVAILABLE;
+#endif
 			LOGi("Start scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(true);
@@ -460,6 +456,10 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
+#if BUILD_MESHING == 0
+			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			return ERR_NOT_AVAILABLE;
+#endif
 			LOGi("Stop scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(false);
@@ -525,6 +525,10 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPresenceCommand(microapp_pre
 }
 
 cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cmd_t* command) {
+#if BUILD_MESHING == 0
+	LOGi("Mesh is not built in bluenet, so mesh-related microapp functionalities are disabled.");
+	return ERR_NOT_AVAILABLE;
+#endif
 	switch (command->opcode) {
 		case CS_MICROAPP_COMMAND_MESH_SEND: {
 			auto cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(command);
@@ -542,11 +546,11 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			TYPIFY(CMD_SEND_MESH_MSG) eventData;
 			bool broadcast = (cmd->stoneId == 0);
 			if (!broadcast) {
-				LOGi("Send mesh message to %i", cmd->stoneId);
+				LOGv("Send mesh message to %i", cmd->stoneId);
 				eventData.idCount   = 1;
 				eventData.targetIds = &(cmd->stoneId);
 			} else {
-				LOGi("Broadcast mesh message");
+				LOGv("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
 			eventData.flags.flags.reliable    = !broadcast;
@@ -558,110 +562,30 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
 			event.dispatch();
 			if (event.result.returnCode != ERR_SUCCESS) {
-				LOGi("Failed to send message, return code: %u", event.result.returnCode);
+				LOGi("Failed to send mesh message, return code: %u", event.result.returnCode);
 				return event.result.returnCode;
 			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_MESH_READ_AVAILABLE: {
-			auto cmd = reinterpret_cast<microapp_mesh_read_available_cmd_t*>(command);
-
-			if (!_meshMessageBuffer.isInitialized()) {
-				_meshMessageBuffer.init();
-			}
-
-			// TODO: This assumes nothing will overwrite the buffer
-			cmd->available = !_meshMessageBuffer.empty();
-			if (cmd->available) {
-				LOGi("Available mesh messages");
-			} else {
-				LOGv("No mesh messages available");
-			}
-
-			// TODO: One might want to call callMicroapp here (at least once).
-			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
+		case CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER: {
+			LOGi("Starting to scan for microapp mesh messages");
+			MicroappController& controller = MicroappController::getInstance();
+			command->header.ack = controller.registerSoftInterruptSlotMesh(command->header.id);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_MESH_READ: {
-			auto cmd = reinterpret_cast<microapp_mesh_read_cmd_t*>(command);
-
-			if (!_meshMessageBuffer.isInitialized()) {
-				_meshMessageBuffer.init();
-			}
-			if (_meshMessageBuffer.empty()) {
-				LOGi("No message in buffer");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-
-			auto message = _meshMessageBuffer.pop();
-			LOGi("Pop message for microapp");
-
-			// TODO: This assumes nothing will overwrite the buffer
-			cmd->stoneId = message.stoneId;
-			cmd->dlen    = message.messageSize;
-			if (message.messageSize > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-				LOGi("Message with wrong size in buffer");
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			memcpy(cmd->data, message.message, message.messageSize);
-
-			// TODO: One might want to call callMicroapp here (at least once).
-			// That would benefit from an ack "the other way around" (so microapp knows "available" is updated).
+		case CS_MICROAPP_COMMAND_MESH_GET_INFO: {
+			LOGi("Microapp requesting mesh info");
+			TYPIFY(CONFIG_CROWNSTONE_ID) id;
+			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+			microapp_mesh_info_cmd_t* info_cmd = reinterpret_cast<microapp_mesh_info_cmd_t*>(command);
+			info_cmd->stoneId = id;
+			info_cmd->meshHeader.header.ack = true;
 			break;
 		}
-
 		default: {
 			LOGi("Unknown microapp mesh command opcode: %u", command->opcode);
 			return ERR_UNKNOWN_OP_CODE;
 		}
 	}
 	return ERR_SUCCESS;
-}
-
-/*
- * Called upon receiving mesh message, places mesh message in a buffer on the bluenet side.
- *
- * TODO: This should actually be implemented differently.
- */
-void MicroappCommandHandler::onMeshMessage(MeshMsgEvent event) {
-
-#ifdef FILTER_MESH_MESSAGES
-	if (event.type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		LOGi("Mesh message received, but not for microapp");
-		return;
-	}
-#endif
-	if (_meshMessageBuffer.full()) {
-		LOGd("Dropping message, buffer is full");
-		return;
-	}
-
-	if (event.msg.len > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-		LOGd("Message is too large: %u", event.msg.len);
-		return;
-	}
-
-	LOGd("Mesh message received, store in buffer");
-	microapp_buffered_mesh_message_t bufferedMessage;
-	bufferedMessage.stoneId     = event.srcStoneId;
-	bufferedMessage.messageSize = event.msg.len;
-	memcpy(bufferedMessage.message, event.msg.data, event.msg.len);
-	_meshMessageBuffer.push(bufferedMessage);
-}
-
-/**
- * Listen to events from bluenet in which the implement buffers those events and their contents on the bluenet side.
- *
- * TODO: It might be better to use an interrupt and store the buffer on the microapp side. Compare the implementation
- * of EVT_RECV_MESH_MSG with EVT_DEVICE_SCANNED (in cs_MicroappCommandHandler.cpp).
- */
-void MicroappCommandHandler::handleEvent(event_t& event) {
-	switch (event.type) {
-		case CS_TYPE::EVT_RECV_MESH_MSG: {
-			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
-			onMeshMessage(*msg);
-			break;
-		}
-		default: break;
-	}
 }
