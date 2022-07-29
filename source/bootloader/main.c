@@ -260,7 +260,18 @@ void flash_protect() {
 
 void explain_reset_reason() {
 	NRF_LOG_INFO("Reset: {reason=%u}", NRF_POWER->RESETREAS);
-	// TODO: add debug string when debug is enabled.
+
+	if (NRF_POWER->RESETREAS & (1 << 0)) NRF_LOG_INFO("resetpin");
+	if (NRF_POWER->RESETREAS & (1 << 1)) NRF_LOG_INFO("watchdog");
+	if (NRF_POWER->RESETREAS & (1 << 2)) NRF_LOG_INFO("softreset");
+	if (NRF_POWER->RESETREAS & (1 << 3)) NRF_LOG_INFO("lockup");
+	// TODO: might depend on chip/family
+	/**
+	 * bit 16: OFF (gpio wake-up)
+	 * bit 17: LPCOMP (adc wake-up)
+	 * bit 18: DIF (debug interface wake-up)
+	 * bit 19: NFC (nfc wake-up)
+	 */
 }
 
 void explain_memory_layout() {
