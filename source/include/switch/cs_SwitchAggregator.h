@@ -42,29 +42,30 @@ protected:
 	std::vector<Component*> getChildren() override;
 
 private:
-	TwilightHandler twilightHandler;
-	BehaviourHandler behaviourHandler;
+	TwilightHandler _twilightHandler;
+	BehaviourHandler _behaviourHandler;
 
-	SmartSwitch smartSwitch;
+	SmartSwitch _smartSwitch;
 
 	// the latest states requested by other parts of the system.
 	std::optional<uint8_t> _overrideState = {};
-	std::optional<uint8_t> behaviourState = {};
-	std::optional<uint8_t> twilightState = {};
+	std::optional<uint8_t> _behaviourState = {};
+	std::optional<uint8_t> _twilightState = {};
 
 	// the last state that was aggregated and passed on towards the SoftwareSwitch.
-	std::optional<uint8_t> aggregatedState = {};
+	std::optional<uint8_t> _aggregatedState = {};
 
 	// Cache of previous time update.
 	uint32_t _lastTimestamp = 0;
 
-	const bool SWITCHCRAFT_DOUBLE_TAP_ENABLED = true;
-	const uint32_t SWITCHCRAFT_DOUBLE_TAP_TIME_MS = 1000;
-	const uint8_t PREFERRED_DIM_VALUE = 50;
+	//! Keeps up the unix timestamp of the last detected switchcraft.
+	uint32_t _lastSwitchcraftEventUnixTimestamp = 0;
 
-	uint32_t _lastSwitchcraftEventTimestamp = 0;
+	//! Keeps up the RTC count of the last detected switchcraft.
 	uint32_t _lastSwitchcraftEventRtcCount = 0;
-	uint8_t _lastOnValue = 0;
+
+	//! Keeps up the switch value of the last time it was on, before being turned off by switchcraft.
+	uint8_t _lastSwitchcraftOnValue = 0;
 
 	/**
 	 * Which source claimed the switch.

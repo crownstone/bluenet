@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <protocol/cs_Typedefs.h>
+
 /**
  * TODO: For now formatting is turned off, but the actual configurations should be:
  *   - loaded from one single file, CMakeBuild.config.default
@@ -188,6 +190,12 @@
 
 
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
+
+//! If 2 switchcraft events happen within this time, it will be regarded as a double tap.
+static const uint32_t SWITCHCRAFT_DOUBLE_TAP_TIME_MS    = 1000;
+
+//! The default dim value to use for double tap, when no preferred dim value is set, and there is no twilight behaviour.
+static const uint8_t DEFAULT_DOUBLE_TAP_DIM_VALUE       = 40;
 
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
