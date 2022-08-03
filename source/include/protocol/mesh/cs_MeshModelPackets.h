@@ -14,6 +14,18 @@
 #include <protocol/cs_RssiAndChannel.h>
 
 /**
+ * Model IDs
+ *
+ * Not sure if these are part of protocol, but it doesn't hurt to have them fixed.
+ */
+enum cs_mesh_model_id_t {
+	CS_MESH_MODEL_ID_MULTICAST       = 0,
+	CS_MESH_MODEL_ID_MULTICAST_ACKED = 1,
+	CS_MESH_MODEL_ID_UNICAST         = 2,
+	CS_MESH_MODEL_ID_NEIGHBOURS      = 3,
+};
+
+/**
  * Message opcodes.
  *
  * Must be in the range 0xC0 - 0xFF

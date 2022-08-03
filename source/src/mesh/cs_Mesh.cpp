@@ -66,25 +66,26 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 
 void Mesh::initModels() {
 	LOGi("Initializing and adding models");
+
 	_modelMulticast.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
 		_msgHandler.handleMsg(msg);
 	});
-	_modelMulticast.init(0);
+	_modelMulticast.init(CS_MESH_MODEL_ID_MULTICAST);
 
 	_modelMulticastAcked.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
 		_msgHandler.handleMsg(msg);
 	});
-	_modelMulticastAcked.init(1);
+	_modelMulticastAcked.init(CS_MESH_MODEL_ID_MULTICAST_ACKED);
 
 	_modelUnicast.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
 		_msgHandler.handleMsg(msg);
 	});
-	_modelUnicast.init(2);
+	_modelUnicast.init(CS_MESH_MODEL_ID_UNICAST);
 
 	_modelMulticastNeighbours.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
 			_msgHandler.handleMsg(msg);
 	});
-	_modelMulticastNeighbours.init(3);
+	_modelMulticastNeighbours.init(CS_MESH_MODEL_ID_NEIGHBOURS);
 }
 
 void Mesh::configureModels(dsm_handle_t appkeyHandle) {
