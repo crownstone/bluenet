@@ -167,9 +167,9 @@ struct __attribute__((__packed__)) state_packet_header_t {
 union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 	struct __attribute__((packed)) {
 		bool broadcast : 1;
-		bool reliable : 1;
+		bool acked : 1;
 		bool useKnownIds : 1;
-		bool noHops : 1;
+		bool doNotRelay : 1;
 	} flags;
 	uint8_t asInt = 1;  // Broadcast to all by default.
 };
