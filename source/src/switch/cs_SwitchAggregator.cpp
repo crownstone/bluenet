@@ -374,6 +374,14 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			}
 			LOGSwitchAggregatorDebug("Resolve double tap dim value.");
 
+			// Check if any active behaviour has a dimmed value, and if so, use that.
+			uint8_t resolved = resolveOverrideState(CS_SWITCH_CMD_VAL_SMART_ON);
+			if (0 < resolved && resolved < CS_SWITCH_CMD_VAL_FULLY_ON) {
+				// This is not an override state.
+				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_SMART_ON, source);
+				return;
+			}
+
 			// TODO: cache this value?
 			TYPIFY(STATE_PREFERRED_DIM_VALUE) preferredDimValue;
 			State::getInstance().get(CS_TYPE::STATE_PREFERRED_DIM_VALUE, &preferredDimValue, sizeof(preferredDimValue));
@@ -383,15 +391,6 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 				// Treat it the same way as manually setting the dim value.
 				preferredDimValue = std::min(preferredDimValue, static_cast<uint8_t>(CS_SWITCH_CMD_VAL_FULLY_ON));
 				executeStateIntentionUpdate(preferredDimValue, source);
-				return;
-			}
-
-			// Check if any behaviour has a dimmed value, and if so, use that.
-			// TODO: accept the twilight even when it's not active at this time.
-			uint8_t resolved = resolveOverrideState(CS_SWITCH_CMD_VAL_SMART_ON);
-			if (0 < resolved && resolved < CS_SWITCH_CMD_VAL_FULLY_ON) {
-				// This is not an override state.
-				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_SMART_ON, source);
 				return;
 			}
 
