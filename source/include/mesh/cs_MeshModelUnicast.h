@@ -67,9 +67,9 @@ public:
 	void handleReliableStatus(access_reliable_status_t status);
 
 private:
-	const static uint8_t queue_size = 5;
+	const static uint8_t QUEUE_SIZE = 5;
 
-	const static uint8_t queue_index_none = 255;
+	const static uint8_t QUEUE_INDEX_NONE = 255;
 
 	struct __attribute__((__packed__)) cs_unicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
@@ -93,12 +93,12 @@ private:
 	uint32_t _canceled = 0;
 #endif
 
-	cs_unicast_queue_item_t _queue[queue_size];
+	cs_unicast_queue_item_t _queue[QUEUE_SIZE];
 
 	/**
 	 * Queue index of message currently being sent.
 	 */
-	uint8_t _queueIndexInProgress = queue_index_none;
+	uint8_t _queueIndexInProgress = QUEUE_INDEX_NONE;
 
 	/**
 	 * Next index in queue to send.

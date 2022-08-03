@@ -29,10 +29,10 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t* meshMsg) {
 	item.metaData.type                   = meshMsg->type;
 	item.metaData.priority               = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
 	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
-	item.reliable                        = meshMsg->flags.flags.reliable;
+	item.acked                           = meshMsg->flags.flags.acked;
 	item.broadcast                       = meshMsg->flags.flags.broadcast;
-	item.noHop                           = meshMsg->flags.flags.noHops;
-	item.numIds                          = meshMsg->idCount;
+	item.doNotRelay                      = meshMsg->flags.flags.doNotRelay;
+	item.numStoneIds                     = meshMsg->idCount;
 	item.stoneIdsPtr                     = meshMsg->targetIds;
 	item.msgPayload.len                  = meshMsg->size;
 	item.msgPayload.data                 = meshMsg->payload;
@@ -46,7 +46,7 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 #if MESH_MODEL_TEST_MSG != 0
 	test.counter = _nextSendCounter++;
 #else
-	test.counter                         = 0;
+	test.counter = 0;
 #endif
 
 	MeshUtil::cs_mesh_queue_item_t item;
@@ -56,14 +56,14 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 
 #if MESH_MODEL_TEST_MSG == 2
 	item.metaData.transmissionsOrTimeout = 0;
-	item.reliable                        = true;
+	item.acked                           = true;
 	item.broadcast                       = false;
 	stone_id_t targetId                  = 1;
-	item.numIds                          = 1;
+	item.numStoneIds                     = 1;
 	item.stoneIdsPtr                     = &targetId;
 #else
 	item.metaData.transmissionsOrTimeout = 1;
-	item.reliable                        = false;
+	item.acked                           = false;
 	item.broadcast                       = true;
 #endif
 
@@ -89,7 +89,7 @@ cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* packet,
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = true;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -108,7 +108,7 @@ cs_ret_code_t MeshMsgSender::sendNoop(uint8_t transmissions) {
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 
 	// Remove old messages of same type, as only the latest is of interest.
@@ -132,7 +132,7 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = true;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(meshItem);
 	item.msgPayload.data   = (uint8_t*)(&meshItem);
@@ -171,7 +171,7 @@ cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* p
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOWEST) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -193,7 +193,7 @@ cs_ret_code_t MeshMsgSender::sendProfileLocation(
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOWEST) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -216,7 +216,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -241,7 +241,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -264,7 +264,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceHeartbeat(
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -284,7 +284,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(
 	item.metaData.transmissionsOrTimeout =
 			(transmissions == 0) ? static_cast<uint8_t>(CS_MESH_RELIABILITY_LOW) : transmissions;
 	item.metaData.priority = false;
-	item.reliable          = false;
+	item.acked             = false;
 	item.broadcast         = true;
 	item.msgPayload.len    = sizeof(*packet);
 	item.msgPayload.data   = (uint8_t*)packet;
@@ -297,7 +297,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(
 cs_ret_code_t MeshMsgSender::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
 	assert(_selector != nullptr, "No model selector set.");
 
-	if (item.reliable) {
+	if (item.acked) {
 		if (item.metaData.transmissionsOrTimeout == 0) {
 			item.metaData.transmissionsOrTimeout = MESH_MODEL_RELIABLE_TIMEOUT_DEFAULT;
 		}
@@ -349,10 +349,10 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 
 	// All these fields can be set from the mesh command.
 	item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
-	item.reliable                        = command->header.flags.flags.reliable;
+	item.acked                           = command->header.flags.flags.acked;
 	item.broadcast                       = command->header.flags.flags.broadcast;
 	item.controlCommand                  = command->controlCommand.type;
-	item.numIds                          = command->header.idCount;
+	item.numStoneIds                     = command->header.idCount;
 	item.stoneIdsPtr                     = command->targetIds;
 
 	switch (command->controlCommand.type) {
@@ -361,7 +361,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			if (command->header.idCount != 0 || command->header.flags.flags.broadcast != true
-				|| command->header.flags.flags.reliable != false || command->header.flags.flags.useKnownIds != false) {
+				|| command->header.flags.flags.acked != false || command->header.flags.flags.useKnownIds != false) {
 				return ERR_NOT_IMPLEMENTED;
 			}
 			uint32_t* time = (uint32_t*)command->controlCommand.data;
@@ -393,7 +393,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 				 stateHeader->stateType,
 				 stateHeader->stateId,
 				 stateHeader->persistenceMode);
-			if (command->header.flags.flags.reliable != true || command->header.flags.flags.useKnownIds != false) {
+			if (command->header.flags.flags.acked != true || command->header.flags.flags.useKnownIds != false) {
 				return ERR_NOT_IMPLEMENTED;
 			}
 			if (!MeshUtil::canShortenStateType(stateHeader->stateType)) {

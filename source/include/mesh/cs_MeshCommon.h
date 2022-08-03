@@ -36,12 +36,12 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
 	bool priority : 1;
 
 	//! Whether this message should be sent to direct neighbours only.
-	bool noHop : 1;
+	bool doNotRelay : 1;
 
 	cs_mesh_queue_item_meta_data_t():
 		transmissionsOrTimeout(0),
 		priority(false),
-		noHop(false)
+		doNotRelay(false)
 	{}
 };
 
@@ -54,13 +54,13 @@ struct cs_mesh_queue_item_t {
 	cs_mesh_queue_item_meta_data_t metaData = {};
 
 	//! Whether the message should be acked.
-	bool reliable                           = false;
+	bool acked                              = false;
 
 	//! Whether the message should be broadcasted.
 	bool broadcast                          = true;
 
 	//! Whether this message should be sent to direct neighbours only.
-	bool noHop                              = false;
+	bool doNotRelay                         = false;
 
 	/**
 	 * If this mesh message is sent because of a Mesh command, then set this field to the control command
@@ -70,9 +70,9 @@ struct cs_mesh_queue_item_t {
 	cs_control_cmd_t controlCommand         = CTRL_CMD_UNKNOWN;
 
 	//! Number of target stone IDs.
-	uint8_t numIds                          = 0;
+	uint8_t numStoneIds                     = 0;
 
-	//! Pointer to the list of stone IDs.
+	//! Pointer to the list of target stone IDs.
 	stone_id_t* stoneIdsPtr                 = nullptr;
 
 	//! The message payload.

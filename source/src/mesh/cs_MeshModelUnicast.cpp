@@ -147,7 +147,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
 		// Handle the message, don't send a reply.
-		if (_queueIndexInProgress == queue_index_none) {
+		if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 			LOGe("Reply receive, but no index in progress.");
 			return;
 		}
@@ -243,7 +243,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, ui
 }
 
 void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
-	if (_queueIndexInProgress == queue_index_none) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 		LOGe("No index in progress. status=%u", status);
 		return;
 	}
@@ -315,7 +315,7 @@ void MeshModelUnicast::checkDone() {
 	if (done) {
 		LOGMeshModelDebug("rem item");
 		remQueueItem(_queueIndexInProgress);
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 }
 
@@ -354,15 +354,15 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 
 	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
-	assert(item.numIds == 1, "Single ID only");
+	assert(item.numStoneIds == 1, "Single ID only");
 	assert(item.broadcast == false, "Unicast only");
-	assert(item.reliable == true, "Reliable only");
+	assert(item.acked == true, "Reliable only");
 
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then iterate over the queue.
 	uint8_t index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
-		index = i % queue_size;
+	for (int i = _queueIndexNext; i < _queueIndexNext + QUEUE_SIZE; ++i) {
+		index = i % QUEUE_SIZE;
 		cs_unicast_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.transmissionsOrTimeout == 0) {
 			it->msgPtr = (uint8_t*)malloc(msgSize);
@@ -379,7 +379,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 			it->targetId = item.stoneIdsPtr[0];
 			it->controlCommand = item.controlCommand;
 			it->msgSize = msgSize;
-			it->metaData.noHop = item.noHop;
+			it->metaData.doNotRelay = item.doNotRelay;
 			_log(LogLevelMeshModelVerbose, false, "added to ind=%u msg=", index);
 			_logArray(LogLevelMeshModelVerbose, true, it->msgPtr, it->msgSize);
 
@@ -394,7 +394,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 
 cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
-	for (int i = 0; i < queue_size; ++i) {
+	for (int i = 0; i < QUEUE_SIZE; ++i) {
 		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
 			cancelQueueItem(i);
 			remQueueItem(i);
@@ -407,7 +407,7 @@ cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint
 void MeshModelUnicast::cancelQueueItem(uint8_t index) {
 	if (_queueIndexInProgress == index) {
 		LOGe("TODO: Cancel progress");
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 }
 
@@ -420,8 +420,8 @@ void MeshModelUnicast::remQueueItem(uint8_t index) {
 
 int MeshModelUnicast::getNextItemInQueue(bool priority) {
 	int index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
-		index = i % queue_size;
+	for (int i = _queueIndexNext; i < _queueIndexNext + QUEUE_SIZE; ++i) {
+		index = i % QUEUE_SIZE;
 		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
@@ -430,7 +430,7 @@ int MeshModelUnicast::getNextItemInQueue(bool priority) {
 }
 
 bool MeshModelUnicast::sendMsgFromQueue() {
-	if (_queueIndexInProgress != queue_index_none) {
+	if (_queueIndexInProgress != QUEUE_INDEX_NONE) {
 		return false;
 	}
 	int index = getNextItemInQueue(true);
@@ -450,7 +450,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 		return false;
 	}
 
-	retCode = setTtl(item->metaData.noHop ? 0 : CS_MESH_DEFAULT_TTL);
+	retCode = setTtl(item->metaData.doNotRelay ? 0 : CS_MESH_DEFAULT_TTL);
 	if (retCode != ERR_SUCCESS) {
 		return false;
 	}
@@ -464,7 +464,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 
 	// Next item will be sent next.
 	// Order might be messed up when some items are prioritized.
-	_queueIndexNext = (index + 1) % queue_size;
+	_queueIndexNext = (index + 1) % QUEUE_SIZE;
 	return true;
 }
 

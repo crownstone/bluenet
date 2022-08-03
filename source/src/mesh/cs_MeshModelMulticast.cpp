@@ -143,7 +143,7 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
 	assert(item.broadcast == true, "Multicast only");
-	assert(item.reliable == false, "Unreliable only");
+	assert(item.acked == false, "Unreliable only");
 
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then reverse iterate over the queue.

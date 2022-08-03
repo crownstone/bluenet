@@ -65,13 +65,13 @@ public:
 	void handleMsg(const access_message_rx_t * accessMsg);
 
 private:
-	const static uint8_t queue_size = 5;
+	const static uint8_t QUEUE_SIZE = 5;
 
-	const static uint8_t queue_index_none = 255;
+	const static uint8_t QUEUE_INDEX_NONE = 255;
 
 	struct __attribute__((__packed__)) cs_multicast_acked_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
-		uint8_t numIds;
+		uint8_t numStoneIds;
 		stone_id_t* stoneIdsPtr;
 		cs_control_cmd_t controlCommand;
 		uint8_t msgSize;
@@ -84,12 +84,12 @@ private:
 
 	callback_msg_t _msgCallback = nullptr;
 
-	cs_multicast_acked_queue_item_t _queue[queue_size];
+	cs_multicast_acked_queue_item_t _queue[QUEUE_SIZE];
 
 	/**
 	 * Queue index of message currently being sent.
 	 */
-	uint8_t _queueIndexInProgress = queue_index_none;
+	uint8_t _queueIndexInProgress = QUEUE_INDEX_NONE;
 
 	/**
 	 * Next index in queue to send.

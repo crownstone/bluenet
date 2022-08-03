@@ -411,7 +411,7 @@ void BehaviourHandler::onBehaviourSettingsIncomingSyncRequest() {
 	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.flags.flags.broadcast = true;
-	meshMsg.flags.flags.noHops = false;
+	meshMsg.flags.flags.doNotRelay = false;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&settings);
 	meshMsg.size = sizeof(settings);
 

@@ -62,9 +62,9 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	cs_mesh_msg_t meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_STONE_MAC;
 	meshMsg.flags.flags.broadcast = false;
-	meshMsg.flags.flags.reliable = true;
+	meshMsg.flags.flags.acked = true;
 	meshMsg.flags.flags.useKnownIds = false;
-	meshMsg.flags.flags.noHops = true;
+	meshMsg.flags.flags.doNotRelay = true;
 	meshMsg.reliability = 3; // Low timeout, we expect a result quickly.
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	meshMsg.idCount = 1;
@@ -173,7 +173,7 @@ void MeshTopology::sendNoop() {
 	meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
 	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = true;
+	meshMsg.flags.flags.doNotRelay = true;
 	meshMsg.payload = nullptr;
 	meshMsg.size = 0;
 
@@ -209,7 +209,7 @@ void MeshTopology::sendNext() {
 	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
 	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = false;
+	meshMsg.flags.flags.doNotRelay = false;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
 	meshMsg.size = sizeof(meshPayload);
 

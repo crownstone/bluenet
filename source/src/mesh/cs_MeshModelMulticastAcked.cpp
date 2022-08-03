@@ -179,7 +179,7 @@ void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, co
 }
 
 void MeshModelMulticastAcked::handleReply(MeshMsgEvent& msg) {
-	if (_queueIndexInProgress == queue_index_none) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 		LOGw("No index in progress");
 		return;
 	}
@@ -187,7 +187,7 @@ void MeshModelMulticastAcked::handleReply(MeshMsgEvent& msg) {
 	// Find stone ID in list of stone IDs.
 	auto item = _queue[_queueIndexInProgress];
 	uint16_t stoneIndex = 0xFFFF;
-	for (uint8_t i = 0; i < item.numIds; ++i) {
+	for (uint8_t i = 0; i < item.numStoneIds; ++i) {
 		if (item.stoneIdsPtr[i] == msg.srcStoneId) {
 			stoneIndex = i;
 			break;
@@ -231,7 +231,7 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
 	assert(item.broadcast == true, "Multicast only");
-	assert(item.reliable == true, "Reliable only");
+	assert(item.acked == true, "Reliable only");
 
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then reverse iterate over the queue.
@@ -239,8 +239,8 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 	// We do the reverse iterate, so that the chance is higher that
 	// the old _queueIndexNext will be sent quickly after this newly added item.
 	uint8_t index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
-		index = i % queue_size;
+	for (int i = _queueIndexNext; i < _queueIndexNext + QUEUE_SIZE; ++i) {
+		index = i % QUEUE_SIZE;
 		cs_multicast_acked_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.transmissionsOrTimeout == 0) {
 
@@ -257,18 +257,18 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 			}
 
 			// Allocate and copy stone ids.
-			it->stoneIdsPtr = (stone_id_t*)malloc(item.numIds * sizeof(stone_id_t));
-			LOGMeshModelVerbose("ids alloc %p size=%u", it->stoneIdsPtr, item.numIds * sizeof(stone_id_t));
+			it->stoneIdsPtr = (stone_id_t*)malloc(item.numStoneIds * sizeof(stone_id_t));
+			LOGMeshModelVerbose("ids alloc %p size=%u", it->stoneIdsPtr, item.numStoneIds * sizeof(stone_id_t));
 			if (it->stoneIdsPtr == NULL) {
 				LOGMeshModelVerbose("msg free %p", it->msgPtr);
 				free(it->msgPtr);
 				return ERR_NO_SPACE;
 			}
-			memcpy(it->stoneIdsPtr, item.stoneIdsPtr, item.numIds * sizeof(stone_id_t));
+			memcpy(it->stoneIdsPtr, item.stoneIdsPtr, item.numStoneIds * sizeof(stone_id_t));
 
 			// Copy meta data.
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
-			it->numIds = item.numIds;
+			it->numStoneIds = item.numStoneIds;
 			it->msgSize = msgSize;
 			it->controlCommand = item.controlCommand;
 
@@ -286,7 +286,7 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 
 cs_ret_code_t MeshModelMulticastAcked::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
-	for (int i = 0; i < queue_size; ++i) {
+	for (int i = 0; i < QUEUE_SIZE; ++i) {
 		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
 			cancelQueueItem(i);
 			remQueueItem(i);
@@ -299,7 +299,7 @@ cs_ret_code_t MeshModelMulticastAcked::remFromQueue(cs_mesh_model_msg_type_t typ
 void MeshModelMulticastAcked::cancelQueueItem(uint8_t index) {
 	if (_queueIndexInProgress == index) {
 		LOGe("TODO: Cancel progress");
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 }
 
@@ -315,8 +315,8 @@ void MeshModelMulticastAcked::remQueueItem(uint8_t index) {
 
 int MeshModelMulticastAcked::getNextItemInQueue(bool priority) {
 	int index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; i++) {
-		index = i % queue_size;
+	for (int i = _queueIndexNext; i < _queueIndexNext + QUEUE_SIZE; i++) {
+		index = i % QUEUE_SIZE;
 		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
@@ -325,7 +325,7 @@ int MeshModelMulticastAcked::getNextItemInQueue(bool priority) {
 }
 
 bool MeshModelMulticastAcked::sendMsgFromQueue() {
-	if (_queueIndexInProgress != queue_index_none) {
+	if (_queueIndexInProgress != QUEUE_INDEX_NONE) {
 		return false;
 	}
 	int index = getNextItemInQueue(true);
@@ -349,19 +349,19 @@ bool MeshModelMulticastAcked::sendMsgFromQueue() {
 	LOGMeshModelInfo("sent ind=%u timeout=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
 
 	// Next item will be sent next, so that items are sent interleaved.
-	_queueIndexNext = (index + 1) % queue_size;
+	_queueIndexNext = (index + 1) % QUEUE_SIZE;
 	return true;
 }
 
 bool MeshModelMulticastAcked::prepareForMsg(cs_multicast_acked_queue_item_t* item) {
 	_processCallsLeft = item->metaData.transmissionsOrTimeout * 1000 / MESH_MODEL_ACKED_RETRY_INTERVAL_MS;
-	if (!_ackedStonesBitmask.setNumBits(item->numIds)) {
+	if (!_ackedStonesBitmask.setNumBits(item->numStoneIds)) {
 		return false;
 	}
 //	_handledSelf = false;
 
 	// Mark own stone ID as acked.
-	for (uint8_t i=0; i < item->numIds; ++i) {
+	for (uint8_t i=0; i < item->numStoneIds; ++i) {
 		if (item->stoneIdsPtr[i] == _ownStoneId) {
 			_ackedStonesBitmask.setBit(i);
 			break;
@@ -371,7 +371,7 @@ bool MeshModelMulticastAcked::prepareForMsg(cs_multicast_acked_queue_item_t* ite
 }
 
 void MeshModelMulticastAcked::checkDone() {
-	if (_queueIndexInProgress == queue_index_none) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 		return;
 	}
 	auto& item = _queue[_queueIndexInProgress];
@@ -392,7 +392,7 @@ void MeshModelMulticastAcked::checkDone() {
 		}
 
 		remQueueItem(_queueIndexInProgress);
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 
 	// Check for timeout.
@@ -409,7 +409,7 @@ void MeshModelMulticastAcked::checkDone() {
 			uart_msg_mesh_result_packet_header_t resultHeader;
 			resultHeader.resultHeader.commandType = cmdType;
 			resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
-			for (uint8_t i = 0; i < item.numIds; ++i) {
+			for (uint8_t i = 0; i < item.numStoneIds; ++i) {
 				if (!_ackedStonesBitmask.isSet(i)) {
 					resultHeader.stoneId = item.stoneIdsPtr[i];
 					LOGMeshModelInfo("Ack result: id=%u commandType=%u returnCode=%u", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
@@ -423,7 +423,7 @@ void MeshModelMulticastAcked::checkDone() {
 		}
 
 		remQueueItem(_queueIndexInProgress);
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 	else {
 		--_processCallsLeft;
@@ -431,7 +431,7 @@ void MeshModelMulticastAcked::checkDone() {
 }
 
 void MeshModelMulticastAcked::retryMsg() {
-	if (_queueIndexInProgress == queue_index_none) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 		return;
 	}
 	auto item = _queue[_queueIndexInProgress];

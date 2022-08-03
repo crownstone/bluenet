@@ -202,11 +202,11 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(MeshMsgEvent& msg) {
 	LOGi("received set time %u", timestamp);
 	if (timestamp != _lastReveivedSetTime) {
 		_lastReveivedSetTime = timestamp;
-		// TODO: send source.
+		// Suggestion: send the correct source?
 		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp), cmd_source_t(CS_CMD_SOURCE_TYPE_ENUM, CS_CMD_SOURCE_NONE, true));
 		event.dispatch();
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_CMD_TIME, msg.msg.data, msg.msg.len);
-//		return event.result.returnCode;
+		// Suggestion: return event.result.returnCode instead?
 		return ERR_SUCCESS;
 	}
 	return ERR_SUCCESS;
@@ -634,7 +634,8 @@ void MeshMsgHandler::replyWithRetCode(cs_mesh_model_msg_type_t type, cs_ret_code
 	if (reply->buf.len < sizeof(cs_mesh_model_msg_result_header_t)) {
 		return;
 	}
-	// TODO: we could save a byte by sending the same mesh message type (with a different payload) instead of a result mesh message.
+	// Suggestion: we could save a byte by sending the same mesh message type (with a different payload) instead of a result mesh message.
+	// However, this is a protocol breaking change.
 	cs_mesh_model_msg_result_header_t* packet = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(reply->buf.data);
 	packet->msgType = type;
 	packet->retCode = MeshUtil::getShortenedRetCode(retCode);

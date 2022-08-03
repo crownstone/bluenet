@@ -41,17 +41,17 @@ cs_ret_code_t Example::sendMsg(stone_id_t stoneId) {
 	payload.b = 29;
 
 	cs_mesh_msg_t meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_EXAMPLE;
-	meshMsg.flags.flags.broadcast = false;
-	meshMsg.flags.flags.reliable = true;
+	meshMsg.type                    = CS_MESH_MODEL_TYPE_EXAMPLE;
+	meshMsg.flags.flags.broadcast   = false;
+	meshMsg.flags.flags.acked       = true;
 	meshMsg.flags.flags.useKnownIds = false;
-	meshMsg.flags.flags.noHops = false;
-	meshMsg.reliability = 0;
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.idCount = 1;
-	meshMsg.targetIds = &stoneId;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&payload);
-	meshMsg.size = sizeof(payload);
+	meshMsg.flags.flags.doNotRelay  = false;
+	meshMsg.reliability             = 0;
+	meshMsg.urgency                 = CS_MESH_URGENCY_LOW;
+	meshMsg.idCount                 = 1;
+	meshMsg.targetIds               = &stoneId;
+	meshMsg.payload                 = reinterpret_cast<uint8_t*>(&payload);
+	meshMsg.size                    = sizeof(payload);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
@@ -68,7 +68,7 @@ Right now, a lot of mesh messages are handled in the `MeshMsgHandler` class. How
 void Example::handleEvent(event_t &event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
-			auto packet = CS_TYPE_CAST(EVT_RECV_MESH_MSG);
+			auto packet = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
 			onMeshMsg(*packet);
 			break;
 		}

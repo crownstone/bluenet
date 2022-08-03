@@ -48,7 +48,7 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 	meshMsg.type = CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION;
 	meshMsg.reliability = reliable ? CS_MESH_RELIABILITY_MEDIUM : CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = true;
+	meshMsg.flags.flags.doNotRelay = true;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&versionPacket);
 	meshMsg.size = sizeof(versionPacket);
 
