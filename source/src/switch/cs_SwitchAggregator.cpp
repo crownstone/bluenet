@@ -383,20 +383,20 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			}
 
 			// TODO: cache this value?
-			TYPIFY(STATE_PREFERRED_DIM_VALUE) preferredDimValue;
-			State::getInstance().get(CS_TYPE::STATE_PREFERRED_DIM_VALUE, &preferredDimValue, sizeof(preferredDimValue));
+			TYPIFY(STATE_DEFAULT_DIM_VALUE) defaultDimValue;
+			State::getInstance().get(CS_TYPE::STATE_DEFAULT_DIM_VALUE, &defaultDimValue, sizeof(defaultDimValue));
 
-			// Use the preferred dim value if it's set.
-			if (preferredDimValue != 0) {
+			// Use the configured default dim value if it's set.
+			if (defaultDimValue != 0) {
 				// Treat it the same way as manually setting the dim value.
-				preferredDimValue = std::min(preferredDimValue, static_cast<uint8_t>(CS_SWITCH_CMD_VAL_FULLY_ON));
-				executeStateIntentionUpdate(preferredDimValue, source);
+				defaultDimValue = std::min(defaultDimValue, static_cast<uint8_t>(CS_SWITCH_CMD_VAL_FULLY_ON));
+				executeStateIntentionUpdate(defaultDimValue, source);
 				return;
 			}
 
 			// Use the default dim value.
 			// Treat it the same way as manually setting the dim value.
-			executeStateIntentionUpdate(DEFAULT_DOUBLE_TAP_DIM_VALUE, source);
+			executeStateIntentionUpdate(DEFAULT_DIM_VALUE, source);
 			return;
 		}
 		case CS_SWITCH_CMD_VAL_BEHAVIOUR: {

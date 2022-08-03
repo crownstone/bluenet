@@ -196,7 +196,7 @@ enum class CS_TYPE: uint16_t {
 	STATE_MESH_SEQ_NUMBER_V5                = 166,
 
 	STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED    = 167,
-	STATE_PREFERRED_DIM_VALUE               = 168,
+	STATE_DEFAULT_DIM_VALUE                 = 168,
 
 	/*
 	 * Internal commands and events.
@@ -523,7 +523,7 @@ typedef cs_mesh_seq_number_v5_t TYPIFY(STATE_MESH_SEQ_NUMBER_V5);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef microapp_state_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
-typedef uint8_t TYPIFY(STATE_PREFERRED_DIM_VALUE);
+typedef uint8_t TYPIFY(STATE_DEFAULT_DIM_VALUE);
 typedef uint8_t TYPIFY(STATE_HUB_MODE);
 typedef asset_filters_version_t TYPIFY(STATE_ASSET_FILTERS_VERSION);
 
