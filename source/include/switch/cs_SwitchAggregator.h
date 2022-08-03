@@ -58,11 +58,8 @@ private:
 	// Cache of previous time update.
 	uint32_t _lastTimestamp = 0;
 
-	//! Keeps up the unix timestamp of the last detected switchcraft.
-	uint32_t _lastSwitchcraftEventUnixTimestamp = 0;
-
-	//! Keeps up the RTC count of the last detected switchcraft.
-	uint32_t _lastSwitchcraftEventRtcCount = 0;
+	//! Set on switchcraft event, then decremented each tick event until 0.
+	uint16_t _switchcraftDoubleTapCountdown = 0;
 
 	//! Keeps up the switch value of the last time it was on, before being turned off by switchcraft.
 	uint8_t _lastSwitchcraftOnValue = 0;

@@ -104,10 +104,10 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 
 	LOGSwitchAggregatorDebug(
 			"overrideState=%u, behaviourState=%u, twilightState=%u, aggregatedState=%u",
-			_overrideState ? _overrideState.value() : CS_SWITCH_CMD_VAL_NONE,
-			_behaviourState ? _behaviourState.value() : CS_SWITCH_CMD_VAL_NONE,
-			_twilightState ? _twilightState.value() : CS_SWITCH_CMD_VAL_NONE,
-			_aggregatedState ? _aggregatedState.value() : CS_SWITCH_CMD_VAL_NONE);
+			_overrideState ? _overrideState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
+			_behaviourState ? _behaviourState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
+			_twilightState ? _twilightState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
+			_aggregatedState ? _aggregatedState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE));
 
 	// attempt to update smartSwitch value
 	cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
@@ -188,7 +188,13 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_TICK: {
 			// decrement until 0
-			_ownerTimeoutCountdown == 0 || _ownerTimeoutCountdown--;
+			if (_ownerTimeoutCountdown == 0) {
+				--_ownerTimeoutCountdown;
+			}
+
+			if (_switchcraftDoubleTapCountdown) {
+				--_switchcraftDoubleTapCountdown;
+			}
 
 			// Execute code following this if statement, only once a second.
 			// But since we poll every tick, we are pretty close to the moment the posix seconds increase.
@@ -328,43 +334,70 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 		case CS_SWITCH_CMD_VAL_TOGGLE: {
 
 			bool doubleTap = false;
-
 			uint8_t currentValue = _smartSwitch.getIntendedState();
 
 			if (source.source.type == CS_CMD_SOURCE_TYPE_ENUM && source.source.id == CS_CMD_SOURCE_SWITCHCRAFT) {
-				TYPIFY(STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED) doubleTapEnabled;
-				State::getInstance().get(CS_TYPE::STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED, &doubleTapEnabled, sizeof(doubleTapEnabled));
 
-				uint32_t timestamp = SystemTime::posix();
-				uint32_t rtcCount = RTC::getCount();
-				if (doubleTapEnabled && timestamp - _lastSwitchcraftEventUnixTimestamp < SWITCHCRAFT_DOUBLE_TAP_TIME_MS / 1000 + 1) {
-					uint32_t diffMs = RTC::differenceMs(rtcCount, _lastSwitchcraftEventRtcCount);
-					if (diffMs < SWITCHCRAFT_DOUBLE_TAP_TIME_MS) {
-						LOGi("Double switchcraft");
+				if (_switchcraftDoubleTapCountdown) {
+					// TODO: cache this value?
+					TYPIFY(STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED) doubleTapEnabled;
+					State::getInstance().get(CS_TYPE::STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED, &doubleTapEnabled, sizeof(doubleTapEnabled));
+					if (doubleTapEnabled) {
+						LOGi("Double tap switchcraft");
 						doubleTap = true;
 					}
 				}
-
-				_lastSwitchcraftEventUnixTimestamp = timestamp;
-				_lastSwitchcraftEventRtcCount = rtcCount;
+				_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIME_MS / TICK_INTERVAL_MS;
 
 				if (currentValue > 0) {
 					_lastSwitchcraftOnValue = currentValue;
 				}
 			}
 
-			uint8_t newValue = 0;
-			if (currentValue == 0) {
-				if (doubleTap && _lastSwitchcraftOnValue) {
-					// Toggle between 100 and PREFERRED_DIM_VALUE.
-					newValue = _lastSwitchcraftOnValue == 100 ? CS_SWITCH_CMD_VAL_PREFERRED_DIM_VALUE : 100;
-				}
-				else {
-					newValue = CS_SWITCH_CMD_VAL_SMART_ON;
-				}
+			if (currentValue != 0) {
+				// Switch is currently on, so switch off.
+				executeStateIntentionUpdate(0, source);
+				return;
 			}
 
-			executeStateIntentionUpdate(newValue, source);
+			if (!doubleTap || !_lastSwitchcraftOnValue) {
+				// No double tap: just turn on (according to behaviour).
+				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_SMART_ON, source);
+				return;
+			}
+
+			// Double tap: on value toggles between fully on, and a dimmed value.
+			if (_lastSwitchcraftOnValue != CS_SWITCH_CMD_VAL_FULLY_ON) {
+				// Treat it the same way as manually setting the switch fully on.
+				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_FULLY_ON, source);
+				return;
+			}
+			LOGSwitchAggregatorDebug("Resolve double tap dim value.");
+
+			// TODO: cache this value?
+			TYPIFY(STATE_PREFERRED_DIM_VALUE) preferredDimValue;
+			State::getInstance().get(CS_TYPE::STATE_PREFERRED_DIM_VALUE, &preferredDimValue, sizeof(preferredDimValue));
+
+			// Use the preferred dim value if it's set.
+			if (preferredDimValue != 0) {
+				// Treat it the same way as manually setting the dim value.
+				preferredDimValue = std::min(preferredDimValue, static_cast<uint8_t>(CS_SWITCH_CMD_VAL_FULLY_ON));
+				executeStateIntentionUpdate(preferredDimValue, source);
+				return;
+			}
+
+			// Check if any behaviour has a dimmed value, and if so, use that.
+			// TODO: accept the twilight even when it's not active at this time.
+			uint8_t resolved = resolveOverrideState(CS_SWITCH_CMD_VAL_SMART_ON);
+			if (0 < resolved && resolved < CS_SWITCH_CMD_VAL_FULLY_ON) {
+				// This is not an override state.
+				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_SMART_ON, source);
+				return;
+			}
+
+			// Use the default dim value.
+			// Treat it the same way as manually setting the dim value.
+			executeStateIntentionUpdate(DEFAULT_DOUBLE_TAP_DIM_VALUE, source);
 			return;
 		}
 		case CS_SWITCH_CMD_VAL_BEHAVIOUR: {
@@ -372,10 +405,6 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			break;
 		}
 		case CS_SWITCH_CMD_VAL_SMART_ON: {
-			_overrideState = value;
-			break;
-		}
-		case CS_SWITCH_CMD_VAL_PREFERRED_DIM_VALUE: {
 			_overrideState = value;
 			break;
 		}
@@ -448,27 +477,8 @@ uint8_t SwitchAggregator::aggregatedBehaviourIntensity() {
 }
 
 uint8_t SwitchAggregator::resolveOverrideState(uint8_t overrideState) {
-	switch (overrideState) {
-		case CS_SWITCH_CMD_VAL_SMART_ON: {
-			break;
-		}
-		case CS_SWITCH_CMD_VAL_PREFERRED_DIM_VALUE: {
-			LOGSwitchAggregatorDebug("Resolve preferred dim value..");
-			TYPIFY(STATE_PREFERRED_DIM_VALUE) preferredDimValue;
-			State::getInstance().get(CS_TYPE::STATE_PREFERRED_DIM_VALUE, &preferredDimValue, sizeof(preferredDimValue));
-
-			if (preferredDimValue != 0) {
-				return std::min(preferredDimValue, static_cast<uint8_t>(100));
-			}
-			// TODO: accept the twilight even when it's not active at this time.
-			uint8_t resolved = resolveOverrideState(CS_SWITCH_CMD_VAL_SMART_ON);
-			if (0 < resolved && resolved < 100) {
-				return resolved;
-			}
-			return DEFAULT_DOUBLE_TAP_DIM_VALUE;
-		}
-		default:
-			return overrideState;
+	if (overrideState != CS_SWITCH_CMD_VAL_SMART_ON) {
+		return overrideState;
 	}
 
 	LOGSwitchAggregatorDebug("Override is smart on");
@@ -488,7 +498,7 @@ uint8_t SwitchAggregator::resolveOverrideState(uint8_t overrideState) {
 		return *_twilightState;
 	}
 
-	return 100;
+	return CS_SWITCH_CMD_VAL_FULLY_ON;
 }
 
 bool SwitchAggregator::checkAndSetOwner(const cmd_source_with_counter_t& source) {
