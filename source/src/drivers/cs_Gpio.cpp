@@ -20,6 +20,9 @@ Gpio::Gpio(): EventListener() {
  * Initialize GPIO with the board configuration. If there are button pins defined (as is the case on dev. boards) we
  * can actually control these from other modules. We limit here the number of pins that can be controlled to not be
  * accidentally driving the relay or the IGBTs.
+ *
+ * Interrupts are not put on the app scheduler, but instead pins are marked to have an interrupt.
+ * Each tick, all pins are checked whether they are marked to have an interrupt. If so, EVT_GPIO_UPDATE is dispatched.
  */
 void Gpio::init(const boards_config_t & board) {
 
@@ -164,7 +167,10 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 					return;
 			}
 			config.pull = nrf_pull;
-			config.hi_accuracy = true;
+
+			// With high accuracy, nrfx_gpiote will make use of GPIOTE channels.
+			// These channels might already be used by our own PWM class.
+			config.hi_accuracy = false;
 			config.is_watcher = false;
 			config.skip_gpio_setup = false;
 
