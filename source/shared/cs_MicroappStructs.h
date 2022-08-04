@@ -69,144 +69,191 @@ enum CallbackMicroappOpcode {
 
 /**
  * Acknowledgments from microapp to bluenet or the other way around.
+ * Negative for errors
  */
-enum CommandMicroappAck {
-	CS_ACK_NONE                      = 0x00,
-	CS_ACK_BLUENET_MICROAPP_REQUEST  = 0x01,
-	CS_ACK_BLUENET_MICROAPP_REQ_ACK  = 0x02,
-	CS_ACK_BLUENET_MICROAPP_REQ_BUSY = 0x03,
-	CS_ACK_MICROAPP_BLUENET_REQUEST  = 0x04,
-	CS_ACK_MICROAPP_BLUENET_REQ_ACK  = 0x05,
-	CS_ACK_MICROAPP_BLUENET_REQ_BUSY = 0x06,
+enum MicroappAck {
+	CS_ACK_NONE                      = 0x00, // No meaning
+
+	// Ack requests
+	CS_ACK_NO_REQUEST                = 0x01, // Explicitly do not ask for an acknowledgement
+	CS_ACK_REQUEST                   = 0x02, // Request for other process (microapp or bluenet) to overwrite this field
+
+	// Ack successful replies (positive)
+	CS_ACK_SUCCESS                   = 0x03, // Finished successfully
+	CS_ACK_WAIT_FOR_SUCCESS          = 0x04, // So far so good, but not done yet
+
+	// Ack error replies (negative)
+	CS_ACK_ERR_NOT_FOUND             = -0x01, // A requested entity could not be found
+	CS_ACK_ERR_UNKNOWN_PROTOCOL      = -0x02, // The request cannot be interpreted fully
+	CS_ACK_ERR_NO_SPACE              = -0x03, // There is no space to fulfill a request
+	CS_ACK_ERR_NOT_IMPLEMENTED       = -0x04, // The request can be interpreted but is not implemented yet
+	CS_ACK_ERR_BUSY                  = -0x05, // The request cannot be fulfilled because of other ongoing requests
 };
 
 /**
  * The main opcodes for microapp commands.
  */
-enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_NONE                    = 0x00,
-	CS_MICROAPP_COMMAND_LOG                     = 0x01,
-	CS_MICROAPP_COMMAND_DELAY                   = 0x02,
-	CS_MICROAPP_COMMAND_PIN                     = 0x03,
-	CS_MICROAPP_COMMAND_SWITCH_DIMMER           = 0x04,
-	CS_MICROAPP_COMMAND_SERVICE_DATA            = 0x05,
-	CS_MICROAPP_COMMAND_TWI                     = 0x06,
-	CS_MICROAPP_COMMAND_BLE                     = 0x07,
-	CS_MICROAPP_COMMAND_POWER_USAGE             = 0x08,
-	CS_MICROAPP_COMMAND_PRESENCE                = 0x09,
-	CS_MICROAPP_COMMAND_MESH                    = 0x0A,
-	CS_MICROAPP_COMMAND_SETUP_END               = 0x0B,
-	CS_MICROAPP_COMMAND_LOOP_END                = 0x0C,
-	CS_MICROAPP_COMMAND_BLE_DEVICE              = 0x0D,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED = 0x0E,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END      = 0x0F,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR    = 0x10,
-	CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED  = 0x11,
+enum MicroappSdkType {
+	CS_MICROAPP_SDK_TYPE_NONE            = 0x00, // No meaning, should not be used
+	CS_MICROAPP_SDK_TYPE_LOG             = 0x01, // Microapp logs
+	CS_MICROAPP_SDK_TYPE_PIN             = 0x02, // GPIO related
+	CS_MICROAPP_SDK_TYPE_SWITCH          = 0x03, // Switch and dimmer commands
+	CS_MICROAPP_SDK_TYPE_SERVICE_DATA    = 0x04, // Microapp service data updates
+	CS_MICROAPP_SDK_TYPE_TWI             = 0x05, // TWI related
+	CS_MICROAPP_SDK_TYPE_BLE             = 0x06, // BLE related (excluding mesh)
+	CS_MICROAPP_SDK_TYPE_MESH            = 0x07, // Mesh related
+	CS_MICROAPP_SDK_TYPE_POWER_USAGE     = 0x08, // Power usage related
+	CS_MICROAPP_SDK_TYPE_PRESENCE        = 0x09, // Presence related
+	CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND = 0x0A, // Generic control command according to the control command protocol
+	CS_MICROAPP_SDK_TYPE_YIELD           = 0x0B, // Microapp yielding to bluenet without expecting a direct return call, i.e. at the end of setup, loop or during a delay
+	CS_MICROAPP_SDK_TYPE_CONTINUE        = 0x0C, // Bluenet calling the microapp without an interrupt, i.e. on a tick or subsequent call
 };
 
-enum CommandMicroappPin {
-	CS_MICROAPP_COMMAND_PIN_GPIO0   = 0x00,
-	CS_MICROAPP_COMMAND_PIN_GPIO1   = 0x01,
-	CS_MICROAPP_COMMAND_PIN_GPIO2   = 0x02,
-	CS_MICROAPP_COMMAND_PIN_GPIO3   = 0x03,
-	CS_MICROAPP_COMMAND_PIN_GPIO4   = 0x04,
-	CS_MICROAPP_COMMAND_PIN_GPIO5   = 0x05,
-	CS_MICROAPP_COMMAND_PIN_GPIO6   = 0x06,
-	CS_MICROAPP_COMMAND_PIN_GPIO7   = 0x07,
-	CS_MICROAPP_COMMAND_PIN_GPIO8   = 0x08,
-	CS_MICROAPP_COMMAND_PIN_GPIO9   = 0x09,
-	CS_MICROAPP_COMMAND_PIN_BUTTON1 = 0x0A,
-	CS_MICROAPP_COMMAND_PIN_BUTTON2 = 0x0B,
-	CS_MICROAPP_COMMAND_PIN_BUTTON3 = 0x0C,
-	CS_MICROAPP_COMMAND_PIN_BUTTON4 = 0x0D,
-	CS_MICROAPP_COMMAND_PIN_LED1    = 0x0E,
-	CS_MICROAPP_COMMAND_PIN_LED2    = 0x0F,
-	CS_MICROAPP_COMMAND_PIN_LED3    = 0x10,
-	CS_MICROAPP_COMMAND_PIN_LED4    = 0x11,
+
+/**
+ * Indicates the GPIO pins of the hardware. These are mostly for the nRF development kits, since the plugs and builtins have no external GPIOS, buttons or leds
+ */
+enum MicroappSdkPin {
+	CS_MICROAPP_SDK_PIN_GPIO0   = 0x00,
+	CS_MICROAPP_SDK_PIN_GPIO1   = 0x01,
+	CS_MICROAPP_SDK_PIN_GPIO2   = 0x02,
+	CS_MICROAPP_SDK_PIN_GPIO3   = 0x03,
+	CS_MICROAPP_SDK_PIN_GPIO4   = 0x04,
+	CS_MICROAPP_SDK_PIN_GPIO5   = 0x05,
+	CS_MICROAPP_SDK_PIN_GPIO6   = 0x06,
+	CS_MICROAPP_SDK_PIN_GPIO7   = 0x07,
+	CS_MICROAPP_SDK_PIN_GPIO8   = 0x08,
+	CS_MICROAPP_SDK_PIN_GPIO9   = 0x09,
+	CS_MICROAPP_SDK_PIN_BUTTON1 = 0x0A,
+	CS_MICROAPP_SDK_PIN_BUTTON2 = 0x0B,
+	CS_MICROAPP_SDK_PIN_BUTTON3 = 0x0C,
+	CS_MICROAPP_SDK_PIN_BUTTON4 = 0x0D,
+	CS_MICROAPP_SDK_PIN_LED1    = 0x0E,
+	CS_MICROAPP_SDK_PIN_LED2    = 0x0F,
+	CS_MICROAPP_SDK_PIN_LED3    = 0x10,
+	CS_MICROAPP_SDK_PIN_LED4    = 0x11,
 };
 
-enum CommandMicroappPinOpcode1 {
-	CS_MICROAPP_COMMAND_PIN_MODE   = 0x00,
-	CS_MICROAPP_COMMAND_PIN_ACTION = 0x01,
+/**
+ * Indicates whether the pin is to be initialized (MODE) or perform an action (ACTION)
+ */
+enum MicroappSdkPinType {
+	CS_MICROAPP_SDK_PIN_INIT   = 0x01, // Initialize the pin with a polarity and a direction and register an interrupt
+	CS_MICROAPP_SDK_PIN_ACTION = 0x02, // An action such as read the value of a pin or write to it
 };
 
-enum CommandMicroappPinOpcode2 {
-	CS_MICROAPP_COMMAND_PIN_READ         = 0x01,
-	CS_MICROAPP_COMMAND_PIN_WRITE        = 0x02,
-	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP = 0x03,
+/**
+ * Directionality of the GPIO pin (input or output)
+ */
+enum MicroappSdkPinDirection {
+	CS_MICROAPP_SDK_PIN_INPUT          = 0x01, // Set pin as input, but do not use a pulling resistor
+	CS_MICROAPP_SDK_PIN_INPUT_PULLUP   = 0x02, // Set pin as input using a pullup resistor
+	CS_MICROAPP_SDK_PIN_INPUT_PULLDOWN = 0x03, // Set pin as input using a pulldown resistor
+	CS_MICROAPP_SDK_PIN_OUTPUT         = 0x04, // Set pin as output
 };
 
-enum CommandMicroappPinValue {
-	CS_MICROAPP_COMMAND_VALUE_OFF     = 0x00,
-	CS_MICROAPP_COMMAND_VALUE_ON      = 0x01,
-	CS_MICROAPP_COMMAND_VALUE_CHANGE  = 0x02,
-	CS_MICROAPP_COMMAND_VALUE_RISING  = 0x03,
-	CS_MICROAPP_COMMAND_VALUE_FALLING = 0x04,
+/**
+ * Polarity of pin for initializing pin interrupts (only for input pins)
+ */
+enum MicroappSdkPinPolarity {
+	CS_MICROAPP_SDK_PIN_CHANGE  = 0x00, // LOTOHI or HITOLO
+	CS_MICROAPP_SDK_PIN_RISING  = 0x01, // LOTOHI
+	CS_MICROAPP_SDK_PIN_FALLING = 0x02, // HITOLO
 };
 
-enum CommandMicroappDimmerSwitchOpcode {
-	CS_MICROAPP_COMMAND_SWITCH = 0x00,
-	CS_MICROAPP_COMMAND_DIMMER = 0x01,
+/**
+ * Type of action to perform on a pin, either read or write
+ */
+enum MicroappSdkPinActionType {
+	CS_MICROAPP_SDK_PIN_READ   = 0x00,
+	CS_MICROAPP_SDK_PIN_WRITE  = 0x01,
 };
 
-enum CommandMicroappSwitchValue {
-	CS_MICROAPP_COMMAND_SWITCH_OFF    = 0x00,
-	CS_MICROAPP_COMMAND_SWITCH_ON     = 0x01,
-	CS_MICROAPP_COMMAND_SWITCH_TOGGLE = 0x02,
+/**
+ * Value to either read from the pin or write to the pin
+ */
+enum MicroappSdkPinValue {
+	CS_MICROAPP_SDK_PIN_ON   = 0x00,
+	CS_MICROAPP_SDK_PIN_OFF  = 0x01,
 };
 
-enum CommandMicroappLog {
-	CS_MICROAPP_COMMAND_LOG_CHAR   = 0x00,
-	CS_MICROAPP_COMMAND_LOG_INT    = 0x01,
-	CS_MICROAPP_COMMAND_LOG_STR    = 0x02,
-	CS_MICROAPP_COMMAND_LOG_ARR    = 0x03,
-	CS_MICROAPP_COMMAND_LOG_FLOAT  = 0x04,
-	CS_MICROAPP_COMMAND_LOG_DOUBLE = 0x05,
-	CS_MICROAPP_COMMAND_LOG_UINT   = 0x06,
-	CS_MICROAPP_COMMAND_LOG_SHORT  = 0x07,
+/**
+ * Switch value according to same protocol as switch command value over BLE and UART
+ * Values between 0 and 100 can be used for dimming
+ */
+enum MicroappSdkSwitchValue {
+	CS_MICROAPP_SDK_SWITCH_OFF       = 0x00, // 0   = fully off
+	CS_MICROAPP_SDK_SWITCH_ON        = 0x64, // 100 = fully on
+	CS_MICROAPP_SDK_SWITCH_TOGGLE    = 0xFD, // Switch off when currently on, switch to smart on when currently off
+	CS_MICROAPP_SDK_SWITCH_BEHAVIOUR = 0xFE, // Switch to the value according to behaviour rules
+	CS_MICROAPP_SDK_SWITCH_SMART_ON  = 0xFF, // Switch on, the value will be determined by behaviour rules
 };
 
-enum CommandMicroappLogOption {
-	CS_MICROAPP_COMMAND_LOG_NEWLINE    = 0x00,
-	CS_MICROAPP_COMMAND_LOG_NO_NEWLINE = 0x01,
+/**
+ * Type of log indicating how to interpret the log payload
+ */
+enum MicroappSdkLogType {
+	CS_MICROAPP_SDK_LOG_CHAR   = 0x00, // Char or byte
+	CS_MICROAPP_SDK_LOG_INT    = 0x01, // Signed int (32-bit)
+	CS_MICROAPP_SDK_LOG_STR    = 0x02, // String or char array, same as arr
+	CS_MICROAPP_SDK_LOG_ARR    = 0x03, // Byte array, same as str
+	CS_MICROAPP_SDK_LOG_FLOAT  = 0x04, // Float
+	CS_MICROAPP_SDK_LOG_DOUBLE = 0x05, // Double
+	CS_MICROAPP_SDK_LOG_UINT   = 0x06, // Unsigned int (32-bit)
+	CS_MICROAPP_SDK_LOG_SHORT  = 0x07, // Unsigned short (16-bit)
 };
 
-enum CommandMicroappTwiOpcode {
-	CS_MICROAPP_COMMAND_TWI_READ    = 0x01,
-	CS_MICROAPP_COMMAND_TWI_WRITE   = 0x02,
-	CS_MICROAPP_COMMAND_TWI_INIT    = 0x03,
-	CS_MICROAPP_COMMAND_TWI_ENABLE  = 0x04,
-	CS_MICROAPP_COMMAND_TWI_DISABLE = 0x05,
+/**
+ * Flags for logging. Currently only using a newline flag
+ */
+enum MicroappSdkLogFlags {
+	CS_MICROAPP_SDK_LOG_FLAGS_NEWLINE    = (1 << 0),
 };
 
-enum CommandMicroappBleOpcode {
-	CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER = 0x01,
-	CS_MICROAPP_COMMAND_BLE_SCAN_START       = 0x02,
-	CS_MICROAPP_COMMAND_BLE_SCAN_STOP        = 0x03,
-	CS_MICROAPP_COMMAND_BLE_CONNECT          = 0x04,
+/**
+ * Type of TWI request
+ */
+enum MicroappSdkTwiType {
+	CS_MICROAPP_SDK_TWI_READ    = 0x01,
+	CS_MICROAPP_SDK_TWI_WRITE   = 0x02,
+	CS_MICROAPP_SDK_TWI_INIT    = 0x03,
+	CS_MICROAPP_SDK_TWI_ENABLE  = 0x04,
+	CS_MICROAPP_SDK_TWI_DISABLE = 0x05,
 };
 
-enum CommandMicroappMeshOpcode {
-	CS_MICROAPP_COMMAND_MESH_SEND             = 0x00,
-	CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER = 0x01,
-	CS_MICROAPP_COMMAND_MESH_GET_INFO         = 0x02,
+/**
+ * Type of BLE request, indicating how to interpret the rest of the request
+ */
+enum MicroappSdkBleType {
+	CS_MICROAPP_SDK_BLE_SCAN       = 0x01, // Scan-related requests
+	CS_MICROAPP_SDK_BLE_CONNECTION = 0x02, // Connection-related requests
 };
 
-enum MicroappBleEventType {
-	BleEventDeviceScanned = 0x01,
-	BleEventConnected     = 0x02,
-	BleEventDisconnected  = 0x03,
+/**
+ * BLE scan request types
+ */
+enum MicroappSdkBleScanType {
+	CS_MICROAPP_SDK_BLE_SCAN_START              = 0x00, // Start forwarding scanned devices to the microapp
+	CS_MICROAPP_SDK_BLE_SCAN_STOP               = 0x01, // Stop forwarding scanned devices to the microapp
+	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT = 0x02, // Register an interrupt for incoming scanned devices
 };
 
-enum MicroappErrorTypes {
-	ERR_MICROAPP_SUCCESS                       = 0x00,
-	ERR_MICROAPP_SOFT_INTERRUPT_NOT_REGISTERED = 0x01,
-	ERR_MICROAPP_USER_ERROR                    = 0x02,
-	ERR_MICROAPP_UNKNOWN_PROTOCOL              = 0x03,
-	ERR_MICROAPP_NO_SPACE                      = 0x04,
-	ERR_MICROAPP_NOT_IMPLEMENTED               = 0x05,
+/**
+ * BLE connection request types
+ */
+enum MicroappSdkBleConnectionType {
+	CS_MICROAPP_SDK_BLE_CONNECTION_CONNECT    = 0x00, // Connect to a peripheral
+	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECT = 0x01, // Disconnect from a peripheral
 };
 
+/**
+ * Mesh request types
+ */
+enum CommandMicroappMeshType {
+	CS_MICROAPP_COMMAND_MESH_TYPE_SEND         = 0x00, // Send a mesh message
+	CS_MICROAPP_COMMAND_MESH_TYPE_LISTEN       = 0x01, // Start listening for mesh messages of the microapp type, and register an interrupt
+	CS_MICROAPP_COMMAND_MESH_TYPE_READ_CONFIG  = 0x02, // Request for information about the mesh configuration. At the moment consisting only of the own stone ID
+};
 
 /**
  * A single buffer (can be either input or output).
