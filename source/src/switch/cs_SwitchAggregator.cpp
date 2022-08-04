@@ -332,71 +332,18 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 
 	switch (value) {
 		case CS_SWITCH_CMD_VAL_TOGGLE: {
-
-			bool doubleTap = false;
+			// Toggle between 0 and on.
 			uint8_t currentValue = _smartSwitch.getIntendedState();
-
+			uint8_t newValue = 0;
 			if (source.source.type == CS_CMD_SOURCE_TYPE_ENUM && source.source.id == CS_CMD_SOURCE_SWITCHCRAFT) {
-
-				if (_switchcraftDoubleTapCountdown) {
-					// TODO: cache this value?
-					TYPIFY(STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED) doubleTapEnabled;
-					State::getInstance().get(CS_TYPE::STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED, &doubleTapEnabled, sizeof(doubleTapEnabled));
-					if (doubleTapEnabled) {
-						LOGi("Double tap switchcraft");
-						doubleTap = true;
-					}
-				}
-				_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIME_MS / TICK_INTERVAL_MS;
-
-				if (currentValue > 0) {
-					_lastSwitchcraftOnValue = currentValue;
-				}
+				bool doubleTap = registerSwitchcraftEvent(currentValue);
+				newValue = getStateIntentionSwitchcraft(currentValue, doubleTap);
 			}
-
-			if (currentValue != 0) {
-				// Switch is currently on, so switch off.
-				executeStateIntentionUpdate(0, source);
-				return;
+			else if (currentValue == 0) {
+				// Switch is currently off, so switch on.
+				newValue = CS_SWITCH_CMD_VAL_SMART_ON;
 			}
-
-			if (!doubleTap || !_lastSwitchcraftOnValue) {
-				// No double tap: just turn on (according to behaviour).
-				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_SMART_ON, source);
-				return;
-			}
-
-			// Double tap: on value toggles between fully on, and a dimmed value.
-			if (_lastSwitchcraftOnValue != CS_SWITCH_CMD_VAL_FULLY_ON) {
-				// Treat it the same way as manually setting the switch fully on.
-				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_FULLY_ON, source);
-				return;
-			}
-			LOGSwitchAggregatorDebug("Resolve double tap dim value.");
-
-			// Check if any active behaviour has a dimmed value, and if so, use that.
-			uint8_t resolved = resolveOverrideState(CS_SWITCH_CMD_VAL_SMART_ON);
-			if (0 < resolved && resolved < CS_SWITCH_CMD_VAL_FULLY_ON) {
-				// This is not an override state.
-				executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_SMART_ON, source);
-				return;
-			}
-
-			// TODO: cache this value?
-			TYPIFY(STATE_DEFAULT_DIM_VALUE) defaultDimValue;
-			State::getInstance().get(CS_TYPE::STATE_DEFAULT_DIM_VALUE, &defaultDimValue, sizeof(defaultDimValue));
-
-			// Use the configured default dim value if it's set.
-			if (defaultDimValue != 0) {
-				// Treat it the same way as manually setting the dim value.
-				defaultDimValue = std::min(defaultDimValue, static_cast<uint8_t>(CS_SWITCH_CMD_VAL_FULLY_ON));
-				executeStateIntentionUpdate(defaultDimValue, source);
-				return;
-			}
-
-			// Use the default dim value.
-			// Treat it the same way as manually setting the dim value.
-			executeStateIntentionUpdate(DEFAULT_DIM_VALUE, source);
+			executeStateIntentionUpdate(newValue, source);
 			return;
 		}
 		case CS_SWITCH_CMD_VAL_BEHAVIOUR: {
@@ -441,6 +388,66 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 	addToSwitchHistory(
 			cs_switch_history_item_t(SystemTime::posix(), value, _smartSwitch.getActualState(), source.source));
 	pushTestDataToHost();
+}
+
+bool SwitchAggregator::registerSwitchcraftEvent(uint8_t currentValue) {
+	if (currentValue > 0) {
+		_lastSwitchcraftOnValue = currentValue;
+	}
+
+	bool doubleTap = false;
+	if (_switchcraftDoubleTapCountdown) {
+		// TODO: cache this value?
+		TYPIFY(STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED) doubleTapEnabled;
+		State::getInstance().get(CS_TYPE::STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED, &doubleTapEnabled, sizeof(doubleTapEnabled));
+		if (doubleTapEnabled) {
+			LOGi("Double tap switchcraft");
+			doubleTap = true;
+		}
+	}
+	_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIME_MS / TICK_INTERVAL_MS;
+	return doubleTap;
+}
+
+uint8_t SwitchAggregator::getStateIntentionSwitchcraft(uint8_t currentValue, bool doubleTap) {
+	if (currentValue != 0) {
+		// Switch is currently on, so switch off.
+		return 0;
+	}
+
+	if (!doubleTap || _lastSwitchcraftOnValue == 0) {
+		// No double tap: just turn on (according to behaviour).
+		return CS_SWITCH_CMD_VAL_SMART_ON;
+	}
+
+	// Double tap: on value toggles between fully on, and a dimmed value.
+	if (_lastSwitchcraftOnValue != CS_SWITCH_CMD_VAL_FULLY_ON) {
+		// Treat it the same way as manually setting the switch fully on.
+		return CS_SWITCH_CMD_VAL_FULLY_ON;
+	}
+	LOGSwitchAggregatorDebug("Resolve double tap dim value.");
+
+	// Check if any active behaviour has a dimmed value, and if so, use that.
+	uint8_t resolved = resolveOverrideState(CS_SWITCH_CMD_VAL_SMART_ON);
+	if (0 < resolved && resolved < CS_SWITCH_CMD_VAL_FULLY_ON) {
+		// This is not an override state.
+		return CS_SWITCH_CMD_VAL_SMART_ON;
+	}
+
+	// TODO: cache this value?
+	TYPIFY(STATE_DEFAULT_DIM_VALUE) defaultDimValue;
+	State::getInstance().get(CS_TYPE::STATE_DEFAULT_DIM_VALUE, &defaultDimValue, sizeof(defaultDimValue));
+
+	// Use the configured default dim value if it's set.
+	if (defaultDimValue != 0) {
+		// Treat it the same way as manually setting the dim value.
+		defaultDimValue = std::min(defaultDimValue, static_cast<uint8_t>(CS_SWITCH_CMD_VAL_FULLY_ON));
+		return defaultDimValue;
+	}
+
+	// Use the default dim value.
+	// Treat it the same way as manually setting the dim value.
+	return DEFAULT_DIM_VALUE;
 }
 
 void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {

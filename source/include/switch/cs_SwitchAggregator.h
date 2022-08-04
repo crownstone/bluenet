@@ -124,6 +124,27 @@ private:
 	void executeStateIntentionUpdate(uint8_t value, cmd_source_with_counter_t& source);
 
 	/**
+	 * Registers a switchcraft event and checks if it's a double tap action.
+	 *
+	 * Sets _lastSwitchcraftOnValue and _switchcraftDoubleTapCountdown.
+	 *
+	 * @param[in] currentValue    The current switch value.
+	 *
+	 * @return    true            When this event is a double tap.
+	 */
+	bool registerSwitchcraftEvent(uint8_t currentValue);
+
+	/**
+	 * Get the state intention from a switchcraft event.
+	 *
+	 * @param[in] currentValue    The current switch value.
+	 * @param[in] doubleTap       Whether the switchcraft event was a double tap.
+	 *
+	 * @return                    The switch value to be set.
+	 */
+	uint8_t getStateIntentionSwitchcraft(uint8_t currentValue, bool doubleTap);
+
+	/**
 	 * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
 	 * a new aggregated state. This handling function takes care of that.
 	 *
