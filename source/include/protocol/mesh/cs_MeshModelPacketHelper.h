@@ -78,9 +78,6 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
  */
 bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* payload, size16_t payloadSize);
 
-bool isCtrlCmd(cs_mesh_model_msg_type_t meshtype);
-CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType);
-
 bool canShortenStateType(uint16_t type);
 bool canShortenStateId(uint16_t id);
 bool canShortenPersistenceMode(uint8_t id);

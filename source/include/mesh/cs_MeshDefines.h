@@ -12,6 +12,7 @@
 #define LOGMeshInfo LOGvv
 #define LOGMeshDebug LOGvv
 #define LOGMeshVerbose LOGvv
+#define LogLevelMeshDebug SERIAL_VERY_VERBOSE
 
 // Debug logs
 #define LOGMeshModelInfo    LOGvv

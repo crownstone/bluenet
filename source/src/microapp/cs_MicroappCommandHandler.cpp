@@ -553,9 +553,9 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 				LOGv("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
-			eventData.flags.flags.reliable    = !broadcast;
+			eventData.flags.flags.acked       = !broadcast;
 			eventData.flags.flags.useKnownIds = false;
-			eventData.flags.flags.noHops      = false;
+			eventData.flags.flags.doNotRelay  = false;
 			eventData.type                    = CS_MESH_MODEL_TYPE_MICROAPP;
 			eventData.payload                 = cmd->data;
 			eventData.size                    = cmd->dlen;

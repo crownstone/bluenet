@@ -48,7 +48,7 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 	meshMsg.type = CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION;
 	meshMsg.reliability = reliable ? CS_MESH_RELIABILITY_MEDIUM : CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = true;
+	meshMsg.flags.flags.doNotRelay = true;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&versionPacket);
 	meshMsg.size = sizeof(versionPacket);
 
@@ -58,7 +58,7 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 
 cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg_asset_filter_version_t& packet) {
 	LOGAssetFilterSyncerDebug("onVersion stoneId=%u protocol=%u version=%u crc=%u",
-			stoneId,
+			srcStoneId,
 			packet.protocol,
 			packet.masterVersion,
 			packet.masterCrc);
@@ -515,10 +515,10 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
 			auto meshMsg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
-			if (meshMsg->type == CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION && meshMsg->hops == 0) {
+			if (meshMsg->type == CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION && meshMsg->isMaybeRelayed == false) {
 				// Only handle 0 hop messages, as in order to sync, we need to connect.
 				auto packet = meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION>();
-				event.result.returnCode = onVersion(meshMsg->srcAddress, packet);
+				event.result.returnCode = onVersion(meshMsg->srcStoneId, packet);
 			}
 			break;
 		}

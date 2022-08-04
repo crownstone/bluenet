@@ -23,8 +23,8 @@ void MeshModelSelector::init(
 cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
 	assert(_multicastModel != nullptr && _unicastModel != nullptr, "Model not set");
 	if (item.broadcast) {
-		if (item.reliable) {
-			if (item.noHop) {
+		if (item.acked) {
+			if (item.doNotRelay) {
 				return ERR_NOT_IMPLEMENTED;
 			}
 			else {
@@ -32,7 +32,7 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 			}
 		}
 		else {
-			if (item.noHop) {
+			if (item.doNotRelay) {
 				return _multicastNeighboursModel->addToQueue(item);
 			}
 			else {
@@ -41,8 +41,8 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 		}
 	}
 	else {
-		if (item.reliable) {
-			if (item.numIds == 1) {
+		if (item.acked) {
+			if (item.numStoneIds == 1) {
 				// Unicast model can send with and without hops.
 				return _unicastModel->addToQueue(item);
 			}
@@ -59,7 +59,7 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 cs_ret_code_t MeshModelSelector::remFromQueue(MeshUtil::cs_mesh_queue_item_t & item) {
 	assert(_multicastModel != nullptr && _unicastModel != nullptr, "Model not set");
 	if (item.broadcast) {
-		if (item.reliable) {
+		if (item.acked) {
 			return _multicastAckedModel->remFromQueue((cs_mesh_model_msg_type_t)item.metaData.type, item.metaData.id);
 		}
 		else {
@@ -67,7 +67,7 @@ cs_ret_code_t MeshModelSelector::remFromQueue(MeshUtil::cs_mesh_queue_item_t & i
 		}
 	}
 	else {
-		if (item.reliable) {
+		if (item.acked) {
 			return _unicastModel->remFromQueue((cs_mesh_model_msg_type_t)item.metaData.type, item.metaData.id);
 		}
 		else {

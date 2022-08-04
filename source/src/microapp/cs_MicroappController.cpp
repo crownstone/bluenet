@@ -450,7 +450,7 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	// Write the isr id to the header so the microapp may know the source
 	microappMeshMsg->meshHeader.header.id = _meshIsr.id;
 
-	microappMeshMsg->stoneId = event->srcAddress;
+	microappMeshMsg->stoneId = event->srcStoneId;
 	microappMeshMsg->dlen = event->msg.len;
 	memcpy(microappMeshMsg->data, event->msg.data, event->msg.len);
 
@@ -540,9 +540,21 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 
 void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 	if (event->type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		// Mesh message received, but not for microapp
+		// Mesh message received, but not for the microapp.
 		return;
 	}
+
+	if (event->isReply) {
+		// We received the empty reply.
+		return;
+	}
+
+	if (event->reply != nullptr) {
+		// Send an empty reply.
+		event->reply->type = CS_MESH_MODEL_TYPE_MICROAPP;
+		event->reply->dataSize = 0;
+	}
+
 	softInterruptMesh(event);
 }
 
