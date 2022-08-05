@@ -193,7 +193,7 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 			}
 
 			if (_switchcraftDoubleTapCountdown) {
-				--_switchcraftDoubleTapCountdown;
+				_switchcraftDoubleTapCountdown--;
 			}
 
 			// Execute code following this if statement, only once a second.
