@@ -188,7 +188,7 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_TICK: {
 			// decrement until 0
-			if (_ownerTimeoutCountdown == 0) {
+			if (_ownerTimeoutCountdown) {
 				--_ownerTimeoutCountdown;
 			}
 
