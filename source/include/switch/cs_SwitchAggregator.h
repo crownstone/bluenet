@@ -61,7 +61,7 @@ private:
 	//! Set on switchcraft event, then decremented each tick event until 0.
 	uint16_t _switchcraftDoubleTapCountdown = 0;
 
-	//! Keeps up the switch value of the last time it was on, before being turned off by switchcraft.
+	//! Keeps up the switch value (1-100 from smart switch) of the last time it was on, before being turned off by switchcraft.
 	uint8_t _lastSwitchcraftOnValue = 0;
 
 	/**
@@ -137,7 +137,7 @@ private:
 	/**
 	 * Get the state intention from a switchcraft event.
 	 *
-	 * @param[in] currentValue    The current switch value.
+	 * @param[in] currentValue    The current switch state (0-100 from smart switch).
 	 * @param[in] doubleTap       Whether the switchcraft event was a double tap.
 	 *
 	 * @return                    The switch value to be set.
