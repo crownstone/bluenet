@@ -405,7 +405,7 @@ bool SwitchAggregator::registerSwitchcraftEvent(uint8_t currentValue) {
 			doubleTap = true;
 		}
 	}
-	_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIME_MS / TICK_INTERVAL_MS;
+	_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIMEOUT_MS / TICK_INTERVAL_MS;
 	return doubleTap;
 }
 
