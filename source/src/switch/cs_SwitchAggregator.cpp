@@ -188,12 +188,12 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_TICK: {
 			// decrement until 0
-			if (_ownerTimeoutCountdown == 0) {
-				--_ownerTimeoutCountdown;
+			if (_ownerTimeoutCountdown) {
+				_ownerTimeoutCountdown--;
 			}
 
 			if (_switchcraftDoubleTapCountdown) {
-				--_switchcraftDoubleTapCountdown;
+				_switchcraftDoubleTapCountdown--;
 			}
 
 			// Execute code following this if statement, only once a second.

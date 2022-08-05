@@ -192,7 +192,7 @@
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
 
 //! If 2 switchcraft events happen within this time, it will be regarded as a double tap.
-static const uint32_t SWITCHCRAFT_DOUBLE_TAP_TIME_MS    = 1000;
+static const uint32_t SWITCHCRAFT_DOUBLE_TAP_TIMEOUT_MS    = 1000;
 
 //! The default default dim value.
 static const uint8_t DEFAULT_DIM_VALUE           = 40;
