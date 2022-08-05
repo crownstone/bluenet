@@ -189,7 +189,7 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 		case CS_TYPE::EVT_TICK: {
 			// decrement until 0
 			if (_ownerTimeoutCountdown) {
-				--_ownerTimeoutCountdown;
+				_ownerTimeoutCountdown--;
 			}
 
 			if (_switchcraftDoubleTapCountdown) {
