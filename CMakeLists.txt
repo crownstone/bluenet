@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 3.10)
 
 option(DOWNLOAD_JLINK                            "Download JLink"                        ON)
 option(DOWNLOAD_NRFUTIL                          "Download nrfutil"                      ON)
-option(DOWNLOAD_NRFJPROG                         "Download nrfjprog"                     ON)
 option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"                   OFF)
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
@@ -18,6 +17,7 @@ option(COMPILE_FOR_HOST                          "Compile for host"             
 option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
 option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" OFF)
 option(FACTORY_IMAGE                             "Create factory image"                  OFF)
+option(REQUIRE_NRFJPROG                          "Require nrfjprog"                      ON)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -91,12 +91,12 @@ message(STATUS "Installation dir with binaries ${CMAKE_INSTALL_PREFIX}")
 
 # FindGit and FindWget are standard cmake modules, see
 # https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
-find_package(Git REQUIRED)
+find_package(Git)
 if(NOT Git_FOUND)
 	message(FATAL_ERROR "Installation requires git, install with something like `sudo apt install git`")
 endif()
 
-find_package(Wget REQUIRED)
+find_package(Wget)
 if(NOT WGET_FOUND)
 	message(FATAL_ERROR "Installation requires wget, install with something like `sudo apt install wget`")
 endif()
@@ -106,14 +106,14 @@ message(STATUS "Search for CMake modules in ${BLUENET_CMAKE_MODULES_PATH}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BLUENET_CMAKE_MODULES_PATH}")
 
 if(FACTORY_IMAGE)
-	find_package(pass REQUIRED)
+	find_package(pass)
 	if(NOT PASS_FOUND)
 		message(STATUS "You should install pass, e.g. by sudo apt install pass.")
 		message(FATAL_ERROR "The utility pass is required to sign release firmware.")
 	else()
 		message(STATUS "Found pass utility ${PASS_EXECUTABLE}")
 	endif()
-	find_package(srecord REQUIRED)
+	find_package(srecord)
 	if(NOT SRECORD_FOUND)
 		message(STATUS "You should install srecord, e.g. by sudo apt install srecord.")
 		message(FATAL_ERROR "The tool srecord (srec_cat) is required to build release firmware.")
@@ -275,15 +275,12 @@ endif()
 # Make some more variables available to the bluenet build
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
-# The nrfjprog utility
-if(COMPILE_ON_ARM)
-	set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-15-0/nrf-command-line-tools-10.15.0_arm.zip)
-	set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.15.0_armhf.deb)
-	set(NRFJPROG_MD5 49d0a47dc197f943502b164460bdd3e1)
-else()
-	set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-14-0/nRF-Command-Line-Tools_10_14_0_Linux64.zip)
-	set(NRFJPROG_DEB_FILE nrf-command-line-tools_10.14.0_amd64.deb)
-	set(NRFJPROG_MD5 8a049bacc67519561b77e014b652d5df)
+# Check for nrfjprog on a system from which we want to flash it as well (not required for cloud-only tests)
+if (REQUIRE_NRFJPROG)
+	find_package(nrfjprog)
+	if (NOT NRFJPROG_FOUND)
+		message(FATAL_ERROR "Installation requires nrfjprog (see https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools)")
+	endif()
 endif()
 
 # The cross-compiler
@@ -444,26 +441,6 @@ ExternalProject_Add(gcc_arm_none_eabi
 
 set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_BLUENET_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
-
-if(DOWNLOAD_NRFJPROG)
-	set(NRFJPROG_TARGET nrfjprog)
-	message(STATUS "Configure ${NRFJPROG_TARGET} target")
-	ExternalProject_Add(${NRFJPROG_TARGET}
-		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		URL ${NRFJPROG_DOWNLOAD_URL}
-		URL_MD5 ${NRFJPROG_MD5}
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Target nrfjprog has user interaction for installation"
-			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
-			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
-			COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE}
-		)
-	if(JLINK_TARGET)
-		add_dependencies(${NRFJPROG_TARGET} ${JLINK_TARGET})
-	endif()
-endif()
 
 if(DOWNLOAD_NRFUTIL)
 	set(NRFUTIL_TARGET nrfutil)
