@@ -84,11 +84,16 @@ enum MicroappSdkAck {
 	CS_ACK_WAIT_FOR_SUCCESS          = 0x04, // So far so good, but not done yet
 
 	// Ack error replies (negative)
-	CS_ACK_ERR_NOT_FOUND             = -0x01, // A requested entity could not be found
-	CS_ACK_ERR_UNKNOWN_PROTOCOL      = -0x02, // The request cannot be interpreted fully
-	CS_ACK_ERR_NO_SPACE              = -0x03, // There is no space to fulfill a request
-	CS_ACK_ERR_NOT_IMPLEMENTED       = -0x04, // The request can be interpreted but is not implemented yet
-	CS_ACK_ERR_BUSY                  = -0x05, // The request cannot be fulfilled because of other ongoing requests
+	CS_ACK_ERROR                     = -0x01, // Unspecified error
+	CS_ACK_ERR_NOT_FOUND             = -0x02, // A requested entity could not be found
+	CS_ACK_ERR_UNDEFINED             = -0x03, // The request cannot be interpreted fully
+	CS_ACK_ERR_NO_SPACE              = -0x04, // There is no space to fulfill a request
+	CS_ACK_ERR_NOT_IMPLEMENTED       = -0x05, // The request can be interpreted but is not implemented yet
+	CS_ACK_ERR_BUSY                  = -0x06, // The request cannot be fulfilled because of other ongoing requests
+	CS_ACK_ERR_OUT_OF_RANGE          = -0x07, // A parameter in the request is out of range
+	CS_ACK_ERR_DISABLED              = -0x08, // Request requires functionality that is disabled
+	CS_ACK_ERR_EMPTY                 = -0x09, // Request or its parameters are empty
+	CS_ACK_ERR_TOO_LARGE             = -0x0A, // Request or its parameters are too large
 };
 
 /**
@@ -169,17 +174,17 @@ enum MicroappSdkPinType {
 enum MicroappSdkPinDirection {
 	CS_MICROAPP_SDK_PIN_INPUT          = 0x01, // Set pin as input, but do not use a pulling resistor
 	CS_MICROAPP_SDK_PIN_INPUT_PULLUP   = 0x02, // Set pin as input using a pullup resistor
-	CS_MICROAPP_SDK_PIN_INPUT_PULLDOWN = 0x03, // Set pin as input using a pulldown resistor
-	CS_MICROAPP_SDK_PIN_OUTPUT         = 0x04, // Set pin as output
+	CS_MICROAPP_SDK_PIN_OUTPUT         = 0x03, // Set pin as output
 };
 
 /**
  * Polarity of pin for initializing pin interrupts (only for input pins)
  */
 enum MicroappSdkPinPolarity {
-	CS_MICROAPP_SDK_PIN_CHANGE  = 0x01, // LOTOHI or HITOLO
-	CS_MICROAPP_SDK_PIN_RISING  = 0x02, // LOTOHI
-	CS_MICROAPP_SDK_PIN_FALLING = 0x03, // HITOLO
+	CS_MICROAPP_SDK_PIN_NO_POLARITY = 0x01, // Not sensing for a specific event
+	CS_MICROAPP_SDK_PIN_CHANGE      = 0x02, // LOTOHI or HITOLO
+	CS_MICROAPP_SDK_PIN_RISING      = 0x03, // LOTOHI
+	CS_MICROAPP_SDK_PIN_FALLING     = 0x04, // HITOLO
 };
 
 /**
@@ -217,8 +222,6 @@ enum MicroappSdkTwiType {
 	CS_MICROAPP_SDK_TWI_READ    = 0x01,
 	CS_MICROAPP_SDK_TWI_WRITE   = 0x02,
 	CS_MICROAPP_SDK_TWI_INIT    = 0x03,
-	CS_MICROAPP_SDK_TWI_ENABLE  = 0x04,
-	CS_MICROAPP_SDK_TWI_DISABLE = 0x05,
 };
 
 /**

@@ -1,39 +1,20 @@
 #pragma once
 
-#include <structs/buffer/cs_CircularBuffer.h>
-
-// struct __attribute__((packed)) microapp_buffered_mesh_message_t {
-// 	stone_id_t stoneId;
-// 	uint8_t messageSize;
-// 	uint8_t message[MICROAPP_MAX_MESH_MESSAGE_SIZE];
-// };
+#include <common/cs_Types.h>
+#include <cs_MicroappStructs.h>
 
 /**
- * The class MicroappCommandHandler has functionality to store a second app (and perhaps in the future even more apps)
+ * The class MicroappRequestHandler has functionality to store a second app (and perhaps in the future even more apps)
  * on another part of the flash memory.
  */
-class MicroappCommandHandler {
+class MicroappRequestHandler {
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
-	MicroappCommandHandler(){};
-	MicroappCommandHandler(MicroappCommandHandler const&);
-	void operator=(MicroappCommandHandler const&);
-
-	/**
-	 * Max number of mesh messages that will be queued.
-	 */
-	// const uint8_t MICROAPP_MAX_MESH_MESSAGES_BUFFERED = 3;
-
-	/**
-	 * Buffer received mesh messages.
-	 *
-	 * Starts with microapp_buffered_mesh_message_header_t, followed by the message.
-	 *
-	 * TODO: The buffer should not be stored on the bluenet side.
-	 */
-	// CircularBuffer<microapp_buffered_mesh_message_t> _meshMessageBuffer;
+	MicroappRequestHandler(){};
+	MicroappRequestHandler(MicroappRequestHandler const&);
+	void operator=(MicroappRequestHandler const&);
 
 	/**
 	 * Maps interrupts to digital pins. See also MicroappController::digitalPinToInterrupt()
@@ -41,6 +22,19 @@ private:
 	int interruptToDigitalPin(int interrupt);
 
 protected:
+
+	cs_ret_code_t handleMicroappLogRequest(microapp_sdk_log_t* log);
+	cs_ret_code_t handleMicroappPinRequest(microapp_sdk_pin_t* pin);
+	cs_ret_code_t handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_);
+	cs_ret_code_t handleMicroappServiceDataRequest(microapp_sdk_service_data_t* serviceData);
+	cs_ret_code_t handleMicroappTwiRequest(microapp_sdk_twi_t* twi);
+	cs_ret_code_t handleMicroappBleRequest(microapp_sdk_ble_t* ble);
+	cs_ret_code_t handleMicroappMeshRequest(microapp_sdk_mesh_t* mesh);
+	cs_ret_code_t handleMicroappPowerUsageRequest(microapp_sdk_power_usage_t* powerUsage);
+	cs_ret_code_t handleMicroappPresenceRequest(microapp_sdk_presence_t* presence);
+	cs_ret_code_t handleMicroappControlCommandRequest(microapp_sdk_control_command_t* controlCommand);
+	cs_ret_code_t handleMicroappYieldRequest(microapp_sdk_yield_t* yield);
+
 	/**
 	 * Handle microapp log commands.
 	 *
@@ -106,14 +100,14 @@ protected:
 	cs_ret_code_t handleMicroappMeshCommand(microapp_mesh_cmd_t* cmd);
 
 public:
-	static MicroappCommandHandler& getInstance() {
-		static MicroappCommandHandler instance;
+	static MicroappRequestHandler& getInstance() {
+		static MicroappRequestHandler instance;
 		return instance;
 	}
 
 	/**
-	 * Handle commands from the microapp
+	 * Handle requests from the microapp
 	 */
-	cs_ret_code_t handleMicroappCommand(microapp_cmd_t* cmd);
+	cs_ret_code_t handleMicroappCommand(microapp_sdk_header_t* header);
 
 };

@@ -22,6 +22,8 @@
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_Packets.h>
+#include <protocols/cs_CommandTypes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_BleError.h>
@@ -29,109 +31,80 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-int MicroappCommandHandler::interruptToDigitalPin(int interrupt) {
+int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
 	return interrupt;
 }
 
 /*
- * Forwards commands from the microapp to the relevant handler
+ * Forwards requests from the microapp to the relevant handler
  */
-cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd) {
-	uint8_t command = cmd->cmd;
-	switch (command) {
-		case CS_MICROAPP_COMMAND_LOG: {
-			LOGd("Microapp log command");
-			microapp_log_cmd_t* log_cmd = reinterpret_cast<microapp_log_cmd_t*>(cmd);
-			return handleMicroappLogCommand(log_cmd);
-		}
-		case CS_MICROAPP_COMMAND_DELAY: {
-			LOGd("Microapp delay command");
-			microapp_delay_cmd_t* delay_cmd = reinterpret_cast<microapp_delay_cmd_t*>(cmd);
-			return handleMicroappDelayCommand(delay_cmd);
-		}
-		case CS_MICROAPP_COMMAND_PIN: {
-			LOGd("Microapp pin command");
-			microapp_pin_cmd_t* pin_cmd = reinterpret_cast<microapp_pin_cmd_t*>(cmd);
-			return handleMicroappPinCommand(pin_cmd);
-		}
-		case CS_MICROAPP_COMMAND_SWITCH_DIMMER: {
-			LOGd("Microapp switch dimmer command");
-			microapp_dimmer_switch_cmd_t* dimmer_switch_cmd = reinterpret_cast<microapp_dimmer_switch_cmd_t*>(cmd);
-			return handleMicroappDimmerSwitchCommand(dimmer_switch_cmd);
-		}
-		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
-			LOGd("Microapp service data command");
-			microapp_service_data_cmd_t* service_data_cmd = reinterpret_cast<microapp_service_data_cmd_t*>(cmd);
-			return handleMicroappServiceDataCommand(service_data_cmd);
-		}
-		case CS_MICROAPP_COMMAND_TWI: {
-			LOGd("Microapp TWI command");
-			microapp_twi_cmd_t* twi_cmd = reinterpret_cast<microapp_twi_cmd_t*>(cmd);
-			return handleMicroappTwiCommand(twi_cmd);
-		}
-		case CS_MICROAPP_COMMAND_BLE: {
-			LOGd("Microapp BLE command");
-			microapp_ble_cmd_t* ble_cmd = reinterpret_cast<microapp_ble_cmd_t*>(cmd);
-			return handleMicroappBleCommand(ble_cmd);
-		}
-		case CS_MICROAPP_COMMAND_POWER_USAGE: {
-			LOGd("Microapp power usage command");
-			microapp_power_usage_cmd_t* power_usage_cmd = reinterpret_cast<microapp_power_usage_cmd_t*>(cmd);
-			return handleMicroappPowerUsageCommand(power_usage_cmd);
-		}
-		case CS_MICROAPP_COMMAND_PRESENCE: {
-			LOGd("Microapp presence command");
-			microapp_presence_cmd_t* presence_cmd = reinterpret_cast<microapp_presence_cmd_t*>(cmd);
-			return handleMicroappPresenceCommand(presence_cmd);
-		}
-		case CS_MICROAPP_COMMAND_MESH: {
-			LOGd("Microapp mesh command");
-			microapp_mesh_cmd_t* mesh_cmd = reinterpret_cast<microapp_mesh_cmd_t*>(cmd);
-			return handleMicroappMeshCommand(mesh_cmd);
-		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED: {
-			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
-			MicroappController& controller = MicroappController::getInstance();
-			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
-			LOGv("Soft interrupt received (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
+cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_t* header) {
+	uint8_t type = header->sdkType;
+	switch (type) {
+		case CS_MICROAPP_SDK_TYPE_NONE: {
+			// This should not be used
+			LOGw("Microapp yields without setting sdkType");
 			break;
 		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
-			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
-			MicroappController& controller = MicroappController::getInstance();
-			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
-			LOGi("Soft interrupt dropped (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
-			break;
+		case CS_MICROAPP_SDK_TYPE_LOG: {
+			LOGd("Microapp log request");
+			microapp_sdk_log_header_t* log = reinterpret_cast<microapp_sdk_log_header_t*>(header);
+			return handleMicroappLogRequest(log);
 		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR: {
-			MicroappController& controller = MicroappController::getInstance();
-			controller.incrementEmptySoftInterruptSlots();
-			LOGi("Soft interrupt returned with error (id=%i)", (int)cmd->id);
-			break;
+		case CS_MICROAPP_SDK_TYPE_PIN: {
+			LOGd("Microapp pin request");
+			microapp_sdk_pin_t* pin = reinterpret_cast<microapp_sdk_pin_t*>(header);
+			return handleMicroappPinRequest(pin);
 		}
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END: {
-			MicroappController& controller = MicroappController::getInstance();
-			controller.incrementEmptySoftInterruptSlots();
-			LOGv("Soft interrupt end (id=%i)", (int)cmd->id);
-			break;
+		case CS_MICROAPP_SDK_TYPE_SWITCH: {
+			LOGd("Microapp switch request");
+			microapp_sdk_switch_t* switch_ = reinterpret_cast<microapp_sdk_switch_t*>(header);
+			return handleMicroappSwitchRequest(switch_);
 		}
-		case CS_MICROAPP_COMMAND_SETUP_END: {
-			LOGi("Setup end");
-			break;
+		case CS_MICROAPP_SDK_TYPE_SERVICE_DATA: {
+			LOGd("Microapp service data request");
+			microapp_sdk_service_data_t* serviceData = reinterpret_cast<microapp_sdk_service_data_t*>(header);
+			return handleMicroappServiceDataRequest(serviceData);
 		}
-		case CS_MICROAPP_COMMAND_LOOP_END: {
-			// Only in debug mode
-			LOGv("Loop end");
-			break;
+		case CS_MICROAPP_SDK_TYPE_TWI: {
+			LOGd("Microapp TWI request");
+			microapp_sdk_twi_t* twi = reinterpret_cast<microapp_sdk_twi_t*>(header);
+			return handleMicroappTwiRequest(twi);
 		}
-		case CS_MICROAPP_COMMAND_NONE: {
-			// ignore, nothing written
-			break;
+		case CS_MICROAPP_SDK_TYPE_BLE: {
+			LOGd("Microapp BLE request");
+			microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(header);
+			return handleMicroappBleRequest(ble);
+		}
+		case CS_MICROAPP_SDK_TYPE_MESH: {
+			LOGd("Microapp mesh request");
+			microapp_sdk_mesh_t* mesh = reinterpret_cast<microapp_sdk_mesh_t*>(header);
+			return handleMicroappMeshRequest(mesh);
+		}
+		case CS_MICROAPP_SDK_TYPE_POWER_USAGE: {
+			LOGd("Microapp power usage request");
+			microapp_sdk_power_usage_t* powerUsage = reinterpret_cast<microapp_sdk_power_usage_t*>(header);
+			return handleMicroappPowerUsageRequest(powerUsage);
+		}
+		case CS_MICROAPP_SDK_TYPE_PRESENCE: {
+			LOGd("Microapp presence request");
+			microapp_sdk_presence_t* presence = reinterpret_cast<microapp_sdk_presence_t*>(header);
+			return handleMicroappPresenceRequest(presence);
+		}
+		case CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND: {
+			LOGd("Microapp control command request");
+			microapp_sdk_control_command_t* controlCommand = reinterpret_cast<microapp_sdk_control_command_t*>(header);
+			return handleMicroappControlCommandRequest(controlCommand);
+		}
+		case CS_MICROAPP_SDK_TYPE_YIELD: {
+			LOGd("Microapp yield request");
+			microapp_sdk_yield_t* yield = reinterpret_cast<microapp_sdk_yield_t*>(header);
+			return handleMicroappYieldRequest(yield);
 		}
 		default: {
-			_log(SERIAL_INFO, true, "Unknown command %u", command);
+			_log(SERIAL_INFO, true, "Unknown command %u", type);
+			// set ack field so microapp will know something went wrong
+			header->ack = CS_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
@@ -141,451 +114,506 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 // TODO: establish a proper default log level for microapps
 #define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappLogCommand(microapp_log_cmd_t* command) {
+cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_header_t* log) {
 
 	__attribute__((unused)) bool newLine = false;
-	if (command->option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
+	if (log->flags & CS_MICROAPP_SDK_LOG_FLAG_NEWLINE) {
 		newLine = true;
 	}
-	if (command->length == 0) {
+	if (log->size == 0) {
 		_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", "");
+		log->header.ack = CS_ACK_SUCCESS;
 		return ERR_SUCCESS;
 	}
-	switch (command->type) {
-		case CS_MICROAPP_COMMAND_LOG_CHAR: {
-			[[maybe_unused]] microapp_log_char_cmd_t* cmd = reinterpret_cast<microapp_log_char_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                 = cmd->value;
+	switch (log->type) {
+		case CS_MICROAPP_SDK_LOG_CHAR: {
+			[[maybe_unused]] microapp_sdk_log_char_t* logChar = reinterpret_cast<microapp_sdk_log_char_t*>(log);
+			[[maybe_unused]] uint32_t val                     = logChar->value;
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_SHORT: {
-			[[maybe_unused]] microapp_log_short_cmd_t* cmd = reinterpret_cast<microapp_log_short_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                  = cmd->value;
+		case CS_MICROAPP_SDK_LOG_SHORT: {
+			[[maybe_unused]] microapp_sdk_log_short_t* logShort = reinterpret_cast<microapp_sdk_log_short_t*>(log);
+			[[maybe_unused]] uint32_t val                       = logShort->value;
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_UINT: {
-			[[maybe_unused]] microapp_log_uint_cmd_t* cmd = reinterpret_cast<microapp_log_uint_cmd_t*>(command);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%u%s", cmd->value);
+		case CS_MICROAPP_SDK_LOG_UINT: {
+			[[maybe_unused]] microapp_sdk_log_uint_t* logUint = reinterpret_cast<microapp_sdk_log_uint_t*>(log);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%u%s", logUint->value);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_INT: {
-			[[maybe_unused]] microapp_log_int_cmd_t* cmd = reinterpret_cast<microapp_log_int_cmd_t*>(command);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", cmd->value);
+		case CS_MICROAPP_SDK_LOG_INT: {
+			[[maybe_unused]] microapp_sdk_log_int_t* logInt = reinterpret_cast<microapp_sdk_log_int_t*>(log);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", logInt->value);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_FLOAT: {
-			[[maybe_unused]] microapp_log_float_cmd_t* cmd = reinterpret_cast<microapp_log_float_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                  = cmd->value;
+		case CS_MICROAPP_SDK_LOG_FLOAT: {
+			[[maybe_unused]] microapp_sdk_log_float_t* logFloat = reinterpret_cast<microapp_sdk_log_float_t*>(log);
+			[[maybe_unused]] uint32_t val                       = logFloat->value;
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
-			[[maybe_unused]] microapp_log_double_cmd_t* cmd = reinterpret_cast<microapp_log_double_cmd_t*>(command);
-			[[maybe_unused]] uint32_t val                   = cmd->value;
+		case CS_MICROAPP_SDK_LOG_DOUBLE: {
+			[[maybe_unused]] microapp_sdk_log_double_t* logDouble = reinterpret_cast<microapp_sdk_log_double_t*>(log);
+			[[maybe_unused]] uint32_t val                         = logDouble->value;
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_STR: {
-			[[maybe_unused]] microapp_log_string_cmd_t* cmd = reinterpret_cast<microapp_log_string_cmd_t*>(command);
+		case CS_MICROAPP_SDK_LOG_STR: {
+			[[maybe_unused]] microapp_sdk_log_string_t* logString = reinterpret_cast<microapp_sdk_log_string_t*>(log);
 			// Enforce a zero-byte at the end before we log
 			uint8_t zeroByteIndex = MICROAPP_SDK_MAX_STRING_LENGTH - 1;
-			if (command->length < zeroByteIndex) {
-				zeroByteIndex = command->length;
+			if (log->size < zeroByteIndex) {
+				zeroByteIndex = log->size;
 			}
-			cmd->str[zeroByteIndex] = 0;
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", cmd->str);
+			logString->str[zeroByteIndex] = 0;
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", logString->str);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_ARR: {
-			[[maybe_unused]] microapp_log_array_cmd_t* cmd = reinterpret_cast<microapp_log_array_cmd_t*>(command);
-			if (command->length >= MICROAPP_SDK_MAX_ARRAY_SIZE) {
+		case CS_MICROAPP_SDK_LOG_ARR: {
+			[[maybe_unused]] microapp_sdk_log_array_t* logArray = reinterpret_cast<microapp_sdk_log_array_t*>(log);
+			if (log->size >= MICROAPP_SDK_MAX_ARRAY_SIZE) {
 				// Truncate, but don't send an error
-				command->length = MICROAPP_SDK_MAX_ARRAY_SIZE;
+				log->size = MICROAPP_SDK_MAX_ARRAY_SIZE;
 			}
-			for (uint8_t i = 0; i < command->length; ++i) {
-				_log(LOCAL_MICROAPP_LOG_LEVEL, false, "0x%x ", (int)cmd->arr[i]);
+			for (uint8_t i = 0; i < log->size; ++i) {
+				_log(LOCAL_MICROAPP_LOG_LEVEL, false, "0x%x ", (int)logArray->arr[i]);
 			}
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "");
 			break;
 		}
 		default: {
-			LOGi("Unsupported microapp log type: %u", command->type);
+			LOGi("Unsupported microapp log type: %u", log->type);
+			log->header.ack = CS_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
+	log->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappDelayCommand(microapp_delay_cmd_t* delay_cmd) {
-	// don't do anything
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappCommandHandler::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	if (pin > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
-		LOGw("Pin %i out of range", pin); return ERR_UNKNOWN_TYPE;
+cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_t* pin) {
+	MicroappSdkPin pinIndex = (MicroappSdkPin)pin->pin;
+	if (pinIndex > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
+		LOGw("Pin %i out of range", pinIndex);
+		pin->header.ack = CS_ACK_ERR_OUT_OF_RANGE;
+		return ERR_NOT_FOUND;
 	}
-	CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
-	switch (opcode1) {
-		case CS_MICROAPP_COMMAND_PIN_MODE: return handleMicroappPinSetModeCommand(pin_cmd);
-		case CS_MICROAPP_COMMAND_PIN_ACTION: return handleMicroappPinActionCommand(pin_cmd);
-		default: LOGw("Unknown opcode1"); return ERR_UNKNOWN_OP_CODE;
-	}
-}
+	MicroappSdkPinType type = (MicroappSdkPinType)pin->type;
+	switch (type) {
+		case CS_MICROAPP_SDK_PIN_INIT: {
+			// Initializing a pin
+			MicroappSdkPinDirection direction = (MicroappSdkPinDirection)pin->direction;
+			MicroappSdkPinPolarity polarity = (MicroappSdkPinPolarity)pin->polarity;
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	TYPIFY(EVT_GPIO_INIT) gpio;
-	gpio.pin_index                    = interruptToDigitalPin(pin);
-	gpio.pull                         = 0;
-	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
-	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
-			gpio.pull = 1;
-			[[ fallthrough ]];
-		case CS_MICROAPP_COMMAND_PIN_READ: {
-			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_VALUE_RISING:
-					gpio.direction = SENSE;
-					gpio.polarity  = LOTOHI;
+			TYPIFY(EVT_GPIO_INIT) gpio;
+			gpio.pin_index = interruptToDigitalPin(pinIndex);
+			gpio.pull      = (direction == CS_MICROAPP_SDK_PIN_INPUT_PULLUP) ? 1 : 0;
+			LOGd("Initializing GPIO pin %i with direction %u and polarity %u", gpio.pin_index, direction, polarity);
+
+			switch (direction) {
+				case CS_MICROAPP_SDK_PIN_INPUT:
+				case CS_MICROAPP_SDK_PIN_INPUT_PULLUP: {
+					// Initializing a pin as input
+					switch (polarity) {
+						case CS_MICROAPP_SDK_PIN_NO_POLARITY: {
+							gpio.direction = INPUT;
+							gpio.polarity  = NONE;
+							break;
+						}
+						case CS_MICROAPP_SDK_PIN_RISING: {
+							gpio.direction = SENSE;
+							gpio.polarity  = LOTOHI;
+							break;
+						}
+						case CS_MICROAPP_SDK_PIN_FALLING: {
+							gpio.direction = SENSE;
+							gpio.polarity  = HITOLO;
+							break;
+						}
+						case CS_MICROAPP_SDK_PIN_CHANGE: {
+							gpio.direction = SENSE;
+							gpio.polarity  = TOGGLE;
+							break;
+						}
+						default: {
+							LOGw("Unknown pin polarity: %u", polarity);
+							pin->header.ack = CS_ACK_ERR_UNDEFINED;
+							return ERR_UNKNOWN_TYPE;
+						}
+					}
 					break;
-				case CS_MICROAPP_COMMAND_VALUE_FALLING:
-					gpio.direction = SENSE;
-					gpio.polarity  = HITOLO;
+				}
+				case CS_MICROAPP_SDK_PIN_OUTPUT: {
+					// Initializing a pin as output
+					gpio.direction = OUTPUT;
 					break;
-				case CS_MICROAPP_COMMAND_VALUE_CHANGE:
-					gpio.direction = SENSE;
-					gpio.polarity  = TOGGLE;
-					break;
-				default:
-					gpio.direction = INPUT;
-					gpio.polarity  = NONE;
-					break;
+				}
+				default: {
+					LOGw("Unknown pin direction: %u", direction);
+					pin->header.ack = CS_ACK_ERR_UNDEFINED;
+					return ERR_UNKNOWN_TYPE;
+				}
 			}
 			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_PIN_WRITE: {
-			gpio.direction = OUTPUT;
-			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		default: LOGw("Unknown opcode2: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
-	}
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappCommandHandler::handleMicroappPinActionCommand(microapp_pin_cmd_t* pin_cmd) {
-	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	LOGd("Read or write pin %i", pin);
-	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_WRITE: {
-			TYPIFY(EVT_GPIO_WRITE) gpio;
-			gpio.pin_index              = interruptToDigitalPin(pin);
-			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_VALUE_OFF: {
-					LOGd("Clear GPIO pin");
-					gpio.length = 1;
-					uint8_t buf[1];
-					buf[0]   = 0;
-					gpio.buf = buf;
-					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_VALUE_ON: {
-					LOGd("Set GPIO pin");
-					gpio.length = 1;
-					uint8_t buf[1];
-					buf[0]   = 1;
-					gpio.buf = buf;
-					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				default: LOGw("Unknown microapp pin value command"); return ERR_UNKNOWN_TYPE;
-			}
-			break;
-		}
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP: // undefined, can only be used with opcode1 CS_MICROAPP_COMMAND_PIN_MODE
-			LOGw("Input pullup undefined as a pin action command"); return ERR_UNSPECIFIED;
-		case CS_MICROAPP_COMMAND_PIN_READ: {
-			// TODO; (note that we do not handle event handler registration here but in SetMode above
-			LOGw("Reading pins via the microapp is not implemented yet"); return ERR_NOT_IMPLEMENTED;
-		}
-		default: LOGw("Unknown opcode2: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
-	}
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappCommandHandler::handleMicroappDimmerSwitchCommand(microapp_dimmer_switch_cmd_t* dim_switch_cmd) {
-	CommandMicroappDimmerSwitchOpcode opcode = (CommandMicroappDimmerSwitchOpcode)dim_switch_cmd->opcode;
-	switch (opcode) {
-		case CS_MICROAPP_COMMAND_SWITCH: {
-			CommandMicroappSwitchValue val = (CommandMicroappSwitchValue)dim_switch_cmd->value;
-			switch (val) {
-				case CS_MICROAPP_COMMAND_SWITCH_OFF: {
-					LOGi("Turn switch off");
-					event_t event(CS_TYPE::CMD_SWITCH_OFF);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_SWITCH_ON: {
-					LOGi("Turn switch on");
-					event_t event(CS_TYPE::CMD_SWITCH_ON);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_SWITCH_TOGGLE: {
-					LOGi("Toggle switch");
-					event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				default: LOGw("Unknown switch command"); return ERR_UNKNOWN_TYPE;
-			}
-			break;
-		}
-		case CS_MICROAPP_COMMAND_DIMMER: {
-			LOGi("Set dimmer to %i", dim_switch_cmd->value);
-			TYPIFY(CMD_SET_DIMMER) eventData;
-			eventData = dim_switch_cmd->value;
-			event_t event(CS_TYPE::CMD_SET_DIMMER, &eventData, sizeof(eventData));
 			event.dispatch();
+
+			if (gpio.direction == SENSE) {
+				// TODO: Manually register interrupt in MicroappController
+			}
 			break;
 		}
-		default: LOGw("Unknown opcode: %i", opcode); return ERR_UNKNOWN_OP_CODE;
+		case CS_MICROAPP_SDK_PIN_ACTION: {
+			// Performing a read or write on a pin
+			MicroappSdkPinActionType action = (MicroappSdkPinActionType)pin->action;
+			switch (action) {
+				case CS_MICROAPP_SDK_PIN_READ: {
+					// Read from a pin. Not implemented
+					pin->header.ack = CS_ACK_ERR_NOT_IMPLEMENTED;
+					return ERR_NOT_IMPLEMENTED;
+				}
+				case CS_MICROAPP_SDK_PIN_WRITE: {
+					// Write to a pin
+					TYPIFY(EVT_GPIO_WRITE) gpio;
+					gpio.pin_index = interruptToDigitalPin(pinIndex);
+					MicroappSdkPinValue value = (MicroappSdkPinValue)pin->value;
+					switch (value) {
+						case CS_MICROAPP_SDK_PIN_ON: {
+							LOGd("Setting GPIO pin %i", gpio.pin_index);
+							gpio.length = 1;
+							uint8_t buf[1];
+							buf[0] = 1;
+							gpio.buf = buf;
+							event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
+							event.dispatch();
+							break;
+						}
+						case CS_MICROAPP_SDK_PIN_OFF: {
+							LOGd("Clearing GPIO pin %i", gpio.pin_index);
+							gpio.length = 1;
+							uint8_t buf[1];
+							buf[0] = 0;
+							gpio.buf = buf;
+							event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
+							event.dispatch();
+							break;
+						}
+						default: {
+							LOGw("Unknown pin value: %u", value);
+							pin->header.ack = CS_ACK_ERR_UNDEFINED;
+							return ERR_UNKNOWN_TYPE;
+						}
+					}
+					break;
+				}
+				default: {
+					LOGw("Unknown pin action: %u", action);
+					pin->header.ack = CS_ACK_ERR_UNDEFINED;
+					return ERR_UNKNOWN_TYPE;
+				}
+			}
+			break;
+		}
+		default: {
+			LOGw("Unknown pin request type");
+			pin->header.ack = CS_ACK_ERR_UNDEFINED;
+			return ERR_UNKNOWN_TYPE;
+		}
 	}
+	pin->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappServiceDataCommand(microapp_service_data_cmd_t* cmd) {
+cs_ret_code_t MicroappRequestHandler::handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_) {
+	MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)switch_->value;
+	LOGd("Sending switch command %u", value);
+	TYPIFY(CMD_SWITCH) switchCommand;
+	switchCommand.switchCmd = value;
+	event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand));
+	event.dispatch();
+	switch_->header.ack = CS_ACK_SUCCESS;
+	return ERR_SUCCESS;
+}
 
-	if (cmd->body.dlen > MAX_COMMAND_SERVICE_DATA_LENGTH) {
-		LOGi("Payload size incorrect");
+cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_sdk_service_data_t* serviceData) {
+	if (serviceData->size > MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH) {
+		LOGi("Payload size too large");
+		serviceData->header.ack = CS_ACK_ERR_TOO_LARGE;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
 	TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
 	eventData.version   = 0;  // TODO: define somewhere.
 	eventData.type      = 0;  // TODO: define somewhere.
-	eventData.appUuid   = cmd->body.appUuid;
-	eventData.data.len  = cmd->body.dlen;
-	eventData.data.data = cmd->body.data;
+	eventData.appUuid   = serviceData->appUuid;
+	eventData.data.len  = serviceData->size;
+	eventData.data.data = serviceData->data;
 	event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 	event.dispatch();
+	serviceData->header.ack = CS_ACK_ERR_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappTwiCommand(microapp_twi_cmd_t* twi_cmd) {
-	CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
-	switch (opcode) {
-		case CS_MICROAPP_COMMAND_TWI_INIT: {
+cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_t* twi) {
+	MicroappSdkTwiType type = (MicroappSdkTwiType)twi->type;
+	switch (type) {
+		case CS_MICROAPP_SDK_TWI_INIT: {
 			LOGi("Init i2c");
-			TYPIFY(EVT_TWI_INIT) twi;
+			TYPIFY(EVT_TWI_INIT) twiInit;
 			// no need to write twi.config (is not under control of microapp)
-			event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
+			event_t event(CS_TYPE::EVT_TWI_INIT, &twiInit, sizeof(twiInit));
+			event.dispatch();
 			break;
 		}
-		case CS_MICROAPP_COMMAND_TWI_WRITE: {
-			LOGd("Write over i2c to address: 0x%02x", twi_cmd->address);
-			uint8_t bufSize = twi_cmd->length;
-			TYPIFY(EVT_TWI_WRITE) twi;
-			twi.address = twi_cmd->address;
-			twi.buf     = twi_cmd->buf;
-			twi.length  = bufSize;
-			twi.stop    = twi_cmd->stop;
-			event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
+		case CS_MICROAPP_SDK_TWI_WRITE: {
+			LOGd("Write over i2c to address: 0x%02x", twi->address);
+			TYPIFY(EVT_TWI_WRITE) twiWrite;
+			twiWrite.address = twi->address;
+			twiWrite.buf     = twi->buf;
+			twiWrite.length  = twi->size;
+			twiWrite.stop    = (twi->flags & CS_MICROAPP_SDK_TWI_FLAG_STOP);
+			event_t event(CS_TYPE::EVT_TWI_WRITE, &twiWrite, sizeof(twiWrite));
+			event.dispatch();
 			break;
 		}
-		case CS_MICROAPP_COMMAND_TWI_READ: {
-			LOGd("Read from i2c address: 0x%02x", twi_cmd->address);
-
+		case CS_MICROAPP_SDK_TWI_READ: {
+			LOGd("Read from i2c address: 0x%02x", twi->address);
 			// Create a synchronous event to retrieve twi data
-			uint8_t bufSize = twi_cmd->length;
-			TYPIFY(EVT_TWI_READ) twi;
-			twi.address = twi_cmd->address;
-			twi.buf     = twi_cmd->buf;
-			twi.length  = bufSize;
-			twi.stop    = twi_cmd->stop;
-			event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
+			TYPIFY(EVT_TWI_READ) twiRead;
+			twiRead.address = twi->address;
+			twiRead.buf     = twi->buf;
+			twiRead.length  = twi->size;
+			twiRead.stop    = (twi->flags & CS_MICROAPP_SDK_TWI_FLAG_STOP);
+			event_t event(CS_TYPE::EVT_TWI_READ, &twiRead, sizeof(twiRead));
 			EventDispatcher::getInstance().dispatch(event);
 
 			// Get data back and prepare for microapp
-			twi_cmd->header.ack = event.result.returnCode;
-			twi_cmd->length     = twi.length;
+			twi->header.ack = event.result.returnCode;
+			twi->size       = twiRead.length;
 			break;
 		}
-		default: LOGw("Unknown i2c opcode: %i", twi_cmd->opcode); return ERR_UNKNOWN_OP_CODE;
+		default: {
+			LOGw("Unknown TWI type: %i", type);
+			twi->header.ack = CS_ACK_UNDEFINED;
+			return ERR_UNKNOWN_TYPE;
+		}
 	}
+	twi->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_t* ble_cmd) {
-	switch (ble_cmd->opcode) {
-		case CS_MICROAPP_COMMAND_BLE_SCAN_SET_HANDLER: {
+cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_t* ble) {
+	MicroappSdkBleType type = (MicroappSdkBleType)ble->type;
+
 #if BUILD_MESHING == 0
+	if (type == CS_MICROAPP_SDK_BLE_SCAN_START ||
+		type == CS_MICROAPP_SDK_BLE_SCAN_STOP ||
+		type == CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT) {
 			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+			ble->header.ack = CS_ACK_ERR_DISABLED;
 			return ERR_NOT_AVAILABLE;
+	}
 #endif
+
+	switch (type) {
+		case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			ble_cmd->header.ack = controller.registerSoftInterruptSlotBle(ble_cmd->id);
+			// TODO: fix this when registering interrupts in controller refactored
+			ble->header.ack = controller.registerSoftInterruptSlotBle();
+			if (ble->header.ack != CS_ACK_SUCCESS) {
+				LOGw("Registering an interrupt for incoming BLE scans failed with %i", ble->header.ack);
+				return ERR_UNSPECIFIED;
+			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
-#if BUILD_MESHING == 0
-			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-			return ERR_NOT_AVAILABLE;
-#endif
+		case CS_MICROAPP_SDK_BLE_SCAN_START: {
 			LOGi("Start scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(true);
-			ble_cmd->header.ack = true;
+			ble->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
-		case CS_MICROAPP_COMMAND_BLE_SCAN_STOP: {
-#if BUILD_MESHING == 0
-			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-			return ERR_NOT_AVAILABLE;
-#endif
+		case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
 			LOGi("Stop scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(false);
-			ble_cmd->header.ack = true;
+			ble->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
-		case CS_MICROAPP_COMMAND_BLE_CONNECT: {
-			LOGi("Set up BLE connection");
+		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT: {
+			// Untested
+			LOGi("Initiate BLE connection");
 			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
-			std::reverse_copy(ble_cmd->addr, ble_cmd->addr + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
+			std::reverse_copy(ble->addr, ble->addr + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 			event.dispatch();
-			ble_cmd->header.ack = true;
+			ble->header.ack = CS_ACK_WAIT_FOR_SUCCESS;
 			LOGi("BLE command result: %u", event.result.returnCode);
 			return event.result.returnCode;
 		}
+		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT: {
+			// Not implemented
+			ble->header.ack = CS_ACK_ERR_NOT_IMPLEMENTED;
+			return ERR_NOT_IMPLEMENTED;
+		}
 		default: {
-			LOGi("Unknown microapp BLE command opcode: %u", ble_cmd->opcode);
-			return ERR_UNKNOWN_OP_CODE;
+			LOGi("Unknown BLE type: %u", type);
+			ble->header.ack = CS_ACK_UNDEFINED;
+			return ERR_UNKNOWN_TYPE;
 		}
 	}
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappCommandHandler::handleMicroappPowerUsageCommand(microapp_power_usage_cmd_t* cmd) {
-	microapp_power_usage_t* commandPayload = &cmd->powerUsage;
+cs_ret_code_t MicroappRequestHandler::handleMicroappMeshCommand(microapp_sdk_mesh_t* mesh) {
 
-	TYPIFY(STATE_POWER_USAGE) powerUsage;
-	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
-
-	commandPayload->powerUsage = powerUsage;
-
-	return ERR_SUCCESS;
-}
-
-/*
- * This queries for a presence event.
- */
-cs_ret_code_t MicroappCommandHandler::handleMicroappPresenceCommand(microapp_presence_cmd_t* cmd) {
-
-	microapp_presence_t* microappPresence = &cmd->presence;
-	if (microappPresence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
-		LOGi("Incorrect profileId");
-		return ERR_UNSAFE;
-	}
-
-	// Obtains presence array
-	presence_t resultBuf;
-	event_t event(CS_TYPE::CMD_GET_PRESENCE);
-	event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resultBuf), sizeof(resultBuf));
-	event.dispatch();
-	if (event.result.returnCode != ERR_SUCCESS) {
-		LOGi("No success, result code: %u", event.result.returnCode);
-		return event.result.returnCode;
-	}
-	if (event.result.dataSize != sizeof(presence_t)) {
-		LOGi("Result is of size %u expected size %u", event.result.dataSize, sizeof(presence_t));
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-
-	microappPresence->presenceBitmask = resultBuf.presence[microappPresence->profileId];
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cmd_t* command) {
 #if BUILD_MESHING == 0
-	LOGi("Mesh is not built in bluenet, so mesh-related microapp functionalities are disabled.");
+	LOGw("Mesh is disabled. Mesh-related microapp requests are ignored.");
+	ble->header.ack = CS_ACK_ERR_DISABLED;
 	return ERR_NOT_AVAILABLE;
 #endif
-	switch (command->opcode) {
-		case CS_MICROAPP_COMMAND_MESH_SEND: {
-			auto cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(command);
+	MicroappSdkMeshType type = (MicroappSdkMeshType)mesh->type;
+	switch (type) {
+		case CS_MICROAPP_SDK_MESH_SEND: {
+			// microapp_mesh_send_cmd_t* cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(mesh);
 
-			if (cmd->dlen == 0) {
-				LOGi("No message.");
+			if (mesh->size == 0) {
+				LOGi("No message");
+				mesh->header.ack = CS_ACK_ERR_EMPTY;
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
-			if (cmd->dlen > MICROAPP_MAX_MESH_MESSAGE_SIZE) {
-				LOGi("Message too large: %u > %u", cmd->dlen, MICROAPP_MAX_MESH_MESSAGE_SIZE);
+			if (mesh->size > MAX_MICROAPP_MESH_PAYLOAD_SIZE) {
+				LOGi("Message too large: %u > %u", mesh->size, MAX_MICROAPP_MESH_PAYLOAD_SIZE);
+				mesh->header.ack = CS_ACK_ERR_TOO_LARGE;
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
 			TYPIFY(CMD_SEND_MESH_MSG) eventData;
-			bool broadcast = (cmd->stoneId == 0);
+			bool broadcast = (mesh->stoneId == 0);
 			if (!broadcast) {
-				LOGv("Send mesh message to %i", cmd->stoneId);
+				LOGd("Send mesh message to %i", mesh->stoneId);
 				eventData.idCount   = 1;
-				eventData.targetIds = &(cmd->stoneId);
+				eventData.targetIds = &(mesh->stoneId);
 			} else {
-				LOGv("Broadcast mesh message");
+				LOGd("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
 			eventData.flags.flags.acked       = !broadcast;
 			eventData.flags.flags.useKnownIds = false;
 			eventData.flags.flags.doNotRelay  = false;
 			eventData.type                    = CS_MESH_MODEL_TYPE_MICROAPP;
-			eventData.payload                 = cmd->data;
-			eventData.size                    = cmd->dlen;
+			eventData.payload                 = mesh->data;
+			eventData.size                    = mesh->size;
 			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
 			event.dispatch();
 			if (event.result.returnCode != ERR_SUCCESS) {
-				LOGi("Failed to send mesh message, return code: %u", event.result.returnCode);
+				LOGw("Failed to send mesh message, return code: %u", event.result.returnCode);
+				mesh->header.ack = CS_ACK_ERROR;
 				return event.result.returnCode;
+			}
+			mesh->header.ack = CS_ACK_SUCCESS;
+			break;
+		}
+		case CS_MICROAPP_SDK_MESH_LISTEN: {
+			LOGi("Starting to listen for microapp mesh messages");
+			MicroappController& controller = MicroappController::getInstance();
+			// TODO: fix this when registering interrupts in controller refactored
+			mesh->header.ack = controller.registerSoftInterruptSlotMesh();
+			if (mesh->header.ack != CS_ACK_SUCCESS) {
+				LOGw("Registering an interrupt for incoming mesh messages failed with %i", mesh->header.ack);
+				return ERR_UNSPECIFIED;
 			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER: {
-			LOGi("Starting to scan for microapp mesh messages");
-			MicroappController& controller = MicroappController::getInstance();
-			command->header.ack = controller.registerSoftInterruptSlotMesh(command->header.id);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_MESH_GET_INFO: {
+		case CS_MICROAPP_SDK_MESH_READ_CONFIG: {
 			LOGi("Microapp requesting mesh info");
 			TYPIFY(CONFIG_CROWNSTONE_ID) id;
 			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
-			microapp_mesh_info_cmd_t* info_cmd = reinterpret_cast<microapp_mesh_info_cmd_t*>(command);
-			info_cmd->stoneId = id;
-			info_cmd->meshHeader.header.ack = true;
+			mesh->stoneId = id;
+			mesh->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
 		default: {
-			LOGi("Unknown microapp mesh command opcode: %u", command->opcode);
-			return ERR_UNKNOWN_OP_CODE;
+			LOGi("Unknown mesh type: %u", type);
+			mesh->header.ack = CS_ACK_ERR_UNDEFINED;
+			return CS_ACK_UNKNOWN_TYPE;
 		}
 	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MicroappRequestHandler::handleMicroappPowerUsageRequest(microapp_sdk_power_usage_t* powerUsage) {
+	TYPIFY(STATE_POWER_USAGE) powerUsageState;
+	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsageState, sizeof(powerUsageState));
+	powerUsage->powerUsage = powerUsageState;
+	powerUsage->header.ack = CS_ACK_SUCCESS;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk_presence_t* presence) {
+	if (presence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
+		LOGw("Incorrect profileId");
+		presence->header.ack = CS_ACK_ERR_OUT_OF_RANGE;
+		return ERR_NOT_FOUND;
+	}
+
+	presence_t resultBuf;
+	event_t event(CS_TYPE::CMD_GET_PRESENCE);
+	event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resultBuf), sizeof(resultBuf));
+	event.dispatch();
+	if (event.result.returnCode != ERR_SUCCESS) {
+		LOGi("No success, result code: %u", event.result.returnCode);
+		presence->header.ack = CS_ACK_ERROR;
+		return event.result.returnCode;
+	}
+	if (event.result.dataSize != sizeof(presence_t)) {
+		LOGi("Result is of size %u, expected size %u", event.result.dataSize, sizeof(presence_t));
+		presence->header.ack = CS_ACK_ERROR;
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	presence->presenceBitmask = resultBuf.presence[microappPresence->profileId];
+	presence->header.ack = CS_ACK_SUCCESS;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(microapp_sdk_control_command_t* controlCommand) {
+	if (controlCommand->size == 0) {
+		LOGi("No control command");
+		controlCommand->header.ack = CS_ACK_ERR_EMPTY;
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	if (controlCommand->size > MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE) {
+		LOGi("Control command too large: %u > %u", controlCommand->size, MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE);
+		controlCommand->header.ack = CS_ACK_ERR_TOO_LARGE;
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	LOGi("Dispatching control command of type %i", controlCommand->type);
+	TYPIFY(CMD_CONTROL_CMD) eventData;
+	eventData.protocolVersion = controlCommand->protocol;
+	eventData.data            = controlCommand->payload;
+	eventData.size            = controlCommand->size;
+	eventData.type            = controlCommand->type;
+	eventData.accessLevel     = EncryptionAccessLevel.BASIC;
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &eventData, sizeof(eventData));
+	event.dispatch();
+	if (event.result.returnCode != ERR_SUCCESS) {
+		LOGi("No success, result code: %u", event.result.returnCode);
+		controlCommand->header.ack = CS_ACK_ERROR;
+		return event.result.returnCode;
+	}
+	controlCommand->header.ack = CS_ACK_SUCCESS;
+	return ERR_SUCCESS;
+
+}
+
+cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yield_t* yield) {
+	LOGd("Microapp yielded with yieldType %d", yield->type);
+	// TODO: call controller to update number of empty Interrupt slots
+	yield->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
