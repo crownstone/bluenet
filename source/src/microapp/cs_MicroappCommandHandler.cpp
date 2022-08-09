@@ -191,7 +191,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappLogCommand(microapp_log_cmd_
 		case CS_MICROAPP_COMMAND_LOG_STR: {
 			[[maybe_unused]] microapp_log_string_cmd_t* cmd = reinterpret_cast<microapp_log_string_cmd_t*>(command);
 			// Enforce a zero-byte at the end before we log
-			uint8_t zeroByteIndex = MAX_MICROAPP_STRING_LENGTH - 1;
+			uint8_t zeroByteIndex = MICROAPP_SDK_MAX_STRING_LENGTH - 1;
 			if (command->length < zeroByteIndex) {
 				zeroByteIndex = command->length;
 			}
@@ -201,9 +201,9 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappLogCommand(microapp_log_cmd_
 		}
 		case CS_MICROAPP_COMMAND_LOG_ARR: {
 			[[maybe_unused]] microapp_log_array_cmd_t* cmd = reinterpret_cast<microapp_log_array_cmd_t*>(command);
-			if (command->length >= MAX_MICROAPP_ARRAY_LENGTH) {
+			if (command->length >= MICROAPP_SDK_MAX_ARRAY_SIZE) {
 				// Truncate, but don't send an error
-				command->length = MAX_MICROAPP_ARRAY_LENGTH;
+				command->length = MICROAPP_SDK_MAX_ARRAY_SIZE;
 			}
 			for (uint8_t i = 0; i < command->length; ++i) {
 				_log(LOCAL_MICROAPP_LOG_LEVEL, false, "0x%x ", (int)cmd->arr[i]);
