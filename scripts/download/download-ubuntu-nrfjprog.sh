@@ -37,5 +37,10 @@ else
 	unzip -n $DOWNLOAD_FILE
 fi
 
-echo "Install $ZIP_FOLDER/$DEB_FILE file using apt (sudo rights required)"
-sudo apt -y install "$ZIP_FOLDER/$DEB_FILE"
+# Allow for prefix 'SUPERUSER_SWITCH= ' (empty) or 'SUPERUSER_SWITCH=su for systems without sudo
+if [ -z ${SUPERUSER_SWITCH+set} ]; then
+	SUPERUSER_SWITCH=sudo
+fi
+
+echo "Install $ZIP_FOLDER/$DEB_FILE file using apt"
+$SUPERUSER_SWITCH apt -y install "$ZIP_FOLDER/$DEB_FILE"

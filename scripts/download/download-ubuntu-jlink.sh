@@ -34,5 +34,10 @@ else
 	fi
 fi
 
-echo "Install $DEB_FILE file using apt (sudo rights required)"
-sudo apt -y install "./$DEB_FILE"
+# Allow for prefix 'SUPERUSER_SWITCH= ' (empty) or 'SUPERUSER_SWITCH=su for systems without sudo
+if [ -z ${SUPERUSER_SWITCH+set} ]; then
+	SUPERUSER_SWITCH=sudo
+fi
+
+echo "Install $DEB_FILE file using apt"
+$SUPERUSER_SWITCH apt -y install "./$DEB_FILE"
