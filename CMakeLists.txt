@@ -7,8 +7,6 @@ cmake_minimum_required(VERSION 3.10)
 #######################################################################################################################
 
 option(DOWNLOAD_NRFUTIL                          "Download nrfutil"                      ON)
-option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"                   OFF)
-option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
 option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary logging"       OFF)
 option(DOWNLOAD_CROWNSTONE_PYTHON_LIBS           "Download Crownstone Python libs"       OFF)
@@ -52,7 +50,7 @@ set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 set(PYTHON_REQUIRED OFF)
-if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS OR DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
+if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
 	message(STATUS "One of the download options requires python")
 	set(PYTHON_REQUIRED ON)
 else()
@@ -148,15 +146,6 @@ if(PYTHON_REQUIRED)
 			message(WARNING "Virtual environment not detected! Set it up or set PYTHON_SETUP_VENV to ON.")
 		endif()
 	endif()
-endif()
-
-if(DOWNLOAD_NRFCONNECT OR DOWNLOAD_NRFCONNECT_PROGRAMMER)
-	message(STATUS "Assumed to be installed for nrfconnect: libudev, npm, make, gcc")
-	find_package(udev REQUIRED)
-	if(NOT UDEV_FOUND)
-		message(FATAL_ERROR "The nrfconnect tools require libudev")
-	endif()
-	message(STATUS "Found library at: ${UDEV_LIBRARIES}")
 endif()
 
 include(ExternalProject)
@@ -442,38 +431,6 @@ if(DOWNLOAD_NRFUTIL)
 		WORKING_DIRECTORY ${WORKSPACE_DIR}
 		COMMENT "Install nrfutil"
 		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
-		)
-endif()
-
-if(DOWNLOAD_NRFCONNECT)
-	set(NRFCONNECT_CORE_TARGET git_nrfconnect_core)
-	message(STATUS "Configure ${NRFCONNECT_CORE_TARGET} target")
-	ExternalProject_Add(${NRFCONNECT_CORE_TARGET}
-		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
-		GIT_CONFIG advice.detachedHead=false
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "-- Target git_nrf_connect_core has user interaction for installation"
-			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
-			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
-			COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
-		BUILD_COMMAND npm install
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps
-			COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
-		)
-endif()
-
-if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
-	set(NRFCONNECT_PROGRAMMER_TARGET git_nrfconnect_programmer)
-	message(STATUS "Configure ${NRFCONNECT_PROGRAMMER_TARGET} target")
-	ExternalProject_Add(git_nrfconnect_programmer
-		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
-		GIT_CONFIG advice.detachedHead=false
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
-		BUILD_COMMAND npm install
-		INSTALL_COMMAND ""
 		)
 endif()
 
@@ -825,7 +782,6 @@ add_custom_target(nrfconnect_core_setup
 	COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
 	COMMAND npm run dev
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-	DEPENDS ${NRFCONNECT_CORE_TARGET}
 	COMMENT "Run nrf connect core development"
 	)
 
@@ -833,14 +789,12 @@ add_custom_target(nrfconnect_core
 	COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
 	COMMAND npm run app
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-	DEPENDS ${NRFCONNECT_CORE_TARGET}
 	COMMENT "Run nrf connect core"
 	)
 
 add_custom_target(nrfconnect_programmer
 	COMMAND npm run app
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-	DEPENDS ${NRFCONNECT_PROGRAMMER_TARGET}
 	COMMENT "Run nrf connect core"
 	)
 
