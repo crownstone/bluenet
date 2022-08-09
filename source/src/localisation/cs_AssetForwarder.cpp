@@ -205,12 +205,12 @@ void AssetForwarder::handleEvent(event_t & event) {
 
 			switch(meshMsg->type) {
 				case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
-					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_MAC>(), meshMsg->srcAddress);
+					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_MAC>(), meshMsg->srcStoneId);
 					event.result.returnCode = ERR_SUCCESS;
 					break;
 				}
 				case CS_MESH_MODEL_TYPE_ASSET_INFO_ID: {
-					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_ID>(), meshMsg->srcAddress);
+					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_ID>(), meshMsg->srcStoneId);
 					event.result.returnCode = ERR_SUCCESS;
 					break;
 				}

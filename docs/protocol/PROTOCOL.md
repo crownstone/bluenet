@@ -973,6 +973,8 @@ Type nr | Type name | Payload type | Payload description | A   | M   | B
 156 | Soft on speed | uint8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
 157 | Hub mode | uint8 | Whether hub mode is enabled. | rw
 158 | UART key | uint8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
+167 | Switchcraft double tap enabled | uint8 | Whether switchcraft double tap is enabled. | rw
+168 | Default dim value | uint8 | The default dim value: 0 - 99. Set to 0 for none. Currently only used for double switchcraft. | rw
 
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:

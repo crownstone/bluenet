@@ -435,8 +435,8 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	PS_TEST_PIN_TOGGLE
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(_bufferQueue, VOLTAGE_CHANNEL_IDX);
-	if (switch_detected) {
+	bool switchDetected = RecognizeSwitch::getInstance().detect(_bufferQueue, VOLTAGE_CHANNEL_IDX);
+	if (switchDetected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 		EventDispatcher::getInstance().dispatch(event);

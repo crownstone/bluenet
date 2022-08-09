@@ -195,6 +195,9 @@ enum class CS_TYPE: uint16_t {
 	STATE_MESH_IV_INDEX_V5                  = 165,
 	STATE_MESH_SEQ_NUMBER_V5                = 166,
 
+	STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED    = 167,
+	STATE_DEFAULT_DIM_VALUE                 = 168,
+
 	/*
 	 * Internal commands and events.
 	 * Start at Internal_Base.
@@ -397,8 +400,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_GPIO_READ,                                    // GPIO, read value (directly)
 	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
 
-	EVT_MICROAPP_BLE_FILTER_INIT,                     // Microapp specific initialization of BLE filter
-
 	CMD_RESOLVE_ASYNC_CONTROL_COMMAND,                // When a control command returned WAIT_FOR_SUCCESS, this event finalizes that control command.
 	CMD_SEND_ASYNC_RESULT_TO_BLE,                     // Sends the async result to the user via BLE.
 
@@ -493,6 +494,7 @@ typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
 typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
+typedef     BOOL TYPIFY(STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED);
 typedef     BOOL TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED);
 typedef   int8_t TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET);
 typedef   int8_t TYPIFY(CONFIG_TX_POWER);
@@ -521,6 +523,7 @@ typedef cs_mesh_seq_number_v5_t TYPIFY(STATE_MESH_SEQ_NUMBER_V5);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef microapp_state_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
+typedef uint8_t TYPIFY(STATE_DEFAULT_DIM_VALUE);
 typedef uint8_t TYPIFY(STATE_HUB_MODE);
 typedef asset_filters_version_t TYPIFY(STATE_ASSET_FILTERS_VERSION);
 
@@ -697,7 +700,6 @@ typedef cs_gpio_write_t TYPIFY(EVT_GPIO_WRITE);
 typedef cs_gpio_read_t TYPIFY(EVT_GPIO_READ);
 typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 
-typedef cs_microapp_filter_init_t TYPIFY(EVT_MICROAPP_BLE_FILTER_INIT);
 typedef cs_async_result_t TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND);
 typedef cs_async_result_t TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE);
 

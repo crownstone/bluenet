@@ -42,21 +42,27 @@ protected:
 	std::vector<Component*> getChildren() override;
 
 private:
-	TwilightHandler twilightHandler;
-	BehaviourHandler behaviourHandler;
+	TwilightHandler _twilightHandler;
+	BehaviourHandler _behaviourHandler;
 
-	SmartSwitch smartSwitch;
+	SmartSwitch _smartSwitch;
 
 	// the latest states requested by other parts of the system.
-	std::optional<uint8_t> overrideState = {};
-	std::optional<uint8_t> behaviourState = {};
-	std::optional<uint8_t> twilightState = {};
+	std::optional<uint8_t> _overrideState = {};
+	std::optional<uint8_t> _behaviourState = {};
+	std::optional<uint8_t> _twilightState = {};
 
 	// the last state that was aggregated and passed on towards the SoftwareSwitch.
-	std::optional<uint8_t> aggregatedState = {};
+	std::optional<uint8_t> _aggregatedState = {};
 
 	// Cache of previous time update.
 	uint32_t _lastTimestamp = 0;
+
+	//! Set on switchcraft event, then decremented each tick event until 0.
+	uint16_t _switchcraftDoubleTapCountdown = 0;
+
+	//! Keeps up the switch value (1-100 from smart switch) of the last time it was on, before being turned off by switchcraft.
+	uint8_t _lastSwitchcraftOnValue = 0;
 
 	/**
 	 * Which source claimed the switch.
@@ -118,6 +124,27 @@ private:
 	void executeStateIntentionUpdate(uint8_t value, cmd_source_with_counter_t& source);
 
 	/**
+	 * Registers a switchcraft event and checks if it's a double tap action.
+	 *
+	 * Sets _lastSwitchcraftOnValue and _switchcraftDoubleTapCountdown.
+	 *
+	 * @param[in] currentValue    The current switch value.
+	 *
+	 * @return    true            When this event is a double tap.
+	 */
+	bool registerSwitchcraftEvent(uint8_t currentValue);
+
+	/**
+	 * Get the state intention from a switchcraft event.
+	 *
+	 * @param[in] currentValue    The current switch state (0-100 from smart switch).
+	 * @param[in] doubleTap       Whether the switchcraft event was a double tap.
+	 *
+	 * @return                    The switch value to be set.
+	 */
+	uint8_t getStateIntentionSwitchcraft(uint8_t currentValue, bool doubleTap);
+
+	/**
 	 * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
 	 * a new aggregated state. This handling function takes care of that.
 	 *
@@ -155,11 +182,12 @@ private:
 	uint8_t aggregatedBehaviourIntensity();
 
 	/**
-	 * When override state is the special value 'smart on'
-	 * it should be interpreted according to the values of twilightHandler
-	 * and behaviourHandler. This getter centralizes that.
+	 * Returns the switch state that should be set according to the override state.
+	 *
+	 * When override state is the special value 'smart on' it should be interpreted according to the values of
+	 * twilightHandler and behaviourHandler. This getter centralizes that.
 	 */
-	uint8_t resolveOverrideState();
+	uint8_t resolveOverrideState(uint8_t overrideState);
 
 	/**
 	 * Tries to set source as owner of the switch.

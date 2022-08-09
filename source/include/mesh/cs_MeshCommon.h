@@ -16,31 +16,32 @@
  */
 namespace MeshUtil {
 
-struct __attribute__((__packed__)) cs_mesh_received_msg_t {
-	uint16_t opCode;
-	uint16_t srcAddress; // of the original sender
-	bool macAddressValid; // True when the following MAC address is valid.
-	uint8_t macAddress[MAC_ADDRESS_LEN]; // MAC address of the relaying node, which is the src in case of 0 hops.
-	uint8_t* msg;
-	uint8_t msgSize;
-	int8_t rssi;
-	uint8_t hops;
-	uint8_t channel;
-};
-
-// Data needed in each model queue.
+/**
+ * Data needed in each model queue.
+ */
 struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
-	uint16_t id = 0; // ID that can freely be used to find similar items.
-	uint8_t type = CS_MESH_MODEL_TYPE_UNKNOWN; // Mesh msg type.
-//	stone_id_t targetId = 0;   // 0 for broadcast
-	uint8_t transmissionsOrTimeout : 6; // Timeout in seconds when reliable, else number of transmissions.
+	//! ID that can freely be used to find similar items.
+	uint16_t id = 0;
+
+	//! Mesh msg type.
+	uint8_t type = CS_MESH_MODEL_TYPE_UNKNOWN;
+
+	/**
+	 * Timeout in seconds when reliable, else number of transmissions.
+	 * Set to 0 to use the default value.
+	 */
+	uint8_t transmissionsOrTimeout : 6;
+
+	//! Whether this item has priority.
 	bool priority : 1;
-	bool noHop : 1;
+
+	//! Whether this message should be sent to direct neighbours only.
+	bool doNotRelay : 1;
 
 	cs_mesh_queue_item_meta_data_t():
 		transmissionsOrTimeout(0),
 		priority(false),
-		noHop(false)
+		doNotRelay(false)
 	{}
 };
 
@@ -49,13 +50,33 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
  * Data is temporary, so has to be copied.
  */
 struct cs_mesh_queue_item_t {
-	cs_mesh_queue_item_meta_data_t metaData;
-	bool reliable = false;
-	bool broadcast = true;
-	bool noHop = false;
-	uint8_t numIds = 0;
-	stone_id_t* stoneIdsPtr = nullptr;
-	cs_data_t msgPayload;
+	//! Metadata
+	cs_mesh_queue_item_meta_data_t metaData = {};
+
+	//! Whether the message should be acked.
+	bool acked                              = false;
+
+	//! Whether the message should be broadcasted.
+	bool broadcast                          = true;
+
+	//! Whether this message should be sent to direct neighbours only.
+	bool doNotRelay                         = false;
+
+	/**
+	 * If this mesh message is sent because of a Mesh command, then set this field to the control command
+	 * payload of that mesh command.
+	 * It is used to send back the result of the mesh command.
+	 */
+	cs_control_cmd_t controlCommand         = CTRL_CMD_UNKNOWN;
+
+	//! Number of target stone IDs.
+	uint8_t numStoneIds                     = 0;
+
+	//! Pointer to the list of target stone IDs.
+	stone_id_t* stoneIdsPtr                 = nullptr;
+
+	//! The message payload.
+	cs_data_t msgPayload                    = {};
 };
 
 #define printMeshQueueItem(modelName, meshQueueItemMetaData) \

@@ -130,7 +130,29 @@ In source files additional information can be given about particular implementat
 
 ### Struct comments
 
-Just add your comments to just before the struct definition. Do not sprinkle code with oneliner comments per field. 
+Just add your comments to just before the struct definition. Do not sprinkle code with oneliner comments per field.
+Comments per field will end up in doxygen at the right place with the following syntax:
+
+```
+/**
+ * @struct adc_channel_config_result_t
+ * Result struct after configuring an ADC channel. Has all the info to put the sample values in context.
+ *
+ * @var adc_channel_config_result_t::pin
+ *   The AIN pin of this channel.
+ */
+struct __attribute__((packed)) adc_channel_config_result_t {
+	adc_pin_id_t pin;
+};
+```
+
+There are a couple of reasons to write the comments not at the same line of the code:
+
++ The line length limitation is more easily maintained (we limit the number of columns to 120, see this doc).
++ The linter adjusts the alignment of all struct comments when a field name is extended. Hence, renaming spills over in whitespace changes on other lines.
++ Alignment across structs depends on the longest field name length per struct, hence it is different for each struct.
+
+These issues are prevented by writing the comments in the comment section before the struct. The only disadvantage is that doxygen requires repeating the struct name for each var.
 
 ### General
 

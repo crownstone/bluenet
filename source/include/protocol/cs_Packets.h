@@ -167,9 +167,9 @@ struct __attribute__((__packed__)) state_packet_header_t {
 union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 	struct __attribute__((packed)) {
 		bool broadcast : 1;
-		bool reliable : 1;
+		bool acked : 1;
 		bool useKnownIds : 1;
-		bool noHops : 1;
+		bool doNotRelay : 1;
 	} flags;
 	uint8_t asInt = 1;  // Broadcast to all by default.
 };
@@ -553,13 +553,6 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t* buf;
 };
 
-/**
- * Stores information on a filter as being expected by the microapp. Currently, only an index of the interrupt handler
- * where the BLE messages have to be delivered to is part of this struct.
- */
-struct __attribute__((packed)) cs_microapp_filter_init_t {
-	uint8_t index;
-};
 
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
 
