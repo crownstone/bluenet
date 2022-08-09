@@ -1,0 +1,15 @@
+@startuml
+participant "UART 1"         as uart_a
+participant "Crownstone 1"   as a
+participant "Crownstone 2"   as b
+participant "UART 2"         as uart_b
+
+uart_a -> a : type = CTRL_CMD_MESH_COMMAND\npayload =\n    targetIds = [2]\n    flags = unicast & acked\n    type = CTRL_CMD_UART_MSG\n    data = "hi"
+a -> b      : opcode = UNICAST_RELIABLE\ntype = CS_MESH_MODEL_TYPE_CTRL_CMD\npayload =\n    ctrl_cmd = CTRL_CMD_UART_MSG\n    data = "hi"
+b -> uart_b : "hi"
+b -> a      : opcode = UNICAST_REPLY\nmsg =\n    ctrl_cmd = CTRL_CMD_UART_MSG\n    result_code = SUCCESS
+a -> uart_a : mesh_result =\n    stone_id = 2\n    ctrl_cmd = CTRL_CMD_UART_MSG\n    result_code = SUCCESS
+a -> uart_a : mesh_ack_all =\n    ctrl_cmd = CTRL_CMD_UART_MSG\n    result_code = SUCCESS
+
+@enduml
+
