@@ -28,16 +28,14 @@ fi
 if [ $SKIP_DOWNLOAD -eq 1 ]; then
 	echo "Skip download. Already file with proper checksum downloaded."
 else
-	# Remove old file (not correct checksum)
 	wget --timestamping "$DOWNLOAD_URL"
 	md5=($(md5sum "$DOWNLOAD_FILE"))
-	if [ "$md5" = "$MD5" ]; then
-		echo "Checksum incorrect. Remove downloaded file and exit"
-		#rm -f $DOWNLOAD_FILE
+	if [ "$md5" != "$MD5" ]; then
+		echo "Checksum incorrect: $md5 != $MD5"
 		exit 1
 	fi
 	unzip -n $DOWNLOAD_FILE
 fi
 
 echo "Install $ZIP_FOLDER/$DEB_FILE file using apt (sudo rights required)"
-sudo apt install "$ZIP_FOLDER/$DEB_FILE"
+sudo apt -y install "$ZIP_FOLDER/$DEB_FILE"

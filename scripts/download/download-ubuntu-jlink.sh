@@ -28,11 +28,11 @@ if [ $SKIP_DOWNLOAD -eq 1 ]; then
 else
 	wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" "$DOWNLOAD_URL"
 	md5=($(md5sum "$DEB_FILE"))
-	if [ "$md5" = "$MD5" ]; then
-		echo "Checksum incorrect"
+	if [ "$md5" != "$MD5" ]; then
+		echo "Checksum incorrect: $md5 != $MD5"
 		exit 1
 	fi
 fi
 
 echo "Install $DEB_FILE file using apt (sudo rights required)"
-sudo apt install "./$DEB_FILE"
+sudo apt -y install "./$DEB_FILE"
