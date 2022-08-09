@@ -43,6 +43,8 @@ const uint8_t MICROAPP_SDK_MAX_STRING_LENGTH = MICROAPP_SDK_MAX_PAYLOAD - MICROA
 const uint8_t MICROAPP_SDK_MAX_ARRAY_SIZE = MICROAPP_SDK_MAX_PAYLOAD - MICROAPP_SDK_LOG_HEADER_SIZE;
 // max total - (header + appUuid [2] + size [1])
 const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 3);
+// max total - (header + protocol [1] + type [2] + size [2])
+const uint8_t MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 5);
 
 // Protocol definitions
 #define MICROAPP_SERIAL_DEFAULT_PORT_NUMBER 1
@@ -257,6 +259,15 @@ enum MicroappSdkPowerUsageType {
 	CS_MICROAPP_SDK_POWER_USAGE_POWER   = 0x01, // Get filtered power data in milliWatt
 	CS_MICROAPP_SDK_POWER_USAGE_CURRENT = 0x02, // Not implemented yet
 	CS_MICROAPP_SDK_POWER_USAGE_VOLTAGE = 0x03, // Not implemented yet
+};
+
+/**
+ * Type of yield from the microapp to bluenet
+ */
+enum MicroappSdkYieldType {
+	CS_MICROAPP_SDK_YIELD_SETUP = 0x01, // End of setup
+	CS_MICROAPP_SDK_YIELD_LOOP  = 0x02, // End of loop
+	CS_MICROAPP_SDK_YIELD_ASYNC = 0x03, // The microapp is doing something asynchronous like a delay call
 };
 
 /**
@@ -539,3 +550,40 @@ struct __attribute__((packed)) microapp_sdk_presence_t {
 };
 
 static_assert(sizeof(microapp_sdk_presence_t) <= MICROAPP_SDK_MAX_PAYLOAD);
+
+/**
+ * @struct microapp_sdk_control_command_t
+ * Struct with payload conforming to control command protocol for direct handling by command handler
+ * See https://github.com/crownstoen/bluenet/blob/master/docs/protocol/PROTOCOL.md#control-packet
+ *
+ * @var microapp_sdk_control_command_t::header
+ * @var microapp_sdk_control_command_t::protocol    The protocol of the command
+ * @var microapp_sdk_control_command_t::type        The type of command
+ * @var microapp_sdk_control_command_t::size        Size of the payload
+ * @var microapp_sdk_control_command_t::payload     Payload
+ */
+struct __attribute__((packed)) microapp_sdk_control_command_t {
+	microapp_sdk_header_t header;
+	uint8_t               protocol;
+	uint16_t              type;
+	uint16_t              size;
+	uint8_t               payload[MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE];
+};
+
+static_assert(sizeof(microapp_sdk_control_command_t) <= MICROAPP_SDK_MAX_PAYLOAD);
+
+/**
+ * @struct microapp_sdk_yield_t
+ * Struct for microapp yielding to bluenet, e.g. upon completing a setup or loop call, or within an async call (e.g. delay)
+ *
+ * @var microapp_sdk_yield_t::header
+ * @var microapp_sdk_yield_t::type                 MicroappSdkYieldType   The type of yield. See the enum definition.
+ * @var microapp_sdk_yield_t::emptyInterruptSlots                         Number of empty slots for interrupts the microapp has. If zero, block new interrupts
+ */
+struct __attribute__((packed)) microapp_sdk_yield_t {
+	microapp_sdk_header_t header;
+	uint8_t               type;
+	uint8_t               emptyInterruptSlots;
+};
+
+static_assert(sizeof(microapp_sdk_yield_t) <= MICROAPP_SDK_MAX_PAYLOAD);
