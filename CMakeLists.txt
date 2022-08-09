@@ -76,6 +76,10 @@ message(STATUS "Source dir ${CMAKE_SOURCE_DIR}")
 message(STATUS "Build dir ${CMAKE_BINARY_DIR}")
 message(STATUS "Installation dir with binaries ${CMAKE_INSTALL_PREFIX}")
 
+set(BLUENET_CMAKE_MODULES_PATH "${CMAKE_SOURCE_DIR}/source/conf/cmake/modules/")
+message(STATUS "Search for CMake modules in ${BLUENET_CMAKE_MODULES_PATH}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BLUENET_CMAKE_MODULES_PATH}")
+
 # FindGit and FindWget are standard cmake modules, see
 # https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html
 find_package(Git)
@@ -88,9 +92,10 @@ if(NOT WGET_FOUND)
 	message(FATAL_ERROR "Installation requires wget, install with something like `sudo apt install wget`")
 endif()
 
-set(BLUENET_CMAKE_MODULES_PATH "${CMAKE_SOURCE_DIR}/source/conf/cmake/modules/")
-message(STATUS "Search for CMake modules in ${BLUENET_CMAKE_MODULES_PATH}")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${BLUENET_CMAKE_MODULES_PATH}")
+find_package(gcc_arm_none_eabi)
+if(NOT gcc_arm_none_eabi_FOUND)
+	message(FATAL_ERROR "Installation requires cross-compiler")
+endif()
 
 if(FACTORY_IMAGE)
 	find_package(pass)
@@ -258,27 +263,6 @@ if (REQUIRE_JLINK)
 	endif()
 endif()
 
-
-# The cross-compiler
-if(COMPILE_ON_ARM)
-	if("${COMPILER_VERSION}" STREQUAL "10.3-2021.10")
-		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-aarch64-linux.tar.bz2)
-		set(GCC_ARM_NONE_EABI_MD5 3fe3d8bb693bd0a6e4615b6569443d0d)
-	else()
-		message(FATAL_ERROR "Unknown compiler version: ${COMPILER_VERSION} for ${CMAKE_HOST_SYSTEM_PROCESSOR}")
-	endif()
-else()
-	if("${COMPILER_VERSION}" STREQUAL "8-2019-q3-update")
-		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
-		set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
-	elseif("${COMPILER_VERSION}" STREQUAL "10.3-2021.10")
-		set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2)
-		set(GCC_ARM_NONE_EABI_MD5 2383e4eb4ea23f248d33adc70dc3227e)
-	else()
-		message(FATAL_ERROR "Unknown compiler version: ${COMPILER_VERSION}")
-	endif()
-endif()
-
 #######################################################################################################################
 # Local names
 #######################################################################################################################
@@ -336,16 +320,6 @@ ExternalProject_Add(${MESH_SDK_TARGET}
 	)
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
-
-ExternalProject_Add(gcc_arm_none_eabi
-	DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-	URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
-	URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
-	SOURCE_DIR ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi
-	CONFIGURE_COMMAND ""
-	BUILD_COMMAND ""
-	INSTALL_COMMAND ""
-	)
 
 set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_BLUENET_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
@@ -411,7 +385,6 @@ add_custom_target(micro_eec
 	COMMENT "Build micro-eec"
 	DEPENDS
 	${NORDIC_SDK_TARGET}
-	gcc_arm_none_eabi
 	)
 
 add_custom_target(target_depend
@@ -420,7 +393,6 @@ add_custom_target(target_depend
 	DEPENDS
 	${NORDIC_SDK_TARGET}
 	${MESH_SDK_TARGET}
-	${BLUENET_LIB_LOGS_TARGET}
 	)
 
 #######################################################################################################################
