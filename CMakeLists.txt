@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.10)
 # Set board target
 #######################################################################################################################
 
-option(DOWNLOAD_JLINK                            "Download JLink"                        ON)
 option(DOWNLOAD_NRFUTIL                          "Download nrfutil"                      ON)
 option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"                   OFF)
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
@@ -18,6 +17,7 @@ option(PYTHON_SETUP_VENV                         "Setup python virtual env for u
 option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" OFF)
 option(FACTORY_IMAGE                             "Create factory image"                  OFF)
 option(REQUIRE_NRFJPROG                          "Require nrfjprog"                      ON)
+option(REQUIRE_JLINK                             "Require JLink"                         ON)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -275,13 +275,22 @@ endif()
 # Make some more variables available to the bluenet build
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
-# Check for nrfjprog on a system from which we want to flash it as well (not required for cloud-only tests)
+# Check for nrfjprog on a system from which we want to flash (not required for cloud-only tests)
 if (REQUIRE_NRFJPROG)
 	find_package(nrfjprog)
 	if (NOT NRFJPROG_FOUND)
 		message(FATAL_ERROR "Installation requires nrfjprog (see https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools)")
 	endif()
 endif()
+
+# Check for JLinkExe on a system from which we want to flash
+if (REQUIRE_JLINK)
+	find_package(JLinkExe)
+	if (NOT JLINKEXE_FOUND)
+		message(FATAL_ERROR "Installation requires JLink (see https://www.segger.com/downloads/jlink/)")
+	endif()
+endif()
+
 
 # The cross-compiler
 if(COMPILE_ON_ARM)
@@ -407,27 +416,6 @@ ExternalProject_Add(${MESH_SDK_TARGET}
 	)
 
 list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
-
-if(DOWNLOAD_JLINK)
-	set(JLINK_TARGET jlink)
-	message(STATUS "Configure ${JLINK_TARGET} target")
-	ExternalProject_Add(${JLINK_TARGET}
-		DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
-		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		URL ${JLINK_LINUX_DOWNLOAD_URL}
-		URL_MD5 ${JLINK_MD5}
-		DOWNLOAD_NO_EXTRACT 1
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		PATCH_COMMAND ""
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "-- Target jlink has user interaction for installation"
-			COMMAND ${CMAKE_COMMAND} -E echo "-- This might halt the process half-way"
-			COMMAND ${CMAKE_COMMAND} -E echo "-- and show \"[sudo] password for ...:\" in the middle of the log"
-			COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE}
-		USES_TERMINAL_INSTALL ON
-		)
-endif()
 
 ExternalProject_Add(gcc_arm_none_eabi
 	DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
@@ -624,7 +612,6 @@ add_custom_target(target_depend
 	DEPENDS
 	${NORDIC_SDK_TARGET}
 	${MESH_SDK_TARGET}
-	${JLINK_TARGET}
 	${NRFUTIL_TARGET}
 	${BLUENET_LIB_LOGS_TARGET}
 	)

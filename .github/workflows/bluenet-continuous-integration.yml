@@ -22,7 +22,7 @@ jobs:
       - name: Run cmake
         working-directory: ./build
         run: |
-          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
+          cmake .. -DREQUIRE_NRFJPROG=OFF -DREQUIRE_JLINK=OFF -DCOMPILE_FOR_HOST=ON
       - name: Run make
         working-directory: ./build
         run: |
@@ -57,7 +57,7 @@ jobs:
       - name: Run cmake
         working-directory: ./build
         run: |
-          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
+          cmake .. -DREQUIRE_NRFJPROG=OFF -DREQUIRE_JLINK=OFF -DCOMPILE_FOR_HOST=ON
       - name: Run make
         working-directory: ./build
         run: |
