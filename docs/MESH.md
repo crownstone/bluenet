@@ -216,6 +216,18 @@ limitation stems:
 
 Currently, bluenet only has Crownstone specific models that all send the same [messages](protocol/MESH_PROTOCOL.md), but differ in whether they send reliable (acked) messages, whether they send unicast or broadcast messages, and the TTL with which they send the messages.
 
+Each model has its own queue of messages to be sent.
+Every model that sends acked messages, handle them 1 by 1: the next message will be sent when the previous is acked or timed out.
+The unacked model interleaves messages from the queue. Every period it sends a burst of messages from the queue. For example if there are 5 messages queued, the sent messages will look something like this:
+```
+[00:00:00] Send messages 1, 2, 3
+[00:00:00] Send messages 4, 5, 1
+[00:00:00] Send messages 2, 3, 4
+...
+```
+The reason we interleave them is to decrease the latency (every message is sent as soon as possible), while keeping the reliability (every messsage is sent multiple times).
+
+
 ### Group addresses
 
 The models that send and receive broadcast messages, assign a predefined group address to the Crownstone. This way, all crownstones can handle the message.
