@@ -2,20 +2,17 @@ message(STATUS "Version of cmake: ${CMAKE_VERSION}")
 
 cmake_minimum_required(VERSION 3.10)
 
+cmake_policy(SET CMP0135 NEW)
+
 #######################################################################################################################
 # Set board target
 #######################################################################################################################
 
-option(DOWNLOAD_NRFUTIL                          "Download nrfutil"                      ON)
-option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
-option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary logging"       OFF)
-option(DOWNLOAD_CROWNSTONE_PYTHON_LIBS           "Download Crownstone Python libs"       OFF)
 option(COMPILE_FOR_HOST                          "Compile for host"                      OFF)
-option(PYTHON_SETUP_VENV                         "Setup python virtual env for user"     OFF)
-option(AUTO_UPDATE_TOOLS                         "Auto-update tools on building bluenet" OFF)
 option(FACTORY_IMAGE                             "Create factory image"                  OFF)
 option(REQUIRE_NRFJPROG                          "Require nrfjprog"                      ON)
 option(REQUIRE_JLINK                             "Require JLink"                         ON)
+option(REQUIRE_PYTHON                            "Require python"                        OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -48,14 +45,6 @@ set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 
 # Create a more explicit name for this variable
 set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
-
-set(PYTHON_REQUIRED OFF)
-if(DOWNLOAD_CSUTIL OR DOWNLOAD_NRFUTIL OR DOWNLOAD_BLUENET_LIB_LOGS OR DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
-	message(STATUS "One of the download options requires python")
-	set(PYTHON_REQUIRED ON)
-else()
-	message(STATUS "No download option which requires python is enabled")
-endif()
 
 # With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
 # With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
@@ -126,7 +115,7 @@ if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*" OR "${CMAKE_HOST_SYSTEM_PROCE
 	set(COMPILE_ON_ARM 1)
 endif()
 
-if(PYTHON_REQUIRED)
+if(REQUIRE_PYTHON)
 	# This utility is able to find either python2 or python3. Set virtual env variant to be used first.
 	set(Python_FIND_VIRTUALENV FIRST)
 	find_package(Python COMPONENTS Interpreter REQUIRED)
@@ -138,13 +127,7 @@ if(PYTHON_REQUIRED)
 	if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
 		message(STATUS "Virtual environment detected")
 	else()
-		if(PYTHON_SETUP_VENV)
-			message(STATUS "No virtual environment detected, will configure it.")
-			message(STATUS "Then call `make python_setup_venv` to set it up")
-			message(STATUS "Also activate the environment")
-		else()
-			message(WARNING "Virtual environment not detected! Set it up or set PYTHON_SETUP_VENV to ON.")
-		endif()
+		message(STATUS "Virtual environment not detected. Not recommended.")
 	endif()
 endif()
 
@@ -207,14 +190,9 @@ endif()
 # Download urls and hashes
 #######################################################################################################################
 
-# If you update the version of a .zip file, also update the md5 hash.
-# Get the hashes through `md5sum downloads/*`
-
 set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
 
 set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
-
-set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
 
 #######################################################################################################################
 # Get proper git tags / hashes
@@ -301,18 +279,6 @@ else()
 	endif()
 endif()
 
-# The JLink tool
-set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-if(COMPILE_ON_ARM)
-	message(STATUS "Get ARM (64-bit) version of JLink tool")
-	set(JLINK_DEB_FILE JLink_Linux_V758_arm64.deb)
-	set(JLINK_MD5 f6a74b6a134fed8036238b107504369b)
-else()
-	set(JLINK_DEB_FILE JLink_Linux_V760b_x86_64.deb)
-	set(JLINK_MD5 4b0e24a040a74117a041807536372846)
-endif()
-set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
-
 #######################################################################################################################
 # Local names
 #######################################################################################################################
@@ -328,41 +294,6 @@ list(APPEND CMAKE_BLUENET_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FI
 #######################################################################################################################
 # Download dependencies
 #######################################################################################################################
-
-if(PYTHON_SETUP_VENV)
-	set(PYTHON_CROWNSTONE_VENV_PATH ${WORKSPACE_DIR}/tools/python/crownstone_env)
-
-	# Add python virtual env setup on Ubuntu systems
-	# We first use `apt-cache` so that we only run `apt install` when there is actually a candidate
-	# that is different from what is installed.
-	set(PYTHON_SETUP_TARGET python_setup_venv)
-	message(STATUS "Configure ${PYTHON_SETUP_TARGET} target")
-	add_custom_target(${PYTHON_SETUP_TARGET}
-		COMMAND ${CMAKE_COMMAND} -E echo "-- Install python3-venv"
-		COMMAND apt-cache policy python3-venv > ${CMAKE_BINARY_DIR}/.apt-cache
-		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Installed:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.installed
-		COMMAND cat ${CMAKE_BINARY_DIR}/.apt-cache | grep 'Candidate:' | cut -f2 -d':' > ${CMAKE_BINARY_DIR}/.apt-cache.candidate
-		COMMAND diff ${CMAKE_BINARY_DIR}/.apt-cache.candidate ${CMAKE_BINARY_DIR}/.apt-cache.installed 1>/dev/null 2>&1 && echo '-- Package python3-venv already installed' || ${SUPERUSER_SWITCH} apt-get install -y python3-venv
-		COMMAND ${CMAKE_COMMAND} -E make_directory ${PYTHON_CROWNSTONE_VENV_PATH}
-		COMMAND ${Python_EXECUTABLE} -m venv ${PYTHON_CROWNSTONE_VENV_PATH}
-		COMMAND ${CMAKE_COMMAND} -E echo "-- Make sure to run the following command:"
-		COMMAND ${CMAKE_COMMAND} -E echo "--  source ${PYTHON_CROWNSTONE_VENV_PATH}/bin/activate"
-		COMMAND ${CMAKE_COMMAND} -E echo "-- You can deactivate on the command line:"
-		COMMAND ${CMAKE_COMMAND} -E echo "--  deactivate"
-		WORKING_DIRECTORY ${WORKSPACE_DIR}
-		COMMENT "Run python venv setup"
-		)
-
-	# Use a cmake -P structure to check actual ENV variables
-	set(PYTHON_TEST_VENV_TARGET python_test_venv)
-	message(STATUS "Configure ${PYTHON_TEST_VENV_TARGET} target")
-	add_custom_target(${PYTHON_TEST_VENV_TARGET}
-		COMMAND ${CMAKE_COMMAND} -E echo "-- Test for venv"
-		COMMAND ${CMAKE_COMMAND} -DPYTHON_CROWNSTONE_VENV_PATH=${PYTHON_CROWNSTONE_VENV_PATH} -P ${DEFAULT_MODULES_PATH}/test_python_venv.cmake
-		WORKING_DIRECTORY ${WORKSPACE_DIR}
-		COMMENT "Run python venv test"
-		)
-endif()
 
 message(STATUS "Configure ${NORDIC_SDK_TARGET} target")
 ExternalProject_Add(${NORDIC_SDK_TARGET}
@@ -418,86 +349,6 @@ ExternalProject_Add(gcc_arm_none_eabi
 
 set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_BLUENET_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
-
-if(DOWNLOAD_NRFUTIL)
-	set(NRFUTIL_TARGET nrfutil)
-	message(STATUS "Configure ${NRFUTIL_TARGET} target")
-	if(PYTHON_SETUP_VENV)
-		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
-	endif()
-	add_custom_target(${NRFUTIL_TARGET}
-		COMMAND ${CMAKE_COMMAND} -E echo "-- Add nrfutil through pip"
-		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel nrfutil
-		WORKING_DIRECTORY ${WORKSPACE_DIR}
-		COMMENT "Install nrfutil"
-		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
-		)
-endif()
-
-if(DOWNLOAD_CSUTIL)
-	message(STATUS "Configure csutil target")
-	message(STATUS "Note, the `csutil` utility will be replaced by tools in Crownstone BLE lib")
-	if(PYTHON_SETUP_VENV)
-		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
-	endif()
-	ExternalProject_Add(csutil
-		GIT_REPOSITORY https://github.com/mrquincle/csutil
-		GIT_CONFIG advice.detachedHead=false
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
-		BINARY_DIR ${WORKSPACE_DIR}/tools/csutil
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		INSTALL_COMMAND ""
-		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
-		)
-endif()
-
-if(DOWNLOAD_BLUENET_LIB_LOGS)
-	set(BLUENET_LIB_LOGS_TARGET bluenet_logs)
-	message(STATUS "Configure ${BLUENET_LIB_LOGS_TARGET} target")
-	if(PYTHON_SETUP_VENV)
-		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
-	endif()
-	add_custom_target(bluenet_logs
-		COMMAND ${CMAKE_COMMAND} -E echo "-- Add bluenet-logs through pip"
-		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel bluenet-logs
-		WORKING_DIRECTORY ${WORKSPACE_DIR}
-		COMMENT "Install bluenet binary logging"
-		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
-		)
-endif()
-
-# Downloads the Crownstone Python libs
-# https://github.com/crownstone/crownstone-lib-python-ble
-# https://github.com/crownstone/crownstone-lib-python-uart
-# https://github.com/crownstone/crownstone-lib-python-cloud
-if(DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
-	set(CROWNSTONE_PYTHON_LIBS_TARGET crownstone_python_libs)
-	message(STATUS "Configure ${CROWNSTONE_PYTHON_LIBS_TARGET} target")
-	if(PYTHON_SETUP_VENV)
-		message(STATUS "This is a python tool and -DPYTHON_SETUP_VENV=ON is set: venv will be enforced for this target!")
-	endif()
-	add_custom_target(${CROWNSTONE_PYTHON_LIBS_TARGET}
-		COMMAND ${CMAKE_COMMAND} -E echo "-- Add Crownstone Python libs through pip"
-		COMMAND ${Python_EXECUTABLE} -m pip -q install wheel crownstone-ble crownstone-uart crownstone-cloud
-		WORKING_DIRECTORY ${WORKSPACE_DIR}
-		COMMENT "Install Crownstone Python libs"
-		DEPENDS ${PYTHON_SETUP_TARGET} ${PYTHON_TEST_VENV_TARGET}
-		)
-endif()
-
-# Target to install all tools that are not required for building and are also not installed
-# automatically through ExternalProject_Add such as bluenet_logs.
-set(TOOLS_TARGET tools)
-message(STATUS "Configure ${TOOLS_TARGET} target")
-add_custom_target(${TOOLS_TARGET} ${ADD_TO_DEFAULT_BUILD_TARGET}
-	COMMAND ${CMAKE_COMMAND} -E echo "-- Install supporting tools"
-	WORKING_DIRECTORY ${WORKSPACE_DIR}
-	COMMENT "Install supporting tools"
-	DEPENDS
-		${BLUENET_LIB_LOGS_TARGET}
-		${NRFUTIL_TARGET}
-	)
 
 if(FACTORY_IMAGE)
 	message(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
@@ -569,7 +420,6 @@ add_custom_target(target_depend
 	DEPENDS
 	${NORDIC_SDK_TARGET}
 	${MESH_SDK_TARGET}
-	${NRFUTIL_TARGET}
 	${BLUENET_LIB_LOGS_TARGET}
 	)
 
@@ -598,33 +448,6 @@ set(BOARD_CONFIG_DIR_FULL "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.config)
 if(EXISTS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.overwrite.config)
 	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${BOARD_CONFIG_DIR_FULL}/CMakeBuild.overwrite.config)
-endif()
-
-if(NOT FACTORY_IMAGE)
-	# No extra dependencies, already included through micro-eec target and target_depend targets
-
-	if(AUTO_UPDATE_TOOLS)
-		message(STATUS "The option AUTO_UPDATE_TOOLS is set to ON.")
-		message(STATUS "Auto-update means automatic download/update of binary logging, nrfutil, etc. on `make bluenet`.")
-		message(STATUS "To skip any bluenet dependency, use `make bluenet/fast`.")
-		if(DOWNLOAD_BLUENET_LIB_LOGS)
-			message(STATUS "Make bluenet depending on ${BLUENET_LIB_LOGS_TARGET}")
-			add_dependencies(bluenet ${BLUENET_LIB_LOGS_TARGET})
-		endif()
-		if(DOWNLOAD_NRFUTIL)
-			message(STATUS "Make bluenet depending on ${NRFUTIL_TARGET}")
-			add_dependencies(bluenet ${NRFUTIL_TARGET})
-		endif()
-		if(DOWNLOAD_CROWNSTONE_PYTHON_LIBS)
-			message(STATUS "Make bluenet depending on ${CROWNSTONE_PYTHON_LIBS_TARGET}")
-			add_dependencies(bluenet ${CROWNSTONE_PYTHON_LIBS_TARGET})
-		endif()
-	else()
-		message(STATUS "The option AUTO_UPDATE_TOOLS is set to OFF.")
-		message(STATUS "This means no download/update of binary logging, nrfutil, etc. on `make bluenet`.")
-		message(STATUS "Download/update can still be done manually (if they are configured).")
-		message(STATUS "For example, when configured with -DDOWNLOAD_NRFUTIL=ON, call `make tools` subsequently.")
-	endif()
 endif()
 
 #######################################################################################################################
