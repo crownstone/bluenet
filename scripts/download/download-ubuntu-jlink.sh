@@ -26,7 +26,7 @@ fi
 if [ $SKIP_DOWNLOAD -eq 1 ]; then
 	echo "Skip download. Already file with proper checksum downloaded."
 else
-	wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" "$DOWNLOAD_URL"
+	wget --no-verbose --show-progress --progress=dot:giga --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" "$DOWNLOAD_URL"
 	md5=($(md5sum "$DEB_FILE"))
 	if [ "$md5" != "$MD5" ]; then
 		echo "Checksum incorrect: $md5 != $MD5"
