@@ -182,28 +182,14 @@ Over the course of time broadcasts of advertisements on iOS are moving more and 
 
 ### Advertising
 
-Similarly, it has **advertiser(s)** implemented as well. We do use both the ordinary advertiser in the nRF5 SDK and
-the advertiser in the mesh.
+Because mesh messages are simply sent as advertisements, it made sense for the mesh SDK to also expose an advertising API. It lets the user send completely custom advertisements at an interval or a limited number of times.
 
-The address we use for the Bluetooth Mesh is decremented with one w.r.t. default factory address for the node. It is
-set to the same for all roles (but only the relay role is used).
+The address we use for the Bluetooth Mesh messages is decremented with one w.r.t. default factory address for the node.
+It is set to the same for all roles (but only the relay role is used).
 
 ```
 mesh_opt_core_adv_addr_set(role, address)
 ```
-
-The advertiser in the mesh (see `cs_Mesh.cpp` and `cs_MeshAdvertiser.cpp`) is set to a mac address incremented with one:
-
-```
-_advertiser.setMacAddress(address)
-```
-
-This advertiser is responsible for broadcasting iBeacon messages (it can even iterate through a couple of them).
-
-
-The `Advertiser` class defined in `cs_Advertiser.cpp` is responsible for broadcasting advertisements (or scan
-responses) with Crownstone service data. This advertiser sends out **connectable advertisements**. It is not possible
-to do that with the advertiser in the mesh SDK.
 
 
 ## Bluenet specific
@@ -233,6 +219,30 @@ Currently, bluenet only has Crownstone specific models that all send the same [m
 ### Group addresses
 
 The models that send and receive broadcast messages, assign a predefined group address to the Crownstone. This way, all crownstones can handle the message.
+
+### Advertising
+
+A Crownstone advertises with 3 MACs:
+
+- Mesh messages (using MAC decremented by 1). Bluetooth mesh messages are sent as advertisements by design.
+- iBeacon advertisements (using MAC incremented by 1).
+- Regular advertisements, contain: connectable flag, name, and service data.
+
+The reason multiple MAC addresses are used, is so phones (or other devices) are not confused by whether they can connect or not to the Crownstone.
+
+#### Details
+The advertiser in the mesh directory (see `cs_Mesh.cpp` and `cs_MeshAdvertiser.cpp`) makes use of the advertiser implemented in the mesh SDK. It is set to a mac address incremented with one w.r.t. default factory address:
+
+```
+_advertiser.setMacAddress(address)
+```
+
+This advertiser is responsible for broadcasting iBeacon messages (it can even iterate through a couple of them). The reason we use the mesh SDK for this, is because it operates completely separate from the softdevice, and thus can use a different MAC. Next to that, the softdevice doesn't have to be reconfigured all the time to interleave iBeacon and service data advertisements.
+
+The `Advertiser` class defined in `cs_Advertiser.cpp` is responsible for broadcasting advertisements (and scan responses) with Crownstone service data.
+This advertiser sends out **connectable advertisements**.
+It is not possible to do that with the advertiser in the mesh SDK, as the softdevice handles connections which are linked to the connectable flag in the advertisement.
+
 
 ### Synchronizing
 
