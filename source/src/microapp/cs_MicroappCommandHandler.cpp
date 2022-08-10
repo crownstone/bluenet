@@ -23,7 +23,7 @@
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Packets.h>
-#include <protocols/cs_CommandTypes.h>
+#include <protocol/cs_CommandTypes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_BleError.h>
@@ -262,7 +262,8 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 			event.dispatch();
 
 			if (gpio.direction == SENSE) {
-				// TODO: Manually register interrupt in MicroappController
+				MicroappController& controller = MicroappController::getInstance();
+				controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
 			}
 			break;
 		}
@@ -353,7 +354,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_
 	eventData.data.data = serviceData->data;
 	event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 	event.dispatch();
-	serviceData->header.ack = CS_ACK_ERR_SUCCESS;
+	serviceData->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -397,7 +398,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_
 		}
 		default: {
 			LOGw("Unknown TWI type: %i", type);
-			twi->header.ack = CS_ACK_UNDEFINED;
+			twi->header.ack = CS_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
@@ -421,12 +422,13 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 	switch (type) {
 		case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			// TODO: fix this when registering interrupts in controller refactored
-			ble->header.ack = controller.registerSoftInterruptSlotBle();
-			if (ble->header.ack != CS_ACK_SUCCESS) {
-				LOGw("Registering an interrupt for incoming BLE scans failed with %i", ble->header.ack);
-				return ERR_UNSPECIFIED;
+			int result = controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
+			if (result != ERR_SUCCESS) {
+				LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
+				ble->header.ack = CS_ACK_ERROR;
+				return result;
 			}
+			ble->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_START: {
@@ -447,10 +449,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 			// Untested
 			LOGi("Initiate BLE connection");
 			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
-			std::reverse_copy(ble->addr, ble->addr + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
+			std::reverse_copy(ble->address, ble->address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 			event.dispatch();
-			ble->header.ack = CS_ACK_WAIT_FOR_SUCCESS;
+			ble->header.ack = CS_ACK_IN_PROGRESS;
 			LOGi("BLE command result: %u", event.result.returnCode);
 			return event.result.returnCode;
 		}
@@ -461,14 +463,14 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 		}
 		default: {
 			LOGi("Unknown BLE type: %u", type);
-			ble->header.ack = CS_ACK_UNDEFINED;
+			ble->header.ack = CS_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappMeshCommand(microapp_sdk_mesh_t* mesh) {
+cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mesh_t* mesh) {
 
 #if BUILD_MESHING == 0
 	LOGw("Mesh is disabled. Mesh-related microapp requests are ignored.");
@@ -521,12 +523,13 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshCommand(microapp_sdk_mes
 		case CS_MICROAPP_SDK_MESH_LISTEN: {
 			LOGi("Starting to listen for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
-			// TODO: fix this when registering interrupts in controller refactored
-			mesh->header.ack = controller.registerSoftInterruptSlotMesh();
-			if (mesh->header.ack != CS_ACK_SUCCESS) {
-				LOGw("Registering an interrupt for incoming mesh messages failed with %i", mesh->header.ack);
-				return ERR_UNSPECIFIED;
+			int result = controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
+			if (result != ERR_SUCCESS) {
+				LOGw("Registering an interrupt for incoming mesh messages failed with %i", result);
+				mesh->header.ack = CS_ACK_ERROR;
+				return result;
 			}
+			mesh->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_READ_CONFIG: {
@@ -537,10 +540,15 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshCommand(microapp_sdk_mes
 			mesh->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
+		case CS_MICROAPP_SDK_MESH_READ: {
+			LOGw("Reading from mesh can only be done via interrupts");
+			mesh->header.ack = CS_ACK_ERR_UNDEFINED;
+			return ERR_WRONG_OPERATION;
+		}
 		default: {
 			LOGi("Unknown mesh type: %u", type);
 			mesh->header.ack = CS_ACK_ERR_UNDEFINED;
-			return CS_ACK_UNKNOWN_TYPE;
+			return ERR_UNKNOWN_TYPE;
 		}
 	}
 	return ERR_SUCCESS;
@@ -576,7 +584,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	presence->presenceBitmask = resultBuf.presence[microappPresence->profileId];
+	presence->presenceBitmask = resultBuf.presence[presence->profileId];
 	presence->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
@@ -597,8 +605,8 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(microa
 	eventData.protocolVersion = controlCommand->protocol;
 	eventData.data            = controlCommand->payload;
 	eventData.size            = controlCommand->size;
-	eventData.type            = controlCommand->type;
-	eventData.accessLevel     = EncryptionAccessLevel.BASIC;
+	eventData.type            = (CommandHandlerTypes)controlCommand->type;
+	eventData.accessLevel     = EncryptionAccessLevel::BASIC;
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &eventData, sizeof(eventData));
 	event.dispatch();
 	if (event.result.returnCode != ERR_SUCCESS) {

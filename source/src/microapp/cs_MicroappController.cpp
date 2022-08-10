@@ -120,11 +120,13 @@ void microappCallbackDummy() {
 		bluenet_io_buffer_t io_buffer;
 		// fake setup and loop commands
 		if (first_time) {
-			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_COMMAND_SETUP_END;
+			// setup end
+			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
 			first_time                            = false;
 		}
 		else {
-			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_COMMAND_LOOP_END;
+			// loop end
+			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
 			// data[0] = CS_MICROAPP_COMMAND_LOOP_END;
 		}
 		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
@@ -198,10 +200,6 @@ MicroappController::MicroappController() : EventListener(), _callCounter(0), _mi
  */
 int MicroappController::digitalPinToInterrupt(int pin) {
 	return pin;
-}
-
-bool MicroappController::microappBusy() {
-	return _emptyInterruptSlots < 1;
 }
 
 /*
@@ -335,10 +333,10 @@ void MicroappController::callMicroapp() {
 }
 
 /*
- * Retrieve request from the microapp. This is within the crownstone coroutine context. It gets the payload from the
- * global `sharedState` variable and calls `handleMicroappCommand` afterwards. The `sharedState.microapp2bluenet buffer`
- * only stores a single command. This is fine because after each command the microapp should transfer control to
- * bluenet. For each command is decided in `stopAfterMicroappCommand` if the microapp should be called again. For
+ * Retrieve request from the microapp. This is within the bluenet coroutine context. It gets the payload from the
+ * global `sharedState` variable and calls `handleMicroappRequest` afterwards. The `sharedState.microapp2bluenet buffer`
+ * only stores a single request. This is fine because after each request the microapp should transfer control to
+ * bluenet. For each command is decided in `stopAfterMicroappRequest` if the microapp should be called again. For
  * example, for the end of setup, loop, or delay, it is **not** immediately called again but normal bluenet execution
  * continues. In that case the microapp is called again on the next tick.
  */
@@ -353,15 +351,18 @@ bool MicroappController::handleRequest() {
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result = microappRequestHandler.handleMicroappRequest(incomingMessage);
 	if (result != ERR_SUCCESS) {
-		LOGi("Handling request of type %i may have failed");
+		LOGi("Handling request of type %i failed with return code %i", result);
 	}
 	bool callAgain = !stopAfterMicroappRequest(incomingMessage);
 	if (!callAgain) {
-		LOGv("Request yields, do not call again");
+		LOGv("Do not call again");
 	}
 	return callAgain;
 }
 
+/*
+ * Check whether the microapp is yielding voluntarily or if consecutive call limit is reached
+ */
 bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* header) {
 	bool stop;
 	switch (header->sdkType) {
@@ -390,6 +391,7 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* header)
 			break;
 		}
 	}
+	// Also check if the max number of consecutive nonyielding calls is reached
 	if (stop) {
 		_callCounter = 0;
 	}
@@ -431,19 +433,16 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 }
 
 /*
- * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the soft interrupt.
- * Hence, we call retrieveCommand after this. Then a number of calls are executed until we reach the end of the loop
- * or until we have reached a maximum of consecutive calls (within retrieveCommand).
- *
+ * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the interrupt.
+ * Hence, we call handleRequest after this if the interrupt is not finished.
  * Note that although we do throttle the number of consecutive calls, this does not throttle the callbacks themselves.
- *
  */
 void MicroappController::generateInterrupt() {
 	// This is probably already checked before this function call, but let's do it anyway to be sure
 	if (!allowInterrupts()) {
 		return;
 	}
-	if (_interruptCounter == MAX_CALLBACKS_WITHIN_A_TICK - 1) {
+	if (_interruptCounter == MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK - 1) {
 		LOGv("Last callback (next one in next tick)");
 	}
 	_interruptCounter++;
@@ -479,19 +478,20 @@ void MicroappController::generateInterrupt() {
 }
 
 /*
- * A GPIO callback towards the microapp.
+ * Do some checks to validate if we want to generate an interrupt for the pin event
+ * and if so, prepare the outgoing buffer and call generateInterrupt()
  */
-void MicroappController::onGpioUpdate(uint8_t pin) {
-	uint8_t interruptPin = digitalPinToInterrupt(pin);
+void MicroappController::onGpioUpdate(uint8_t pinIndex) {
 	if (!allowInterrupts()) {
 		LOGi("Interrupts in progress, ignore pin event");
 		return;
 	}
+	uint8_t interruptPin = digitalPinToInterrupt(pinIndex);
 	if (!interruptRegistered(CS_MICROAPP_SDK_TYPE_PIN, interruptPin)) {
 		LOGv("No interrupt registered for virtual pin %d", interruptPin);
 		return;
 	}
-	// Write pin command into the buffer.
+	// Write pin data into the buffer.
 	uint8_t* outputBuffer    = getOutputMicroappBuffer();
 	microapp_sdk_pin_t* pin  = reinterpret_cast<microapp_sdk_pin_t*>(outputBuffer);
 	pin->header.sdkType      = CS_MICROAPP_SDK_TYPE_PIN;
@@ -502,7 +502,8 @@ void MicroappController::onGpioUpdate(uint8_t pin) {
 }
 
 /*
- * Called upon receiving scanned BLE device, generates a soft interrupt if a slot has been registered before.
+ * Do some checks to validate if we want to generate an interrupt for the scanned device
+ * and if so, prepare the outgoing buffer and call generateInterrupt()
  */
 void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	if (!_microappIsScanning) {
@@ -547,6 +548,10 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	generateInterrupt();
 }
 
+/*
+ * Do some checks to validate if we want to generate an interrupt for the received message
+ * and if so, prepare the outgoing buffer and call generateInterrupt()
+ */
 void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 	if (event->type != CS_MESH_MODEL_TYPE_MICROAPP) {
 		// Mesh message received, but not for the microapp.
@@ -607,9 +612,11 @@ cs_ret_code_t MicroappController::registerInterrupt(uint8_t major, uint8_t minor
 		return ERR_NO_SPACE;
 	}
 	// Register the interrupt
-	_interruptRegistrations[i].registered = true;
-	_interruptRegistrations[i].major = major;
-	_interruptRegistrations[i].minor = minor;
+	_interruptRegistrations[emptySlotIndex].registered = true;
+	_interruptRegistrations[emptySlotIndex].major = major;
+	_interruptRegistrations[emptySlotIndex].minor = minor;
+
+	return ERR_SUCCESS;
 }
 
 /*
@@ -627,11 +634,17 @@ bool MicroappController::interruptRegistered(uint8_t major, uint8_t minor) {
 	return false;
 }
 
+/*
+ * Check whether new interrupts can be generated
+ */
 bool MicroappController::allowInterrupts() {
+	// if the microapp dropped the last one and hasn't finished an interrupt,
+	// we won't try to call it with a new interrupt
 	if (_emptyInterruptSlots <= 0) {
 		return false;
 	}
-	if (_interruptCounter == MAX_INTERRUPTS_WITHIN_A_TICK) {
+	// Check if we already exceeded the max number of interrupts in this tick
+	if (_interruptCounter == MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK) {
 		return false;
 	}
 	return true;
@@ -654,18 +667,10 @@ void MicroappController::setScanning(bool scanning) {
 }
 
 /**
- * Listen to events from the microapp with respect to initialization (registering soft interrupt service routines) and
- * get the interrupts for those routines and forward them.
+ * Listen to events from the microapp that are coupled with (possibly) registered interrupts
  */
 void MicroappController::handleEvent(event_t& event) {
 	switch (event.type) {
-		case CS_TYPE::EVT_GPIO_INIT: {
-			auto gpio = CS_TYPE_CAST(EVT_GPIO_INIT, event.data);
-			if (gpio->direction == INPUT || gpio->direction == SENSE) {
-				registerSoftInterruptSlotGpio(gpio->pin_index);
-			}
-			break;
-		}
 		case CS_TYPE::EVT_GPIO_UPDATE: {
 			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);
 			onGpioUpdate(gpio->pin_index);
@@ -681,7 +686,6 @@ void MicroappController::handleEvent(event_t& event) {
 			onReceivedMeshMessage(msg);
 			break;
 		}
-
 		default: break;
 	}
 }

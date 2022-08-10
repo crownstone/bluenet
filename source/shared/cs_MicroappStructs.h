@@ -312,7 +312,7 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
  */
 struct __attribute__((packed)) microapp_sdk_header_t {
 	uint8_t sdkType;
-	uint8_t ack;
+	int8_t ack;
 };
 
 static_assert(sizeof(microapp_sdk_header_t) == MICROAPP_SDK_HEADER_SIZE);
