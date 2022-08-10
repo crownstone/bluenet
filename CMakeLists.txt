@@ -250,6 +250,8 @@ if (REQUIRE_NRFJPROG)
 	find_package(nrfjprog)
 	if (NOT NRFJPROG_FOUND)
 		message(FATAL_ERROR "Installation requires nrfjprog (see https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools)")
+	else()
+		message(STATUS "Version of nrfjprog: ${NRFJPROG_VERSION_STRING}")
 	endif()
 endif()
 
