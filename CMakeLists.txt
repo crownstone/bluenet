@@ -31,8 +31,6 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
 
-set(OVERWRITE_COMPILER_VERSION                   "" CACHE STRING "Overwrite compiler version")
-
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE                         Debug)
@@ -93,6 +91,8 @@ endif()
 find_package(gcc_arm_none_eabi)
 if(NOT gcc_arm_none_eabi_FOUND)
 	message(FATAL_ERROR "Installation requires cross-compiler")
+else()
+	message(STATUS "Version of gcc_arm_none_eabi: ${gcc_arm_none_eabi_VERSION_STRING}")
 endif()
 
 if(FACTORY_IMAGE)
@@ -153,17 +153,6 @@ load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
 
 # From now on you can use information from the config files, not above!
-
-#######################################################################################################################
-# Overwrite configuration values for just a few options
-#######################################################################################################################
-
-if(OVERWRITE_COMPILER_VERSION)
-	message(STATUS "Overwrite compiler version with ${OVERWRITE_COMPILER_VERSION}")
-	set(COMPILER_VERSION "${OVERWRITE_COMPILER_VERSION}")
-else()
-	message(STATUS "Compiler version to use: ${COMPILER_VERSION}")
-endif()
 
 #######################################################################################################################
 # Create some convenience variables that use configuration values
@@ -260,6 +249,8 @@ if (REQUIRE_JLINK)
 	find_package(JLinkExe)
 	if (NOT JLINKEXE_FOUND)
 		message(FATAL_ERROR "Installation requires JLink (see https://www.segger.com/downloads/jlink/)")
+	else()
+		message(STATUS "Version of JLink: ${JLINK_VERSION_STRING}")
 	endif()
 endif()
 
