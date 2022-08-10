@@ -173,7 +173,7 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 			break;
 
 		case ACR01B10B:
-			asACR01B10B(config);
+			asACR01B10B(config, NULL);
 			break;
 		case ACR01B10D:
 			asACR01B10D(config);
@@ -275,9 +275,10 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 			switch (uicrData->majorMinorPatch.fields.major) {
 				case 0:
 					switch (uicrData->majorMinorPatch.fields.minor) {
-						case 0:
-							asACR01B10B(config);
+						case 0: {
+							asACR01B10B(config, uicrData);
 							return ERR_SUCCESS;
+						}
 						case 1:
 							asACR01B10D(config);
 							return ERR_SUCCESS;
