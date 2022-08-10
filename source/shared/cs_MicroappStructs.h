@@ -81,7 +81,7 @@ enum MicroappSdkAck {
 
 	// Ack successful replies (positive)
 	CS_ACK_SUCCESS                   = 0x03, // Finished successfully
-	CS_ACK_WAIT_FOR_SUCCESS          = 0x04, // So far so good, but not done yet
+	CS_ACK_IN_PROGRESS               = 0x04, // So far so good, but not done yet
 
 	// Ack error replies (negative)
 	CS_ACK_ERROR                     = -0x01, // Unspecified error

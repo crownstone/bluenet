@@ -613,7 +613,9 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(microa
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yield_t* yield) {
 	LOGd("Microapp yielded with yieldType %d", yield->type);
-	// TODO: call controller to update number of empty Interrupt slots
+	// Update number of empty Interrupt slots the microapp has
+	MicroappController& controller = MicroappController::getInstance();
+	controller.setEmptyInterruptSlots(yield->emptyInterruptSlots);
 	yield->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }

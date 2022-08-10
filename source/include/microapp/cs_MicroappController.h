@@ -44,6 +44,12 @@ struct microapp_mesh_isr_t {
 	bool registered = false;
 };
 
+struct microapp_interrupt_registration_t {
+	bool registered = false;
+	uint8_t major = 0;
+	uint8_t minor = 0;
+};
+
 /**
  * The class MicroappController has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
@@ -80,6 +86,10 @@ private:
 	 * The maximum number of consecutive calls to a microapp.
 	 */
 	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES = 8;
+
+	const uint8_t MICROAPP_MAX_INTERRUPT_REGISTRATIONS = 10;
+
+	microapp_interrupt_registration_t _interruptRegistrations[MICROAPP_MAX_INTERRUPT_REGISTRATIONS];
 
 	/**
 	 * Addressees of pin interrupt service routines.
