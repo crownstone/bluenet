@@ -7,8 +7,9 @@
 
 #include <ble/cs_Nordic.h>
 #include <ble/cs_UUID.h>
-#include <protocol/cs_ErrorCodes.h>
 #include <cstring>
+#include <logging/cs_Logger.h>
+#include <protocol/cs_ErrorCodes.h>
 #include <util/cs_UuidParser.h>
 #include <util/cs_BleError.h>
 
@@ -112,6 +113,8 @@ ret_code_t UUID::getFromCache(const ble_uuid128_t& fullUuid) {
 }
 
 ret_code_t UUID::add(const ble_uuid128_t& fullUuid) {
+	_log(SERIAL_DEBUG, false, "Register vendor specific base UUID:");
+	_logArray(SERIAL_DEBUG, true, fullUuid.uuid128, sizeof(fullUuid.uuid128));
 	uint32_t nrfCode = sd_ble_uuid_vs_add(&fullUuid, &(_uuid.type));
 	return nrfCode;
 }
