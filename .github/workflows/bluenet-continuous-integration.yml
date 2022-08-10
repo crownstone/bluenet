@@ -45,19 +45,18 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Crownstone!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: Install dependencies
+      - name: Prepare dependencies
         run: |
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update -y --fix-missing
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -f -y
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ git make python3 python3-pip wget unzip apt
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y libusb-1.0-0 libsm6
-          cmake --version
+          echo "🖥️ Prepare dependencies by symlinking to /bluenet/tools and add some to $PATH"
+          ln -s /bluenet/tools tools
+          echo "/bluenet/tools/gcc_arm_none_eabi/bin" >> $GITHUB_PATH
+          echo "🖥️ The workflow is now ready to test your code on the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Create build dir
         run: |
           mkdir build

@@ -2,6 +2,8 @@
 
 FROM ubuntu:20.04
 
+LABEL LABEL org.opencontainers.image.source https://github.com/crownstone/bluenet
+
 MAINTAINER Crownstone <ask@crownstone.rocks>
 
 RUN DEBIAN_FRONTEND=noninteractive TZ=Europe/Amsterdam apt-get update
