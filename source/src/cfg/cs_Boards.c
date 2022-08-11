@@ -161,13 +161,9 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 
 	switch(hardwareBoard) {
 		case ACR01B1A:
-			__attribute__ ((fallthrough));
 		case ACR01B1B:
-			__attribute__ ((fallthrough));
 		case ACR01B1C:
-			__attribute__ ((fallthrough));
 		case ACR01B1D:
-			__attribute__ ((fallthrough));
 		case ACR01B1E:
 			asACR01B1D(config);
 			break;
@@ -188,15 +184,12 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 			break;
 
 		case ACR01B2A:
-			__attribute__ ((fallthrough));
 		case ACR01B2B:
-			__attribute__ ((fallthrough));
 		case ACR01B2C:
 			asACR01B2C(config);
 			break;
 
 		case ACR01B2E:
-			__attribute__ ((fallthrough));
 		case ACR01B2G:
 			asACR01B2G(config);
 			break;
@@ -211,7 +204,6 @@ cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards
 			break;
 
 		case PCA10036:
-			__attribute__ ((fallthrough));
 		case PCA10040:
 			asPca10040(config);
 			break;
@@ -240,49 +232,69 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 	init(config);
 	config->hardwareBoard = uicrData->board;
 
+	// Be strict for major version: no default.
+	// Do have a default for minor and patch version, so that future hardware will still be supported.
 	switch (uicrData->productRegionFamily.fields.productType) {
-		case PRODUCT_DEV_BOARD:
+		case PRODUCT_DEV_BOARD: {
 			asPca10040(config);
 			return ERR_SUCCESS;
+		}
 		case PRODUCT_CROWNSTONE_PLUG_ZERO: {
 			switch (uicrData->majorMinorPatch.fields.major) {
-				case 0:
+				case 0: {
 					asACR01B2C(config);
 					return ERR_SUCCESS;
-				case 1:
+				}
+				case 1: {
 					switch (uicrData->majorMinorPatch.fields.minor) {
-						case 0:
+						case 0: {
 							asACR01B2C(config);
 							return ERR_SUCCESS;
+						}
 						case 1:
-							__attribute__ ((fallthrough));
 						case 3:
+						default: {
 							asACR01B2G(config);
 							return ERR_SUCCESS;
+						}
 					}
+				}
 			}
 			break;
 		}
 		case PRODUCT_CROWNSTONE_PLUG_ONE: {
-			asACR01B11A(config);
-			return ERR_SUCCESS;
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0: {
+					asACR01B11A(config);
+					return ERR_SUCCESS;
+				}
+			}
+			break;
 		}
 		case PRODUCT_CROWNSTONE_BUILTIN_ZERO: {
-			asACR01B1D(config);
-			return ERR_SUCCESS;
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0: {
+					asACR01B1D(config);
+					return ERR_SUCCESS;
+				}
+			}
+			break;
 		}
 		case PRODUCT_CROWNSTONE_BUILTIN_ONE: {
 			switch (uicrData->majorMinorPatch.fields.major) {
-				case 0:
+				case 0: {
 					switch (uicrData->majorMinorPatch.fields.minor) {
 						case 0: {
 							asACR01B10B(config, uicrData);
 							return ERR_SUCCESS;
 						}
 						case 1:
+						default: {
 							asACR01B10D(config);
 							return ERR_SUCCESS;
+						}
 					}
+				}
 			}
 			break;
 		}
@@ -290,27 +302,46 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 			switch (uicrData->majorMinorPatch.fields.major) {
 				case 0:
 					switch (uicrData->majorMinorPatch.fields.minor) {
-						case 1:
+						case 1: {
 							asACR01B13B(config);
 							return ERR_SUCCESS;
+						}
 						case 2:
+						default: {
 							asACR01B15A(config);
 							return ERR_SUCCESS;
+						}
 					}
 			}
 			break;
 		}
 		case PRODUCT_GUIDESTONE: {
-			asGuidestone(config);
-			return ERR_SUCCESS;
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0:
+				case 1: {
+					asGuidestone(config);
+					return ERR_SUCCESS;
+				}
+			}
+			break;
 		}
 		case PRODUCT_CROWNSTONE_USB_DONGLE: {
-			asUsbDongle(config);
-			return ERR_SUCCESS;
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0: {
+					asUsbDongle(config);
+					return ERR_SUCCESS;
+				}
+			}
+			break;
 		}
 		case PRODUCT_CROWNSTONE_OUTLET: {
-			asCR01R02v4(config);
-			return ERR_SUCCESS;
+			switch (uicrData->majorMinorPatch.fields.major) {
+				case 0: {
+					asCR01R02v4(config);
+					return ERR_SUCCESS;
+				}
+			}
+			break;
 		}
 	}
 	return ERR_UNKNOWN_TYPE;
