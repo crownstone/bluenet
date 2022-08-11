@@ -236,7 +236,23 @@ cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_c
 	// Do have a default for minor and patch version, so that future hardware will still be supported.
 	switch (uicrData->productRegionFamily.fields.productType) {
 		case PRODUCT_DEV_BOARD: {
-			asPca10040(config);
+			// For dev boards, we don't have useful UICR data, so just use hardware board.
+			switch (uicrData->board) {
+				case PCA10036:
+				case PCA10040: {
+					asPca10040(config);
+					break;
+				}
+				case PCA10056: {
+					asPca10056(config);
+					break;
+				}
+				default: {
+					// Fall back to pca10040
+					asPca10040(config);
+					break;
+				}
+			}
 			return ERR_SUCCESS;
 		}
 		case PRODUCT_CROWNSTONE_PLUG_ZERO: {
