@@ -17,35 +17,41 @@ especially if also used to download prerequisite tools.
 * Continuous integration by a few simple commands
 * Construction of a docker image by a few simple commands
 
+# Dependencies
+
+There are couple of tools that are expected to by present on your system. If you are on Ubuntu download scripts for such tools can be found at `scripts/download`.
+
+Absolutely required is the cross-compiler.
+
+    ./download-ubuntu-gcc-arm-none-eabi.sh ../..
+
+This places the cross-compiler in the `tools` directory that can be found by `cmake`.
+
+To download `JLinkExe` on Ubuntu (required to flash development boards or Crownstones over a JLink device):
+
+    cd scripts/download
+    ./download-ubuntu-jlink.sh ../..
+
+Similarly download `nrfjprog` (also required for flashing hardware).
+
+    ./download-ubuntu-nrfjprog.sh ../..
+
 # Downloads
 
-All downloaded tools are now part of the build as well. There is a parent directory that downloads all software that
-is required. This is:
+When running `cmake` and `make` there are a couple of sources that are obtained automatically:
 
 * Nordic SDK
 * Nordic Mesh
-* GNU cross-compiler
-* Nordic nrfutil software (semi-optional)
-* JLink tools (semi-optional)
 
-The Softdevice is part of the Nordic SDK and does not need to be downloaded separately. The continuous
-integration system (Github Actions) does not need to download JLink and the nrfutil software henceforth they can be excluded from the
-build by
+The Softdevice is part of the Nordic SDK and does not need to be downloaded separately.
 
-    cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
+# Checks
 
-If you update the version of one of the supporting tools, you will also need to update the md5 hash in the parent
-`CMakeLists.txt` file. This has the following syntax:
+The continuous integration system (Github Actions) does not need JLink nor nrfjprog. To remove the checks against their existence run cmake with the options:
 
-    set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip)
-    set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
+    cmake .. -DREQUIRE_JLINK=OFF -DREQUIRE_NRFJPROG=OFF
 
-If you upgrade to a new file, download it, and run `md5sum *` on the command line. Then update both name and hash in
-the `CMakeLists.txt` file.
-
-The semi-optional tools can be downloaded using flags (see below). They are not necessary to build bluenet, hence
-they are semi-optional. If you want to flash the `bluenet` binaries to hardware they are required. You can download
-them also on yourself. This is not recommended because we know which versions work / have no bugs.
+We currently do not check for the versions of those tools.
 
 # Downloads of optional tools
 
@@ -61,14 +67,16 @@ It reads out how the memory layout is implemented and displays this in a very ni
 
 ![Nordic Tools](../images/pc_nordic_tools.png)
 
-You can enable the download of `nrfconnect` by:
+You can download `nrfconnect` by
 
-    cmake .. -DDOWNLOAD_NRFCONNECT=ON
-    make
+    ./download-ubuntu-nrfconnect-core.sh ../..
+    ./download-ubuntu-nrfconnect-programmer.sh ../..
 
 This particular tool requires `npm`. Install it through something like `sudo apt install npm`.
 Subsequently, it downloads a lot of stuff, amongst which also `nrfjprog` it it cannot find it.
-Make sure it does not lead to version conflicts. You can run these by:
+Make sure it does not lead to version conflicts.
+
+You can run these tools by:
 
     make nrfconnect_core_setup
     make nrfconnect_core
@@ -88,61 +96,13 @@ microapps. Just the targets are also listed through:
 
     make help
 
-If tools are configured to be downloaded, the download itself does not necessarily have to happen when running `make bluenet`. It is possible to do this automatically by setting `-DAUTO_UPDATE_TOOLS=ON`. You can do this manually also by:
-
-    make tools
-
-Or separately:
-
-    make bluenet_logs
-    make nrfutil
-
-If Crownstone Python libs are configured through `-DDOWNLOAD_CROWNSTONE_PYTHON_LIBS`, they can be installed through:
-
-    make crownstone_python_libs
-
-Check the result through something like `python -m pip list`.
-
 # Python virtual environment
 
-Although it is possible to use bluenet without a Python virtual environment, it is discouraged. There's now an option
-which helps the user in this: `-DPYTHON_SETUP_ENV=ON`. When running `cmake` with this option enabled, it will create
-an extra `make` target that can be called afterwards:
-
-    make python_setup_venv
-
-This will also automatically be called (is a dependency for):
-
-    make bluenet_logs
-    make nrfutil
-    make csutil
-
-Running `cmake` only configures the build system. The installation happens when running `make`. After configuration you will need to activate the environment. The exact command is given when you do the build and you will be driven
-to set it like this:
-
-```
-  Not running in a virtual environment (while configured with
-  -DPYTHON_SETUP_VENV=ON).
-
-  Make sure to call:
-
-    source /home/anne/workspace/bluenet/tools/python/crownstone_env/bin/activate
-
-  Or activate a virtual env of your own choice.
-```
-
-This `source` command you will need to execute before any call to `make`.
+Although it is possible to use bluenet without a Python virtual environment, it is discouraged.
 
 ## Patches
 
-There are at times patches required for the tools that are downloaded. They can be found in the `patch` directory.
-That directory contains a `README.md` file with general instructions and if lucky explanations of the patches. In
-general patches are generated through something like (take the mesh SDK as example):
-
-    diff -ruN tools/mesh_sdk tools/mesh_sdk_patched > patch/00mesh.patch
-
-A patch is applied in the workspace directory. On the moment there are no patches applied because the code is
-maintained in patched form in dedicated github repositories (for the nRF5 SDK and the Mesh SDK).
+We used to have patches that are run against a downloaded code base, e.g. the mesh sdk. Now we run a copy of the code on github with all proper patches already applied. There's no need to perform patches for that reason.
 
 # Configuration
 
@@ -184,7 +144,7 @@ make as `VERBOSE=1 make`, those will not be visible to the user.
 To actually add this dependency we need `set_source_files_properties` with `OBJECT_DEPENDS`:
 
     set_source_files_properties(${FOLDER_SOURCE}
-	    PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+        PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
     )
 
 Also add the dependency to the target binary.
@@ -240,7 +200,7 @@ Due to the fact that the bootloader is linked through `add_subdirectory` it inhe
 It is important to not include the directory in which aforementioned file is stored. 
 
 Hence, we add this include directory only to firmware target (not the bootloader):
-    
+
     set(INCLUDE_DIR "include" "include/ble" "include/third") # not here
     ...
     target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf") # here
@@ -326,5 +286,5 @@ The following DOES work
 You might think dependencies are managed by `make`, but this is not true. The dependencies are managed by `cmake`. See for example [this question on SO](https://stackoverflow.com/questions/56155681/cmake-make-object-dependency-issue-not-rebuilding-when-header-changes). A `depend.make` file is generated by `cmake` and especially if particular header files are not used anymore after a refactoring it might be the case that this file is not updated. Just running `make clean` is not sufficient. You can rebuild the dependencies by:
 
     make depend
-    
+
 For any suggestion to improve the build system, file an issue at the issue tracker on github!
