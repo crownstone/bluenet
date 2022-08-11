@@ -44,6 +44,7 @@
  */
 void asPca10040(boards_config_t* config) {
 	config->pinDimmer                          = 20;
+	config->pinRelayDebug                      = 19;
 	config->pinRelayOn                         = 11;
 	config->pinRelayOff                        = 12;
 	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(3);
@@ -63,10 +64,10 @@ void asPca10040(boards_config_t* config) {
 	config->pinButton[2]                       = 15;
 	config->pinButton[3]                       = 16;
 
-	// The fourth LED is used to indicate the state of the dimmer
+	// The third and fourth LEDs are used to indicate the state of the relay and dimmer.
 	config->pinLed[0]                          = 17;
 	config->pinLed[1]                          = 18;
-	config->pinLed[2]                          = 19;
+	config->pinLed[2]                          = PIN_NONE;
 	config->pinLed[3]                          = PIN_NONE;
 
 	config->flags.dimmerInverted               = true;

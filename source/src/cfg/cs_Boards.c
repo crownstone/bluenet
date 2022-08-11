@@ -60,7 +60,8 @@
 void init(boards_config_t* config) {
 	config->hardwareBoard = 0;
 	config->pinDimmer = PIN_NONE;
-	config->pinEnableDimmer= PIN_NONE;
+	config->pinEnableDimmer = PIN_NONE;
+	config->pinRelayDebug = PIN_NONE;
 	config->pinRelayOn = PIN_NONE;
 	config->pinRelayOff = PIN_NONE;
 	config->pinAinZeroRef = PIN_NONE;

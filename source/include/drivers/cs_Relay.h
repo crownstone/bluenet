@@ -39,6 +39,9 @@ private:
 	uint8_t _pinRelayOff;
 	TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDurationMs;
 
+	uint8_t _pinRelayDebug;
+	bool _ledInverted;
+
     bool turnOn();
     bool turnOff();
 };
