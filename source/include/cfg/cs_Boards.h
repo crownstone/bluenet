@@ -173,6 +173,9 @@ typedef struct  {
 	// GPIO pin to enable the IGBT circuit.
 	uint8_t pinEnableDimmer;
 
+	// GPIO to debug the relay: turns on when relay is turned on, and vice versa. Inverted when LEDs are inverted.
+	uint8_t pinRelayDebug;
+
 	// GPIO pin to switch the relay on.
 	uint8_t pinRelayOn;
 

@@ -27,6 +27,11 @@ void Relay::init(const boards_config_t& board) {
 	nrf_gpio_cfg_output(_pinRelayOn);
 	nrf_gpio_pin_clear(_pinRelayOn);
 
+	_pinRelayDebug = board.pinRelayDebug;
+	_ledInverted = board.flags.ledInverted;
+	nrf_gpio_cfg_output(_pinRelayDebug);
+	nrf_gpio_pin_clear(_pinRelayDebug);
+
 	LOGd("init duration=%u ms", _relayHighDurationMs);
 }
 
@@ -38,6 +43,19 @@ bool Relay::set(bool value) {
 	assert(_initialized == true, "Not initialized");
 
 	TEST_PUSH_EXPR_B(this, "on", value);
+
+	if (_pinRelayDebug != PIN_NONE) {
+		bool debugPinValue = value;
+		if (_ledInverted) {
+			debugPinValue = !debugPinValue;
+		}
+		if (debugPinValue) {
+			nrf_gpio_pin_set(_pinRelayDebug);
+		}
+		else {
+			nrf_gpio_pin_clear(_pinRelayDebug);
+		}
+	}
 
 	if (value) {
 		return turnOn();
