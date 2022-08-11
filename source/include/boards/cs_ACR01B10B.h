@@ -24,7 +24,7 @@ void asACR01B10B(boards_config_t* config, const cs_uicr_data_t* uicrData) {
 	if (uicrData != NULL && uicrData->majorMinorPatch.fields.patch >= 2) {
 		// With patch 2:
 		config->pinEnableDimmer                    = 15;
-		config->flags.canDimOnWarmBoot             = true; // TODO: can it?
+		config->flags.canDimOnWarmBoot             = true;
 		config->flags.dimmerOnWhenPinsFloat        = false;
 	}
 }
