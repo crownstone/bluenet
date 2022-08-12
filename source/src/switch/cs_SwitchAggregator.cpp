@@ -405,22 +405,34 @@ bool SwitchAggregator::registerSwitchcraftEvent(uint8_t currentValue) {
 			doubleTap = true;
 		}
 	}
-	_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIMEOUT_MS / TICK_INTERVAL_MS;
+	if (doubleTap) {
+		// Double tap happened now, so next tap should not be a double tap.
+		_switchcraftDoubleTapCountdown = 0;
+	}
+	else {
+		_switchcraftDoubleTapCountdown = SWITCHCRAFT_DOUBLE_TAP_TIMEOUT_MS / TICK_INTERVAL_MS;
+	}
+
+	if (doubleTap && _lastSwitchcraftOnValue == 0) {
+		// This shouldn't happen.
+		LOGw("Last switchcract on value not known");
+		doubleTap = false;
+	}
+
 	return doubleTap;
 }
 
 uint8_t SwitchAggregator::getStateIntentionSwitchcraft(uint8_t currentValue, bool doubleTap) {
-	if (currentValue != 0) {
-		// Switch is currently on, so switch off.
-		return 0;
-	}
-
-	if (!doubleTap || _lastSwitchcraftOnValue == 0) {
-		// No double tap: just turn on (according to behaviour).
+	if (!doubleTap) {
+		if (currentValue != 0) {
+			// Switch is currently on, so switch off.
+			return 0;
+		}
+		// Just turn on (according to behaviour).
 		return CS_SWITCH_CMD_VAL_SMART_ON;
 	}
 
-	// Double tap: on value toggles between fully on, and a dimmed value.
+	// Double tap: always turn on, but cycles between fully on, and a dimmed value.
 	if (_lastSwitchcraftOnValue != CS_SWITCH_CMD_VAL_FULLY_ON) {
 		// Treat it the same way as manually setting the switch fully on.
 		return CS_SWITCH_CMD_VAL_FULLY_ON;
