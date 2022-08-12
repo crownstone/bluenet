@@ -8,7 +8,7 @@
 
 #include <util/cs_Math.h>
 
-#include <cstddef>
+#include <cstdint>
 
 enum class DayOfWeek : uint8_t {
 	Sunday    = 1 << 0,
