@@ -42,10 +42,6 @@ void asACR01B13B(boards_config_t* config) {
 	config->pinRx                              = 10;
 	config->pinTx                              = 9;
 
-//	config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
-//	config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
-//	config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
-//	config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
 	config->pinGpio[3]                         = 20;
 
 	config->flags.dimmerInverted               = true;

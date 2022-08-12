@@ -108,6 +108,13 @@ void init(boards_config_t* config) {
 	for (uint8_t i = 0; i < BUTTON_COUNT; ++i) {
 		config->pinButton[i] = PIN_NONE;
 	}
+
+	config->pinFlash.cs = PIN_NONE;
+	config->pinFlash.clk = PIN_NONE;
+	config->pinFlash.dio[0] = PIN_NONE;
+	config->pinFlash.dio[1] = PIN_NONE;
+	config->pinFlash.dio[2] = PIN_NONE;
+	config->pinFlash.dio[3] = PIN_NONE;
 }
 
 /**

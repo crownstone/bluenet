@@ -89,6 +89,11 @@ void asACR01B10D(boards_config_t* config) {
 	config->pinRx                              = 20;
 	config->pinTx                              = 19;
 
+	config->pinGpio[0]                         = 18;
+	config->pinGpio[1]                         = 17;
+	config->pinGpio[2]                         = 16;
+	config->pinGpio[3]                         = 15;
+
 	config->flags.dimmerInverted               = false;
 	config->flags.enableUart                   = false;
 	config->flags.enableLeds                   = false;

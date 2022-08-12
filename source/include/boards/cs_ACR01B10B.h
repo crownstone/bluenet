@@ -26,5 +26,7 @@ void asACR01B10B(boards_config_t* config, const cs_uicr_data_t* uicrData) {
 		config->pinEnableDimmer                    = 15;
 		config->flags.canDimOnWarmBoot             = true;
 		config->flags.dimmerOnWhenPinsFloat        = false;
+
+		config->pinGpio[3]                         = PIN_NONE;
 	}
 }
