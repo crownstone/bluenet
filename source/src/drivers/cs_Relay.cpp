@@ -29,8 +29,10 @@ void Relay::init(const boards_config_t& board) {
 
 	_pinRelayDebug = board.pinRelayDebug;
 	_ledInverted = board.flags.ledInverted;
-	nrf_gpio_cfg_output(_pinRelayDebug);
-	nrf_gpio_pin_clear(_pinRelayDebug);
+	if (_pinRelayDebug != PIN_NONE) {
+		nrf_gpio_cfg_output(_pinRelayDebug);
+		nrf_gpio_pin_clear(_pinRelayDebug);
+	}
 
 	LOGd("init duration=%u ms", _relayHighDurationMs);
 }
