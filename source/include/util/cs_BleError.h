@@ -9,6 +9,16 @@
 #include <logging/cs_CLogger.h>
 #include <util/cs_Error.h>
 
+// Used to be undefined in cs_Nordic.h, another header.
+// That introduces the issue that those headers have to included in the right order.
+#ifdef APP_ERROR_CHECK
+#undef APP_ERROR_CHECK
+#endif
+
+#ifdef APP_ERROR_HANDLER
+#undef APP_ERROR_HANDLER
+#endif
+
 // These macros can end up in C code, so use the C logger.
 
 #ifdef __cplusplus

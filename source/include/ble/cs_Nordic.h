@@ -79,15 +79,6 @@ typedef uint32_t ret_code_t;
 #include <nrf_uart.h>
 #endif
 
-// undefine the following macros, we will use our macros as defined in <util/cs_BleError.h>
-#ifdef APP_ERROR_CHECK
-#undef APP_ERROR_CHECK
-#endif
-
-#ifdef APP_ERROR_HANDLER
-#undef APP_ERROR_HANDLER
-#endif
-
 #else  // DISABLE_NRF_HEADERS
 
 #ifndef __ALIGN
