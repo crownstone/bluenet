@@ -106,23 +106,29 @@ set(SOURCE_DIR "../source/src")
 include(crownstone-application.src)
 include(crownstone-platform-mock.src)
 
+#######################################################################
+# util function to reduce verbosity
+# args: full path to test, relative to this cmake file 
+####################################################################### 
+
+function(add_crownstone_test testpath)
+	get_filename_component(TESTNAME ${testpath} NAME_WE)
+	add_executable(${TESTNAME} ${FOLDER_SOURCE} "test/${testpath}")
+	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
+	install(TARGETS ${TESTNAME} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
+endfunction()
+
 ###############################
 # register test files for ctest
 ###############################
 
 enable_testing()
 
-# util function to reduce verbosity
-function(add_crownstone_test testname)
-add_executable(${testname} ${FOLDER_SOURCE} "test/${testname}.cpp")
-add_test(NAME ${testname} COMMAND ${testname})
-install(TARGETS ${testname} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
-endfunction()
-
 # actual test definitions
-add_crownstone_test(test_InterleavedBuffer)
-add_crownstone_test(test_HashFletcher32)
-add_crownstone_test(test_BitmaskVarSize)
-add_crownstone_test(test_SystemTimeSync)
-add_crownstone_test(test_EventDispatcher)
-add_crownstone_test(test_BoardMap)
+add_crownstone_test(test_InterleavedBuffer.cpp)
+add_crownstone_test(test_HashFletcher32.cpp)
+add_crownstone_test(test_BitmaskVarSize.cpp)
+add_crownstone_test(test_SystemTimeSync.cpp)
+add_crownstone_test(test_EventDispatcher.cpp)
+add_crownstone_test(test_BoardMap.cpp)
+add_crownstone_test(scenarios/test_ReleaseOverrideOnBehaviourUpdate.cpp)
