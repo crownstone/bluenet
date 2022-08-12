@@ -11,6 +11,12 @@ option(FACTORY_IMAGE                             "Create factory image"         
 option(REQUIRE_NRFJPROG                          "Require nrfjprog"                      ON)
 option(REQUIRE_JLINK                             "Require JLink"                         ON)
 option(REQUIRE_PYTHON                            "Require python"                        OFF)
+option(BUILD_OFFLINE                             "Build offline"                         OFF)
+
+if (${BUILD_OFFLINE})
+	set_property(DIRECTORY ${myrootproject_SOURCE_DIR}
+		PROPERTY EP_UPDATE_DISCONNECTED 1)
+endif()
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")

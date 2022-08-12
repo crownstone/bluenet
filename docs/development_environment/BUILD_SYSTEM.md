@@ -96,6 +96,14 @@ microapps. Just the targets are also listed through:
 
     make help
 
+# Build offline
+
+If you have worked on bluenet before (and downloaded dependencies) and subsequently you want to build the project, the `cmake` build system requires an internet connection to check if the downloaded code such as the Nordic SDK etc are still up to date. You can disable this by the following option.
+
+    cmake .. -DBUILD_OFFLINE=ON
+
+Make sure you set this back to pick up the latest changes in the project's dependencies.
+
 # Python virtual environment
 
 Although it is possible to use bluenet without a Python virtual environment, it is discouraged.
