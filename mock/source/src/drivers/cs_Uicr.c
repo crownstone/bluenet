@@ -2,7 +2,12 @@
 #include <protocol/cs_ErrorCodes.h>
 
 static bool useNfcPinsAsGpio = false;
-static cs_uicr_data_t staticUicrData = {0xFF};
+static cs_uicr_data_t staticUicrData = {
+		.board = 0xFFFFFFFF,
+		.productRegionFamily.asInt = 0xFFFFFFFF,
+		.majorMinorPatch.asInt = 0xFFFFFFFF,
+		.productionDateHousing.asInt = 0xFFFFFFFF,
+};
 static uint32_t board = 0xFFFFFFFF;
 
 uint32_t getHardwareBoard() {
