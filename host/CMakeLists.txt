@@ -13,7 +13,8 @@ set(CMAKE_CXX_FLAGS          "${DEFAULT_CXX_FLAGS}"             CACHE STRING "C+
 set(CMAKE_C_FLAGS            "${DEFAULT_C_FLAGS}"               CACHE STRING "C flags" FORCE)
 set(CMAKE_C_AND_CXX_FLAGS    "${DEFAULT_C_AND_CXX_FLAGS}"       CACHE STRING "C and C++ flags")
 
-set(CMAKE_BLUENET_SOURCE_DIR_MOCK ${CMAKE_CURRENT_SOURCE_DIR}/../mock/source)
+set(CMAKE_BLUENET_MOCK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../mock/source)
+set(CMAKE_BLUENET_SOURCE_DIR_MOCK ${CMAKE_BLUENET_MOCK_DIR}/src)
 set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
@@ -83,8 +84,8 @@ foreach(cs_include_dir ${HOST_INCLUDE_DIRS})
 	
 	# Add mock include with higher prio.
 	# Override header files by adding a mock file in the exact same relative location in the mock folder.
-	message(STATUS "Add mock include directory: " ${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir})
-	include_directories(BEFORE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/${cs_include_dir}")
+	message(STATUS "Add mock include directory: " ${CMAKE_BLUENET_MOCK_DIR}/${cs_include_dir})
+	include_directories(BEFORE "${CMAKE_BLUENET_MOCK_DIR}/${cs_include_dir}")
 endforeach()
 
 

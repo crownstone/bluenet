@@ -1,14 +1,10 @@
 # List of Crownstone application source files.
 MESSAGE(STATUS "crownstone source files appended to FOLDER_SOURCE")
 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_Behaviour.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourHandler.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourStore.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourConflictResolution.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_ExtendedSwitchBehaviour.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_SwitchBehaviour.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_TwilightBehaviour.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_TwilightHandler.cpp")
+
+
+
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Advertiser.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_BleCentral.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Characteristic.cpp")
@@ -20,7 +16,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_ServiceData.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Stack.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_UUID.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/../shared/ipc/cs_IpcRamData.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Component.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
@@ -50,7 +46,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/logging/cs_Logger.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/logging/cs_CLogger.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresenceCondition.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresencePredicate.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresenceHandler.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_BackgroundAdvHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_CommandAdvHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_CommandHandler.cpp")
@@ -68,7 +64,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshModelPacketHelper.
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_CrownstoneService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/buffer/cs_CharacteristicBuffer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_StateData.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SafeSwitch.cpp")
@@ -77,8 +72,8 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SwitchAggregator.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/optmed.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_error_weak.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/time/cs_SystemTime.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/time/cs_TimeOfDay.cpp")
+
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevice.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevices.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_AssetFilter.cpp")
@@ -86,12 +81,12 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_ExactMatchFilter.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_CuckooFilter.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartCommandHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartHandler.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Crc16.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Crc32.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_WireFormat.cpp")
+
 
 IF (BUILD_MICROAPP_SUPPORT)
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_Microapp.cpp")
