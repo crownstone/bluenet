@@ -99,12 +99,12 @@ private:
 	/**
 	 * Cached value of what's stored in State.
 	 */
-	TYPIFY(CONFIG_SWITCH_LOCKED)_switchLocked = false;
+	TYPIFY(CONFIG_SWITCH_LOCKED) _switchLocked   = false;
 
 	/**
 	 * Override of switch lock, necessary to restore state at startup.
 	 */
-	bool _allowSwitchingOverride = false;
+	bool _allowSwitchingOverride                 = false;
 
 	/**
 	 * Whether switch state is allowed to be changed.
@@ -182,5 +182,3 @@ private:
 
 	cs_ret_code_t handleCommandSetDimmer(uint8_t intensity);
 };
-
-

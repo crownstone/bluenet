@@ -14,7 +14,8 @@
  *
  * However, we do use NRF_BL_DFU_ENTER_METHOD_GPREGRET in the bootloader once it decided to go into DFU mode,
  * to avoid modifications to nrf_bootloader.c.
- * This means that if GPREGRET == 1011 0001 (counter=17, brownout=true, storage_recovered=true), the bootloader will also go into DFU mode.
+ * This means that if GPREGRET == 1011 0001 (counter=17, brownout=true, storage_recovered=true), the bootloader will
+ * also go into DFU mode.
  *
  * We use 5 bits of GPREGRET as counter. Each boot, the bootloader increases the count by 1.
  * Once the counter is at its max, the bootloader will go into DFU mode.
@@ -27,13 +28,13 @@
  *
  * The remaining bits are used as flags.
  */
-#define CS_GPREGRET_COUNTER_MASK            31   // Bits used to count reboots.
-#define CS_GPREGRET_COUNTER_MAX             CS_GPREGRET_COUNTER_MASK // Max value of the counter.
-#define CS_GPREGRET_COUNTER_SOFT_RESET      1    // Value to set the counter to when we want to reboot normally.
-#define CS_GPREGRET_LEGACY_DFU_RESET        66   // Value that used to be the value of the counter to enter dfu mode.
-#define CS_GPREGRET_FLAG_BROWNOUT           32   // Bit used to indicate a brownout happened.
-#define CS_GPREGRET_FLAG_DFU_RESET          64   // Bit used to indicate we want to go to dfu mode.
-#define CS_GPREGRET_FLAG_STORAGE_RECOVERED  128  // Bit used to indicate storage recovered.
+#define CS_GPREGRET_COUNTER_MASK 31                       // Bits used to count reboots.
+#define CS_GPREGRET_COUNTER_MAX CS_GPREGRET_COUNTER_MASK  // Max value of the counter.
+#define CS_GPREGRET_COUNTER_SOFT_RESET 1        // Value to set the counter to when we want to reboot normally.
+#define CS_GPREGRET_LEGACY_DFU_RESET 66         // Value that used to be the value of the counter to enter dfu mode.
+#define CS_GPREGRET_FLAG_BROWNOUT 32            // Bit used to indicate a brownout happened.
+#define CS_GPREGRET_FLAG_DFU_RESET 64           // Bit used to indicate we want to go to dfu mode.
+#define CS_GPREGRET_FLAG_STORAGE_RECOVERED 128  // Bit used to indicate storage recovered.
 
 /**
  * Values in GPREGRET2 used to remember things after a reboot.

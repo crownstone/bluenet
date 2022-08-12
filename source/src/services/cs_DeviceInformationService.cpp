@@ -21,7 +21,7 @@
 
 union cs_variant_t {
 	uint32_t u32;
-	uint8_t  u8[4];
+	uint8_t u8[4];
 };
 
 inline std::string get_hardware_revision(void) {
@@ -30,10 +30,10 @@ inline std::string get_hardware_revision(void) {
 	std::string production_run = "0000";
 
 	// get Housing ID
-	std::string housing_id = "0000";
+	std::string housing_id     = "0000";
 
 	// reserved
-	std::string reserved = "00000000";
+	std::string reserved       = "00000000";
 
 	// AAB0 is stored as 0x41414230
 	cs_variant_t variant;
@@ -59,26 +59,28 @@ inline std::string get_hardware_revision(void) {
 			nordic_chip_version[0] = 'C';
 			nordic_chip_version[1] = 'K';
 			break;
-		default:
-			nordic_chip_version[0] = '?';
-			nordic_chip_version[1] = '?';
+		default: nordic_chip_version[0] = '?'; nordic_chip_version[1] = '?';
 	}
 
 	for (uint8_t i = 0; i < 4; ++i) {
-		nordic_chip_version[i+2] = variant.u8[i];
+		nordic_chip_version[i + 2] = variant.u8[i];
 	}
 
 	char hardware_revision[34];
-	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(),
-			housing_id.c_str(), reserved.c_str(), nordic_chip_version);
+	sprintf(hardware_revision,
+			"%11.11s%.4s%.4s%.8s%.6s",
+			get_hardware_version(),
+			production_run.c_str(),
+			housing_id.c_str(),
+			reserved.c_str(),
+			nordic_chip_version);
 	return std::string(hardware_revision, 34);
 }
 
-DeviceInformationService::DeviceInformationService():
-	_hardwareRevisionCharacteristic(NULL),
-	_firmwareRevisionCharacteristic(NULL),
-	_softwareRevisionCharacteristic(NULL)
-{
+DeviceInformationService::DeviceInformationService()
+		: _hardwareRevisionCharacteristic(NULL)
+		, _firmwareRevisionCharacteristic(NULL)
+		, _softwareRevisionCharacteristic(NULL) {
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
 	setName(BLE_SERVICE_DEVICE_INFORMATION);
 }
@@ -129,7 +131,8 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	std::string firmware_version;
 	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
 		firmware_version = g_FIRMWARE_VERSION;
-	} else {
+	}
+	else {
 		firmware_version = g_GIT_SHA1;
 	}
 	LOGd("Firmware version: %s", firmware_version.c_str());

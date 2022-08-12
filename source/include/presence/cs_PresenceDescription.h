@@ -9,6 +9,7 @@
 
 #include <logging/cs_Logger.h>
 #include <util/cs_Utils.h>
+
 #include <cstdint>
 
 /**
@@ -19,13 +20,13 @@
 class PresenceStateDescription {
 private:
 	uint64_t _bitmask;
-public:
 
+public:
 	PresenceStateDescription(uint64_t bitmask = 0) : _bitmask(bitmask) {}
 
-//	operator uint64_t() const { return _bitmask; }
+	//	operator uint64_t() const { return _bitmask; }
 
-	friend bool operator== (const PresenceStateDescription& lhs, const PresenceStateDescription& rhs) {
+	friend bool operator==(const PresenceStateDescription& lhs, const PresenceStateDescription& rhs) {
 		return lhs._bitmask == rhs._bitmask;
 	}
 
@@ -36,15 +37,11 @@ public:
 		}
 	}
 
-	uint64_t getBitmask() {
-		return _bitmask;
-	}
+	uint64_t getBitmask() { return _bitmask; }
 
 	void print() {
 		[[maybe_unused]] uint32_t bitmasks[2] = {
-				static_cast<uint32_t>(_bitmask >> 0 ),
-				static_cast<uint32_t>(_bitmask >> 32)
-		};
-		LOGd("PresenceDesc(0x%04x 0x%04x)" , bitmasks[1], bitmasks[0]);
+				static_cast<uint32_t>(_bitmask >> 0), static_cast<uint32_t>(_bitmask >> 32)};
+		LOGd("PresenceDesc(0x%04x 0x%04x)", bitmasks[1], bitmasks[0]);
 	}
 };

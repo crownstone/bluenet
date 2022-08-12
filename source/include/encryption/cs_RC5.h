@@ -10,9 +10,9 @@
 #include <protocol/cs_Packets.h>
 
 #define RC5_ROUNDS 12
-#define RC5_NUM_SUBKEYS (2 * (RC5_ROUNDS + 1)) // t = 2(r+1) - the number of round subkeys required.
+#define RC5_NUM_SUBKEYS (2 * (RC5_ROUNDS + 1))  // t = 2(r+1) - the number of round subkeys required.
 #define RC5_KEYLEN 16
-#define RC5_BLOCK_SIZE 4 // Size in bytes of an RC5 block.
+#define RC5_BLOCK_SIZE 4  // Size in bytes of an RC5 block.
 
 /**
  * Class that implements RC5 encryption.
@@ -51,7 +51,7 @@ private:
 	RC5(RC5 const&);
 
 	// This class is singleton, deny implementation
-	void operator=(RC5 const &);
+	void operator=(RC5 const&);
 
 	/**
 	 * The round subkey words.
@@ -68,5 +68,3 @@ private:
 	 */
 	bool prepareKey(uint8_t* key, uint8_t keyLength);
 };
-
-

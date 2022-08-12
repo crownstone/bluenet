@@ -5,10 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <localisation/cs_AssetFilterSyncer.h>
-#include <protocol/cs_ErrorCodes.h>
 #include <events/cs_Event.h>
 #include <localisation/cs_AssetFilterStore.h>
+#include <localisation/cs_AssetFilterSyncer.h>
+#include <protocol/cs_ErrorCodes.h>
 #include <util/cs_Lollipop.h>
 #include <util/cs_Math.h>
 
@@ -35,29 +35,27 @@ void AssetFilterSyncer::sendVersion(bool reliable) {
 		return;
 	}
 	uint16_t masterVersion = _store->getMasterVersion();
-	uint32_t masterCrc = _store->getMasterCrc();
+	uint32_t masterCrc     = _store->getMasterCrc();
 	LOGAssetFilterSyncerDebug("sendVersion reliable=%u version=%u crc=%u", reliable, masterVersion, masterCrc);
 
 	cs_mesh_model_msg_asset_filter_version_t versionPacket = {
-			.protocol = ASSET_FILTER_CMD_PROTOCOL_VERSION,
-			.masterVersion = masterVersion,
-			.masterCrc = masterCrc
-	};
+			.protocol = ASSET_FILTER_CMD_PROTOCOL_VERSION, .masterVersion = masterVersion, .masterCrc = masterCrc};
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION;
-	meshMsg.reliability = reliable ? CS_MESH_RELIABILITY_MEDIUM : CS_MESH_RELIABILITY_LOWEST;
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	meshMsg.type                   = CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION;
+	meshMsg.reliability            = reliable ? CS_MESH_RELIABILITY_MEDIUM : CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency                = CS_MESH_URGENCY_LOW;
 	meshMsg.flags.flags.doNotRelay = true;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&versionPacket);
-	meshMsg.size = sizeof(versionPacket);
+	meshMsg.payload                = reinterpret_cast<uint8_t*>(&versionPacket);
+	meshMsg.size                   = sizeof(versionPacket);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
 }
 
 cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg_asset_filter_version_t& packet) {
-	LOGAssetFilterSyncerDebug("onVersion stoneId=%u protocol=%u version=%u crc=%u",
+	LOGAssetFilterSyncerDebug(
+			"onVersion stoneId=%u protocol=%u version=%u crc=%u",
 			srcStoneId,
 			packet.protocol,
 			packet.masterVersion,
@@ -82,14 +80,15 @@ cs_ret_code_t AssetFilterSyncer::onVersion(stone_id_t stoneId, cs_mesh_model_msg
 	return ERR_SUCCESS;
 }
 
-AssetFilterSyncer::VersionCompare AssetFilterSyncer::compareToMyVersion(asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint32_t masterCrc) {
+AssetFilterSyncer::VersionCompare AssetFilterSyncer::compareToMyVersion(
+		asset_filter_cmd_protocol_t protocol, uint16_t masterVersion, uint32_t masterCrc) {
 	if (protocol != ASSET_FILTER_CMD_PROTOCOL_VERSION) {
 		LOGAssetFilterSyncerInfo("Unknown protocol: %u", protocol);
 		return VersionCompare::UNKOWN;
 	}
 
 	uint16_t myMasterVersion = _store->getMasterVersion();
-	uint32_t myMasterCrc = _store->getMasterCrc();
+	uint32_t myMasterCrc     = _store->getMasterCrc();
 
 	if (myMasterVersion == 0) {
 		if (masterVersion == 0) {
@@ -163,7 +162,8 @@ void AssetFilterSyncer::connect(stone_id_t stoneId) {
 }
 
 void AssetFilterSyncer::removeNextFilter() {
-	LOGAssetFilterSyncerDebug("removeNextFilter _nextFilterIndex=%u _filterRemoveCount=%u", _nextFilterIndex, _filterRemoveCount);
+	LOGAssetFilterSyncerDebug(
+			"removeNextFilter _nextFilterIndex=%u _filterRemoveCount=%u", _nextFilterIndex, _filterRemoveCount);
 	if (_nextFilterIndex == _filterRemoveCount) {
 		// We're done
 		_nextFilterIndex = 0;
@@ -172,13 +172,11 @@ void AssetFilterSyncer::removeNextFilter() {
 	}
 
 	asset_filter_cmd_remove_filter_t removeCmd = {
-			.protocolVersion = ASSET_FILTER_CMD_PROTOCOL_VERSION,
-			.filterId = _filterIdsToRemove[_nextFilterIndex]
-	};
+			.protocolVersion = ASSET_FILTER_CMD_PROTOCOL_VERSION, .filterId = _filterIdsToRemove[_nextFilterIndex]};
 
 	TYPIFY(CMD_CS_CENTRAL_WRITE) packet;
 	packet.commandType = CTRL_CMD_FILTER_REMOVE;
-	packet.data = cs_data_t(reinterpret_cast<uint8_t*>(&removeCmd), sizeof(removeCmd));
+	packet.data        = cs_data_t(reinterpret_cast<uint8_t*>(&removeCmd), sizeof(removeCmd));
 
 	event_t event(CS_TYPE::CMD_CS_CENTRAL_WRITE, &packet, sizeof(packet));
 	event.dispatch();
@@ -192,7 +190,8 @@ void AssetFilterSyncer::removeNextFilter() {
 }
 
 void AssetFilterSyncer::uploadNextFilter() {
-	LOGAssetFilterSyncerDebug("uploadNextFilter _nextFilterIndex=%u _filterUploadCount=%u _nextChunkIndex=%u",
+	LOGAssetFilterSyncerDebug(
+			"uploadNextFilter _nextFilterIndex=%u _filterUploadCount=%u _nextChunkIndex=%u",
 			_nextFilterIndex,
 			_filterUploadCount,
 			_nextChunkIndex);
@@ -229,26 +228,28 @@ void AssetFilterSyncer::uploadNextFilter() {
 		return;
 	}
 
-	uint16_t filterDataLength = filter.filterdata().length();
+	uint16_t filterDataLength    = filter.filterdata().length();
 	uint16_t filterDataRemaining = filterDataLength - _nextChunkIndex;
-	uint16_t chunkSize = std::min(maxChunkSize, filterDataRemaining);
-	LOGAssetFilterSyncerVerbose("maxChunkSize=%u filterDataLength=%u filterDataRemaining=%u chunkSize=%u",
+	uint16_t chunkSize           = std::min(maxChunkSize, filterDataRemaining);
+	LOGAssetFilterSyncerVerbose(
+			"maxChunkSize=%u filterDataLength=%u filterDataRemaining=%u chunkSize=%u",
 			maxChunkSize,
 			filterDataLength,
 			filterDataRemaining,
 			chunkSize);
 
-	auto uploadCmd = reinterpret_cast<asset_filter_cmd_upload_filter_t*>(writeBuf.data);
+	auto uploadCmd             = reinterpret_cast<asset_filter_cmd_upload_filter_t*>(writeBuf.data);
 	uploadCmd->protocolVersion = ASSET_FILTER_CMD_PROTOCOL_VERSION;
-	uploadCmd->filterId = filter.runtimedata()->filterId;
+	uploadCmd->filterId        = filter.runtimedata()->filterId;
 	uploadCmd->chunkStartIndex = _nextChunkIndex;
-	uploadCmd->totalSize = filterDataLength;
-	uploadCmd->chunkSize = chunkSize;
+	uploadCmd->totalSize       = filterDataLength;
+	uploadCmd->chunkSize       = chunkSize;
 	memcpy(uploadCmd->chunk, filter.filterdata()._data + _nextChunkIndex, chunkSize);
 
 	TYPIFY(CMD_CS_CENTRAL_WRITE) packet;
 	packet.commandType = CTRL_CMD_FILTER_UPLOAD;
-	packet.data = cs_data_t(reinterpret_cast<uint8_t*>(uploadCmd), sizeof(asset_filter_cmd_upload_filter_t) + uploadCmd->chunkSize);
+	packet.data        = cs_data_t(
+            reinterpret_cast<uint8_t*>(uploadCmd), sizeof(asset_filter_cmd_upload_filter_t) + uploadCmd->chunkSize);
 
 	event_t event(CS_TYPE::CMD_CS_CENTRAL_WRITE, &packet, sizeof(packet));
 	event.dispatch();
@@ -269,13 +270,12 @@ void AssetFilterSyncer::commit() {
 	LOGAssetFilterSyncerDebug("commit");
 	asset_filter_cmd_commit_filter_changes_t commitCmd = {
 			.protocolVersion = ASSET_FILTER_CMD_PROTOCOL_VERSION,
-			.masterVersion = _store->getMasterVersion(),
-			.masterCrc = _store->getMasterCrc()
-	};
+			.masterVersion   = _store->getMasterVersion(),
+			.masterCrc       = _store->getMasterCrc()};
 
 	TYPIFY(CMD_CS_CENTRAL_WRITE) packet;
 	packet.commandType = CTRL_CMD_FILTER_COMMIT;
-	packet.data = cs_data_t(reinterpret_cast<uint8_t*>(&commitCmd), sizeof(commitCmd));
+	packet.data        = cs_data_t(reinterpret_cast<uint8_t*>(&commitCmd), sizeof(commitCmd));
 
 	event_t event(CS_TYPE::CMD_CS_CENTRAL_WRITE, &packet, sizeof(packet));
 	event.dispatch();
@@ -312,11 +312,10 @@ void AssetFilterSyncer::disconnect() {
 
 void AssetFilterSyncer::done() {
 	LOGAssetFilterSyncerInfo("Done uploading master version %u", _store->getMasterVersion());
-	// Send out version again, so the next crownstone with an old version can send their version, which makes us connect to that crownstone.
+	// Send out version again, so the next crownstone with an old version can send their version, which makes us connect
+	// to that crownstone.
 	sendVersionAtLowInterval();
 }
-
-
 
 void AssetFilterSyncer::onConnectResult(cs_ret_code_t retCode) {
 	if (_step != SyncStep::CONNECT) {
@@ -360,11 +359,13 @@ void AssetFilterSyncer::onWriteResult(cs_central_write_result_t& result) {
 		return;
 	}
 
-	LOGAssetFilterSyncerDebug("  protocol=%u resultCode=%u type=%u",
+	LOGAssetFilterSyncerDebug(
+			"  protocol=%u resultCode=%u type=%u",
 			result.result.getProtocolVersion(),
 			result.result.getResult(),
 			result.result.getType());
-	if (result.result.getProtocolVersion() != CS_CONNECTION_PROTOCOL_VERSION || result.result.getResult() != ERR_SUCCESS) {
+	if (result.result.getProtocolVersion() != CS_CONNECTION_PROTOCOL_VERSION
+		|| result.result.getResult() != ERR_SUCCESS) {
 		reset();
 		return;
 	}
@@ -419,19 +420,20 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 	auto header = reinterpret_cast<asset_filter_cmd_get_filter_summaries_ret_t*>(payload.data);
 
 	// Double check master version etc.
-	if (compareToMyVersion(header->protocolVersion, header->masterVersion, header->masterCrc) != VersionCompare::OLDER) {
+	if (compareToMyVersion(header->protocolVersion, header->masterVersion, header->masterCrc)
+		!= VersionCompare::OLDER) {
 		reset();
 		return;
 	}
 
 	// Figure out which filter IDs to upload, and which to remove.
-	_filterUploadCount = 0;
-	_filterRemoveCount = 0;
+	_filterUploadCount  = 0;
+	_filterRemoveCount  = 0;
 
 	// Loop over their filters, to see if there are abundant IDs, or filter CRC mismatches.
 	uint8_t filterCount = (payload.len - sizeof(*header)) / sizeof(asset_filter_summary_t);
 	for (uint8_t i = 0; i < filterCount; ++i) {
-		uint8_t filterId = header->summaries[i].id;
+		uint8_t filterId             = header->summaries[i].id;
 		std::optional<uint8_t> index = _store->findFilterIndex(filterId);
 		if (index.has_value()) {
 			AssetFilter myFilter = _store->getFilter(index.value());
@@ -452,8 +454,8 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 	// Loop over our filters, to see if there are IDs that we have, but the other does not.
 	for (uint8_t i = 0; i < _store->getFilterCount(); ++i) {
 		AssetFilter myFilter = _store->getFilter(i);
-		uint8_t filterId = myFilter.runtimedata()->filterId;
-		bool found = false;
+		uint8_t filterId     = myFilter.runtimedata()->filterId;
+		bool found           = false;
 		for (uint8_t j = 0; j < filterCount; ++j) {
 			if (header->summaries[j].id == filterId) {
 				// CRC has been checked in previous loop.
@@ -468,7 +470,7 @@ void AssetFilterSyncer::onFilterSummaries(cs_data_t& payload) {
 	}
 
 	_nextFilterIndex = 0;
-	_nextChunkIndex = 0;
+	_nextChunkIndex  = 0;
 	setStep(SyncStep::REMOVE_FILTERS);
 	removeNextFilter();
 }
@@ -485,15 +487,14 @@ void AssetFilterSyncer::sendVersionAtLowInterval() {
 	_sendVersionAtLowIntervalCountdown = VERSION_BROADCAST_INTERVAL_RESET_SECONDS * 1000 / TICK_INTERVAL_MS;
 
 	// Clamp the countdown: leave current countdown as it is, but it should be at most the low interval.
-	_sendVersionCountdown = CsMath::min(
-			_sendVersionCountdown,
-			VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS);
+	_sendVersionCountdown =
+			CsMath::min(_sendVersionCountdown, VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS);
 	LOGAssetFilterSyncerDebug("sendVersionAtLowInterval sendVersionCountdown=%u", _sendVersionCountdown);
 }
 
 void AssetFilterSyncer::onTick(uint32_t tickCount) {
 	// Decrement timers.
-	if (_sendVersionAtLowIntervalCountdown != 0 ) {
+	if (_sendVersionAtLowIntervalCountdown != 0) {
 		_sendVersionAtLowIntervalCountdown--;
 	}
 	if (_sendVersionCountdown != 0) {
@@ -504,9 +505,9 @@ void AssetFilterSyncer::onTick(uint32_t tickCount) {
 		// Send our version.
 		bool isInLowIntervalMode = _sendVersionAtLowIntervalCountdown == 0;
 
-		_sendVersionCountdown = isInLowIntervalMode
-				? VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS
-				: VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS;
+		_sendVersionCountdown    = isInLowIntervalMode
+										   ? VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS
+										   : VERSION_BROADCAST_LOW_INTERVAL_SECONDS * 1000 / TICK_INTERVAL_MS;
 		sendVersion(false);
 	}
 }
@@ -517,7 +518,7 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 			auto meshMsg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
 			if (meshMsg->type == CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION && meshMsg->isMaybeRelayed == false) {
 				// Only handle 0 hop messages, as in order to sync, we need to connect.
-				auto packet = meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION>();
+				auto packet             = meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_FILTER_VERSION>();
 				event.result.returnCode = onVersion(meshMsg->srcStoneId, packet);
 			}
 			break;
@@ -550,7 +551,6 @@ void AssetFilterSyncer::handleEvent(event_t& event) {
 			onTick(*tickCount);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }

@@ -9,7 +9,6 @@
 #include <localisation/cs_AssetFilterPacketAccessors.h>
 #include <structs/cs_PacketsInternal.h>
 
-
 class AssetHandlerMac {
 public:
 	/**
@@ -17,7 +16,7 @@ public:
 	 * be identified by a short asset id.
 	 */
 	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset) = 0;
-	virtual ~AssetHandlerMac() = default;
+	virtual ~AssetHandlerMac()                                                     = default;
 };
 
 class AssetHandlerShortId {
@@ -27,5 +26,5 @@ public:
 	 * be identified by its mac address.
 	 */
 	virtual void handleAcceptedAsset(AssetFilter f, const scanned_device_t& asset, asset_id_t assetId) = 0;
-	virtual ~AssetHandlerShortId() = default;
+	virtual ~AssetHandlerShortId()                                                                     = default;
 };

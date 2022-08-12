@@ -5,22 +5,20 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <common/cs_Types.h>
 #include <drivers/cs_RNG.h>
+#include <storage/cs_State.h>
 #include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
-#include <storage/cs_State.h>
-#include <common/cs_Types.h>
 
 #define LOGUartconnectionDebug LOGnone
 
-UartConnection::UartConnection() {
-
-}
+UartConnection::UartConnection() {}
 
 void UartConnection::init() {
 	// Init status flags.
 
-	std::vector<cs_state_id_t> *ids = nullptr;
+	std::vector<cs_state_id_t>* ids = nullptr;
 	State::getInstance().getIds(CS_TYPE::STATE_UART_KEY, ids);
 	_status.flags.flags.encryptionRequired = (ids->empty() == false);
 
@@ -30,7 +28,7 @@ void UartConnection::init() {
 
 	TYPIFY(STATE_HUB_MODE) hubMode;
 	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
-	_status.flags.flags.hubMode = (hubMode != 0);
+	_status.flags.flags.hubMode  = (hubMode != 0);
 
 	_status.flags.flags.hasError = false;
 
@@ -62,7 +60,7 @@ void UartConnection::onHello(const uart_msg_status_user_flags_t& flags) {
 
 	uart_msg_hello_t hello;
 	hello.sphereId = sphereId;
-	hello.status = _status;
+	hello.status   = _status;
 	LOGd("Reply hello with sphereId=%u, flags=%u", hello.sphereId, hello.status.flags.asInt);
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HELLO, (uint8_t*)&hello, sizeof(hello));
 }
@@ -76,9 +74,9 @@ void UartConnection::onUserStatus(const uart_msg_status_user_t& status) {
 
 void UartConnection::onHeartBeat(uint16_t timeoutSeconds, bool encrypted) {
 	LOGUartconnectionDebug("Heartbeat timeout=%u", timeoutSeconds);
-	_isConnectionAlive = true;
-	_isConnectionEncrypted = encrypted;
-	_connectionTimeoutCountdown = timeoutSeconds * (1000 / TICK_INTERVAL_MS);
+	_isConnectionAlive            = true;
+	_isConnectionEncrypted        = encrypted;
+	_connectionTimeoutCountdown   = timeoutSeconds * (1000 / TICK_INTERVAL_MS);
 
 	// Reply with a heartbeat, which is only encrypted if the received heartbeat is encrypted.
 	UartProtocol::Encrypt encrypt = encrypted ? UartProtocol::ENCRYPT_OR_FAIL : UartProtocol::Encrypt::ENCRYPT_NEVER;
@@ -86,9 +84,14 @@ void UartConnection::onHeartBeat(uint16_t timeoutSeconds, bool encrypted) {
 }
 
 void UartConnection::onSessionNonce(const uart_msg_session_nonce_t& sessionNonce) {
-	LOGUartconnectionDebug("SessionNonce timeout=%u nonce=[%u %u .. %u]", sessionNonce.timeoutMinutes, sessionNonce.sessionNonce[0], sessionNonce.sessionNonce[1], sessionNonce.sessionNonce[SESSION_NONCE_LENGTH - 1]);
+	LOGUartconnectionDebug(
+			"SessionNonce timeout=%u nonce=[%u %u .. %u]",
+			sessionNonce.timeoutMinutes,
+			sessionNonce.sessionNonce[0],
+			sessionNonce.sessionNonce[1],
+			sessionNonce.sessionNonce[SESSION_NONCE_LENGTH - 1]);
 	memcpy(_sessionNonceRx, sessionNonce.sessionNonce, SESSION_NONCE_LENGTH);
-	_sessionNonceValid = true;
+	_sessionNonceValid            = true;
 	_sessionNonceTimeoutCountdown = sessionNonce.timeoutMinutes * 60 * (1000 / TICK_INTERVAL_MS);
 
 	// Refresh our own session nonce.
@@ -126,7 +129,7 @@ void UartConnection::onTick() {
 		if (_connectionTimeoutCountdown == 0) {
 			LOGi("Connection timed out");
 			// No heartbeat received within timeout: connection died.
-			_isConnectionAlive = false;
+			_isConnectionAlive     = false;
 			_isConnectionEncrypted = false;
 		}
 	}
@@ -140,14 +143,12 @@ void UartConnection::onTick() {
 	}
 }
 
-void UartConnection::handleEvent(event_t & event) {
+void UartConnection::handleEvent(event_t& event) {
 	switch (event.type) {
-		case CS_TYPE::EVT_TICK:
-			onTick();
-			break;
+		case CS_TYPE::EVT_TICK: onTick(); break;
 		case CS_TYPE::STATE_HUB_MODE: {
 			TYPIFY(STATE_HUB_MODE)* hubMode = reinterpret_cast<TYPIFY(STATE_HUB_MODE)*>(event.data);
-			_status.flags.flags.hubMode = (*hubMode != 0);
+			_status.flags.flags.hubMode     = (*hubMode != 0);
 			break;
 		}
 		case CS_TYPE::STATE_UART_KEY: {
@@ -155,7 +156,6 @@ void UartConnection::handleEvent(event_t & event) {
 			_status.flags.flags.encryptionRequired = true;
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }

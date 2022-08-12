@@ -14,7 +14,5 @@ public:
 	AssetFilter _primaryFilter;
 	const scanned_device_t& _asset;
 
-	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset)
-		: _primaryFilter(filter), _asset(asset) {}
+	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset) : _primaryFilter(filter), _asset(asset) {}
 };
-

@@ -45,8 +45,8 @@ protected:
 private:
 	AssetFilterStore* _filterStore   = nullptr;
 	AssetFilterSyncer* _filterSyncer = nullptr;
-	AssetForwarder* _assetForwarder   = nullptr;
-	AssetStore* _assetStore = nullptr;
+	AssetForwarder* _assetForwarder  = nullptr;
+	AssetStore* _assetStore          = nullptr;
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker* _nearestCrownstoneTracker = nullptr;
@@ -54,9 +54,9 @@ private:
 
 	// Keeps up the init state of this class.
 	enum class AssetFilteringState {
-		NONE,           // Nothing happened yet.
-		INIT_FAILED,    // Init failed.
-		INIT_SUCCESS    // Init was successful.
+		NONE,         // Nothing happened yet.
+		INIT_FAILED,  // Init failed.
+		INIT_SUCCESS  // Init was successful.
 	};
 	AssetFilteringState _initState = AssetFilteringState::NONE;
 
@@ -67,15 +67,12 @@ private:
 	 */
 	cs_ret_code_t initInternal();
 
-
 	// --------- Processing of accepted Assest ---------------
 
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
 	void handleScannedDevice(const scanned_device_t& asset);
-
-
 
 	/**
 	 * Check if the filter with given index accepts the device, call handleAcceptedAsset and.
@@ -107,5 +104,3 @@ public:
 	 */
 	void handleEvent(event_t& evt);
 };
-
-

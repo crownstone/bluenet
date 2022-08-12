@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <protocol/cs_Packets.h>
 #include <common/cs_Types.h>
+#include <protocol/cs_Packets.h>
 
 /**
  * Class to get keys based on access level, and to check access levels.
@@ -85,7 +85,7 @@ private:
 	KeysAndAccess(KeysAndAccess const&);
 
 	// This class is singleton, deny implementation
-	void operator=(KeysAndAccess const &);
+	void operator                =(KeysAndAccess const&);
 
 	/**
 	 * Cached operation mode.
@@ -95,7 +95,7 @@ private:
 	/**
 	 * Cache of whether encryption is enabled.
 	 */
-	bool _encryptionEnabled = true;
+	bool _encryptionEnabled      = true;
 
 	/**
 	 * Current setup key.
@@ -106,7 +106,4 @@ private:
 	 * Whether the setup key is valid.
 	 */
 	bool _setupKeyValid = false;
-
 };
-
-

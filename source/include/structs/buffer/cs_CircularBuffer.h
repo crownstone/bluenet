@@ -6,10 +6,12 @@
  */
 #pragma once
 
-#include <cstdlib>
-#include "common/cs_Types.h"
-#include <logging/cs_Logger.h>
 #include <cfg/cs_Strings.h>
+#include <logging/cs_Logger.h>
+
+#include <cstdlib>
+
+#include "common/cs_Types.h"
 
 #define LOGCircularBufferDebug LOGvv
 
@@ -26,15 +28,12 @@ class CircularBuffer {
 public:
 	/** Default constructor
 	 */
-	CircularBuffer(uint16_t capacity): _array(nullptr), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0), _allocatedSelf(false)
-	{
-	}
+	CircularBuffer(uint16_t capacity)
+			: _array(nullptr), _capacity(capacity), _head(0), _tail(-1), _contentsSize(0), _allocatedSelf(false) {}
 
 	/** Default destructor
 	 */
-	virtual ~CircularBuffer() {
-		deinit();
-	}
+	virtual ~CircularBuffer() { deinit(); }
 
 	uint16_t getMaxByteSize(uint16_t capacity) { return capacity * sizeof(T); }
 	uint16_t getMaxByteSize() { return getMaxByteSize(_capacity); }
@@ -72,7 +71,7 @@ public:
 			free(_array);
 		}
 		_allocatedSelf = false;
-		_array = nullptr;
+		_array         = nullptr;
 		return true;
 	}
 
@@ -88,7 +87,7 @@ public:
 			return false;
 		}
 		LOGCircularBufferDebug(FMT_ASSIGN_BUFFER_LEN, buffer, bufferSize);
-		_array = (T*) buffer;
+		_array = (T*)buffer;
 
 		// Also call clear to make sure we start with a clean buffer
 		clear();
@@ -110,13 +109,9 @@ public:
 	/**
 	 * Returns true when the buffer has been allocated, either via init() or via assign().
 	 */
-	bool isInitialized() {
-		return _array != nullptr;
-	}
+	bool isInitialized() { return _array != nullptr; }
 
-	T* getBuffer() {
-		return _array;
-	}
+	T* getBuffer() { return _array; }
 
 	/** Clears the buffer
 	 *
@@ -125,8 +120,8 @@ public:
 	 * doesn't have to be cleared
 	 */
 	void clear() {
-		_head = 0;
-		_tail = -1;
+		_head         = 0;
+		_tail         = -1;
 		_contentsSize = 0;
 	}
 
@@ -134,9 +129,7 @@ public:
 	 *
 	 * @return the number of elements stored in the buffer
 	 */
-	uint16_t size() const {
-		return _contentsSize;
-	}
+	uint16_t size() const { return _contentsSize; }
 
 	/** Returns the capacity of the buffer
 	 *
@@ -145,25 +138,19 @@ public:
 	 *
 	 * @return the capacity of the buffer
 	 */
-	uint16_t capacity() const {
-		return _capacity;
-	}
+	uint16_t capacity() const { return _capacity; }
 
 	/** Checks if the buffer is empty
 	 *
 	 * @return true if empty, false otherwise
 	 */
-	bool empty() const {
-		return size() == 0;
-	}
+	bool empty() const { return size() == 0; }
 
 	/** Checks if the buffer is full
 	 *
 	 * @return true if full, false otherwise
 	 */
-	bool full() const {
-		return size() == capacity();
-	}
+	bool full() const { return size() == capacity(); }
 
 	/** Add an element to the end of the buffer
 	 *
@@ -216,17 +203,13 @@ public:
 	 *
 	 * @return the value of the oldest element
 	 */
-	T& peek() const {
-		return _array[_head];
-	}
+	T& peek() const { return _array[_head]; }
 
 	/** Returns the Nth value, starting from oldest element
 	 *
 	 * Does NOT check if you reached the end, make sure you read no more than size().
 	 */
-	T& operator[](uint16_t idx) const {
-		return _array[(_head+idx)%_capacity];
-	}
+	T& operator[](uint16_t idx) const { return _array[(_head + idx) % _capacity]; }
 
 	/**
 	 * Find a value in the buffer.
@@ -245,7 +228,7 @@ public:
 
 private:
 	/** Pointer to the array storing the elements */
-	T *_array;
+	T* _array;
 
 	/** The capacity of the buffer (maximum number of elements) */
 	uint16_t _capacity;
@@ -283,5 +266,4 @@ private:
 		_head %= _capacity;
 		--_contentsSize;
 	}
-
 };

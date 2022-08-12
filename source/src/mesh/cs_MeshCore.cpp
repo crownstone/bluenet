@@ -349,7 +349,7 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 	TYPIFY(CONFIG_CROWNSTONE_ID) id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
-	_ownAddress = id;
+	_ownAddress      = id;
 
 	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
@@ -478,7 +478,7 @@ void MeshCore::provisionLoad() {
 	uint32_t netKeyCount                     = 1;
 	mesh_key_index_t keyIndices[netKeyCount] = {0};
 
-	retCode = dsm_subnet_get_all(keyIndices, &netKeyCount);
+	retCode                                  = dsm_subnet_get_all(keyIndices, &netKeyCount);
 	APP_ERROR_CHECK(retCode);
 
 	if (netKeyCount != 1) {
@@ -487,7 +487,7 @@ void MeshCore::provisionLoad() {
 
 	_netkeyHandle = dsm_net_key_index_to_subnet_handle(keyIndices[0]);
 
-	retCode = dsm_appkey_get_all(_netkeyHandle, &_appkeyHandle, &netKeyCount);
+	retCode       = dsm_appkey_get_all(_netkeyHandle, &_appkeyHandle, &netKeyCount);
 	APP_ERROR_CHECK(retCode);
 
 	dsm_local_unicast_addresses_get(&localAddress);
@@ -511,14 +511,14 @@ void MeshCore::provision() {
 	uint32_t retCode;
 	static const uint8_t static_auth_data[NRF_MESH_KEY_SIZE] = STATIC_AUTH_DATA;
 	mesh_provisionee_start_params_t prov_start_params;
-	prov_start_params.p_static_data    = static_auth_data;
-	prov_start_params.prov_complete_cb = provisioning_complete_cb;
+	prov_start_params.p_static_data                       = static_auth_data;
+	prov_start_params.prov_complete_cb                    = provisioning_complete_cb;
 	prov_start_params.prov_device_identification_start_cb = device_identification_start_cb;
-	prov_start_params.prov_device_identification_stop_cb = NULL;
-	prov_start_params.prov_abort_cb = provisioning_aborted_cb;
-	prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
-	prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Server example";
-	retCode = mesh_provisionee_prov_start(&prov_start_params);
+	prov_start_params.prov_device_identification_stop_cb  = NULL;
+	prov_start_params.prov_abort_cb                       = provisioning_aborted_cb;
+	prov_start_params.p_device_uri                        = URI_SCHEME_EXAMPLE "URI for LS Client example";
+	prov_start_params.p_device_uri                        = URI_SCHEME_EXAMPLE "URI for LS Server example";
+	retCode                                               = mesh_provisionee_prov_start(&prov_start_params);
 	APP_ERROR_CHECK(retCode);
 #endif
 }
@@ -699,7 +699,8 @@ void MeshCore::handleEvent(event_t& event) {
 					TYPIFY(STATE_MESH_SEQ_NUMBER) seqNumber;
 					State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER, &seqNumber, sizeof(seqNumber));
 					LOGi("net_state_ext_write_done seqNum=%u", seqNumber);
-					net_state_ext_write_done(MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD, &seqNumber, sizeof(seqNumber));
+					net_state_ext_write_done(
+							MESH_OPT_NET_STATE_SEQ_NUM_BLOCK_LEGACY_RECORD, &seqNumber, sizeof(seqNumber));
 					break;
 				}
 				case CS_TYPE::STATE_MESH_SEQ_NUMBER_V5: {

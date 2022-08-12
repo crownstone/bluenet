@@ -5,10 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <switch/cs_SafeSwitch.h>
-
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
+#include <switch/cs_SafeSwitch.h>
 #include <test/cs_Test.h>
 
 #define LOGSafeSwitch LOGvv
@@ -16,15 +15,15 @@
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);
 	relay.init(board);
-	canTryDimmingOnBoot = board.flags.canTryDimmingOnBoot;
-	canDimOnWarmBoot = board.flags.canDimOnWarmBoot;
+	canTryDimmingOnBoot   = board.flags.canTryDimmingOnBoot;
+	canDimOnWarmBoot      = board.flags.canDimOnWarmBoot;
 	dimmerOnWhenPinsFloat = board.flags.dimmerOnWhenPinsFloat;
-	
+
 	// Load switch state.
 	// Only relay state is persistent.
 	TYPIFY(STATE_SWITCH_STATE) storedState;
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &storedState, sizeof(storedState));
-	currentState.state.relay = storedState.state.relay;
+	currentState.state.relay  = storedState.state.relay;
 	currentState.state.dimmer = 0;
 
 	LOGd("init storedState=(%u %u%%)", storedState.state.relay, storedState.state.dimmer);
@@ -33,7 +32,6 @@ void SafeSwitch::init(const boards_config_t& board) {
 	// we'll push the stored value upon init so that the test suite knows it's state.
 	TEST_PUSH_EXPR_B(this, "storedState.state.relay", storedState.state.relay);
 	TEST_PUSH_EXPR_X(this, "storedState.state", storedState.asInt);
-
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
@@ -44,7 +42,7 @@ void SafeSwitch::init(const boards_config_t& board) {
 
 void SafeSwitch::start() {
 	LOGd("start");
-	
+
 	if (isDimmerStateChangeAllowed()) {
 		dimmer.start();
 	}
@@ -71,7 +69,7 @@ cs_ret_code_t SafeSwitch::setRelay(bool value) {
 	auto stateErrors = getErrorState();
 	LOGSafeSwitch("setRelay %u errors=%u", value, stateErrors.asInt);
 
-	if ( !isRelayStateChangeAllowed()) {
+	if (!isRelayStateChangeAllowed()) {
 		LOGSafeSwitch("isRelayStateChangeAllowed returned false");
 		return ERR_NO_ACCESS;
 	}
@@ -96,14 +94,15 @@ cs_ret_code_t SafeSwitch::setRelayUnchecked(bool value) {
 
 	relay.set(value);
 	currentState.state.relay = value;
-	relayHasBeenSetBefore = true;
+	relayHasBeenSetBefore    = true;
 
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity, bool fade) {
-	LOGSafeSwitch("setDimmer %u fade=%u dimmerPowered=%u errors=%u", intensity, fade, dimmerPowered, getErrorState().asInt);
-	if ( !isDimmerStateChangeAllowed()) {
+	LOGSafeSwitch(
+			"setDimmer %u fade=%u dimmerPowered=%u errors=%u", intensity, fade, dimmerPowered, getErrorState().asInt);
+	if (!isDimmerStateChangeAllowed()) {
 		LOGSafeSwitch("isDimmerStateChangeAllowed returned false");
 		return ERR_NO_ACCESS;
 	}
@@ -154,7 +153,7 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity, bool fade) {
 	// Turn dimmer on, then relay off, to prevent flicker.
 	// Use unchecked, as this function is called via setDimmer().
 	setDimmerUnchecked(intensity, fade);
-//	setRelay(false);
+	//	setRelay(false);
 
 	if (dimmerCheckCountDown == 0) {
 		dimmerCheckCountDown = DIMMER_BOOT_CHECK_DELAY_MS / TICK_INTERVAL_MS;
@@ -186,16 +185,16 @@ void SafeSwitch::checkDimmerPower() {
 	LOGd("powerUsage=%i mW powerZero=%i mW", powerUsage, powerZero);
 
 	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW
-			|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED && powerZero == CONFIG_POWER_ZERO_INVALID)) {
+		|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED && powerZero == CONFIG_POWER_ZERO_INVALID)) {
 		// Dimmer didn't work: mark dimmer as not powered, and turn relay on instead.
 		setDimmerPowered(false);
 		setRelayUnchecked(true);
 		setDimmerUnchecked(0, false);
 		sendUnexpectedStateUpdate();
 	}
-//	else {
-//		setDimmerPowered(true);
-//	}
+	//	else {
+	//		setDimmerPowered(true);
+	//	}
 }
 
 void SafeSwitch::dimmerPoweredUp() {
@@ -206,7 +205,7 @@ void SafeSwitch::dimmerPoweredUp() {
 
 void SafeSwitch::setDimmerPowered(bool powered) {
 	LOGd("setDimmerPowered %u", powered);
-	dimmerPowered = powered;
+	dimmerPowered                        = powered;
 	TYPIFY(EVT_DIMMER_POWERED) eventData = dimmerPowered;
 	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &eventData, sizeof(eventData));
 	event.dispatch();
@@ -226,12 +225,12 @@ void SafeSwitch::forceSwitchOff() {
 
 		sendUnexpectedStateUpdate();
 
-		event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF); // TODO: remove, as this event is not used.
+		event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF);  // TODO: remove, as this event is not used.
 		EventDispatcher::getInstance().dispatch(event);
 	}
 	else {
 		// The dimmer should have already be turned off, so no need for event here.
-		event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF); // TODO: remove, as this event is not used.
+		event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF);  // TODO: remove, as this event is not used.
 		EventDispatcher::getInstance().dispatch(eventDimmer);
 	}
 }
@@ -243,7 +242,7 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	relay.set(true);
 	dimmer.set(0, false);
 
-	currentState.state.relay = 1;
+	currentState.state.relay  = 1;
 	currentState.state.dimmer = 0;
 
 	sendUnexpectedStateUpdate();
@@ -252,9 +251,9 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	TYPIFY(CONFIG_DIMMING_ALLOWED) dimmingEnabled = 0;
 	State::getInstance().set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &dimmingEnabled, sizeof(dimmingEnabled));
 
-	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON); // TODO: remove, as this event is not used.
+	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON);  // TODO: remove, as this event is not used.
 	EventDispatcher::getInstance().dispatch(eventRelay);
-	event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF); // TODO: remove, as this event is not used.
+	event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF);  // TODO: remove, as this event is not used.
 	EventDispatcher::getInstance().dispatch(eventDimmer);
 }
 
@@ -267,14 +266,11 @@ state_errors_t SafeSwitch::getErrorState() {
 }
 
 bool SafeSwitch::isSwitchOverLoaded(state_errors_t stateErrors) {
-	return stateErrors.errors.chipTemp
-			|| stateErrors.errors.overCurrent;
+	return stateErrors.errors.chipTemp || stateErrors.errors.overCurrent;
 }
 
 bool SafeSwitch::hasDimmerError(state_errors_t stateErrors) {
-	return stateErrors.errors.overCurrentDimmer
-			|| stateErrors.errors.dimmerTemp
-			|| stateErrors.errors.dimmerOn;
+	return stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn;
 }
 
 bool SafeSwitch::isSafeToTurnRelayOn(state_errors_t stateErrors) {
@@ -341,8 +337,7 @@ void SafeSwitch::goingToDfu() {
 	// shut off public state change api of this class.
 	allowStateChanges = false;
 
-
-	bool turnOnRelay = false;
+	bool turnOnRelay  = false;
 	if (currentState.state.dimmer != 0) {
 		// If dimmer is on, then turn relay on instead, as the bootloader doesn't have a dimmer.
 		// It's a bit weird to have this here, should be in SmartSwitch, but then there's a
@@ -369,7 +364,7 @@ void SafeSwitch::factoryReset() {
 	// TODO: 31-01-2020 set to default value instead of always off.
 	setRelayUnchecked(false);
 	// Don't store the value, so don't send unexpected state update.
-//	sendUnexpectedStateUpdate();
+	//	sendUnexpectedStateUpdate();
 }
 
 void SafeSwitch::handleGetBehaviourDebug(event_t& evt) {
@@ -386,20 +381,16 @@ void SafeSwitch::handleGetBehaviourDebug(event_t& evt) {
 	}
 	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
 
-	behaviourDebug->dimmerPowered = dimmerPowered;
+	behaviourDebug->dimmerPowered     = dimmerPowered;
 
-	evt.result.dataSize = sizeof(behaviour_debug_t);
-	evt.result.returnCode = ERR_SUCCESS;
+	evt.result.dataSize               = sizeof(behaviour_debug_t);
+	evt.result.returnCode             = ERR_SUCCESS;
 }
 
-void SafeSwitch::handleEvent(event_t & evt) {
+void SafeSwitch::handleEvent(event_t& evt) {
 	switch (evt.type) {
-		case CS_TYPE::EVT_GOING_TO_DFU:
-			goingToDfu();
-			break;
-		case CS_TYPE::CMD_FACTORY_RESET:
-			factoryReset();
-			break;
+		case CS_TYPE::EVT_GOING_TO_DFU: goingToDfu(); break;
+		case CS_TYPE::CMD_FACTORY_RESET: factoryReset(); break;
 		case CS_TYPE::EVT_TICK:
 			if (dimmerPowerUpCountDown && --dimmerPowerUpCountDown == 0) {
 				dimmerPoweredUp();
@@ -410,22 +401,15 @@ void SafeSwitch::handleEvent(event_t & evt) {
 			break;
 		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
 		case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
-		case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
-			forceRelayOnAndDimmerOff();
-			break;
+		case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED: forceRelayOnAndDimmerOff(); break;
 		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
-		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-			forceSwitchOff();
-			break;
-		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
-			handleGetBehaviourDebug(evt);
-			break;
+		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD: forceSwitchOff(); break;
+		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: handleGetBehaviourDebug(evt); break;
 		case CS_TYPE::STATE_SOFT_ON_SPEED: {
 			TYPIFY(STATE_SOFT_ON_SPEED) speed = *reinterpret_cast<TYPIFY(STATE_SOFT_ON_SPEED)*>(evt.data);
 			dimmer.setSoftOnSpeed(speed);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }

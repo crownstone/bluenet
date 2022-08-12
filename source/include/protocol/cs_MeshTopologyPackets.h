@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include <cstdint>
-#include <protocol/cs_Typedefs.h>
 #include <protocol/cs_RssiAndChannel.h>
+#include <protocol/cs_Typedefs.h>
+
+#include <cstdint>
 
 static constexpr uint8_t MESH_TOPOLOGY_CHANNEL_COUNT = 3;
-
 
 struct __attribute__((packed)) mesh_topology_neighbour_rssi_uart_t {
 	uint8_t type = 0;
@@ -21,10 +21,9 @@ struct __attribute__((packed)) mesh_topology_neighbour_rssi_uart_t {
 	int8_t rssiChannel37;
 	int8_t rssiChannel38;
 	int8_t rssiChannel39;
-	uint8_t lastSeenSecondsAgo; // How many seconds ago the sender was last seen by the receiver.
-	uint8_t msgNumber; // Number that is increased by 1 for each message.
+	uint8_t lastSeenSecondsAgo;  // How many seconds ago the sender was last seen by the receiver.
+	uint8_t msgNumber;           // Number that is increased by 1 for each message.
 };
-
 
 /**
  * Message format to be sent over uart.
@@ -39,4 +38,3 @@ struct __attribute__((packed)) mesh_topology_neighbour_research_rssi_t {
 	uint8_t rssi[MESH_TOPOLOGY_CHANNEL_COUNT];
 	uint8_t standardDeviation[MESH_TOPOLOGY_CHANNEL_COUNT];
 };
-

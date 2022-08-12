@@ -1,9 +1,9 @@
-#include "cfg/cs_Boards.h"
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
+#include <nrf_pwm.h>
 #include <util/cs_BleError.h>
 
-#include <nrf_pwm.h>
+#include "cfg/cs_Boards.h"
 
 /**
  * A Crownstone samples voltage and current. These are both sine waves. The voltage curve normally does not exhibit
@@ -15,16 +15,20 @@
 
 /*
 const nrf_clock_lf_cfg_t defaultClockSource = {  .source        = NRF_CLOCK_LF_SRC_XTAL,                     \
-                                                 .rc_ctiv       = 0,                                         \
-                                                 .rc_temp_ctiv  = 0,                                         \
-                                                 .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
+												 .rc_ctiv       = 0,                                         \
+												 .rc_temp_ctiv  = 0,                                         \
+												 .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
 */
 
 // beter name should be -cos() table, it starts with 0 and ends with 0
 // t=t=0:2*pi/100:2*pi*99/100, x=round((1-cos(t))*127.5)
 // this means that the mean of x is 127.5 (this is exactly what we expect if our range is from 0 to 255).
-const uint8_t sin_table[]= {0,0,1,2,4,6,9,12,16,20,24,29,35,40,46,53,59,66,73,81,88,96,104,112,119,128,136,143,151,159,167,174,182,189,196,202,209,215,220,226,231,235,239,243,246,249,251,253,254,255,255,255,254,253,251,249,246,243,239,235,231,226,220,215,209,202,196,189,182,174,167,159,151,143,136,128,119,112,104,96,88,81,73,66,59,53,46,40,35,29,24,20,16,12,9,6,4,2,1,0};
-
+const uint8_t sin_table[] = {0,   0,   1,   2,   4,   6,   9,   12,  16,  20,  24,  29,  35,  40,  46,  53,  59,
+							 66,  73,  81,  88,  96,  104, 112, 119, 128, 136, 143, 151, 159, 167, 174, 182, 189,
+							 196, 202, 209, 215, 220, 226, 231, 235, 239, 243, 246, 249, 251, 253, 254, 255, 255,
+							 255, 254, 253, 251, 249, 246, 243, 239, 235, 231, 226, 220, 215, 209, 202, 196, 189,
+							 182, 174, 167, 159, 151, 143, 136, 128, 119, 112, 104, 96,  88,  81,  73,  66,  59,
+							 53,  46,  40,  35,  29,  24,  20,  16,  12,  9,   6,   4,   2,   1,   0};
 
 void initPwm() {
 	/*
@@ -41,11 +45,13 @@ void initPwm() {
 
 int main() {
 	// enabled hard float, without it, we get a hardfaults
-	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
+	SCB->CPACR |= (3UL << 20) | (3UL << 22);
+	__DSB();
+	__ISB();
 
 	uint32_t errCode;
 	boards_config_t board = {};
-	errCode = configure_board(&board);
+	errCode               = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
 	serial_config(board.pinGpioRx, board.pinGpioTx);
@@ -54,33 +60,32 @@ int main() {
 	LOGd("Test ADC in separate program");
 
 	Timer::getInstance().init();
-	
-	//nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
 
-//	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
-	
+	// nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
+
+	//	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
+
 	LOGd("Run");
 
-	int i = 1;
+	int i            = 1;
 
 	uint32_t counter = 0;
 
-
 	enum { WITHOUT_LOAD, WITH_LOAD };
-	uint8_t switch_type = WITHOUT_LOAD;
+	uint8_t switch_type     = WITHOUT_LOAD;
 
-	bool trigger_switch = false;
+	bool trigger_switch     = false;
 	uint32_t switch_counter = 0;
 
 	// each increment of one corresponds with 0.2 msec, a typical switch might last 5 msec, so that would be a
 	// switch_delay value of 25
-	uint8_t switch_delay = 25;
-	
+	uint8_t switch_delay    = 25;
+
 	uint8_t index;
 
 	uint32_t prev_value;
 
-	while(1) {
+	while (1) {
 
 		// Add a delay to control the speed of the sine wave
 		// 200 microseconds times 100 samples is 20 milliseconds for the entire wave, which is 50 Hz.
@@ -94,8 +99,9 @@ int main() {
 		}
 		if (trigger_switch) {
 			// Simulate switch event
-			switch(switch_type) {
-				case WITHOUT_LOAD: default: {
+			switch (switch_type) {
+				case WITHOUT_LOAD:
+				default: {
 					// We keep the value at [counter - switch_counter]: it stays the same.
 					index = (counter - 1 - switch_counter + sizeof(sin_table)) % sizeof(sin_table);
 					value = sin_table[index];
@@ -105,29 +111,30 @@ int main() {
 					uint8_t end_value = 255 >> 1;
 
 					if (switch_counter == 0) {
-						index = (counter - 1 - switch_counter + sizeof(sin_table)) % sizeof(sin_table);
+						index               = (counter - 1 - switch_counter + sizeof(sin_table)) % sizeof(sin_table);
 						uint8_t start_value = sin_table[index];
-						prev_value = start_value;
-					}				
-	
+						prev_value          = start_value;
+					}
+
 					// if v is starting point, e is endpoint (255 >> 1), then:
 					// x=[v-e round((v-e)*0.8.^[1:19])]+e;
 					// plot(1:length(x),x,'o')
-					value = (prev_value - end_value) * 80/100 + end_value;
+					value      = (prev_value - end_value) * 80 / 100 + end_value;
 
-					///nrf_pwm_set_value(0, value);
+					/// nrf_pwm_set_value(0, value);
 					prev_value = value;
-					
+
 				} break;
 			}
 			if (switch_counter++ == switch_delay) {
 				trigger_switch = false;
 				switch_counter = 0;
 			}
-		} else {
+		}
+		else {
 			// Update sine wave with value as is
 		}
 		counter = (counter + 1) % 100;
-//		nrf_pwm_set_value(0, value);
+		//		nrf_pwm_set_value(0, value);
 	}
 }

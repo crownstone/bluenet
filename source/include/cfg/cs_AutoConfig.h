@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,4 +103,3 @@ extern const int8_t g_LED4_INDEX;
 #ifdef __cplusplus
 }
 #endif
-

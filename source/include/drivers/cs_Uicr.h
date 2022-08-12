@@ -11,8 +11,8 @@
 extern "C" {
 #endif
 
-#include <protocol/cs_UicrPacket.h>
 #include <protocol/cs_Typedefs.h>
+#include <protocol/cs_UicrPacket.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -49,7 +49,6 @@ cs_ret_code_t enableNfcPinsAsGpio();
  * Returns true when the NFC pins can be used as GPIO.
  */
 bool canUseNfcPinsAsGpio();
-
 
 /**
  * Read the UICR data from UICR.

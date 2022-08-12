@@ -77,9 +77,9 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 	bool shouldResetOverrideState = false;
 
 	if (_overrideState && _behaviourState && _aggregatedState) {
-		bool overrideStateIsOn   = (*_overrideState != 0);
-		bool aggregatedStateIsOn = (*_aggregatedState != 0);
-		bool behaviourStateIsOn  = (*_behaviourState != 0);
+		bool overrideStateIsOn           = (*_overrideState != 0);
+		bool aggregatedStateIsOn         = (*_aggregatedState != 0);
+		bool behaviourStateIsOn          = (*_behaviourState != 0);
 
 		bool overrideMatchedAggregated   = (overrideStateIsOn == aggregatedStateIsOn);
 		bool behaviourWantsToChangeState = (behaviourStateIsOn != aggregatedStateIsOn);
@@ -202,7 +202,7 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 			if (timestamp == _lastTimestamp) {
 				break;
 			}
-			_lastTimestamp = timestamp;
+			_lastTimestamp             = timestamp;
 
 			// Update switch value.
 			bool behaviourValueChanged = updateBehaviourHandlers();
@@ -334,10 +334,10 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 		case CS_SWITCH_CMD_VAL_TOGGLE: {
 			// Toggle between 0 and on.
 			uint8_t currentValue = _smartSwitch.getIntendedState();
-			uint8_t newValue = 0;
+			uint8_t newValue     = 0;
 			if (source.source.type == CS_CMD_SOURCE_TYPE_ENUM && source.source.id == CS_CMD_SOURCE_SWITCHCRAFT) {
 				bool doubleTap = registerSwitchcraftEvent(currentValue);
-				newValue = getStateIntentionSwitchcraft(currentValue, doubleTap);
+				newValue       = getStateIntentionSwitchcraft(currentValue, doubleTap);
 			}
 			else if (currentValue == 0) {
 				// Switch is currently off, so switch on.
@@ -399,7 +399,8 @@ bool SwitchAggregator::registerSwitchcraftEvent(uint8_t currentValue) {
 	if (_switchcraftDoubleTapCountdown) {
 		// TODO: cache this value?
 		TYPIFY(STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED) doubleTapEnabled;
-		State::getInstance().get(CS_TYPE::STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED, &doubleTapEnabled, sizeof(doubleTapEnabled));
+		State::getInstance().get(
+				CS_TYPE::STATE_SWITCHCRAFT_DOUBLE_TAP_ENABLED, &doubleTapEnabled, sizeof(doubleTapEnabled));
 		if (doubleTapEnabled) {
 			LOGi("Double tap switchcraft");
 			doubleTap = true;

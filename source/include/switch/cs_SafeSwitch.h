@@ -61,10 +61,10 @@ public:
 
 	/**
 	 * The relay bit of the return value of getState() is retrieved from
-	 * persistent memory at startup. There is a possibility of this getting 
+	 * persistent memory at startup. There is a possibility of this getting
 	 * out of sync with the physical relay state. Until the first relay action
 	 * it isn't certain which physical state the device is in.
-	 * 
+	 *
 	 * If it is certain this method returns true.
 	 */
 	bool isRelayStateAccurate();
@@ -88,11 +88,11 @@ private:
 	Dimmer dimmer;
 	Relay relay;
 
-	bool initialized = false;
+	bool initialized           = false;
 
-	bool canTryDimmingOnBoot = false;
+	bool canTryDimmingOnBoot   = false;
 
-	bool canDimOnWarmBoot = false;
+	bool canDimOnWarmBoot      = false;
 
 	bool dimmerOnWhenPinsFloat = true;
 
@@ -106,12 +106,12 @@ private:
 	/**
 	 * Whether the relay circuit is powered.
 	 */
-	bool relayPowered = false;
+	bool relayPowered               = false;
 
 	/**
 	 * Whether the dimmer circuit is powered.
 	 */
-	bool dimmerPowered = false;
+	bool dimmerPowered              = false;
 
 	/**
 	 * Counter that counts down until enough time has passed for dimmer circuit to be powered.
@@ -121,28 +121,28 @@ private:
 	/**
 	 * Counter that counts down until power usage via dimmer should be checked.
 	 */
-	uint32_t dimmerCheckCountDown = 0;
+	uint32_t dimmerCheckCountDown   = 0;
 
 	/**
 	 * Whether power usage via dimmer has been checked already.
 	 */
-	bool checkedDimmerPowerUsage = false;
+	bool checkedDimmerPowerUsage    = false;
 
 	/**
 	 * Determines whether or not setDimmer and setRelay will have any effect.
 	 * (Will be set to false when GOING_TO_DFU event is set for example.)
 	 */
-	bool allowStateChanges = true;
+	bool allowStateChanges          = true;
 
 	/**
 	 * Whether the relay has been set at least once after boot.
 	 */
-	bool relayHasBeenSetBefore = false;
+	bool relayHasBeenSetBefore      = false;
 
 	/**
 	 * Cached operation mode.
 	 */
-	OperationMode operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
+	OperationMode operationMode     = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	/**
 	 * Set relay.
@@ -250,5 +250,3 @@ private:
 
 	void handleGetBehaviourDebug(event_t& evt);
 };
-
-

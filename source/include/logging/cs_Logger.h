@@ -580,7 +580,7 @@ void cs_log_args_no_fmt(
 	header.numArgs              = 0;
 
 	// Get number of arguments and size of all arguments.
-	size_t totalSize = sizeof(header);
+	size_t totalSize            = sizeof(header);
 	(cs_log_add_arg_size(totalSize, header.numArgs, args), ...);
 
 	// Write the header.
@@ -634,7 +634,7 @@ __attribute__((unused)) static bool _logPrefixPlainText = true;
 
 // Write a string with printf functionality.
 #ifdef HOST_TARGET
-__attribute__((unused)) static bool _logPrefixHost = true;
+__attribute__((unused)) static bool _logPrefixHost      = true;
 
 #define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__) - 30 - 1) : __FILE__)
 

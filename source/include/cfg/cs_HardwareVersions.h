@@ -6,14 +6,14 @@
  */
 #pragma once
 
-#include <cfg/cs_Boards.h>
 #include <cfg/cs_AutoConfig.h>
+#include <cfg/cs_Boards.h>
 #include <drivers/cs_Uicr.h>
 #include <protocol/cs_UicrPacket.h>
 #include <stdio.h>
 
 //#ifdef __cplusplus
-//extern "C" {
+// extern "C" {
 //#endif
 //
 //#include "nrf52.h"
@@ -37,7 +37,7 @@
 	  |  |  |--------------  Product Type, see cs_DeviceTypes.h
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
-	
+
 	Product type can be:
 	  1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 Dongle, 6 Builtin One, 7 Hub, 8 Builtin Two, 9 Plug One, 10 Outlet
 */
@@ -71,11 +71,11 @@ static inline const char* get_hardware_version() {
 		case ACR01B2G: return "10102010300";
 
 		// CROWNSTONE BUILTINS
-		case ACR01B1A:  return "10103000100";
-		case ACR01B1B:  return "10103000200";
-		case ACR01B1C:  return "10103000300";
-		case ACR01B1D:  return "10103000400";
-		case ACR01B1E:  return "10103000500";
+		case ACR01B1A: return "10103000100";
+		case ACR01B1B: return "10103000200";
+		case ACR01B1C: return "10103000300";
+		case ACR01B1D: return "10103000400";
+		case ACR01B1E: return "10103000500";
 
 		// GUIDESTONE
 		case GUIDESTONE: return "10104010000";
@@ -111,7 +111,8 @@ static char versionString[12];
 
 static inline const char* get_hardware_version_from_uicr(const cs_uicr_data_t* uicrData) {
 	// Since you can't specify a max width, just use modulo to limit it.
-	sprintf(versionString, "%u%02u%02u%02u%02u%02u",
+	sprintf(versionString,
+			"%u%02u%02u%02u%02u%02u",
 			uicrData->productRegionFamily.fields.productFamily % 10,
 			uicrData->productRegionFamily.fields.region % 100,
 			uicrData->productRegionFamily.fields.productType % 100,

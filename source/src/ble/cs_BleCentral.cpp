@@ -615,7 +615,7 @@ void BleCentral::onConnect(uint16_t connectionHandle, const ble_gap_evt_connecte
 
 	_connectionHandle = connectionHandle;
 
-	uint32_t nrfCode = sd_ble_gattc_exchange_mtu_request(_connectionHandle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
+	uint32_t nrfCode  = sd_ble_gattc_exchange_mtu_request(_connectionHandle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
 	if (nrfCode == NRF_SUCCESS) {
 		// Wait for MTU response.
 	}

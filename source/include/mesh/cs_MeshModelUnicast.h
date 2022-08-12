@@ -7,10 +7,10 @@
 
 #pragma once
 
+#include <cfg/cs_Config.h>
 #include <mesh/cs_MeshCommon.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <third/std/function.h>
-#include <cfg/cs_Config.h>
 
 extern "C" {
 #include <access_reliable.h>
@@ -61,13 +61,13 @@ public:
 	void tick(uint32_t tickCount);
 
 	/** Internal usage */
-	void handleMsg(const access_message_rx_t * accessMsg);
+	void handleMsg(const access_message_rx_t* accessMsg);
 
 	/** Internal usage */
 	void handleReliableStatus(access_reliable_status_t status);
 
 private:
-	const static uint8_t QUEUE_SIZE = 5;
+	const static uint8_t QUEUE_SIZE       = 5;
 
 	const static uint8_t QUEUE_INDEX_NONE = 255;
 
@@ -81,14 +81,14 @@ private:
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
-	dsm_handle_t _publishAddressHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _publishAddressHandle       = DSM_HANDLE_INVALID;
 
-	callback_msg_t _msgCallback = nullptr;
+	callback_msg_t _msgCallback              = nullptr;
 
 	access_reliable_t _accessReliableMsg;
 
 #if MESH_MODEL_TEST_MSG == 2
-	uint32_t _acked = 0;
+	uint32_t _acked    = 0;
 	uint32_t _timedout = 0;
 	uint32_t _canceled = 0;
 #endif
@@ -103,20 +103,20 @@ private:
 	/**
 	 * Next index in queue to send.
 	 */
-	uint8_t _queueIndexNext = 0;
+	uint8_t _queueIndexNext       = 0;
 
 	/**
 	 * Status of the reliable msg.
 	 * 255 for no status.
 	 */
-	uint8_t _reliableStatus = 255;
+	uint8_t _reliableStatus       = 255;
 
 	/**
 	 * Whether the reply message has been received.
 	 */
-	bool _replyReceived = false;
+	bool _replyReceived           = false;
 
-	uint8_t _ttl = CS_MESH_DEFAULT_TTL;
+	uint8_t _ttl                  = CS_MESH_DEFAULT_TTL;
 
 	/**
 	 * If item at index is in progress, cancel it.

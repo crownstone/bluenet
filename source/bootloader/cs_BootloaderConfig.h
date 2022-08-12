@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cfg/cs_Boards.h>
-
 #include <stdint.h>
 
 /*

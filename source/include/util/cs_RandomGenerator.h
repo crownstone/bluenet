@@ -15,10 +15,10 @@
  * sequences of pseudo random numbers that are identical across devices in the mesh.
  */
 class RandomGenerator {
-	private:
+private:
 	Msws::State _state;
 
-	public:
+public:
 	/**
 	 * The given seed need not be very high quality. The constructor will
 	 * ensure that the internal state is set up to acceptable values,
@@ -29,11 +29,7 @@ class RandomGenerator {
 	/**
 	 * Generates a new random number and updates the internal state.
 	 */
-	uint32_t rand() {
-		return Msws::msws(_state);
-	}
+	uint32_t rand() { return Msws::msws(_state); }
 
-	uint32_t operator()() {
-		return rand();
-	}
+	uint32_t operator()() { return rand(); }
 };

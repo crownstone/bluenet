@@ -50,22 +50,17 @@
  */
 class StreamBufferAccessor {
 public:
-	StreamBufferAccessor(buffer_ptr_t buffer, cs_buffer_size_t size) {
-		assign(buffer,size);
-	}
-	StreamBufferAccessor(cs_data_t data) :
-		StreamBufferAccessor(data.data, data.len) {
-	}
-
+	StreamBufferAccessor(buffer_ptr_t buffer, cs_buffer_size_t size) { assign(buffer, size); }
+	StreamBufferAccessor(cs_data_t data) : StreamBufferAccessor(data.data, data.len) {}
 
 	/**
 	 * Resets the stream buffer accessor to construction state,
 	 * such that the next operation will read/write will happen from
 	 * the first byte of the buffer.
 	 */
-	void reset(){
+	void reset() {
 		internal_status = ERR_SUCCESS;
-		buff_curr = buff_begin;
+		buff_curr       = buff_begin;
 	}
 
 	/**
@@ -75,31 +70,23 @@ public:
 	/** @inherit */
 	cs_ret_code_t assign(buffer_ptr_t buffer, cs_buffer_size_t size) {
 		buff_begin = buffer;
-		buff_end = buffer + size;
+		buff_end   = buffer + size;
 		reset();
 
 		return ERR_SUCCESS;
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getSerializedSize() const {
-		return buff_curr - buff_begin;
-	}
+	cs_buffer_size_t getSerializedSize() const { return buff_curr - buff_begin; }
 
 	/** @inherit */
-	cs_buffer_size_t getBufferSize() const {
-		return buff_end - buff_begin;
-	}
+	cs_buffer_size_t getBufferSize() const { return buff_end - buff_begin; }
 
 	/** @inherit */
-	cs_buffer_size_t getRemainingCapacity() const {
-		return buff_end - buff_curr;
-	}
+	cs_buffer_size_t getRemainingCapacity() const { return buff_end - buff_curr; }
 
 	/** @inherit */
-	cs_data_t getSerializedBuffer() {
-		return cs_data_t(buff_begin, getBufferSize());
-	}
+	cs_data_t getSerializedBuffer() { return cs_data_t(buff_begin, getBufferSize()); }
 
 	// ============ Get ============
 
@@ -110,19 +97,20 @@ public:
 	 *
 	 * This will not make any copies.
 	 */
-	template<class T>
-	StreamBufferAccessor& get(T* &packet_ptr){
-		if( !status_check() ){
+	template <class T>
+	StreamBufferAccessor& get(T*& packet_ptr) {
+		if (!status_check()) {
 			// failed status check
 			// ignore get request when failure
 			return *this;
 		}
 
-		if( !size_check<T>() ){
+		if (!size_check<T>()) {
 			// failed size check
-			packet_ptr = nullptr;
+			packet_ptr      = nullptr;
 			internal_status = ERR_NO_SPACE;
-		} else {
+		}
+		else {
 			// write to the out-parameter packet_ptr
 			packet_ptr = reinterpret_cast<T*>(buff_curr);
 			increment_buff<T>();
@@ -137,9 +125,9 @@ public:
 	 * a default value if the stream is in error state or doesn't have enough
 	 * bytes left.
 	 */
-	template<class T>
-	T get(){
-		if( !size_check<T>() && !status_check() ){
+	template <class T>
+	T get() {
+		if (!size_check<T>() && !status_check()) {
 			increment_buff<T>();
 			return *reinterpret_cast<T*>(buff_curr);
 		}
@@ -155,13 +143,14 @@ public:
 	 * Put packet into the stream, if possible. Then increment the current
 	 * buffer pointer.
 	 */
-	template<class T>
-	void put(T packet){
-		if( size_check<T>() && status_check() ){
+	template <class T>
+	void put(T packet) {
+		if (size_check<T>() && status_check()) {
 			// copy into the buffer, after that, increment
 			*reinterpret_cast<T*>(buff_curr) = packet;
 			increment_buff<T>();
-		} else {
+		}
+		else {
 			// failed size_check
 			internal_status = ERR_NO_SPACE;
 		}
@@ -169,20 +158,18 @@ public:
 
 protected:
 	// returns false on failure
-	template<class T>
-	inline bool size_check(){
+	template <class T>
+	inline bool size_check() {
 		return buff_curr + sizeof(T) <= buff_end;
 	}
 
-	template<class T>
-	inline void increment_buff(){
+	template <class T>
+	inline void increment_buff() {
 		buff_curr += sizeof(T);
 	}
 
 	// returns false on failure
-	inline bool status_check(){
-		return internal_status == ERR_SUCCESS;
-	}
+	inline bool status_check() { return internal_status == ERR_SUCCESS; }
 
 private:
 	buffer_ptr_t buff_begin;

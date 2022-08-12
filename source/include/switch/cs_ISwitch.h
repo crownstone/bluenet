@@ -13,7 +13,7 @@
  * Interface class that defines what a switch can do.
  */
 class ISwitch {
-    virtual void setRelay(bool is_on) = 0;
-    virtual void setDimmerPower(bool is_on) = 0;
-    virtual void setIntensity(uint8_t value) = 0;
+	virtual void setRelay(bool is_on)        = 0;
+	virtual void setDimmerPower(bool is_on)  = 0;
+	virtual void setIntensity(uint8_t value) = 0;
 };

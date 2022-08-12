@@ -10,10 +10,9 @@
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
-
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <common/cs_Component.h>
 
 #include <array>
 #include <optional>
@@ -25,6 +24,7 @@
 class BehaviourStore : public EventListener, public Component {
 public:
 	static constexpr size_t MaxBehaviours = 50;
+
 private:
 	std::array<Behaviour*, MaxBehaviours> activeBehaviours = {};
 
@@ -43,15 +43,13 @@ public:
 	 *   }
 	 * }
 	 */
-	inline std::array<Behaviour*, MaxBehaviours>& getActiveBehaviours() {
-		return activeBehaviours;
-	}
+	inline std::array<Behaviour*, MaxBehaviours>& getActiveBehaviours() { return activeBehaviours; }
 
 	/**
 	 * Initialize store from flash.
 	 */
 	cs_ret_code_t init() override;
-	
+
 	virtual ~BehaviourStore();
 
 private:
@@ -65,7 +63,7 @@ private:
 	 * @param[out] index     Index at which the behaviour was added, only set on success.
 	 * @return error code.
 	 */
-	ErrorCodesGeneral addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t & index);
+	ErrorCodesGeneral addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t& index);
 
 	/**
 	 * Remove the behaviour at [index]. If [index] is out of bounds,
@@ -105,6 +103,6 @@ private:
 
 	// loads the behaviours from state into the 'activeBehaviours' array.
 	// BehaviourType must match BehaviourCsType.
-	template<class BehaviourType>
+	template <class BehaviourType>
 	void LoadBehavioursFromMemory(CS_TYPE BehaviourCsType);
 };

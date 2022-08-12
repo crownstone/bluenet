@@ -30,8 +30,11 @@ void EventDispatcher::dispatch(event_t& event) {
 			break;
 		default:
 			if (event.size != TypeSize(event.type)) {
-				LOGEventdispatcherWarning("Can't dispatch: wrong payload length (%u should be %u) for type %u",
-						event.size, TypeSize(event.type), event.type);
+				LOGEventdispatcherWarning(
+						"Can't dispatch: wrong payload length (%u should be %u) for type %u",
+						event.size,
+						TypeSize(event.type),
+						event.type);
 				event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 				return;
 			}
@@ -54,7 +57,7 @@ bool EventDispatcher::addListener(EventListener* listener) {
 
 	// check for duplicate registration
 	for (uint8_t listenerIndex = 0; listenerIndex < _listenerCount; listenerIndex++) {
-		if(_listeners[listenerIndex] == listener) {
+		if (_listeners[listenerIndex] == listener) {
 			return true;
 		}
 	}

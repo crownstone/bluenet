@@ -8,19 +8,10 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 
 TwilightBehaviour::TwilightBehaviour(
-		uint8_t intensity,
-		uint8_t profileid,
-		DayOfWeekBitMask activedaysofweek,
-		TimeOfDay from,
-		TimeOfDay until) :
-		Behaviour(Behaviour::Type::Twilight, intensity, profileid, activedaysofweek, from, until)
-{
-}
+		uint8_t intensity, uint8_t profileid, DayOfWeekBitMask activedaysofweek, TimeOfDay from, TimeOfDay until)
+		: Behaviour(Behaviour::Type::Twilight, intensity, profileid, activedaysofweek, from, until) {}
 
-TwilightBehaviour::TwilightBehaviour(SerializedDataType arr)
-: Behaviour(std::move(arr)) {
-
-}
+TwilightBehaviour::TwilightBehaviour(SerializedDataType arr) : Behaviour(std::move(arr)) {}
 
 TwilightBehaviour::SerializedDataType TwilightBehaviour::serialize() {
 	return Behaviour::serialize();
@@ -43,12 +34,15 @@ size_t TwilightBehaviour::serializedSize() const {
 void TwilightBehaviour::print() {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
 	LOGd("TwilightBehaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), profile(%d)",
-			static_cast<uint8_t>(typ),
-			from().h(), from().m(), from().s(),
-			until().h(), until().m(), until().s(),
-			activeIntensity,
-			activeDays,
-			profileId
-	);
+		 static_cast<uint8_t>(typ),
+		 from().h(),
+		 from().m(),
+		 from().s(),
+		 until().h(),
+		 until().m(),
+		 until().s(),
+		 activeIntensity,
+		 activeDays,
+		 profileId);
 #endif
 }

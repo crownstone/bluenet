@@ -231,7 +231,7 @@ union __attribute__((__packed__)) switch_state_t {
  * and 1 bit that determines whether the value is switch value (0-100), or a special value (enum).
  */
 enum SwitchCommandValue : uint8_t {
-	CS_SWITCH_CMD_VAL_OFF = 0,
+	CS_SWITCH_CMD_VAL_OFF                      = 0,
 	// Dimmed from 1 - 99
 	CS_SWITCH_CMD_VAL_FULLY_ON                 = 100,
 	CS_SWITCH_CMD_VAL_NONE                     = 128,  // For printing: the value is set to nothing.
@@ -552,7 +552,6 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t length;
 	uint8_t* buf;
 };
-
 
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
 

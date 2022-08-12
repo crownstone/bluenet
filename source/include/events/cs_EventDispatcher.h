@@ -32,13 +32,11 @@ public:
 	}
 
 	EventDispatcher(EventDispatcher const&) = delete;
-	void operator=(EventDispatcher const&)  = delete;
+	void operator=(EventDispatcher const&) = delete;
 
 	//! Add a listener
-	bool addListener(EventListener *listener);
+	bool addListener(EventListener* listener);
 
 	//! Dispatch an event with data
-	void dispatch(event_t & event);
+	void dispatch(event_t& event);
 };
-
-

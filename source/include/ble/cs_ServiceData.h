@@ -96,7 +96,7 @@ public:
 
 private:
 	//! Timer used to periodically update the advertisement.
-	app_timer_t    _updateTimerData;
+	app_timer_t _updateTimerData;
 	app_timer_id_t _updateTimerId = NULL;
 
 	/**
@@ -110,7 +110,7 @@ private:
 	stone_id_t _crownstoneId = 0;
 
 	//! Cache switch state
-	uint8_t _switchState = 0;
+	uint8_t _switchState     = 0;
 
 	//! Cache flags
 	service_data_state_flags_t _flags;
@@ -119,16 +119,16 @@ private:
 	service_data_state_extra_flags_t _extraFlags;
 
 	//! Cache the temperature
-	int8_t  _temperature = 0;
+	int8_t _temperature     = 0;
 
 	//! Cache the power factor
-	int8_t  _powerFactor = 0;
+	int8_t _powerFactor     = 0;
 
 	//! Cache the power usage in mW
 	int32_t _powerUsageReal = 0;
 
 	//! Cache the energy used, in units of 64 J
-	int32_t _energyUsed = 0;
+	int32_t _energyUsed     = 0;
 
 	//! Cache the state errors.
 	TYPIFY(STATE_ERRORS) _stateErrors;
@@ -136,13 +136,13 @@ private:
 	//! Cache timestamp of first error
 	uint32_t _firstErrorTimestamp = 0;
 
-	uint32_t _sendStateCountdown = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
+	uint32_t _sendStateCountdown  = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
 
 	//! Cache the operation mode.
-	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
+	OperationMode _operationMode  = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	//! Counter that keeps up the number of times that the advertisement has been updated.
-	uint32_t _updateCount = 0;
+	uint32_t _updateCount         = 0;
 
 	ExternalStates _externalStates;
 
@@ -157,9 +157,7 @@ private:
 	service_data_encrypted_microapp_t _microappServiceData;
 
 	/* Static function for the timeout */
-	static void staticTimeout(ServiceData *ptr) {
-		ptr->updateServiceData(false);
-	}
+	static void staticTimeout(ServiceData* ptr) { ptr->updateServiceData(false); }
 
 	/**
 	 * Selects a type of data and puts this in the service data.
@@ -212,16 +210,13 @@ private:
 	 */
 	bool fillWithMicroapp(uint32_t timestamp);
 
-
 	/** Called when there are events to handle.
 	 *
 	 * @param[in] evt             Event type, see cs_EventTypes.h.
 	 * @param[in] p_data          Pointer to the data.
 	 * @param[in] length          Length of the data.
 	 */
-	void handleEvent(event_t & event);
-
-
+	void handleEvent(event_t& event);
 
 	/** Compress power usage, according to service data protocol v3.
 	 *
@@ -237,14 +232,12 @@ private:
 	 */
 	int32_t decompressPowerUsage(int16_t compressedPowerUsage);
 
-
 	/** Convert timestamp to a partial timestamp, according to service data protocol v3.
 	 *
 	 * @param[in] timestamp       The timestamp.
 	 * @return                    The least significant part of the timestamp.
 	 */
 	uint16_t timestampToPartialTimestamp(uint32_t timestamp);
-
 
 	/** When a timestamp is available, return partial timestamp, else returns a counter.
 	 *
@@ -266,4 +259,3 @@ private:
 	 */
 	void sendMeshState(bool event);
 };
-

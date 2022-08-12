@@ -10,19 +10,18 @@
 #include <drivers/cs_PWM.h>
 #include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
+#include <test/cs_Test.h>
 #include <util/cs_Error.h>
 
-#include <test/cs_Test.h>
-
 void Dimmer::init(const boards_config_t& board) {
-	if(_initialized) {
+	if (_initialized) {
 		LOGw("Dimmer init was already executed.");
 		return;
 	}
 
-	_hardwareBoard = board.hardwareBoard;
+	_hardwareBoard   = board.hardwareBoard;
 	_pinEnableDimmer = board.pinEnableDimmer;
-	_hasDimmer = board.pinDimmer != PIN_NONE;
+	_hasDimmer       = board.pinDimmer != PIN_NONE;
 
 	if (!_hasDimmer) {
 		return;
@@ -38,12 +37,17 @@ void Dimmer::init(const boards_config_t& board) {
 
 	State::getInstance().get(CS_TYPE::STATE_SOFT_ON_SPEED, &_softOnSpeed, sizeof(_softOnSpeed));
 
-	LOGd("init enablePin=%u dimmerPin=%u inverted=%u period=%u µs softOnSpeed=%u", board.pinEnableDimmer, board.pinDimmer, board.flags.dimmerInverted, pwmPeriodUs, _softOnSpeed);
+	LOGd("init enablePin=%u dimmerPin=%u inverted=%u period=%u µs softOnSpeed=%u",
+		 board.pinEnableDimmer,
+		 board.pinDimmer,
+		 board.flags.dimmerInverted,
+		 pwmPeriodUs,
+		 _softOnSpeed);
 
 	pwm_config_t pwmConfig;
-	pwmConfig.channelCount = 1;
-	pwmConfig.period_us = pwmPeriodUs;
-	pwmConfig.channels[0].pin = board.pinDimmer;
+	pwmConfig.channelCount         = 1;
+	pwmConfig.period_us            = pwmPeriodUs;
+	pwmConfig.channels[0].pin      = board.pinDimmer;
 	pwmConfig.channels[0].inverted = board.flags.dimmerInverted;
 
 	PWM::getInstance().init(pwmConfig);
@@ -68,9 +72,10 @@ void Dimmer::start() {
 	enable();
 
 	TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING) startDimmerOnZeroCrossing;
-	State::getInstance().get(CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING, &startDimmerOnZeroCrossing, sizeof(startDimmerOnZeroCrossing));
-
-
+	State::getInstance().get(
+			CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING,
+			&startDimmerOnZeroCrossing,
+			sizeof(startDimmerOnZeroCrossing));
 
 	// These boards only have DC, so no zero crossings.
 	// TODO: should this be a flag in the board config?
@@ -82,9 +87,7 @@ void Dimmer::start() {
 			// These dev boards don't have power measurement, so no zero crossing.
 			PWM::getInstance().start(false);
 			break;
-		default:
-			PWM::getInstance().start(startDimmerOnZeroCrossing);
-			break;
+		default: PWM::getInstance().start(startDimmerOnZeroCrossing); break;
 	}
 
 	_started = true;
@@ -105,7 +108,7 @@ bool Dimmer::set(uint8_t intensity, bool fade) {
 
 	TEST_PUSH_EXPR_D(this, "intensity", intensity);
 	PWM::getInstance().setValue(0, intensity, speed);
-	
+
 	return true;
 }
 

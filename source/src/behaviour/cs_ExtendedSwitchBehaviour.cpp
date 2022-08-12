@@ -10,23 +10,16 @@
 #include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 
-ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour coreBehaviour, PresenceCondition extCondition) :
-	SwitchBehaviour(coreBehaviour), extensionCondition(extCondition) {
+ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour coreBehaviour, PresenceCondition extCondition)
+		: SwitchBehaviour(coreBehaviour), extensionCondition(extCondition) {
 	typ = Behaviour::Type::Extended;
 }
 
-ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SerializedDataType arr) : 
-	ExtendedSwitchBehaviour(
-			WireFormat::deserialize<SwitchBehaviour>(
-					arr.data() +  0,
-					WireFormat::size<SwitchBehaviour>()
-			),
-			WireFormat::deserialize<PresenceCondition>(
-					arr.data() + WireFormat::size<SwitchBehaviour>(),
-					WireFormat::size<PresenceCondition>()
-			)
-	) {
-}
+ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SerializedDataType arr)
+		: ExtendedSwitchBehaviour(
+				WireFormat::deserialize<SwitchBehaviour>(arr.data() + 0, WireFormat::size<SwitchBehaviour>()),
+				WireFormat::deserialize<PresenceCondition>(
+						arr.data() + WireFormat::size<SwitchBehaviour>(), WireFormat::size<PresenceCondition>())) {}
 
 ExtendedSwitchBehaviour::SerializedDataType ExtendedSwitchBehaviour::serialize() {
 	SerializedDataType result;
@@ -57,15 +50,13 @@ size_t ExtendedSwitchBehaviour::serializedSize() const {
 }
 
 bool ExtendedSwitchBehaviour::requiresPresence() {
-	return extensionIsActive
-			? presenceCondition.predicate.requiresPresence()
-			: extensionCondition.predicate.requiresPresence();
+	return extensionIsActive ? presenceCondition.predicate.requiresPresence()
+							 : extensionCondition.predicate.requiresPresence();
 }
 
 bool ExtendedSwitchBehaviour::requiresAbsence() {
-	return extensionIsActive
-			? presenceCondition.predicate.requiresAbsence()
-			: extensionCondition.predicate.requiresAbsence();
+	return extensionIsActive ? presenceCondition.predicate.requiresAbsence()
+							 : extensionCondition.predicate.requiresAbsence();
 }
 
 bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
@@ -91,9 +82,8 @@ bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription
 	}
 
 	if (prevExtensionIsValidTimeStamp) {
-		if (CsMath::Interval<uint32_t>(
-				SystemTime::posix(), extensionCondition.timeOut, true)
-				.contains(prevExtensionIsValidTimeStamp->timestamp())) {
+		if (CsMath::Interval<uint32_t>(SystemTime::posix(), extensionCondition.timeOut, true)
+					.contains(prevExtensionIsValidTimeStamp->timestamp())) {
 			// in extension and presence is invalid,
 			// but we're in the extension's grace period.
 			return true;

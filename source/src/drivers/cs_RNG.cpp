@@ -5,12 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <drivers/cs_RNG.h>
-
 #include <ble/cs_Nordic.h>
+#include <drivers/cs_RNG.h>
 #include <util/cs_BleError.h>
 
-RNG::RNG() {};
+RNG::RNG(){};
 
 void RNG::fillBuffer(uint8_t* buffer, uint8_t length) {
 	uint8_t bytes_available = 0;
@@ -30,7 +29,6 @@ uint32_t RNG::getRandom32() {
 		err_code = sd_rand_application_bytes_available_get(&bytes_available);
 		APP_ERROR_CHECK(err_code);
 	}
-
 
 	err_code = sd_rand_application_vector_get(_randomBytes, 4);
 	APP_ERROR_CHECK(err_code);
@@ -52,7 +50,6 @@ uint16_t RNG::getRandom16() {
 		APP_ERROR_CHECK(err_code);
 	}
 
-
 	err_code = sd_rand_application_vector_get(_randomBytes, 2);
 	APP_ERROR_CHECK(err_code);
 
@@ -71,7 +68,6 @@ uint8_t RNG::getRandom8() {
 		err_code = sd_rand_application_bytes_available_get(&bytes_available);
 		APP_ERROR_CHECK(err_code);
 	}
-
 
 	err_code = sd_rand_application_vector_get(_randomBytes, 1);
 	APP_ERROR_CHECK(err_code);
