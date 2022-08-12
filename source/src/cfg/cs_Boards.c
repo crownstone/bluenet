@@ -152,7 +152,11 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 	cs_uicr_data_t uicrData = mapBoardToUicrData(hardwareBoard);
 
 	// Try to set uicr data, in case it's not set yet.
+	// If it's set already, this will only write fields that were not set yet.
 	setUicr(&uicrData, false);
+
+	// Finally ,read the UICR.
+	getUicr(&uicrData);
 
 	return configure_board_from_uicr(&uicrData, config);
 }
