@@ -11,6 +11,7 @@ option(FACTORY_IMAGE                             "Create factory image"         
 option(REQUIRE_NRFJPROG                          "Require nrfjprog"                      ON)
 option(REQUIRE_JLINK                             "Require JLink"                         ON)
 option(REQUIRE_PYTHON                            "Require python"                        OFF)
+option(BUILD_OFFLINE                             "Build offline"                         OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -30,6 +31,12 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
+
+message(STATUS "Workspace directory: ${WORKSPACE_DIR}")
+
+if (${BUILD_OFFLINE})
+	set_property(DIRECTORY ${WORKSPACE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1)
+endif()
 
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
@@ -110,12 +117,6 @@ if(FACTORY_IMAGE)
 	else()
 		message(STATUS "Found srecord ${SRECORD_EXECUTABLE}")
 	endif()
-endif()
-
-set(COMPILE_ON_ARM 0)
-if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*" OR "${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "aarch64")
-	message(STATUS "Host has an ARM processor")
-	set(COMPILE_ON_ARM 1)
 endif()
 
 if(REQUIRE_PYTHON)
