@@ -119,12 +119,6 @@ if(FACTORY_IMAGE)
 	endif()
 endif()
 
-set(COMPILE_ON_ARM 0)
-if("${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "arm*" OR "${CMAKE_HOST_SYSTEM_PROCESSOR}" MATCHES "aarch64")
-	message(STATUS "Host has an ARM processor")
-	set(COMPILE_ON_ARM 1)
-endif()
-
 if(REQUIRE_PYTHON)
 	# This utility is able to find either python2 or python3. Set virtual env variant to be used first.
 	set(Python_FIND_VIRTUALENV FIRST)
