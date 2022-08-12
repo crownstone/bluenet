@@ -9,8 +9,8 @@
 
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
-#include <cfg/cs_Config.h>
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
@@ -21,9 +21,9 @@
 #include <microapp/cs_MicroappCommandHandler.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
+#include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Packets.h>
-#include <protocol/cs_CommandTypes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_BleError.h>
@@ -165,7 +165,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 		case CS_MICROAPP_SDK_LOG_STR: {
 			[[maybe_unused]] microapp_sdk_log_string_t* logString = reinterpret_cast<microapp_sdk_log_string_t*>(log);
 			// Enforce a zero-byte at the end before we log
-			uint8_t zeroByteIndex = MICROAPP_SDK_MAX_STRING_LENGTH - 1;
+			uint8_t zeroByteIndex                                 = MICROAPP_SDK_MAX_STRING_LENGTH - 1;
 			if (log->size < zeroByteIndex) {
 				zeroByteIndex = log->size;
 			}
@@ -207,7 +207,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 		case CS_MICROAPP_SDK_PIN_INIT: {
 			// Initializing a pin
 			MicroappSdkPinDirection direction = (MicroappSdkPinDirection)pin->direction;
-			MicroappSdkPinPolarity polarity = (MicroappSdkPinPolarity)pin->polarity;
+			MicroappSdkPinPolarity polarity   = (MicroappSdkPinPolarity)pin->polarity;
 
 			TYPIFY(EVT_GPIO_INIT) gpio;
 			gpio.pin_index = interruptToDigitalPin(pinIndex);
@@ -279,14 +279,14 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 				case CS_MICROAPP_SDK_PIN_WRITE: {
 					// Write to a pin
 					TYPIFY(EVT_GPIO_WRITE) gpio;
-					gpio.pin_index = interruptToDigitalPin(pinIndex);
+					gpio.pin_index            = interruptToDigitalPin(pinIndex);
 					MicroappSdkPinValue value = (MicroappSdkPinValue)pin->value;
 					switch (value) {
 						case CS_MICROAPP_SDK_PIN_ON: {
 							LOGd("Setting GPIO pin %i", gpio.pin_index);
 							gpio.length = 1;
 							uint8_t buf[1];
-							buf[0] = 1;
+							buf[0]   = 1;
 							gpio.buf = buf;
 							event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
 							event.dispatch();
@@ -296,7 +296,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 							LOGd("Clearing GPIO pin %i", gpio.pin_index);
 							gpio.length = 1;
 							uint8_t buf[1];
-							buf[0] = 0;
+							buf[0]   = 0;
 							gpio.buf = buf;
 							event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
 							event.dispatch();
@@ -410,19 +410,19 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 	MicroappSdkBleType type = (MicroappSdkBleType)ble->type;
 
 #if BUILD_MESHING == 0
-	if (type == CS_MICROAPP_SDK_BLE_SCAN_START ||
-		type == CS_MICROAPP_SDK_BLE_SCAN_STOP ||
-		type == CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT) {
-			LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-			ble->header.ack = CS_ACK_ERR_DISABLED;
-			return ERR_NOT_AVAILABLE;
+	if (type == CS_MICROAPP_SDK_BLE_SCAN_START || type == CS_MICROAPP_SDK_BLE_SCAN_STOP
+		|| type == CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT) {
+		LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+		ble->header.ack = CS_ACK_ERR_DISABLED;
+		return ERR_NOT_AVAILABLE;
 	}
 #endif
 
 	switch (type) {
 		case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			int result = controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
+			int result =
+					controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
 			if (result != ERR_SUCCESS) {
 				LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
 				ble->header.ack = CS_ACK_ERROR;
@@ -500,7 +500,8 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 				LOGd("Send mesh message to %i", mesh->stoneId);
 				eventData.idCount   = 1;
 				eventData.targetIds = &(mesh->stoneId);
-			} else {
+			}
+			else {
 				LOGd("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
@@ -536,7 +537,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			LOGi("Microapp requesting mesh info");
 			TYPIFY(CONFIG_CROWNSTONE_ID) id;
 			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
-			mesh->stoneId = id;
+			mesh->stoneId    = id;
 			mesh->header.ack = CS_ACK_SUCCESS;
 			break;
 		}
@@ -585,11 +586,12 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk
 	}
 
 	presence->presenceBitmask = resultBuf.presence[presence->profileId];
-	presence->header.ack = CS_ACK_SUCCESS;
+	presence->header.ack      = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(microapp_sdk_control_command_t* controlCommand) {
+cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
+		microapp_sdk_control_command_t* controlCommand) {
 	if (controlCommand->size == 0) {
 		LOGi("No control command");
 		controlCommand->header.ack = CS_ACK_ERR_EMPTY;
@@ -616,7 +618,6 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(microa
 	}
 	controlCommand->header.ack = CS_ACK_SUCCESS;
 	return ERR_SUCCESS;
-
 }
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yield_t* yield) {

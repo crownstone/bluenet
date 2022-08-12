@@ -22,7 +22,6 @@ private:
 	int interruptToDigitalPin(int interrupt);
 
 protected:
-
 	cs_ret_code_t handleMicroappLogRequest(microapp_sdk_log_header_t* log);
 	cs_ret_code_t handleMicroappPinRequest(microapp_sdk_pin_t* pin);
 	cs_ret_code_t handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_);
@@ -45,5 +44,4 @@ public:
 	 * Handle requests from the microapp
 	 */
 	cs_ret_code_t handleMicroappRequest(microapp_sdk_header_t* header);
-
 };

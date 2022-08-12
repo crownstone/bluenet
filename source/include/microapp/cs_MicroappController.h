@@ -25,8 +25,8 @@ struct coroutine_args_t {
  */
 struct microapp_interrupt_registration_t {
 	bool registered = false;
-	uint8_t major = 0;
-	uint8_t minor = 0;
+	uint8_t major   = 0;
+	uint8_t minor   = 0;
 };
 
 /**
@@ -45,12 +45,12 @@ private:
 	/**
 	 * Limit the number of interrupts in a tick (if -1) there is no limit.
 	 */
-	const int8_t MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK = 10;
+	const int8_t MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK        = 10;
 
 	/**
 	 * The maximum number of consecutive calls to a microapp.
 	 */
-	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS = 8;
+	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS       = 8;
 
 	/**
 	 * The maximum number of registered interrupts
