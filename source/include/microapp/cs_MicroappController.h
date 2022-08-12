@@ -74,14 +74,14 @@ private:
 	coroutine_args_t sharedState;
 
 	/**
-	 * Call counter
-	 */
-	uint8_t _callCounter;
-
-	/**
-	 * Interrupt counter
+	 * Counter for interrupts within a tick
 	 */
 	int8_t _interruptCounter;
+
+	/**
+	 * Counter for consecutive microapp calls
+	 */
+	uint8_t _consecutiveMicroappCallCounter;
 
 	/**
 	 * To throttle the ticks themselves.

@@ -188,7 +188,11 @@ void goIntoMicroapp(void* p) {
  * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
-MicroappController::MicroappController() : EventListener(), _callCounter(0), _microappIsScanning(false) {
+MicroappController::MicroappController() : 	EventListener(),
+											_tickCounter(0),
+											_interruptCounter(0),
+											_consecutiveMicroappCallCounter(0),
+											_microappIsScanning(false) {
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -298,17 +302,6 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 	return payload;
 }
 
-// callMicroapp
-// handleRequest
-// stopAfterMicroappRequest
-// tickMicroapp
-// generateInterrupt
-// allowInterrupts
-// registerInterrupt
-// misc setters/getters
-// on[event]
-// handleEvent
-
 /*
  * We resume the previously started coroutine.
  */
@@ -341,31 +334,67 @@ void MicroappController::callMicroapp() {
  * continues. In that case the microapp is called again on the next tick.
  */
 bool MicroappController::handleRequest() {
-	uint8_t* inputBuffer            = getInputMicroappBuffer();
-	microapp_sdk_header_t* incomingMessage = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
+	// First check the outgoing buffer to see if an interrupt is finished
+	uint8_t* outputBuffer                  = getOutputMicroappBuffer();
+	microapp_sdk_header_t* outgoingHeader  = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
+	if (outgoingHeader->ack == CS_ACK_NONE) {
+		// Don't handle requests, just return
+		_consecutiveMicroappCalls = 0;
+		return false
+	}
+	bool inInterruptContext = (outgoingHeader->ack != CS_ACK_NO_REQUEST)
+	if (inInterruptContext) {
+		bool interruptDone = (outgoingHeader->ack != CS_ACK_IN_PROGRESS);
+		if (interruptDone) {
+			bool interruptDropped = (outgoingHeader->ack == CS_ACK_ERR_BUSY);
+			if (interruptDropped) {
+				LOGv("Microapp is busy, drop interrupt");
+				// Also prevent new interrupts since apparently the microapp has no more space
+				setEmptyInterruptSlots(0);
+			}
+			else {
+				LOGv("Finished interrupt with return code %i", outgoingInterrupt->ack);
+				// Increment number of empty interrupt slots since we just finished one
+				incrementEmptyInterruptSlots();
+			}
+			// If interrupt finished, we do not call again and we also don't handle the microapp request
+			_consecutiveMicroappCalls = 0;
+			return false;
+		}
+	}
+	// Now check the incoming buffer for microapp requests
+	uint8_t* inputBuffer                  = getInputMicroappBuffer();
+	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
 
 	[[maybe_unused]] static int retrieveCounter = 0;
-	if (incomingMessage->sdkType != CS_MICROAPP_SDK_TYPE_YIELD) {
-		LOGv("Retrieve and handle [%i] request %i", ++retrieveCounter, incomingMessage->sdkType);
-	}
+	LOGv("Retrieve and handle [%i] request %i", ++retrieveCounter, incomingHeader->sdkType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
-	cs_ret_code_t result = microappRequestHandler.handleMicroappRequest(incomingMessage);
+	cs_ret_code_t result = microappRequestHandler.handleMicroappRequest(incomingHeader);
 	if (result != ERR_SUCCESS) {
 		LOGi("Handling request of type %i failed with return code %i", result);
 	}
-	bool callAgain = !stopAfterMicroappRequest(incomingMessage);
+	bool callAgain = !stopAfterMicroappRequest(incomingHeader);
 	if (!callAgain) {
 		LOGv("Do not call again");
+		_consecutiveMicroappCalls = 0;
+	}
+	// Also check if the max number of consecutive nonyielding calls is reached
+	else {
+		if (++_consecutiveMicroappCalls >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
+			_consecutiveMicroappCalls = 0;
+			LOGi("Stop because we've reached a max # of consecutive calls");
+			callAgain = false;
+		}
 	}
 	return callAgain;
 }
 
 /*
- * Check whether the microapp is yielding voluntarily or if consecutive call limit is reached
+ * Check whether the microapp is yielding voluntarily based on the sdkType
  */
-bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* header) {
+bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomingHeader) {
 	bool stop;
-	switch (header->sdkType) {
+	switch (incomingHeader->sdkType) {
 		case CS_MICROAPP_SDK_TYPE_LOG:
 		case CS_MICROAPP_SDK_TYPE_PIN:
 		case CS_MICROAPP_SDK_TYPE_SWITCH:
@@ -391,17 +420,6 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* header)
 			break;
 		}
 	}
-	// Also check if the max number of consecutive nonyielding calls is reached
-	if (stop) {
-		_callCounter = 0;
-	}
-	else {
-		if (++_callCounter % MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS == 0) {
-			_callCounter = 0;
-			LOGi("Stop because we've reached a max # of consecutive calls");
-			return true;
-		}
-	}
 	return stop;
 }
 
@@ -424,11 +442,15 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	// Indicate to the microapp that this is a standard tick entry by writing in outgoing message header
 	uint8_t* outputBuffer = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
+
 	outgoingMessage->sdkType = CS_MICROAPP_SDK_TYPE_CONTINUE;
-	outgoingMessage->ack = CS_ACK_NO_REQUEST;
+	outgoingMessage->ack     = CS_ACK_NO_REQUEST;
+	int8_t repeatCounter     = 0;
 	do {
+		LOGv("Call [%i], within tick", repeatCounter);
 		callMicroapp();
 		callAgain = handleRequest();
+		repeatCounter++;
 	} while (callAgain);
 }
 
@@ -457,21 +479,6 @@ void MicroappController::generateInterrupt() {
 	do {
 		LOGv("Call [%i,%i], within interrupt", _interruptCounter, repeatCounter);
 		callMicroapp();
-		bool done = (outgoingInterrupt->ack != CS_ACK_IN_PROGRESS);
-		bool dropped = (outgoingInterrupt->ack == CS_ACK_ERR_BUSY);
-		if (done) {
-			if (dropped) {
-				LOGv("Microapp is busy, drop interrupt");
-				// Also prevent new interrupts since apparently the microapp has no more space
-				setEmptyInterruptSlots(0);
-			}
-			else {
-				LOGv("Finished interrupt with return code %i", outgoingInterrupt->ack);
-				// Increment number of empty interrupt slots since we just finished one
-				incrementEmptyInterruptSlots();
-			}
-			return;
-		}
 		callAgain = handleRequest();
 		repeatCounter++;
 	} while (callAgain);
