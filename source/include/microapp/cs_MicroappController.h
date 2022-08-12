@@ -120,6 +120,11 @@ protected:
 	void callMicroapp();
 
 	/**
+	 * Read the ack from the microapp and returns whether to handle its request
+	 */
+	bool handleAck();
+
+	/**
 	 * Get the request from the microapp and let the request handler handle it
 	 */
 	bool handleRequest();

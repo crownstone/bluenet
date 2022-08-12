@@ -325,20 +325,19 @@ void MicroappController::callMicroapp() {
 	LOGi("End of coroutine. Should not happen.")
 }
 
-/*
- * Retrieve request from the microapp. This is within the bluenet coroutine context. It gets the payload from the
- * global `sharedState` variable and calls `handleMicroappRequest` afterwards. The `sharedState.microapp2bluenet buffer`
- * only stores a single request. This is fine because after each request the microapp should transfer control to
- * bluenet. For each command is decided in `stopAfterMicroappRequest` if the microapp should be called again. For
- * example, for the end of setup, loop, or delay, it is **not** immediately called again but normal bluenet execution
- * continues. In that case the microapp is called again on the next tick.
+/**
+ * Retrieve ack from the outgoing buffer that the microapp may have overwritten.
+ * Particularly check if the microapp exit was on finishing an interrupt.
+ * In that case, ignore the request made by the microapp
+ *
+ * @return true     if the request in the incoming buffer should be handled
+ * @return false    if the request in the incoming buffer should be ignored
  */
-bool MicroappController::handleRequest() {
-	// First check the outgoing buffer to see if an interrupt is finished
+bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                  = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader  = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 	if (outgoingHeader->ack == CS_ACK_NONE) {
-		// Don't handle requests, just return
+		// Don't handle requests on undefined ack
 		_consecutiveMicroappCalls = 0;
 		return false
 	}
@@ -362,7 +361,19 @@ bool MicroappController::handleRequest() {
 			return false;
 		}
 	}
-	// Now check the incoming buffer for microapp requests
+	return true;
+}
+
+/**
+ * Retrieve request from the microapp and let MicroappRequestHandler handle it.
+ * Return whether the microapp should be called again immediately or not.
+ * This depends on both the type of request (i.e. for YIELDs do not call again)
+ * and on whether the max number of consecutive calls has been reached
+ *
+ * @return true     if the microapp should be called again
+ * @return false    if the microapp should not be called again
+ */
+bool MicroappController::handleRequest() {
 	uint8_t* inputBuffer                  = getInputMicroappBuffer();
 	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
 
@@ -430,7 +441,6 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomin
  * There's no load failure detection. When the call fails bluenet hangs and should reboot.
  */
 void MicroappController::tickMicroapp(uint8_t appIndex) {
-	bool callAgain = false;
 	_tickCounter++;
 	if (_tickCounter < MICROAPP_LOOP_FREQUENCY) {
 		return;
@@ -439,16 +449,22 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	LOGv("Tick microapp");
 	// Reset interrupt counter every microapp tick
 	_interruptCounter = 0;
-	// Indicate to the microapp that this is a standard tick entry by writing in outgoing message header
+	// Indicate to the microapp that this is a tick entry by writing in outgoing message header
 	uint8_t* outputBuffer = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 
 	outgoingMessage->sdkType = CS_MICROAPP_SDK_TYPE_CONTINUE;
 	outgoingMessage->ack     = CS_ACK_NO_REQUEST;
+	bool callAgain           = false;
+	bool handleRequest       = false;
 	int8_t repeatCounter     = 0;
 	do {
 		LOGv("Call [%i], within tick", repeatCounter);
 		callMicroapp();
+		handleRequest = handleAck();
+		if (!handleRequest) {
+			return;
+		}
 		callAgain = handleRequest();
 		repeatCounter++;
 	} while (callAgain);
@@ -475,10 +491,15 @@ void MicroappController::generateInterrupt() {
 	// Request an acknowledgement by the microapp indicating status of interrupt
 	outgoingInterrupt->ack = CS_ACK_REQUEST;
 	bool callAgain         = false;
+	bool handleRequest     = false;
 	int8_t repeatCounter   = 0;
 	do {
 		LOGv("Call [%i,%i], within interrupt", _interruptCounter, repeatCounter);
 		callMicroapp();
+		handleRequest = handleAck();
+		if (!handleRequest) {
+			return;
+		}
 		callAgain = handleRequest();
 		repeatCounter++;
 	} while (callAgain);
