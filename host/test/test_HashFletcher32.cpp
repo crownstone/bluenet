@@ -70,9 +70,7 @@ int main(){
         return -1;
     }
 
-    LOGe("success");
     fflush( stdout );
-#pragma message("serial verbosity: " XSTR(SERIAL_VERBOSITY))
 
     return 0;
 }
