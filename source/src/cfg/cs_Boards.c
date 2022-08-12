@@ -149,7 +149,7 @@ cs_ret_code_t configure_board(boards_config_t* config) {
 //	return configure_board_from_hardware_board(hardwareBoard, config);
 
 	// Create UICR data from hardware board.
-	cs_uicr_data_t uicrData = getUicrData(hardwareBoard);
+	cs_uicr_data_t uicrData = mapBoardToUicrData(hardwareBoard);
 
 	// Try to set uicr data, in case it's not set yet.
 	setUicr(&uicrData, false);

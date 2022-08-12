@@ -16,7 +16,7 @@ extern "C" {
 #include <protocol/cs_UicrPacket.h>
 #include <stdint.h>
 
-static cs_uicr_data_t getUicrData(uint32_t boardVersion) {
+static cs_uicr_data_t mapBoardToUicrData(uint32_t boardVersion) {
 	cs_uicr_data_t data = {
 			.board = boardVersion,
 			.productRegionFamily = { .asInt = 0xFFFFFFFF },
