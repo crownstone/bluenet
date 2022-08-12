@@ -48,7 +48,7 @@ switch_state_t SmartSwitch::getActualState() {
 
 uint8_t SmartSwitch::getIntensityFromSwitchState(switch_state_t switchState) {
 	if (switchState.state.relay) {
-		return 100;
+		return CS_SWITCH_CMD_VAL_FULLY_ON;
 	}
 	return switchState.state.dimmer;
 }
@@ -68,8 +68,8 @@ bool SmartSwitch::allowSwitching() {
 
 cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
 	LOGSmartSwitchDebug("set %u", intensity);
-	if (intensity > 100) {
-		intensity = 100;
+	if (intensity > CS_SWITCH_CMD_VAL_FULLY_ON) {
+		intensity = CS_SWITCH_CMD_VAL_FULLY_ON;
 //		return ERR_WRONG_PARAMETER;
 	}
 	_intendedState = intensity;
@@ -95,8 +95,8 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		LOGSmartSwitchDebug("retCodeDimmer=%u retCodeRelay=%u", retCodeDimmer, retCodeRelay);
 		return retCode;
 	}
-	else if (_intendedState == 100) {
-		// Set dimmer to 100 or turn relay on.
+	else if (_intendedState == CS_SWITCH_CMD_VAL_FULLY_ON) {
+		// Set dimmer to CS_SWITCH_CMD_VAL_FULLY_ON or turn relay on.
 		if (currentState.state.relay && _safeSwitch.isRelayStateAccurate()) {
 			LOGSmartSwitchDebug("already on");
 			return ERR_SUCCESS;
@@ -105,8 +105,8 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 			// If it isn't active yet, or the setDimmer call below doesn't succeed we'll try relay.
 		}
 
-		// Try to set dimmer to 100.
-		cs_ret_code_t retCode = setDimmer(100);
+		// Try to set dimmer to CS_SWITCH_CMD_VAL_FULLY_ON.
+		cs_ret_code_t retCode = setDimmer(CS_SWITCH_CMD_VAL_FULLY_ON);
 		if (retCode != ERR_SUCCESS) {
 			// If that doesn't work, turn relay on instead.
 			LOGSmartSwitchDebug("Turn on relay instead.");
