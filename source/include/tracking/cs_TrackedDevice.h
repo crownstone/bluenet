@@ -10,13 +10,13 @@
 #include <structs/cs_PacketsInternal.h>
 
 enum TrackedDeviceFields {
-	BIT_POS_ACCESS_LEVEL  = 0,
-	BIT_POS_LOCATION      = 1,
-	BIT_POS_PROFILE       = 2,
-	BIT_POS_RSSI_OFFSET   = 3,
-	BIT_POS_FLAGS         = 4,
-	BIT_POS_DEVICE_TOKEN  = 5,
-	BIT_POS_TTL           = 6,
+	BIT_POS_ACCESS_LEVEL = 0,
+	BIT_POS_LOCATION     = 1,
+	BIT_POS_PROFILE      = 2,
+	BIT_POS_RSSI_OFFSET  = 3,
+	BIT_POS_FLAGS        = 4,
+	BIT_POS_DEVICE_TOKEN = 5,
+	BIT_POS_TTL          = 6,
 };
 static const uint8_t ALL_FIELDS_SET = 0x7F;
 

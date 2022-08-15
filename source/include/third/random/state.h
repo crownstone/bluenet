@@ -21,4 +21,4 @@ public:
 	uint64_t s;
 };
 
-} // namespace Msws
+}  // namespace Msws

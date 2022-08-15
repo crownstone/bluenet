@@ -11,10 +11,10 @@
 #include <cfg/cs_DeviceTypes.h>
 
 void asUsbDongle(boards_config_t* config) {
-	config->pinRx                              = 8;
-	config->pinTx                              = 6;
-	config->flags.enableUart                   = true;
-	config->deviceType                         = DEVICE_CROWNSTONE_USB;
-	config->minTxPower                         = -40;
-	config->scanWindowUs                       = config->scanIntervalUs;
+	config->pinRx            = 8;
+	config->pinTx            = 6;
+	config->flags.enableUart = true;
+	config->deviceType       = DEVICE_CROWNSTONE_USB;
+	config->minTxPower       = -40;
+	config->scanWindowUs     = config->scanIntervalUs;
 }

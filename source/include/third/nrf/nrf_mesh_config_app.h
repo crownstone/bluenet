@@ -38,15 +38,12 @@
 #ifndef NRF_MESH_CONFIG_APP_H__
 #define NRF_MESH_CONFIG_APP_H__
 
-#include "sdk_config.h"
+#include "cfg/cs_Config.h"
 #include "fds.h"
 #include "fds_internal_defs.h"
-#include "cfg/cs_Config.h"
+#include "sdk_config.h"
 
 // See more options in nrf_mesh_config_*.h
-
-
-
 
 /** Enable logging module. */
 #define NRF_MESH_LOG_ENABLE NRF_LOG_BACKEND_RTT_ENABLED
@@ -68,8 +65,6 @@
 
 /** Enable logging with RTT callback. */
 #define LOG_ENABLE_RTT NRF_LOG_BACKEND_RTT_ENABLED
-
-
 
 /** Relay feature */
 #define MESH_FEATURE_RELAY_ENABLED (1)
@@ -130,12 +125,13 @@
  * @note To fit the configuration and health models, this value must equal at least
  * the number of models needed by the application plus two.
  */
-#define ACCESS_MODEL_COUNT (1 /* Configuration server */  \
-                            + 1 /* Health server */  \
-                            + 1 /* Crownstone multicast model */  \
-                            + 1 /* Crownstone multicast acked model */  \
-                            + 1   /* Crownstone unicast model */ \
-                            + 1   /* Crownstone multicast neighbours model */)
+#define ACCESS_MODEL_COUNT                      \
+	(1   /* Configuration server */             \
+	 + 1 /* Health server */                    \
+	 + 1 /* Crownstone multicast model */       \
+	 + 1 /* Crownstone multicast acked model */ \
+	 + 1 /* Crownstone unicast model */         \
+	 + 1 /* Crownstone multicast neighbours model */)
 
 /**
  * The number of elements in the application.
@@ -162,48 +158,43 @@
 #define ACCESS_FLASH_PAGE_COUNT (1)
 
 /** Number of the allowed parallel transfers (size of the internal context pool). */
-#define ACCESS_RELIABLE_TRANSFER_COUNT (1 /* Configuration server */  \
-                                        + 1 /* Health server */  \
-                                        + 1 /* Crownstone unicast model */)
+#define ACCESS_RELIABLE_TRANSFER_COUNT \
+	(1   /* Configuration server */    \
+	 + 1 /* Health server */           \
+	 + 1 /* Crownstone unicast model */)
 
 /** Define for acknowledging message transaction timeout, in micro seconds. */
-#define MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT  (SEC_TO_US(3))
-
-
+#define MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT (SEC_TO_US(3))
 
 /** Maximum number of subnetworks. */
 //#define DSM_SUBNET_MAX                                  (1)
-#define DSM_SUBNET_MAX                                  (4)
+#define DSM_SUBNET_MAX (4)
 
 /** Maximum number of applications. */
-#define DSM_APP_MAX                                     (1)
+#define DSM_APP_MAX (1)
 //#define DSM_APP_MAX                                     (8)
 
 /** Maximum number of device keys. */
-#define DSM_DEVICE_MAX                                  (1)
+#define DSM_DEVICE_MAX (1)
 
 /** Maximum number of virtual addresses. */
-#define DSM_VIRTUAL_ADDR_MAX                            (2)
+#define DSM_VIRTUAL_ADDR_MAX (2)
 
 /** Maximum number of non-virtual addresses. One for each of the servers and a group address.
  * - Generic OnOff publication
  * - Health publication
  * - Subscription address
  */
-#define DSM_NONVIRTUAL_ADDR_MAX                         (ACCESS_MODEL_COUNT + 1)
+#define DSM_NONVIRTUAL_ADDR_MAX (ACCESS_MODEL_COUNT + 1)
 
 /** Number of flash pages reserved for the DSM storage. */
-#define DSM_FLASH_PAGE_COUNT                            (1)
-
-
+#define DSM_FLASH_PAGE_COUNT (1)
 
 /** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
  *  @note This value will be ignored if FLASH_MANAGER_RECOVERY_PAGE is set.
  */
 //#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (FDS_PHY_PAGES)
 // We reserve a few pages for future expansion of FDS pages.
-#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (2 + FDS_PHY_PAGES)
-
-
+#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES (2 + FDS_PHY_PAGES)
 
 #endif /* NRF_MESH_CONFIG_APP_H__ */

@@ -9,6 +9,7 @@
 
 // TODO: requires symbol names to be preceded by std::
 #include <cstdint>
+
 #include "ble/cs_Nordic.h"
 
 /**
@@ -29,7 +30,7 @@ enum CompEvent_t {
  * Define comp_event_cb_t to be a void function with a CompEvent_t parameter as single argument.
  * This function can be used as callback after an event occurred.
  */
-typedef void (*comp_event_cb_t) (CompEvent_t event);
+typedef void (*comp_event_cb_t)(CompEvent_t event);
 
 /**
  * Class that enables you to get events when a the voltage on an AIN pin goes over or below a given threshold.
@@ -52,7 +53,8 @@ public:
 	 * @param[in] ainPin           An analog input pin: so for pin AIN6 the value should be 6.
 	 * @param[in] thresholdDown    Threshold to be triggered when input drops below a certain value.
 	 * @param[in] thresholdUp      Threshold to be triggered when input goes beyond a certain value.
-	 * @param[in] callback         The function to be called when the value goes over/under the threshold. Use null pointer for none.
+	 * @param[in] callback         The function to be called when the value goes over/under the threshold. Use null
+	 * pointer for none.
 	 */
 	void init(uint8_t ainPin, float thresholdDown, float thresholdUp, comp_event_cb_t callback);
 
@@ -92,7 +94,7 @@ private:
 	COMP(COMP const&);
 
 	// This class is singleton, deny implementation
-	void operator=(COMP const &);
+	void operator=(COMP const&);
 
 	/**
 	 * Apply work arounds that are suggested by Nordic. For the NRF52 PAN 12 refers to COMP.
@@ -100,10 +102,9 @@ private:
 	 */
 	void applyWorkarounds() {
 #ifdef NRF52_PAN_12
-		*(volatile uint32_t *)0x40013540 = (*(volatile uint32_t *)0x10000324 & 0x00001F00) >> 8;
+		*(volatile uint32_t*)0x40013540 = (*(volatile uint32_t*)0x10000324 & 0x00001F00) >> 8;
 #endif
 	}
 
 	comp_event_cb_t _callback = nullptr;
 };
-

@@ -5,14 +5,13 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <storage/cs_State.h>
+#include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
-#include <util/cs_BleError.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
-#include <ble/cs_Stack.h>
+#include <storage/cs_State.h>
 #include <structs/cs_ScheduleEntriesAccessor.h>
-#include <drivers/cs_Timer.h>
+#include <util/cs_BleError.h>
 
 /**
  * File to test the state / storage.
@@ -26,7 +25,7 @@
 
 // Don't know where to get this from nicely, but the NRF52 has a page size of 4kB.
 //#define FLASH_PAGE_SIZE 4096
-#define FLASH_PAGE_SIZE (4*FDS_VIRTUAL_PAGE_SIZE)
+#define FLASH_PAGE_SIZE (4 * FDS_VIRTUAL_PAGE_SIZE)
 
 enum TestResult {
 	DONE,
@@ -38,9 +37,9 @@ class TestState : EventListener {
 public:
 	TestState() {
 		EventDispatcher::getInstance().addListener(this);
-		_state = &State::getInstance();
-		_tickTimerData = { {0} };
-		_tickTimerId = &_tickTimerData;
+		_state         = &State::getInstance();
+		_tickTimerData = {{0}};
+		_tickTimerId   = &_tickTimerData;
 	}
 
 	void assertSuccess(cs_ret_code_t retCode);
@@ -49,10 +48,8 @@ public:
 	void setResetCount(uint16_t count);
 	void waitForStore(CS_TYPE type);
 	void continueTest();
-	void handleEvent(event_t & event);
-	static void staticTick(TestState *ptr) {
-		ptr->tick();
-	}
+	void handleEvent(event_t& event);
+	static void staticTick(TestState* ptr) { ptr->tick(); }
 
 	TestResult getAndSetUint16(uint16_t resetCount, uint32_t step);
 	TestResult getAndSetInvalid(uint16_t resetCount, uint32_t step);
@@ -64,15 +61,15 @@ public:
 	TestResult testCorruptedRecords(uint16_t resetCount, uint32_t step);
 
 private:
-	uint16_t _resetCount = 0;
-	uint32_t _test = 0;
-	uint32_t _testStep = 0;
+	uint16_t _resetCount             = 0;
+	uint32_t _test                   = 0;
+	uint32_t _testStep               = 0;
 
 	volatile CS_TYPE _lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
-	State *_state;
+	State* _state;
 
-	app_timer_t              _tickTimerData;
-	app_timer_id_t           _tickTimerId;
+	app_timer_t _tickTimerData;
+	app_timer_id_t _tickTimerId;
 
 	void tick();
 };
@@ -80,16 +77,18 @@ private:
 int main() {
 	// Mostly copied from crownstone main.
 	// this enabled the hard float, without it, we get a hardfault
-	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
+	SCB->CPACR |= (3UL << 20) | (3UL << 22);
+	__DSB();
+	__ISB();
 
-//	atexit(on_exit);
+	//	atexit(on_exit);
 
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 
 	uint32_t errCode;
 	boards_config_t board = {};
-	errCode = configure_board(&board);
+	errCode               = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
 	serial_config(board.pinGpioRx, board.pinGpioTx);
@@ -100,10 +99,10 @@ int main() {
 
 	// from crownstone constructor
 	EventDispatcher::getInstance();
-	Stack *stack = &Stack::getInstance();
-	Timer *timer = &Timer::getInstance();
-	Storage *storage = &Storage::getInstance();
-//	State *state = &State::getInstance();
+	Stack* stack     = &Stack::getInstance();
+	Timer* timer     = &Timer::getInstance();
+	Storage* storage = &Storage::getInstance();
+	//	State *state = &State::getInstance();
 	__attribute__((unused)) TestState test;
 
 	// from crownstone init
@@ -134,30 +133,14 @@ void TestState::waitForStore(CS_TYPE type) {
 void TestState::continueTest() {
 	TestResult result = DONE;
 	switch (_test) {
-		case 0:
-			result = getAndSetInvalid(_resetCount, _testStep);
-			break;
-		case 1:
-			result = getAndSetUint16(_resetCount, _testStep);
-			break;
-		case 2:
-			result = getAndSetLargeStruct(_resetCount, _testStep);
-			break;
-		case 3:
-			result = testGarbageCollection(_resetCount, _testStep);
-			break;
-		case 4:
-			result = testMultipleWrites(_resetCount, _testStep);
-			break;
-		case 5:
-			result = testDelayedSet(_resetCount, _testStep);
-			break;
-		case 6:
-			result = testDuplicateRecords(_resetCount, _testStep);
-			break;
-		case 7:
-			result = testCorruptedRecords(_resetCount, _testStep);
-			break;
+		case 0: result = getAndSetInvalid(_resetCount, _testStep); break;
+		case 1: result = getAndSetUint16(_resetCount, _testStep); break;
+		case 2: result = getAndSetLargeStruct(_resetCount, _testStep); break;
+		case 3: result = testGarbageCollection(_resetCount, _testStep); break;
+		case 4: result = testMultipleWrites(_resetCount, _testStep); break;
+		case 5: result = testDelayedSet(_resetCount, _testStep); break;
+		case 6: result = testDuplicateRecords(_resetCount, _testStep); break;
+		case 7: result = testCorruptedRecords(_resetCount, _testStep); break;
 		default:
 			if (_resetCount == 0) {
 				LOGi("");
@@ -170,51 +153,48 @@ void TestState::continueTest() {
 			return;
 	}
 	switch (result) {
-	case DONE_BUT_WAIT_FOR_WRITE:
-		_test++;
-		_testStep = 0;
-		break;
-	case DONE:
-		_test++;
-		_testStep = 0;
-		continueTest();
-		break;
-	case NOT_DONE_WAIT_FOR_WRITE:
-		_testStep++;
-		break;
+		case DONE_BUT_WAIT_FOR_WRITE:
+			_test++;
+			_testStep = 0;
+			break;
+		case DONE:
+			_test++;
+			_testStep = 0;
+			continueTest();
+			break;
+		case NOT_DONE_WAIT_FOR_WRITE: _testStep++; break;
 	}
 }
 
-void TestState::handleEvent(event_t & event) {
+void TestState::handleEvent(event_t& event) {
 	switch (event.type) {
-	case CS_TYPE::EVT_STORAGE_INITIALIZED: {
-		LOGi("storage initialized");
-		boards_config_t board = {};
-		uint32_t errCode = configure_board(&board);
-		APP_ERROR_CHECK(errCode);
-		State::getInstance().init(&board);
-		State::getInstance().startWritesToFlash();
+		case CS_TYPE::EVT_STORAGE_INITIALIZED: {
+			LOGi("storage initialized");
+			boards_config_t board = {};
+			uint32_t errCode      = configure_board(&board);
+			APP_ERROR_CHECK(errCode);
+			State::getInstance().init(&board);
+			State::getInstance().startWritesToFlash();
 
-		Timer::getInstance().createSingleShot(_tickTimerId, (app_timer_timeout_handler_t)TestState::staticTick);
-		Timer::getInstance().start(_tickTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
+			Timer::getInstance().createSingleShot(_tickTimerId, (app_timer_timeout_handler_t)TestState::staticTick);
+			Timer::getInstance().start(_tickTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
 
-		LOGi("");
-		LOGi("##### Start tests #####");
-		_resetCount = getResetCount();
-		setResetCount(_resetCount + 1);
-		// Wait for reset count to be set, code continues at storage write done event.
-		break;
-	}
-	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
-		CS_TYPE storedType = *(CS_TYPE*)event.data;
-		LOGTestDebug("lastStoredType=%u storedType=%u", _lastStoredType, storedType);
-		assert(_lastStoredType == storedType, "Wrong type written");
-		_lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
-		continueTest();
-		break;
-	}
-	default:
-		break;
+			LOGi("");
+			LOGi("##### Start tests #####");
+			_resetCount = getResetCount();
+			setResetCount(_resetCount + 1);
+			// Wait for reset count to be set, code continues at storage write done event.
+			break;
+		}
+		case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
+			CS_TYPE storedType = *(CS_TYPE*)event.data;
+			LOGTestDebug("lastStoredType=%u storedType=%u", _lastStoredType, storedType);
+			assert(_lastStoredType == storedType, "Wrong type written");
+			_lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
+			continueTest();
+			break;
+		}
+		default: break;
 	}
 }
 
@@ -270,52 +250,52 @@ TestResult TestState::getAndSetUint16(uint16_t resetCount, uint32_t step) {
 
 	if (resetCount == 0) {
 		switch (step) {
-		case 0:{
-			LOGi("## get default boot delay");
-			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
-			assertSuccess(errCode);
-			assert(bootDelay == CONFIG_BOOT_DELAY_DEFAULT, "Expected CONFIG_BOOT_DELAY_DEFAULT");
+			case 0: {
+				LOGi("## get default boot delay");
+				errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+				LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+				assertSuccess(errCode);
+				assert(bootDelay == CONFIG_BOOT_DELAY_DEFAULT, "Expected CONFIG_BOOT_DELAY_DEFAULT");
 
-			bootDelay = 1234;
-			LOGi("## set boot delay to %u", bootDelay);
-			errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
+				bootDelay = 1234;
+				LOGi("## set boot delay to %u", bootDelay);
+				errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
 
-			LOGi("## get boot delay before write is done");
-			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
-			assertSuccess(errCode);
-			assert(bootDelay == 1234, "Expected 1234");
+				LOGi("## get boot delay before write is done");
+				errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+				LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+				assertSuccess(errCode);
+				assert(bootDelay == 1234, "Expected 1234");
 
-			waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
-			return NOT_DONE_WAIT_FOR_WRITE;
-		}
-		case 1: {
-			LOGi("## get bootDelay after write is done");
-			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
-			assertSuccess(errCode);
-			assert(bootDelay == 1234, "Expected 1234");
+				waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
+				return NOT_DONE_WAIT_FOR_WRITE;
+			}
+			case 1: {
+				LOGi("## get bootDelay after write is done");
+				errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+				LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+				assertSuccess(errCode);
+				assert(bootDelay == 1234, "Expected 1234");
 
-			bootDelay = 65432;
-			LOGi("## set boot delay to %u", bootDelay);
-			errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
+				bootDelay = 65432;
+				LOGi("## set boot delay to %u", bootDelay);
+				errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
 
-			waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
-			return NOT_DONE_WAIT_FOR_WRITE;
-		}
-		case 2: {
-			LOGi("## get boot delay after write is done");
-			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
-			assertSuccess(errCode);
-			assert(bootDelay == 65432, "Expected 65432");
-			return DONE;
-		}
+				waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
+				return NOT_DONE_WAIT_FOR_WRITE;
+			}
+			case 2: {
+				LOGi("## get boot delay after write is done");
+				errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+				LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+				assertSuccess(errCode);
+				assert(bootDelay == 65432, "Expected 65432");
+				return DONE;
+			}
 		}
 	}
 	else {
@@ -346,7 +326,7 @@ TestResult TestState::getAndSetInvalid(uint16_t resetCount, uint32_t step) {
 
 		LOGi("## set boot delay with wrong size");
 		bootDelay = 200;
-		errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+		errCode   = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
 		LOGi("errCode=%u", errCode);
 		assertError(errCode);
 
@@ -357,7 +337,7 @@ TestResult TestState::getAndSetInvalid(uint16_t resetCount, uint32_t step) {
 		assertError(errCode);
 
 		LOGi("## set brownout");
-		val = 200;
+		val     = 200;
 		errCode = _state->set(CS_TYPE::EVT_BROWNOUT_IMPENDING, &val, sizeof(val));
 		LOGi("errCode=%u", errCode);
 		assertError(errCode);
@@ -380,49 +360,49 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount, uint32_t step) {
 
 	if (resetCount == 0) {
 		switch (step) {
-		case 0: {
-			LOGi("## get default schedule");
-			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
-			if (printSchedules) scheduleAccessor.print();
+			case 0: {
+				LOGi("## get default schedule");
+				errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
+				if (printSchedules) scheduleAccessor.print();
 
-			schedule.list[3].nextTimestamp = 1234567;
-			LOGi("## set schedule");
-			errCode = _state->set(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
+				schedule.list[3].nextTimestamp = 1234567;
+				LOGi("## set schedule");
+				errCode = _state->set(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
 
-			waitForStore(CS_TYPE::STATE_SCHEDULE);
-			return NOT_DONE_WAIT_FOR_WRITE;
-		}
-		case 1: {
-			LOGi("## get schedule after write is done");
-			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
-			if (printSchedules) scheduleAccessor.print();
-			assert(schedule.list[3].nextTimestamp == 1234567, "Expected 1234567");
+				waitForStore(CS_TYPE::STATE_SCHEDULE);
+				return NOT_DONE_WAIT_FOR_WRITE;
+			}
+			case 1: {
+				LOGi("## get schedule after write is done");
+				errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
+				if (printSchedules) scheduleAccessor.print();
+				assert(schedule.list[3].nextTimestamp == 1234567, "Expected 1234567");
 
-			schedule.list[3].nextTimestamp = 7654321;
-			LOGi("## set schedule");
-			errCode = _state->set(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
+				schedule.list[3].nextTimestamp = 7654321;
+				LOGi("## set schedule");
+				errCode = _state->set(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
 
-			waitForStore(CS_TYPE::STATE_SCHEDULE);
-			return NOT_DONE_WAIT_FOR_WRITE;
-		}
-		case 2:{
-			LOGi("## get schedule after write is done");
-			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
-			LOGi("errCode=%u", errCode);
-			assertSuccess(errCode);
-			if (printSchedules) scheduleAccessor.print();
-			assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
+				waitForStore(CS_TYPE::STATE_SCHEDULE);
+				return NOT_DONE_WAIT_FOR_WRITE;
+			}
+			case 2: {
+				LOGi("## get schedule after write is done");
+				errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+				LOGi("errCode=%u", errCode);
+				assertSuccess(errCode);
+				if (printSchedules) scheduleAccessor.print();
+				assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
 
-			return DONE;
-		}
+				return DONE;
+			}
 		}
 	}
 	else {
@@ -448,7 +428,7 @@ TestResult TestState::testGarbageCollection(uint16_t resetCount, uint32_t step) 
 	cs_ret_code_t errCode;
 	TYPIFY(CONFIG_CURRENT_ADC_ZERO) currentZero = step;
 
-	uint32_t numStepsToFillPage = FLASH_PAGE_SIZE / (sizeof(fds_header_t) + sizeof(currentZero));
+	uint32_t numStepsToFillPage                 = FLASH_PAGE_SIZE / (sizeof(fds_header_t) + sizeof(currentZero));
 	if (step < numStepsToFillPage) {
 		errCode = _state->set(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &currentZero, sizeof(currentZero));
 		assertSuccess(errCode);
@@ -471,21 +451,21 @@ TestResult TestState::testMultipleWrites(uint16_t resetCount, uint32_t step) {
 	TYPIFY(CONFIG_CURRENT_ADC_ZERO) currentZero = 0;
 
 	switch (step) {
-	case 0: {
-		uint32_t numSteps = 10;
-		for (uint32_t i=0; i<numSteps; ++i) {
-			currentZero = i;
-			errCode = _state->set(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &currentZero, sizeof(currentZero));
-			assertSuccess(errCode);
+		case 0: {
+			uint32_t numSteps = 10;
+			for (uint32_t i = 0; i < numSteps; ++i) {
+				currentZero = i;
+				errCode     = _state->set(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &currentZero, sizeof(currentZero));
+				assertSuccess(errCode);
+			}
+			waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
+			return NOT_DONE_WAIT_FOR_WRITE;
 		}
-		waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
-		return NOT_DONE_WAIT_FOR_WRITE;
-	}
-	case 1: {
-		// Another write done event is expected.
-		waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
-		return DONE_BUT_WAIT_FOR_WRITE;
-	}
+		case 1: {
+			// Another write done event is expected.
+			waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
+			return DONE_BUT_WAIT_FOR_WRITE;
+		}
 	}
 	return DONE;
 }
@@ -534,33 +514,33 @@ TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
 	fds_record_t record;
 	if (resetCount == 0) {
 		switch (step) {
-		case 0:
-		case 1:
-		case 2: {
-			uint32_t *data = (uint32_t*)malloc(sizeof(pwmPeriod));	
-			pwmPeriod = 10000 + step;
-			*data = pwmPeriod;
-			record.file_id           = FILE_CONFIGURATION;
-			record.key               = to_underlying_type(CS_TYPE::CONFIG_PWM_PERIOD);
-			record.data.p_data       = data;
-			record.data.length_words = 1;
-			uint32_t fdsRet = fds_record_write(NULL, &record);
-			assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
-			waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
-			return NOT_DONE_WAIT_FOR_WRITE;
-		}
-		case 3: {
-			errCode = _state->get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
-			LOGi("errCode=%u pwmPeriod=%u", errCode, pwmPeriod);
-			assertSuccess(errCode);
-			assert(pwmPeriod == 10002, "Expected 10002");
+			case 0:
+			case 1:
+			case 2: {
+				uint32_t* data           = (uint32_t*)malloc(sizeof(pwmPeriod));
+				pwmPeriod                = 10000 + step;
+				*data                    = pwmPeriod;
+				record.file_id           = FILE_CONFIGURATION;
+				record.key               = to_underlying_type(CS_TYPE::CONFIG_PWM_PERIOD);
+				record.data.p_data       = data;
+				record.data.length_words = 1;
+				uint32_t fdsRet          = fds_record_write(NULL, &record);
+				assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
+				waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
+				return NOT_DONE_WAIT_FOR_WRITE;
+			}
+			case 3: {
+				errCode = _state->get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+				LOGi("errCode=%u pwmPeriod=%u", errCode, pwmPeriod);
+				assertSuccess(errCode);
+				assert(pwmPeriod == 10002, "Expected 10002");
 
-			pwmPeriod = 1234567890;
-			errCode = _state->set(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
-			assertSuccess(errCode);
-			waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
-			return DONE_BUT_WAIT_FOR_WRITE;
-		}
+				pwmPeriod = 1234567890;
+				errCode   = _state->set(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+				assertSuccess(errCode);
+				waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
+				return DONE_BUT_WAIT_FOR_WRITE;
+			}
 		}
 	}
 	else {
@@ -587,49 +567,49 @@ TestResult TestState::testCorruptedRecords(uint16_t resetCount, uint32_t step) {
 		LOGi("##### Test corrupted records #####");
 	}
 	cs_ret_code_t errCode;
-	int32_t powerZero = 0;
+	int32_t powerZero  = 0;
 	uint16_t recordKey = to_underlying_type(CS_TYPE::CONFIG_POWER_ZERO);
 	fds_record_t record;
 	if (resetCount == 0) {
 		switch (step) {
-		case 0: {
-			int32_t *data = (int32_t*)malloc(sizeof(powerZero));
-			LOGi("Write to flash");
-			powerZero = 123456;
-			*data = powerZero;
-			record.file_id           = FILE_CONFIGURATION;
-			record.key               = recordKey;
-			record.data.p_data       = data;
-			record.data.length_words = 1;
-			uint32_t fdsRet = fds_record_write(NULL, &record);
-			// Modify data while FDS is writing.
-			for (uint32_t i=0; i<100000; ++i) {
-				*data = i;
+			case 0: {
+				int32_t* data = (int32_t*)malloc(sizeof(powerZero));
+				LOGi("Write to flash");
+				powerZero                = 123456;
+				*data                    = powerZero;
+				record.file_id           = FILE_CONFIGURATION;
+				record.key               = recordKey;
+				record.data.p_data       = data;
+				record.data.length_words = 1;
+				uint32_t fdsRet          = fds_record_write(NULL, &record);
+				// Modify data while FDS is writing.
+				for (uint32_t i = 0; i < 100000; ++i) {
+					*data = i;
+				}
+				assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
+				waitForStore(CS_TYPE::CONFIG_POWER_ZERO);
+				return NOT_DONE_WAIT_FOR_WRITE;
 			}
-			assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
-			waitForStore(CS_TYPE::CONFIG_POWER_ZERO);
-			return NOT_DONE_WAIT_FOR_WRITE;
-		}
-		case 1: {
-			LOGi("Read from flash");
-			fds_flash_record_t flash_record;
-			fds_record_desc_t record_desc;
-			fds_find_token_t ftok;
-			memset(&ftok, 0x00, sizeof(fds_find_token_t));
-			uint32_t fdsRet = fds_record_find(FILE_CONFIGURATION, recordKey, &record_desc, &ftok);
-			assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
-			fdsRet = fds_record_open(&record_desc, &flash_record);
-			assert(fdsRet == FDS_ERR_CRC_CHECK_FAILED, "Expected FDS_ERR_CRC_CHECK_FAILED");
+			case 1: {
+				LOGi("Read from flash");
+				fds_flash_record_t flash_record;
+				fds_record_desc_t record_desc;
+				fds_find_token_t ftok;
+				memset(&ftok, 0x00, sizeof(fds_find_token_t));
+				uint32_t fdsRet = fds_record_find(FILE_CONFIGURATION, recordKey, &record_desc, &ftok);
+				assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
+				fdsRet = fds_record_open(&record_desc, &flash_record);
+				assert(fdsRet == FDS_ERR_CRC_CHECK_FAILED, "Expected FDS_ERR_CRC_CHECK_FAILED");
 
-			LOGi("Get from state");
-			powerZero = 0xDEADBEEF;
-			errCode = _state->get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
-			LOGi("errCode=%u powerZero=%u", errCode, powerZero);
-			assertSuccess(errCode);
-			assert(powerZero == CONFIG_POWER_ZERO_DEFAULT, "Expected default");
+				LOGi("Get from state");
+				powerZero = 0xDEADBEEF;
+				errCode   = _state->get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
+				LOGi("errCode=%u powerZero=%u", errCode, powerZero);
+				assertSuccess(errCode);
+				assert(powerZero == CONFIG_POWER_ZERO_DEFAULT, "Expected default");
 
-			return DONE;
-		}
+				return DONE;
+			}
 		}
 	}
 	else {

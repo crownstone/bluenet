@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <common/cs_Types.h>
 #include <cfg/cs_Boards.h>
+#include <common/cs_Types.h>
 
 /**
  * Struct to communicate state variables.
@@ -20,24 +20,15 @@
  *            Afterwards, it will be set to the size of the state value.
  */
 struct __attribute__((packed)) cs_state_data_t {
-	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
+	CS_TYPE type     = CS_TYPE::CONFIG_DO_NOT_USE;
 	cs_state_id_t id = 0;
-	uint8_t *value = NULL;
-	size16_t size = 0;
+	uint8_t* value   = NULL;
+	size16_t size    = 0;
 
 	cs_state_data_t() {}
-	cs_state_data_t(CS_TYPE type, uint8_t *value, size16_t size):
-		type(type),
-		id(0),
-		value(value),
-		size(size)
-	{}
-	cs_state_data_t(CS_TYPE type, cs_state_id_t id, uint8_t *value, size16_t size):
-		type(type),
-		id(id),
-		value(value),
-		size(size)
-	{}
+	cs_state_data_t(CS_TYPE type, uint8_t* value, size16_t size) : type(type), id(0), value(value), size(size) {}
+	cs_state_data_t(CS_TYPE type, cs_state_id_t id, uint8_t* value, size16_t size)
+			: type(type), id(id), value(value), size(size) {}
 };
 
 /** Gets the default.
@@ -51,7 +42,7 @@ struct __attribute__((packed)) cs_state_data_t {
  * This function does not check if data size fits the default value.
  * TODO: check how to check this at compile time.
  */
-cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsConfig);
+cs_ret_code_t getDefault(cs_state_data_t& data, const boards_config_t& boardsConfig);
 
 /**
  * Store values in FLASH or RAM. Load values from FIRMWARE_DEFAULT, FLASH or RAM.
@@ -76,15 +67,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
  * Only after we have deleted the FLASH record we can upload the new firmware. Then the new FIRMWARE_DEFAULT is used
  * automatically.
  */
-enum class PersistenceMode: uint8_t {
-	FLASH,
-	RAM,
-	FIRMWARE_DEFAULT,
-	STRATEGY1,
-	NEITHER_RAM_NOR_FLASH
-};
+enum class PersistenceMode : uint8_t { FLASH, RAM, FIRMWARE_DEFAULT, STRATEGY1, NEITHER_RAM_NOR_FLASH };
 
 PersistenceModeGet toPersistenceModeGet(uint8_t mode);
 PersistenceModeSet toPersistenceModeSet(uint8_t mode);
 
-PersistenceMode DefaultLocation(CS_TYPE const & type);
+PersistenceMode DefaultLocation(CS_TYPE const& type);

@@ -22,7 +22,7 @@ class CharacteristicBase;
 
 /** Service as defined in the GATT Specification.
  */
-class Service: public BaseClass<1> {
+class Service : public BaseClass<1> {
 public:
 	enum condition_t { C_SERVICE_INITIALIZED };
 
@@ -40,15 +40,14 @@ public:
 	 * If we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
 	 * keep track of whether we allocated the characteristic or whether it was passed into us.
 	 */
-	virtual ~Service() {
-	}
+	virtual ~Service() {}
 
 	/** Set the name of the service.
 	 *
 	 * The name of the service is a const char pointer. Setting the parameters can be done in a chained manner, the
 	 * function returns Service again.
 	 */
-	Service& setName(const char * const name) {
+	Service& setName(const char* const name) {
 		_name = name;
 		return *this;
 	}
@@ -59,28 +58,22 @@ public:
 	 */
 	Service& setUUID(const UUID& uuid);
 
-	Stack* getStack() {
-		return _stack;
-	}
+	Stack* getStack() { return _stack; }
 
-	const UUID& getUUID() const {
-		return _uuid;
-	}
+	const UUID& getUUID() const { return _uuid; }
 
-	uint16_t getHandle() {
-		return _service_handle;
-	}
+	uint16_t getHandle() { return _service_handle; }
 
 protected:
 	friend class Stack;
 
 	//! Back reference to the stack.
-	Stack*  _stack;
+	Stack* _stack;
 
-	UUID                     _uuid;
-	std::string              _name;
+	UUID _uuid;
+	std::string _name;
 	//! Service handle will be obtained from SoftDevice
-	uint16_t                 _service_handle;
+	uint16_t _service_handle;
 
 	//! List of characteristics
 	Characteristics_t _characteristics;
@@ -93,7 +86,7 @@ protected:
 	 */
 	virtual void init(Stack* stack);
 
-	virtual void on_ble_event(const ble_evt_t * p_ble_evt);
+	virtual void on_ble_event(const ble_evt_t* p_ble_evt);
 
 	virtual void on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt);
 
@@ -101,15 +94,13 @@ protected:
 
 	virtual bool on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_handle);
 
-	virtual void onTxComplete(const ble_common_evt_t * p_ble_evt);
+	virtual void onTxComplete(const ble_common_evt_t* p_ble_evt);
 
 	/** Get list of characteristics
 	 *
 	 * @return list of characteristics
 	 */
-	virtual Characteristics_t & getCharacteristics() {
-		return _characteristics;
-	}
+	virtual Characteristics_t& getCharacteristics() { return _characteristics; }
 
 	/** Add a single characteristic to the list
 	 * @characteristic Characteristic to add
@@ -125,5 +116,4 @@ protected:
 	}
 
 	void setAesEncrypted(bool encrypted);
-
 };

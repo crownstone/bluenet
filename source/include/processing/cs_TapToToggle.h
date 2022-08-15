@@ -12,7 +12,7 @@
 
 struct __attribute__((__packed__)) t2t_entry_t {
 	uint8_t address[BLE_GAP_ADDR_LEN];
-	uint16_t score; // Score that decreases every tick, and increases when rssi is above threshold.
+	uint16_t score;  // Score that decreases every tick, and increases when rssi is above threshold.
 };
 
 #define T2T_LIST_COUNT 3
@@ -42,7 +42,7 @@ public:
 		return instance;
 	}
 	void init(int8_t rssiThreshold);
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 private:
 	/**
@@ -54,12 +54,12 @@ private:
 	/**
 	 * Used to count down the timeout.
 	 */
-	uint16_t timeoutCounter = 0;
+	uint16_t timeoutCounter     = 0;
 
 	/**
 	 * RSSI threshold, above which score will be added.
 	 */
-	int8_t rssiThreshold = 0;
+	int8_t rssiThreshold        = 0;
 
 	/**
 	 * Default RSSI threshold for this board.
@@ -69,22 +69,22 @@ private:
 	/**
 	 * Score is increased with this value when rssi is above rssi threshold.
 	 */
-	uint8_t scoreIncrement = T2T_SCORE_INC;
+	uint8_t scoreIncrement      = T2T_SCORE_INC;
 
 	/**
 	 * Threshold above which the toggle is triggered.
 	 */
-	uint8_t scoreThreshold = T2T_SCORE_THRESHOLD;
+	uint8_t scoreThreshold      = T2T_SCORE_THRESHOLD;
 
 	/**
 	 * Score can't be higher than this value.
 	 */
-	uint8_t scoreMax = T2T_SCORE_MAX;
+	uint8_t scoreMax            = T2T_SCORE_MAX;
 
 	/**
 	 * Minimal time in ticks between 2 tap to toggle events.
 	 */
-	uint8_t timeoutTicks = (T2T_TIMEOUT_MS / TICK_INTERVAL_MS);
+	uint8_t timeoutTicks        = (T2T_TIMEOUT_MS / TICK_INTERVAL_MS);
 
 	TapToToggle();
 

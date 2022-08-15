@@ -9,14 +9,12 @@
 
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
-#include <protocol/cs_Typedefs.h>
-#include <protocol/mesh/cs_MeshModelPackets.h>
-
-#include <localisation/cs_TrackableEvent.h>
+#include <localisation/cs_AssetHandler.h>
 #include <localisation/cs_AssetRecord.h>
 #include <localisation/cs_AssetStore.h>
-#include <localisation/cs_AssetHandler.h>
+#include <localisation/cs_TrackableEvent.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 /**
  * This class implements the in-mesh computation of which crownstone
@@ -32,16 +30,13 @@
  * crownstone will be an element of this subset.
  */
 class NearestCrownstoneTracker : public EventListener, public Component {
-	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD = 180;
+	static constexpr uint8_t LAST_RECEIVED_TIMEOUT_THRESHOLD        = 180;
 	static constexpr uint16_t MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS = 100;
 
-	static constexpr uint8_t RSSI_FALL_OFF_RATE_DB_PER_S = 1;
-	static constexpr int8_t RSSI_CUT_OFF_THRESHOLD = -90;
+	static constexpr uint8_t RSSI_FALL_OFF_RATE_DB_PER_S            = 1;
+	static constexpr int8_t RSSI_CUT_OFF_THRESHOLD                  = -90;
 
-	enum class FilterStrategy {
-		TIME_OUT,
-		RSSI_FALL_OFF
-	};
+	enum class FilterStrategy { TIME_OUT, RSSI_FALL_OFF };
 
 	static constexpr auto FILTER_STRATEGY = FilterStrategy::TIME_OUT;
 
@@ -53,7 +48,7 @@ public:
 	cs_ret_code_t init() override;
 
 	/**
- 	 * Returns true if it is desired to send a message to inform other devices
+	 * Returns true if it is desired to send a message to inform other devices
 	 * in the mesh of relevant changes.
 	 */
 	bool handleAcceptedAsset(const scanned_device_t& asset, const asset_id_t& id, uint8_t filterBitmask);
@@ -158,5 +153,5 @@ public:
 	 * EVT_ASSET_ACCEPTED
 	 * EVT_FILTERS_UPDATED
 	 */
-	void handleEvent(event_t &evt);
+	void handleEvent(event_t& evt);
 };

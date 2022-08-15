@@ -6,10 +6,12 @@
  */
 
 #include "processing/cs_ExternalStates.h"
+
+#include <events/cs_Event.h>
+#include <events/cs_EventDispatcher.h>
+
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"
-#include <events/cs_EventDispatcher.h>
-#include <events/cs_Event.h>
 //#include <cstring> // For calloc
 
 /**
@@ -33,14 +35,15 @@
 #define LOGExternalStatesDebug LOGnone
 
 void ExternalStates::init() {
-	_states = (cs_external_state_item_t*) calloc(EXTERNAL_STATE_LIST_COUNT, sizeof(cs_external_state_item_t));
+	_states = (cs_external_state_item_t*)calloc(EXTERNAL_STATE_LIST_COUNT, sizeof(cs_external_state_item_t));
 	if (_states == nullptr) {
 		APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
 	}
 }
 
 void ExternalStates::receivedState(state_external_stone_t* state) {
-	LOGExternalStatesDebug("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
+	LOGExternalStatesDebug(
+			"received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
 			state->data.extState.id,
 			state->data.extState.switchState,
 			state->data.extState.flags,
@@ -53,7 +56,7 @@ void ExternalStates::receivedState(state_external_stone_t* state) {
 	stone_id_t id = getStoneId(&(state->data));
 
 	// Overwrite item with same id
-	for (int i=0; i<EXTERNAL_STATE_LIST_COUNT; ++i) {
+	for (int i = 0; i < EXTERNAL_STATE_LIST_COUNT; ++i) {
 		if (_states[i].id == id) {
 			addToList(i, id, state);
 			return;
@@ -62,10 +65,10 @@ void ExternalStates::receivedState(state_external_stone_t* state) {
 
 	// Else, write at oldest item
 	uint16_t oldest = 0xFFFF;
-	int oldestInd = 0;
-	for (int i=0; i<EXTERNAL_STATE_LIST_COUNT; ++i) {
+	int oldestInd   = 0;
+	for (int i = 0; i < EXTERNAL_STATE_LIST_COUNT; ++i) {
 		if (_states[i].timeoutCount < oldest) {
-			oldest = _states[i].timeoutCount;
+			oldest    = _states[i].timeoutCount;
 			oldestInd = i;
 		}
 	}
@@ -73,7 +76,7 @@ void ExternalStates::receivedState(state_external_stone_t* state) {
 }
 
 void ExternalStates::removeFromList(stone_id_t id) {
-	for (int i=0; i<EXTERNAL_STATE_LIST_COUNT; ++i) {
+	for (int i = 0; i < EXTERNAL_STATE_LIST_COUNT; ++i) {
 		if (_states[i].id == id) {
 			_states[i].timeoutCount = 0;
 			break;
@@ -82,7 +85,7 @@ void ExternalStates::removeFromList(stone_id_t id) {
 }
 
 void ExternalStates::addToList(int index, stone_id_t id, state_external_stone_t* state) {
-	_states[index].id = id;
+	_states[index].id           = id;
 	_states[index].timeoutCount = EXTERNAL_STATE_TIMEOUT_COUNT_START;
 	memcpy(&(_states[index].state), state, sizeof(*state));
 	LOGExternalStatesDebug("added id=%u to ind=%u", id, index);
@@ -93,7 +96,8 @@ service_data_encrypted_t* ExternalStates::getNextState() {
 		int index = i % EXTERNAL_STATE_LIST_COUNT;
 		if (_states[index].timeoutCount != 0) {
 			_broadcastIndex = (index + 1) % EXTERNAL_STATE_LIST_COUNT;
-			LOGExternalStatesDebug("picked ind=%u id=%u timeout=%u", index, _states[index].id, _states[index].timeoutCount);
+			LOGExternalStatesDebug(
+					"picked ind=%u id=%u timeout=%u", index, _states[index].id, _states[index].timeoutCount);
 			fixState(&(_states[index].state));
 			return &(_states[index].state.data);
 		}
@@ -110,7 +114,7 @@ service_data_encrypted_t* ExternalStates::getNextState() {
  */
 void ExternalStates::fixState(state_external_stone_t* state) {
 	stone_id_t id = getStoneId(&(state->data));
-	int8_t rssi = getRssi(id);
+	int8_t rssi   = getRssi(id);
 	switch (state->data.type) {
 		case SERVICE_DATA_DATA_TYPE_STATE: {
 			convertToExternalState(&(state->data), rssi);
@@ -146,7 +150,7 @@ int8_t ExternalStates::getRssi(stone_id_t id) {
 
 void ExternalStates::tick(TYPIFY(EVT_TICK) tickCount) {
 	if (tickCount % (EXTERNAL_STATE_COUNT_INTERVAL_MS / TICK_INTERVAL_MS) == 0) {
-		for (int i=0; i<EXTERNAL_STATE_LIST_COUNT; ++i) {
+		for (int i = 0; i < EXTERNAL_STATE_LIST_COUNT; ++i) {
 			if (_states[i].timeoutCount) {
 				_states[i].timeoutCount--;
 			}

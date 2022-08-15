@@ -63,18 +63,17 @@ void asCR01R02v4(boards_config_t* config) {
 	config->pinButton[2]                    = 24;
 	config->pinButton[3]                    = 25;
 
+	config->pinLed[0]                       = 13;
+	config->pinLed[1]                       = 14;
+	config->pinLed[2]                       = 17;
+	config->pinLed[3]                       = PIN_NONE;
+
 	config->pinFlash.cs                     = 19;
 	config->pinFlash.clk                    = 20;
 	config->pinFlash.dio[0]                 = 21;
 	config->pinFlash.dio[1]                 = 22;
 	config->pinFlash.dio[2]                 = 23;
 	config->pinFlash.dio[3]                 = 24;
-
-	// The fourth LED is used to indicate the state of the dimmer
-	config->pinLed[0]                       = 13;
-	config->pinLed[1]                       = 14;
-	config->pinLed[2]                       = 17;
-	config->pinLed[3]                       = PIN_NONE;
 
 	config->flags.dimmerInverted            = false;
 	config->flags.enableUart                = true;

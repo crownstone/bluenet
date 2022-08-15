@@ -61,7 +61,7 @@ public:
 	void tick(uint32_t tickCount);
 
 	/** Internal usage */
-	void handleMsg(const access_message_rx_t * accessMsg);
+	void handleMsg(const access_message_rx_t* accessMsg);
 
 private:
 	const static uint8_t _queueSize = 10;
@@ -74,9 +74,9 @@ private:
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
-	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _groupAddressHandle         = DSM_HANDLE_INVALID;
 
-	callback_msg_t _msgCallback = nullptr;
+	callback_msg_t _msgCallback              = nullptr;
 
 	cs_multicast_queue_item_t _queue[_queueSize];
 

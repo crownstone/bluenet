@@ -62,10 +62,10 @@ public:
 	void tick(uint32_t tickCount);
 
 	/** Internal usage */
-	void handleMsg(const access_message_rx_t * accessMsg);
+	void handleMsg(const access_message_rx_t* accessMsg);
 
 private:
-	const static uint8_t QUEUE_SIZE = 5;
+	const static uint8_t QUEUE_SIZE       = 5;
 
 	const static uint8_t QUEUE_INDEX_NONE = 255;
 
@@ -80,9 +80,9 @@ private:
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
-	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _groupAddressHandle         = DSM_HANDLE_INVALID;
 
-	callback_msg_t _msgCallback = nullptr;
+	callback_msg_t _msgCallback              = nullptr;
 
 	cs_multicast_acked_queue_item_t _queue[QUEUE_SIZE];
 
@@ -94,7 +94,7 @@ private:
 	/**
 	 * Next index in queue to send.
 	 */
-	uint8_t _queueIndexNext = 0;
+	uint8_t _queueIndexNext       = 0;
 
 	/**
 	 * Bitmask of acked stones.

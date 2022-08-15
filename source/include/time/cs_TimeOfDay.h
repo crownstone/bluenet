@@ -7,66 +7,63 @@
 
 #pragma once
 
-
-#include <array>
 #include <stdint.h>
 #include <util/cs_Math.h>
+
+#include <array>
 
 /**
  * Objects of this type represent a time of day. They are stored as time offset relative
  * to one of several key events like midnight and sunrise.
  */
 class TimeOfDay {
-    public:
-    enum class BaseTime : uint8_t { Midnight = 0, Sunrise = 1, Sunset = 2 };
-    typedef std::array<uint8_t, 5> SerializedDataType;
-    
-    private:
+public:
+	enum class BaseTime : uint8_t { Midnight = 0, Sunrise = 1, Sunset = 2 };
+	typedef std::array<uint8_t, 5> SerializedDataType;
 
-    BaseTime base;
-    int32_t secSinceBase;
+private:
+	BaseTime base;
+	int32_t secSinceBase;
 
-    // ensures that sec_since_base is positive when base is equal to BaseTime::Midnight
-    // otherwise does nothing 
-    void wrap();
+	// ensures that sec_since_base is positive when base is equal to BaseTime::Midnight
+	// otherwise does nothing
+	void wrap();
 
-    // currently hardcoded sunrise/down times.
-    int32_t baseTimeSinceMidnight(BaseTime b);
+	// currently hardcoded sunrise/down times.
+	int32_t baseTimeSinceMidnight(BaseTime b);
 
-    public:
+public:
+	// ===================== Constructors =====================
 
-    // ===================== Constructors =====================
+	TimeOfDay(BaseTime basetime, int32_t secondsSinceBase);
 
-    TimeOfDay(BaseTime basetime, int32_t secondsSinceBase);
-    
-    TimeOfDay(SerializedDataType rawData);
+	TimeOfDay(SerializedDataType rawData);
 
-    // H:M:S constructor, creates a Midnight based TimeOfDay.
-    TimeOfDay(uint32_t h, uint32_t m, uint32_t s);
-    TimeOfDay(uint32_t secondsSinceMidnight);
+	// H:M:S constructor, creates a Midnight based TimeOfDay.
+	TimeOfDay(uint32_t h, uint32_t m, uint32_t s);
+	TimeOfDay(uint32_t secondsSinceMidnight);
 
+	// TimeOfDay describing the given 'event'
+	static TimeOfDay Midnight();
+	static TimeOfDay Sunrise();
+	static TimeOfDay Sunset();
 
-    // TimeOfDay describing the given 'event'
-    static TimeOfDay Midnight();
-    static TimeOfDay Sunrise();
-    static TimeOfDay Sunset();
+	// ===================== Conversions =====================
 
-    // ===================== Conversions =====================
+	SerializedDataType serialize() const;
 
-    SerializedDataType serialize() const;
+	// converts to a different base time in order to compare.
+	// note that this conversion is in principle dependent on the season
+	// as sunrise/down are so too.
+	TimeOfDay convert(BaseTime newBase);
 
-    // converts to a different base time in order to compare.
-    // note that this conversion is in principle dependent on the season
-    // as sunrise/down are so too.
-    TimeOfDay convert(BaseTime newBase);
+	uint8_t h();
+	uint8_t m();
+	uint8_t s();
 
-    uint8_t h();
-    uint8_t m();
-    uint8_t s();
-
-    /**
-     * Implicit cast operators, returns seconds since midnight
-     * (enables built in relational operators).
-     */
-    operator uint32_t();
+	/**
+	 * Implicit cast operators, returns seconds since midnight
+	 * (enables built in relational operators).
+	 */
+	operator uint32_t();
 };

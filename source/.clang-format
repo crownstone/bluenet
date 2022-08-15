@@ -2,12 +2,12 @@
 BasedOnStyle: Chromium
 Language: Cpp
 
-###### Install clang-format-12
+###### Install clang-format-14
 #
 # Install clang
-#   sudo apt install clang-12 clang-tidy-12 clang-format-12
-# Update clang-format to version 12 by adding a link group clink
-#   sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-12 90 --slave /usr/bin/clang++ clang++ /usr/bin/clang++-12 --slave /usr/share/man/man1/clang.1.gz clang.1.gz /usr/share/man/man1/clang-12.1.gz --slave /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-12 --slave /usr/bin/clang-format clang-format /usr/bin/clang-format-12
+#   python3 -m pip install clang-format
+#   sudo apt install clang-14 clang-tidy-14 clang-format-14
+#
 # Only available in clang-format-12 and later:
 #   AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
 

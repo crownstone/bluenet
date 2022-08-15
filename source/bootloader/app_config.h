@@ -18,7 +18,6 @@
 #define NRF_BL_DFU_ENTER_METHOD_GPREGRET 1
 #define NRF_BL_DFU_ENTER_METHOD_BUTTONLESS 0
 
-
 #define NRF_DFU_IN_APP 0
 #define NRF_DFU_SAVE_PROGRESS_IN_FLASH 0
 
@@ -39,7 +38,7 @@
  * 1 for mesh net state (NET_FLASH_PAGE_COUNT).
  * 1 for mesh defrag/garbage collection.
  */
-#define NRF_DFU_APP_DATA_AREA_SIZE ((8+1+4)*4096)
+#define NRF_DFU_APP_DATA_AREA_SIZE ((8 + 1 + 4) * 4096)
 
 //! Device information service.
 #define BLE_DIS_ENABLED 1

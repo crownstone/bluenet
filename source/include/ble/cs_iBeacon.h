@@ -101,13 +101,9 @@ public:
 	 *
 	 * @return the size of the advertisement data
 	 */
-	uint8_t size() {
-		return 23;
-	}
+	uint8_t size() { return 23; }
 
-	uint8_t* getArray() {
-		return _buffer;
-	}
+	uint8_t* getArray() { return _buffer; }
 
 	/** Set major value */
 	void setMajor(uint16_t major);
@@ -128,5 +124,4 @@ public:
 	void setTxPower(int8_t txPower);
 	/** Get RSSI value */
 	int8_t getTxPower();
-
 };

@@ -37,9 +37,8 @@ public:
 	 * unnecessary allocation of memory, use initialize = false and call
 	 * <CircularDifferentialBuffer::init()> only once the buffer is used.
 	 */
-	CircularDifferentialBuffer(uint16_t capacity = 32, bool initialize = false) :
-		_array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentSize(0)
-	{
+	CircularDifferentialBuffer(uint16_t capacity = 32, bool initialize = false)
+			: _array(NULL), _capacity(capacity), _head(0), _tail(-1), _contentSize(0) {
 		if (initialize) {
 			init();
 		}
@@ -49,9 +48,7 @@ public:
 	 *
 	 * Free memory allocated for the buffer
 	 */
-	virtual ~CircularDifferentialBuffer() {
-		free(_array);
-	}
+	virtual ~CircularDifferentialBuffer() { free(_array); }
 
 	/** Initializes and allocates memory for the buffer based on the capacity
 	 * used with the constructor
@@ -63,7 +60,7 @@ public:
 	 */
 	bool init() {
 		if (!_array) {
-			_array = (int8_t*)calloc(_capacity-1, sizeof(int8_t));
+			_array = (int8_t*)calloc(_capacity - 1, sizeof(int8_t));
 		}
 		// also call clear to make sure the head and tail are reset and we
 		// start with a clean buffer
@@ -78,8 +75,8 @@ public:
 	 * doesn't have to be cleared
 	 */
 	void clear() {
-		_head = 0;
-		_tail = -1;
+		_head        = 0;
+		_tail        = -1;
 		_contentSize = 0;
 	}
 
@@ -87,9 +84,7 @@ public:
 	 *
 	 * @return the number of elements stored in the buffer
 	 */
-	uint16_t size() const {
-		return _contentSize;
-	}
+	uint16_t size() const { return _contentSize; }
 
 	/** Returns the capacity of the buffer
 	 *
@@ -98,25 +93,19 @@ public:
 	 *
 	 * @return the capacity of the buffer
 	 */
-	uint16_t capacity() const {
-		return _capacity;
-	}
+	uint16_t capacity() const { return _capacity; }
 
 	/** Checks if the buffer is empty
 	 *
 	 * @return true if empty, false otherwise
 	 */
-	bool empty() const {
-		return size() == 0;
-	}
+	bool empty() const { return size() == 0; }
 
 	/** Checks if the buffer is full
 	 *
 	 * @return true if full, false otherwise
 	 */
-	bool full() const {
-		return size() == capacity();
-	}
+	bool full() const { return size() == capacity(); }
 
 	/** Peek at the oldest element without removing it
 	 *
@@ -126,9 +115,7 @@ public:
 	 *
 	 * @return the value of the oldest element
 	 */
-	T peek() const {
-		return _firstVal;
-	}
+	T peek() const { return _firstVal; }
 
 	/** Get the first element of the buffer
 	 * @val the value of the oldest element
@@ -139,9 +126,9 @@ public:
 		if (!_contentSize) {
 			return false;
 		}
-//		_readIdx = _head;
+		//		_readIdx = _head;
 		_readIdx = 0;
-		val = _firstVal;
+		val      = _firstVal;
 		return true;
 	}
 
@@ -152,14 +139,14 @@ public:
 	 * @return false when the last element has been reached (this read is invalid).
 	 */
 	bool getNextElement(T& val) {
-		if (_readIdx >= (_contentSize-1)) {
-//		if (_readIdx == _tail) {
+		if (_readIdx >= (_contentSize - 1)) {
+			//		if (_readIdx == _tail) {
 			return false;
 		}
-//		++_readIdx;
-//		_readIdx %= (_capacity-1);
-//		val += _array[_readIdx];
-		val += _array[(_head+_readIdx++)%(_capacity-1)];
+		//		++_readIdx;
+		//		_readIdx %= (_capacity-1);
+		//		val += _array[_readIdx];
+		val += _array[(_head + _readIdx++) % (_capacity - 1)];
 		return true;
 	}
 
@@ -176,7 +163,6 @@ public:
 		return true;
 	}
 
-
 	/** Get the serialized length
 	 *
 	 * @return the size to fit all elements in a uint8_t buffer
@@ -185,7 +171,7 @@ public:
 		if (empty()) {
 			return 0;
 		}
-		return sizeof(T) + size()-1;
+		return sizeof(T) + size() - 1;
 	}
 
 	/** Write all elements to a buffer
@@ -221,15 +207,15 @@ public:
 	 */
 	bool push(T value) {
 		if (!_contentSize) {
-			_firstVal = value;
-			_lastVal = value;
-			_contentSize=1;
+			_firstVal    = value;
+			_lastVal     = value;
+			_contentSize = 1;
 			return true;
 		}
 
 		int32_t diff = (int32_t)value - _lastVal;
 		if (diff > 127 || diff < -127) {
-//			LOGd("difference too large! %i", diff);
+			//			LOGd("difference too large! %i", diff);
 			clear();
 			return false;
 		}
@@ -240,13 +226,13 @@ public:
 			incHead();
 		}
 		_array[_tail] = diff;
-		_lastVal = value;
+		_lastVal      = value;
 		return true;
 	}
 
 private:
 	/** Pointer to the array storing the difference of elements compared to the previous element */
-	int8_t *_array;
+	int8_t* _array;
 
 	/** The capacity of the buffer (maximum number of elements) */
 	uint16_t _capacity;
@@ -269,7 +255,6 @@ private:
 	/** Index of the last read value, used in getNextElement() */
 	uint16_t _readIdx;
 
-
 	/** Increases the tail.
 	 *
 	 * Increases the contentsSize and the index of the tail. It also
@@ -277,7 +262,7 @@ private:
 	 */
 	void incTail() {
 		++_tail;
-		_tail %= (_capacity-1);
+		_tail %= (_capacity - 1);
 		++_contentSize;
 	}
 
@@ -288,8 +273,7 @@ private:
 	 */
 	void incHead() {
 		++_head;
-		_head %= (_capacity-1);
+		_head %= (_capacity - 1);
 		--_contentSize;
 	}
-
 };

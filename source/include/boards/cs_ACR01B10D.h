@@ -39,7 +39,8 @@
  *   - The voltage multiplier of 0.00087912 * 302.94 = 0.26632.
  *   - The difference between 3.3V/2=1.65V and 1.2V = 0.45V.
  *   - That means there will be an offset of 450 / 0.87912 = 512. The voltageZero value.
- * See: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52840%2Fsaadc.html&cp=4_0_0_5_22_2&anchor=saadc_digital_output
+ * See:
+ * https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52840%2Fsaadc.html&cp=4_0_0_5_22_2&anchor=saadc_digital_output
  *
  * TODO: Explain how it relates to:
  *       RESULT = (V(P) – V(N)) * (GAIN/REFERENCE) * 2^(RESOLUTION - m)
@@ -72,72 +73,77 @@
  *   - The TX power is with -20 higher for the built-ins than for the plugs.
  */
 void asACR01B10D(boards_config_t* config) {
-	config->pinDimmer                          = 8;
-	config->pinEnableDimmer                    = 10;
-	config->pinRelayOn                         = 14;
-	config->pinRelayOff                        = 13;
+	config->pinDimmer                         = 8;
+	config->pinEnableDimmer                   = 10;
+	config->pinRelayOn                        = 14;
+	config->pinRelayOff                       = 13;
 
-	config->pinAinCurrent[GAIN_LOW]            = GpioToAin(30);
-	config->pinAinCurrent[GAIN_MIDDLE]         = GpioToAin(29);
-	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(28);
+	config->pinAinCurrent[GAIN_LOW]           = GpioToAin(30);
+	config->pinAinCurrent[GAIN_MIDDLE]        = GpioToAin(29);
+	config->pinAinCurrent[GAIN_HIGH]          = GpioToAin(28);
 
-	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
+	config->pinAinVoltage[GAIN_SINGLE]        = GpioToAin(3);
 
-	config->pinAinZeroRef                      = GpioToAin(2);
-	config->pinAinDimmerTemp                   = GpioToAin(4);
+	config->pinAinZeroRef                     = GpioToAin(2);
+	config->pinAinDimmerTemp                  = GpioToAin(4);
 
-	config->pinRx                              = 20;
-	config->pinTx                              = 19;
+	config->pinRx                             = 20;
+	config->pinTx                             = 19;
 
-	config->flags.dimmerInverted               = false;
-	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = false;
-	config->flags.dimmerTempInverted           = true;
-	config->flags.usesNfcPins                  = true;
-	config->flags.hasAccuratePowerMeasurement  = true;
-	config->flags.canTryDimmingOnBoot          = true;
-	config->flags.canDimOnWarmBoot             = true;
-	config->flags.dimmerOnWhenPinsFloat        = false;
+	config->pinGpio[0]                        = 18;
+	config->pinGpio[1]                        = 17;
+	config->pinGpio[2]                        = 16;
+	config->pinGpio[3]                        = 15;
 
-	config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
+	config->flags.dimmerInverted              = false;
+	config->flags.enableUart                  = false;
+	config->flags.enableLeds                  = false;
+	config->flags.dimmerTempInverted          = true;
+	config->flags.usesNfcPins                 = true;
+	config->flags.hasAccuratePowerMeasurement = true;
+	config->flags.canTryDimmingOnBoot         = true;
+	config->flags.canDimOnWarmBoot            = true;
+	config->flags.dimmerOnWhenPinsFloat       = false;
+
+	config->deviceType                        = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	// TODO: Explain why not -0.26632 (see above). If incorrect, replace.
-	config->voltageMultiplier[GAIN_SINGLE]     = -0.2547;
+	config->voltageMultiplier[GAIN_SINGLE]    = -0.2547;
 
 	// TODO: Explain this value
-	config->currentMultiplier[GAIN_LOW]        = 0.01486f;
+	config->currentMultiplier[GAIN_LOW]       = 0.01486f;
 
 	// TODO: Calculate the following values (now set to something arbitrary)
-	config->currentMultiplier[GAIN_MIDDLE]     = 0.015;
-	config->currentMultiplier[GAIN_HIGH]       = 0.015;
+	config->currentMultiplier[GAIN_MIDDLE]    = 0.015;
+	config->currentMultiplier[GAIN_HIGH]      = 0.015;
 
-	config->voltageOffset[GAIN_SINGLE]         = 512;
+	config->voltageOffset[GAIN_SINGLE]        = 512;
 
 	// TODO: Explain this value
-	config->currentOffset[GAIN_LOW]            = -125;
+	config->currentOffset[GAIN_LOW]           = -125;
 
 	// TODO: Calculate the following values (now set to something arbitrary)
-	config->currentOffset[GAIN_MIDDLE]         = -125;
-	config->currentOffset[GAIN_HIGH]           = -125;
+	config->currentOffset[GAIN_MIDDLE]        = -125;
+	config->currentOffset[GAIN_HIGH]          = -125;
 
 	// TODO: Explain this value
-	config->powerOffsetMilliWatt               = 800;
+	config->powerOffsetMilliWatt              = 800;
 
 	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
-	config->voltageAdcRangeMilliVolt           = 1800;
+	config->voltageAdcRangeMilliVolt          = 1800;
 	// ADC values [-2048, 2047] map to [REF - 1.2V, REF + 1.2V].
-	config->currentAdcRangeMilliVolt           = 1200;
+	config->currentAdcRangeMilliVolt          = 1200;
 
 	// TODO: These are incorrectly calculated with R_12 = 16k and B_ntc = 3380 K.
-	config->pwmTempVoltageThreshold            = 0.35; // 0.3518
-	config->pwmTempVoltageThresholdDown        = 0.30; // 0.3036
+	config->pwmTempVoltageThreshold           = 0.35;  // 0.3518
+	config->pwmTempVoltageThresholdDown       = 0.30;  // 0.3036
 
 	// TODO: It should be with R_12 = 18k and B_ntc = 3434 K (enable the following).
-	//config->pwmTempVoltageThreshold            = 0.3090;
-	//config->pwmTempVoltageThresholdDown        = 0.2655;
+	// config->pwmTempVoltageThreshold            = 0.3090;
+	// config->pwmTempVoltageThresholdDown        = 0.2655;
 
-	config->minTxPower                         = -20;
+	config->minTxPower                        = -20;
 
-	config->scanWindowUs                       = config->scanIntervalUs;
-	config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                      = config->scanIntervalUs;
+	config->tapToToggleDefaultRssiThreshold   = -35;
 }

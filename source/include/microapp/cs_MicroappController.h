@@ -40,7 +40,7 @@ private:
 	 */
 	MicroappController();
 	MicroappController(MicroappController const&);
-	void operator=(MicroappController const&);
+	void operator                                          =(MicroappController const&);
 
 	/**
 	 * Limit the number of interrupts in a tick (if -1) there is no limit.

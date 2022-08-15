@@ -21,7 +21,7 @@
 // Standard MAC address length
 const uint8_t MAC_ADDRESS_LENGTH                            = 6;
 // Defined by the BLE SIG
-const uint8_t MAX_BLE_ADV_DATA_LENGTH                       = 31;
+const uint8_t MAX_BLE_ADV_DATA_LENGTH                               = 31;
 // Defined by the mesh protocol
 const uint8_t MAX_MICROAPP_MESH_PAYLOAD_SIZE                = 7;
 

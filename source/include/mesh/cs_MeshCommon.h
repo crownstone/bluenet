@@ -21,7 +21,7 @@ namespace MeshUtil {
  */
 struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
 	//! ID that can freely be used to find similar items.
-	uint16_t id = 0;
+	uint16_t id  = 0;
 
 	//! Mesh msg type.
 	uint8_t type = CS_MESH_MODEL_TYPE_UNKNOWN;
@@ -38,11 +38,7 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
 	//! Whether this message should be sent to direct neighbours only.
 	bool doNotRelay : 1;
 
-	cs_mesh_queue_item_meta_data_t():
-		transmissionsOrTimeout(0),
-		priority(false),
-		doNotRelay(false)
-	{}
+	cs_mesh_queue_item_meta_data_t() : transmissionsOrTimeout(0), priority(false), doNotRelay(false) {}
 };
 
 /**
@@ -79,12 +75,12 @@ struct cs_mesh_queue_item_t {
 	cs_data_t msgPayload                    = {};
 };
 
-#define printMeshQueueItem(modelName, meshQueueItemMetaData) \
-		LOGMeshModelDebug(modelName " id=%u type=%u priority=%u transmissionsOrTimeout=%u", \
-			meshQueueItemMetaData.id,                                                       \
-			meshQueueItemMetaData.type,                                                     \
-			meshQueueItemMetaData.priority,                                                 \
-			meshQueueItemMetaData.transmissionsOrTimeout                                    \
-	);
+#define printMeshQueueItem(modelName, meshQueueItemMetaData)                  \
+	LOGMeshModelDebug(                                                        \
+			modelName " id=%u type=%u priority=%u transmissionsOrTimeout=%u", \
+			meshQueueItemMetaData.id,                                         \
+			meshQueueItemMetaData.type,                                       \
+			meshQueueItemMetaData.priority,                                   \
+			meshQueueItemMetaData.transmissionsOrTimeout);
 
-}
+}  // namespace MeshUtil

@@ -37,7 +37,7 @@ public:
 	/**
 	 * Remove an item from the send queue.
 	 */
-	cs_ret_code_t remFromQueue(MeshUtil::cs_mesh_queue_item_t & item);
+	cs_ret_code_t remFromQueue(MeshUtil::cs_mesh_queue_item_t& item);
 
 private:
 	MeshModelMulticast* _multicastModel                     = nullptr;

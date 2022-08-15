@@ -19,7 +19,7 @@
 #define CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS 0
 
 // It is still the case that apply_old_config.h is applied...
-// The problem is described at 
+// The problem is described at
 //   https://devzone.nordicsemi.com/f/nordic-q-a/60127/compare-sdk_config-files
 // As soon as an old macro like TWI_ENABLED is defined in app_config.h (or anywhere else) it will lead to the
 // NRFX_TWI_ENABLED macro to be disabled.
@@ -50,11 +50,9 @@
 #define NRF_FSTORAGE_ENABLED 1
 #define NRF_FSTORAGE_SD_QUEUE_SIZE 4
 
-
 #define HARDFAULT_HANDLER_ENABLED 1
 
 #define APP_SCHEDULER_WITH_PROFILER 1
-
 
 #if CS_SERIAL_NRF_LOG_ENABLED > 0
 #define NRF_LOG_ENABLED 1
@@ -79,7 +77,6 @@
 #define NRF_LOG_USES_TIMESTAMP 0
 #define NRF_FPRINTF_ENABLED 1
 #define NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED 1
-
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 #define NRF_LOG_BACKEND_RTT_ENABLED 1
@@ -125,19 +122,20 @@
 // <268435456=> 1000000 baud
 #define NRF_LOG_BACKEND_UART_BAUDRATE 61865984
 
-
 #define BLE_DB_DISCOVERY_ENABLED 1
 
 #define NRF_SDH_BLE_ENABLED 1
 #define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
 #define NRF_SDH_BLE_CENTRAL_LINK_COUNT 1
 
-// Though we can have 1 outgoing (central), and 1 incoming (peripheral) connection, we can't have them both at the same time, because we set total link count to 1.
-// This means we should stop connectable advertisements before connecting to a peripheral.
+// Though we can have 1 outgoing (central), and 1 incoming (peripheral) connection, we can't have them both at the same
+// time, because we set total link count to 1. This means we should stop connectable advertisements before connecting to
+// a peripheral.
 #define NRF_SDH_BLE_TOTAL_LINK_COUNT 1
 
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh, see MESH_GATT_MTU_SIZE_MAX.
-//#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 72 // For microapps, we want a multiple of 4. Ok this doesn't make sense, as there's a L2CAP header of 3 bytes?
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69  // Advised by mesh, see MESH_GATT_MTU_SIZE_MAX.
+//#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 72 // For microapps, we want a multiple of 4. Ok this doesn't make sense, as
+// there's a L2CAP header of 3 bytes?
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
 /**
@@ -158,8 +156,6 @@
 
 // Used by cs_Comp
 #define COMP_ENABLED 1
-
-
 
 #if CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS == 0
 // NRFX_WDT_ENABLED is overwritten by apply_old_config.h
@@ -195,12 +191,10 @@
 
 //#define NRFX_SAADC_ENABLED 1
 
-
 //#define NRFX_RTC_ENABLED 1
 //#define NRFX_RTC0_ENABLED 1
 //#define NRFX_RTC1_ENABLED 1
 //#define NRFX_RTC2_ENABLED 1
-
 
 //#define NRFX_TIMER_ENABLED 1
 //#define NRFX_TIMER0_ENABLED 1
@@ -214,23 +208,10 @@
 //#define UART0_ENABLED 1
 //#define UART0_CONFIG_USE_EASY_DMA 0
 
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Settings below were missing from the sdk_config.h
  * They're copied from some example sdk_config.h
  */
-
 
 // <o> NRF_LOG_BACKEND_RTT_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.
 // <i> Size of the buffer is a trade-off between RAM usage and processing.

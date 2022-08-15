@@ -183,14 +183,14 @@ int main(int argc, char* argv[]) {
 	if (argc > 1) {
 		std::string str(argv[1]);
 		board = std::stoul(str);
-		auto uicr = getUicrData(board);
+		auto uicr = mapBoardToUicrData(board);
 		return check(board, uicr, true);
 	}
 
 	std::cout << "Skipping dev boards, starting at board 100" << std::endl;
 	for (board = 100; board < 2000; ++board) {
 //		std::cout << "board=" << board << std::endl;
-		auto uicr = getUicrData(board);
+		auto uicr = mapBoardToUicrData(board);
 		result = check(board, uicr, false);
 		if (result) {
 			break;

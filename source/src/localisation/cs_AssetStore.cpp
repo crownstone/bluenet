@@ -5,25 +5,24 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #include <localisation/cs_AssetStore.h>
 #include <logging/cs_Logger.h>
 #include <protocol/cs_RssiAndChannel.h>
 
-#define LOGAssetStoreWarn    LOGw
-#define LOGAssetStoreInfo    LOGi
-#define LOGAssetStoreDebug   LOGvv
+#define LOGAssetStoreWarn LOGw
+#define LOGAssetStoreInfo LOGi
+#define LOGAssetStoreDebug LOGvv
 #define LOGAssetStoreVerbose LOGvv
 
 AssetStore::AssetStore()
-	: updateLastReceivedCounterRoutine([this]() {
-		incrementLastReceivedCounters();
-		return Coroutine::delayMs(LAST_RECEIVED_COUNTER_PERIOD_MS);
-	})
-	, updateLastSentCounterRoutine([this]() {
-		decrementThrottlingCounters();
-		return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS);
-	})
+		: updateLastReceivedCounterRoutine([this]() {
+			incrementLastReceivedCounters();
+			return Coroutine::delayMs(LAST_RECEIVED_COUNTER_PERIOD_MS);
+		})
+		, updateLastSentCounterRoutine([this]() {
+			decrementThrottlingCounters();
+			return Coroutine::delayMs(THROTTLE_COUNTER_PERIOD_MS);
+		})
 
 {}
 
@@ -55,11 +54,12 @@ asset_record_t* AssetStore::handleAcceptedAsset(const scanned_device_t& asset, c
 	LOGAssetStoreVerbose("handleAcceptedAsset id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	asset_record_t* record = getOrCreateRecord(assetId);
 	if (record != nullptr) {
-		record->myRssi = rssi_and_channel_t(asset.rssi, asset.channel);
+		record->myRssi              = rssi_and_channel_t(asset.rssi, asset.channel);
 		record->lastReceivedCounter = 0;
 	}
 	else {
-		LOGAssetStoreDebug("Could not create a record for id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
+		LOGAssetStoreDebug(
+				"Could not create a record for id=%02X:%02X:%02X", assetId.data[0], assetId.data[1], assetId.data[2]);
 	}
 	return record;
 }
@@ -71,7 +71,7 @@ asset_record_t* AssetStore::getRecord(const asset_id_t& id) {
 asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 	LOGAssetStoreVerbose("getOrCreateRecord id=%02X:%02X:%02X", id.data[0], id.data[1], id.data[2]);
 
-	if(asset_record_t* rec = _store.getOrAdd(id)) {
+	if (asset_record_t* rec = _store.getOrAdd(id)) {
 		// record found, or empty space was newly occupied.
 		rec->empty();
 		rec->assetId = id;
@@ -99,7 +99,10 @@ asset_record_t* AssetStore::getOrCreateRecord(const asset_id_t& id) {
 
 void AssetStore::addThrottlingBump(asset_record_t& record, uint16_t timeToNextThrottleOpenMs) {
 
-	LOGAssetStoreVerbose("Adding throttle ticks: %u for %u ms", throttlingBumpMsToTicks(timeToNextThrottleOpenMs), timeToNextThrottleOpenMs);
+	LOGAssetStoreVerbose(
+			"Adding throttle ticks: %u for %u ms",
+			throttlingBumpMsToTicks(timeToNextThrottleOpenMs),
+			timeToNextThrottleOpenMs);
 
 	record.addThrottlingCountdown(throttlingBumpMsToTicks(timeToNextThrottleOpenMs));
 }
@@ -112,9 +115,8 @@ uint16_t AssetStore::throttlingBumpMsToTicks(uint16_t timeToNextThrottleOpenMs) 
 	return ticksRoundedUp;
 }
 
-
 void AssetStore::incrementLastReceivedCounters() {
-	for (auto& record: _store) {
+	for (auto& record : _store) {
 		if (!record.isValid()) {
 			// skip invalid records
 			continue;
@@ -125,15 +127,18 @@ void AssetStore::incrementLastReceivedCounters() {
 		}
 
 		if (record.lastReceivedCounter >= LAST_RECEIVED_TIMEOUT_THRESHOLD_S) {
-			LOGAssetStoreDebug("Asset timed out. %02X:%02X:%02X",
-					record.assetId.data[0], record.assetId.data[1], record.assetId.data[2]);
+			LOGAssetStoreDebug(
+					"Asset timed out. %02X:%02X:%02X",
+					record.assetId.data[0],
+					record.assetId.data[1],
+					record.assetId.data[2]);
 			record.invalidate();
 		}
 	}
 }
 
 void AssetStore::decrementThrottlingCounters() {
-	for (auto& record: _store) {
+	for (auto& record : _store) {
 		if (!record.isValid()) {
 			// skip invalid records
 			continue;

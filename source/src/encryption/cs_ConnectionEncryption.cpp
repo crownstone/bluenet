@@ -26,7 +26,8 @@ void ConnectionEncryption::init() {
 	listen();
 }
 
-cs_ret_code_t ConnectionEncryption::encrypt(cs_data_t input, cs_data_t output, EncryptionAccessLevel accessLevel, ConnectionEncryptionType encryptionType) {
+cs_ret_code_t ConnectionEncryption::encrypt(
+		cs_data_t input, cs_data_t output, EncryptionAccessLevel accessLevel, ConnectionEncryptionType encryptionType) {
 	uint8_t key[ENCRYPTION_KEY_LENGTH];
 	if (!KeysAndAccess::getInstance().getKey(accessLevel, key, sizeof(key))) {
 		return ERR_NOT_FOUND;
@@ -71,13 +72,15 @@ cs_ret_code_t ConnectionEncryption::encrypt(cs_data_t input, cs_data_t output, E
 
 			return retCode;
 		}
-		default:
-			return ERR_NOT_IMPLEMENTED;
+		default: return ERR_NOT_IMPLEMENTED;
 	}
 }
 
-
-cs_ret_code_t ConnectionEncryption::decrypt(cs_data_t input, cs_data_t output, EncryptionAccessLevel& accessLevel, ConnectionEncryptionType encryptionType) {
+cs_ret_code_t ConnectionEncryption::decrypt(
+		cs_data_t input,
+		cs_data_t output,
+		EncryptionAccessLevel& accessLevel,
+		ConnectionEncryptionType encryptionType) {
 	switch (encryptionType) {
 		case ConnectionEncryptionType::CTR: {
 			// Parse the non encrypted header.
@@ -88,21 +91,11 @@ cs_ret_code_t ConnectionEncryption::decrypt(cs_data_t input, cs_data_t output, E
 			}
 
 			switch (header->accessLevel) {
-				case ADMIN:
-					accessLevel = ADMIN;
-					break;
-				case MEMBER:
-					accessLevel = MEMBER;
-					break;
-				case BASIC:
-					accessLevel = BASIC;
-					break;
-				case SETUP:
-					accessLevel = SETUP;
-					break;
-				default:
-					accessLevel = NOT_SET;
-					break;
+				case ADMIN: accessLevel = ADMIN; break;
+				case MEMBER: accessLevel = MEMBER; break;
+				case BASIC: accessLevel = BASIC; break;
+				case SETUP: accessLevel = SETUP; break;
+				default: accessLevel = NOT_SET; break;
 			}
 
 			uint8_t key[ENCRYPTION_KEY_LENGTH];
@@ -126,21 +119,22 @@ cs_ret_code_t ConnectionEncryption::decrypt(cs_data_t input, cs_data_t output, E
 					decryptedPayloadSize);
 
 			// Check validation key.
-			if (memcmp(encryptedHeader.validationKey, _sessionData.validationKey, sizeof(_sessionData.validationKey)) != 0) {
-				LOGConnectionEncryption("Validation mismatch [%u %u ..] vs [%u %u ..]", encryptedHeader.validationKey[0], encryptedHeader.validationKey[1], _sessionData.validationKey[0], _sessionData.validationKey[1]);
+			if (memcmp(encryptedHeader.validationKey, _sessionData.validationKey, sizeof(_sessionData.validationKey))
+				!= 0) {
+				LOGConnectionEncryption(
+						"Validation mismatch [%u %u ..] vs [%u %u ..]",
+						encryptedHeader.validationKey[0],
+						encryptedHeader.validationKey[1],
+						_sessionData.validationKey[0],
+						_sessionData.validationKey[1]);
 				return ERR_NO_ACCESS;
 			}
 
 			return retCode;
 		}
-		default:
-			LOGe("Wrong type: %u", encryptionType);
-			return ERR_NOT_IMPLEMENTED;
+		default: LOGe("Wrong type: %u", encryptionType); return ERR_NOT_IMPLEMENTED;
 	}
 }
-
-
-
 
 void ConnectionEncryption::generateSessionData() {
 	RNG::fillBuffer(_sessionData.sessionNonce, sizeof(_sessionData.sessionNonce));
@@ -154,8 +148,8 @@ cs_ret_code_t ConnectionEncryption::setSessionData(session_data_t& sessionData) 
 	if (sessionData.protocol != _sessionData.protocol) {
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
-//	memcpy(_sessionData.sessionNonce, sessionData.sessionNonce, sizeof(sessionData.sessionNonce));
-//	memcpy(_sessionData.validationKey, sessionData.validationKey, sizeof(sessionData.validationKey));
+	//	memcpy(_sessionData.sessionNonce, sessionData.sessionNonce, sizeof(sessionData.sessionNonce));
+	//	memcpy(_sessionData.validationKey, sessionData.validationKey, sizeof(sessionData.validationKey));
 	_sessionData = sessionData;
 	memcpy(_nonce.sessionNonce, sessionData.sessionNonce, sizeof(sessionData.sessionNonce));
 	_log(LogLevelConnectionEncryption, false, "Set session data:");
@@ -163,21 +157,20 @@ cs_ret_code_t ConnectionEncryption::setSessionData(session_data_t& sessionData) 
 	return ERR_SUCCESS;
 }
 
-
-cs_buffer_size_t ConnectionEncryption::getEncryptedBufferSize(cs_buffer_size_t plaintextBufferSize, ConnectionEncryptionType encryptionType) {
+cs_buffer_size_t ConnectionEncryption::getEncryptedBufferSize(
+		cs_buffer_size_t plaintextBufferSize, ConnectionEncryptionType encryptionType) {
 	switch (encryptionType) {
 		case ConnectionEncryptionType::CTR: {
 			cs_buffer_size_t encryptedSize = plaintextBufferSize + sizeof(encryption_header_encrypted_t);
 			return sizeof(encryption_header_t) + CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(encryptedSize, AES_BLOCK_SIZE);
 		}
 		case ConnectionEncryptionType::ECB:
-		default:
-			return CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(plaintextBufferSize, AES_BLOCK_SIZE);
+		default: return CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(plaintextBufferSize, AES_BLOCK_SIZE);
 	}
 }
 
-
-cs_buffer_size_t ConnectionEncryption::getPlaintextBufferSize(cs_buffer_size_t encryptedBufferSize, ConnectionEncryptionType encryptionType) {
+cs_buffer_size_t ConnectionEncryption::getPlaintextBufferSize(
+		cs_buffer_size_t encryptedBufferSize, ConnectionEncryptionType encryptionType) {
 	switch (encryptionType) {
 		case ConnectionEncryptionType::CTR: {
 			// Make sure we don't try to return a negative value.
@@ -187,8 +180,7 @@ cs_buffer_size_t ConnectionEncryption::getPlaintextBufferSize(cs_buffer_size_t e
 			return encryptedBufferSize - sizeof(encryption_header_t);
 		}
 		case ConnectionEncryptionType::ECB:
-		default:
-			return encryptedBufferSize;
+		default: return encryptedBufferSize;
 	}
 }
 
@@ -221,8 +213,6 @@ void ConnectionEncryption::handleEvent(event_t& event) {
 			KeysAndAccess::getInstance().invalidateSetupKey();
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }
-

@@ -12,7 +12,7 @@ Gpio& Gpio::getInstance() {
 	return instance;
 }
 
-Gpio::Gpio(): EventListener() {
+Gpio::Gpio() : EventListener() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -20,8 +20,11 @@ Gpio::Gpio(): EventListener() {
  * Initialize GPIO with the board configuration. If there are button pins defined (as is the case on dev. boards) we
  * can actually control these from other modules. We limit here the number of pins that can be controlled to not be
  * accidentally driving the relay or the IGBTs.
+ *
+ * Interrupts are not put on the app scheduler, but instead pins are marked to have an interrupt.
+ * Each tick, all pins are checked whether they are marked to have an interrupt. If so, EVT_GPIO_UPDATE is dispatched.
  */
-void Gpio::init(const boards_config_t & board) {
+void Gpio::init(const boards_config_t& board) {
 
 	int activePins = 0;
 	for (int i = 0; i < GPIO_INDEX_COUNT; i++) {
@@ -110,7 +113,7 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 	}
 
 	nrf_gpio_pin_pull_t nrf_pull;
-	switch(pull) {
+	switch (pull) {
 		case GpioPullResistor::NONE:
 			nrf_pull = NRF_GPIO_PIN_NOPULL;
 			LOGi("Set pin %i with index %i to use no pull-up", pin, pin_index);
@@ -123,12 +126,10 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 			nrf_pull = NRF_GPIO_PIN_PULLDOWN;
 			LOGi("Set pin %i with index %i to use pull-down", pin, pin_index);
 			break;
-		default:
-			LOGw("Huh? No such pull registor construction exists");
-			return;
+		default: LOGw("Huh? No such pull registor construction exists"); return;
 	}
 
-	switch(direction) {
+	switch (direction) {
 		case GpioDirection::INPUT:
 			LOGi("Configure pin %i as input", pin);
 			nrf_gpio_cfg_input(pin, nrf_pull);
@@ -149,23 +150,18 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 			}
 
 			nrfx_gpiote_in_config_t config;
-			switch(polarity) {
-				case GpioPolarity::HITOLO:
-					config.sense = NRF_GPIOTE_POLARITY_HITOLO;
-					break;
-				case GpioPolarity::LOTOHI:
-					config.sense = NRF_GPIOTE_POLARITY_LOTOHI;
-					break;
-				case GpioPolarity::TOGGLE:
-					config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
-					break;
-				default:
-					LOGw("Huh? No such polarity exists");
-					return;
+			switch (polarity) {
+				case GpioPolarity::HITOLO: config.sense = NRF_GPIOTE_POLARITY_HITOLO; break;
+				case GpioPolarity::LOTOHI: config.sense = NRF_GPIOTE_POLARITY_LOTOHI; break;
+				case GpioPolarity::TOGGLE: config.sense = NRF_GPIOTE_POLARITY_TOGGLE; break;
+				default: LOGw("Huh? No such polarity exists"); return;
 			}
-			config.pull = nrf_pull;
-			config.hi_accuracy = true;
-			config.is_watcher = false;
+			config.pull            = nrf_pull;
+
+			// With high accuracy, nrfx_gpiote will make use of GPIOTE channels.
+			// These channels might already be used by our own PWM class.
+			config.hi_accuracy     = false;
+			config.is_watcher      = false;
 			config.skip_gpio_setup = false;
 
 			LOGi("Register pin %i using polarity %i with event handler", pin, polarity);
@@ -178,16 +174,14 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 			nrfx_gpiote_in_event_enable(pin, true);
 
 			break;
-		default:
-			LOGw("Unknown pin action");
-			break;
+		default: LOGw("Unknown pin action"); break;
 	}
 }
 
 /*
  * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
  */
-void Gpio::write(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
+void Gpio::write(uint8_t pin_index, uint8_t* buf, uint8_t& length) {
 
 	pin_t pin = getPin(pin_index);
 	if (pin == PIN_NONE) {
@@ -206,7 +200,7 @@ void Gpio::write(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
 	}
 }
 
-void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
+void Gpio::read(uint8_t pin_index, uint8_t* buf, uint8_t& length) {
 
 	pin_t pin = getPin(pin_index);
 	if (pin == PIN_NONE) {
@@ -254,7 +248,7 @@ void Gpio::tick() {
 			TYPIFY(EVT_GPIO_UPDATE) gpio;
 			// we send back the pin index, not the pin number
 			gpio.pin_index = i;
-			gpio.length = 0;
+			gpio.length    = 0;
 			LOGd("Send GPIO event at index %i", gpio.pin_index);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);
@@ -263,13 +257,13 @@ void Gpio::tick() {
 }
 
 void Gpio::handleEvent(event_t& event) {
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::EVT_GPIO_INIT: {
 			LOGi("Configure pin in GPIO module");
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
-			GpioPolarity polarity = (GpioPolarity)gpio.polarity;
-			GpioDirection direction = (GpioDirection)gpio.direction;
-			GpioPullResistor pull = (GpioPullResistor)gpio.pull;
+			GpioPolarity polarity      = (GpioPolarity)gpio.polarity;
+			GpioDirection direction    = (GpioDirection)gpio.direction;
+			GpioPullResistor pull      = (GpioPullResistor)gpio.pull;
 			configure(gpio.pin_index, direction, pull, polarity);
 			break;
 		}
@@ -291,7 +285,6 @@ void Gpio::handleEvent(event_t& event) {
 			tick();
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }

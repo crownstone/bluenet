@@ -14,9 +14,9 @@
  * The Guidestone has pads for pin 9, 10, 25, 26, 27, SWDIO, SWDCLK, GND, VDD.
  */
 void asGuidestone(boards_config_t* config) {
-	config->pinRx                              = 25;
-	config->pinTx                              = 26;
-	config->deviceType                         = DEVICE_GUIDESTONE;
-	config->minTxPower                         = -20;
-	config->scanWindowUs                       = config->scanIntervalUs;
+	config->pinRx        = 25;
+	config->pinTx        = 26;
+	config->deviceType   = DEVICE_GUIDESTONE;
+	config->minTxPower   = -20;
+	config->scanWindowUs = config->scanIntervalUs;
 }

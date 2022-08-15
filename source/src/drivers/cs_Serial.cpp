@@ -63,10 +63,10 @@ void init_uart() {
 	if (_initializedUart) {
 		return;
 	}
-	_initializedUart    = true;
+	_initializedUart   = true;
 
-	NRF_UART0->PSELRXD  = _pinRx;
-	NRF_UART0->PSELTXD  = _pinTx;
+	NRF_UART0->PSELRXD = _pinRx;
+	NRF_UART0->PSELTXD = _pinTx;
 #if !defined(UART_BAUDRATE)
 #error "UART_BAUDRATE not defined"
 #endif
@@ -80,7 +80,7 @@ void init_uart() {
 #else
 #error "Unknown UART_BAUDRATE"
 #endif
-	NRF_UART0->ENABLE   = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
+	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
 }
 
 void deinit_uart() {

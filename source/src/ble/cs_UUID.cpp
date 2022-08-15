@@ -7,16 +7,16 @@
 
 #include <ble/cs_Nordic.h>
 #include <ble/cs_UUID.h>
+#include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <cstring>
-#include <util/cs_UuidParser.h>
 #include <util/cs_BleError.h>
+#include <util/cs_UuidParser.h>
+
+#include <cstring>
 
 UUID::UUID() {}
 
-UUID::UUID(ble_uuid_t uuid):
-		_uuid(uuid)
-{}
+UUID::UUID(ble_uuid_t uuid) : _uuid(uuid) {}
 
 UUID::UUID(const char* fullUuid) {
 	ble_uuid128_t uuid;
@@ -112,6 +112,8 @@ ret_code_t UUID::getFromCache(const ble_uuid128_t& fullUuid) {
 }
 
 ret_code_t UUID::add(const ble_uuid128_t& fullUuid) {
+	_log(SERIAL_DEBUG, false, "Register vendor specific base UUID:");
+	_logArray(SERIAL_DEBUG, true, fullUuid.uuid128, sizeof(fullUuid.uuid128));
 	uint32_t nrfCode = sd_ble_uuid_vs_add(&fullUuid, &(_uuid.type));
 	return nrfCode;
 }
@@ -124,7 +126,7 @@ ret_code_t UUID::rem(const ble_uuid_t& uuid) {
 	}
 
 	// The remove function changes the type, we don't want that.
-	uint8_t type = uuid.type;
+	uint8_t type     = uuid.type;
 
 	uint32_t nrfCode = sd_ble_uuid_vs_remove(&type);
 	return nrfCode;
@@ -132,18 +134,18 @@ ret_code_t UUID::rem(const ble_uuid_t& uuid) {
 
 cs_ret_code_t UUID::fromNrfCode(ret_code_t nrfCode) {
 	switch (nrfCode) {
-		case NRF_SUCCESS:              return ERR_SUCCESS;
-		case NRF_ERROR_NO_MEM:         return ERR_NO_SPACE;
-		case NRF_ERROR_NOT_FOUND:      return ERR_NOT_FOUND;
+		case NRF_SUCCESS: return ERR_SUCCESS;
+		case NRF_ERROR_NO_MEM: return ERR_NO_SPACE;
+		case NRF_ERROR_NOT_FOUND: return ERR_NOT_FOUND;
 
 		// We only get these in rem()
-		case NRF_ERROR_INVALID_PARAM:  return ERR_WRONG_PARAMETER;
-		case NRF_ERROR_FORBIDDEN:      return ERR_BUSY;
-		default:                       return ERR_UNSPECIFIED;
+		case NRF_ERROR_INVALID_PARAM: return ERR_WRONG_PARAMETER;
+		case NRF_ERROR_FORBIDDEN: return ERR_BUSY;
+		default: return ERR_UNSPECIFIED;
 	}
 }
 
 bool UUID::operator==(const UUID& other) {
 	return (_uuid.uuid == other._uuid.uuid) && (_uuid.type == other._uuid.type);
-//	return memcmp(&_uuid, &(other._uuid), sizeof(_uuid)) == 0; // Bad idea, as the struct is not packed.
+	//	return memcmp(&_uuid, &(other._uuid), sizeof(_uuid)) == 0; // Bad idea, as the struct is not packed.
 }

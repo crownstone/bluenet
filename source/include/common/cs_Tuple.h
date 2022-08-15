@@ -6,15 +6,16 @@
  */
 #pragma once
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 /** A tuple is a vector with a templated type and a public constructor.
  *
  * Wrapper for a std::vector with a default constructor.
  * @param T                  Templated type of elements in the vector.
  */
-template<typename T> class tuple : public std::vector<T> {
+template <typename T>
+class tuple : public std::vector<T> {
 public:
 	//! Default constructor
 	tuple() {}
@@ -26,11 +27,9 @@ public:
  * @param T                  Templated type of elements in the vector.
  * @param capacity           Predefined capacity of the underlying std::vector.
  */
-template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
+template <typename T, uint8_t capacity>
+class fixed_tuple : public tuple<T> {
 public:
 	//! Constructor reserves capacity in vector
-	fixed_tuple<T, capacity>() : tuple<T>() {this->reserve(capacity);}
-
+	fixed_tuple<T, capacity>() : tuple<T>() { this->reserve(capacity); }
 };
-
-

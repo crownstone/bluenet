@@ -18,7 +18,7 @@
  * - Keeps up the state of microapps.
  * - Instantiates and uses classes MicroappStorage and MicroappProtocol.
  */
-class Microapp: public EventListener {
+class Microapp : public EventListener {
 public:
 	static Microapp& getInstance() {
 		static Microapp instance;
@@ -36,7 +36,7 @@ private:
 	 */
 	Microapp();
 	Microapp(Microapp const&) = delete;
-	void operator=(Microapp const &) = delete;
+	void operator=(Microapp const&) = delete;
 
 	/**
 	 * The state of each microapp.
@@ -113,5 +113,5 @@ private:
 	/**
 	 * Handle incoming events.
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 };

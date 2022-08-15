@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_Nordic.h> // For the crc16.h include
+#include <ble/cs_Nordic.h>  // For the crc16.h include
 #include <util/cs_Crc16.h>
 
 // We use the nrf implementation, as that seems a faster implementation..

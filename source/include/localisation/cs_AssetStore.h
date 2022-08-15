@@ -8,7 +8,6 @@
 
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
 #include <localisation/cs_AssetRecord.h>
 #include <util/cs_Coroutine.h>
 #include <util/cs_Store.h>
@@ -27,12 +26,12 @@ public:
 	/**
 	 * Interval at which the timeout counter is increased, should be 1 second.
 	 */
-	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS = 1000;
+	static constexpr auto LAST_RECEIVED_COUNTER_PERIOD_MS      = 1000;
 
 	/**
 	 * Interval at which the throttle countdown is decreased.
 	 */
-	static constexpr auto THROTTLE_COUNTER_PERIOD_MS = 100;
+	static constexpr auto THROTTLE_COUNTER_PERIOD_MS           = 100;
 
 	// ===================== public methods =====================
 

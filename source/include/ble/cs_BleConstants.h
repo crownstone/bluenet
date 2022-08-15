@@ -18,9 +18,9 @@
  * See https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers
  */
 enum BleCompanyId : uint16_t {
-	Apple = 0x004C,
+	Apple      = 0x004C,
 	Crownstone = 0x038E,
-	Tile = 0x067C,
+	Tile       = 0x067C,
 };
 
 /**
@@ -30,11 +30,10 @@ enum BleCompanyId : uint16_t {
  * https://btprodspecificationrefs.blob.core.windows.net/assigned-values/16-bit%20UUID%20Numbers%20Document.pdf
  */
 enum BleServiceUuid : uint16_t {
-	TileX = 0xFEEC, // proprietary service of Tile, inc.
-	TileY = 0xFEED, // proprietary service of Tile, inc.
-	TileZ = 0xFD84, // proprietary service of Tile, inc.
+	TileX = 0xFEEC,  // proprietary service of Tile, inc.
+	TileY = 0xFEED,  // proprietary service of Tile, inc.
+	TileZ = 0xFD84,  // proprietary service of Tile, inc.
 };
-
 
 /**
  * Maximum length advertisement data.

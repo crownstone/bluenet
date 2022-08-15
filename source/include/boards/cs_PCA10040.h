@@ -43,55 +43,56 @@
  * The voltageMultiplier and currentMultiplier values are set to 0.0 which disables checks with respect to sampling.
  */
 void asPca10040(boards_config_t* config) {
-	config->pinDimmer                          = 20;
-	config->pinRelayOn                         = 11;
-	config->pinRelayOff                        = 12;
-	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(3);
-	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(4);
-	config->pinAinDimmerTemp                   = GpioToAin(2);
+	config->pinDimmer                       = 20;
+	config->pinRelayDebug                   = 19;
+	config->pinRelayOn                      = 11;
+	config->pinRelayOff                     = 12;
+	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(3);
+	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(4);
+	config->pinAinDimmerTemp                = GpioToAin(2);
 
-	config->pinRx                              = 8;
-	config->pinTx                              = 6;
+	config->pinRx                           = 8;
+	config->pinTx                           = 6;
 
-	config->pinGpio[0]                         = 27;
-	config->pinGpio[1]                         = 26;
-	config->pinGpio[2]                         = 25;
-	config->pinGpio[3]                         = 24;
+	config->pinGpio[0]                      = 27;
+	config->pinGpio[1]                      = 26;
+	config->pinGpio[2]                      = 25;
+	config->pinGpio[3]                      = 24;
 
-	config->pinButton[0]                       = 13;
-	config->pinButton[1]                       = 14;
-	config->pinButton[2]                       = 15;
-	config->pinButton[3]                       = 16;
+	config->pinButton[0]                    = 13;
+	config->pinButton[1]                    = 14;
+	config->pinButton[2]                    = 15;
+	config->pinButton[3]                    = 16;
 
-	// The fourth LED is used to indicate the state of the dimmer
-	config->pinLed[0]                          = 17;
-	config->pinLed[1]                          = 18;
-	config->pinLed[2]                          = 19;
-	config->pinLed[3]                          = PIN_NONE;
+	// The third and fourth LEDs are used to indicate the state of the relay and dimmer.
+	config->pinLed[0]                       = 17;
+	config->pinLed[1]                       = 18;
+	config->pinLed[2]                       = PIN_NONE;
+	config->pinLed[3]                       = PIN_NONE;
 
-	config->flags.dimmerInverted               = true;
-	config->flags.enableUart                   = true;
-	config->flags.enableLeds                   = true;
-	config->flags.ledInverted                  = true;
-	config->flags.dimmerTempInverted           = false;
-	config->flags.usesNfcPins                  = false;
+	config->flags.dimmerInverted            = true;
+	config->flags.enableUart                = true;
+	config->flags.enableLeds                = true;
+	config->flags.ledInverted               = true;
+	config->flags.dimmerTempInverted        = false;
+	config->flags.usesNfcPins               = false;
 
-	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
+	config->deviceType                      = DEVICE_CROWNSTONE_PLUG;
 
 	// All values below are set to something rather than nothing, but are not truly in use.
-	config->voltageOffset[GAIN_SINGLE]         = 1000;
-	config->currentOffset[GAIN_SINGLE]         = 1000;
-	config->powerOffsetMilliWatt               = 0;
+	config->voltageOffset[GAIN_SINGLE]      = 1000;
+	config->currentOffset[GAIN_SINGLE]      = 1000;
+	config->powerOffsetMilliWatt            = 0;
 
 	// ADC values [0, 4095] map to [0, 3.6V].
-	config->voltageAdcRangeMilliVolt           = 3600;
-	config->currentAdcRangeMilliVolt           = 3600;
+	config->voltageAdcRangeMilliVolt        = 3600;
+	config->currentAdcRangeMilliVolt        = 3600;
 
-	config->pwmTempVoltageThreshold            = 2.0;
-	config->pwmTempVoltageThresholdDown        = 1.0;
+	config->pwmTempVoltageThreshold         = 2.0;
+	config->pwmTempVoltageThresholdDown     = 1.0;
 
-	config->minTxPower                         = -40;
+	config->minTxPower                      = -40;
 
-	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
-	config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                    = 3 * config->scanIntervalUs / 4;
+	config->tapToToggleDefaultRssiThreshold = -35;
 }

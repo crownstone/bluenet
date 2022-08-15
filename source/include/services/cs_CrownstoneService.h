@@ -6,13 +6,12 @@
  */
 #pragma once
 
-#include <ble/cs_Nordic.h>
-
-#include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
+#include <ble/cs_Nordic.h>
+#include <ble/cs_Service.h>
 #include <events/cs_EventListener.h>
-#include <structs/cs_PacketsInternal.h>
 #include <structs/cs_ControlPacketAccessor.h>
+#include <structs/cs_PacketsInternal.h>
 #include <structs/cs_ResultPacketAccessor.h>
 
 /** General Service for the Crownstone
@@ -23,14 +22,14 @@
  *
  * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
-class CrownstoneService: public Service, EventListener {
+class CrownstoneService : public Service, EventListener {
 public:
 	/** Constructor for general crownstone service object
 	 *
 	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that is
 	 * set over so-called configuration characteristics. It also initializes all characteristics.
 	 */
-	 CrownstoneService();
+	CrownstoneService();
 
 	/** Perform non urgent functionality every main loop.
 	 *
@@ -38,11 +37,11 @@ public:
 	 * resolved immediately in interrupt service handlers. The temperature for example is updated every
 	 * tick, because timing is not important for this at all.
 	 */
-//	void tick();
+	//	void tick();
 
-//	void scheduleNextTick();
+	//	void scheduleNextTick();
 
-	virtual void handleEvent(event_t & event);
+	virtual void handleEvent(event_t& event);
 
 protected:
 	/** Initialize a CrownstoneService object
@@ -52,20 +51,20 @@ protected:
 	void createCharacteristics();
 
 	/** Enable the control characteristic.
- 	 */
-	void addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid,
-			EncryptionAccessLevel minimumAccessLevel);
+	 */
+	void addControlCharacteristic(
+			buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel);
 
 	/**
 	 * Enable the result characteristic.
 	 */
-	void addResultCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid,
-			EncryptionAccessLevel minimumAccessLevel);
+	void addResultCharacteristic(
+			buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel);
 
 	void addFactoryResetCharacteristic();
 
-	void addSessionDataCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size,
-			EncryptionAccessLevel minimumAccessLevel = BASIC);
+	void addSessionDataCharacteristic(
+			buffer_ptr_t buffer, cs_buffer_size_t size, EncryptionAccessLevel minimumAccessLevel = BASIC);
 
 	void getReadBuffer(buffer_ptr_t& buffer, cs_buffer_size_t& maxLength);
 	void getWriteBuffer(buffer_ptr_t& buffer, cs_buffer_size_t& maxLength);
@@ -74,10 +73,10 @@ protected:
 
 protected:
 	Characteristic<buffer_ptr_t>* _controlCharacteristic = nullptr;
-	Characteristic<buffer_ptr_t>* _resultCharacteristic = nullptr;
+	Characteristic<buffer_ptr_t>* _resultCharacteristic  = nullptr;
 
-	ControlPacketAccessor<>* _controlPacketAccessor = nullptr;
-	ResultPacketAccessor<>* _resultPacketAccessor = nullptr;
+	ControlPacketAccessor<>* _controlPacketAccessor      = nullptr;
+	ResultPacketAccessor<>* _resultPacketAccessor        = nullptr;
 
 	/** Write a result to the result characteristic.
 	 *
@@ -85,7 +84,7 @@ protected:
 	 * @param[in] type            The command type that was handled.
 	 * @param[in] result          The result of handling the command.
 	 */
-	void writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t & result);
+	void writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t& result);
 
 	/** Write a result to the result characteristic.
 	 *
@@ -96,11 +95,10 @@ protected:
 	 */
 	void writeResult(uint8_t protocol, CommandHandlerTypes type, cs_ret_code_t retCode, cs_data_t data);
 
-
 private:
 	uint8_t _keySessionDataBuffer[sizeof(session_data_t)];
 
-	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic = nullptr;
+	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic            = nullptr;
 	Characteristic<buffer_ptr_t>* _sessionDataUnencryptedCharacteristic = nullptr;
-	Characteristic<uint32_t>*     _factoryResetCharacteristic = nullptr;
+	Characteristic<uint32_t>* _factoryResetCharacteristic               = nullptr;
 };

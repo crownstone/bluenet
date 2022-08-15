@@ -13,7 +13,6 @@
 // Set true to enable debug logs.
 #define CS_GPREGRET_DEBUG false
 
-
 #if CS_GPREGRET_DEBUG == true
 #define LOGGpRegRetDebug LOGd
 #else
@@ -30,7 +29,7 @@ void GpRegRet::clearAll() {
 	LOGGpRegRetDebug("clearAll");
 	uint32_t retCode;
 	uint32_t mask = 0xFFFFFFFF;
-	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
+	retCode       = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
 	printRegRet();
 }
@@ -39,7 +38,7 @@ void GpRegRet::clearCounter() {
 	LOGGpRegRetDebug("clearCounter");
 	uint32_t retCode;
 	uint32_t mask = CS_GPREGRET_COUNTER_MASK;
-	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
+	retCode       = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
 	printRegRet();
 }
@@ -61,8 +60,8 @@ void GpRegRet::clearFlags() {
 	LOGGpRegRetDebug("clearFlags");
 	uint32_t retCode;
 	uint32_t mask = CS_GPREGRET_COUNTER_MASK;
-	mask = ~mask;
-	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
+	mask          = ~mask;
+	retCode       = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
 	printRegRet();
 }
@@ -79,7 +78,7 @@ void GpRegRet::clearFlag(GpRegRetFlag flag) {
 	LOGGpRegRetDebug("clearFlag %u", flag);
 	uint32_t retCode;
 	uint32_t mask = flag;
-	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
+	retCode       = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
 	printRegRet();
 }

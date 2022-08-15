@@ -6,25 +6,25 @@
  */
 #pragma once
 
-#include <cstdint>
-#include <cstdlib>
 #include <cfg/cs_Config.h>
-#include <util/cs_Error.h>
 #include <logging/cs_Logger.h>
 #include <structs/cs_PacketsInternal.h>
+#include <util/cs_Error.h>
 
+#include <cstdint>
+#include <cstdlib>
 
 // The number of channels per buffer.
-static const adc_channel_id_t ADC_CHANNEL_COUNT = CS_ADC_NUM_CHANNELS;
+static const adc_channel_id_t ADC_CHANNEL_COUNT             = CS_ADC_NUM_CHANNELS;
 
 // The number of samples for each channel in a buffer.
 static const adc_sample_value_id_t ADC_CHANNEL_SAMPLE_COUNT = CS_ADC_NUM_SAMPLES_PER_CHANNEL;
 
 // Total number of samples in a buffer.
-static const uint32_t ADC_BUFFER_SAMPLE_COUNT = ADC_CHANNEL_COUNT * ADC_CHANNEL_SAMPLE_COUNT;
+static const uint32_t ADC_BUFFER_SAMPLE_COUNT               = ADC_CHANNEL_COUNT * ADC_CHANNEL_SAMPLE_COUNT;
 
 // The number of buffers.
-static const adc_buffer_id_t ADC_BUFFER_COUNT = CS_ADC_NUM_BUFFERS;
+static const adc_buffer_id_t ADC_BUFFER_COUNT               = CS_ADC_NUM_BUFFERS;
 
 /**
  * Class that keeps up the buffers used for ADC.
@@ -34,12 +34,11 @@ static const adc_buffer_id_t ADC_BUFFER_COUNT = CS_ADC_NUM_BUFFERS;
  */
 class AdcBuffer {
 private:
+	adc_buffer_t* _buf[ADC_BUFFER_COUNT] = {nullptr};
+	bool _allocated                      = false;
 
-	adc_buffer_t* _buf[ADC_BUFFER_COUNT] = { nullptr };
-	bool _allocated = false;
-
-	AdcBuffer() {};
-	AdcBuffer(AdcBuffer const&) {};
+	AdcBuffer(){};
+	AdcBuffer(AdcBuffer const&){};
 
 public:
 	/**
@@ -59,13 +58,13 @@ public:
 			return ERR_SUCCESS;
 		}
 		for (adc_buffer_id_t i = 0; i < ADC_BUFFER_COUNT; ++i) {
-			adc_buffer_t* buf = (adc_buffer_t*) malloc(sizeof(adc_buffer_t));
+			adc_buffer_t* buf = (adc_buffer_t*)malloc(sizeof(adc_buffer_t));
 			if (buf == nullptr) {
 				LOGw("No space to allocate buf");
 				// TODO: free all buffers?
 				return ERR_NO_SPACE;
 			}
-			buf->samples = (adc_sample_value_t*) malloc(sizeof(adc_sample_value_t) * ADC_BUFFER_SAMPLE_COUNT);
+			buf->samples = (adc_sample_value_t*)malloc(sizeof(adc_sample_value_t) * ADC_BUFFER_SAMPLE_COUNT);
 			if (buf->samples == nullptr) {
 				LOGw("No space to allocate samples buf");
 				// TODO: free all buffers?
@@ -82,7 +81,7 @@ public:
 	 * Get buffer with given id.
 	 */
 	adc_buffer_t* getBuffer(adc_buffer_id_t buffer_id) {
-//		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
+		//		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		return _buf[buffer_id];
 	}
 
@@ -92,38 +91,28 @@ public:
 	 * this function is responsible for setting the right pointer. No checks w.r.t. this pointer are
 	 * performed.
 	 */
-	void setBuffer(adc_buffer_id_t buffer_id, adc_buffer_t* ptr) {
-		_buf[buffer_id] = ptr;
-	}
+	void setBuffer(adc_buffer_id_t buffer_id, adc_buffer_t* ptr) { _buf[buffer_id] = ptr; }
 #endif
 
 	/**
 	 * Get total number of samples in a buffer.
 	 */
-	static inline constexpr adc_sample_value_id_t getBufferLength() {
-		return ADC_BUFFER_SAMPLE_COUNT;
-	}
+	static inline constexpr adc_sample_value_id_t getBufferLength() { return ADC_BUFFER_SAMPLE_COUNT; }
 
 	/**
 	 * Get number of samples for each channel in a buffer.
 	 */
-	static inline constexpr adc_sample_value_id_t getChannelLength() {
-		return ADC_CHANNEL_SAMPLE_COUNT;
-	}
+	static inline constexpr adc_sample_value_id_t getChannelLength() { return ADC_CHANNEL_SAMPLE_COUNT; }
 
 	/**
 	 * Get number of channels per buffer.
 	 */
-	static inline constexpr adc_channel_id_t getChannelCount() {
-		return ADC_CHANNEL_COUNT;
-	}
+	static inline constexpr adc_channel_id_t getChannelCount() { return ADC_CHANNEL_COUNT; }
 
 	/**
 	 * Get number of buffers.
 	 */
-	static inline constexpr adc_buffer_id_t getBufferCount() {
-		return ADC_BUFFER_COUNT;
-	}
+	static inline constexpr adc_buffer_id_t getBufferCount() { return ADC_BUFFER_COUNT; }
 
 	/**
 	 * Get a particular value from a buffer.
@@ -135,13 +124,14 @@ public:
 	 * @param[in] value_id                       Index to the value in the buffer (0 up to getChannelLength() - 1)
 	 * @return                                   Particular value
 	 */
-	adc_sample_value_t getValue(adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id) {
+	adc_sample_value_t getValue(
+			adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id) {
 		static_assert(std::is_unsigned<adc_sample_value_id_t>::value, "value id should be unsigned");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
 
 		adc_sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
-		adc_sample_value_t* buf = getBuffer(buffer_id)->samples;
-		adc_sample_value_t value = buf[value_id_in_channel];
+		adc_sample_value_t* buf                   = getBuffer(buffer_id)->samples;
+		adc_sample_value_t value                  = buf[value_id_in_channel];
 		return value;
 	}
 
@@ -153,13 +143,16 @@ public:
 	 * @param[in] value_id                       Index to the value in the buffer
 	 * @param[in] value                          Value to be written to the buffer
 	 */
-	void setValue(adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id, adc_sample_value_t value) {
+	void setValue(
+			adc_buffer_id_t buffer_id,
+			adc_channel_id_t channel_id,
+			adc_sample_value_id_t value_id,
+			adc_sample_value_t value) {
 		static_assert(std::is_unsigned<adc_sample_value_id_t>::value, "value id should be unsigned");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
 
 		adc_sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
-		adc_sample_value_t* buf = getBuffer(buffer_id)->samples;
-		buf[value_id_in_channel] = value;
+		adc_sample_value_t* buf                   = getBuffer(buffer_id)->samples;
+		buf[value_id_in_channel]                  = value;
 	}
-
 };

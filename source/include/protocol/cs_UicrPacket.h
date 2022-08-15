@@ -43,8 +43,8 @@ typedef struct __attribute__((packed)) {
 	union __attribute__((packed)) {
 		struct __attribute__((packed)) {
 			uint8_t housing;
-			uint8_t week; // week number
-			uint8_t year; // last 2 digits of the year
+			uint8_t week;  // week number
+			uint8_t year;  // last 2 digits of the year
 			uint8_t reserved;
 		} fields;
 		uint32_t asInt;

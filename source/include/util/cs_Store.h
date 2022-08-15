@@ -7,10 +7,9 @@
 
 #pragma once
 
-#include <type_traits>
-
 #include <logging/cs_Logger.h>
 
+#include <type_traits>
 
 /**
  * A storage utility for objects of type Rec.
@@ -34,15 +33,11 @@ private:
 	uint16_t _currentSize = 0;
 
 public:
-	Rec _records[Size]    = {};
+	Rec _records[Size] = {};
 
-	Rec* begin() {
-		return _records;
-	}
+	Rec* begin() { return _records; }
 
-	Rec* end() {
-		return _records + _currentSize;
-	}
+	Rec* end() { return _records + _currentSize; }
 
 	/**
 	 * Identifies and simplifies the type returned by the id() method of Rec.
@@ -52,7 +47,6 @@ public:
 	 *  - decltype doesn't dereference the nullptr
 	 */
 	typedef typename std::remove_reference<decltype(((Rec*)nullptr)->id())>::type IdType;
-
 
 	/**
 	 * invalidate all records.
@@ -86,8 +80,8 @@ public:
 	 * NOTE: this does _not_ check for isValid, because you may want to find the
 	 * first invalid item for example!
 	 */
-	template<class UnaryPredicate>
-	constexpr Rec* get(UnaryPredicate  p) {
+	template <class UnaryPredicate>
+	constexpr Rec* get(UnaryPredicate p) {
 		for (auto& obj : *this) {
 			if (p(obj)) {
 				return &obj;
@@ -106,20 +100,20 @@ public:
 	 * takes an object of type `Rec` as argument and returns the value
 	 * that should be minimized.
 	 */
-	template<class ValueFunction>
+	template <class ValueFunction>
 	constexpr Rec* getMin(ValueFunction getValue) {
-		Rec* smallest = get([] (auto rec) { return rec.isValid();});
+		Rec* smallest = get([](auto rec) { return rec.isValid(); });
 
-		if(smallest == nullptr){
+		if (smallest == nullptr) {
 			return nullptr;
 		}
 
-		for(Rec* obj = smallest + 1; obj != end(); obj++) {
-			if(!obj->isValid()) {
+		for (Rec* obj = smallest + 1; obj != end(); obj++) {
+			if (!obj->isValid()) {
 				continue;
 			}
 
-			if (getValue(*obj) <  getValue(*smallest)) {
+			if (getValue(*obj) < getValue(*smallest)) {
 				smallest = obj;
 			}
 		}
@@ -144,7 +138,7 @@ public:
 			}
 		}
 
-		if(retval != nullptr)  {
+		if (retval != nullptr) {
 			// not found, but encountered an invalid record in the loop.
 			return retval;
 		}
@@ -171,9 +165,9 @@ public:
 	 * the entry at the end(), after invalidating.
 	 */
 	constexpr Rec* addAtEnd() {
-		if(_currentSize < Size) {
+		if (_currentSize < Size) {
 			// still have space, increment size and return ref to last index.
-			Rec* retval = &_records[_currentSize++]; // must postcrement
+			Rec* retval = &_records[_currentSize++];  // must postcrement
 			retval->invalidate();
 			return retval;
 		}
@@ -181,17 +175,15 @@ public:
 		return nullptr;
 	}
 
-	uint16_t size() {
-		return _currentSize;
-	}
+	uint16_t size() { return _currentSize; }
 
 	/**
 	 * returns number of elements that satisfy the predicate.
 	 */
-	template<class UnaryPredicate>
+	template <class UnaryPredicate>
 	constexpr uint16_t countIf(UnaryPredicate p) {
 		uint16_t s = 0;
-		for (auto& rec : *this ) {
+		for (auto& rec : *this) {
 			s += p(rec) ? 1 : 0;
 		}
 		return s;
@@ -203,12 +195,8 @@ public:
 		return countIf([](auto& rec) { rec.isValid(); });
 	}
 
-
-
 	/**
 	 * returns true if all elements are occupied and valid.
 	 */
 	constexpr bool full() { return count() == Size; }
-
-
 };

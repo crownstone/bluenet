@@ -7,6 +7,7 @@
 #pragma once
 
 #include <stddef.h>
+
 #include <cstdint>
 
 typedef const void* cuckoo_key_t;
@@ -31,13 +32,11 @@ struct __attribute__((__packed__)) cuckoo_compressed_fingerprint_t {
 	cuckoo_index_t bucket;  // the bucket this fingerprint should be put in
 };
 
-
-
 /**
  * Data content of the cuckoo filter.
  */
 struct __attribute__((__packed__)) cuckoo_filter_data_t {
-	cuckoo_index_t bucketCountLog2; // we save the log2 value since bucket_count needs to be a power of 2.
+	cuckoo_index_t bucketCountLog2;  // we save the log2 value since bucket_count needs to be a power of 2.
 	cuckoo_index_t nestsPerBucket;
 	cuckoo_extended_fingerprint_t victim;
 	cuckoo_fingerprint_t bucketArray[];  // 'flexible array member'

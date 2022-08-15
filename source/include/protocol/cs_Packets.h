@@ -226,24 +226,23 @@ union __attribute__((__packed__)) switch_state_t {
 
 /**
  * Switch command values.
- *
- * We could also write this as struct with 7 bits value,
- * and 1 bit that determines whether the value is switch value (0-100), or a special value (enum).
  */
-enum SwitchCommandValue : uint8_t {
-	CS_SWITCH_CMD_VAL_OFF = 0,
-	// Dimmed from 1 - 99
-	CS_SWITCH_CMD_VAL_FULLY_ON                 = 100,
-	CS_SWITCH_CMD_VAL_NONE                     = 128,  // For printing: the value is set to nothing.
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_ALL          = 129,
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG          = 130,
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE     = 131,
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132,
+constexpr uint8_t CS_SWITCH_CMD_VAL_OFF                      = 0;
+constexpr uint8_t CS_SWITCH_CMD_VAL_FULLY_ON                 = 100;
+constexpr uint8_t CS_SWITCH_CMD_VAL_NONE                     = 128;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_ALL          = 129;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG          = 130;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE     = 131;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132;
 
-	CS_SWITCH_CMD_VAL_TOGGLE    = 253,  // Switch OFF when currently on, switch to SMART_ON when currently off.
-	CS_SWITCH_CMD_VAL_BEHAVIOUR = 254,  // Switch to the value according to behaviour rules.
-	CS_SWITCH_CMD_VAL_SMART_ON  = 255   // Switch on, the value will be determined by behaviour rules.
-};
+//! Switch OFF when currently on, switch to SMART_ON when currently off.
+constexpr uint8_t CS_SWITCH_CMD_VAL_TOGGLE                   = 253;
+
+//! Switch to the value according to behaviour rules.
+constexpr uint8_t CS_SWITCH_CMD_VAL_BEHAVIOUR                = 254;
+
+//! Switch on, the value will be determined by behaviour rules.
+constexpr uint8_t CS_SWITCH_CMD_VAL_SMART_ON                 = 255;
 
 /**
  * A single multi switch item.
@@ -552,7 +551,6 @@ struct __attribute__((packed)) cs_gpio_update_t {
 	uint8_t length;
 	uint8_t* buf;
 };
-
 
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;
 

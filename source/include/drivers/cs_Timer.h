@@ -10,11 +10,11 @@
 #include <cfg/cs_Config.h>
 
 extern "C" {
-#include <components/libraries/timer/app_timer.h>
 #include <components/libraries/scheduler/app_scheduler.h>
+#include <components/libraries/timer/app_timer.h>
 }
 
-#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000/hz)
+#define HZ_TO_TICKS(hz) APP_TIMER_TICKS(1000 / hz)
 #define MS_TO_TICKS(ms) APP_TIMER_TICKS(ms)
 
 /** Timer on top of the timer peripheral.
@@ -54,10 +54,8 @@ public:
 	void reset(app_timer_id_t& timer_handle, uint32_t ticks, void* obj);
 
 private:
-	Timer() {};
+	Timer(){};
 
 	Timer(Timer const&);
-	void operator=(Timer const &);
-
+	void operator=(Timer const&);
 };
-

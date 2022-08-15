@@ -22,7 +22,7 @@ public:
 
 	void setStack(Stack* stack);
 
-	void onBleEvent(ble_evt_t * p_ble_evt);
+	void onBleEvent(ble_evt_t* p_ble_evt);
 
 	void manualStartScan();
 	void manualStopScan();
@@ -41,10 +41,9 @@ public:
 	//! stop scan immediately (no results will be sent)
 	void stop();
 
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 private:
-
 	enum SCAN_OP_CODE {
 		SCAN_START,
 		SCAN_STOP,
@@ -61,8 +60,8 @@ private:
 
 	uint16_t _scanCount;
 
-	app_timer_t              _appTimerData;
-	app_timer_id_t           _appTimerId;
+	app_timer_t _appTimerData;
+	app_timer_id_t _appTimerId;
 
 	Stack* _stack;
 
@@ -72,4 +71,3 @@ private:
 
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 };
-

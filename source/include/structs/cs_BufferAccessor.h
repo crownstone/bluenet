@@ -18,7 +18,7 @@ public:
 	/**
 	 * Default destructor
 	 */
-	virtual ~BufferAccessor() {};
+	virtual ~BufferAccessor(){};
 
 	/**
 	 * Assign the buffer used to hold the data.
@@ -34,18 +34,16 @@ public:
 	 *
 	 * @return                    Maximum size of the buffer in bytes.
 	 */
-	virtual cs_buffer_size_t getBufferSize() const = 0;
+	virtual cs_buffer_size_t getBufferSize() const                           = 0;
 
 	/**
 	 * Get the size of the serialized data in the buffer.
 	 *
 	 * @return                    Size of the serialized data in bytes.
 	 */
-	virtual cs_buffer_size_t getSerializedSize() const = 0;
+	virtual cs_buffer_size_t getSerializedSize() const                       = 0;
 
-	virtual cs_buffer_size_t getRemainingCapacity() const {
-		return getBufferSize() - getSerializedSize();
-	}
+	virtual cs_buffer_size_t getRemainingCapacity() const { return getBufferSize() - getSerializedSize(); }
 
 	/**
 	 * Get the pointer to the buffer.
@@ -54,4 +52,3 @@ public:
 	 */
 	virtual cs_data_t getSerializedBuffer() = 0;
 };
-

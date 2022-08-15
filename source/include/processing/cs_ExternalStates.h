@@ -51,6 +51,7 @@ public:
 	 * To be called every EVT_TICK.
 	 */
 	void tick(TYPIFY(EVT_TICK) tickCount);
+
 private:
 	cs_external_state_item_t* _states;
 

@@ -15,7 +15,7 @@
  * Currently has hard coded values, so it's really plug and play.
  * It also serves as an example usage.
  */
-class TestCrownstoneCentral: EventListener {
+class TestCrownstoneCentral : EventListener {
 public:
 	TestCrownstoneCentral();
 	void init();
@@ -27,8 +27,8 @@ public:
 	void writeGetPowerSamples();
 	void disconnect();
 
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
+
 private:
 	uint8_t _writeStep = 0;
 };
-
