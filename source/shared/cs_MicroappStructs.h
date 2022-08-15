@@ -97,6 +97,8 @@ enum MicroappSdkAck {
 	CS_ACK_ERR_TOO_LARGE       = -0x0A,  // Request or its parameters are too large
 };
 
+typedef MicroappSdkAck microapp_result_t;
+
 /**
  * The main opcodes for microapp commands.
  */
@@ -112,10 +114,8 @@ enum MicroappSdkType {
 	CS_MICROAPP_SDK_TYPE_POWER_USAGE     = 0x08,  // Power usage related
 	CS_MICROAPP_SDK_TYPE_PRESENCE        = 0x09,  // Presence related
 	CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND = 0x0A,  // Generic control command according to the control command protocol
-	CS_MICROAPP_SDK_TYPE_YIELD = 0x0B,  // Microapp yielding to bluenet without expecting a direct return call, i.e. at
-										// the end of setup, loop or during a delay
-	CS_MICROAPP_SDK_TYPE_CONTINUE =
-			0x0C,  // Bluenet calling the microapp without an interrupt, i.e. on a tick or subsequent call
+	CS_MICROAPP_SDK_TYPE_YIELD           = 0x0B,  // Microapp yielding to bluenet without expecting a direct return call
+	CS_MICROAPP_SDK_TYPE_CONTINUE        = 0x0C,  // Bluenet calling the microapp on a tick or subsequent call
 };
 
 /**
@@ -136,6 +136,7 @@ enum MicroappSdkLogType {
  * Flags for logging. Currently only using a newline flag
  */
 enum MicroappSdkLogFlags {
+	CS_MICROAPP_SDK_LOG_FLAG_CLEAR   = 0,
 	CS_MICROAPP_SDK_LOG_FLAG_NEWLINE = (1 << 0),  // Add a newline character
 };
 
@@ -203,8 +204,8 @@ enum MicroappSdkPinActionType {
  * Value to either read from the pin or write to the pin
  */
 enum MicroappSdkPinValue {
+	CS_MICROAPP_SDK_PIN_OFF = 0x00,
 	CS_MICROAPP_SDK_PIN_ON  = 0x01,
-	CS_MICROAPP_SDK_PIN_OFF = 0x02,
 };
 
 /**
@@ -232,7 +233,8 @@ enum MicroappSdkTwiType {
  * Flags for TWI requests
  */
 enum MicroappSdkTwiFlags {
-	CS_MICROAPP_SDK_TWI_FLAG_STOP = (1 << 0),  // Stop bit
+	CS_MICROAPP_SDK_TWI_FLAG_CLEAR = 0,
+	CS_MICROAPP_SDK_TWI_FLAG_STOP  = (1 << 0),  // Stop bit
 };
 
 /**
@@ -297,7 +299,7 @@ struct __attribute__((packed)) bluenet_io_buffer_t {
 	io_buffer_t bluenet2microapp;
 };
 
-typedef uint16_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffer_t*);
+typedef microapp_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffer_t*);
 
 /*
  * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
@@ -350,7 +352,7 @@ static_assert(sizeof(microapp_sdk_log_header_t) <= MICROAPP_SDK_LOG_HEADER_SIZE)
 
 // Char
 struct __attribute__((packed)) microapp_sdk_log_char_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	uint8_t value;
 };
 
@@ -358,7 +360,7 @@ static_assert(sizeof(microapp_sdk_log_char_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Short
 struct __attribute__((packed)) microapp_sdk_log_short_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	uint16_t value;
 };
 
@@ -366,7 +368,7 @@ static_assert(sizeof(microapp_sdk_log_short_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Uint
 struct __attribute__((packed)) microapp_sdk_log_uint_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	uint32_t value;
 };
 
@@ -374,7 +376,7 @@ static_assert(sizeof(microapp_sdk_log_uint_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Int
 struct __attribute__((packed)) microapp_sdk_log_int_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	int32_t value;
 };
 
@@ -382,7 +384,7 @@ static_assert(sizeof(microapp_sdk_log_int_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Float
 struct __attribute__((packed)) microapp_sdk_log_float_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	float value;
 };
 
@@ -390,7 +392,7 @@ static_assert(sizeof(microapp_sdk_log_float_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Double
 struct __attribute__((packed)) microapp_sdk_log_double_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	double value;
 };
 
@@ -398,7 +400,7 @@ static_assert(sizeof(microapp_sdk_log_double_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // String
 struct __attribute__((packed)) microapp_sdk_log_string_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	char str[MICROAPP_SDK_MAX_STRING_LENGTH];
 };
 
@@ -406,7 +408,7 @@ static_assert(sizeof(microapp_sdk_log_string_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Char array
 struct __attribute__((packed)) microapp_sdk_log_array_t {
-	microapp_sdk_log_header_t log_header;
+	microapp_sdk_log_header_t logHeader;
 	char arr[MICROAPP_SDK_MAX_ARRAY_SIZE];
 };
 
