@@ -5,16 +5,16 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cstring>
-#include <cstdlib>
-#include <logging/cs_Logger.h>
 #include "structs/buffer/cs_CharacteristicBuffer.h"
+
+#include <logging/cs_Logger.h>
+
+#include <cstdlib>
+#include <cstring>
+
 #include "util/cs_Error.h"
 
-
-CharacteristicBuffer::CharacteristicBuffer() {
-
-}
+CharacteristicBuffer::CharacteristicBuffer() {}
 
 CharacteristicBuffer::~CharacteristicBuffer() {
 	if (_buffer) {
@@ -24,13 +24,13 @@ CharacteristicBuffer::~CharacteristicBuffer() {
 
 void CharacteristicBuffer::alloc(cs_buffer_size_t size) {
 	LOGd("Allocate buffer [%d]", size);
-	_size = size + CS_CHAR_BUFFER_DEFAULT_OFFSET;
+	_size   = size + CS_CHAR_BUFFER_DEFAULT_OFFSET;
 	_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
 	LOGd("buffer: %p", _buffer);
 }
 
 void CharacteristicBuffer::clear() {
-//		LOGd("clear");
+	//		LOGd("clear");
 	if (_buffer) {
 		memset(_buffer, 0, _size);
 	}
@@ -41,7 +41,8 @@ bool CharacteristicBuffer::lock() {
 	if (!_locked) {
 		_locked = true;
 		return true;
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -51,7 +52,8 @@ bool CharacteristicBuffer::unlock() {
 	if (_locked) {
 		_locked = false;
 		return true;
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -65,7 +67,7 @@ cs_data_t CharacteristicBuffer::getBuffer(cs_buffer_size_t offset) {
 	assert(offset <= _size, "Invalid arguments");
 	cs_data_t data;
 	data.data = _buffer + offset;
-	data.len = _size - offset;
+	data.len  = _size - offset;
 	return data;
 }
 

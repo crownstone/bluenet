@@ -23,7 +23,7 @@ struct coroutine_args_t {
  * Interrupt service routines for pins as registered by the microapp.
  */
 struct microapp_pin_isr_t {
-	uint8_t pin = 0;
+	uint8_t pin     = 0;
 	bool registered = false;
 };
 
@@ -32,7 +32,7 @@ struct microapp_pin_isr_t {
  */
 struct microapp_ble_isr_t {
 	MicroappBleEventType type;
-	uint8_t id = 0;
+	uint8_t id      = 0;
 	bool registered = false;
 };
 
@@ -40,7 +40,7 @@ struct microapp_ble_isr_t {
  * Interrupt service routines for received mesh events as registered by the microapp.
  */
 struct microapp_mesh_isr_t {
-	uint8_t id = 0;
+	uint8_t id      = 0;
 	bool registered = false;
 };
 
@@ -55,12 +55,12 @@ private:
 	 */
 	MicroappController();
 	MicroappController(MicroappController const&);
-	void operator=(MicroappController const&);
+	void operator                                          =(MicroappController const&);
 
 	/**
 	 * Limit maximum number of to be registered service routines for the microapp.
 	 */
-	static const uint8_t MICROAPP_MAX_PIN_ISR_COUNT = 8;
+	static const uint8_t MICROAPP_MAX_PIN_ISR_COUNT        = 8;
 
 	/**
 	 * Limit maximum number of to be registered service routines for the microapp.
@@ -69,12 +69,12 @@ private:
 	 * - device connected
 	 * - device disconnected
 	 */
-	static const uint8_t MICROAPP_MAX_BLE_ISR_COUNT = 3;
+	static const uint8_t MICROAPP_MAX_BLE_ISR_COUNT        = 3;
 
 	/**
 	 * Limit the number of callbacks in a tick (if -1) there is no limit.
 	 */
-	const int8_t MAX_CALLBACKS_WITHIN_A_TICK = 10;
+	const int8_t MAX_CALLBACKS_WITHIN_A_TICK               = 10;
 
 	/**
 	 * The maximum number of consecutive calls to a microapp.

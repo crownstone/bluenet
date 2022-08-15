@@ -115,5 +115,4 @@ public:
 	 * Handle commands from the microapp
 	 */
 	cs_ret_code_t handleMicroappCommand(microapp_cmd_t* cmd);
-
 };

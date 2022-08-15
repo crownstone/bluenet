@@ -17,10 +17,10 @@ void UartProtocol::unEscape(uint8_t& val) {
 	val ^= UART_ESCAPE_FLIP_MASK;
 }
 
-uint16_t UartProtocol::crc16(const uint8_t * data, uint16_t size) {
+uint16_t UartProtocol::crc16(const uint8_t* data, uint16_t size) {
 	return crc16_compute(data, size, NULL);
 }
 
-void UartProtocol::crc16(const uint8_t * data, const uint16_t size, uint16_t& crc) {
+void UartProtocol::crc16(const uint8_t* data, const uint16_t size, uint16_t& crc) {
 	crc = crc16_compute(data, size, &crc);
 }

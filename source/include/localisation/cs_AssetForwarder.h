@@ -9,10 +9,8 @@
 
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
 #include <localisation/cs_AssetHandler.h>
 #include <localisation/cs_AssetRecord.h>
-
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
 /**
@@ -47,7 +45,6 @@ public:
 	 */
 	void clearOutbox();
 
-
 	/**
 	 * Prepare a CS_MESH_MODEL_TYPE_ASSET_RSSI_MAC message and put it
 	 * on the outbox. If an identical message is already contained in
@@ -66,7 +63,8 @@ public:
 	 *
 	 * Returns true if there was enough space in the outbox to place the message. Else, false.
 	 */
-	bool sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
+	bool sendAssetIdToMesh(
+			asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask);
 
 	/**
 	 * sets how many ticks will be added to records upon sending a message.
@@ -115,7 +113,6 @@ private:
 	 */
 	bool dispatchOutboxMessage(outbox_msg_t& outMsg);
 
-
 	/**
 	 * Returns an empty slot in the outbox.
 	 * Returns null pointer when there is no empty slot.
@@ -145,9 +142,8 @@ private:
 	void forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId);
 
 public:
-
 	/**
 	 * Forwards relevant incoming mesh messages to UART.
 	 */
-	virtual void handleEvent(event_t & event);
+	virtual void handleEvent(event_t& event);
 };

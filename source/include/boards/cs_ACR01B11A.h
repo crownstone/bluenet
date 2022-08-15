@@ -50,63 +50,63 @@
  * Hence, the voltage multiplier (from ADC values to volts RMS) is 0.19355.
  */
 void asACR01B11A(boards_config_t* config) {
-	config->pinDimmer                          = 8; // Actually red LED, but the dimmer pin is N.C.
-	config->pinRelayOn                         = 15;
-	config->pinRelayOff                        = 13;
+	config->pinDimmer                       = 8;  // Actually red LED, but the dimmer pin is N.C.
+	config->pinRelayOn                      = 15;
+	config->pinRelayOff                     = 13;
 
-	config->pinAinCurrent[GAIN_LOW]            = GpioToAin(2);
-	config->pinAinCurrent[GAIN_HIGH]           = GpioToAin(3);
+	config->pinAinCurrent[GAIN_LOW]         = GpioToAin(2);
+	config->pinAinCurrent[GAIN_HIGH]        = GpioToAin(3);
 
-	config->pinAinVoltage[GAIN_LOW]            = GpioToAin(31);
-	config->pinAinVoltage[GAIN_HIGH]           = GpioToAin(29);
+	config->pinAinVoltage[GAIN_LOW]         = GpioToAin(31);
+	config->pinAinVoltage[GAIN_HIGH]        = GpioToAin(29);
 
-	config->pinAinZeroRef                      = GpioToAin(5);
-	config->pinAinDimmerTemp                   = GpioToAin(4);
+	config->pinAinZeroRef                   = GpioToAin(5);
+	config->pinAinDimmerTemp                = GpioToAin(4);
 
-	config->pinRx                              = 22;
-	config->pinTx                              = 20;
+	config->pinRx                           = 22;
+	config->pinTx                           = 20;
 
-	config->pinGpio[0]                         = 24;
-	config->pinGpio[1]                         = GetGpioPin(1, 0);
-	config->pinGpio[2]                         = GetGpioPin(1, 2);
-	config->pinGpio[3]                         = GetGpioPin(1, 4);
+	config->pinGpio[0]                      = 24;
+	config->pinGpio[1]                      = GetGpioPin(1, 0);
+	config->pinGpio[2]                      = GetGpioPin(1, 2);
+	config->pinGpio[3]                      = GetGpioPin(1, 4);
 
-	config->pinLed[LED_RED]                    = 8;
-	config->pinLed[LED_GREEN]                  = GetGpioPin(1, 9);
+	config->pinLed[LED_RED]                 = 8;
+	config->pinLed[LED_GREEN]               = GetGpioPin(1, 9);
 
-	config->flags.dimmerInverted               = true;
-	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = false;
-	config->flags.ledInverted                  = false;
-	config->flags.dimmerTempInverted           = true;
-	config->flags.usesNfcPins                  = false;
-	config->flags.canTryDimmingOnBoot          = false;
-	config->flags.canDimOnWarmBoot             = false;
-	config->flags.dimmerOnWhenPinsFloat        = true;
+	config->flags.dimmerInverted            = true;
+	config->flags.enableUart                = false;
+	config->flags.enableLeds                = false;
+	config->flags.ledInverted               = false;
+	config->flags.dimmerTempInverted        = true;
+	config->flags.usesNfcPins               = false;
+	config->flags.canTryDimmingOnBoot       = false;
+	config->flags.canDimOnWarmBoot          = false;
+	config->flags.dimmerOnWhenPinsFloat     = true;
 
-	config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+	config->deviceType                      = DEVICE_CROWNSTONE_PLUG_ONE;
 
 	// All the values below are just copied from configuration values from other hardware and should be adjusted.
-	config->voltageMultiplier[GAIN_SINGLE]     = 0.19355f;
-	config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
-	config->voltageOffset[GAIN_SINGLE]         = 0;
+	config->voltageMultiplier[GAIN_SINGLE]  = 0.19355f;
+	config->currentMultiplier[GAIN_SINGLE]  = 0.00385f;
+	config->voltageOffset[GAIN_SINGLE]      = 0;
 
-	config->currentOffset[GAIN_LOW]            = -270;
-	config->currentOffset[GAIN_HIGH]           = -270;
+	config->currentOffset[GAIN_LOW]         = -270;
+	config->currentOffset[GAIN_HIGH]        = -270;
 
-	config->powerOffsetMilliWatt               = 9000;
+	config->powerOffsetMilliWatt            = 9000;
 
 	// ADC values [-2048, 2047] map to [REF - 1.8V, REF + 1.8V].
-	config->voltageAdcRangeMilliVolt           = 1800;
+	config->voltageAdcRangeMilliVolt        = 1800;
 
 	// ADC values [-2048, 2047] map to [REF - 0.6V, REF + 0.6V].
-	config->currentAdcRangeMilliVolt           = 600;
+	config->currentAdcRangeMilliVolt        = 600;
 
-	config->pwmTempVoltageThreshold            = 0.3639;
-	config->pwmTempVoltageThresholdDown        = 0.3135;
+	config->pwmTempVoltageThreshold         = 0.3639;
+	config->pwmTempVoltageThresholdDown     = 0.3135;
 
-	config->minTxPower                         = -20;
+	config->minTxPower                      = -20;
 
-	config->scanWindowUs                       = config->scanIntervalUs;
-	config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                    = config->scanIntervalUs;
+	config->tapToToggleDefaultRssiThreshold = -35;
 }

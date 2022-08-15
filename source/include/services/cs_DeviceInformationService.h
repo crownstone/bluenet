@@ -6,8 +6,8 @@
  */
 #pragma once
 
-#include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
+#include <ble/cs_Service.h>
 
 /** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
  */

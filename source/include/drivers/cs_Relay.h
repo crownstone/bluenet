@@ -42,8 +42,6 @@ private:
 	uint8_t _pinRelayDebug;
 	bool _ledInverted;
 
-    bool turnOn();
-    bool turnOff();
+	bool turnOn();
+	bool turnOff();
 };
-
-

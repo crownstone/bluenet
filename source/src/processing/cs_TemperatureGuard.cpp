@@ -9,14 +9,10 @@
 #include <processing/cs_TemperatureGuard.h>
 #include <storage/cs_State.h>
 
-TemperatureGuard::TemperatureGuard() :
-		_appTimerId(NULL),
-		_maxChipTemp(g_MAX_CHIP_TEMPERATURE),
-		_comp(NULL)
-	{
-		_appTimerData = { {0} };
-		_appTimerId = &_appTimerData;
-	}
+TemperatureGuard::TemperatureGuard() : _appTimerId(NULL), _maxChipTemp(g_MAX_CHIP_TEMPERATURE), _comp(NULL) {
+	_appTimerData = {{0}};
+	_appTimerId   = &_appTimerData;
+}
 
 // This callback is decoupled from interrupt
 void comp_event_callback(CompEvent_t event) {
@@ -33,28 +29,22 @@ void TemperatureGuard::init(const boards_config_t& boardConfig) {
 	_comp = &COMP::getInstance();
 	TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP) pwmTempThresholdUp;
 	TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN) pwmTempThresholdDown;
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp, sizeof(pwmTempThresholdUp));
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown, sizeof(pwmTempThresholdDown));
+	State::getInstance().get(
+			CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp, sizeof(pwmTempThresholdUp));
+	State::getInstance().get(
+			CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown, sizeof(pwmTempThresholdDown));
 	_comp->init(boardConfig.pinAinDimmerTemp, pwmTempThresholdDown, pwmTempThresholdUp, nullptr);
 
 	_lastChipTempEvent = CS_TYPE::EVT_CHIP_TEMP_OK;
-	_lastPwmTempEvent = CS_TYPE::EVT_DIMMER_TEMP_OK;
+	_lastPwmTempEvent  = CS_TYPE::EVT_DIMMER_TEMP_OK;
 }
-
 
 void TemperatureGuard::handleCompEvent(CompEvent_t event) {
 	switch (event) {
-		case COMP_EVENT_DOWN:
-			LOGd("down");
-			break;
-		case COMP_EVENT_UP:
-			LOGd("up");
-			break;
-		case COMP_EVENT_CROSS:
-			LOGd("cross");
-			break;
-		default:
-			break;
+		case COMP_EVENT_DOWN: LOGd("down"); break;
+		case COMP_EVENT_UP: LOGd("up"); break;
+		case COMP_EVENT_CROSS: LOGd("cross"); break;
+		default: break;
 	}
 }
 
@@ -84,7 +74,6 @@ void TemperatureGuard::tick() {
 		EventDispatcher::getInstance().dispatch(event);
 		_lastChipTempEvent = curEvent;
 	}
-
 
 	// Check PWM temperature, send event if it changed
 	bool compVal = _comp->sample();
@@ -118,7 +107,6 @@ void TemperatureGuard::tick() {
 
 	scheduleNextTick();
 }
-
 
 void TemperatureGuard::scheduleNextTick() {
 	Timer::getInstance().start(_appTimerId, HZ_TO_TICKS(TEMPERATURE_UPDATE_FREQUENCY), this);

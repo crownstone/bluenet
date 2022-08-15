@@ -6,12 +6,12 @@
  */
 #pragma once
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 /** BaseClass
  */
-template<uint8_t N=1>
+template <uint8_t N = 1>
 class BaseClass {
 public:
 	BaseClass() {
@@ -20,19 +20,12 @@ public:
 		}
 	}
 
-	inline bool isInitialized(uint8_t i = 0) {
-		return _initialized[i];
-	}
+	inline bool isInitialized(uint8_t i = 0) { return _initialized[i]; }
 
-	inline void setInitialized(uint8_t i = 0) {
-		_initialized[i] = true;
-	}
+	inline void setInitialized(uint8_t i = 0) { _initialized[i] = true; }
 
-	inline void setUninitialized(uint8_t i = 0) {
-		_initialized[i] = false;
-	}
+	inline void setUninitialized(uint8_t i = 0) { _initialized[i] = false; }
 
 private:
 	bool _initialized[N];
 };
-

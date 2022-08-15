@@ -49,88 +49,77 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "app_error.h"
+#include "app_error_weak.h"
+#include "bootloader/cs_MemoryLayout.h"
+#include "cfg/cs_Boards.h"
+#include "cfg/cs_DeviceTypes.h"
+#include "cs_BootloaderConfig.h"
 #include "cs_GpRegRetConfig.h"
-#include "nrf_mbr.h"
+#include "drivers/cs_Uicr.h"
+#include "ipc/cs_IpcRamData.h"
 #include "nrf_bootloader.h"
 #include "nrf_bootloader_app_start.h"
 #include "nrf_bootloader_dfu_timers.h"
+#include "nrf_bootloader_info.h"
+#include "nrf_delay.h"
 #include "nrf_dfu.h"
+#include "nrf_gpio.h"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-#include "app_error.h"
-#include "app_error_weak.h"
-#include "nrf_bootloader_info.h"
-#include "nrf_delay.h"
-#include "nrf_gpio.h"
-#include "cfg/cs_Boards.h"
-#include "cfg/cs_DeviceTypes.h"
+#include "nrf_mbr.h"
 #include "nrf_nvmc.h"
-#include "ipc/cs_IpcRamData.h"
-#include "cs_BootloaderConfig.h"
-#include "bootloader/cs_MemoryLayout.h"
-#include "drivers/cs_Uicr.h"
 #include "protocol/cs_ErrorCodes.h"
 
-static void on_error(void)
-{
-    NRF_LOG_FINAL_FLUSH();
+static void on_error(void) {
+	NRF_LOG_FINAL_FLUSH();
 
 #if NRF_MODULE_ENABLED(NRF_LOG_BACKEND_RTT)
-    // To allow the buffer to be flushed by the host.
-    nrf_delay_ms(100);
+	// To allow the buffer to be flushed by the host.
+	nrf_delay_ms(100);
 #endif
 #ifdef NRF_DFU_DEBUG_VERSION
-    NRF_BREAKPOINT_COND;
+	NRF_BREAKPOINT_COND;
 #endif
-    NVIC_SystemReset();
+	NVIC_SystemReset();
 }
 
-
-void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name)
-{
-    NRF_LOG_ERROR("%s:%d", p_file_name, line_num);
-    on_error();
+void app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t* p_file_name) {
+	NRF_LOG_ERROR("%s:%d", p_file_name, line_num);
+	on_error();
 }
 
-
-void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
-{
-    NRF_LOG_ERROR("Received a fault! id: 0x%08x, pc: 0x%08x, info: 0x%08x", id, pc, info);
-    on_error();
+void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info) {
+	NRF_LOG_ERROR("Received a fault! id: 0x%08x, pc: 0x%08x, info: 0x%08x", id, pc, info);
+	on_error();
 }
 
-
-void app_error_handler_bare(uint32_t error_code)
-{
-    NRF_LOG_ERROR("Received an error: 0x%08x!", error_code);
-    on_error();
+void app_error_handler_bare(uint32_t error_code) {
+	NRF_LOG_ERROR("Received an error: 0x%08x!", error_code);
+	on_error();
 }
 
 /**
  * @brief Function notifies certain events in DFU process.
  */
-static void dfu_observer(nrf_dfu_evt_type_t evt_type)
-{
-    switch (evt_type)
-    {
-        case NRF_DFU_EVT_DFU_FAILED:
-        case NRF_DFU_EVT_DFU_ABORTED:
-        case NRF_DFU_EVT_DFU_INITIALIZED:
-//            bsp_board_init(BSP_INIT_LEDS);
-//            bsp_board_led_on(BSP_BOARD_LED_0);
-//            bsp_board_led_on(BSP_BOARD_LED_1);
-//            bsp_board_led_off(BSP_BOARD_LED_2);
-            break;
-        case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
-//            bsp_board_led_off(BSP_BOARD_LED_1);
-//            bsp_board_led_on(BSP_BOARD_LED_2);
-            break;
-        case NRF_DFU_EVT_DFU_STARTED:
-            break;
-        default:
-            break;
-    }
+static void dfu_observer(nrf_dfu_evt_type_t evt_type) {
+	switch (evt_type) {
+		case NRF_DFU_EVT_DFU_FAILED:
+		case NRF_DFU_EVT_DFU_ABORTED:
+		case NRF_DFU_EVT_DFU_INITIALIZED:
+			//            bsp_board_init(BSP_INIT_LEDS);
+			//            bsp_board_led_on(BSP_BOARD_LED_0);
+			//            bsp_board_led_on(BSP_BOARD_LED_1);
+			//            bsp_board_led_off(BSP_BOARD_LED_2);
+			break;
+		case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
+			//            bsp_board_led_off(BSP_BOARD_LED_1);
+			//            bsp_board_led_on(BSP_BOARD_LED_2);
+			break;
+		case NRF_DFU_EVT_DFU_STARTED: break;
+		default: break;
+	}
 }
 
 /**
@@ -147,7 +136,7 @@ void cs_gpio_init(boards_config_t* board) {
 		}
 	}
 
-//	if (IS_CROWNSTONE(board->deviceType)) {
+	//	if (IS_CROWNSTONE(board->deviceType)) {
 	// Turn dimmer off.
 	if (board->pinDimmer != PIN_NONE) {
 		nrf_gpio_cfg_output(board->pinDimmer);
@@ -173,15 +162,15 @@ void cs_gpio_init(boards_config_t* board) {
 		nrf_gpio_cfg_output(board->pinRelayOn);
 		nrf_gpio_pin_clear(board->pinRelayOn);
 	}
-//	}
+	//	}
 }
 
 /** See cs_GpRegRet.h */
 void cs_check_gpregret() {
 	uint32_t gpregret = NRF_POWER->GPREGRET;
-	bool start_dfu = false;
-	uint32_t counter = gpregret & CS_GPREGRET_COUNTER_MASK;
-//	uint32_t flags = gpregret & (~CS_GPREGRET_RESET_COUNTER_MASK);
+	bool start_dfu    = false;
+	uint32_t counter  = gpregret & CS_GPREGRET_COUNTER_MASK;
+	//	uint32_t flags = gpregret & (~CS_GPREGRET_RESET_COUNTER_MASK);
 	NRF_LOG_INFO("GPREGRET=%u counter=%u", gpregret, counter);
 
 	if (gpregret == CS_GPREGRET_LEGACY_DFU_RESET) {
@@ -200,9 +189,9 @@ void cs_check_gpregret() {
 	}
 	else {
 		// Increase counter, but maintain flags.
-//		counter += 1;
-//		gpregret = flags | counter;
-//		NRF_POWER->GPREGRET = gpregret;
+		//		counter += 1;
+		//		gpregret = flags | counter;
+		//		NRF_POWER->GPREGRET = gpregret;
 		NRF_POWER->GPREGRET = gpregret + 1;
 	}
 
@@ -219,15 +208,15 @@ void set_bootloader_info() {
 	NRF_LOG_FLUSH();
 
 	bluenet_ipc_bootloader_data_t bootloader_data;
-	bootloader_data.protocol = g_BOOTLOADER_IPC_RAM_PROTOCOL;
+	bootloader_data.protocol    = g_BOOTLOADER_IPC_RAM_PROTOCOL;
 	bootloader_data.dfu_version = g_BOOTLOADER_DFU_VERSION;
-	bootloader_data.major = g_BOOTLOADER_VERSION_MAJOR;
-	bootloader_data.minor = g_BOOTLOADER_VERSION_MINOR;
-	bootloader_data.patch = g_BOOTLOADER_VERSION_PATCH;
-	bootloader_data.prerelease = g_BOOTLOADER_VERSION_PRERELEASE;
-	bootloader_data.build_type = g_BOOTLOADER_BUILD_TYPE;
+	bootloader_data.major       = g_BOOTLOADER_VERSION_MAJOR;
+	bootloader_data.minor       = g_BOOTLOADER_VERSION_MINOR;
+	bootloader_data.patch       = g_BOOTLOADER_VERSION_PATCH;
+	bootloader_data.prerelease  = g_BOOTLOADER_VERSION_PRERELEASE;
+	bootloader_data.build_type  = g_BOOTLOADER_BUILD_TYPE;
 
-	uint8_t size = sizeof(bootloader_data);
+	uint8_t size                = sizeof(bootloader_data);
 
 	// should not happen but we don't want asserts in the bootloader, so we just truncate the struct
 	if (size > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
@@ -236,22 +225,20 @@ void set_bootloader_info() {
 	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)&bootloader_data, size);
 }
 
-
 /**
  * Round up val to the next page boundary (from nrf_dfu_utils.h)
  */
 #define ALIGN_TO_PAGE(val) ALIGN_NUM((CODE_PAGE_SIZE), (val))
 
 /**@brief Function for application main entry. */
-int main(void)
-{
+int main(void) {
 	uint32_t ret_val;
 
 	boards_config_t board = {};
 	configure_board(&board);
 	cs_gpio_init(&board);
 
-	(void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
+	(void)NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 
 	NRF_LOG_INFO("Reset reason: %u", NRF_POWER->RESETREAS);
@@ -273,8 +260,8 @@ int main(void)
 	ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE);
 	APP_ERROR_CHECK(ret_val);
 #endif
-//	ret_val = nrf_bootloader_flash_protect(0, ALIGN_TO_PAGE(BOOTLOADER_START_ADDR + BOOTLOADER_SIZE), false);
-//	APP_ERROR_CHECK(ret_val);
+	//	ret_val = nrf_bootloader_flash_protect(0, ALIGN_TO_PAGE(BOOTLOADER_START_ADDR + BOOTLOADER_SIZE), false);
+	//	APP_ERROR_CHECK(ret_val);
 
 	set_bootloader_info();
 
@@ -284,7 +271,8 @@ int main(void)
 	// Need to adjust dfu_enter_check().
 	// Or we can simply use NRF_BL_DFU_ENTER_METHOD_GPREGRET
 	// and set GPREGRET to (BOOTLOADER_DFU_GPREGRET_MASK | BOOTLOADER_DFU_START_BIT_MASK) to start enter dfu mode.
-	// See https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/group__nrf__bootloader__config.html
+	// See
+	// https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/group__nrf__bootloader__config.html
 	ret_val = nrf_bootloader_init(dfu_observer);
 	APP_ERROR_CHECK(ret_val);
 

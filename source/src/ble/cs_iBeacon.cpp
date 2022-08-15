@@ -7,10 +7,10 @@
 
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Strings.h>
-#include <algorithm> // for reverse copy
 
-IBeacon::IBeacon(cs_uuid128_t uuid, uint16_t major, uint16_t minor,
-		int8_t rssi) {
+#include <algorithm>  // for reverse copy
+
+IBeacon::IBeacon(cs_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi) {
 	// advertisement indicator for an iBeacon is defined as 0x0215
 	_params.adv_indicator = CsUtils::convertEndian16(0x0215);
 	setUUID(uuid);

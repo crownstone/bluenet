@@ -7,12 +7,13 @@
 
 #pragma once
 
-#include "events/cs_EventListener.h"
 #include "common/cs_Types.h"
+#include "events/cs_EventListener.h"
 
 class MultiSwitchHandler : public EventListener {
 private:
 	MultiSwitchHandler();
+
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static MultiSwitchHandler& getInstance() {
@@ -25,8 +26,8 @@ public:
 	void init();
 	void handleMultiSwitch(internal_multi_switch_item_t* cmd, cmd_source_with_counter_t& source);
 	// Handle events as EventListener
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
+
 private:
 	stone_id_t _ownId = 0;
 };
-

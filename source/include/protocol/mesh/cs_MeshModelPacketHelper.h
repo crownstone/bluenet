@@ -7,10 +7,10 @@
 
 #pragma once
 
+#include <protocol/cs_CommandTypes.h>
+#include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <structs/cs_PacketsInternal.h>
-#include <protocol/cs_Typedefs.h>
-#include <protocol/cs_CommandTypes.h>
 
 namespace MeshUtil {
 
@@ -63,7 +63,12 @@ size16_t getMeshMessageSize(size16_t payloadSize);
  * @param[in]      meshMsgSize    Size of allocated the mesh message.
  * @retval                        True on success.
  */
-bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t meshMsgSize);
+bool setMeshMessage(
+		cs_mesh_model_msg_type_t type,
+		const uint8_t* payload,
+		size16_t payloadSize,
+		uint8_t* meshMsg,
+		size16_t meshMsgSize);
 
 /**
  * Set payload of a mesh message.
@@ -94,4 +99,4 @@ EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel);
 uint8_t getShortenedSource(const cmd_source_with_counter_t& source);
 cmd_source_with_counter_t getInflatedSource(uint8_t sourceId);
 
-}
+}  // namespace MeshUtil

@@ -15,8 +15,8 @@
 #include <mesh/cs_MeshModelMulticast.h>
 #include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshModelMulticastNeighbours.h>
-#include <mesh/cs_MeshModelUnicast.h>
 #include <mesh/cs_MeshModelSelector.h>
+#include <mesh/cs_MeshModelUnicast.h>
 #include <mesh/cs_MeshMsgHandler.h>
 #include <mesh/cs_MeshMsgSender.h>
 #include <mesh/cs_MeshScanner.h>
@@ -96,7 +96,7 @@ public:
 	void startSync();
 
 	/** Internal usage */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 private:
 	//! Constructor, singleton, thus made private
@@ -106,24 +106,24 @@ private:
 	Mesh(Mesh const&) = delete;
 
 	//! Assignment operator, singleton, thus made private
-	Mesh& operator=(Mesh const &) = delete;
+	Mesh& operator=(Mesh const&) = delete;
 
-	MeshCore*                     _core;
-	MeshModelMulticast            _modelMulticast;
-	MeshModelMulticastNeighbours  _modelMulticastNeighbours;
-	MeshModelMulticastAcked       _modelMulticastAcked;
-	MeshModelUnicast              _modelUnicast;
-	MeshModelSelector             _modelSelector;
-	MeshMsgHandler                _msgHandler;
-	MeshMsgSender                 _msgSender;
-	MeshAdvertiser                _advertiser;
-	MeshScanner                   _scanner;
+	MeshCore* _core;
+	MeshModelMulticast _modelMulticast;
+	MeshModelMulticastNeighbours _modelMulticastNeighbours;
+	MeshModelMulticastAcked _modelMulticastAcked;
+	MeshModelUnicast _modelUnicast;
+	MeshModelSelector _modelSelector;
+	MeshMsgHandler _msgHandler;
+	MeshMsgSender _msgSender;
+	MeshAdvertiser _advertiser;
+	MeshScanner _scanner;
 
-	BOOL _enabled = true;
+	BOOL _enabled                 = true;
 
 	// Sync request
-	bool _synced = false;
-	uint32_t _syncCountdown = -1;
+	bool _synced                  = false;
+	uint32_t _syncCountdown       = -1;
 	uint32_t _syncFailedCountdown = 0;
 
 	/**
@@ -133,9 +133,11 @@ private:
 	 * Assumes all event handlers that are interested in obtaining data are registered
 	 * with the event dispatcher.
 	 *
-	 * @param [propagateSyncMessageOverMesh] if set to false no mesh messages will be sent. (Use this internally to check if device is synced.)
-	 * 
-	 * @return true  When request was necessary. If propagateSyncMessageOverMesh is true, a mesh message will be sent to resolve the sync.
+	 * @param [propagateSyncMessageOverMesh] if set to false no mesh messages will be sent. (Use this internally to
+	 * check if device is synced.)
+	 *
+	 * @return true  When request was necessary. If propagateSyncMessageOverMesh is true, a mesh message will be sent to
+	 * resolve the sync.
 	 * @return false When nothing had to be requested, so everything is synced.
 	 */
 	bool requestSync(bool propagateSyncMessageOverMesh = true);

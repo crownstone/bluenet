@@ -5,13 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #pragma once
 
-
 #include <localisation/cs_AssetFilterPacketAccessors.h>
-#include <util/cs_FilterInterface.h>
 #include <structs/cs_PacketsInternal.h>
+#include <util/cs_FilterInterface.h>
 
 /**
  * Class that contains all data required for an asset filter:
@@ -50,7 +48,6 @@ public:
 
 	bool isValid() override;
 
-
 	// ================
 	// Scan based utils
 	// ================
@@ -68,7 +65,6 @@ public:
 	 * filterInputResult will return false in that case.)
 	 */
 	asset_id_t getAssetId(const scanned_device_t& asset);
-
 
 private:
 	/**

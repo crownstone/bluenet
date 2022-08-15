@@ -9,7 +9,6 @@
 
 // -------------------
 
-
 void Component::setParent(Component* p) {
 	_parent = p;
 }
@@ -26,7 +25,7 @@ cs_ret_code_t Component::initChildren() {
 	parentAllChildren();
 
 	for (Component* child : getChildren()) {
-		if(child == nullptr) {
+		if (child == nullptr) {
 			continue;
 		}
 

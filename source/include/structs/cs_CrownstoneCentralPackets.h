@@ -7,9 +7,10 @@
 
 #pragma once
 
-#include <cstdint>
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_ResultPacketAccessor.h>
+
+#include <cstdint>
 
 // Commands
 

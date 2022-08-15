@@ -14,18 +14,17 @@
 #define LOGScannerDebug LOGvv
 #define LOGScannerVerbose LOGvv
 
-Scanner::Scanner() :
-	_opCode(SCAN_START),
-	_scanning(false),
-	_running(false),
-	_scanDuration(g_SCAN_DURATION),
-	_scanBreakDuration(g_SCAN_BREAK_DURATION),
-	_scanCount(0),
-	_appTimerId(NULL),
-	_stack(NULL)
-{
-	_appTimerData = { {0} };
-	_appTimerId = &_appTimerData;
+Scanner::Scanner()
+		: _opCode(SCAN_START)
+		, _scanning(false)
+		, _running(false)
+		, _scanDuration(g_SCAN_DURATION)
+		, _scanBreakDuration(g_SCAN_BREAK_DURATION)
+		, _scanCount(0)
+		, _appTimerId(NULL)
+		, _stack(NULL) {
+	_appTimerData = {{0}};
+	_appTimerId   = &_appTimerData;
 }
 
 void Scanner::init() {
@@ -47,7 +46,7 @@ void Scanner::manualStartScan() {
 		return;
 	}
 
-//	LOGi(FMT_INIT, "scan result");
+	//	LOGi(FMT_INIT, "scan result");
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
@@ -85,11 +84,12 @@ void Scanner::staticTick(Scanner* ptr) {
 
 void Scanner::start() {
 	if (!_running) {
-		_running = true;
+		_running   = true;
 		_scanCount = 0;
-		_opCode = SCAN_START;
+		_opCode    = SCAN_START;
 		executeScan();
-	} else {
+	}
+	else {
 		LOGi(FMT_ALREADY "scanning");
 	}
 }
@@ -97,11 +97,12 @@ void Scanner::start() {
 void Scanner::delayedStart(uint16_t delay) {
 	if (!_running) {
 		LOGi("delayed start by %d ms", delay);
-		_running = true;
+		_running   = true;
 		_scanCount = 0;
-		_opCode = SCAN_START;
+		_opCode    = SCAN_START;
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(delay), this);
-	} else {
+	}
+	else {
 		LOGd(FMT_ALREADY "scanning");
 	}
 }
@@ -113,15 +114,17 @@ void Scanner::delayedStart() {
 void Scanner::stop() {
 	if (_running) {
 		_running = false;
-		_opCode = SCAN_STOP;
+		_opCode  = SCAN_STOP;
 		LOGi("Force STOP");
 		manualStopScan();
 		// no need to execute scan on stop is there? we want to stop after all
-	//	executeScan();
-	//	_running = false;
-	} else if (_scanning) {
+		//	executeScan();
+		//	_running = false;
+	}
+	else if (_scanning) {
 		manualStopScan();
-	} else {
+	}
+	else {
 		LOGi(STR_ERR_ALREADY_STOPPED);
 	}
 }
@@ -155,10 +158,9 @@ void Scanner::executeScan() {
 			break;
 		}
 	}
-
 }
 
-void Scanner::handleEvent(event_t & event) {
+void Scanner::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::CONFIG_SCAN_DURATION: {
 			_scanDuration = *(TYPIFY(CONFIG_SCAN_DURATION)*)event.data;

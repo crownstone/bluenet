@@ -55,10 +55,8 @@ private:
 	TYPIFY(STATE_SOFT_ON_SPEED) _softOnSpeed;
 
 	bool _initialized = false;
-	bool _started = false;
-	bool _enabled = false;
+	bool _started     = false;
+	bool _enabled     = false;
 
 	void enable();
 };
-
-

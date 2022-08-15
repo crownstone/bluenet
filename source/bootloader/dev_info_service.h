@@ -7,5 +7,3 @@
 #pragma once
 
 void dev_info_service_init(void);
-
-

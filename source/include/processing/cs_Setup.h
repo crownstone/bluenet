@@ -10,9 +10,10 @@
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
-#include <cstdint>
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventListener.h>
+
+#include <cstdint>
 
 // All the state variables that are expected to be written to flash.
 enum SetupConfigBit {
@@ -57,7 +58,7 @@ public:
 	cs_ret_code_t handleCommand(cs_data_t data);
 
 	// Handle events as EventListener
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 private:
 	Setup();
@@ -65,7 +66,7 @@ private:
 	// Used to check if all state variables are written to flash.
 	uint32_t _successfullyStoredBitmask = 0;
 
-	void setWithCheck(const CS_TYPE& type, void *value, const size16_t size);
+	void setWithCheck(const CS_TYPE& type, void* value, const size16_t size);
 	void onStorageDone(const CS_TYPE& type);
 	void setNormalMode();
 

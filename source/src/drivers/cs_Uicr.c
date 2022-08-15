@@ -7,11 +7,9 @@
 
 #include <cs_SharedConfig.h>
 #include <drivers/cs_Uicr.h>
-#include <protocol/cs_ErrorCodes.h>
-
 #include <nrf_nvmc.h>
 #include <nrf_sdh.h>
-
+#include <protocol/cs_ErrorCodes.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -43,7 +41,7 @@ cs_ret_code_t enableNfcPinsAsGpio() {
 		return ERR_WRONG_STATE;
 	}
 	if (NRF_UICR->NFCPINS & 1) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0xFFFFFFFE);
+		nrf_nvmc_write_word((uint32_t) & (NRF_UICR->NFCPINS), 0xFFFFFFFE);
 	}
 	return ERR_SUCCESS;
 }
@@ -51,7 +49,6 @@ cs_ret_code_t enableNfcPinsAsGpio() {
 bool canUseNfcPinsAsGpio() {
 	return (NRF_UICR->NFCPINS & 1) == 0;
 }
-
 
 /**
  * Checks whether a value can be written to UICR, but does not check if UICR is writable at all.
@@ -87,26 +84,23 @@ cs_ret_code_t _clearUicr() {
 		return ERR_WRONG_STATE;
 	}
 
-
 	// In order to clear the UICR, we can only clear the whole UICR, including fields used by nordic.
 	// So we have to first copy the nordic contents to RAM, clear UICR, and copy back.
 
 	// Based on the following post, but using nrf_nvmc functions where we can.
 	// https://devzone.nordicsemi.com/f/nordic-q-a/18199/dfu---updating-from-legacy-sdk-v11-0-0-bootloader-to-secure-sdk-v12-x-0-bootloader
 
-
 	// First block, contains all UICR->NRFFW[] and UICR->NRFHW.
 	const uint32_t startAddress = 0x10001014;
 	const uint32_t endAddress   = 0x10001080;
-	const int bufSize = (endAddress - startAddress) / sizeof(uint32_t);
+	const int bufSize           = (endAddress - startAddress) / sizeof(uint32_t);
 	uint32_t buffer[bufSize];
 
 	// Second block, contains all UICR fields after the UICR->CUSTOMER[].
 	const uint32_t startAddress2 = 0x10001200;
 	const uint32_t endAddress2   = 0x10001210;
-	const int bufSize2 = (endAddress2 - startAddress2) / sizeof(uint32_t);
+	const int bufSize2           = (endAddress2 - startAddress2) / sizeof(uint32_t);
 	uint32_t buffer2[bufSize];
-
 
 	CRITICAL_REGION_ENTER();
 
@@ -123,17 +117,18 @@ cs_ret_code_t _clearUicr() {
 		address++;
 	}
 
-    // Enable erase.
-    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Een;
-    __ISB();
-    __DSB();
+	// Enable erase.
+	NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Een;
+	__ISB();
+	__DSB();
 
-    // Erase the page
-    NRF_NVMC->ERASEUICR = NVMC_ERASEUICR_ERASEUICR_Erase << NVMC_ERASEUICR_ERASEUICR_Pos;
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy) {}
+	// Erase the page
+	NRF_NVMC->ERASEUICR = NVMC_ERASEUICR_ERASEUICR_Erase << NVMC_ERASEUICR_ERASEUICR_Pos;
+	while (NRF_NVMC->READY == NVMC_READY_READY_Busy) {
+	}
 
-    // Unlike nrf_nvmc_page_erase() we don't have to enable read here,
-    // as the next thing we do is go into write mode.
+	// Unlike nrf_nvmc_page_erase() we don't have to enable read here,
+	// as the next thing we do is go into write mode.
 
 	// Write the cached UICR contents back to the UICR.
 	nrf_nvmc_write_words(startAddress, buffer, bufSize);
@@ -155,9 +150,9 @@ cs_ret_code_t getUicr(cs_uicr_data_t* uicrData) {
 cs_ret_code_t setUicr(const cs_uicr_data_t* uicrData, bool overwrite) {
 	// First check if every field can be written to UICR, we don't want a partial write.
 	if (!_canSetUicrField(uicrData->board, g_HARDWARE_BOARD_ADDRESS)
-			|| !_canSetUicrField(uicrData->productRegionFamily.asInt, g_FAMILY_MARKET_TYPE_ADDRESS)
-			|| !_canSetUicrField(uicrData->majorMinorPatch.asInt, g_MAJOR_MINOR_PATCH_ADDRESS)
-			|| !_canSetUicrField(uicrData->productionDateHousing.asInt, g_PROD_DATE_HOUSING_ADDRESS)) {
+		|| !_canSetUicrField(uicrData->productRegionFamily.asInt, g_FAMILY_MARKET_TYPE_ADDRESS)
+		|| !_canSetUicrField(uicrData->majorMinorPatch.asInt, g_MAJOR_MINOR_PATCH_ADDRESS)
+		|| !_canSetUicrField(uicrData->productionDateHousing.asInt, g_PROD_DATE_HOUSING_ADDRESS)) {
 		if (!overwrite) {
 			return ERR_ALREADY_EXISTS;
 		}

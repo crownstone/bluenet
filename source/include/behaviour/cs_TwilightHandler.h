@@ -6,10 +6,9 @@
  */
 #pragma once
 
+#include <behaviour/cs_BehaviourStore.h>
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
-#include <behaviour/cs_BehaviourStore.h>
 #include <presence/cs_PresenceDescription.h>
 #include <time/cs_Time.h>
 
@@ -68,10 +67,10 @@ private:
 	/**
 	 * Is this handler active?
 	 */
-	bool _isActive = true;
+	bool _isActive                               = true;
 
 	/**
 	 * cached reference to the behaviour store. (obtained at init)
 	 */
-	BehaviourStore* _behaviourStore = nullptr;
+	BehaviourStore* _behaviourStore              = nullptr;
 };

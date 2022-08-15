@@ -17,7 +17,6 @@
  * and provide read/write access to the buffer according to the protocol.
  */
 
-
 /**
  * Class that determines the input data for a filter or for the output.
  */
@@ -29,14 +28,14 @@ public:
 	/**
 	 * Get the type of input.
 	 */
-	AssetFilterInputType*           type();
+	AssetFilterInputType* type();
 
 	/**
 	 * Get the payload for type AdDataType.
 	 *
 	 * @return nullptr if type is not AdDataType.
 	 */
-	ad_data_type_selector_t*        AdTypeField();
+	ad_data_type_selector_t* AdTypeField();
 
 	/**
 	 * Get the payload for type MaskedAdDataType.
@@ -74,7 +73,7 @@ public:
 	 *
 	 * Currently only valid if type is assetId. Do not use for other output types!
 	 */
-	AssetFilterInput         inFormat();
+	AssetFilterInput inFormat();
 
 	/**
 	 * Returns true if inFormat() is safe to use.
@@ -85,7 +84,6 @@ public:
 	 * Checks if the data has valid values.
 	 */
 	bool isValid();
-
 
 	/**
 	 * Get the expected length of this class, depends on type.
@@ -181,4 +179,3 @@ public:
 	 */
 	size_t length();
 };
-

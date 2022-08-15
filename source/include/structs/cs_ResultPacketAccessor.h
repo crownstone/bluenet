@@ -6,13 +6,14 @@
  */
 #pragma once
 
-#include <cstdint>
 #include <cfg/cs_StaticConfig.h>
 #include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_BufferAccessor.h>
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Error.h>
+
+#include <cstdint>
 
 /**
  * Default payload size for a result packet.
@@ -21,14 +22,12 @@
 static const size_t CS_RESULT_PACKET_DEFAULT_PAYLOAD_SIZE = (g_CS_CHAR_READ_BUF_SIZE - sizeof(result_packet_header_t));
 
 template <cs_buffer_size_t PAYLOAD_SIZE = CS_RESULT_PACKET_DEFAULT_PAYLOAD_SIZE>
-class ResultPacketAccessor: BufferAccessor {
+class ResultPacketAccessor : BufferAccessor {
 public:
 	/**
 	 * Only set or get fields when this instance is initialized.
 	 */
-	bool isInitialized() const {
-		return _buffer != NULL;
-	}
+	bool isInitialized() const { return _buffer != NULL; }
 
 	/**
 	 * Get the protocol version.
@@ -87,7 +86,7 @@ public:
 		checkInitialized();
 		cs_data_t data;
 		data.data = _buffer->payload;
-		data.len = getPayloadSize();
+		data.len  = getPayloadSize();
 		return data;
 	}
 
@@ -175,7 +174,7 @@ public:
 		checkInitialized();
 		cs_data_t data;
 		data.data = (buffer_ptr_t)_buffer;
-		data.len = getSerializedSize();
+		data.len  = getSerializedSize();
 		return data;
 	}
 
@@ -185,9 +184,7 @@ protected:
 	 */
 	result_packet_t<PAYLOAD_SIZE>* _buffer;
 
-	void checkInitialized() const {
-		assert(isInitialized(), "Buffer not initialized");
-	}
+	void checkInitialized() const { assert(isInitialized(), "Buffer not initialized"); }
 
 private:
 };

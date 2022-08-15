@@ -9,8 +9,8 @@
 
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
-#include <cfg/cs_Config.h>
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
@@ -91,16 +91,16 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappCommand(microapp_cmd_t* cmd)
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
-			MicroappController& controller = MicroappController::getInstance();
+			uint8_t emptyInterruptSlots                       = soft_interrupt_cmd->emptyInterruptSlots;
+			MicroappController& controller                    = MicroappController::getInstance();
 			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
 			LOGv("Soft interrupt received (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_DROPPED: {
 			microapp_soft_interrupt_cmd_t* soft_interrupt_cmd = reinterpret_cast<microapp_soft_interrupt_cmd_t*>(cmd);
-			uint8_t emptyInterruptSlots = soft_interrupt_cmd->emptyInterruptSlots;
-			MicroappController& controller = MicroappController::getInstance();
+			uint8_t emptyInterruptSlots                       = soft_interrupt_cmd->emptyInterruptSlots;
+			MicroappController& controller                    = MicroappController::getInstance();
 			controller.setEmptySoftInterruptSlots(emptyInterruptSlots);
 			LOGi("Soft interrupt dropped (id=%i) [slots=%i]", (int)cmd->id, emptyInterruptSlots);
 			break;
@@ -191,7 +191,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappLogCommand(microapp_log_cmd_
 		case CS_MICROAPP_COMMAND_LOG_STR: {
 			[[maybe_unused]] microapp_log_string_cmd_t* cmd = reinterpret_cast<microapp_log_string_cmd_t*>(command);
 			// Enforce a zero-byte at the end before we log
-			uint8_t zeroByteIndex = MAX_MICROAPP_STRING_LENGTH - 1;
+			uint8_t zeroByteIndex                           = MAX_MICROAPP_STRING_LENGTH - 1;
 			if (command->length < zeroByteIndex) {
 				zeroByteIndex = command->length;
 			}
@@ -227,7 +227,8 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappDelayCommand(microapp_delay_
 cs_ret_code_t MicroappCommandHandler::handleMicroappPinCommand(microapp_pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
 	if (pin > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
-		LOGw("Pin %i out of range", pin); return ERR_UNKNOWN_TYPE;
+		LOGw("Pin %i out of range", pin);
+		return ERR_UNKNOWN_TYPE;
 	}
 	CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
 	switch (opcode1) {
@@ -245,9 +246,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinSetModeCommand(microapp_p
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
 	switch (opcode2) {
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
-			gpio.pull = 1;
-			[[ fallthrough ]];
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP: gpio.pull = 1; [[fallthrough]];
 		case CS_MICROAPP_COMMAND_PIN_READ: {
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
 			switch (val) {
@@ -317,11 +316,14 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappPinActionCommand(microapp_pi
 			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP: // undefined, can only be used with opcode1 CS_MICROAPP_COMMAND_PIN_MODE
-			LOGw("Input pullup undefined as a pin action command"); return ERR_UNSPECIFIED;
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:  // undefined, can only be used with opcode1
+													// CS_MICROAPP_COMMAND_PIN_MODE
+			LOGw("Input pullup undefined as a pin action command");
+			return ERR_UNSPECIFIED;
 		case CS_MICROAPP_COMMAND_PIN_READ: {
 			// TODO; (note that we do not handle event handler registration here but in SetMode above
-			LOGw("Reading pins via the microapp is not implemented yet"); return ERR_NOT_IMPLEMENTED;
+			LOGw("Reading pins via the microapp is not implemented yet");
+			return ERR_NOT_IMPLEMENTED;
 		}
 		default: LOGw("Unknown opcode2: %i", pin_cmd->opcode2); return ERR_UNKNOWN_OP_CODE;
 	}
@@ -441,7 +443,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappBleCommand(microapp_ble_cmd_
 			return ERR_NOT_AVAILABLE;
 #endif
 			MicroappController& controller = MicroappController::getInstance();
-			ble_cmd->header.ack = controller.registerSoftInterruptSlotBle(ble_cmd->id);
+			ble_cmd->header.ack            = controller.registerSoftInterruptSlotBle(ble_cmd->id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_BLE_SCAN_START: {
@@ -549,7 +551,8 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 				LOGv("Send mesh message to %i", cmd->stoneId);
 				eventData.idCount   = 1;
 				eventData.targetIds = &(cmd->stoneId);
-			} else {
+			}
+			else {
 				LOGv("Broadcast mesh message");
 			}
 			eventData.flags.flags.broadcast   = broadcast;
@@ -570,7 +573,7 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 		case CS_MICROAPP_COMMAND_MESH_READ_SET_HANDLER: {
 			LOGi("Starting to scan for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
-			command->header.ack = controller.registerSoftInterruptSlotMesh(command->header.id);
+			command->header.ack            = controller.registerSoftInterruptSlotMesh(command->header.id);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_MESH_GET_INFO: {
@@ -578,8 +581,8 @@ cs_ret_code_t MicroappCommandHandler::handleMicroappMeshCommand(microapp_mesh_cm
 			TYPIFY(CONFIG_CROWNSTONE_ID) id;
 			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 			microapp_mesh_info_cmd_t* info_cmd = reinterpret_cast<microapp_mesh_info_cmd_t*>(command);
-			info_cmd->stoneId = id;
-			info_cmd->meshHeader.header.ack = true;
+			info_cmd->stoneId                  = id;
+			info_cmd->meshHeader.header.ack    = true;
 			break;
 		}
 		default: {

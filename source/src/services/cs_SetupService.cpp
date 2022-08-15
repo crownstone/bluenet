@@ -10,6 +10,7 @@
 #include <cs_GpRegRetConfig.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
+#include <nrf_soc.h>
 #include <processing/cs_CommandHandler.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
@@ -17,12 +18,7 @@
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <util/cs_BleError.h>
 
-#include <nrf_soc.h>
-
-SetupService::SetupService() :
-	_macAddressCharacteristic(NULL),
-	_setupKeyCharacteristic(NULL)
-{
+SetupService::SetupService() : _macAddressCharacteristic(NULL), _setupKeyCharacteristic(NULL) {
 	setUUID(UUID(SETUP_UUID));
 	setName(BLE_SERVICE_SETUP);
 }
@@ -30,13 +26,13 @@ SetupService::SetupService() :
 void SetupService::createCharacteristics() {
 	LOGi(FMT_SERVICE_INIT "Setup");
 
-	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
+	cs_data_t writeBuf     = CharacteristicWriteBuffer::getInstance().getBuffer();
 	_controlPacketAccessor = new ControlPacketAccessor<>();
 	_controlPacketAccessor->assign(writeBuf.data, writeBuf.len);
 	addControlCharacteristic(writeBuf.data, writeBuf.len, SETUP_CONTROL_UUID, SETUP);
 	LOGi(FMT_CHAR_ADD STR_CHAR_CONTROL);
 
-	cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
+	cs_data_t readBuf     = CharacteristicReadBuffer::getInstance().getBuffer();
 	_resultPacketAccessor = new ResultPacketAccessor<>();
 	_resultPacketAccessor->assign(readBuf.data, readBuf.len);
 	addResultCharacteristic(readBuf.data, readBuf.len, SETUP_RESULT_UUID, SETUP);
@@ -90,7 +86,7 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 	_setupKeyCharacteristic->setValueLength(0);
 }
 
-void SetupService::handleEvent(event_t & event) {
+void SetupService::handleEvent(event_t& event) {
 	// make sure the session key is populated.
 	CrownstoneService::handleEvent(event);
 	switch (event.type) {
@@ -103,7 +99,7 @@ void SetupService::handleEvent(event_t & event) {
 			}
 			break;
 		}
-		default: {}
+		default: {
+		}
 	}
 }
-

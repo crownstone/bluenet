@@ -13,5 +13,4 @@ void CrownstoneManufacturer::toArray(uint8_t* array) {
 void CrownstoneManufacturer::parse(uint8_t* array, uint16_t len) {
 
 	_params.deviceType = *array;
-
 }

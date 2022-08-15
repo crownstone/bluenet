@@ -7,13 +7,14 @@
 
 #pragma once
 
-#include <cstdint>
 #include <events/cs_EventListener.h>
-#include <map>
 #include <protocol/cs_MeshTopologyPackets.h>
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Coroutine.h>
 #include <util/cs_Variance.h>
+
+#include <cstdint>
+#include <map>
 
 /**
  * This class/component keeps track of the rssi distance of a
@@ -48,20 +49,20 @@ public:
 	void init();
 
 private:
-	stone_id_t my_id = 0xff;
+	stone_id_t my_id                                                     = 0xff;
 
 	// stores the relevant history, per neighbor stone_id.
-	static constexpr uint8_t CHANNEL_COUNT = 3;
-	static constexpr uint8_t CHANNEL_START = 37;
+	static constexpr uint8_t CHANNEL_COUNT                               = 3;
+	static constexpr uint8_t CHANNEL_START                               = 37;
 
 	// TODO: change maps to object for small ram memory footprint optimization
-	std::map<stone_id_t,VarianceAggregator> variance_map[CHANNEL_COUNT] = {};
+	std::map<stone_id_t, VarianceAggregator> variance_map[CHANNEL_COUNT] = {};
 
 	// will be set to true by coroutine to flush data after startup.
-	bool boot_sequence_finished = false;
+	bool boot_sequence_finished                                          = false;
 
 	// loop variables to keep track of outside of coroutine for the burst loop
-	stone_id_t last_stone_id_broadcasted_in_burst = 0;
+	stone_id_t last_stone_id_broadcasted_in_burst                        = 0;
 
 	// --------------- Coroutine parameters ---------------
 
@@ -94,15 +95,15 @@ private:
 
 	static constexpr TimingSettings Settings = {
 #ifdef DEBUG
-		.min_samples_to_trigger_burst = 20,
-		.burst_period_ms = 500,
-		.accumulation_period_ms = 2 * 60 * 1000,
-		.boot_sequence_period_ms = 1 * 60 * 1000
+			.min_samples_to_trigger_burst = 20,
+			.burst_period_ms              = 500,
+			.accumulation_period_ms       = 2 * 60 * 1000,
+			.boot_sequence_period_ms      = 1 * 60 * 1000
 #else
-		.min_samples_to_trigger_burst = 20,
-		.burst_period_ms = 5,
-		.accumulation_period_ms = 30 * 60 * 1000,
-		.boot_sequence_period_ms = 1 * 60 * 1000,
+			.min_samples_to_trigger_burst = 20,
+			.burst_period_ms              = 5,
+			.accumulation_period_ms       = 30 * 60 * 1000,
+			.boot_sequence_period_ms      = 1 * 60 * 1000,
 #endif
 	};
 
@@ -181,7 +182,6 @@ private:
 	 * Assumes mesh_msg_event is of type CS_MESH_MODEL_TYPE_RSSI_DATA.
 	 */
 	void receiveRssiDataMessage(MeshMsgEvent& mesh_msg_evt);
-
 
 	// ------------- recording mesh messages -------------
 

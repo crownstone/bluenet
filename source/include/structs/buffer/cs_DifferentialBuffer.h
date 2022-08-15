@@ -7,10 +7,12 @@
 
 #pragma once
 
+#include <logging/cs_Logger.h>
+
 #include <cstdlib>
+
 #include "common/cs_Types.h"
 #include "util/cs_BleError.h"
-#include <logging/cs_Logger.h>
 
 /** Struct with dynamic length, used by StackBuffer class.
  */
@@ -26,7 +28,7 @@ struct __attribute__((__packed__)) differential_buffer_t {
 	T lastVal;
 
 	/** Pointer to the array storing the difference of elements compared to the previous element */
-	int8_t array[1]; // Dummy length
+	int8_t array[1];  // Dummy length
 };
 
 /** Struct with fixed length, useful when sending as payload.
@@ -44,9 +46,8 @@ struct __attribute__((__packed__)) differential_buffer_fixed_t {
 	T lastVal;
 
 	/** Pointer to the array storing the difference of elements compared to the previous element */
-	int8_t array[S-1];
+	int8_t array[S - 1];
 };
-
 
 /** Differential Buffer implementation
  * @param T primitive type such as uint8_t
@@ -57,16 +58,13 @@ struct __attribute__((__packed__)) differential_buffer_fixed_t {
 template <typename T>
 class DifferentialBuffer {
 public:
+	DifferentialBuffer(uint16_t capacity) : _buffer(NULL), _capacity(capacity), _allocatedSelf(false) {}
 
-	DifferentialBuffer(uint16_t capacity): _buffer(NULL), _capacity(capacity), _allocatedSelf(false) {
-	}
+	virtual ~DifferentialBuffer() {}
 
-	virtual ~DifferentialBuffer() {
-	}
-
-	uint16_t getMaxByteSize(uint16_t capacity) { return 2 + 2*sizeof(T) + capacity-1; }
+	uint16_t getMaxByteSize(uint16_t capacity) { return 2 + 2 * sizeof(T) + capacity - 1; }
 	uint16_t getMaxByteSize() { return getMaxByteSize(_capacity); }
-	uint16_t getMaxSize(uint16_t byteSize) { return byteSize - 2 - 2*sizeof(T) + 1; }
+	uint16_t getMaxSize(uint16_t byteSize) { return byteSize - 2 - 2 * sizeof(T) + 1; }
 
 	bool init() {
 		if (_buffer != NULL) {
@@ -78,7 +76,7 @@ public:
 			LOGw("Could not allocate memory");
 			return false;
 		}
-//		LOGd("Allocated memory at %u", _buffer);
+		//		LOGd("Allocated memory at %u", _buffer);
 		_allocatedSelf = true;
 		// Also call clear to make sure we start with a clean buffer
 		clear();
@@ -90,7 +88,7 @@ public:
 			free(_buffer);
 		}
 		_allocatedSelf = false;
-		_buffer = NULL;
+		_buffer        = NULL;
 		return true;
 	}
 
@@ -100,8 +98,8 @@ public:
 			LOGd("%u < %u", getMaxSize(bufferSize), _capacity);
 			return false;
 		}
-//		LOGd("assign at %u", buffer);
-		_buffer = (differential_buffer_t<T>*) buffer;
+		//		LOGd("assign at %u", buffer);
+		_buffer = (differential_buffer_t<T>*)buffer;
 		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
@@ -115,45 +113,32 @@ public:
 		return true;
 	}
 
-	differential_buffer_t<T>* getBuffer() {
-		return _buffer;
-	}
+	differential_buffer_t<T>* getBuffer() { return _buffer; }
 
-	void clear() {
-		_buffer->length = 0;
-	}
+	void clear() { _buffer->length = 0; }
 
-	uint16_t size() const {
-		return _buffer->length;
-	}
+	uint16_t size() const { return _buffer->length; }
 
-	uint16_t capacity() const {
-		return _capacity;
-	}
+	uint16_t capacity() const { return _capacity; }
 
-	bool empty() const {
-		return _buffer->length == 0;
-	}
+	bool empty() const { return _buffer->length == 0; }
 
-	bool full() const {
-		return size() >= _capacity;
-	}
-
+	bool full() const { return size() >= _capacity; }
 
 	bool push(T value) {
 		if (full()) {
 			return false;
 		}
-//		LOGd("push %u at %u buffer=%u", value, _buffer->length, _buffer);
+		//		LOGd("push %u at %u buffer=%u", value, _buffer->length, _buffer);
 		if (empty()) {
 			_buffer->firstVal = value;
-			_buffer->lastVal = value;
-			_buffer->length = 1;
+			_buffer->lastVal  = value;
+			_buffer->length   = 1;
 			return true;
 		}
 
 		int32_t diff = (int32_t)value - _buffer->lastVal;
-//		LOGd("diff=%i", diff);
+		//		LOGd("diff=%i", diff);
 		if (diff > 127 || diff < -127) {
 			LOGw("diff too large! %u - %u", value, _buffer->lastVal);
 			clear();
@@ -192,11 +177,11 @@ public:
 			return false;
 		}
 		if (index == 0) {
-//			LOGd("getVal %u", index);
+			//			LOGd("getVal %u", index);
 			value = _buffer->firstVal;
 			return true;
 		}
-//		LOGd("getVal %u diff=%i buffer=%u array=%u", index, _buffer->array[index - 1], _buffer, _buffer->array);
+		//		LOGd("getVal %u diff=%i buffer=%u array=%u", index, _buffer->array[index - 1], _buffer, _buffer->array);
 		value += _buffer->array[index - 1];
 		return true;
 	}

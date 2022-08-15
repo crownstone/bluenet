@@ -7,17 +7,19 @@
 
 #pragma once
 
+#include <logging/cs_Logger.h>
+
 #include <cstdlib>
+
 #include "common/cs_Types.h"
 #include "util/cs_BleError.h"
-#include <logging/cs_Logger.h>
 
 /** Struct with dynamic length, used by StackBuffer class.
  */
 template <typename T>
 struct __attribute__((__packed__)) stack_buffer_t {
 	uint16_t length;
-	T array[1]; //! Dummy size
+	T array[1];  //! Dummy size
 };
 
 /** Struct with fixed length, useful when sending as payload.
@@ -32,15 +34,13 @@ struct __attribute__((__packed__)) stack_buffer_fixed_t {
 template <typename T>
 class StackBuffer {
 public:
-	StackBuffer(uint16_t capacity): _buffer(NULL), _capacity(capacity), _allocatedSelf(false) {
-	}
+	StackBuffer(uint16_t capacity) : _buffer(NULL), _capacity(capacity), _allocatedSelf(false) {}
 
-	virtual ~StackBuffer() {
-	}
+	virtual ~StackBuffer() {}
 
 	uint16_t getMaxByteSize(uint16_t capacity) { return 2 + capacity * sizeof(T); }
 	uint16_t getMaxByteSize() { return getMaxByteSize(_capacity); }
-	uint16_t getMaxSize(uint16_t byteSize) { return (byteSize-2) / sizeof(T); }
+	uint16_t getMaxSize(uint16_t byteSize) { return (byteSize - 2) / sizeof(T); }
 
 	bool init() {
 		if (_buffer != NULL) {
@@ -52,7 +52,7 @@ public:
 			LOGw("Could not allocate memory");
 			return false;
 		}
-//		LOGd("Allocated memory at %u", _buffer);
+		//		LOGd("Allocated memory at %u", _buffer);
 		_allocatedSelf = true;
 		// Also call clear to make sure we start with a clean buffer
 		clear();
@@ -64,7 +64,7 @@ public:
 			free(_buffer);
 		}
 		_allocatedSelf = false;
-		_buffer = NULL;
+		_buffer        = NULL;
 		return true;
 	}
 
@@ -73,8 +73,8 @@ public:
 			LOGd("Could not assign at %u", buffer);
 			return false;
 		}
-		_buffer = (stack_buffer_t<T>*) buffer;
-//		LOGd("assign at %u array=%u", buffer, _buffer->array);
+		_buffer = (stack_buffer_t<T>*)buffer;
+		//		LOGd("assign at %u array=%u", buffer, _buffer->array);
 		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
@@ -88,35 +88,23 @@ public:
 		return true;
 	}
 
-	stack_buffer_t<T>* getBuffer() {
-		return _buffer;
-	}
+	stack_buffer_t<T>* getBuffer() { return _buffer; }
 
-	void clear() {
-		_buffer->length = 0;
-	}
+	void clear() { _buffer->length = 0; }
 
-	uint16_t size() const {
-		return _buffer->length;
-	}
+	uint16_t size() const { return _buffer->length; }
 
-	uint16_t capacity() const {
-		return _capacity;
-	}
+	uint16_t capacity() const { return _capacity; }
 
-	bool empty() const {
-		return (_buffer->length == 0);
-	}
+	bool empty() const { return (_buffer->length == 0); }
 
-	bool full() const {
-		return (size() >= _capacity);
-	}
+	bool full() const { return (size() >= _capacity); }
 
 	bool push(T value) {
 		if (full()) {
 			return false;
 		}
-//		LOGd("push %u at %u buffer=%u array=%u", value, _buffer->length, _buffer, _buffer->array);
+		//		LOGd("push %u at %u buffer=%u array=%u", value, _buffer->length, _buffer, _buffer->array);
 		_buffer->array[_buffer->length++] = value;
 		return true;
 	}
@@ -128,7 +116,7 @@ public:
 
 	T operator[](uint16_t idx) const {
 		assert(idx < size(), "Index too large");
-//		LOGd("get %u buffer=%u array=%u", idx, _buffer, _buffer->array);
+		//		LOGd("get %u buffer=%u array=%u", idx, _buffer, _buffer->array);
 		return _buffer->array[idx];
 	}
 

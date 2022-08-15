@@ -17,8 +17,8 @@
 /** Setup Service for the Crownstone
  *
  */
-class SetupService: public CrownstoneService {
-    public:
+class SetupService : public CrownstoneService {
+public:
 	/** Setup Service derivces from Crownstone Service.
 	 */
 	SetupService();
@@ -30,16 +30,14 @@ class SetupService: public CrownstoneService {
 	 */
 	void createCharacteristics();
 
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
-    protected:
-
+protected:
 	inline void addMacAddressCharacteristic();
 
 	inline void addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-    private:
-
+private:
 	// stores the MAC address of the devices to be used for mesh message handling
 	ble_gap_addr_t _myAddr;
 

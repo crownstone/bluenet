@@ -55,7 +55,7 @@ public:
 	bool isAllBitsSet();
 
 protected:
-	uint8_t _numBits = 0;
+	uint8_t _numBits  = 0;
 
 	/**
 	 * Bitmask.
@@ -73,5 +73,3 @@ protected:
 	 */
 	uint8_t getNumBytes(uint8_t numBits);
 };
-
-

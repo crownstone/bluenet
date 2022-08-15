@@ -315,9 +315,9 @@ ret_code_t Storage::writeInternal(const cs_state_data_t& stateData) {
 	fds_record_desc_t recordDesc;
 	ret_code_t fdsRetCode;
 
-	record.file_id     = fileId;
-	record.key         = recordKey;
-	record.data.p_data = stateData.value;
+	record.file_id           = fileId;
+	record.key               = recordKey;
+	record.data.p_data       = stateData.value;
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(stateData.size) >> 2;
@@ -478,7 +478,7 @@ cs_ret_code_t Storage::continueFactoryReset() {
 				CS_TYPE type     = toCsType(recordKey);
 				cs_state_id_t id = getStateId(fileId);
 
-				remove = removeOnFactoryReset(type, id);
+				remove           = removeOnFactoryReset(type, id);
 				if (!remove) {
 					LOGStorageVerbose(
 							"skip record type=%u id=%u recordKey=%u fileId=%u",
@@ -561,14 +561,14 @@ cs_ret_code_t Storage::eraseAllPages() {
 		return ERR_NOT_AVAILABLE;
 	}
 	// The function fds_flash_end_addr() is available in patched SDKs
-	uint32_t endAddr        = fds_flash_end_addr();
-	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
-	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
-	uint32_t startAddr      = endAddr - flashSizeBytes;
+	uint32_t endAddr           = fds_flash_end_addr();
+	uint32_t flashSizeWords    = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
+	uint32_t flashSizeBytes    = flashSizeWords * sizeof(uint32_t);
+	uint32_t startAddr         = endAddr - flashSizeBytes;
 
 	// Check if pages are already erased.
 	uint32_t* startAddrPointer = (uint32_t*)startAddr;
-	bool isErased                  = true;
+	bool isErased              = true;
 	for (uint32_t i = 0; i < flashSizeWords; ++i) {
 		if (startAddrPointer[i] != 0xFFFFFFFF) {
 			isErased = false;
