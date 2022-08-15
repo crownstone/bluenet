@@ -1,6 +1,6 @@
 ## Formatter
 
-A lot of the style is now taken care of by the formatter.
+A lot of the style is now taken care of by the formatter. We currently use clang-format version 14.0.
 
 Investigate the `source/.clang-format` (<https://github.com/crownstone/bluenet/blob/master/source/.clang-format>) file for formatting details, a few:
 
