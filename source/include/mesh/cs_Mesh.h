@@ -103,7 +103,7 @@ private:
 	Mesh();
 
 	//! Copy constructor, singleton, thus made private
-	Mesh(Mesh const&) = delete;
+	Mesh(Mesh const&)            = delete;
 
 	//! Assignment operator, singleton, thus made private
 	Mesh& operator=(Mesh const&) = delete;

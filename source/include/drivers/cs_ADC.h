@@ -173,7 +173,7 @@ private:
 	ADC(ADC const&);
 
 	// This class is singleton, deny implementation
-	void operator      =(ADC const&);
+	void operator=(ADC const&);
 
 	/**
 	 * Whether or not the config should be changed.

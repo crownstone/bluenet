@@ -4,6 +4,8 @@
 
 #pragma once
 
+// clang-format off
+
 #define CS_SERIAL_NRF_LOG_PIN_TX                 ${CS_SERIAL_NRF_LOG_PIN_TX}
 
 #define MAX_NUM_VS_SERVICES                      ${MAX_NUM_VS_SERVICES}
@@ -24,3 +26,4 @@
 
 #define CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER      ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}
 
+// clang-format on

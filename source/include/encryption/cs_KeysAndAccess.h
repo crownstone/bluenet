@@ -85,7 +85,7 @@ private:
 	KeysAndAccess(KeysAndAccess const&);
 
 	// This class is singleton, deny implementation
-	void operator                =(KeysAndAccess const&);
+	void operator=(KeysAndAccess const&);
 
 	/**
 	 * Cached operation mode.

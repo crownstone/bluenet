@@ -53,14 +53,20 @@ struct __attribute__((__packed__)) asset_record_t {
 	/**
 	 * Invalidate this record.
 	 */
-	void invalidate() { lastReceivedCounter = 0xFF; }
+	void invalidate() {
+		lastReceivedCounter = 0xFF;
+	}
 
 	/**
 	 * Returns whether this record is valid.
 	 */
-	bool isValid() { return lastReceivedCounter != 0xFF; }
+	bool isValid() {
+		return lastReceivedCounter != 0xFF;
+	}
 
-	asset_id_t id() { return assetId; }
+	asset_id_t id() {
+		return assetId;
+	}
 
 	// ------------- utility functions -------------
 
@@ -72,7 +78,9 @@ struct __attribute__((__packed__)) asset_record_t {
 #endif
 	}
 
-	bool isThrottled() { return throttlingCountdown != 0; }
+	bool isThrottled() {
+		return throttlingCountdown != 0;
+	}
 
 	void setThrottlingCountdown(uint8_t ticks) {
 		if (ticks >= 0xff) {

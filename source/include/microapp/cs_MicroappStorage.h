@@ -96,12 +96,12 @@ private:
 	 */
 	MicroappStorage();
 	MicroappStorage(MicroappStorage const&) = delete;
-	void operator=(MicroappStorage const&) = delete;
+	void operator=(MicroappStorage const&)  = delete;
 
 	/**
 	 * Keep up whether or not we are currently writing to flash.
 	 */
-	bool _writing                          = false;
+	bool _writing                           = false;
 
 	/**
 	 * The buffer is required to perform writes to flash, as the data has to

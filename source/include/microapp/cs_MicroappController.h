@@ -55,7 +55,7 @@ private:
 	 */
 	MicroappController();
 	MicroappController(MicroappController const&);
-	void operator                                          =(MicroappController const&);
+	void operator=(MicroappController const&);
 
 	/**
 	 * Limit maximum number of to be registered service routines for the microapp.
