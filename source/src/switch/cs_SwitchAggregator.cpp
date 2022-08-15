@@ -262,7 +262,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 		case CS_TYPE::CMD_SWITCH_ON: {
 			LOGSwitchAggregatorEvent("CMD_SWITCH_ON");
 
-			executeStateIntentionUpdate(100, event.source);
+			executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_FULLY_ON, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH_OFF: {

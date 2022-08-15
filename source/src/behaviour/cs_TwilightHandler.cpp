@@ -10,6 +10,7 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_TwilightHandler.h>
 #include <logging/cs_Logger.h>
+#include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
 #include <test/cs_Test.h>
 #include <time/cs_SystemTime.h>
@@ -120,8 +121,8 @@ std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currentTime) {
 		}
 	}
 
-	// if no winning_value is found at all, return 100.
-	return winningValue == 0xFF ? 100 : winningValue;
+	// if no winning_value is found at all, return CS_SWITCH_CMD_VAL_FULLY_ON.
+	return winningValue == 0xFF ? CS_SWITCH_CMD_VAL_FULLY_ON : winningValue;
 }
 
 std::optional<uint8_t> TwilightHandler::getValue() {
