@@ -1,10 +1,6 @@
 # List of Crownstone application source files.
 MESSAGE(STATUS "crownstone source files appended to FOLDER_SOURCE")
 
-
-
-
-
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Advertiser.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_BleCentral.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Characteristic.cpp")
@@ -44,8 +40,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetForwarder.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetStore.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/logging/cs_Logger.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/logging/cs_CLogger.c")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresenceCondition.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresencePredicate.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_BackgroundAdvHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_CommandAdvHandler.cpp")
@@ -76,9 +70,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_error_weak.c")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevice.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevices.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_AssetFilter.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_ExactMatchFilter.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_CuckooFilter.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartCommandHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")
 
