@@ -86,8 +86,7 @@ void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer)
  *
  * @param[in] payload                            pointer to buffer with command for bluenet
  */
-cs_ret_code_t microappCallback(uint8_t opcode, bluenet_io_buffer_t* io_buffer) {
-	cs_ret_code_t retCode = ERR_SUCCESS;
+microapp_result_t microappCallback(uint8_t opcode, bluenet_io_buffer_t* io_buffer) {
 	switch (opcode) {
 		case CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER: {
 			setCoroutineContext(COROUTINE_MICROAPP0, io_buffer);
@@ -105,7 +104,7 @@ cs_ret_code_t microappCallback(uint8_t opcode, bluenet_io_buffer_t* io_buffer) {
 			LOGi("Unknown opcode");
 		}
 	}
-	return retCode;
+	return CS_ACK_SUCCESS;
 }
 
 #ifdef DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET
@@ -339,10 +338,11 @@ bool MicroappController::handleAck() {
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 	if (outgoingHeader->ack == CS_ACK_NONE) {
 		// Don't handle requests on undefined ack
-		_consecutiveMicroappCalls = 0;
-		return false
+		_consecutiveMicroappCallCounter = 0;
+		return false;
 	}
-	bool inInterruptContext = (outgoingHeader->ack != CS_ACK_NO_REQUEST) if (inInterruptContext) {
+	bool inInterruptContext = (outgoingHeader->ack != CS_ACK_NO_REQUEST);
+	if (inInterruptContext) {
 		bool interruptDone = (outgoingHeader->ack != CS_ACK_IN_PROGRESS);
 		if (interruptDone) {
 			bool interruptDropped = (outgoingHeader->ack == CS_ACK_ERR_BUSY);
@@ -357,7 +357,7 @@ bool MicroappController::handleAck() {
 				incrementEmptyInterruptSlots();
 			}
 			// If interrupt finished, we do not call again and we also don't handle the microapp request
-			_consecutiveMicroappCalls = 0;
+			_consecutiveMicroappCallCounter = 0;
 			return false;
 		}
 	}
@@ -386,12 +386,12 @@ bool MicroappController::handleRequest() {
 	bool callAgain = !stopAfterMicroappRequest(incomingHeader);
 	if (!callAgain) {
 		LOGv("Do not call again");
-		_consecutiveMicroappCalls = 0;
+		_consecutiveMicroappCallCounter = 0;
 	}
 	// Also check if the max number of consecutive nonyielding calls is reached
 	else {
-		if (++_consecutiveMicroappCalls >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
-			_consecutiveMicroappCalls = 0;
+		if (++_consecutiveMicroappCallCounter >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
+			_consecutiveMicroappCallCounter = 0;
 			LOGi("Stop because we've reached a max # of consecutive calls");
 			callAgain = false;
 		}
@@ -425,7 +425,7 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomin
 			break;
 		}
 		default: {
-			LOGw("Unknown request type: %i", header->sdkType);
+			LOGw("Unknown request type: %i", incomingHeader->sdkType);
 			stop = true;
 			break;
 		}
@@ -455,13 +455,13 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	outgoingMessage->sdkType               = CS_MICROAPP_SDK_TYPE_CONTINUE;
 	outgoingMessage->ack                   = CS_ACK_NO_REQUEST;
 	bool callAgain                         = false;
-	bool handleRequest                     = false;
+	bool ignoreRequest                     = false;
 	int8_t repeatCounter                   = 0;
 	do {
 		LOGv("Call [%i], within tick", repeatCounter);
 		callMicroapp();
-		handleRequest = handleAck();
-		if (!handleRequest) {
+		ignoreRequest = !handleAck();
+		if (ignoreRequest) {
 			return;
 		}
 		callAgain = handleRequest();
@@ -490,13 +490,13 @@ void MicroappController::generateInterrupt() {
 	// Request an acknowledgement by the microapp indicating status of interrupt
 	outgoingInterrupt->ack                   = CS_ACK_REQUEST;
 	bool callAgain                           = false;
-	bool handleRequest                       = false;
+	bool ignoreRequest                       = false;
 	int8_t repeatCounter                     = 0;
 	do {
 		LOGv("Call [%i,%i], within interrupt", _interruptCounter, repeatCounter);
 		callMicroapp();
-		handleRequest = handleAck();
-		if (!handleRequest) {
+		ignoreRequest = !handleAck();
+		if (ignoreRequest) {
 			return;
 		}
 		callAgain = handleRequest();

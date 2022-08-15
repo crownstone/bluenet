@@ -40,7 +40,7 @@ private:
 	 */
 	MicroappController();
 	MicroappController(MicroappController const&);
-	void operator                                          =(MicroappController const&);
+	void operator=(MicroappController const&);
 
 	/**
 	 * Limit the number of interrupts in a tick (if -1) there is no limit.
@@ -74,6 +74,11 @@ private:
 	coroutine_args_t sharedState;
 
 	/**
+	 * To throttle the ticks themselves.
+	 */
+	uint8_t _tickCounter;
+
+	/**
 	 * Counter for interrupts within a tick
 	 */
 	int8_t _interruptCounter;
@@ -82,11 +87,6 @@ private:
 	 * Counter for consecutive microapp calls
 	 */
 	uint8_t _consecutiveMicroappCallCounter;
-
-	/**
-	 * To throttle the ticks themselves.
-	 */
-	uint8_t _tickCounter;
 
 	/**
 	 * Flag to indicate whether to forward scanned devices to microapp.
