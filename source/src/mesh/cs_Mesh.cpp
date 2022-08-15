@@ -7,14 +7,14 @@
 
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
-#include <logging/cs_Logger.h>
 #include <drivers/cs_RNG.h>
+#include <logging/cs_Logger.h>
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshCommon.h>
-#include <uart/cs_UartHandler.h>
 #include <storage/cs_State.h>
 #include <third/std/function.h>
 #include <time/cs_SystemTime.h>
+#include <uart/cs_UartHandler.h>
 //#include <util/cs_BleError.h>
 //#include <util/cs_Utils.h>
 
@@ -42,15 +42,10 @@ bool Mesh::checkFlashValid() {
 cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	LOGi("init");
 	_msgHandler.init();
-	_core->registerModelInitCallback([&]() -> void {
-		initModels();
-	});
-	_core->registerModelConfigureCallback([&](dsm_handle_t appkeyHandle) -> void {
-		configureModels(appkeyHandle);
-	});
-	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
-		_scanner.onScan(scanData);
-	});
+	_core->registerModelInitCallback([&]() -> void { initModels(); });
+	_core->registerModelConfigureCallback([&](dsm_handle_t appkeyHandle) -> void { configureModels(appkeyHandle); });
+	_core->registerScanCallback(
+			[&](const nrf_mesh_adv_packet_rx_data_t* scanData) -> void { _scanner.onScan(scanData); });
 	_modelSelector.init(_modelMulticast, _modelMulticastAcked, _modelMulticastNeighbours, _modelUnicast);
 	_msgSender.init(&_modelSelector);
 
@@ -67,24 +62,16 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 void Mesh::initModels() {
 	LOGi("Initializing and adding models");
 
-	_modelMulticast.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
-		_msgHandler.handleMsg(msg);
-	});
+	_modelMulticast.registerMsgHandler([&](MeshMsgEvent& msg) -> void { _msgHandler.handleMsg(msg); });
 	_modelMulticast.init(CS_MESH_MODEL_ID_MULTICAST);
 
-	_modelMulticastAcked.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
-		_msgHandler.handleMsg(msg);
-	});
+	_modelMulticastAcked.registerMsgHandler([&](MeshMsgEvent& msg) -> void { _msgHandler.handleMsg(msg); });
 	_modelMulticastAcked.init(CS_MESH_MODEL_ID_MULTICAST_ACKED);
 
-	_modelUnicast.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
-		_msgHandler.handleMsg(msg);
-	});
+	_modelUnicast.registerMsgHandler([&](MeshMsgEvent& msg) -> void { _msgHandler.handleMsg(msg); });
 	_modelUnicast.init(CS_MESH_MODEL_ID_UNICAST);
 
-	_modelMulticastNeighbours.registerMsgHandler([&](MeshMsgEvent& msg) -> void {
-			_msgHandler.handleMsg(msg);
-	});
+	_modelMulticastNeighbours.registerMsgHandler([&](MeshMsgEvent& msg) -> void { _msgHandler.handleMsg(msg); });
 	_modelMulticastNeighbours.init(CS_MESH_MODEL_ID_NEIGHBOURS);
 }
 
@@ -137,7 +124,7 @@ void Mesh::stopAdvertising() {
 	_advertiser.stop();
 }
 
-void Mesh::handleEvent(event_t & event) {
+void Mesh::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_TICK: {
 			TYPIFY(EVT_TICK) tickCount = *((TYPIFY(EVT_TICK)*)event.data);
@@ -172,18 +159,17 @@ void Mesh::handleEvent(event_t & event) {
 			break;
 		}
 
-		default:
-			break;
+		default: break;
 	}
 }
 
 void Mesh::onTick(uint32_t tickCount) {
-	if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
+	if (tickCount % (500 / TICK_INTERVAL_MS) == 0) {
 		if (Stack::getInstance().isScanning()) {
-//				Stack::getInstance().stopScanning();
+			//				Stack::getInstance().stopScanning();
 		}
 		else {
-//				Stack::getInstance().startScanning();
+			//				Stack::getInstance().startScanning();
 		}
 	}
 
@@ -192,7 +178,7 @@ void Mesh::onTick(uint32_t tickCount) {
 			--_syncCountdown;
 		}
 		else {
-			_synced = !requestSync();
+			_synced        = !requestSync();
 			_syncCountdown = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
 		}
 		if (_syncFailedCountdown) {
@@ -229,8 +215,8 @@ void Mesh::onTick(uint32_t tickCount) {
 }
 
 void Mesh::startSync() {
-	_synced = !requestSync();
-	_syncCountdown = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
+	_synced              = !requestSync();
+	_syncCountdown       = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
 	_syncFailedCountdown = MESH_SYNC_GIVE_UP_MS / TICK_INTERVAL_MS;
 }
 
@@ -244,7 +230,7 @@ bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 	LOGd("requestSync bitmask=%u", syncRequest.bitmask);
 
 	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh) {
-		// bitmask == 0 implies sync is unnecessary 
+		// bitmask == 0 implies sync is unnecessary
 		// propagateSyncMessageOverMesh==false implies we return here, before contacting the mesh.
 		return syncRequest.bitmask != 0;
 	}
@@ -255,17 +241,15 @@ bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 	// Set crownstone id.
 	TYPIFY(CONFIG_CROWNSTONE_ID) id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
-	requestMsg->id = id;
+	requestMsg->id    = id;
 
 	// Send the message over the mesh.
 	cs_mesh_msg_t msg = {};
-	msg.payload = reinterpret_cast<uint8_t*>(requestMsg);
-	msg.size = sizeof(*requestMsg);
-	msg.type = CS_MESH_MODEL_TYPE_SYNC_REQUEST;
-	msg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+	msg.payload       = reinterpret_cast<uint8_t*>(requestMsg);
+	msg.size          = sizeof(*requestMsg);
+	msg.type          = CS_MESH_MODEL_TYPE_SYNC_REQUEST;
+	msg.reliability   = CS_MESH_RELIABILITY_MEDIUM;
 	_msgSender.sendMsg(&msg);
 
 	return true;
 }
-
-

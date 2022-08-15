@@ -10,6 +10,7 @@
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Config.h>
 #include <events/cs_EventListener.h>
+
 #include <vector>
 
 #define TOTAL_PIN_COUNT GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT
@@ -30,20 +31,19 @@ typedef struct pin_info_t {
 class Gpio : public EventListener {
 
 public:
-
 	//! Get singleton instance
 	static Gpio& getInstance();
 
 	//! Initialize (from cs_Crownstone as driver)
-	void init(const boards_config_t & board);
+	void init(const boards_config_t& board);
 
 	//! Handle incoming events
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 	//! Register event (from event handler)
 	void registerEvent(pin_t pin);
-private:
 
+private:
 	//! Constructor
 	Gpio();
 
@@ -51,7 +51,7 @@ private:
 	Gpio(Gpio const&);
 
 	//! This class is a singleton, deny implementation
-	void operator=(Gpio const &);
+	void operator=(Gpio const&);
 
 	//! Get regular ticks to send events
 	void tick();
@@ -72,15 +72,14 @@ private:
 	void configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity);
 
 	//! Write to pin
-	void write(uint8_t pin_index, uint8_t *buf, uint8_t & length);
+	void write(uint8_t pin_index, uint8_t* buf, uint8_t& length);
 
 	//! Read from pin
-	void read(uint8_t pin_index, uint8_t *buf, uint8_t & length);
+	void read(uint8_t pin_index, uint8_t* buf, uint8_t& length);
 
 	//! Initialized flag
 	bool _initialized;
 
 	//! Board configuration
 	const boards_config_t* _boardConfig;
-
 };

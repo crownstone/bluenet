@@ -6,11 +6,10 @@
  */
 #pragma once
 
-#include <cstdlib>
-
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
 
+#include <cstdlib>
 #include <cstring>
 
 /** EncryptionBuffer is a byte array with header.
@@ -30,7 +29,7 @@ private:
 
 	bool _locked;
 
-	EncryptionBuffer() :_buffer(NULL), _size(0), _locked(false) {};
+	EncryptionBuffer() : _buffer(NULL), _size(0), _locked(false){};
 	~EncryptionBuffer() {
 		if (_buffer) {
 			free(_buffer);
@@ -45,33 +44,33 @@ public:
 
 	void alloc(uint16_t size) {
 		LOGd("Allocate buffer [%d]", size);
-		_size = size;
+		_size   = size;
 		_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
-//		LOGd("buffer: 0x%p", _buffer);
+		//		LOGd("buffer: 0x%p", _buffer);
 	}
 
 	void clear() {
-//		LOGd("clear");
+		//		LOGd("clear");
 		if (_buffer) {
 			memset(_buffer, 0, _size);
 		}
 	}
 
 	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
-//		LOGd("getBuffer");
+		//		LOGd("getBuffer");
 		if (_buffer) {
-			buffer = _buffer;
+			buffer    = _buffer;
 			maxLength = _size;
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
 
-//	buffer_ptr_t getBuffer() {
-//		return _buffer;
-//	}
+	//	buffer_ptr_t getBuffer() {
+	//		return _buffer;
+	//	}
 
 	uint16_t size() { return _size; }
-
 };

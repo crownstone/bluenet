@@ -11,7 +11,6 @@
 
 namespace CsUtils {
 
-
 /**
  * Parses a hex char to an integer.
  */
@@ -31,14 +30,14 @@ constexpr int parseHexChar(const char chr) {
 /**
  * Parses 2 hex chars to an integer.
  */
-constexpr int parseHexPair(const char *str) {
+constexpr int parseHexPair(const char* str) {
 	return (parseHexChar(str[0]) << 4) | (parseHexChar(str[1]) << 0);
 }
 
 /**
  * Parse UUID string (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) to a byte array.
  */
-constexpr bool parseUuid(const char *str, int stringSize, uint8_t* array, int arraySize) {
+constexpr bool parseUuid(const char* str, int stringSize, uint8_t* array, int arraySize) {
 	if (stringSize != CS_UUID_STR_LEN || arraySize < 16) {
 		return false;
 	}
@@ -49,7 +48,7 @@ constexpr bool parseUuid(const char *str, int stringSize, uint8_t* array, int ar
 	array[14] = parseHexPair(str + 2);
 	array[13] = parseHexPair(str + 4);
 	array[12] = parseHexPair(str + 6);
-	array[11] = parseHexPair(str + 8  + 1);
+	array[11] = parseHexPair(str + 8 + 1);
 	array[10] = parseHexPair(str + 10 + 1);
 	array[9]  = parseHexPair(str + 12 + 2);
 	array[8]  = parseHexPair(str + 14 + 2);
@@ -64,4 +63,4 @@ constexpr bool parseUuid(const char *str, int stringSize, uint8_t* array, int ar
 	return true;
 }
 
-}
+}  // namespace CsUtils

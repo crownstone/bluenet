@@ -15,7 +15,7 @@
  * Currently has hard coded values, so it's really plug and play.
  * It also serves as an example usage.
  */
-class TestCentral: EventListener {
+class TestCentral : EventListener {
 public:
 	TestCentral();
 	void init();
@@ -27,9 +27,9 @@ public:
 	void write();
 	void disconnect();
 
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
+
 private:
 	uint16_t _fwVersionHandle;
 	uint16_t _controlHandle;
 };
-

@@ -10,15 +10,12 @@
 #pragma once
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include <ble_gap.h>
-
 #include <rbc_mesh.h>
 
 #ifdef __cplusplus
 }
 #endif
-

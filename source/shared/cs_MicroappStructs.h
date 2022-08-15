@@ -15,31 +15,31 @@
 #endif
 
 // This is a given for a MAC address
-const uint8_t MAC_ADDRESS_LENGTH = 6;
+const uint8_t MAC_ADDRESS_LENGTH              = 6;
 
 // This is a given for BLE advertisement data
-const uint8_t MAX_BLE_ADV_DATA_LENGTH = 31;
+const uint8_t MAX_BLE_ADV_DATA_LENGTH         = 31;
 
 // This is a given for Mesh messages
-const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE = 7;
+const uint8_t MICROAPP_MAX_MESH_MESSAGE_SIZE  = 7;
 
 // This is the information we want in each command
-const uint8_t MICROAPP_CMD_SIZE_HEADER = 6;
+const uint8_t MICROAPP_CMD_SIZE_HEADER        = 6;
 
 // This is the size of a pin command header
-const uint8_t MICROAPP_PIN_CMD_SIZE_HEADER = 10;
+const uint8_t MICROAPP_PIN_CMD_SIZE_HEADER    = 10;
 
 // Derived maximum payload (should at least fit BLE advertisement data)
 
-const uint8_t MAX_PAYLOAD = 48;
+const uint8_t MAX_PAYLOAD                     = 48;
 
-const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - MICROAPP_CMD_SIZE_HEADER - 5;
+const uint8_t MAX_TWI_PAYLOAD                 = MAX_PAYLOAD - MICROAPP_CMD_SIZE_HEADER - 5;
 
 // Derived size limitations (change when structs get more info)
 
-const uint8_t MAX_MICROAPP_STRING_LENGTH = MAX_PAYLOAD - MICROAPP_CMD_SIZE_HEADER - 4;
+const uint8_t MAX_MICROAPP_STRING_LENGTH      = MAX_PAYLOAD - MICROAPP_CMD_SIZE_HEADER - 4;
 
-const uint8_t MAX_MICROAPP_ARRAY_LENGTH = MAX_MICROAPP_STRING_LENGTH;
+const uint8_t MAX_MICROAPP_ARRAY_LENGTH       = MAX_MICROAPP_STRING_LENGTH;
 
 const uint8_t MAX_COMMAND_SERVICE_DATA_LENGTH = MAX_PAYLOAD - MICROAPP_PIN_CMD_SIZE_HEADER - 3;
 
@@ -206,7 +206,6 @@ enum MicroappErrorTypes {
 	ERR_MICROAPP_NO_SPACE                      = 0x04,
 	ERR_MICROAPP_NOT_IMPLEMENTED               = 0x05,
 };
-
 
 /**
  * A single buffer (can be either input or output).
@@ -417,7 +416,7 @@ static_assert(sizeof(microapp_mesh_read_cmd_t) <= MAX_PAYLOAD);
  */
 struct __attribute__((packed)) microapp_mesh_info_cmd_t {
 	microapp_mesh_cmd_t meshHeader;
-	uint8_t stoneId; //< Own stone id
+	uint8_t stoneId;  //< Own stone id
 };
 
 static_assert(sizeof(microapp_mesh_info_cmd_t) <= MAX_PAYLOAD);

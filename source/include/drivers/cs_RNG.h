@@ -36,7 +36,7 @@ public:
 	static void fillBuffer(uint8_t* buffer, uint8_t length);
 	uint32_t getRandom32();
 	uint16_t getRandom16();
-	uint8_t  getRandom8();
+	uint8_t getRandom8();
 
 private:
 	// Constructor
@@ -46,5 +46,5 @@ private:
 	RNG(RNG const&);
 
 	// This class is singleton, deny implementation
-	void operator=(RNG const &);
+	void operator=(RNG const&);
 };

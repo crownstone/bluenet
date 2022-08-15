@@ -15,7 +15,6 @@
 #include <string>
 #include <vector>
 
-
 enum cs_storage_operation_t {
 	CS_STORAGE_OP_READ,
 	CS_STORAGE_OP_WRITE,
@@ -24,7 +23,7 @@ enum cs_storage_operation_t {
 	CS_STORAGE_OP_GC,
 };
 
-typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id);
+typedef void (*cs_storage_error_callback_t)(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id);
 
 /**
  * Class to store items persistently in flash (persistent) memory.
@@ -57,7 +56,6 @@ typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, C
  */
 class Storage {
 public:
-
 	/** Returns the singleton instance of this class
 	 *
 	 * @return static instance of Storage class
@@ -69,9 +67,7 @@ public:
 
 	cs_ret_code_t init();
 
-	inline bool isInitialized() {
-		return _initialized;
-	}
+	inline bool isInitialized() { return _initialized; }
 
 	/**
 	 * Set the callback for errors.
@@ -94,7 +90,7 @@ public:
 	 * @retval ERR_NOT_FOUND                When the first id of this type was not found.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t findFirst(CS_TYPE type, cs_state_id_t & id);
+	cs_ret_code_t findFirst(CS_TYPE type, cs_state_id_t& id);
 
 	/**
 	 * Find next id of stored values of given type.
@@ -106,10 +102,11 @@ public:
 	 *
 	 * @retval ERR_SUCCESS                  When successful.
 	 * @retval ERR_NOT_FOUND                When the next id of this type was not found.
-	 * @retval ERR_WRONG_STATE              When not called after findFirst(), or another storage operation was done in between.
+	 * @retval ERR_WRONG_STATE              When not called after findFirst(), or another storage operation was done in
+	 * between.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t findNext(CS_TYPE type, cs_state_id_t & id);
+	cs_ret_code_t findNext(CS_TYPE type, cs_state_id_t& id);
 
 	/**
 	 * Find and read stored value of given type and id.
@@ -123,7 +120,7 @@ public:
 	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t read(cs_state_data_t & data);
+	cs_ret_code_t read(cs_state_data_t& data);
 
 	/**
 	 * Read the old (v3) reset counter.
@@ -134,7 +131,7 @@ public:
 	 *
 	 * @return Error code like read().
 	 */
-	cs_ret_code_t readV3ResetCounter(cs_state_data_t & data);
+	cs_ret_code_t readV3ResetCounter(cs_state_data_t& data);
 
 	/**
 	 * Find and read from first stored value of given type.
@@ -148,14 +145,15 @@ public:
 	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t readFirst(cs_state_data_t & data);
+	cs_ret_code_t readFirst(cs_state_data_t& data);
 
 	/**
 	 * Find and read next stored value of given type.
 	 *
 	 * NOTE: must be called immediately after readFirst(), no other storage operations should be done in between.
 	 *
-	 * When iterating: just keep overwriting, so in case of duplicates (same type and id), you end up with the latest value.
+	 * When iterating: just keep overwriting, so in case of duplicates (same type and id), you end up with the latest
+	 * value.
 	 *
 	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
 	 *
@@ -164,7 +162,7 @@ public:
 	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t readNext(cs_state_data_t & data);
+	cs_ret_code_t readNext(cs_state_data_t& data);
 
 	/**
 	 * Write to persistent storage.
@@ -179,7 +177,7 @@ public:
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NO_SPACE                 When there is no space, not even after garbage collection.
 	 */
-	cs_ret_code_t write(const cs_state_data_t & data);
+	cs_ret_code_t write(const cs_state_data_t& data);
 
 	/**
 	 * Remove value of given type and id.
@@ -188,7 +186,8 @@ public:
 	 * @param[in] id              ID of value to remove.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the value.
-	 * @retval ERR_NOT_FOUND                When no match was found, consider this a success, but don't wait for an event.
+	 * @retval ERR_NOT_FOUND                When no match was found, consider this a success, but don't wait for an
+	 * event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
@@ -200,7 +199,8 @@ public:
 	 * @param[in] type            Type to remove.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
-	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an event.
+	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an
+	 * event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
@@ -212,7 +212,8 @@ public:
 	 * @param[in] id              ID of the values to remove.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing.
-	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an event.
+	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an
+	 * event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
@@ -261,7 +262,7 @@ public:
 	 * @retval ERR_SUCCESS                  When successfully started erasing all pages.
 	 * @retval ERR_NOT_AVAILABLE            When you can't use this function (storage initialized already).
 	 */
-	cs_ret_code_t erasePages(const CS_TYPE doneEvent, void * startAddress, void * endAddress);
+	cs_ret_code_t erasePages(const CS_TYPE doneEvent, void* startAddress, void* endAddress);
 
 	/**
 	 * Allocate ram that is correctly aligned and padded.
@@ -274,7 +275,7 @@ public:
 	/**
 	 * Handle FDS events.
 	 */
-	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
+	void handleFileStorageEvent(fds_evt_t const* p_fds_evt);
 
 	/**
 	 * Handle FDS SOC event NRF_EVT_FLASH_OPERATION_SUCCESS.
@@ -289,52 +290,52 @@ public:
 private:
 	Storage();
 	Storage(Storage const&);
-	void operator=(Storage const &);
+	void operator                              =(Storage const&);
 
-	bool _initialized = false;
-	bool _registeredFds = false;
+	bool _initialized                          = false;
+	bool _registeredFds                        = false;
 	cs_storage_error_callback_t _errorCallback = NULL;
 
 	fds_find_token_t _findToken;
-	CS_TYPE _currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
+	CS_TYPE _currentSearchType   = CS_TYPE::CONFIG_DO_NOT_USE;
 
-	bool _collectingGarbage = false;
-	bool _removingFile = false;
+	bool _collectingGarbage      = false;
+	bool _removingFile           = false;
 	bool _performingFactoryReset = false;
 	std::vector<uint16_t> _busyRecordKeys;
 
 	/**
 	 * Next page to erase. Used by eraseAllPages().
 	 */
-	uint32_t _erasePage = 0;
+	uint32_t _erasePage     = 0;
 
 	/**
 	 * Page that should _not_ be erased. Used by eraseAllPages().
 	 */
-	uint32_t _eraseEndPage = 0;
+	uint32_t _eraseEndPage  = 0;
 
 	CS_TYPE _eraseDoneEvent = CS_TYPE::CONFIG_DO_NOT_USE;
 
 	/**
 	 * Find next fileId for given recordKey.
 	 */
-	cs_ret_code_t findNextInternal(uint16_t recordKey, uint16_t & fileId);
+	cs_ret_code_t findNextInternal(uint16_t recordKey, uint16_t& fileId);
 
 	/**
 	 * Read next fileId for given recordKey.
 	 */
-	cs_ret_code_t readNextInternal(uint16_t recordKey, uint16_t & fileId, uint8_t* buf, uint16_t size);
+	cs_ret_code_t readNextInternal(uint16_t recordKey, uint16_t& fileId, uint8_t* buf, uint16_t size);
 
 	/**
 	 * Read a record: copy data to buffer, and sets fileId.
 	 *
 	 * Only returns success when data has been copied to buffer.
 	 */
-	cs_ret_code_t readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t & fileId);
+	cs_ret_code_t readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t& fileId);
 
 	/** Write to persistent storage.
-	*/
-	ret_code_t writeInternal(const cs_state_data_t & data);
+	 */
+	ret_code_t writeInternal(const cs_state_data_t& data);
 
 	ret_code_t garbageCollectInternal();
 
@@ -384,7 +385,7 @@ private:
 	 */
 	void initSearch();
 
-//	ret_code_t exists(cs_file_id_t fileId, uint16_t recordKey, bool & result);
+	//	ret_code_t exists(cs_file_id_t fileId, uint16_t recordKey, bool & result);
 
 	/**
 	 * Check if a type of record exists and return the record descriptor.
@@ -394,7 +395,7 @@ private:
 	 * @param[out] record_desc                   Record descriptor, used to manipulate records.
 	 * @param[out] result                        True if record was found.
 	 */
-	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result);
+	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t& record_desc, bool& result);
 
 	void setBusy(uint16_t recordKey);
 	void clearBusy(uint16_t recordKey);
@@ -403,11 +404,10 @@ private:
 
 	cs_ret_code_t getErrorCode(ret_code_t code);
 
-	void handleWriteEvent(fds_evt_t const * p_fds_evt);
-	void handleRemoveRecordEvent(fds_evt_t const * p_fds_evt);
-	void handleRemoveFileEvent(fds_evt_t const * p_fds_evt);
-	void handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt);
+	void handleWriteEvent(fds_evt_t const* p_fds_evt);
+	void handleRemoveRecordEvent(fds_evt_t const* p_fds_evt);
+	void handleRemoveFileEvent(fds_evt_t const* p_fds_evt);
+	void handleGarbageCollectionEvent(fds_evt_t const* p_fds_evt);
 
-//	inline void print(const std::string & prefix, CS_TYPE type);
+	//	inline void print(const std::string & prefix, CS_TYPE type);
 };
-

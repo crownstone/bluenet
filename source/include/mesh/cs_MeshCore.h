@@ -13,9 +13,9 @@
 #include <third/std/function.h>
 
 extern "C" {
+#include <device_state_manager.h>
 #include <nrf_mesh_config_app.h>
 #include <nrf_mesh_defines.h>
-#include <device_state_manager.h>
 }
 
 /**
@@ -25,7 +25,7 @@ extern "C" {
  * - Performs provisioning.
  * - Manages mesh flash.
  */
-class MeshCore: EventListener {
+class MeshCore : EventListener {
 public:
 	/**
 	 * Get a reference to the MeshCore object.
@@ -39,7 +39,7 @@ public:
 	typedef function<void(dsm_handle_t appkeyHandle)> callback_model_configure_t;
 
 	/** Callback function definition. */
-	typedef function<void(const nrf_mesh_adv_packet_rx_data_t *scanData)> callback_scan_t;
+	typedef function<void(const nrf_mesh_adv_packet_rx_data_t* scanData)> callback_scan_t;
 
 	/**
 	 * Register a callback function that's called when the models should be initialized.
@@ -120,13 +120,13 @@ public:
 	void factoryResetDone();
 
 	/** Internal usage */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 	/** Internal usage */
 	void modelsInitCallback();
 
 	/** Internal usage */
-	void scanCallback(const nrf_mesh_adv_packet_rx_data_t *scanData);
+	void scanCallback(const nrf_mesh_adv_packet_rx_data_t* scanData);
 
 private:
 	//! Constructor, singleton, thus made private
@@ -136,11 +136,11 @@ private:
 	MeshCore(MeshCore const&) = delete;
 
 	//! Assignment operator, singleton, thus made private
-	MeshCore& operator=(MeshCore const &) = delete;
+	MeshCore& operator=(MeshCore const&)               = delete;
 
 	// Callbacks
-	callback_scan_t _scanCallback = nullptr;
-	callback_model_init_t _modelInitCallback = nullptr;
+	callback_scan_t _scanCallback                      = nullptr;
+	callback_model_init_t _modelInitCallback           = nullptr;
 	callback_model_configure_t _modelConfigureCallback = nullptr;
 
 	// Keys
@@ -149,12 +149,12 @@ private:
 	uint8_t _appkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _appkeyHandle = DSM_HANDLE_INVALID;
 	uint8_t _devkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _devkeyHandle   = DSM_HANDLE_INVALID;
 
 	/** Address of this node */
-	uint16_t _ownAddress = 0;
+	uint16_t _ownAddress         = 0;
 
-	bool _isProvisioned = false;
+	bool _isProvisioned          = false;
 
 	bool _performingFactoryReset = false;
 
@@ -162,5 +162,5 @@ private:
 
 	void provisionLoad();
 
-	void getFlashPages(void* & startAddress, void* & endAddress);
+	void getFlashPages(void*& startAddress, void*& endAddress);
 };

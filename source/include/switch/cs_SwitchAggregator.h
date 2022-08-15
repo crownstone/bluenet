@@ -9,11 +9,12 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_TwilightHandler.h>
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-#include <optional>
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <switch/cs_SmartSwitch.h>
-#include <common/cs_Component.h>
+
+#include <optional>
 
 /**
  * Handler that aggregates events related to switching such as SwitchCraft,
@@ -48,21 +49,22 @@ private:
 	SmartSwitch _smartSwitch;
 
 	// the latest states requested by other parts of the system.
-	std::optional<uint8_t> _overrideState = {};
-	std::optional<uint8_t> _behaviourState = {};
-	std::optional<uint8_t> _twilightState = {};
+	std::optional<uint8_t> _overrideState       = {};
+	std::optional<uint8_t> _behaviourState      = {};
+	std::optional<uint8_t> _twilightState       = {};
 
 	// the last state that was aggregated and passed on towards the SoftwareSwitch.
-	std::optional<uint8_t> _aggregatedState = {};
+	std::optional<uint8_t> _aggregatedState     = {};
 
 	// Cache of previous time update.
-	uint32_t _lastTimestamp = 0;
+	uint32_t _lastTimestamp                     = 0;
 
 	//! Set on switchcraft event, then decremented each tick event until 0.
-	uint16_t _switchcraftDoubleTapCountdown = 0;
+	uint16_t _switchcraftDoubleTapCountdown     = 0;
 
-	//! Keeps up the switch value (1-100 from smart switch) of the last time it was on, before being turned off by switchcraft.
-	uint8_t _lastSwitchcraftOnValue = 0;
+	//! Keeps up the switch value (1-100 from smart switch) of the last time it was on, before being turned off by
+	//! switchcraft.
+	uint8_t _lastSwitchcraftOnValue             = 0;
 
 	/**
 	 * Which source claimed the switch.
@@ -70,8 +72,8 @@ private:
 	 * Until timeout, nothing with a different source can set the switch.
 	 * Unless that source overrules the current source.
 	 */
-	cmd_source_with_counter_t _source = cmd_source_with_counter_t(CS_CMD_SOURCE_NONE);
-	uint32_t _ownerTimeoutCountdown = 0;
+	cmd_source_with_counter_t _source           = cmd_source_with_counter_t(CS_CMD_SOURCE_NONE);
+	uint32_t _ownerTimeoutCountdown             = 0;
 
 	// Max number of switch commands to store in history.
 	const static uint8_t _maxSwitchHistoryItems = 10;
@@ -114,7 +116,7 @@ private:
 	 * Triggers an updateState() call on all handled events and adjusts
 	 * at least one of behaviourState or overrideState.
 	 */
-	bool handleStateIntentionEvents(event_t & evt);
+	bool handleStateIntentionEvents(event_t& evt);
 
 	/**
 	 * Tries to update [overrideState] to [value] and then calls updateState(false).
@@ -151,7 +153,7 @@ private:
 	 * returns true when the event should be considered 'consumed'.
 	 * (which is when evt is of one of these types.)
 	 */
-	bool handleTimingEvents(event_t & evt);
+	bool handleTimingEvents(event_t& evt);
 
 	/**
 	 * EVT_PRESENCE_MUTATION
@@ -191,7 +193,8 @@ private:
 
 	/**
 	 * Tries to set source as owner of the switch.
-	 * Returns true on success, false if switch is already owned by a different source, and given source does not overrule it.
+	 * Returns true on success, false if switch is already owned by a different source, and given source does not
+	 * overrule it.
 	 */
 	bool checkAndSetOwner(const cmd_source_with_counter_t& source);
 

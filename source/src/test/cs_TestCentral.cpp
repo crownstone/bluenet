@@ -5,32 +5,24 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <test/cs_TestCentral.h>
 #include <ble/cs_BleCentral.h>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_UuidConfig.h>
 #include <events/cs_EventDispatcher.h>
+#include <test/cs_TestCentral.h>
 #include <util/cs_Utils.h>
 
-TestCentral::TestCentral() :
-	_fwVersionHandle(BLE_GATT_HANDLE_INVALID),
-	_controlHandle(BLE_GATT_HANDLE_INVALID)
-{
-
-}
+TestCentral::TestCentral() : _fwVersionHandle(BLE_GATT_HANDLE_INVALID), _controlHandle(BLE_GATT_HANDLE_INVALID) {}
 
 void TestCentral::init() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
 void TestCentral::connect() {
-	TYPIFY(CMD_BLE_CENTRAL_CONNECT) cmdPacket = {
-			.address = {
-					.address = { 0xEC, 0x22, 0x35, 0xEF, 0x60, 0xF4 },
-					.addressType = CS_ADDRESS_TYPE_RANDOM_STATIC
-			},
-			.timeoutMs = 3000
-	};
+	TYPIFY(CMD_BLE_CENTRAL_CONNECT)
+	cmdPacket = {
+			.address = {.address = {0xEC, 0x22, 0x35, 0xEF, 0x60, 0xF4}, .addressType = CS_ADDRESS_TYPE_RANDOM_STATIC},
+			.timeoutMs = 3000};
 	_log(SERIAL_INFO, false, "Address: ");
 	CsUtils::printAddress((uint8_t*)cmdPacket.address.address, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 
@@ -45,8 +37,8 @@ void TestCentral::discover() {
 	uuids[0].fromFullUuid(CROWNSTONE_UUID);
 	uuids[1].fromFullUuid(SETUP_UUID);
 	uuids[2].fromShortUuid(BLE_UUID_DEVICE_INFORMATION_SERVICE);
-	uuids[3].fromShortUuid(0xFE59); // DFU service
-	cmdPacket.uuids = uuids;
+	uuids[3].fromShortUuid(0xFE59);  // DFU service
+	cmdPacket.uuids     = uuids;
 	cmdPacket.uuidCount = sizeof(uuids) / sizeof(uuids[0]);
 	event_t cmdEvent(CS_TYPE::CMD_BLE_CENTRAL_DISCOVER, &cmdPacket, sizeof(cmdPacket));
 	cmdEvent.dispatch();
@@ -55,10 +47,10 @@ void TestCentral::discover() {
 
 void TestCentral::onDiscovery(ble_central_discovery_t& packet) {
 	LOGi("Discovered a service/char uuid=%u type=%u valueHandle=%u cccdHandle=%u",
-			packet.uuid.getUuid().uuid,
-			packet.uuid.getUuid().type,
-			packet.valueHandle,
-			packet.cccdHandle);
+		 packet.uuid.getUuid().uuid,
+		 packet.uuid.getUuid().type,
+		 packet.valueHandle,
+		 packet.cccdHandle);
 
 	UUID crownstoneUuid;
 	crownstoneUuid.fromFullUuid(CROWNSTONE_UUID);
@@ -74,10 +66,10 @@ void TestCentral::onDiscovery(ble_central_discovery_t& packet) {
 	ble_uuid_t uuid1 = firmwareVersionUuid.getUuid();
 	ble_uuid_t uuid2 = packet.uuid.getUuid();
 	LOGi("fw version uuid=%u type=%u memcmp=%u size=%u",
-			firmwareVersionUuid.getUuid().uuid,
-			firmwareVersionUuid.getUuid().type,
-			memcmp(&uuid1, &uuid2, sizeof(ble_uuid_t)),
-			sizeof(ble_uuid_t));
+		 firmwareVersionUuid.getUuid().uuid,
+		 firmwareVersionUuid.getUuid().type,
+		 memcmp(&uuid1, &uuid2, sizeof(ble_uuid_t)),
+		 sizeof(ble_uuid_t));
 	if (packet.uuid == firmwareVersionUuid) {
 		_fwVersionHandle = packet.valueHandle;
 		LOGi("Found fw version handle: %u", _fwVersionHandle);
@@ -99,7 +91,7 @@ void TestCentral::write() {
 	}
 	TYPIFY(CMD_BLE_CENTRAL_WRITE) cmdPacket;
 	cmdPacket.handle = _controlHandle;
-	cmdPacket.data = cs_data_t(writeData, sizeof(writeData));
+	cmdPacket.data   = cs_data_t(writeData, sizeof(writeData));
 	event_t cmdEvent(CS_TYPE::CMD_BLE_CENTRAL_WRITE, &cmdPacket, sizeof(cmdPacket));
 	cmdEvent.dispatch();
 	LOGi("write: %u", cmdEvent.result.returnCode);
@@ -111,7 +103,7 @@ void TestCentral::disconnect() {
 	LOGi("disconnect: %u", cmdEvent.result.returnCode);
 }
 
-void TestCentral::handleEvent(event_t & event) {
+void TestCentral::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_CONTROL_CMD: {
 			control_command_packet_t* packet = CS_TYPE_CAST(CMD_CONTROL_CMD, event.data);
@@ -159,8 +151,6 @@ void TestCentral::handleEvent(event_t & event) {
 			break;
 		}
 
-
-		default:
-			break;
+		default: break;
 	}
 }

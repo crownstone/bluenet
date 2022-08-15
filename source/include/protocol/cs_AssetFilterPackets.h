@@ -6,15 +6,14 @@
  */
 
 #pragma once
-#include <cstdint>
-#include <cstring>
 #include <protocol/cs_CuckooFilterStructs.h>
 
+#include <cstdint>
+#include <cstring>
 
 // ------------------ Command protocol version ------------------
 typedef uint8_t asset_filter_cmd_protocol_t;
 constexpr asset_filter_cmd_protocol_t ASSET_FILTER_CMD_PROTOCOL_VERSION = 0;
-
 
 // ------------------ Command values -----------------
 
@@ -45,7 +44,6 @@ struct __attribute__((__packed__)) asset_filter_summary_t {
 	uint32_t crc;
 };
 
-
 struct __attribute__((__packed__)) asset_filter_cmd_get_filter_summaries_ret_t {
 	asset_filter_cmd_protocol_t protocolVersion;
 	uint16_t masterVersion;
@@ -57,7 +55,7 @@ struct __attribute__((__packed__)) asset_filter_cmd_get_filter_summaries_ret_t {
 // ------------------ Filter format ------------------
 
 enum class AssetFilterType : uint8_t {
-	CuckooFilter = 0,
+	CuckooFilter     = 0,
 	ExactMatchFilter = 1,
 };
 
@@ -68,9 +66,9 @@ enum class AssetFilterInputType : uint8_t {
 };
 
 enum class AssetFilterOutputFormat : uint8_t {
-	Mac            = 0,
-	AssetId        = 1,
-	None           = 2,
+	Mac     = 0,
+	AssetId = 1,
+	None    = 2,
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	AssetIdNearest = 100,
 #endif
@@ -78,11 +76,10 @@ enum class AssetFilterOutputFormat : uint8_t {
 
 union __attribute__((__packed__)) asset_filter_flags_t {
 	struct __attribute__((packed)) {
-		bool exclude: 1;
+		bool exclude : 1;
 	} flags;
 	uint8_t asInt = 0;
 };
-
 
 struct __attribute__((__packed__)) ad_data_type_selector_t {
 	uint8_t adDataType;
@@ -93,23 +90,16 @@ struct __attribute__((__packed__)) masked_ad_data_type_selector_t {
 	uint32_t adDataMask;
 };
 
-
 struct __attribute__((__packed__)) asset_id_t {
 	uint8_t data[3];
 
 	// default implementation according to C++20
-	bool operator==(const asset_id_t& other) const {
-		return std::memcmp(data, other.data, sizeof(data)) == 0;
-	}
+	bool operator==(const asset_id_t& other) const { return std::memcmp(data, other.data, sizeof(data)) == 0; }
 };
 
-constexpr asset_id_t INVALID_ASSET_ID { .data{0xff, 0xff, 0xff} };
-
+constexpr asset_id_t INVALID_ASSET_ID{.data{0xff, 0xff, 0xff}};
 
 struct __attribute__((__packed__)) asset_filters_version_t {
 	uint16_t masterVersion = 0;
 	uint32_t masterCrc;
 };
-
-
-

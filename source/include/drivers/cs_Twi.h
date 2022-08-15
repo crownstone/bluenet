@@ -15,13 +15,13 @@ enum class TwiIsrEvent { Read, Write, Error };
 /**
  * Class that implements twi/i2c. This on the moment only implements twi as master.
  */
-class Twi: public EventListener {
+class Twi : public EventListener {
 public:
 	/**
 	 * Construct twi/i2c instance.
 	 */
 	static Twi& getInstance();
-	
+
 	/**
 	 * Init twi with board configuration (nothing is happening to the pins yet).
 	 *
@@ -53,7 +53,7 @@ public:
 	 * @param[out]    data         Pointer to data array where result will be received.
 	 * @param[in,out] length       Number of items to read, and returns number of items actually read.
 	 */
-	void read(uint8_t address, uint8_t* data, size_t & length);
+	void read(uint8_t address, uint8_t* data, size_t& length);
 
 	/**
 	 * Incoming events.
@@ -66,15 +66,15 @@ public:
 	 * Events from the hardware.
 	 */
 	void isrEvent(TwiIsrEvent event);
-protected:
 
+protected:
 	// Local struct to store configuration.
 	static const nrfx_twi_t _twi;
 
 private:
 	Twi();
 	Twi(Twi const&);
-	void operator=(Twi const &);
+	void operator=(Twi const&);
 
 	// Local config for driver
 	nrfx_twi_config_t _config;
@@ -91,4 +91,3 @@ private:
 	// Error event
 	bool _eventError;
 };
-

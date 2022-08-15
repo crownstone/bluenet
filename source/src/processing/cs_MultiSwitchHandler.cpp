@@ -6,11 +6,11 @@
  */
 
 #include "processing/cs_MultiSwitchHandler.h"
+
 #include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
 
-MultiSwitchHandler::MultiSwitchHandler() {
-}
+MultiSwitchHandler::MultiSwitchHandler() {}
 
 void MultiSwitchHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
@@ -27,19 +27,22 @@ void MultiSwitchHandler::handleMultiSwitch(internal_multi_switch_item_t* item, c
 	else {
 		LOGd("send multi switch");
 		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* eventData = item;
-		event_t event(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, eventData, sizeof(TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)), source);
+		event_t event(
+				CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH,
+				eventData,
+				sizeof(TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)),
+				source);
 		EventDispatcher::getInstance().dispatch(event);
 		return;
 	}
 }
 
-void MultiSwitchHandler::handleEvent(event_t & event) {
+void MultiSwitchHandler::handleEvent(event_t& event) {
 	switch (event.type) {
-	case CS_TYPE::CMD_MULTI_SWITCH: {
-		handleMultiSwitch((TYPIFY(CMD_MULTI_SWITCH)*) event.data, event.source);
-		break;
-	}
-	default:
-		break;
+		case CS_TYPE::CMD_MULTI_SWITCH: {
+			handleMultiSwitch((TYPIFY(CMD_MULTI_SWITCH)*)event.data, event.source);
+			break;
+		}
+		default: break;
 	}
 }

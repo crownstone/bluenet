@@ -330,8 +330,8 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
  * continues. In that case the microapp is called again on the next tick.
  */
 bool MicroappController::retrieveCommand() {
-	uint8_t* inputBuffer            = getInputMicroappBuffer();
-	microapp_cmd_t* incomingMessage = reinterpret_cast<microapp_cmd_t*>(inputBuffer);
+	uint8_t* inputBuffer                        = getInputMicroappBuffer();
+	microapp_cmd_t* incomingMessage             = reinterpret_cast<microapp_cmd_t*>(inputBuffer);
 
 	[[maybe_unused]] static int retrieveCounter = 0;
 	if (incomingMessage->cmd != CS_MICROAPP_COMMAND_LOOP_END) {
@@ -413,8 +413,8 @@ void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
 	microappBleDevice->header.interruptCmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
 
 	// Allow microapp to map to handler with given id
-	microappBleDevice->header.id = id;
-	microappBleDevice->type      = type;
+	microappBleDevice->header.id           = id;
+	microappBleDevice->type                = type;
 
 	// Copy address and at the same time convert from little endian to big endian
 	std::reverse_copy(
@@ -441,23 +441,22 @@ void MicroappController::softInterruptMesh(MeshMsgEvent* event) {
 	}
 
 	// Write bluetooth device to buffer
-	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
-	microapp_mesh_read_cmd_t* microappMeshMsg = reinterpret_cast<microapp_mesh_read_cmd_t*>(outputBuffer);
+	uint8_t* outputBuffer                           = getOutputMicroappBuffer();
+	microapp_mesh_read_cmd_t* microappMeshMsg       = reinterpret_cast<microapp_mesh_read_cmd_t*>(outputBuffer);
 
 	// Add the type of softInterruptCmd
 	microappMeshMsg->meshHeader.header.interruptCmd = CS_MICROAPP_COMMAND_MESH;
 
 	// Write the isr id to the header so the microapp may know the source
-	microappMeshMsg->meshHeader.header.id = _meshIsr.id;
+	microappMeshMsg->meshHeader.header.id           = _meshIsr.id;
 
-	microappMeshMsg->stoneId = event->srcStoneId;
-	microappMeshMsg->dlen = event->msg.len;
+	microappMeshMsg->stoneId                        = event->srcStoneId;
+	microappMeshMsg->dlen                           = event->msg.len;
 	memcpy(microappMeshMsg->data, event->msg.data, event->msg.len);
 
 	LOGv("Incoming mesh message for microapp (id=%d)", _meshIsr.id);
 	softInterrupt();
 }
-
 
 /*
  * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the soft interrupt.
@@ -481,9 +480,9 @@ void MicroappController::softInterrupt() {
 	}
 	_softInterruptCounter++;
 
-	outgoingCommand->ack                = CS_ACK_BLUENET_MICROAPP_REQUEST;
-	bool callAgain                      = false;
-	int8_t repeatCounter                = 0;
+	outgoingCommand->ack = CS_ACK_BLUENET_MICROAPP_REQUEST;
+	bool callAgain       = false;
+	int8_t repeatCounter = 0;
 	do {
 		LOGv("Call [%i,%i,%i], within interrupt %i",
 			 _softInterruptCounter,
@@ -492,7 +491,7 @@ void MicroappController::softInterrupt() {
 			 outgoingCommand->interruptCmd);
 		callMicroapp();
 		bool acked = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK);
-		bool busy = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_BUSY);
+		bool busy  = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_BUSY);
 		if (acked) {
 			LOGv("Acked interrupt");
 		}
@@ -551,7 +550,7 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 
 	if (event->reply != nullptr) {
 		// Send an empty reply.
-		event->reply->type = CS_MESH_MODEL_TYPE_MICROAPP;
+		event->reply->type     = CS_MESH_MODEL_TYPE_MICROAPP;
 		event->reply->dataSize = 0;
 	}
 
@@ -628,7 +627,7 @@ bool MicroappController::registerSoftInterruptSlotBle(uint8_t id) {
 	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
 		if (!_bleIsr[i].registered) {
 			_bleIsr[i].registered = true;
-			_bleIsr[i].type       = BleEventDeviceScanned; // TODO: change if more types
+			_bleIsr[i].type       = BleEventDeviceScanned;  // TODO: change if more types
 			_bleIsr[i].id         = id;
 			LOGi("Registered slot %i for BLE events towards the microapp (id=%d)", i, id);
 			return true;
@@ -646,10 +645,10 @@ bool MicroappController::registerSoftInterruptSlotMesh(uint8_t id) {
 	if (!_meshIsr.registered) {
 		LOGi("Registered the softInterrupt slot for mesh interrupts (id=%d)", id);
 		_meshIsr.registered = true;
-		_meshIsr.id = id;
+		_meshIsr.id         = id;
 		return true;
 	}
-	else { // already registered
+	else {  // already registered
 		LOGw("Could not register slot for Mesh events for the microapp (id=%i)", id);
 		return false;
 	}

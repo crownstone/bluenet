@@ -6,3 +6,4 @@ message(STATUS "crownstone platform mock source files appended to FOLDER_SOURCE"
 
 list(APPEND FOLDER_SOURCE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/drivers/cs_Uicr.c")
 LIST(APPEND FOLDER_SOURCE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/storage/cs_State.cpp")
+list(APPEND FOLDER_SOURCE "${CMAKE_BLUENET_SOURCE_DIR_MOCK}/util/cs_BleError.c")

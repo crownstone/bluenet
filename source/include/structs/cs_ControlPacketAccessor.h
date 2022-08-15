@@ -6,7 +6,6 @@
  */
 #pragma once
 
-#include <cstdint>
 #include <cfg/cs_StaticConfig.h>
 #include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
@@ -14,15 +13,18 @@
 #include <structs/cs_PacketsInternal.h>
 #include <util/cs_Error.h>
 
+#include <cstdint>
+
 /**
  * Default payload size for a control packet.
  * Requires CS_CHAR_WRITE_BUF_SIZE to be defined.
  */
 //#define CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE (CS_CHAR_WRITE_BUF_SIZE - sizeof(control_packet_header_t))
-static constexpr size_t CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE = (g_CS_CHAR_WRITE_BUF_SIZE - sizeof(control_packet_header_t));
+static constexpr size_t CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE =
+		(g_CS_CHAR_WRITE_BUF_SIZE - sizeof(control_packet_header_t));
 
 template <cs_buffer_size_t PAYLOAD_SIZE = CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE>
-class ControlPacketAccessor: BufferAccessor {
+class ControlPacketAccessor : BufferAccessor {
 public:
 	/**
 	 * Get the protocol version.
@@ -65,7 +67,7 @@ public:
 		checkInitialized();
 		cs_data_t data;
 		data.data = _buffer->payload;
-		data.len = getPayloadSize();
+		data.len  = getPayloadSize();
 		return data;
 	}
 
@@ -143,7 +145,7 @@ public:
 		checkInitialized();
 		cs_data_t data;
 		data.data = (buffer_ptr_t)_buffer;
-		data.len = getSerializedSize();
+		data.len  = getSerializedSize();
 		return data;
 	}
 
@@ -153,9 +155,7 @@ protected:
 	 */
 	control_packet_t<PAYLOAD_SIZE>* _buffer;
 
-	void checkInitialized() const {
-		assert(_buffer != NULL, "Butter not initialized");
-	}
+	void checkInitialized() const { assert(_buffer != NULL, "Butter not initialized"); }
 
 private:
 };

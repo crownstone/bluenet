@@ -5,21 +5,18 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
-#include <behaviour/cs_BehaviourHandler.h>
-
 #include <behaviour/cs_BehaviourConflictResolution.h>
+#include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <common/cs_Types.h>
+#include <logging/cs_Logger.h>
 #include <presence/cs_PresenceDescription.h>
 #include <presence/cs_PresenceHandler.h>
 #include <storage/cs_State.h>
+#include <test/cs_Test.h>
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
-#include <logging/cs_Logger.h>
-#include <test/cs_Test.h>
-
 
 #define LOGBehaviourHandlerDebug LOGnone
 #define LOGBehaviourHandlerVerbose LOGnone
@@ -32,7 +29,7 @@ cs_ret_code_t BehaviourHandler::init() {
 
 	LOGi("Init: _isActive=%u", _isActive);
 	_presenceHandler = getComponent<PresenceHandler>();
-	_behaviourStore = getComponent<BehaviourStore>();
+	_behaviourStore  = getComponent<BehaviourStore>();
 
 	listen();
 
@@ -69,7 +66,7 @@ void BehaviourHandler::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
-			auto request = CS_TYPE_CAST(EVT_MESH_SYNC_REQUEST_OUTGOING, evt.data);
+			auto request                    = CS_TYPE_CAST(EVT_MESH_SYNC_REQUEST_OUTGOING, evt.data);
 			request->bits.behaviourSettings = onBehaviourSettingsOutgoingSyncRequest();
 			break;
 		}
@@ -96,7 +93,7 @@ bool BehaviourHandler::update() {
 		currentIntendedState = std::nullopt;
 	}
 	else {
-		Time time = SystemTime::now();
+		Time time                                        = SystemTime::now();
 		std::optional<PresenceStateDescription> presence = _presenceHandler->getCurrentPresenceDescription();
 
 		if (!presence) {
@@ -110,8 +107,9 @@ bool BehaviourHandler::update() {
 	return true;
 }
 
-SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) {
-	if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
+SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(
+		Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) {
+	if (SwitchBehaviour* switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
 		if (switchbehave->isValid(currentTime, currentPresence)) {
 			return switchbehave;
 		}
@@ -121,8 +119,7 @@ SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Ti
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
-		Time currentTime,
-		PresenceStateDescription currentPresence) {
+		Time currentTime, PresenceStateDescription currentPresence) {
 	if (!_isActive) {
 		LOGBehaviourHandlerDebug("Behaviour handler is inactive, computed intended state: empty");
 		return {};
@@ -131,7 +128,7 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		LOGBehaviourHandlerDebug("Current time invalid, computed intended state: empty");
 		return {};
 	}
-	if(_behaviourStore == nullptr) {
+	if (_behaviourStore == nullptr) {
 		LOGBehaviourHandlerDebug("BehaviourStore is nullptr, computed intended state: empty");
 		return {};
 	}
@@ -141,8 +138,8 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 	// 'best' meaning most relevant considering from/until time window.
 	SwitchBehaviour* currentBestSwitchBehaviour = nullptr;
 	for (auto candidateBehaviour : _behaviourStore->getActiveBehaviours()) {
-		SwitchBehaviour* candidateSwitchBehaviour = ValidateSwitchBehaviour(
-				candidateBehaviour, currentTime, currentPresence);
+		SwitchBehaviour* candidateSwitchBehaviour =
+				ValidateSwitchBehaviour(candidateBehaviour, currentTime, currentPresence);
 
 		// check for failed transformation from right to left. If either
 		// current or candidate is nullptr, we can continue to the next candidate.
@@ -156,23 +153,18 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		}
 
 		// conflict resolve:
-		if (FromUntilIntervalIsEqual(
-				currentBestSwitchBehaviour,
-				candidateSwitchBehaviour)) {
+		if (FromUntilIntervalIsEqual(currentBestSwitchBehaviour, candidateSwitchBehaviour)) {
 			// when interval coincides, lowest intensity behaviour wins:
 			if (candidateSwitchBehaviour->value() < currentBestSwitchBehaviour->value()) {
 				currentBestSwitchBehaviour = candidateSwitchBehaviour;
 			}
 		}
 		else if (FromUntilIntervalIsMoreRelevantOrEqual(
-				candidateSwitchBehaviour,
-				currentBestSwitchBehaviour,
-				currentTime)) {
+						 candidateSwitchBehaviour, currentBestSwitchBehaviour, currentTime)) {
 			// when interval is more relevant, that behaviour wins
 			currentBestSwitchBehaviour = candidateSwitchBehaviour;
 		}
 	}
-
 
 	if (currentBestSwitchBehaviour) {
 		return currentBestSwitchBehaviour->value();
@@ -195,7 +187,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	}
 	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
 
-	Time currentTime = SystemTime::now();
+	Time currentTime                  = SystemTime::now();
 	std::optional<PresenceStateDescription> currentPresence =
 			_presenceHandler == nullptr ? std::nullopt : _presenceHandler->getCurrentPresenceDescription();
 
@@ -205,8 +197,8 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	// Set sunrise and sunset.
 	TYPIFY(STATE_SUN_TIME) sunTime;
 	State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &sunTime, sizeof(sunTime));
-	behaviourDebug->sunrise = sunTime.sunrise;
-	behaviourDebug->sunset  = sunTime.sunset;
+	behaviourDebug->sunrise          = sunTime.sunrise;
+	behaviourDebug->sunset           = sunTime.sunset;
 
 	// Set behaviour enabled.
 	behaviourDebug->behaviourEnabled = _isActive;
@@ -215,17 +207,17 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	for (uint8_t i = 0; i < 8; ++i) {
 		behaviourDebug->presence[i] = 0;
 	}
-	behaviourDebug->presence[0] = currentPresence ? currentPresence.value().getBitmask() : 0;
+	behaviourDebug->presence[0]         = currentPresence ? currentPresence.value().getBitmask() : 0;
 
 	// Set active behaviours.
-	behaviourDebug->storedBehaviours = 0;
-	behaviourDebug->activeBehaviours = 0;
-	behaviourDebug->extensionActive = 0;
+	behaviourDebug->storedBehaviours    = 0;
+	behaviourDebug->activeBehaviours    = 0;
+	behaviourDebug->extensionActive     = 0;
 	behaviourDebug->activeTimeoutPeriod = 0;
 
-	if(_behaviourStore == nullptr) {
+	if (_behaviourStore == nullptr) {
 		LOGMeshWarning("BehaviourStore is nullptr, no info available.");
-		evt.result.dataSize = sizeof(behaviour_debug_t);
+		evt.result.dataSize   = sizeof(behaviour_debug_t);
 		evt.result.returnCode = ERR_SUCCESS;
 		return;
 	}
@@ -252,7 +244,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 
 	if (checkBehaviours) {
 		for (uint8_t index = 0; index < behaviours.size(); ++index) {
-			if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behaviours[index])) {
+			if (SwitchBehaviour* switchbehave = dynamic_cast<SwitchBehaviour*>(behaviours[index])) {
 				// cast to switch behaviour succesful.
 				// note: this may also be an extendedswitchbehaviour - which is intended!
 				if (switchbehave->isValid(currentTime, currentPresence.value())) {
@@ -263,12 +255,12 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 				}
 			}
 
-			if (ExtendedSwitchBehaviour* extendedswitchbehave = dynamic_cast<ExtendedSwitchBehaviour*>(behaviours[index])) {
-				behaviourDebug->extensionActive |=
-						extendedswitchbehave->extensionPeriodIsActive() ? (1 << index) : 0;
+			if (ExtendedSwitchBehaviour* extendedswitchbehave =
+						dynamic_cast<ExtendedSwitchBehaviour*>(behaviours[index])) {
+				behaviourDebug->extensionActive |= extendedswitchbehave->extensionPeriodIsActive() ? (1 << index) : 0;
 			}
 
-			if (TwilightBehaviour * twilight = dynamic_cast<TwilightBehaviour*>(behaviours[index])) {
+			if (TwilightBehaviour* twilight = dynamic_cast<TwilightBehaviour*>(behaviours[index])) {
 				if (twilight->isValid(currentTime)) {
 					behaviourDebug->activeBehaviours |= (1 << index);
 				}
@@ -276,7 +268,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 		}
 	}
 
-	evt.result.dataSize = sizeof(behaviour_debug_t);
+	evt.result.dataSize   = sizeof(behaviour_debug_t);
 	evt.result.returnCode = ERR_SUCCESS;
 }
 
@@ -286,7 +278,7 @@ std::optional<uint8_t> BehaviourHandler::getValue() {
 }
 
 bool BehaviourHandler::requiresPresence(Time t) {
-	if(_behaviourStore == nullptr) {
+	if (_behaviourStore == nullptr) {
 		return false;
 	}
 
@@ -308,7 +300,7 @@ bool BehaviourHandler::requiresPresence(Time t) {
 }
 
 bool BehaviourHandler::requiresAbsence(Time t) {
-	if(_behaviourStore == nullptr) {
+	if (_behaviourStore == nullptr) {
 		return false;
 	}
 
@@ -329,7 +321,8 @@ void BehaviourHandler::onBehaviourSettingsChange(behaviour_settings_t settings) 
 	_isActive = settings.flags.enabled;
 	LOGi("onBehaviourSettingsChange active=%u", _isActive);
 	TEST_PUSH_B(this, _isActive);
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, reinterpret_cast<uint8_t*>(&settings), sizeof(settings));
+	UartHandler::getInstance().writeMsg(
+			UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, reinterpret_cast<uint8_t*>(&settings), sizeof(settings));
 	update();
 }
 
@@ -388,7 +381,7 @@ void BehaviourHandler::tryFinalizeBehaviourSettingsSync() {
 	}
 	LOGBehaviourHandlerDebug("Finalize behaviour settings sync");
 
-	_behaviourSettingsSynced = true;
+	_behaviourSettingsSynced                       = true;
 
 	// After we received all the sync responses, we store the final settings.
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) stateSettings = _receivedBehaviourSettings.value();
@@ -407,13 +400,13 @@ void BehaviourHandler::onBehaviourSettingsIncomingSyncRequest() {
 	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &settings, sizeof(settings));
 
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS;
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.broadcast = true;
+	meshMsg.type                   = CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS;
+	meshMsg.reliability            = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency                = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.broadcast  = true;
 	meshMsg.flags.flags.doNotRelay = false;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&settings);
-	meshMsg.size = sizeof(settings);
+	meshMsg.payload                = reinterpret_cast<uint8_t*>(&settings);
+	meshMsg.size                   = sizeof(settings);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();

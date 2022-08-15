@@ -12,21 +12,21 @@
 #include <limits>
 #endif
 
-namespace CsMath{
+namespace CsMath {
 
 /**
  * returns lhs+rhs, clamping return values that would roll over
  * to the min/max values of lhs.
  */
-template<class T, class U>
-constexpr inline T SafeAdd (T lhs, U rhs) {
+template <class T, class U>
+constexpr inline T SafeAdd(T lhs, U rhs) {
 	T min = std::numeric_limits<T>::lowest();
 	T max = std::numeric_limits<T>::max();
 
-	if(rhs > 0) {
+	if (rhs > 0) {
 		return (lhs > max - rhs) ? max : T(lhs + rhs);
 	}
-	if(rhs < 0) {
+	if (rhs < 0) {
 		return (lhs < min - rhs) ? min : T(lhs + rhs);
 	}
 	return lhs;
@@ -35,8 +35,8 @@ constexpr inline T SafeAdd (T lhs, U rhs) {
 /**
  * roll over safe variant of ++some_value;
  */
-template<class T, class U=int>
-constexpr inline T& Increase(T& obj, U diff=1) {
+template <class T, class U = int>
+constexpr inline T& Increase(T& obj, U diff = 1) {
 	obj = SafeAdd(obj, diff);
 	return obj;
 }
@@ -44,8 +44,8 @@ constexpr inline T& Increase(T& obj, U diff=1) {
 /**
  * roll over safe variant of --some_value;
  */
-template<class T, class U=int>
-constexpr inline T& Decrease(T& obj, U diff=1) {
+template <class T, class U = int>
+constexpr inline T& Decrease(T& obj, U diff = 1) {
 	obj = SafeAdd(obj, -diff);
 	return obj;
 }
@@ -57,8 +57,8 @@ constexpr inline T& Decrease(T& obj, U diff=1) {
  * 'cannot bind packed field to ...&' or
  * 'taking address of packed member ... may result in an unaligned pointer value'.
  */
-template<class T, class M, class U=int>
-constexpr inline decltype(auto) DecreaseMember(T& obj, M member, U diff=1) {
+template <class T, class M, class U = int>
+constexpr inline decltype(auto) DecreaseMember(T& obj, M member, U diff = 1) {
 	obj.*member = SafeAdd(obj.*member, -diff);
 	return obj.*member;
 }
@@ -180,4 +180,4 @@ T round(float val) {
 	// adding 0.5 results in conventional rounding.
 	return T(val + 0.5);
 }
-} // namespace CsMath
+}  // namespace CsMath

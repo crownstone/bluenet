@@ -9,9 +9,8 @@
 
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
-#include <protocol/cs_Typedefs.h>
 #include <localisation/cs_AssetFilterStore.h>
+#include <protocol/cs_Typedefs.h>
 
 /**
  * Class that takes care of synchronizing the asset filters between crownstones.
@@ -25,12 +24,12 @@ public:
 	 * Interval at which the master version is broadcasted.
 	 */
 	constexpr static uint16_t VERSION_BROADCAST_NORMAL_INTERVAL_SECONDS = 5 * 60;
-	constexpr static uint16_t VERSION_BROADCAST_LOW_INTERVAL_SECONDS = 1;
+	constexpr static uint16_t VERSION_BROADCAST_LOW_INTERVAL_SECONDS    = 1;
 
 	/**
 	 * How long the low interval will be used after setting it to low interval.
 	 */
-	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_RESET_SECONDS = 60;
+	constexpr static uint16_t VERSION_BROADCAST_INTERVAL_RESET_SECONDS  = 60;
 
 	/**
 	 * Init the class:
@@ -42,25 +41,12 @@ private:
 	/**
 	 * Async steps that are taken when synchronizing filters to another crownstone.
 	 */
-	enum class SyncStep {
-		NONE,
-		CONNECT,
-		GET_FILTER_SUMMARIES,
-		REMOVE_FILTERS,
-		UPLOAD_FILTERS,
-		COMMIT,
-		DISCONNECT
-	};
+	enum class SyncStep { NONE, CONNECT, GET_FILTER_SUMMARIES, REMOVE_FILTERS, UPLOAD_FILTERS, COMMIT, DISCONNECT };
 
 	/**
 	 * Results of comparing master version with another crownstone.
 	 */
-	enum class VersionCompare {
-		UNKOWN,
-		OLDER,
-		EQUAL,
-		NEWER
-	};
+	enum class VersionCompare { UNKOWN, OLDER, EQUAL, NEWER };
 
 	/**
 	 * Pointer to the (intialized) filter store.
@@ -70,7 +56,7 @@ private:
 	/**
 	 * Current step.
 	 */
-	SyncStep _step = SyncStep::NONE;
+	SyncStep _step           = SyncStep::NONE;
 
 	/**
 	 * Next index of filter IDs to upload/remove array.
@@ -102,7 +88,7 @@ private:
 	/**
 	 * Countdown counter that keeps track when to call sendVersion again.
 	 */
-	uint16_t _sendVersionCountdown = 0;
+	uint16_t _sendVersionCountdown              = 0;
 
 	/**
 	 * Sends the master version and CRC over the mesh.
@@ -177,5 +163,3 @@ public:
 	 */
 	void handleEvent(event_t& evt);
 };
-
-

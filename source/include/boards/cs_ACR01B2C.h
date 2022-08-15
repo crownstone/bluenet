@@ -38,51 +38,51 @@
  * TODO: The values used now might be empirical. Replace by theoretic values or tell why the calcluation is incorrect.
  */
 void asACR01B2C(boards_config_t* config) {
-	config->pinDimmer                          = 8;
-	config->pinRelayOn                         = 6;
-	config->pinRelayOff                        = 7;
-	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
-	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
-	config->pinAinDimmerTemp                   = GpioToAin(5);
-	config->pinRx                              = 20;
-	config->pinTx                              = 19;
+	config->pinDimmer                       = 8;
+	config->pinRelayOn                      = 6;
+	config->pinRelayOff                     = 7;
+	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(3);
+	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(4);
+	config->pinAinDimmerTemp                = GpioToAin(5);
+	config->pinRx                           = 20;
+	config->pinTx                           = 19;
 
-	config->pinLed[LED_RED]                    = 10;
-	config->pinLed[LED_GREEN]                  = 9;
+	config->pinLed[LED_RED]                 = 10;
+	config->pinLed[LED_GREEN]               = 9;
 
-	config->flags.dimmerInverted               = false;
-	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = false;
-	config->flags.ledInverted                  = false;
-	config->flags.dimmerTempInverted           = false;
-	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
-	config->flags.canTryDimmingOnBoot          = false;
-	config->flags.canDimOnWarmBoot             = false;
-	config->flags.dimmerOnWhenPinsFloat        = true;
+	config->flags.dimmerInverted            = false;
+	config->flags.enableUart                = false;
+	config->flags.enableLeds                = false;
+	config->flags.ledInverted               = false;
+	config->flags.dimmerTempInverted        = false;
+	config->flags.usesNfcPins               = false;  // Set to true if you want to use the LEDs.
+	config->flags.canTryDimmingOnBoot       = false;
+	config->flags.canDimOnWarmBoot          = false;
+	config->flags.dimmerOnWhenPinsFloat     = true;
 
-	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
+	config->deviceType                      = DEVICE_CROWNSTONE_PLUG;
 
-	config->voltageMultiplier[GAIN_SINGLE]     = 0.2f;
-	config->currentMultiplier[GAIN_SINGLE]     = 0.0045f;
+	config->voltageMultiplier[GAIN_SINGLE]  = 0.2f;
+	config->currentMultiplier[GAIN_SINGLE]  = 0.0045f;
 
 	// TODO: 2010 seems to be better than 2003 (check this old remark with theory).
-	config->voltageOffset[GAIN_SINGLE]         = 2003;
+	config->voltageOffset[GAIN_SINGLE]      = 2003;
 	// TODO: 1991 seems to be better than 1997 (check this old remark with theory).
-	config->currentOffset[GAIN_SINGLE]         = 1997;
+	config->currentOffset[GAIN_SINGLE]      = 1997;
 
-	config->powerOffsetMilliWatt               = 1500;
+	config->powerOffsetMilliWatt            = 1500;
 
 	// ADC values [0, 4095] map to [0V, 1.2V].
-	config->voltageAdcRangeMilliVolt           = 1200;
-	config->currentAdcRangeMilliVolt           = 1200;
+	config->voltageAdcRangeMilliVolt        = 1200;
+	config->currentAdcRangeMilliVolt        = 1200;
 
 	// About 1.5kOhm --> 90-100C
-	config->pwmTempVoltageThreshold            = 0.76;
+	config->pwmTempVoltageThreshold         = 0.76;
 	// About 0.7kOhm --> 70-95C
-	config->pwmTempVoltageThresholdDown        = 0.41;
+	config->pwmTempVoltageThresholdDown     = 0.41;
 
-	config->minTxPower                         = -20;
+	config->minTxPower                      = -20;
 
-	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
-	config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                    = 3 * config->scanIntervalUs / 4;
+	config->tapToToggleDefaultRssiThreshold = -35;
 }

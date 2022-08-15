@@ -7,47 +7,44 @@
 
 #pragma once
 
-#include <structs/buffer/cs_CircularBuffer.h>
 #include <structs/buffer/cs_AdcBuffer.h>
+#include <structs/buffer/cs_CircularBuffer.h>
 
 class RecognizeSwitch {
 private:
 	// Keep up whether this class is running (started).
-	bool _running = false;
+	bool _running                            = false;
 
 	// Keep up number of detect() calls to skip.
 	// This is used to prevent multiple switch detections in a row, and to prevent switch detections on init.
-	uint8_t _skipSwitchDetectionTriggers = 200;
+	uint8_t _skipSwitchDetectionTriggers     = 200;
 
 	// Threshold above which buffers are considered to be different.
-	float _thresholdDifferent = SWITCHCRAFT_THRESHOLD;
+	float _thresholdDifferent                = SWITCHCRAFT_THRESHOLD;
 
 	// Threshold below which buffers are considered to be similar.
-	float _thresholdSimilar = SWITCHCRAFT_THRESHOLD;
+	float _thresholdSimilar                  = SWITCHCRAFT_THRESHOLD;
 
 	// Alternative to thresholdSimilar.
-	float _thresholdRatio = 100.0;
+	float _thresholdRatio                    = 100.0;
 
 	const static uint8_t _numBuffersRequired = 4;
 
-	const static uint8_t _numStoredBuffers = _numBuffersRequired;
+	const static uint8_t _numStoredBuffers   = _numBuffersRequired;
 
 	// Store the samples and meta data of the last detection.
 	cs_power_samples_header_t _lastDetection;
 	cs_power_samples_header_t _lastAlmostDetection;
-	int16_t _lastDetectionSamples[_numStoredBuffers * AdcBuffer::getChannelLength()] = {0};
+	int16_t _lastDetectionSamples[_numStoredBuffers * AdcBuffer::getChannelLength()]       = {0};
 	int16_t _lastAlmostDetectionSamples[_numStoredBuffers * AdcBuffer::getChannelLength()] = {0};
 
-	enum FoundSwitch {
-		True,
-		Almost,
-		False
-	};
+	enum FoundSwitch { True, Almost, False };
 
 	/**
 	 * Check if a switch is detected in the given buffers.
 	 */
-	FoundSwitch detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration);
+	FoundSwitch detect(
+			const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration);
 
 	/**
 	 * Check if a switch is detected in the given buffers.
@@ -71,9 +68,11 @@ private:
 			const adc_sample_value_id_t numSamples);
 
 	bool ignoreSample(const adc_sample_value_t value1, const adc_sample_value_t value2);
-	bool ignoreSample(const adc_sample_value_t value0, const adc_sample_value_t value1, const adc_sample_value_t value2);
+	bool ignoreSample(
+			const adc_sample_value_t value0, const adc_sample_value_t value1, const adc_sample_value_t value2);
 
-	void setLastDetection(bool aboveThreshold, const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
+	void setLastDetection(
+			bool aboveThreshold, const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
 
 public:
 	// Gets a static singleton (no dynamic memory allocation)
@@ -125,7 +124,8 @@ public:
 	 * Get the samples of the last (almost) detected switch event.
 	 *
 	 * @param[in] type                           Either SWITCHCRAFT or SWITCHCRAFT_NON_TRIGGERED.
-	 * @param[in/out]                            Result with buffer to fill with data (header + samples), and result code to set.
+	 * @param[in/out]                            Result with buffer to fill with data (header + samples), and result
+	 * code to set.
 	 */
 	void getLastDetection(PowerSamplesType type, uint8_t index, cs_result_t& result);
 };

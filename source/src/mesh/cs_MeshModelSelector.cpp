@@ -56,7 +56,7 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 	}
 }
 
-cs_ret_code_t MeshModelSelector::remFromQueue(MeshUtil::cs_mesh_queue_item_t & item) {
+cs_ret_code_t MeshModelSelector::remFromQueue(MeshUtil::cs_mesh_queue_item_t& item) {
 	assert(_multicastModel != nullptr && _unicastModel != nullptr, "Model not set");
 	if (item.broadcast) {
 		if (item.acked) {

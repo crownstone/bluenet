@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+
 #include "drivers/cs_Timer.h"
 #include "events/cs_EventListener.h"
 
@@ -21,7 +22,7 @@ enum FactoryResetClassBit {
 };
 #define FACTORY_RESET_MASK_ALL ((1 << FACTORY_RESET_NUM_BITS) - 1)
 
-class FactoryReset: public EventListener {
+class FactoryReset : public EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static FactoryReset& getInstance() {
@@ -44,19 +45,15 @@ public:
 	void enableRecovery(bool enable);
 
 	/* Static function for the timeout */
-	static void staticTimeout(FactoryReset *ptr) {
-		ptr->timeout();
-	}
+	static void staticTimeout(FactoryReset* ptr) { ptr->timeout(); }
 
 	/* Static function for the timeout */
-	static void staticProcess(FactoryReset *ptr) {
-		ptr->process();
-	}
+	static void staticProcess(FactoryReset* ptr) { ptr->process(); }
 
 	/**
 	 * Handle events.
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 private:
 	FactoryReset();
@@ -74,9 +71,9 @@ private:
 	// Used to check if all classes are factory reset.
 	uint32_t _successfullyFactoryResetBitmask = 0;
 
-	app_timer_t              _recoveryDisableTimerData;
-	app_timer_id_t           _recoveryDisableTimerId;
+	app_timer_t _recoveryDisableTimerData;
+	app_timer_id_t _recoveryDisableTimerId;
 
-	app_timer_t              _recoveryProcessTimerData;
-	app_timer_id_t           _recoveryProcessTimerId;
+	app_timer_t _recoveryProcessTimerData;
+	app_timer_id_t _recoveryProcessTimerId;
 };

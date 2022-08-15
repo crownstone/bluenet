@@ -9,6 +9,7 @@
 //#include "nrf_soc.h"
 
 #include <ble/cs_Nordic.h>
+
 #include "util/cs_BleError.h"
 
 /** Get temperature reading from the softdevice

@@ -73,8 +73,10 @@ struct cs_async_result_t {
 	cs_ret_code_t resultCode;
 	cs_data_t resultData;
 
-	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode) : commandType(type), resultCode(resultCode), resultData() {}
-	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode, cs_data_t data) : commandType(type), resultCode(resultCode), resultData(data) {}
+	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode)
+			: commandType(type), resultCode(resultCode), resultData() {}
+	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode, cs_data_t data)
+			: commandType(type), resultCode(resultCode), resultData(data) {}
 };
 
 /**
@@ -342,7 +344,7 @@ struct adc_buffer_t {
 	 *
 	 * This may change at any moment, so make sure to check it after calculations and be ready to revert.
 	 */
-	bool valid = false;
+	bool valid                = false;
 
 	/**
 	 * Sequence number.

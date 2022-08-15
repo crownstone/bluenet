@@ -6,11 +6,13 @@
  */
 #pragma once
 
-#include <string>
+#include <ble/cs_Nordic.h>  // required for __get_IPSR()
 #include <logging/cs_Logger.h>
+
+#include <string>
+
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
-#include <ble/cs_Nordic.h> // required for __get_IPSR()
 
 /** @namespace CsUtils
  *
@@ -37,13 +39,8 @@ inline uint16_t convertEndian16(uint16_t val) {
  * @return the converted value
  */
 inline uint32_t convertEndian32(uint32_t val) {
-	return ((val >> 24) & 0xFF)
-		 | ((val >> 8) & 0xFF00)
-		 | ((val & 0xFF00) << 8)
-		 | ((val & 0xFF) << 24);
+	return ((val >> 24) & 0xFF) | ((val >> 8) & 0xFF00) | ((val & 0xFF00) << 8) | ((val & 0xFF) << 24);
 }
-
-
 
 /**
  * Macro that rounds up to the next multiple of given number
@@ -63,39 +60,39 @@ inline uint32_t convertEndian32(uint32_t val) {
  *
  * Usage: auto count = ArraySize(myArray);
  */
-template<class T, size_t N>
-constexpr auto ArraySize(T(&)[N]) {
+template <class T, size_t N>
+constexpr auto ArraySize(T (&)[N]) {
 	return N;
 }
 
-template<typename T>
+template <typename T>
 void printAddress(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG, bool addNewLine = true) {
 	_logArray(verbosity, addNewLine, arr, len, "", "", "%02X", ":", true);
 }
 
-inline void print_heap([[maybe_unused]] const std::string & msg) {
-	uint8_t *p = (uint8_t*)malloc(128);
+inline void print_heap([[maybe_unused]] const std::string& msg) {
+	uint8_t* p = (uint8_t*)malloc(128);
 	LOGd("%s %p", msg.c_str(), p);
 	free(p);
 }
 
-inline void print_stack([[maybe_unused]] const std::string & msg) {
+inline void print_stack([[maybe_unused]] const std::string& msg) {
 	void* sp;
-	asm("mov %0, sp" : "=r"(sp) : : );
+	asm("mov %0, sp" : "=r"(sp) : :);
 	LOGd("%s %p", msg.c_str(), (uint8_t*)sp);
 }
 
-template<typename T>
+template <typename T>
 inline bool isBitSet(const T value, uint8_t bit) {
 	return value & (1 << bit);
 }
 
-template<typename T>
+template <typename T>
 inline bool setBit(T& value, uint8_t bit) {
 	return value |= (1 << bit);
 }
 
-template<typename T>
+template <typename T>
 inline bool clearBit(T& value, uint8_t bit) {
 	return value &= ~(1 << bit);
 }
@@ -111,7 +108,7 @@ inline bool clearBit(T& value, uint8_t bit) {
  * 4     | 000000100          | 2
  * 132	 | 100000100          | 2
  */
-template<typename T>
+template <typename T>
 inline constexpr T lowestBitSet(T value) {
 	// TODO: there is a faster implementation for this.
 	T numBits = sizeof(T) * 8;
@@ -124,7 +121,6 @@ inline constexpr T lowestBitSet(T value) {
 	return numBits;
 }
 
-
 /**
  * Returns true when newValue is newer than previousValue, for a value that is increased all the time and overflows.
  */
@@ -136,7 +132,8 @@ inline bool isNewer(uint8_t previousValue, uint8_t newValue) {
 /**
  * @brief Parses advertisement data, providing length and location of the field in case matching data is found.
  *
- * @param[in]  Type of data to be looked for in advertisement data. See https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile
+ * @param[in]  Type of data to be looked for in advertisement data. See
+ * https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile
  * @param[in]  Pointer to advertisement data.
  * @param[in]  Advertisement data length.
  * @param[out] If data type requested is found: pointer to data of given type.
@@ -146,11 +143,11 @@ inline bool isNewer(uint8_t previousValue, uint8_t newValue) {
  * @retval ERR_NOT_FOUND if the type could not be found.
  */
 inline static cs_ret_code_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLen, cs_data_t* foundData) {
-	int index = 0;
+	int index       = 0;
 	foundData->data = nullptr;
-	foundData->len = 0;
-	while (index < advLen-1) {
-		uint8_t fieldLen = advData[index];
+	foundData->len  = 0;
+	while (index < advLen - 1) {
+		uint8_t fieldLen  = advData[index];
 		uint8_t fieldType = advData[index + 1];
 		// Check if length is not 0 or larger than remaining advertisement data.
 		if (fieldLen == 0 || index + 1 + fieldLen > advLen) {
@@ -158,11 +155,11 @@ inline static cs_ret_code_t findAdvType(uint8_t type, uint8_t* advData, uint8_t 
 		}
 
 		if (fieldType == type) {
-			foundData->data = &advData[index+2];
-			foundData->len = fieldLen-1;
+			foundData->data = &advData[index + 2];
+			foundData->len  = fieldLen - 1;
 			return ERR_SUCCESS;
 		}
-		index += fieldLen+1;
+		index += fieldLen + 1;
 	}
 	return ERR_NOT_FOUND;
 }
@@ -183,29 +180,27 @@ constexpr uint16_t stringLen(const char* str, uint16_t maxSize) {
 	return size;
 }
 
-
-
 inline uint32_t getInterruptLevel() {
-//	return __get_IPSR() & 0x1FF;
+	//	return __get_IPSR() & 0x1FF;
 	return __get_IPSR();
-//	0 = Thread mode
-//	1 = Reserved
-//	2 = NMI
-//	3 = HardFault
-//	4 = MemManage
-//	5 = BusFault
-//	6 = UsageFault
-//	7-10 = Reserved
-//	11 = SVCall
-//	12 = Reserved for Debug
-//	13 = Reserved
-//	14 = PendSV
-//	15 = SysTick
-//	16 = IRQ0.
-//	17 = IRQ1.
-//	18 = IRQ2.
-//	..
-//	n+16 = IRQn
+	//	0 = Thread mode
+	//	1 = Reserved
+	//	2 = NMI
+	//	3 = HardFault
+	//	4 = MemManage
+	//	5 = BusFault
+	//	6 = UsageFault
+	//	7-10 = Reserved
+	//	11 = SVCall
+	//	12 = Reserved for Debug
+	//	13 = Reserved
+	//	14 = PendSV
+	//	15 = SysTick
+	//	16 = IRQ0.
+	//	17 = IRQ1.
+	//	18 = IRQ2.
+	//	..
+	//	n+16 = IRQn
 }
 
-}
+}  // namespace CsUtils

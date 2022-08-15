@@ -98,7 +98,6 @@ public:
 	 */
 	cs_ret_code_t getSessionNonceRx(cs_data_t data);
 
-
 private:
 	//! Constructor
 	UartConnection();
@@ -107,9 +106,7 @@ private:
 	UartConnection(UartConnection const&) = delete;
 
 	//! This class is singleton, deny implementation
-	void operator=(UartConnection const &) = delete;
-
-
+	void operator=(UartConnection const&) = delete;
 
 	//! Keep up the UART status reply.
 	uart_msg_status_reply_t _status;
@@ -117,21 +114,17 @@ private:
 	//! Keep up the UART user status.
 	uart_msg_status_user_t _userStatus;
 
-
-
 	//! Keep up whether the connection is considered to be alive.
-	bool _isConnectionAlive = false;
+	bool _isConnectionAlive              = false;
 
 	//! Whether the connection heartbeats are encrypted.
-	bool _isConnectionEncrypted = false;
+	bool _isConnectionEncrypted          = false;
 
 	/**
 	 * Timeout (in tick events) set by heartbeat.
 	 * When this reaches 0, consider the connection te be dead.
 	 */
 	uint32_t _connectionTimeoutCountdown = 0;
-
-
 
 	/**
 	 * Session nonce used to decrypt incoming uart msgs.
@@ -146,7 +139,7 @@ private:
 	/**
 	 * Whether the RX and TX session nonce are valid.
 	 */
-	bool _sessionNonceValid = false;
+	bool _sessionNonceValid                = false;
 
 	/**
 	 * Timeout (in tick events) set by the received session nonce.
@@ -154,12 +147,7 @@ private:
 	 */
 	uint32_t _sessionNonceTimeoutCountdown = 0;
 
-
-
-
 	void onTick();
 
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 };
-
-

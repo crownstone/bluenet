@@ -8,9 +8,7 @@
 #include <localisation/cs_AssetFilterPacketAccessors.h>
 #include <logging/cs_Logger.h>
 
-
 #define LogAssetFilterPacketAccessorsWarn LOGw
-
 
 AssetFilterInputType* AssetFilterInput::type() {
 	return reinterpret_cast<AssetFilterInputType*>(_data + 0);
@@ -68,7 +66,6 @@ AssetFilterInput AssetFilterOutput::inFormat() {
 	return AssetFilterInput(_data + sizeof(AssetFilterOutputFormat));
 }
 
-
 bool AssetFilterOutput::hasInFormat() {
 	auto outform = *outFormat();
 
@@ -101,7 +98,7 @@ bool AssetFilterOutput::isValid() {
 		case AssetFilterOutputFormat::AssetIdNearest:
 #endif
 
-		return true;
+			return true;
 	}
 
 	LogAssetFilterPacketAccessorsWarn("Unknown outFormat: %u", *outFormat());
@@ -111,7 +108,7 @@ bool AssetFilterOutput::isValid() {
 size_t AssetFilterOutput::length() {
 	size_t len = sizeof(AssetFilterOutputFormat);
 
-	if(hasInFormat()) {
+	if (hasInFormat()) {
 		len += inFormat().length();
 	}
 
@@ -144,11 +141,8 @@ bool AssetFilterMetadata::isValid() {
 }
 
 size_t AssetFilterMetadata::length() {
-	return sizeof(AssetFilterType)
-			+ sizeof(asset_filter_flags_t)
-			+ sizeof(uint8_t)
-			+ inputType().length()
-			+ outputType().length();
+	return sizeof(AssetFilterType) + sizeof(asset_filter_flags_t) + sizeof(uint8_t) + inputType().length()
+		   + outputType().length();
 }
 
 AssetFilterMetadata AssetFilterData::metadata() {
@@ -199,4 +193,3 @@ size_t AssetFilterData::length() {
 	}
 	return len;
 }
-

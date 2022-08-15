@@ -8,14 +8,15 @@
 #pragma once
 
 #include <cstdint>
-#include "common/cs_Types.h"
-#include "drivers/cs_Timer.h"
-#include "drivers/cs_Temperature.h"
-#include "storage/cs_State.h"
-#include "events/cs_EventListener.h"
-#include "events/cs_EventDispatcher.h"
-#include "drivers/cs_COMP.h"
+
 #include "cfg/cs_Boards.h"
+#include "common/cs_Types.h"
+#include "drivers/cs_COMP.h"
+#include "drivers/cs_Temperature.h"
+#include "drivers/cs_Timer.h"
+#include "events/cs_EventDispatcher.h"
+#include "events/cs_EventListener.h"
+#include "storage/cs_State.h"
 
 #define TEMPERATURE_UPDATE_FREQUENCY 10
 
@@ -39,9 +40,7 @@ public:
 
 	void stop();
 
-	static void staticTick(TemperatureGuard* ptr) {
-		ptr->tick();
-	}
+	static void staticTick(TemperatureGuard* ptr) { ptr->tick(); }
 
 	void handleCompEvent(CompEvent_t event);
 
@@ -53,15 +52,13 @@ private:
 	//! This class is singleton, deny implementation
 	TemperatureGuard(TemperatureGuard const&);
 	//! This class is singleton, deny implementation
-	void operator=(TemperatureGuard const &);
+	void operator=(TemperatureGuard const&);
 
-	app_timer_t              _appTimerData;
-	app_timer_id_t           _appTimerId;
+	app_timer_t _appTimerData;
+	app_timer_id_t _appTimerId;
 	TYPIFY(CONFIG_MAX_CHIP_TEMP) _maxChipTemp;
 	COMP* _comp;
 	CS_TYPE _lastChipTempEvent;
 	CS_TYPE _lastPwmTempEvent;
 	bool _dimmerTempInverted;
 };
-
-

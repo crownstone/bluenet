@@ -15,8 +15,8 @@
 #define LogLevelMeshDebug SERIAL_VERY_VERBOSE
 
 // Debug logs
-#define LOGMeshModelInfo    LOGvv
-#define LOGMeshModelDebug   LOGvv
+#define LOGMeshModelInfo LOGvv
+#define LOGMeshModelDebug LOGvv
 #define LOGMeshModelVerbose LOGvv
 #define LogLevelMeshModelVerbose SERIAL_VERY_VERBOSE
 
@@ -75,4 +75,3 @@
  * Group address used for acked multicast.
  */
 #define MESH_MODEL_GROUP_ADDRESS_ACKED 0xC51F
-

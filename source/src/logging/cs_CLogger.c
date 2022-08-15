@@ -5,8 +5,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <logging/cs_CLogger.h>
 #include <drivers/cs_Serial.h>
+#include <logging/cs_CLogger.h>
 #include <stdarg.h>
 
 #define C_LOGGER_BUF_SIZE 16
@@ -20,7 +20,7 @@ void cs_clog_write_uint_dec(unsigned int value) {
 	size_t i = C_LOGGER_BUF_SIZE;
 	do {
 		const char digit = (char)(value % 10) + '0';
-		_logBuffer[--i] = digit;
+		_logBuffer[--i]  = digit;
 		value /= 10;
 	} while (value && i);
 
@@ -47,7 +47,6 @@ void cs_clog_write_uint_hex(unsigned int value) {
 		serial_write(_logBuffer[i]);
 	}
 }
-
 
 void cs_clog(bool addNewLine, const char* fmt, ...) {
 	va_list va;

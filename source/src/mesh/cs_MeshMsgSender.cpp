@@ -46,7 +46,7 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 #if MESH_MODEL_TEST_MSG != 0
 	test.counter = _nextSendCounter++;
 #else
-	test.counter = 0;
+	test.counter                         = 0;
 #endif
 
 	MeshUtil::cs_mesh_queue_item_t item;
@@ -343,9 +343,9 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 	MeshUtil::cs_mesh_queue_item_t item;
 
 	// These fields can should be decided per type.
-	item.metaData.id       = 0;
-	item.metaData.type     = CS_MESH_MODEL_TYPE_UNKNOWN;
-	item.metaData.priority = false;
+	item.metaData.id                     = 0;
+	item.metaData.type                   = CS_MESH_MODEL_TYPE_UNKNOWN;
+	item.metaData.priority               = false;
 
 	// All these fields can be set from the mesh command.
 	item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
@@ -366,7 +366,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 			}
 			uint32_t* time = (uint32_t*)command->controlCommand.data;
 			cs_mesh_model_msg_time_t packet;
-			packet.timestamp = *time;
+			packet.timestamp      = *time;
 
 			uint8_t transmissions = command->header.timeoutOrTransmissions;
 			if (transmissions == 0) {
@@ -420,16 +420,16 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(
 			uint8_t stateHeaderSize  = sizeof(state_packet_header_t);
 			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
 
-			uint16_t meshMsgSize = sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize;
-			uint8_t* meshMsg     = new (std::nothrow) uint8_t[meshMsgSize];
+			uint16_t meshMsgSize     = sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize;
+			uint8_t* meshMsg         = new (std::nothrow) uint8_t[meshMsgSize];
 			if (meshMsg == nullptr) {
 				return ERR_NO_SPACE;
 			}
 			cs_mesh_model_msg_state_header_ext_t* meshStateHeader = (cs_mesh_model_msg_state_header_ext_t*)meshMsg;
 
-			meshStateHeader->header.type            = stateHeader->stateType;
-			meshStateHeader->header.id              = stateHeader->stateId;
-			meshStateHeader->header.persistenceMode = stateHeader->persistenceMode;
+			meshStateHeader->header.type                          = stateHeader->stateType;
+			meshStateHeader->header.id                            = stateHeader->stateId;
+			meshStateHeader->header.persistenceMode               = stateHeader->persistenceMode;
 			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
 			meshStateHeader->sourceId    = MeshUtil::getShortenedSource(source);
 

@@ -17,9 +17,9 @@
 /**
  * CharacteristicBuffer is a byte array with header.
  *
- * The CharacteristicBuffer is used to put in all kind of data. This data is unorganized. The CharacteristicBuffer can also be
- * accessed through more dedicated structures. This allows to read/write from the buffer directly or other
- * types of sophisticated objects.
+ * The CharacteristicBuffer is used to put in all kind of data. This data is unorganized. The CharacteristicBuffer can
+ * also be accessed through more dedicated structures. This allows to read/write from the buffer directly or other types
+ * of sophisticated objects.
  *
  * The disadvantage is that the data will be overwritten by the different accessors. The advantage is that the data
  * fits actually in the device RAM.
@@ -27,18 +27,18 @@
 class CharacteristicBuffer {
 
 protected:
-	buffer_ptr_t _buffer = NULL;
+	buffer_ptr_t _buffer   = NULL;
 	cs_buffer_size_t _size = 0;
-	bool _locked = false;
+	bool _locked           = false;
 
 	CharacteristicBuffer();
 	~CharacteristicBuffer();
 
 public:
-//	static CharacteristicBuffer& getInstance() {
-//		static CharacteristicBuffer instance;
-//		return instance;
-//	}
+	//	static CharacteristicBuffer& getInstance() {
+	//		static CharacteristicBuffer instance;
+	//		return instance;
+	//	}
 
 	/**
 	 * Allocate the buffer.
@@ -86,5 +86,4 @@ public:
 	 * @return                    Size of the buffer.
 	 */
 	cs_buffer_size_t size(cs_buffer_size_t offset = CS_CHAR_BUFFER_DEFAULT_OFFSET);
-
 };

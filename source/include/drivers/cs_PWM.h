@@ -13,7 +13,6 @@
 
 #define ERR_PWM_NOT_ENABLED 1
 
-
 typedef struct {
 	uint16_t pin;
 	bool inverted;
@@ -28,7 +27,7 @@ typedef struct {
 /** Pulse Wide Modulation class
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
- * 
+ *
  * TODO: The PWM class concerns dimming in general. It should be called "Dimmer", not just "PWM".
  */
 class PWM {
@@ -94,7 +93,7 @@ private:
 	PWM(PWM const&);
 
 	//! Private PWM copy assignment definition
-	void operator=(PWM const &);
+	void operator=(PWM const&);
 
 	//! Config of the PWM.
 	pwm_config_t _config;
@@ -133,8 +132,6 @@ private:
 	 */
 	void setValue(uint8_t channel, uint8_t newValue);
 
-
-
 	//! Max value of channel, in ticks. Set at init
 	uint32_t _maxTickVal;
 
@@ -144,12 +141,12 @@ private:
 	/**
 	 * Target duty cycle values of the channels in percentage.
 	 */
-	uint8_t _targetValues[CS_PWM_MAX_CHANNELS] = {0};
+	uint8_t _targetValues[CS_PWM_MAX_CHANNELS]       = {0};
 
 	/**
 	 * Step size to move actual value towards target value.
 	 */
-	uint8_t _stepSize[CS_PWM_MAX_CHANNELS] = {0};
+	uint8_t _stepSize[CS_PWM_MAX_CHANNELS]           = {0};
 
 	/**
 	 * Only update values every so many PWM periods.
@@ -159,10 +156,10 @@ private:
 	/**
 	 * Current number of periods to wait before next value update.
 	 */
-	uint8_t _updateValuesCountdown = 0;
+	uint8_t _updateValuesCountdown                   = 0;
 
 	//! Duty cycle values of the channels in ticks.
-	uint32_t _tickValues[CS_PWM_MAX_CHANNELS] = {0};
+	uint32_t _tickValues[CS_PWM_MAX_CHANNELS]        = {0};
 
 	//! PPI channels to be used to trigger GPIOTE tasks from timer compare events. Turning the switch on.
 	nrf_ppi_channel_t _ppiChannelsOn[CS_PWM_MAX_CHANNELS];
@@ -207,7 +204,6 @@ private:
 	void writeCC(uint8_t channelIdx, uint32_t ticks);
 	//! Read CC of timer
 	uint32_t readCC(uint8_t channelIdx);
-
 
 	//! Enables the timer interrupt, to change the pwm value.
 	void enableInterrupt();

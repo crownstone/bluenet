@@ -313,7 +313,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	uint32_t nrfCode;
 
 	// Init the CRC.
-	crc = crc16(nullptr, 0);
+	crc                      = crc16(nullptr, 0);
 
 	uint32_t binStartAddress = startAddress + sizeof(header);
 	LOGMicroappDebug("binStartAddress=0x%08X", binStartAddress);

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <ble/cs_Nordic.h>  // TODO: don't use nrf_fstorage_evt_t in header.
 #include <events/cs_EventListener.h>
 #include <protocol/cs_MicroappPackets.h>
-#include <ble/cs_Nordic.h> // TODO: don't use nrf_fstorage_evt_t in header.
 
 constexpr uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
 
@@ -51,7 +51,8 @@ public:
 	 * @param[in] appIndex   Index of the microapp, validity is not checked.
 	 *
 	 * @return ERR_SUCCESS_NO_CHANGE        The storage is already erased.
-	 * @return ERR_WAIT_FOR_SUCCESS         The storage will be written erased, wait for CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
+	 * @return ERR_WAIT_FOR_SUCCESS         The storage will be written erased, wait for
+	 * CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
 	 */
 	cs_ret_code_t erase(uint8_t appIndex);
 
@@ -64,7 +65,8 @@ public:
 	 * @param[in] size       Size of the data to be written, must be a multiple of 4.
 	 *
 	 * @return ERR_SUCCESS_NO_CHANGE        The data is already on flash.
-	 * @return ERR_WAIT_FOR_SUCCESS         The data will be written to flash, wait for CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
+	 * @return ERR_WAIT_FOR_SUCCESS         The data will be written to flash, wait for
+	 * CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
 	 * @return ERR_NO_SPACE                 Data would go outside the app storage space.
 	 * @return ERR_WRONG_PAYLOAD_LENGTH     Data size is not a multiple of 4.
 	 * @return ERR_WRITE_DISABLED           App storage space is not erased.
@@ -86,33 +88,34 @@ public:
 	/**
 	 * Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler).
 	 */
-	void handleFileStorageEvent(nrf_fstorage_evt_t *evt);
+	void handleFileStorageEvent(nrf_fstorage_evt_t* evt);
+
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
 	MicroappStorage();
 	MicroappStorage(MicroappStorage const&) = delete;
-	void operator=(MicroappStorage const &)  = delete;
+	void operator=(MicroappStorage const&) = delete;
 
 	/**
 	 * Keep up whether or not we are currently writing to flash.
 	 */
-	bool _writing = false;
+	bool _writing                          = false;
 
 	/**
 	 * The buffer is required to perform writes to flash, as the data has to
 	 * be aligned, and stay in memory until the write is done.
 	 */
-	__attribute__((aligned(4)))	uint8_t _writeBuffer[MICROAPP_STORAGE_BUF_SIZE];
+	__attribute__((aligned(4))) uint8_t _writeBuffer[MICROAPP_STORAGE_BUF_SIZE];
 
 	/**
 	 * When writing a chunk of data, it will be done in parts.
 	 * These variable are needed to know what to write where to.
 	 */
-	const uint8_t* _chunkData = nullptr;
-	uint16_t _chunkSize = 0;
-	uint16_t _chunkWritten = 0;
+	const uint8_t* _chunkData   = nullptr;
+	uint16_t _chunkSize         = 0;
+	uint16_t _chunkWritten      = 0;
 	uint32_t _chunkFlashAddress = 0;
 
 	/**

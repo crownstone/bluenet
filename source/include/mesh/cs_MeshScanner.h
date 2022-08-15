@@ -28,5 +28,5 @@ public:
 	/**
 	 * Handle a scan by the mesh, and dispatch scanned device event.
 	 */
-	void onScan(const nrf_mesh_adv_packet_rx_data_t *scanData);
+	void onScan(const nrf_mesh_adv_packet_rx_data_t* scanData);
 };

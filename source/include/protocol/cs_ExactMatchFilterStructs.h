@@ -7,6 +7,7 @@
 #pragma once
 
 #include <stddef.h>
+
 #include <cstdint>
 
 typedef const uint8_t* filter_entry_t;
