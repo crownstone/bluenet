@@ -25,7 +25,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Dimmer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_GpRegRet.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_PWM.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Relay.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_RNG.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Timer.cpp")
