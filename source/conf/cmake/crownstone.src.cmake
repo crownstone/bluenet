@@ -24,7 +24,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Relay.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Timer.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Watchdog.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_AES.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_ConnectionEncryption.cpp")
@@ -33,7 +33,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_RC5.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_MeshTopology.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFiltering.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterPacketAccessors.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterStore.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterSyncer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetForwarder.cpp")

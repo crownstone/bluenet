@@ -97,7 +97,7 @@ typedef uint32_t ret_code_t;
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
-#endif
+#endif // DISABLE_NRF_HEADERS
 
 #ifdef __cplusplus
 }
