@@ -7,29 +7,19 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_UUID.h>
-#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
-#include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
-#include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappCommandHandler.h>
 #include <microapp/cs_MicroappController.h>
-#include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
-#include <storage/cs_StateData.h>
-#include <util/cs_BleError.h>
-#include <util/cs_Error.h>
-#include <util/cs_Hash.h>
-#include <util/cs_Utils.h>
 
 int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
 	return interrupt;
@@ -39,6 +29,7 @@ int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
  * Forwards requests from the microapp to the relevant handler
  */
 cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_t* header) {
+	LOGi("handleMicroappRequest: [%i, %i]", header->sdkType, header->ack);
 	uint8_t type = header->sdkType;
 	switch (type) {
 		case CS_MICROAPP_SDK_TYPE_NONE: {
@@ -115,7 +106,6 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_
 #define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_header_t* log) {
-
 	__attribute__((unused)) bool newLine = false;
 	if (log->flags & CS_MICROAPP_SDK_LOG_FLAG_NEWLINE) {
 		newLine = true;
@@ -408,7 +398,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_t* ble) {
 	MicroappSdkBleType type = (MicroappSdkBleType)ble->type;
-
+	LOGi("handleMicroappBleRequest: [type %i]", type);
 #if BUILD_MESHING == 0
 	if (type == CS_MICROAPP_SDK_BLE_SCAN_START || type == CS_MICROAPP_SDK_BLE_SCAN_STOP
 		|| type == CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT) {

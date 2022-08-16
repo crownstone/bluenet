@@ -8,14 +8,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_UUID.h>
+
 #include <cfg/cs_AutoConfig.h>
-#include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
-#include <cs_MicroappStructs.h>
-#include <drivers/cs_Gpio.h>
-#include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
@@ -23,16 +19,6 @@
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <storage/cs_State.h>
-#include <storage/cs_StateData.h>
-#include <util/cs_BleError.h>
-#include <util/cs_Error.h>
-#include <util/cs_Hash.h>
-#include <util/cs_Utils.h>
-
-#include <algorithm>
-
-#include "nrf_fstorage_sd.h"
 
 /**
  * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
