@@ -9,7 +9,10 @@
 #include <stdint.h>
 
 
-#if !defined HOST_PLATFORM
+/**
+ * implementation of some inline functions is deferred to mock .cpp file on host.
+ */
+#if !defined HOST_TARGET
 #define INLINE inline
 #else
 #define INLINE
