@@ -107,6 +107,8 @@ set(SOURCE_DIR "../source/src")
 include(crownstone-application.src)
 include(crownstone-platform-mock.src)
 
+add_library(BluenetMock STATIC ${FOLDER_SOURCE})
+
 #######################################################################
 # util function to reduce verbosity
 # args: full path to test, relative to this cmake file 
@@ -114,7 +116,8 @@ include(crownstone-platform-mock.src)
 
 function(add_crownstone_test testpath)
 	get_filename_component(TESTNAME ${testpath} NAME_WE)
-	add_executable(${TESTNAME} ${FOLDER_SOURCE} "test/${testpath}")
+	add_executable(${TESTNAME} "test/${testpath}")
+	target_link_libraries(${TESTNAME} BluenetMock)
 	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
 	install(TARGETS ${TESTNAME} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
 endfunction()
