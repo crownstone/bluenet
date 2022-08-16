@@ -29,7 +29,7 @@ int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
  * Forwards requests from the microapp to the relevant handler
  */
 cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_t* header) {
-	LOGi("handleMicroappRequest: [%i, %i]", header->sdkType, header->ack);
+	LOGd("handleMicroappRequest: [%i, %i]", header->sdkType, header->ack);
 	uint8_t type = header->sdkType;
 	switch (type) {
 		case CS_MICROAPP_SDK_TYPE_NONE: {
@@ -398,7 +398,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_t* ble) {
 	MicroappSdkBleType type = (MicroappSdkBleType)ble->type;
-	LOGi("handleMicroappBleRequest: [type %i]", type);
+	LOGd("handleMicroappBleRequest: [type %i]", type);
 #if BUILD_MESHING == 0
 	if (type == CS_MICROAPP_SDK_BLE_SCAN_START || type == CS_MICROAPP_SDK_BLE_SCAN_STOP
 		|| type == CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT) {

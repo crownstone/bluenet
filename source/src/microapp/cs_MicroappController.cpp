@@ -8,7 +8,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
@@ -385,8 +384,11 @@ bool MicroappController::handleRequest() {
 	return callAgain;
 }
 
-/*
+/**
  * Check whether the microapp is yielding voluntarily based on the sdkType
+ *
+ * @return true     if the microapp is yielding
+ * @return false    if the microapp is not yielding
  */
 bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomingHeader) {
 	bool stop;
@@ -656,16 +658,25 @@ bool MicroappController::allowInterrupts() {
 		return false;
 	}
 	// Check if we already exceeded the max number of interrupts in this tick
-	if (_interruptCounter == MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK) {
+	if (_interruptCounter >= MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK) {
 		return false;
 	}
 	return true;
 }
 
+/*
+ * Set the number of empty interrupt slots.
+ * This function can be used upon microapp yield requests, which contain an emptyInterruptSlots field
+ */
 void MicroappController::setEmptyInterruptSlots(uint8_t emptyInterruptSlots) {
 	_emptyInterruptSlots = emptyInterruptSlots;
 }
 
+/*
+ * Increment the number of empty interrupt slots.
+ * This function can be used when the microapp finishes handling an interrupt.
+ * That means a slot will have been freed at the microapp side.
+ */
 void MicroappController::incrementEmptyInterruptSlots() {
 	// Make sure we don't overflow to zero in extreme cases
 	if (_emptyInterruptSlots == 0xFF) {
@@ -674,6 +685,9 @@ void MicroappController::incrementEmptyInterruptSlots() {
 	_emptyInterruptSlots++;
 }
 
+/*
+ * Set the internal scanning flag
+ */
 void MicroappController::setScanning(bool scanning) {
 	_microappIsScanning = scanning;
 }

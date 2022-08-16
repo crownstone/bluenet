@@ -22,6 +22,11 @@ private:
 	int interruptToDigitalPin(int interrupt);
 
 protected:
+	/**
+	 * SDK-type specific handlers. Called from handleMicroappRequest.
+	 * The incoming header ack always needs to be set in these handlers.
+	 * The microapp may check the result of the request handling via this ack field
+	 */
 	cs_ret_code_t handleMicroappLogRequest(microapp_sdk_log_header_t* log);
 	cs_ret_code_t handleMicroappPinRequest(microapp_sdk_pin_t* pin);
 	cs_ret_code_t handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_);
@@ -41,7 +46,8 @@ public:
 	}
 
 	/**
-	 * Handle requests from the microapp
+	 * Handle requests from the microapp.
+	 * Gets incoming buffer, checks SDK type in the header and calls the appropriate handler
 	 */
 	cs_ret_code_t handleMicroappRequest(microapp_sdk_header_t* header);
 };

@@ -22,6 +22,10 @@ struct coroutine_args_t {
 /**
  * @struct microapp_interrupt_registration_t
  * Struct for keeping track of registered interrupts from the microapp
+ *
+ * @var microapp_interrupt_registration_t::registered indicates whether a registration slot is filled.
+ * @var microapp_interrupt_registration_t::major      major identifier. SDK type is used for this.
+ * @var microapp_interrupt_registration_t::minor      minonr identifier for identification within SDK type.
  */
 struct microapp_interrupt_registration_t {
 	bool registered = false;
@@ -43,12 +47,12 @@ private:
 	void operator=(MicroappController const&);
 
 	/**
-	 * Limit the number of interrupts in a tick (if -1) there is no limit.
+	 * Limit the number of interrupts in a tick. (if -1 there is no limit)
 	 */
 	const int8_t MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK        = 10;
 
 	/**
-	 * The maximum number of consecutive calls to a microapp.
+	 * The maximum number of consecutive calls to a microapp
 	 */
 	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS       = 8;
 
@@ -74,17 +78,17 @@ private:
 	coroutine_args_t sharedState;
 
 	/**
-	 * To throttle the ticks themselves.
+	 * To throttle the ticks themselves
 	 */
 	uint8_t _tickCounter;
 
 	/**
-	 * Counter for interrupts within a tick
+	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK
 	 */
 	int8_t _interruptCounter;
 
 	/**
-	 * Counter for consecutive microapp calls
+	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
 	 */
 	uint8_t _consecutiveMicroappCallCounter;
 
