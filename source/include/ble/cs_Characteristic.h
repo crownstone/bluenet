@@ -603,10 +603,14 @@ public:
 #endif
 
 	/** @inherit */
-	uint8_t* getValuePtr() { return (uint8_t*)&this->getValue(); }
+	uint8_t* getValuePtr() {
+		return (uint8_t*)&this->getValue();
+	}
 
 	/** @inherit */
-	uint16_t getValueLength() { return sizeof(T); }
+	uint16_t getValueLength() {
+		return sizeof(T);
+	}
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
@@ -619,7 +623,9 @@ public:
 	}
 
 	/** @inherit */
-	uint16_t getGattValueMaxLength() { return getGattValueLength(); }
+	uint16_t getGattValueMaxLength() {
+		return getGattValueLength();
+	}
 };
 
 /** A characteristic for strings

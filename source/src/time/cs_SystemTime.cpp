@@ -366,19 +366,9 @@ uint32_t SystemTime::syncTimeCoroutineAction() {
 		rootClockId = myId;
 	}
 
-	//	if (meIsRootClock()) {
-	//		LOGSystemTimeDebug("meIsRootClock");
 	auto stamp = getSynchronizedStamp();
 	sendTimeSyncMessage(stamp, myId);
 	return Coroutine::delayMs(root_clock_update_period_ms());
-	//	}
-
-	//	LOGSystemTimeDebug("syncTimeCoroutineAction did nothing, waiting for reelection (myId=%u, rootId=%u,
-	//version=%u)", 			myId, rootClockId, rootTime.version);
-	//
-	//	// we need to check at least once in a while so that if there are
-	//	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
-	//	return Coroutine::delayMs(root_clock_reelection_timeout_ms());
 }
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {

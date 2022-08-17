@@ -133,7 +133,7 @@ private:
 	MeshCore();
 
 	//! Copy constructor, singleton, thus made private
-	MeshCore(MeshCore const&) = delete;
+	MeshCore(MeshCore const&)                          = delete;
 
 	//! Assignment operator, singleton, thus made private
 	MeshCore& operator=(MeshCore const&)               = delete;

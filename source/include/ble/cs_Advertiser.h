@@ -29,7 +29,7 @@ public:
 		static Advertiser instance;
 		return instance;
 	}
-	Advertiser(Advertiser const&) = delete;
+	Advertiser(Advertiser const&)     = delete;
 	void operator=(Advertiser const&) = delete;
 
 	/**

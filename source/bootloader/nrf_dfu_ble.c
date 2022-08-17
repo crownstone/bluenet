@@ -540,8 +540,8 @@ static void on_write(ble_dfu_t* p_dfu, ble_evt_t const* p_ble_evt) {
 			.request   = NRF_DFU_OP_OBJECT_WRITE,
 			.p_context = p_dfu,
 			.callback  = {
-                    .response = ble_dfu_req_handler_callback,
-                    .write    = on_flash_write,
+					 .response = ble_dfu_req_handler_callback,
+					 .write    = on_flash_write,
             }};
 
 	/* Set up the request buffer. */

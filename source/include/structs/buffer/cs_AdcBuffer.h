@@ -91,28 +91,38 @@ public:
 	 * this function is responsible for setting the right pointer. No checks w.r.t. this pointer are
 	 * performed.
 	 */
-	void setBuffer(adc_buffer_id_t buffer_id, adc_buffer_t* ptr) { _buf[buffer_id] = ptr; }
+	void setBuffer(adc_buffer_id_t buffer_id, adc_buffer_t* ptr) {
+		_buf[buffer_id] = ptr;
+	}
 #endif
 
 	/**
 	 * Get total number of samples in a buffer.
 	 */
-	static inline constexpr adc_sample_value_id_t getBufferLength() { return ADC_BUFFER_SAMPLE_COUNT; }
+	static inline constexpr adc_sample_value_id_t getBufferLength() {
+		return ADC_BUFFER_SAMPLE_COUNT;
+	}
 
 	/**
 	 * Get number of samples for each channel in a buffer.
 	 */
-	static inline constexpr adc_sample_value_id_t getChannelLength() { return ADC_CHANNEL_SAMPLE_COUNT; }
+	static inline constexpr adc_sample_value_id_t getChannelLength() {
+		return ADC_CHANNEL_SAMPLE_COUNT;
+	}
 
 	/**
 	 * Get number of channels per buffer.
 	 */
-	static inline constexpr adc_channel_id_t getChannelCount() { return ADC_CHANNEL_COUNT; }
+	static inline constexpr adc_channel_id_t getChannelCount() {
+		return ADC_CHANNEL_COUNT;
+	}
 
 	/**
 	 * Get number of buffers.
 	 */
-	static inline constexpr adc_buffer_id_t getBufferCount() { return ADC_BUFFER_COUNT; }
+	static inline constexpr adc_buffer_id_t getBufferCount() {
+		return ADC_BUFFER_COUNT;
+	}
 
 	/**
 	 * Get a particular value from a buffer.

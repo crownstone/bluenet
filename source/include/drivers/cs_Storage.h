@@ -290,7 +290,7 @@ public:
 private:
 	Storage();
 	Storage(Storage const&);
-	void operator                              =(Storage const&);
+	void operator=(Storage const&);
 
 	bool _initialized                          = false;
 	bool _registeredFds                        = false;

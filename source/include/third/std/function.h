@@ -470,7 +470,9 @@ public:
 	}
 
 #ifndef FUNC_NO_RTTI
-	const std::type_info& target_type() const FUNC_NOEXCEPT { return manager_storage.manager->call_type_id(); }
+	const std::type_info& target_type() const FUNC_NOEXCEPT {
+		return manager_storage.manager->call_type_id();
+	}
 	template <typename T>
 	T* target() FUNC_NOEXCEPT {
 		return static_cast<T*>(manager_storage.manager->call_target(manager_storage, typeid(T)));
