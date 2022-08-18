@@ -47,10 +47,6 @@ const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = MICROAPP_SDK_MAX_P
 // max total - (header + protocol [1] + type [2] + size [2])
 const uint8_t MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 5);
 
-// Protocol definitions
-#define MICROAPP_SERIAL_DEFAULT_PORT_NUMBER 1
-#define MICROAPP_SERIAL_SERVICE_DATA_PORT_NUMBER 4
-
 // Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
 #define MICROAPP_LOOP_FREQUENCY 10
 
@@ -141,8 +137,8 @@ enum MicroappSdkLogFlags {
 };
 
 /**
- * Indicates the GPIO pins of the hardware. These are mostly for the nRF development kits, since the plugs and builtins
- * have no external GPIOS, buttons or leds
+ * Indicates the GPIO pins of the hardware.
+ * Pin functionality can be used for crownstones that have exposed GPIO pins only
  */
 enum MicroappSdkPin {
 	CS_MICROAPP_SDK_PIN_GPIO0   = 0x00,
@@ -294,12 +290,12 @@ struct __attribute__((packed)) io_buffer_t {
 /**
  * Combined input and output buffer.
  */
-struct __attribute__((packed)) bluenet_io_buffer_t {
+struct __attribute__((packed)) bluenet_io_buffers_t {
 	io_buffer_t microapp2bluenet;
 	io_buffer_t bluenet2microapp;
 };
 
-typedef microapp_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffer_t*);
+typedef microapp_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffers_t*);
 
 /*
  * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
@@ -424,7 +420,7 @@ static_assert(sizeof(microapp_sdk_log_array_t) <= MICROAPP_SDK_MAX_PAYLOAD);
  * (ACTION)
  * @var microapp_sdk_pin_t::direction   MicroappSdkPinDirection    Specifies whether to set the pin as input or output.
  * Only used with INIT
- * @var microapp_sdk_pin_t::polarity    MicroappSdkPinPolarity     Specifies for which pin events to look out. Only used
+ * @var microapp_sdk_pin_t::polarity    MicroappSdkPinPolarity     Specifies which pin events to watch. Only used
  * with INIT
  * @var microapp_sdk_pin_t::action      MicroappSdkPinActionType   Specifies whether to read from or write to pin. Only
  * used with ACTION

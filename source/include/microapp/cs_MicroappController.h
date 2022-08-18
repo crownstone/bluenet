@@ -16,7 +16,7 @@ static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SI
  */
 struct coroutine_args_t {
 	uintptr_t entry;
-	bluenet_io_buffer_t* io_buffer;
+	bluenet_io_buffers_t* io_buffers;
 };
 
 /**
@@ -49,17 +49,17 @@ private:
 	/**
 	 * Limit the number of interrupts in a tick. (if -1 there is no limit)
 	 */
-	const int8_t MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK        = 10;
+	static const int8_t MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK  = 10;
 
 	/**
 	 * The maximum number of consecutive calls to a microapp
 	 */
-	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS       = 8;
+	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS = 8;
 
 	/**
 	 * The maximum number of registered interrupts
 	 */
-	static const uint8_t MICROAPP_MAX_INTERRUPT_REGISTRATIONS = 10;
+	static const uint8_t MICROAPP_MAX_INTERRUPT_REGISTRATIONS  = 10;
 
 	/**
 	 * Buffer for keeping track of registered interrupts

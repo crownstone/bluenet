@@ -55,11 +55,11 @@ extern "C" {
 /*
  * Set arguments for coroutine.
  */
-void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer) {
+void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffers_t* io_buffers) {
 	stack_params_t* stackParams = getStackParams();
 	coroutine_args_t* args      = (coroutine_args_t*)stackParams->arg;
 	switch (coroutineIndex) {
-		case COROUTINE_MICROAPP0: args->io_buffer = io_buffer; break;
+		case COROUTINE_MICROAPP0: args->io_buffers = io_buffers; break;
 		// potentially more microapps here
 		default: break;
 	}
@@ -71,10 +71,10 @@ void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer)
  *
  * @param[in] payload                            pointer to buffer with command for bluenet
  */
-microapp_result_t microappCallback(uint8_t opcode, bluenet_io_buffer_t* io_buffer) {
+microapp_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* io_buffers) {
 	switch (opcode) {
 		case CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER: {
-			setCoroutineContext(COROUTINE_MICROAPP0, io_buffer);
+			setCoroutineContext(COROUTINE_MICROAPP0, io_buffers);
 			[[fallthrough]];
 		}
 		case CS_MICROAPP_CALLBACK_SIGNAL: {
@@ -98,28 +98,18 @@ microapp_result_t microappCallback(uint8_t opcode, bluenet_io_buffer_t* io_buffe
  * callbacks are working properly without a microapp present.
  */
 void microappCallbackDummy() {
-	static int first_time = true;
 	while (1) {
 		// just some random data array
-		bluenet_io_buffer_t io_buffer;
-		// fake setup and loop commands
-		if (first_time) {
-			// setup end
-			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
-			first_time                            = false;
-		}
-		else {
-			// loop end
-			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
-			// data[0] = CS_MICROAPP_COMMAND_LOOP_END;
-		}
+		bluenet_io_buffers_t io_buffers;
+		// fake setup or loop yields
+		io_buffers.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
 		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
 		uint8_t rd_size = 0;
 		bluenet2microapp_ipcdata_t ipc_data;
 		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t), &rd_size);
 
 		// Perform the actual callback. Should call microappCallback and yield.
-		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffer);
+		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffers);
 	}
 }
 #endif
@@ -275,7 +265,7 @@ void MicroappController::callApp(uint8_t appIndex) {
  * Get incoming microapp buffer (from coroutine_args).
  */
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffer->microapp2bluenet.payload;
+	uint8_t* payload = sharedState.io_buffers->microapp2bluenet.payload;
 	return payload;
 }
 
@@ -283,7 +273,7 @@ uint8_t* MicroappController::getInputMicroappBuffer() {
  * Get outgoing microapp buffer (from coroutine_args).
  */
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffer->bluenet2microapp.payload;
+	uint8_t* payload = sharedState.io_buffers->bluenet2microapp.payload;
 	return payload;
 }
 
