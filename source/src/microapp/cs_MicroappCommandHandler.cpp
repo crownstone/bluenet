@@ -29,12 +29,12 @@ int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
  * Forwards requests from the microapp to the relevant handler
  */
 cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_t* header) {
-	LOGd("handleMicroappRequest: [%i, %i]", header->sdkType, header->ack);
-	uint8_t type = header->sdkType;
+	LOGd("handleMicroappRequest: [%i, %i]", header->messageType, header->ack);
+	uint8_t type = header->messageType;
 	switch (type) {
 		case CS_MICROAPP_SDK_TYPE_NONE: {
 			// This should not be used
-			LOGw("Microapp yields without setting sdkType");
+			LOGw("Microapp yields without setting messageType");
 			break;
 		}
 		case CS_MICROAPP_SDK_TYPE_LOG: {

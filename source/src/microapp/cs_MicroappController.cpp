@@ -104,7 +104,7 @@ void microappCallbackDummy() {
 		// fake setup or loop yields
 		io_buffers.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
 		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
-		uint8_t rd_size = 0;
+		uint8_t rd_size                        = 0;
 		bluenet2microapp_ipcdata_t ipc_data;
 		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t), &rd_size);
 
@@ -311,7 +311,7 @@ void MicroappController::callMicroapp() {
 bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
-	bool inInterruptContext = (outgoingHeader->ack != CS_ACK_NO_REQUEST);
+	bool inInterruptContext               = (outgoingHeader->ack != CS_ACK_NO_REQUEST);
 	if (inInterruptContext) {
 		bool interruptDone = (outgoingHeader->ack != CS_ACK_IN_PROGRESS);
 		if (interruptDone) {
@@ -347,7 +347,7 @@ bool MicroappController::handleRequest() {
 	uint8_t* inputBuffer                        = getInputMicroappBuffer();
 	microapp_sdk_header_t* incomingHeader       = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
 	[[maybe_unused]] static int retrieveCounter = 0;
-	LOGv("Retrieve and handle [%i] request %i", ++retrieveCounter, incomingHeader->sdkType);
+	LOGv("Retrieve and handle [%i] request %i", ++retrieveCounter, incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
 	if (result != ERR_SUCCESS) {
@@ -370,14 +370,14 @@ bool MicroappController::handleRequest() {
 }
 
 /**
- * Check whether the microapp is yielding voluntarily based on the sdkType
+ * Check whether the microapp is yielding voluntarily based on the messageType
  *
  * @return true     if the microapp is yielding
  * @return false    if the microapp is not yielding
  */
 bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomingHeader) {
 	bool stop;
-	switch (incomingHeader->sdkType) {
+	switch (incomingHeader->messageType) {
 		case CS_MICROAPP_SDK_TYPE_LOG:
 		case CS_MICROAPP_SDK_TYPE_PIN:
 		case CS_MICROAPP_SDK_TYPE_SWITCH:
@@ -398,7 +398,7 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomin
 			break;
 		}
 		default: {
-			LOGw("Unknown request type: %i", incomingHeader->sdkType);
+			LOGw("Unknown request type: %i", incomingHeader->messageType);
 			stop = true;
 			break;
 		}
@@ -425,7 +425,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	uint8_t* outputBuffer                  = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 
-	outgoingMessage->sdkType               = CS_MICROAPP_SDK_TYPE_CONTINUE;
+	outgoingMessage->messageType           = CS_MICROAPP_SDK_TYPE_CONTINUE;
 	outgoingMessage->ack                   = CS_ACK_NO_REQUEST;
 	bool callAgain                         = false;
 	bool ignoreRequest                     = false;
@@ -494,7 +494,7 @@ void MicroappController::onGpioUpdate(uint8_t pinIndex) {
 	// Write pin data into the buffer.
 	uint8_t* outputBuffer   = getOutputMicroappBuffer();
 	microapp_sdk_pin_t* pin = reinterpret_cast<microapp_sdk_pin_t*>(outputBuffer);
-	pin->header.sdkType     = CS_MICROAPP_SDK_TYPE_PIN;
+	pin->header.messageType = CS_MICROAPP_SDK_TYPE_PIN;
 	pin->pin                = interruptPin;
 
 	LOGv("Incoming GPIO interrupt for microapp on virtual pin %i", interruptPin);
@@ -536,9 +536,9 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 		return;
 	}
 
-	ble->header.sdkType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type           = CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE;
-	ble->address_type   = dev->addressType;
+	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type               = CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE;
+	ble->address_type       = dev->addressType;
 	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, ble->address);
 	ble->rssi = dev->rssi;
 	ble->size = dev->dataSize;
@@ -578,7 +578,7 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 	uint8_t* outputBuffer        = getOutputMicroappBuffer();
 	microapp_sdk_mesh_t* meshMsg = reinterpret_cast<microapp_sdk_mesh_t*>(outputBuffer);
 
-	meshMsg->header.sdkType      = CS_MICROAPP_SDK_TYPE_MESH;
+	meshMsg->header.messageType  = CS_MICROAPP_SDK_TYPE_MESH;
 	meshMsg->type                = CS_MICROAPP_SDK_MESH_READ;
 	meshMsg->stoneId             = event->srcStoneId;
 	meshMsg->size                = event->msg.len;
@@ -590,7 +590,7 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 
 /*
  * Attempt registration of an interrupt. An interrupt registration is uniquely identified
- * by a major (=sdkType, see enum MicroappSdkType) and a minor which uniquely identifies the interrupt
+ * by a major (=messageType, see enum MicroappSdkMessageType) and a minor which uniquely identifies the interrupt
  * registration within the scope of the major.
  */
 cs_ret_code_t MicroappController::registerInterrupt(uint8_t major, uint8_t minor) {

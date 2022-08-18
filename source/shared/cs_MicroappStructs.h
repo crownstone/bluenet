@@ -32,7 +32,7 @@ const uint8_t MAX_MICROAPP_MESH_PAYLOAD_SIZE                = 7;
 // Maximum total payload (somewhat arbitrary, should be able to contain most-used data structures e.g. BLE
 // advertisements)
 const uint8_t MICROAPP_SDK_MAX_PAYLOAD                      = 48;
-// sdkType [1] + ack [1]
+// messageType [1] + ack [1]
 const uint8_t MICROAPP_SDK_HEADER_SIZE                      = 2;
 // header + type [1] + flags [1] + size [1]
 const uint8_t MICROAPP_SDK_LOG_HEADER_SIZE                  = MICROAPP_SDK_HEADER_SIZE + 3;
@@ -95,7 +95,7 @@ typedef MicroappSdkAck microapp_result_t;
 /**
  * The main opcodes for microapp commands.
  */
-enum MicroappSdkType {
+enum MicroappSdkMessageType {
 	CS_MICROAPP_SDK_TYPE_NONE            = 0x00,  // No meaning, should not be used
 	CS_MICROAPP_SDK_TYPE_LOG             = 0x01,  // Microapp logs
 	CS_MICROAPP_SDK_TYPE_PIN             = 0x02,  // GPIO related
@@ -312,13 +312,13 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
  * Header for io buffers shared between bluenet and microapp. The payload of the io buffer always starts with this
  * header.
  *
- * @var microapp_sdk_header_t::sdkType  MicroappSdkType     Specifies the type of message, and how to interpret the rest
- * of the payload
- * @var microapp_sdk_header_t::ack      MicroappSdkAck      Used for requesting and receiving acks. Can be used for
+ * @var microapp_sdk_header_t::messageType  MicroappSdkMessageType     Specifies the type of message, and how to
+ * interpret the rest of the payload
+ * @var microapp_sdk_header_t::ack          MicroappSdkAck      Used for requesting and receiving acks. Can be used for
  * identifying requests and interrupts.
  */
 struct __attribute__((packed)) microapp_sdk_header_t {
-	uint8_t sdkType;
+	uint8_t messageType;
 	int8_t ack;
 };
 
