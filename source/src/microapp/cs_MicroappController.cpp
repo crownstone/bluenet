@@ -311,11 +311,6 @@ void MicroappController::callMicroapp() {
 bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
-	if (outgoingHeader->ack == CS_ACK_NONE) {
-		// Don't handle requests on undefined ack
-		_consecutiveMicroappCallCounter = 0;
-		return false;
-	}
 	bool inInterruptContext = (outgoingHeader->ack != CS_ACK_NO_REQUEST);
 	if (inInterruptContext) {
 		bool interruptDone = (outgoingHeader->ack != CS_ACK_IN_PROGRESS);
