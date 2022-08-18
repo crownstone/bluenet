@@ -2,12 +2,21 @@
 
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
+#include <ble/cs_BleConstants.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
 static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+
+// Do some asserts on the redefinitions in the shared header files
+// These asserts cannot be done where declared since the shared files do not depend on the rest of bluenet
+static_assert(MAC_ADDRESS_LENGTH == MAC_ADDRESS_LEN);
+static_assert(MAX_BLE_ADV_DATA_LENGTH == ADVERTISEMENT_DATA_MAX_SIZE);
+static_assert(MAX_MICROAPP_MESH_PAYLOAD_SIZE == MAX_MESH_MSG_PAYLOAD_SIZE);
 
 /**
  * The IPC buffers can be used to bootstrap communication between microapp and bluenet. However, when in the microapp
