@@ -38,3 +38,5 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_AssetFilterPacketAccess
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Timer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SwitchAggregator.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SafeSwitch.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SmartSwitch.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")

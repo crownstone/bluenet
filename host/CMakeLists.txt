@@ -107,6 +107,10 @@ set(SOURCE_DIR "../source/src")
 include(crownstone-application.src)
 include(crownstone-platform-mock.src)
 
+foreach(F ${FOLDER_SOURCE})
+	message(STATUS "FOLDER_SOURCE contains: " ${F})
+endforeach()
+
 add_library(BluenetMock STATIC ${FOLDER_SOURCE})
 
 #######################################################################

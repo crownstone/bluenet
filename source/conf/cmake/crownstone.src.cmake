@@ -22,7 +22,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_GpRegRet.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_PWM.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Relay.cpp")
 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Watchdog.cpp")
@@ -61,7 +61,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/buffer/cs_CharacteristicBuffer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_StateData.cpp")
 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SmartSwitch.cpp")
+
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/optmed.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
