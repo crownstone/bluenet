@@ -71,7 +71,7 @@ void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffers_t* io_buffer
  *
  * @param[in] payload                            pointer to buffer with command for bluenet
  */
-microapp_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* io_buffers) {
+microapp_sdk_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* io_buffers) {
 	switch (opcode) {
 		case CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER: {
 			setCoroutineContext(COROUTINE_MICROAPP0, io_buffers);

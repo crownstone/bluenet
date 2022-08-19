@@ -90,7 +90,7 @@ enum MicroappSdkAck {
 	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,  // Request or its parameters are too large
 };
 
-typedef MicroappSdkAck microapp_result_t;
+typedef MicroappSdkAck microapp_sdk_result_t;
 
 /**
  * The main opcodes for microapp commands.
@@ -292,7 +292,7 @@ struct __attribute__((packed)) bluenet_io_buffers_t {
 	io_buffer_t bluenet2microapp;
 };
 
-typedef microapp_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffers_t*);
+typedef microapp_sdk_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffers_t*);
 
 /*
  * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
