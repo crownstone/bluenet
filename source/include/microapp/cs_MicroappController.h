@@ -29,14 +29,14 @@ struct coroutine_args_t {
 };
 
 /**
- * @struct microapp_interrupt_registration_t
+ * @struct microapp_soft_interrupt_registration_t
  * Struct for keeping track of registered interrupts from the microapp
  *
- * @var microapp_interrupt_registration_t::registered indicates whether a registration slot is filled.
- * @var microapp_interrupt_registration_t::type       indicates the message type for the interrupt
- * @var microapp_interrupt_registration_t::id         unique identifier for interrupt registrations
+ * @var microapp_soft_interrupt_registration_t::registered indicates whether a registration slot is filled.
+ * @var microapp_soft_interrupt_registration_t::type       indicates the message type for the interrupt
+ * @var microapp_soft_interrupt_registration_t::id         unique identifier for interrupt registrations
  */
-struct microapp_interrupt_registration_t {
+struct microapp_soft_interrupt_registration_t {
 	bool registered             = false;
 	MicroappSdkMessageType type = CS_MICROAPP_SDK_TYPE_NONE;
 	uint8_t id                  = 0;
@@ -58,7 +58,7 @@ private:
 	/**
 	 * Limit the number of interrupts in a tick. (if -1 there is no limit)
 	 */
-	static const int8_t MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK  = 10;
+	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK  = 10;
 
 	/**
 	 * The maximum number of consecutive calls to a microapp
@@ -68,12 +68,12 @@ private:
 	/**
 	 * The maximum number of registered interrupts
 	 */
-	static const uint8_t MICROAPP_MAX_INTERRUPT_REGISTRATIONS  = 10;
+	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS  = 10;
 
 	/**
 	 * Buffer for keeping track of registered interrupts
 	 */
-	microapp_interrupt_registration_t _interruptRegistrations[MICROAPP_MAX_INTERRUPT_REGISTRATIONS];
+	microapp_soft_interrupt_registration_t _softInterruptRegistrations[MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS];
 
 	/**
 	 * Coroutine for microapp.
@@ -92,9 +92,9 @@ private:
 	uint8_t _tickCounter;
 
 	/**
-	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK
+	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK
 	 */
-	int8_t _interruptCounter;
+	int8_t _softInterruptCounter;
 
 	/**
 	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
@@ -109,7 +109,7 @@ private:
 	/**
 	 * Keeps track of how many empty interrupt slots are available on the microapp side
 	 */
-	uint8_t _emptyInterruptSlots = 1;
+	uint8_t _emptySoftInterruptSlots = 1;
 
 	/**
 	 * Maps digital pins to interrupts. See also MicroappCommandHandler::interruptToDigitalPin()
@@ -119,12 +119,12 @@ private:
 	/**
 	 * Checks whether an interrupt registration already exists
 	 */
-	bool interruptRegistered(MicroappSdkMessageType type, uint8_t id);
+	bool softInterruptRegistered(MicroappSdkMessageType type, uint8_t id);
 
 	/**
 	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
 	 */
-	bool allowInterrupts();
+	bool allowSoftInterrupts();
 
 protected:
 	/**
@@ -145,7 +145,7 @@ protected:
 	/**
 	 * Call the microapp in an interrupt context
 	 */
-	void generateInterrupt();
+	void generateSoftInterrupt();
 
 	/**
 	 * Check if start address of the microapp is within the flash boundaries assigned to the microapps.
@@ -216,19 +216,19 @@ public:
 	/**
 	 * Register interrupts that allow generation of interrupts to the microapp
 	 */
-	cs_ret_code_t registerInterrupt(MicroappSdkMessageType type, uint8_t id);
+	cs_ret_code_t registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id);
 
 	/**
 	 * Set the number of empty interrupt slots
 	 *
-	 * @param emptyInterruptSlots The new value
+	 * @param emptySlots The new value
 	 */
-	void setEmptyInterruptSlots(uint8_t emptyInterruptSlots);
+	void setEmptySoftInterruptSlots(uint8_t emptySlots);
 
 	/**
 	 * Increment the number of empty interrupt slots
 	 */
-	void incrementEmptyInterruptSlots();
+	void incrementEmptySoftInterruptSlots();
 
 	/**
 	 * Enable or disable BLE scanned device interrupt calls

@@ -165,7 +165,7 @@ void goIntoMicroapp(void* p) {
 MicroappController::MicroappController()
 		: EventListener()
 		, _tickCounter(0)
-		, _interruptCounter(0)
+		, _softInterruptCounter(0)
 		, _consecutiveMicroappCallCounter(0)
 		, _microappIsScanning(false) {
 
@@ -319,12 +319,12 @@ bool MicroappController::handleAck() {
 			if (interruptDropped) {
 				LOGv("Microapp is busy, drop interrupt");
 				// Also prevent new interrupts since apparently the microapp has no more space
-				setEmptyInterruptSlots(0);
+				setEmptySoftInterruptSlots(0);
 			}
 			else {
 				LOGv("Finished interrupt with return code %i", outgoingInterrupt->ack);
 				// Increment number of empty interrupt slots since we just finished one
-				incrementEmptyInterruptSlots();
+				incrementEmptySoftInterruptSlots();
 			}
 			// If interrupt finished, we do not call again and we also don't handle the microapp request
 			_consecutiveMicroappCallCounter = 0;
@@ -420,7 +420,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	_tickCounter = 0;
 	LOGv("Tick microapp");
 	// Reset interrupt counter every microapp tick
-	_interruptCounter                      = 0;
+	_softInterruptCounter                      = 0;
 	// Indicate to the microapp that this is a tick entry by writing in outgoing message header
 	uint8_t* outputBuffer                  = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
@@ -447,15 +447,15 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
  * Hence, we call handleRequest after this if the interrupt is not finished.
  * Note that although we do throttle the number of consecutive calls, this does not throttle the callbacks themselves.
  */
-void MicroappController::generateInterrupt() {
+void MicroappController::generateSoftInterrupt() {
 	// This is probably already checked before this function call, but let's do it anyway to be sure
-	if (!allowInterrupts()) {
+	if (!allowSoftInterrupts()) {
 		return;
 	}
-	if (_interruptCounter == MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK - 1) {
+	if (_softInterruptCounter == MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK - 1) {
 		LOGv("Last callback (next one in next tick)");
 	}
-	_interruptCounter++;
+	_softInterruptCounter++;
 
 	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingInterrupt = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
@@ -466,7 +466,7 @@ void MicroappController::generateInterrupt() {
 	bool ignoreRequest                       = false;
 	int8_t repeatCounter                     = 0;
 	do {
-		LOGv("Call [%i,%i], within interrupt", _interruptCounter, repeatCounter);
+		LOGv("Call [%i,%i], within interrupt", _softInterruptCounter, repeatCounter);
 		callMicroapp();
 		ignoreRequest = !handleAck();
 		if (ignoreRequest) {
@@ -479,15 +479,15 @@ void MicroappController::generateInterrupt() {
 
 /*
  * Do some checks to validate if we want to generate an interrupt for the pin event
- * and if so, prepare the outgoing buffer and call generateInterrupt()
+ * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
  */
 void MicroappController::onGpioUpdate(uint8_t pinIndex) {
-	if (!allowInterrupts()) {
+	if (!allowSoftInterrupts()) {
 		LOGi("Interrupts in progress, ignore pin event");
 		return;
 	}
 	uint8_t interruptPin = digitalPinToInterrupt(pinIndex);
-	if (!interruptRegistered(CS_MICROAPP_SDK_TYPE_PIN, interruptPin)) {
+	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_PIN, interruptPin)) {
 		LOGv("No interrupt registered for virtual pin %d", interruptPin);
 		return;
 	}
@@ -498,12 +498,12 @@ void MicroappController::onGpioUpdate(uint8_t pinIndex) {
 	pin->pin                = interruptPin;
 
 	LOGv("Incoming GPIO interrupt for microapp on virtual pin %i", interruptPin);
-	generateInterrupt();
+	generateSoftInterrupt();
 }
 
 /*
  * Do some checks to validate if we want to generate an interrupt for the scanned device
- * and if so, prepare the outgoing buffer and call generateInterrupt()
+ * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
  */
 void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	if (!_microappIsScanning) {
@@ -518,11 +518,11 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	}
 #endif
 
-	if (!allowInterrupts()) {
+	if (!allowSoftInterrupts()) {
 		LOGi("Interrupts in progress, ignore mesh event");
 		return;
 	}
-	if (!interruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE)) {
+	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE)) {
 		LOGv("No interrupt registered");
 		return;
 	}
@@ -545,12 +545,12 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	memcpy(ble->data, dev->data, dev->dataSize);
 
 	LOGv("Incoming BLE scanned device for microapp (id=%d)", id);
-	generateInterrupt();
+	generateSoftInterrupt();
 }
 
 /*
  * Do some checks to validate if we want to generate an interrupt for the received message
- * and if so, prepare the outgoing buffer and call generateInterrupt()
+ * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
  */
 void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 	if (event->type != CS_MESH_MODEL_TYPE_MICROAPP) {
@@ -566,11 +566,11 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 		event->reply->type     = CS_MESH_MODEL_TYPE_MICROAPP;
 		event->reply->dataSize = 0;
 	}
-	if (!allowInterrupts()) {
+	if (!allowSoftInterrupts()) {
 		LOGi("Interrupts in progress, ignore mesh event");
 		return;
 	}
-	if (!interruptRegistered(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ)) {
+	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ)) {
 		LOGv("No interrupt registered");
 		return;
 	}
@@ -585,7 +585,7 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 	memcpy(meshMsg->data, event->msg.data, event->msg.len);
 
 	LOGv("Incoming mesh message for microapp");
-	generateInterrupt();
+	generateSoftInterrupt();
 }
 
 /*
@@ -593,16 +593,16 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
  * by a type (=messageType, see enum MicroappSdkMessageType) and an id which identifies the interrupt
  * registration within the scope of the type.
  */
-cs_ret_code_t MicroappController::registerInterrupt(MicroappSdkMessageType type, uint8_t id) {
+cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id) {
 	// Check if interrupt registration already exists
-	if (interruptRegistered(type, id)) {
+	if (softInterruptRegistered(type, id)) {
 		LOGw("Interrupt [%i, %i] already registered", type, id);
 		return ERR_ALREADY_EXISTS;
 	}
 	// Look for first empty slot, if it exists
 	int emptySlotIndex = -1;
-	for (int i = 0; i < MICROAPP_MAX_INTERRUPT_REGISTRATIONS; ++i) {
-		if (!_interruptRegistrations[i].registered) {
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		if (!_softInterruptRegistrations[i].registered) {
 			emptySlotIndex = i;
 			break;
 		}
@@ -612,9 +612,9 @@ cs_ret_code_t MicroappController::registerInterrupt(MicroappSdkMessageType type,
 		return ERR_NO_SPACE;
 	}
 	// Register the interrupt
-	_interruptRegistrations[emptySlotIndex].registered = true;
-	_interruptRegistrations[emptySlotIndex].type       = type;
-	_interruptRegistrations[emptySlotIndex].id         = id;
+	_softInterruptRegistrations[emptySlotIndex].registered = true;
+	_softInterruptRegistrations[emptySlotIndex].type       = type;
+	_softInterruptRegistrations[emptySlotIndex].id         = id;
 
 	return ERR_SUCCESS;
 }
@@ -622,10 +622,10 @@ cs_ret_code_t MicroappController::registerInterrupt(MicroappSdkMessageType type,
 /*
  * Check whether an interrupt registration already exists
  */
-bool MicroappController::interruptRegistered(MicroappSdkMessageType type, uint8_t id) {
-	for (int i = 0; i < MICROAPP_MAX_INTERRUPT_REGISTRATIONS; ++i) {
-		if (_interruptRegistrations[i].registered) {
-			if (_interruptRegistrations[i].type == type && _interruptRegistrations[i].id == id) {
+bool MicroappController::softInterruptRegistered(MicroappSdkMessageType type, uint8_t id) {
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		if (_softInterruptRegistrations[i].registered) {
+			if (_softInterruptRegistrations[i].type == type && _softInterruptRegistrations[i].id == id) {
 				return true;
 			}
 		}
@@ -636,14 +636,14 @@ bool MicroappController::interruptRegistered(MicroappSdkMessageType type, uint8_
 /*
  * Check whether new interrupts can be generated
  */
-bool MicroappController::allowInterrupts() {
+bool MicroappController::allowSoftInterrupts() {
 	// if the microapp dropped the last one and hasn't finished an interrupt,
 	// we won't try to call it with a new interrupt
-	if (_emptyInterruptSlots <= 0) {
+	if (_emptySoftInterruptSlots <= 0) {
 		return false;
 	}
 	// Check if we already exceeded the max number of interrupts in this tick
-	if (_interruptCounter >= MICROAPP_MAX_INTERRUPTS_WITHIN_A_TICK) {
+	if (_softInterruptCounter >= MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK) {
 		return false;
 	}
 	return true;
@@ -653,8 +653,8 @@ bool MicroappController::allowInterrupts() {
  * Set the number of empty interrupt slots.
  * This function can be used upon microapp yield requests, which contain an emptyInterruptSlots field
  */
-void MicroappController::setEmptyInterruptSlots(uint8_t emptyInterruptSlots) {
-	_emptyInterruptSlots = emptyInterruptSlots;
+void MicroappController::setEmptySoftInterruptSlots(uint8_t emptySlots) {
+	_emptySoftInterruptSlots = emptySlots;
 }
 
 /*
@@ -662,12 +662,12 @@ void MicroappController::setEmptyInterruptSlots(uint8_t emptyInterruptSlots) {
  * This function can be used when the microapp finishes handling an interrupt.
  * That means a slot will have been freed at the microapp side.
  */
-void MicroappController::incrementEmptyInterruptSlots() {
+void MicroappController::incrementEmptySoftInterruptSlots() {
 	// Make sure we don't overflow to zero in extreme cases
-	if (_emptyInterruptSlots == 0xFF) {
+	if (_emptySoftInterruptSlots == 0xFF) {
 		return;
 	}
-	_emptyInterruptSlots++;
+	_emptySoftInterruptSlots++;
 }
 
 /*

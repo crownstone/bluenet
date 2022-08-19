@@ -253,7 +253,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 
 			if (gpio.direction == SENSE) {
 				MicroappController& controller = MicroappController::getInstance();
-				controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
+				controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
 			}
 			break;
 		}
@@ -412,7 +412,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 		case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
 			int result =
-					controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
+					controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
 			if (result != ERR_SUCCESS) {
 				LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
 				ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
@@ -514,7 +514,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 		case CS_MICROAPP_SDK_MESH_LISTEN: {
 			LOGi("Starting to listen for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
-			int result = controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
+			int result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
 			if (result != ERR_SUCCESS) {
 				LOGw("Registering an interrupt for incoming mesh messages failed with %i", result);
 				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
@@ -612,9 +612,9 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yield_t* yield) {
 	LOGd("Microapp yielded with yieldType %d", yield->type);
-	// Update number of empty Interrupt slots the microapp has
+	// Update number of empty interrupt slots the microapp has
 	MicroappController& controller = MicroappController::getInstance();
-	controller.setEmptyInterruptSlots(yield->emptyInterruptSlots);
+	controller.setEmptySoftInterruptSlots(yield->emptyInterruptSlots);
 	yield->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
