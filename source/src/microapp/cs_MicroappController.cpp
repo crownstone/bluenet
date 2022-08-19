@@ -590,13 +590,13 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 
 /*
  * Attempt registration of an interrupt. An interrupt registration is uniquely identified
- * by a major (=messageType, see enum MicroappSdkMessageType) and a minor which uniquely identifies the interrupt
- * registration within the scope of the major.
+ * by a type (=messageType, see enum MicroappSdkMessageType) and an id which identifies the interrupt
+ * registration within the scope of the type.
  */
-cs_ret_code_t MicroappController::registerInterrupt(uint8_t major, uint8_t minor) {
+cs_ret_code_t MicroappController::registerInterrupt(MicroappSdkMessageType type, uint8_t id) {
 	// Check if interrupt registration already exists
-	if (interruptRegistered(major, minor)) {
-		LOGw("Interrupt [%i, %i] already registered", major, minor);
+	if (interruptRegistered(type, id)) {
+		LOGw("Interrupt [%i, %i] already registered", type, id);
 		return ERR_ALREADY_EXISTS;
 	}
 	// Look for first empty slot, if it exists
@@ -613,8 +613,8 @@ cs_ret_code_t MicroappController::registerInterrupt(uint8_t major, uint8_t minor
 	}
 	// Register the interrupt
 	_interruptRegistrations[emptySlotIndex].registered = true;
-	_interruptRegistrations[emptySlotIndex].major      = major;
-	_interruptRegistrations[emptySlotIndex].minor      = minor;
+	_interruptRegistrations[emptySlotIndex].type       = type;
+	_interruptRegistrations[emptySlotIndex].id         = id;
 
 	return ERR_SUCCESS;
 }
@@ -622,10 +622,10 @@ cs_ret_code_t MicroappController::registerInterrupt(uint8_t major, uint8_t minor
 /*
  * Check whether an interrupt registration already exists
  */
-bool MicroappController::interruptRegistered(uint8_t major, uint8_t minor) {
+bool MicroappController::interruptRegistered(MicroappSdkMessageType type, uint8_t id) {
 	for (int i = 0; i < MICROAPP_MAX_INTERRUPT_REGISTRATIONS; ++i) {
 		if (_interruptRegistrations[i].registered) {
-			if (_interruptRegistrations[i].major == major && _interruptRegistrations[i].minor == minor) {
+			if (_interruptRegistrations[i].type == type && _interruptRegistrations[i].id == id) {
 				return true;
 			}
 		}

@@ -1,10 +1,10 @@
 #pragma once
 
+#include <ble/cs_BleConstants.h>
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
-#include <ble/cs_BleConstants.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
@@ -33,13 +33,13 @@ struct coroutine_args_t {
  * Struct for keeping track of registered interrupts from the microapp
  *
  * @var microapp_interrupt_registration_t::registered indicates whether a registration slot is filled.
- * @var microapp_interrupt_registration_t::major      major identifier. SDK type is used for this.
- * @var microapp_interrupt_registration_t::minor      minonr identifier for identification within SDK type.
+ * @var microapp_interrupt_registration_t::type       indicates the message type for the interrupt
+ * @var microapp_interrupt_registration_t::id         unique identifier for interrupt registrations
  */
 struct microapp_interrupt_registration_t {
-	bool registered = false;
-	uint8_t major   = 0;
-	uint8_t minor   = 0;
+	bool registered             = false;
+	MicroappSdkMessageType type = CS_MICROAPP_SDK_TYPE_NONE;
+	uint8_t id                  = 0;
 };
 
 /**
@@ -119,7 +119,7 @@ private:
 	/**
 	 * Checks whether an interrupt registration already exists
 	 */
-	bool interruptRegistered(uint8_t major, uint8_t minor);
+	bool interruptRegistered(MicroappSdkMessageType type, uint8_t id);
 
 	/**
 	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
@@ -216,7 +216,7 @@ public:
 	/**
 	 * Register interrupts that allow generation of interrupts to the microapp
 	 */
-	cs_ret_code_t registerInterrupt(uint8_t major, uint8_t minor);
+	cs_ret_code_t registerInterrupt(MicroappSdkMessageType type, uint8_t id);
 
 	/**
 	 * Set the number of empty interrupt slots
