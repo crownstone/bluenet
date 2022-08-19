@@ -70,24 +70,24 @@ enum CallbackMicroappOpcode {
  */
 enum MicroappSdkAck {
 	// Ack successfull return value
-	CS_ACK_SUCCESS             = 0x00,  // Finished successfully
+	CS_MICROAPP_SDK_ACK_SUCCESS             = 0x00,  // Finished successfully
 
 	// Ack requests (should not be interpreted as a return value)
-	CS_ACK_NO_REQUEST          = 0x01,  // Explicitly do not ask for an acknowledgement
-	CS_ACK_REQUEST             = 0x02,  // Request for other process (microapp or bluenet) to overwrite this field
+	CS_MICROAPP_SDK_ACK_NO_REQUEST          = 0x01,  // Explicitly do not ask for an acknowledgement
+	CS_MICROAPP_SDK_ACK_REQUEST             = 0x02,  // Request for other process (microapp or bluenet) to overwrite this field
 
 	// Ack return values
-	CS_ACK_IN_PROGRESS         = 0x03,  // So far so good, but not done yet
-	CS_ACK_ERROR               = 0x04,  // Unspecified error
-	CS_ACK_ERR_NOT_FOUND       = 0x05,  // A requested entity could not be found
-	CS_ACK_ERR_UNDEFINED       = 0x06,  // The request cannot be interpreted fully
-	CS_ACK_ERR_NO_SPACE        = 0x07,  // There is no space to fulfill a request
-	CS_ACK_ERR_NOT_IMPLEMENTED = 0x08,  // The request can be interpreted but is not implemented yet
-	CS_ACK_ERR_BUSY            = 0x09,  // The request cannot be fulfilled because of other ongoing requests
-	CS_ACK_ERR_OUT_OF_RANGE    = 0x0A,  // A parameter in the request is out of range
-	CS_ACK_ERR_DISABLED        = 0x0B,  // Request requires functionality that is disabled
-	CS_ACK_ERR_EMPTY           = 0x0C,  // Request or its parameters are empty
-	CS_ACK_ERR_TOO_LARGE       = 0x0D,  // Request or its parameters are too large
+	CS_MICROAPP_SDK_ACK_IN_PROGRESS         = 0x03,  // So far so good, but not done yet
+	CS_MICROAPP_SDK_ACK_ERROR               = 0x04,  // Unspecified error
+	CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND       = 0x05,  // A requested entity could not be found
+	CS_MICROAPP_SDK_ACK_ERR_UNDEFINED       = 0x06,  // The request cannot be interpreted fully
+	CS_MICROAPP_SDK_ACK_ERR_NO_SPACE        = 0x07,  // There is no space to fulfill a request
+	CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED = 0x08,  // The request can be interpreted but is not implemented yet
+	CS_MICROAPP_SDK_ACK_ERR_BUSY            = 0x09,  // The request cannot be fulfilled because of other ongoing requests
+	CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE    = 0x0A,  // A parameter in the request is out of range
+	CS_MICROAPP_SDK_ACK_ERR_DISABLED        = 0x0B,  // Request requires functionality that is disabled
+	CS_MICROAPP_SDK_ACK_ERR_EMPTY           = 0x0C,  // Request or its parameters are empty
+	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,  // Request or its parameters are too large
 };
 
 typedef MicroappSdkAck microapp_result_t;

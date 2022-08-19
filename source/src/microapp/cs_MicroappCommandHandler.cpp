@@ -95,7 +95,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_
 		default: {
 			_log(SERIAL_INFO, true, "Unknown command %u", type);
 			// set ack field so microapp will know something went wrong
-			header->ack = CS_ACK_ERR_UNDEFINED;
+			header->ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
@@ -112,7 +112,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 	}
 	if (log->size == 0) {
 		_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", "");
-		log->header.ack = CS_ACK_SUCCESS;
+		log->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 		return ERR_SUCCESS;
 	}
 	switch (log->type) {
@@ -177,11 +177,11 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 		}
 		default: {
 			LOGi("Unsupported microapp log type: %u", log->type);
-			log->header.ack = CS_ACK_ERR_UNDEFINED;
+			log->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
-	log->header.ack = CS_ACK_SUCCESS;
+	log->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -189,7 +189,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 	MicroappSdkPin pinIndex = (MicroappSdkPin)pin->pin;
 	if (pinIndex > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
 		LOGw("Pin %i out of range", pinIndex);
-		pin->header.ack = CS_ACK_ERR_OUT_OF_RANGE;
+		pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE;
 		return ERR_NOT_FOUND;
 	}
 	MicroappSdkPinType type = (MicroappSdkPinType)pin->type;
@@ -231,7 +231,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 						}
 						default: {
 							LOGw("Unknown pin polarity: %u", polarity);
-							pin->header.ack = CS_ACK_ERR_UNDEFINED;
+							pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 							return ERR_UNKNOWN_TYPE;
 						}
 					}
@@ -244,7 +244,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 				}
 				default: {
 					LOGw("Unknown pin direction: %u", direction);
-					pin->header.ack = CS_ACK_ERR_UNDEFINED;
+					pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 					return ERR_UNKNOWN_TYPE;
 				}
 			}
@@ -263,7 +263,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 			switch (action) {
 				case CS_MICROAPP_SDK_PIN_READ: {
 					// Read from a pin. Not implemented
-					pin->header.ack = CS_ACK_ERR_NOT_IMPLEMENTED;
+					pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED;
 					return ERR_NOT_IMPLEMENTED;
 				}
 				case CS_MICROAPP_SDK_PIN_WRITE: {
@@ -294,7 +294,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 						}
 						default: {
 							LOGw("Unknown pin value: %u", value);
-							pin->header.ack = CS_ACK_ERR_UNDEFINED;
+							pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 							return ERR_UNKNOWN_TYPE;
 						}
 					}
@@ -302,7 +302,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 				}
 				default: {
 					LOGw("Unknown pin action: %u", action);
-					pin->header.ack = CS_ACK_ERR_UNDEFINED;
+					pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 					return ERR_UNKNOWN_TYPE;
 				}
 			}
@@ -310,11 +310,11 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 		}
 		default: {
 			LOGw("Unknown pin request type");
-			pin->header.ack = CS_ACK_ERR_UNDEFINED;
+			pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
-	pin->header.ack = CS_ACK_SUCCESS;
+	pin->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -325,14 +325,14 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappSwitchRequest(microapp_sdk_s
 	switchCommand.switchCmd = value;
 	event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand));
 	event.dispatch();
-	switch_->header.ack = CS_ACK_SUCCESS;
+	switch_->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_sdk_service_data_t* serviceData) {
 	if (serviceData->size > MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH) {
 		LOGi("Payload size too large");
-		serviceData->header.ack = CS_ACK_ERR_TOO_LARGE;
+		serviceData->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
@@ -344,7 +344,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_
 	eventData.data.data = serviceData->data;
 	event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 	event.dispatch();
-	serviceData->header.ack = CS_ACK_SUCCESS;
+	serviceData->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -388,11 +388,11 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_
 		}
 		default: {
 			LOGw("Unknown TWI type: %i", type);
-			twi->header.ack = CS_ACK_ERR_UNDEFINED;
+			twi->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
-	twi->header.ack = CS_ACK_SUCCESS;
+	twi->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -403,7 +403,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 	if (type == CS_MICROAPP_SDK_BLE_SCAN_START || type == CS_MICROAPP_SDK_BLE_SCAN_STOP
 		|| type == CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT) {
 		LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-		ble->header.ack = CS_ACK_ERR_DISABLED;
+		ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
 		return ERR_NOT_AVAILABLE;
 	}
 #endif
@@ -415,24 +415,24 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 					controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
 			if (result != ERR_SUCCESS) {
 				LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
-				ble->header.ack = CS_ACK_ERROR;
+				ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 				return result;
 			}
-			ble->header.ack = CS_ACK_SUCCESS;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_START: {
 			LOGi("Start scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(true);
-			ble->header.ack = CS_ACK_SUCCESS;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
 			LOGi("Stop scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(false);
-			ble->header.ack = CS_ACK_SUCCESS;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT: {
@@ -442,18 +442,18 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 			std::reverse_copy(ble->address, ble->address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 			event.dispatch();
-			ble->header.ack = CS_ACK_IN_PROGRESS;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
 			LOGi("BLE command result: %u", event.result.returnCode);
 			return event.result.returnCode;
 		}
 		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT: {
 			// Not implemented
-			ble->header.ack = CS_ACK_ERR_NOT_IMPLEMENTED;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED;
 			return ERR_NOT_IMPLEMENTED;
 		}
 		default: {
 			LOGi("Unknown BLE type: %u", type);
-			ble->header.ack = CS_ACK_ERR_UNDEFINED;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
@@ -464,7 +464,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 
 #if BUILD_MESHING == 0
 	LOGw("Mesh is disabled. Mesh-related microapp requests are ignored.");
-	ble->header.ack = CS_ACK_ERR_DISABLED;
+	ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
 	return ERR_NOT_AVAILABLE;
 #endif
 	MicroappSdkMeshType type = (MicroappSdkMeshType)mesh->type;
@@ -474,13 +474,13 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 
 			if (mesh->size == 0) {
 				LOGi("No message");
-				mesh->header.ack = CS_ACK_ERR_EMPTY;
+				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_EMPTY;
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
 			if (mesh->size > MAX_MICROAPP_MESH_PAYLOAD_SIZE) {
 				LOGi("Message too large: %u > %u", mesh->size, MAX_MICROAPP_MESH_PAYLOAD_SIZE);
-				mesh->header.ack = CS_ACK_ERR_TOO_LARGE;
+				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
@@ -505,10 +505,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			event.dispatch();
 			if (event.result.returnCode != ERR_SUCCESS) {
 				LOGw("Failed to send mesh message, return code: %u", event.result.returnCode);
-				mesh->header.ack = CS_ACK_ERROR;
+				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 				return event.result.returnCode;
 			}
-			mesh->header.ack = CS_ACK_SUCCESS;
+			mesh->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_LISTEN: {
@@ -517,10 +517,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			int result = controller.registerInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
 			if (result != ERR_SUCCESS) {
 				LOGw("Registering an interrupt for incoming mesh messages failed with %i", result);
-				mesh->header.ack = CS_ACK_ERROR;
+				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 				return result;
 			}
-			mesh->header.ack = CS_ACK_SUCCESS;
+			mesh->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_READ_CONFIG: {
@@ -528,17 +528,17 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			TYPIFY(CONFIG_CROWNSTONE_ID) id;
 			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 			mesh->stoneId    = id;
-			mesh->header.ack = CS_ACK_SUCCESS;
+			mesh->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_READ: {
 			LOGw("Reading from mesh can only be done via interrupts");
-			mesh->header.ack = CS_ACK_ERR_UNDEFINED;
+			mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_WRONG_OPERATION;
 		}
 		default: {
 			LOGi("Unknown mesh type: %u", type);
-			mesh->header.ack = CS_ACK_ERR_UNDEFINED;
+			mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
@@ -549,14 +549,14 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPowerUsageRequest(microapp_s
 	TYPIFY(STATE_POWER_USAGE) powerUsageState;
 	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsageState, sizeof(powerUsageState));
 	powerUsage->powerUsage = powerUsageState;
-	powerUsage->header.ack = CS_ACK_SUCCESS;
+	powerUsage->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk_presence_t* presence) {
 	if (presence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
 		LOGw("Incorrect profileId");
-		presence->header.ack = CS_ACK_ERR_OUT_OF_RANGE;
+		presence->header.ack = CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE;
 		return ERR_NOT_FOUND;
 	}
 
@@ -566,17 +566,17 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk
 	event.dispatch();
 	if (event.result.returnCode != ERR_SUCCESS) {
 		LOGi("No success, result code: %u", event.result.returnCode);
-		presence->header.ack = CS_ACK_ERROR;
+		presence->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 		return event.result.returnCode;
 	}
 	if (event.result.dataSize != sizeof(presence_t)) {
 		LOGi("Result is of size %u, expected size %u", event.result.dataSize, sizeof(presence_t));
-		presence->header.ack = CS_ACK_ERROR;
+		presence->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
 	presence->presenceBitmask = resultBuf.presence[presence->profileId];
-	presence->header.ack      = CS_ACK_SUCCESS;
+	presence->header.ack      = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -584,12 +584,12 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 		microapp_sdk_control_command_t* controlCommand) {
 	if (controlCommand->size == 0) {
 		LOGi("No control command");
-		controlCommand->header.ack = CS_ACK_ERR_EMPTY;
+		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERR_EMPTY;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	if (controlCommand->size > MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE) {
 		LOGi("Control command too large: %u > %u", controlCommand->size, MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE);
-		controlCommand->header.ack = CS_ACK_ERR_TOO_LARGE;
+		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	LOGi("Dispatching control command of type %i", controlCommand->type);
@@ -603,10 +603,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 	event.dispatch();
 	if (event.result.returnCode != ERR_SUCCESS) {
 		LOGi("No success, result code: %u", event.result.returnCode);
-		controlCommand->header.ack = CS_ACK_ERROR;
+		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 		return event.result.returnCode;
 	}
-	controlCommand->header.ack = CS_ACK_SUCCESS;
+	controlCommand->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
@@ -615,6 +615,6 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yi
 	// Update number of empty Interrupt slots the microapp has
 	MicroappController& controller = MicroappController::getInstance();
 	controller.setEmptyInterruptSlots(yield->emptyInterruptSlots);
-	yield->header.ack = CS_ACK_SUCCESS;
+	yield->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }

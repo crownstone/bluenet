@@ -89,7 +89,7 @@ microapp_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* io_buff
 			LOGi("Unknown opcode");
 		}
 	}
-	return CS_ACK_SUCCESS;
+	return CS_MICROAPP_SDK_ACK_SUCCESS;
 }
 
 #ifdef DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET
@@ -311,11 +311,11 @@ void MicroappController::callMicroapp() {
 bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
-	bool inInterruptContext               = (outgoingHeader->ack != CS_ACK_NO_REQUEST);
+	bool inInterruptContext               = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_NO_REQUEST);
 	if (inInterruptContext) {
-		bool interruptDone = (outgoingHeader->ack != CS_ACK_IN_PROGRESS);
+		bool interruptDone = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_IN_PROGRESS);
 		if (interruptDone) {
-			bool interruptDropped = (outgoingHeader->ack == CS_ACK_ERR_BUSY);
+			bool interruptDropped = (outgoingHeader->ack == CS_MICROAPP_SDK_ACK_ERR_BUSY);
 			if (interruptDropped) {
 				LOGv("Microapp is busy, drop interrupt");
 				// Also prevent new interrupts since apparently the microapp has no more space
@@ -426,7 +426,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 
 	outgoingMessage->messageType           = CS_MICROAPP_SDK_TYPE_CONTINUE;
-	outgoingMessage->ack                   = CS_ACK_NO_REQUEST;
+	outgoingMessage->ack                   = CS_MICROAPP_SDK_ACK_NO_REQUEST;
 	bool callAgain                         = false;
 	bool ignoreRequest                     = false;
 	int8_t repeatCounter                   = 0;
@@ -461,7 +461,7 @@ void MicroappController::generateInterrupt() {
 	microapp_sdk_header_t* outgoingInterrupt = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 
 	// Request an acknowledgement by the microapp indicating status of interrupt
-	outgoingInterrupt->ack                   = CS_ACK_REQUEST;
+	outgoingInterrupt->ack                   = CS_MICROAPP_SDK_ACK_REQUEST;
 	bool callAgain                           = false;
 	bool ignoreRequest                       = false;
 	int8_t repeatCounter                     = 0;
