@@ -17,16 +17,16 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_COMP.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Dimmer.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_GpRegRet.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_PWM.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Relay.cpp")
+
 
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Watchdog.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_AES.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_ConnectionEncryption.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_KeysAndAccess.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_RC5.cpp")
@@ -53,7 +53,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Scanner.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Setup.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_TapToToggle.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_TemperatureGuard.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_UartProtocol.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshModelPacketHelper.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_CrownstoneService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cpp")
