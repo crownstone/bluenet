@@ -112,7 +112,7 @@ private:
 	uint8_t _emptySoftInterruptSlots = 1;
 
 	/**
-	 * Maps digital pins to interrupts. See also MicroappCommandHandler::interruptToDigitalPin()
+	 * Maps digital pins to interrupts. See also MicroappRequestHandler::interruptToDigitalPin()
 	 */
 	int digitalPinToInterrupt(int pin);
 

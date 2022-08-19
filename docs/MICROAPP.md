@@ -60,7 +60,7 @@ The microapp may ask to be notified upon certain events within bluenet.
 Whenever such an event occurs, bluenet will write relevant event information in the shared RAM, again according to the protocol below.
 Then, bluenet calls the microapp which can handle the event and yield back once it has done so.
 
-Shared protocol definitions are located in `/source/shared/cs_MicroappStructs.h`. The bluenet entry and exit points for the microapp are defined in `/source/src/microapp/cs_MicroappController.cpp` and handling the requests happens in `/source/src/microapp/cs_MicroappCommandHandler.cpp`.
+Shared protocol definitions are located in `/source/shared/cs_MicroappStructs.h`. The bluenet entry and exit points for the microapp are defined in `/source/src/microapp/cs_MicroappController.cpp` and handling the requests happens in `/source/src/microapp/cs_MicroappRequestHandler.cpp`.
 
 ### Microapp protocol packets
 The remaining part of this section is dedicated to explaining the protocol for writing to the shared memory for the following functionalities that are supported as of now:

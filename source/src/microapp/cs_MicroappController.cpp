@@ -14,7 +14,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
-#include <microapp/cs_MicroappCommandHandler.h>
+#include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
