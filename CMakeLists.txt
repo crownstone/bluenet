@@ -165,9 +165,6 @@ set(NORDIC_SDK_VERSION_FULL "${NORDIC_SDK_VERSION_MAJOR}.${NORDIC_SDK_VERSION_MI
 # Create full semver string for mesh
 set(MESH_SDK_VERSION_FULL "${MESH_SDK_VERSION_MAJOR}.${MESH_SDK_VERSION_MINOR}.${MESH_SDK_VERSION_PATCH}")
 
-# Location of adjusted version of the SDK that can be used on a host system
-set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
-
 #######################################################################################################################
 # Print some important configuration values that have been loaded above
 #######################################################################################################################
@@ -281,21 +278,6 @@ ExternalProject_Add(${NORDIC_SDK_TARGET}
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
 	)
-
-if(COMPILE_FOR_HOST)
-	set(NORDIC_HOST_SDK_TARGET nordic_host_sdk${NORDIC_SDK_VERSION_FULL})
-	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
-	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
-		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
-		GIT_TAG host
-		GIT_CONFIG advice.detachedHead=false
-		SOURCE_DIR ${HOST_NRF5_DIR}
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		INSTALL_COMMAND ""
-		PATCH_COMMAND ""
-		)
-endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
@@ -716,17 +698,35 @@ endif()
 # Build/compile for host
 #######################################################################################################################
 
+# Location of adjusted version of the SDK that can be used on a host system
+set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
+
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_TARGET:OPTION=ON")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_DIR:STRING=${HOST_NRF5_DIR}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
+# TODO: this line can be removed as host build folder simply doesn't use the variable
 list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 
 if(COMPILE_FOR_HOST)
+	set(NORDIC_HOST_SDK_TARGET nordic_host_sdk${NORDIC_SDK_VERSION_FULL})
+	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
+	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
+		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
+		GIT_TAG host
+		GIT_CONFIG advice.detachedHead=false
+		SOURCE_DIR ${HOST_NRF5_DIR}
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ""
+		PATCH_COMMAND ""
+		)
+
 	set(BLUENET_HOST_TARGET bluenet_host)
 	message(STATUS "Configure ${BLUENET_HOST_TARGET} target")
+	message(STATUS "NORDIC_HOST_SDK_TARGET: " ${NORDIC_HOST_SDK_TARGET})
 	ExternalProject_Add(${BLUENET_HOST_TARGET}
 		SOURCE_DIR ${WORKSPACE_DIR}/host
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}
@@ -738,4 +738,3 @@ if(COMPILE_FOR_HOST)
 		DEPENDS ${NORDIC_HOST_SDK_TARGET}
 		)
 endif()
-
