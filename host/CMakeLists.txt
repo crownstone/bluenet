@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 
 project(bluenet-host)
 
+
+
+message(STATUS "from host cmake: NORDIC_HOST_SDK_TARGET: " ${NORDIC_HOST_SDK_TARGET})
+
+
 option(HOST_TARGET ON)
 option(DISABLE_NRF_HEADERS ON)
 
@@ -18,6 +23,9 @@ set(CMAKE_BLUENET_SOURCE_DIR_MOCK ${CMAKE_BLUENET_MOCK_DIR}/src)
 set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
+
+message (STATUS "arend: ${HOST_NRF5_DIR}")
+message(STATUS "arend: ${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
 
 if(HOST_TARGET)
 	add_compile_definitions("HOST_TARGET")
@@ -93,9 +101,27 @@ endforeach()
 # Get all includes from nordic
 ##############################
 
-include(nordic.src)
+include(nordic-includes.src)
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
+
+# This will add the required nRF5 code files to a list variable ${NORDIC_SOURCE_NRF5_REL}
+foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
+	message(STATUS "nordic rel file from before includiding nrf5.src.cmake: ${NORDIC_FILE_REL}")
+endforeach()
+include(nrf5.src)
+
+#loop through NORDIC_SOURCE_REL and convert to absolute paths in NORDIC_SOURCE_HOST
+foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
+	list(APPEND NORDIC_SOURCE_HOST ${HOST_NRF5_DIR}/${NORDIC_FILE_REL})
+	message(STATUS "nordic rel file: ${NORDIC_FILE_REL}")
+endforeach()
+
+foreach(F ${NORDIC_SOURCE_HOST})
+	message(STATUS "nordic abs file: ${F}")
+endforeach()
+
+add_library(NordicSdkHost STATIC ${NORDIC_SOURCE_HOST})
 
 #################################################
 # Include crownstone application and mock sources
@@ -122,8 +148,7 @@ function(add_crownstone_test testpath)
 	get_filename_component(TESTNAME ${testpath} NAME_WE)
 	add_executable(${TESTNAME} "test/${testpath}")
 	target_link_libraries(${TESTNAME} BluenetMock)
-	message(STATUS "NORDIC_HOST_SDK_TARGET: " ${NORDIC_HOST_SDK_TARGET})
-	#add_dependencies(${TESTNAME} ${NORDIC_HOST_SDK_TARGET})
+	target_link_libraries(${TESTNAME} NordicSdkHost)
 	
 	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
 	install(TARGETS ${TESTNAME} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})

@@ -108,11 +108,6 @@ if(VERBOSITY GREATER 4)
 	message(STATUS "Linked libraries: ${LIBS}")
 endif()
 
-# Source directory
-set(SOURCE_DIR "src")
-
-# Get all includes from nordic
-include(nordic.src)
 
 set(BOOTLOADER "_bootloader_.hex")
 
@@ -120,7 +115,14 @@ set(BOOTLOADER "_bootloader_.hex")
 # Include source files
 #######################################################################################################################
 
-include(crownstone.src)
+# Source directory
+set(SOURCE_DIR "src")
+
+# Get all includes from nordic
+include(nordic-includes.src)
+
+# include crownstone sources
+include(crownstone.src)                # deprecated: choose appropriate file from crownstone-{application,platform,platform-mock}
 include(crownstone-application.src)
 include(crownstone-platform.src)
 
@@ -138,8 +140,15 @@ set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS}
 )
 
-# This will add the required nRF5 code files to ${NORDIC_SOURCE}
+# ----------------
+# This will add the required nRF5 code files to a list variable ${NORDIC_SOURCE_NRF5_REL}
 include(nrf5.src)
+
+#loop through NORDIC_SOURCE_REL and convert to absolute paths in NORDIC_SOURCE
+foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
+	list(APPEND NORDIC_SOURCE ${NRF5_DIR}/${NORDIC_FILE_REL})
+endforeach()
+# ----------------
 
 if(BUILD_MESHING)
 	# This will add the required mesh code files to ${NORDIC_SOURCE}
