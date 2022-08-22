@@ -140,14 +140,14 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 		}
 		case CS_MICROAPP_SDK_LOG_FLOAT: {
 			[[maybe_unused]] microapp_sdk_log_float_t* logFloat = reinterpret_cast<microapp_sdk_log_float_t*>(log);
-			[[maybe_unused]] uint32_t val                       = logFloat->value;
+			[[maybe_unused]] int32_t val                        = logFloat->value;
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_DOUBLE: {
 			[[maybe_unused]] microapp_sdk_log_double_t* logDouble = reinterpret_cast<microapp_sdk_log_double_t*>(log);
-			[[maybe_unused]] uint32_t val                         = logDouble->value;
+			[[maybe_unused]] int32_t val                          = logDouble->value;
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
 			break;
@@ -253,7 +253,12 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 
 			if (gpio.direction == SENSE) {
 				MicroappController& controller = MicroappController::getInstance();
-				controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
+				cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
+				if (result != ERR_SUCCESS) {
+					// Either already registered or no space
+					pin->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+					return ERR_UNSPECIFIED;
+				}
 			}
 			break;
 		}
