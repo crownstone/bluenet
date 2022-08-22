@@ -8,10 +8,13 @@
 
 #include <structs/buffer/cs_CharacteristicBuffer.h>
 
-class EncryptionBuffer : public CharacteristicBuffer {
+/**
+ * Buffer used to hold encrypted characteristic data.
+ */
+class EncryptedBuffer : public CharacteristicBuffer {
 public:
-	static EncryptionBuffer& getInstance() {
-		static EncryptionBuffer instance;
+	static EncryptedBuffer& getInstance() {
+		static EncryptedBuffer instance;
 		return instance;
 	}
 };

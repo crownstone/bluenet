@@ -18,7 +18,7 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <logging/cs_Logger.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <third/std/function.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
@@ -534,7 +534,7 @@ protected:
 		if (_encryptionBuffer == NULL) {
 			if (_status.sharedEncryptionBuffer) {
 				uint16_t size;
-				EncryptionBuffer::getInstance().getBuffer(_encryptionBuffer, size, CS_CHAR_BUFFER_DEFAULT_OFFSET);
+				EncryptedBuffer::getInstance().getBuffer(_encryptionBuffer, size, CS_CHAR_BUFFER_DEFAULT_OFFSET);
 			}
 			else {
 				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));

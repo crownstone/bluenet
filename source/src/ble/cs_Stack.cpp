@@ -204,7 +204,7 @@ void Stack::createCharacteristics() {
 	// Init buffers.
 	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-	EncryptionBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	EncryptedBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 
 	for (Service* svc : _services) {
 		svc->createCharacteristics();
@@ -660,7 +660,7 @@ void Stack::onMemoryRequest(uint16_t connectionHandle) {
 	//		BLE_CALL(sd_ble_user_mem_reply, (connectionHandle, NULL));
 
 	ble_user_mem_block_t memBlock;
-	EncryptionBuffer::getInstance().getBuffer(
+	EncryptedBuffer::getInstance().getBuffer(
 			memBlock.p_mem, memBlock.len, CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
 
 	_log(LogLevelStackDebug, false, "mem request: ptr=%p len=%u buf=", memBlock.p_mem, memBlock.len);
@@ -725,7 +725,7 @@ void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writ
 			// Finalize a long write: the data was written to the buffer we provided in the memory request.
 			// However, the buffer has a header and can contain data for multiple handles.
 
-			cs_data_t encryptionBuffer = EncryptionBuffer::getInstance().getBuffer(
+			cs_data_t encryptionBuffer = EncryptedBuffer::getInstance().getBuffer(
 					CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
 			uint16_t* header = (uint16_t*)(encryptionBuffer.data);
 			_log(LogLevelStackDebug,

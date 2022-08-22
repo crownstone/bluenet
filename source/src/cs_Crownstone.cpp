@@ -54,7 +54,6 @@
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
 #include <time/cs_SystemTime.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>

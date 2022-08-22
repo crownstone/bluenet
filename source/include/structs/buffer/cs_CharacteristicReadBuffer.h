@@ -8,6 +8,9 @@
 
 #include "structs/buffer/cs_CharacteristicBuffer.h"
 
+/**
+ * Buffer used to hold plain text data that is read by the user.
+ */
 class CharacteristicReadBuffer : public CharacteristicBuffer {
 public:
 	static CharacteristicReadBuffer& getInstance() {
