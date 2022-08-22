@@ -137,9 +137,9 @@ endif()
 
 include(ExternalProject)
 
-include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
-include(${DEFAULT_MODULES_PATH}/git_info.cmake)
-include(${DEFAULT_MODULES_PATH}/compilation_info.cmake)
+include(load_configuration)
+include(git_info)
+include(compilation_info)
 
 #######################################################################################################################
 # Load configuration values from multiple files
@@ -604,8 +604,8 @@ add_custom_target(nrfconnect_programmer
 # We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions
 # do not support hexadecimal values either
 if(FACTORY_IMAGE)
-	include(${DEFAULT_MODULES_PATH}/hex.cmake)
-	include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
+	include(hex)
+	include(load_hardware_version_mapping)
 
 	message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
 	load_hardware_version(${CMAKE_SOURCE_DIR}/source/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
@@ -736,11 +736,12 @@ list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
+
+
 # TODO: this line can be removed as host build folder simply doesn't use the variable
 list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 
 if(COMPILE_FOR_HOST)
-include(ExternalProject)
 	message(STATUS "Configure ${NORDIC_SDK_HOST_TARGET} target")
 	
 	ExternalProject_Add(${NORDIC_SDK_HOST_TARGET}
