@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(bluenet-host)
 
+include (cs_list_utils)
+
 message(STATUS "Building bluenet-host project. NORDIC_SDK_HOST_TARGET:=" ${NORDIC_SDK_HOST_TARGET})
 message (STATUS "NRF5_HOST_DIR: ${NRF5_HOST_DIR}")
 
@@ -66,18 +68,6 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h")
 
-######################################################
-# util function to print a list variable with preamble
-# args: full path to test, relative to this cmake file
-######################################################
-
-
-function(print_list preamble listvarname)
-	foreach(F IN LISTS ${listvarname})
-		message(STATUS "${preamble} ${F}")
-	endforeach()
-endfunction()
-
 
 ##################################
 # Get all includes from crownstone
@@ -110,7 +100,10 @@ endforeach()
 # Get all includes from nordic
 ##############################
 
-include(nordic-includes.src)
+set (INCLUDE_BASE_DIR ${NRF5_HOST_DIR})
+message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
+include(nrf5-sdk-includes.src)
+
 include(nrf5-host.src)
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
@@ -146,10 +139,12 @@ else()
 	message(WARNING "No sources provided for BLUENET_HOST_LIB")
 endif()
 
-#######################################################################
-# util function to reduce verbosity
-# args: full path to test, relative to this cmake file 
-####################################################################### 
+##################################################################################
+# This function defines a test executable, links it to the bluenet and
+# nrf mock libs, and adds it to the ctest runner.
+#
+# @argument testpath: path to sourcefile of the test, relative to this cmake file.
+##################################################################################
 
 function(add_crownstone_test testpath)
 	get_filename_component(TESTNAME ${testpath} NAME_WE)

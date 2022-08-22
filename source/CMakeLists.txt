@@ -50,6 +50,8 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 message(STATUS "Git branch ${GIT_REFSPEC} at hash ${GIT_SHA1}")
 
+include (cs_list_utils)
+
 #######################################################################################################################
 
 if(NOT CONFIG_DIR)
@@ -119,7 +121,11 @@ set(BOOTLOADER "_bootloader_.hex")
 set(SOURCE_DIR "src")
 
 # Get all includes from nordic
-include(nordic-includes.src)
+set(INCLUDE_BASE_DIR ${NRF5_DIR})
+message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
+include(nrf5-sdk-includes.src)
+
+include(mesh-sdk-includes.src)
 
 # include crownstone sources
 include(crownstone.src)                # deprecated: choose appropriate file from crownstone-{application,platform,platform-mock}
@@ -148,6 +154,8 @@ include(nrf5.src)
 foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
 	list(APPEND NORDIC_SOURCE ${NRF5_DIR}/${NORDIC_FILE_REL})
 endforeach()
+
+print_list("NORDIC_SOURCE: " NORDIC_SOURCE)
 # ----------------
 
 if(BUILD_MESHING)

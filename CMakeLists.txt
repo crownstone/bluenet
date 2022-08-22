@@ -727,6 +727,7 @@ endif()
 #######################################################################################################################
 
 # Location of adjusted version of the SDK that can be used on a host system
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_HOST_DIR:STRING=${NRF5_HOST_DIR}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 
