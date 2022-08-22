@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(bluenet-host)
 
-
-
-message(STATUS "from host cmake: NORDIC_HOST_SDK_TARGET: " ${NORDIC_HOST_SDK_TARGET})
+message(STATUS "Building bluenet-host project. NORDIC_HOST_SDK_TARGET:=" ${NORDIC_HOST_SDK_TARGET})
 
 
 option(HOST_TARGET ON)
@@ -24,7 +22,7 @@ set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
-message (STATUS "arend: ${HOST_NRF5_DIR}")
+message (STATUS "HOST_NRF5_DIR: ${HOST_NRF5_DIR}")
 message(STATUS "arend: ${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
 
 if(HOST_TARGET)
@@ -69,6 +67,18 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h")
 
+######################################################
+# util function to print a list variable with preamble
+# args: full path to test, relative to this cmake file
+######################################################
+
+
+function(print_list preamble listvarname)
+	foreach(F IN LISTS ${listvarname})
+		message(STATUS "${preamble} ${F}")
+	endforeach()
+endfunction()
+
 
 ##################################
 # Get all includes from crownstone
@@ -102,26 +112,22 @@ endforeach()
 ##############################
 
 include(nordic-includes.src)
+include(nrf5-host.src)
 
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
-# This will add the required nRF5 code files to a list variable ${NORDIC_SOURCE_NRF5_REL}
-foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
-	message(STATUS "nordic rel file from before includiding nrf5.src.cmake: ${NORDIC_FILE_REL}")
-endforeach()
-include(nrf5.src)
+if(SOURCE_NRF5_HOST_REL)
+	#loop through NORDIC_SOURCE_REL and convert to absolute paths in SOURCE_NRF5_HOST_ABS
+	foreach(FILE_NRF5_HOST_REL ${SOURCE_NRF5_HOST_REL})
+		list(APPEND SOURCE_NRF5_HOST_ABS ${HOST_NRF5_DIR}/${FILE_NRF5_HOST_REL})
+	endforeach()
 
-#loop through NORDIC_SOURCE_REL and convert to absolute paths in NORDIC_SOURCE_HOST
-foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
-	list(APPEND NORDIC_SOURCE_HOST ${HOST_NRF5_DIR}/${NORDIC_FILE_REL})
-	message(STATUS "nordic rel file: ${NORDIC_FILE_REL}")
-endforeach()
-
-foreach(F ${NORDIC_SOURCE_HOST})
-	message(STATUS "nordic abs file: ${F}")
-endforeach()
-
-add_library(NordicSdkHost STATIC ${NORDIC_SOURCE_HOST})
+	set(NRF5_HOST_LIB NordicSdkHost)
+	print_list("${NRF5_HOST_LIB} contains: " SOURCE_NRF5_HOST_ABS)
+	add_library(${NRF5_HOST_LIB} STATIC ${SOURCE_NRF5_HOST_ABS})
+else()
+	message(WARNING "No sources provided for NRF5_HOST_LIB")
+endif()
 
 #################################################
 # Include crownstone application and mock sources
@@ -133,11 +139,13 @@ set(SOURCE_DIR "../source/src")
 include(crownstone-application.src)
 include(crownstone-platform-mock.src)
 
-foreach(F ${FOLDER_SOURCE})
-	message(STATUS "FOLDER_SOURCE contains: " ${F})
-endforeach()
-
-add_library(BluenetMock STATIC ${FOLDER_SOURCE})
+if(FOLDER_SOURCE)
+	set(BLUENET_HOST_LIB BluenetHost)
+	print_list("${BLUENET_HOST_LIB} contains: " FOLDER_SOURCE)
+	add_library(${BLUENET_HOST_LIB} STATIC ${FOLDER_SOURCE})
+else()
+	message(WARNING "No sources provided for BLUENET_HOST_LIB")
+endif()
 
 #######################################################################
 # util function to reduce verbosity
@@ -147,8 +155,14 @@ add_library(BluenetMock STATIC ${FOLDER_SOURCE})
 function(add_crownstone_test testpath)
 	get_filename_component(TESTNAME ${testpath} NAME_WE)
 	add_executable(${TESTNAME} "test/${testpath}")
-	target_link_libraries(${TESTNAME} BluenetMock)
-	target_link_libraries(${TESTNAME} NordicSdkHost)
+
+	if(BLUENET_HOST_LIB)
+		target_link_libraries(${TESTNAME} ${BLUENET_HOST_LIB})
+	endif()
+
+	if(NRF5_HOST_LIB)
+		target_link_libraries(${TESTNAME} {NRF5_HOST_LIB})
+	endif()
 	
 	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
 	install(TARGETS ${TESTNAME} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
