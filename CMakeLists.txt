@@ -195,8 +195,13 @@ endif()
 #  - NRF5_HOST_DIR:          source dir for respective lib.
 #  - MESH_SDK_DIR: 
 
-set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
-set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+if(NOT NRF5_SDK_REPOSITORY)
+	set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
+endif()
+
+if(NOT MESH_SDK_REPOSITORY) 
+	set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+endif()
 
 # The Nordic SDK
 
@@ -215,7 +220,7 @@ else()
 	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
 endif()
 
-message(STATUS "Use git tag ${NORDIC_SDK_GIT_TAG} from repository ${NRF5_SDK_REPOSITORY} for bluenet")
+message(STATUS "Will use git tag/hash ${NORDIC_SDK_GIT_TAG} from repository ${NRF5_SDK_REPOSITORY} for bluenet")
 
 # The Nordic SDK (for host)
 
@@ -229,7 +234,7 @@ else()
 	set(NRF5_HOST_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}-host")
 endif()
 
-message(STATUS "Will use git hash ${NORDIC_SDK_HOST_GIT_TAG} from repository ${NRF5_SDK_REPOSITORY} for host")
+message(STATUS "Will use git tag/hash ${NORDIC_SDK_HOST_GIT_TAG} from repository ${NRF5_SDK_REPOSITORY} for host")
 
 # The mesh
 
@@ -722,13 +727,11 @@ endif()
 #######################################################################################################################
 
 # Location of adjusted version of the SDK that can be used on a host system
-set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_NRF5_DIR:STRING=${HOST_NRF5_DIR}")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_HOST_DIR:STRING=${NRF5_HOST_DIR}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_TARGET:OPTION=ON")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_DIR:STRING=${HOST_NRF5_DIR}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
@@ -737,15 +740,13 @@ list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE
 
 if(COMPILE_FOR_HOST)
 include(ExternalProject)
-	set(NORDIC_HOST_SDK_TARGET nordic_host_sdk${NORDIC_SDK_VERSION_FULL})
-	list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_HOST_SDK_TARGET:STRING=${NORDIC_HOST_SDK_TARGET}")
-	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
+	message(STATUS "Configure ${NORDIC_SDK_HOST_TARGET} target")
 	
-	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
-		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
-		GIT_TAG host
+	ExternalProject_Add(${NORDIC_SDK_HOST_TARGET}
+		GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
+		GIT_TAG ${NORDIC_SDK_HOST_GIT_TAG}
 		GIT_CONFIG advice.detachedHead=false
-		SOURCE_DIR ${HOST_NRF5_DIR}
+		SOURCE_DIR ${NRF5_HOST_DIR}
 		CONFIGURE_COMMAND ""
 		BUILD_COMMAND ""
 		INSTALL_COMMAND ""
@@ -763,6 +764,6 @@ include(ExternalProject)
 		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/tmp
 		CMAKE_ARGS "${CMAKE_BLUENET_HOST_ARGS}"
 		BUILD_ALWAYS 1
-		DEPENDS ${NORDIC_HOST_SDK_TARGET}
+		DEPENDS ${NORDIC_SDK_HOST_TARGET}
 		)
 endif()

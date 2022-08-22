@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(bluenet-host)
 
-message(STATUS "Building bluenet-host project. NORDIC_HOST_SDK_TARGET:=" ${NORDIC_HOST_SDK_TARGET})
+message(STATUS "Building bluenet-host project. NORDIC_SDK_HOST_TARGET:=" ${NORDIC_SDK_HOST_TARGET})
+message (STATUS "NRF5_HOST_DIR: ${NRF5_HOST_DIR}")
 
 
 option(HOST_TARGET ON)
@@ -22,8 +23,6 @@ set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
-message (STATUS "HOST_NRF5_DIR: ${HOST_NRF5_DIR}")
-message(STATUS "arend: ${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
 
 if(HOST_TARGET)
 	add_compile_definitions("HOST_TARGET")
@@ -119,7 +118,7 @@ add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 if(SOURCE_NRF5_HOST_REL)
 	#loop through NORDIC_SOURCE_REL and convert to absolute paths in SOURCE_NRF5_HOST_ABS
 	foreach(FILE_NRF5_HOST_REL ${SOURCE_NRF5_HOST_REL})
-		list(APPEND SOURCE_NRF5_HOST_ABS ${HOST_NRF5_DIR}/${FILE_NRF5_HOST_REL})
+		list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
 	endforeach()
 
 	set(NRF5_HOST_LIB NordicSdkHost)
