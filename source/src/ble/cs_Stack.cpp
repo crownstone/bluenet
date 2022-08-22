@@ -38,7 +38,6 @@ Stack::Stack() {
 #define CS_STACK_LONG_WRITE_HEADER_SIZE 6
 
 Stack::~Stack() {
-	shutdown();
 }
 
 /**
@@ -161,7 +160,7 @@ void Stack::initRadio() {
 	LOGd("nrf_sdh_ble_enable ram_start=%p", ram_start);
 	nrfCode = nrf_sdh_ble_enable(&ram_start);
 	switch (nrfCode) {
-		case NRF_SUCCESS: LOGi("Softdevice enabled"); break;
+		case NRF_SUCCESS: LOGi("BLE stack enabled"); break;
 		case NRF_ERROR_INVALID_STATE: LOGe("BLE: invalid radio state"); [[fallthrough]];
 		case NRF_ERROR_INVALID_ADDR: LOGe("BLE: invalid memory address"); [[fallthrough]];
 		case NRF_ERROR_NO_MEM:
@@ -195,20 +194,10 @@ void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
 	_clockSource = clockSource;
 }
 
-void Stack::createCharacteristics() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
-		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
-	}
-	LOGd("Create characteristics");
-
-	// Init buffers.
-	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-	EncryptedBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-
-	for (Service* svc : _services) {
-		svc->createCharacteristics();
-	}
+void Stack::addService(Service* svc) {
+	_services.push_back(svc);
+	svc->createCharacteristics();
+	svc->updatedCharacteristics();
 }
 
 void Stack::initServices() {
@@ -222,17 +211,6 @@ void Stack::initServices() {
 	}
 
 	setInitialized(C_SERVICES_INITIALIZED);
-}
-
-void Stack::shutdown() {
-	// 16-sep-2019 TODO: stop advertising
-	// 02-11-2021 TODO: we don't support shutdown.
-	setUninitialized(C_STACK_INITIALIZED);
-}
-
-Stack& Stack::addService(Service* svc) {
-	_services.push_back(svc);
-	return *this;
 }
 
 void Stack::updateMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -740,7 +718,7 @@ void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writ
 				// for a long write, don't have the service handle available to check for the correct
 				// service, so we just go through all the services and characteristics until we find
 				// the correct characteristic, then we return
-				if (svc->on_write(writeEvt, header[0])) {
+				if (svc->onWrite(writeEvt, header[0])) {
 					return;
 				}
 			}
@@ -749,7 +727,7 @@ void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writ
 		case BLE_GATTS_OP_WRITE_REQ:
 		case BLE_GATTS_OP_WRITE_CMD: {
 			for (Service* svc : _services) {
-				svc->on_write(writeEvt, writeEvt.handle);
+				svc->onWrite(writeEvt, writeEvt.handle);
 			}
 			break;
 		}
@@ -846,7 +824,7 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 	LOGi("Device connected");
 
 	for (Service* svc : _services) {
-		svc->on_ble_event(p_ble_evt);
+		svc->onBleEvent(p_ble_evt);
 	}
 
 	startConnectionAliveTimer();
@@ -870,7 +848,7 @@ void Stack::onIncomingDisconnected(const ble_evt_t* p_ble_evt) {
 	LOGi("Device disconnected");
 
 	for (Service* svc : _services) {
-		svc->on_ble_event(p_ble_evt);
+		svc->onBleEvent(p_ble_evt);
 	}
 
 	stopConnectionAliveTimer();

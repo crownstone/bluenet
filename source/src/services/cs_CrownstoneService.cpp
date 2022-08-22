@@ -23,7 +23,6 @@ CrownstoneService::CrownstoneService() : EventListener() {
 	LOGi("Add crownstone service");
 
 	setUUID(UUID(CROWNSTONE_UUID));
-	setName(BLE_SERVICE_CROWNSTONE);
 }
 
 void CrownstoneService::createCharacteristics() {
@@ -47,8 +46,6 @@ void CrownstoneService::createCharacteristics() {
 
 	LOGi(FMT_CHAR_ADD STR_CHAR_FACTORY_RESET);
 	addFactoryResetCharacteristic();
-
-	updatedCharacteristics();
 }
 
 void CrownstoneService::addControlCharacteristic(

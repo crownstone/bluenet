@@ -82,7 +82,6 @@ DeviceInformationService::DeviceInformationService()
 		, _firmwareRevisionCharacteristic(NULL)
 		, _softwareRevisionCharacteristic(NULL) {
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
-	setName(BLE_SERVICE_DEVICE_INFORMATION);
 }
 
 void DeviceInformationService::createCharacteristics() {
@@ -94,8 +93,6 @@ void DeviceInformationService::createCharacteristics() {
 #ifdef SOFTWARE_REVISION_CHARACTERISTIC
 	addSoftwareRevisionCharacteristic();
 #endif
-
-	updatedCharacteristics();
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {

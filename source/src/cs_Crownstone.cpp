@@ -54,6 +54,9 @@
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
+#include <structs/buffer/cs_CharacteristicReadBuffer.h>
+#include <structs/buffer/cs_CharacteristicWriteBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <time/cs_SystemTime.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
@@ -472,6 +475,11 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 	// Start operation mode
 	startOperationMode(newMode);
 
+	// Init buffers, used by characteristics and central.
+	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	EncryptedBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+
 	// Create services that belong to the new mode.
 	switch (newMode) {
 		case OperationMode::OPERATION_MODE_NORMAL:
@@ -490,11 +498,6 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 				// nothing to do
 				;
 	}
-
-	// Loop through all services added to the stack and create the characteristics.
-	_stack->createCharacteristics();
-
-	//	_stack->resume();
 
 	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
