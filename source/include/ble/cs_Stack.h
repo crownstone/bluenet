@@ -211,7 +211,7 @@ protected:
 	void onMemoryRequest(uint16_t connectionHandle);
 	void onMemoryRelease(uint16_t connectionHandle);
 
-	void onWrite(const ble_gatts_evt_write_t& writeEvt);
+	void onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writeEvt);
 
 	/** Transmission complete event
 	 *

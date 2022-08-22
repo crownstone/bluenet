@@ -663,10 +663,7 @@ cs_ret_code_t CrownstoneCentral::mergeNotification(const cs_const_data_t& data, 
 	}
 
 	// Get the encryption buffer.
-	cs_data_t encryptedBuffer;
-	if (!EncryptionBuffer::getInstance().getBuffer(encryptedBuffer.data, encryptedBuffer.len)) {
-		return ERR_BUFFER_UNASSIGNED;
-	}
+	cs_data_t encryptedBuffer = EncryptionBuffer::getInstance().getBuffer(0);
 
 	if (encryptedBuffer.len < _notificationMergedDataSize + dataSize) {
 		return ERR_BUFFER_TOO_SMALL;

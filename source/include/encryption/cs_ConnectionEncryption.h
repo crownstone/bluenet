@@ -90,13 +90,6 @@ public:
 	cs_ret_code_t setSessionData(session_data_t& sessionData);
 
 	/**
-	 * Whether a it's allowed to write to a characteristic.
-	 *
-	 * TODO: remove and let stack handle this.
-	 */
-	bool allowedToWrite();
-
-	/**
 	 * Close connection due to insufficient access.
 	 */
 	void disconnect();

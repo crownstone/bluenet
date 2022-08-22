@@ -23,13 +23,17 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-/** General BLE name service
+#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
+
+/**
+ * General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
 class Service;
 
-/** CharacteristicInit collects fields required to define a BLE characteristic
+/**
+ * CharacteristicInit collects fields required to define a BLE characteristic
  */
 struct CharacteristicInit {
 	ble_gatts_attr_t attr_char_value;
@@ -48,9 +52,8 @@ struct CharacteristicInit {
 	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
 };
 
-#define STATUS_INITED
-
-/** Status of a Characteristic.
+/**
+ * Status of a Characteristic.
  *
  * The status can be initialized, with notifications, writable, etc.
  */
@@ -462,12 +465,7 @@ protected:
 	 *  aes encryption enabled. then calls the on write callback.
 	 */
 	void written(uint16_t len) {
-		// We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
-		// TODO: have this from the stack directly.
-		if (ConnectionEncryption::getInstance().allowedToWrite()) {
-			LOGi("Not allowed to write, disconnect in progress");
-			return;
-		}
+		LOGd("%s: onWrite", _name);
 
 		setGattValueLength(len);
 
@@ -480,6 +478,14 @@ protected:
 			// there. In the case of a characteristic with a dynamic buffer length we need to set the length ourselves.
 			// To do this we assume the length of the data is the same as the encrypted buffer minus the overhead for
 			// the encryption. The result can be zero padded but generally the payload has it's own length indication.
+
+			_log(LogLevelCharacteristicDebug,
+				 false,
+				 "gattPtr=%p gattLen=%u data=",
+				 getGattValuePtr(),
+				 getGattValueLength());
+			_logArray(LogLevelCharacteristicDebug, true, getGattValuePtr(), getGattValueLength());
+
 			uint16_t decryptionBufferLength =
 					ConnectionEncryption::getPlaintextBufferSize(getGattValueLength(), ConnectionEncryptionType::CTR);
 			setValueLength(decryptionBufferLength);
@@ -508,7 +514,8 @@ protected:
 			setValueLength(len);
 		}
 
-		LOGd("%s: onWrite()", _name);
+		_log(LogLevelCharacteristicDebug, false, "valuePtr=%p valueLen=%u data=", getValuePtr(), getValueLength());
+		_logArray(LogLevelCharacteristicDebug, true, getValuePtr(), getValueLength());
 
 		_callbackOnWrite(accessLevel, getValue(), getValueLength());
 	}
@@ -527,8 +534,7 @@ protected:
 		if (_encryptionBuffer == NULL) {
 			if (_status.sharedEncryptionBuffer) {
 				uint16_t size;
-				EncryptionBuffer::getInstance().getBuffer(_encryptionBuffer, size);
-				assert(_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+				EncryptionBuffer::getInstance().getBuffer(_encryptionBuffer, size, CS_CHAR_BUFFER_DEFAULT_OFFSET);
 			}
 			else {
 				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
@@ -739,21 +745,6 @@ public:
 
 	/** @inherit */
 	virtual uint16_t getGattValueLength() { return _gattValueLength; }
-	//
-	//	void initEncryptionBuffer() {
-	//		if (_encryptionBufferUsed) {
-	//
-	//		} else {
-	//			uint16_t size;
-	//			EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
-	//			assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes
-	// encryption");
-	//		}
-	//	}
-	//
-	//	void freeEncryptionBuffer() {
-	//		CharacteristicBase::_encryptionBuffer = NULL;
-	//	}
 
 protected:
 };

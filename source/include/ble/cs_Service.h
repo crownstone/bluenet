@@ -26,9 +26,6 @@ class Service : public BaseClass<1> {
 public:
 	enum condition_t { C_SERVICE_INITIALIZED };
 
-	//! The "Generic Service"
-	static const char* defaultServiceName;
-
 	//! A container with characteristics (underlying data format is a std::vector).
 	typedef tuple<CharacteristicBase*> Characteristics_t;
 

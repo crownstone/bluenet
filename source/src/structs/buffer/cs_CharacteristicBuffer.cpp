@@ -71,6 +71,13 @@ cs_data_t CharacteristicBuffer::getBuffer(cs_buffer_size_t offset) {
 	return data;
 }
 
+void CharacteristicBuffer::getBuffer(buffer_ptr_t& buffer, uint16_t& size, cs_buffer_size_t offset) {
+	assert(_buffer != NULL, "Buffer not initialized");
+	assert(offset <= _size, "Invalid arguments");
+	buffer = _buffer + offset;
+	size   = _size - offset;
+}
+
 cs_buffer_size_t CharacteristicBuffer::size(cs_buffer_size_t offset) {
 	return _size - offset;
 }

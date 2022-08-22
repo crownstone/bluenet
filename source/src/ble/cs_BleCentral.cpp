@@ -64,7 +64,7 @@ void BleCentral::init() {
 	}
 
 	// Use the encryption buffer, as that contains the encrypted data, which is what we usually write or read.
-	EncryptionBuffer::getInstance().getBuffer(_buf.data, _buf.len);
+	EncryptionBuffer::getInstance().getBuffer(_buf.data, _buf.len, 0);
 
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &_scanInterval, sizeof(_scanInterval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &_scanWindow, sizeof(_scanWindow));

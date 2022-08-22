@@ -166,8 +166,6 @@ Crownstone::Crownstone(boards_config_t& board)
 	_mainTimerData = {{0}};
 	_mainTimerId   = &_mainTimerData;
 
-	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
-
 	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as
 	// well.
 	this->listen();

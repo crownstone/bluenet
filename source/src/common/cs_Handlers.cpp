@@ -230,8 +230,7 @@ void BleHandler::handleEvent(const ble_evt_t* event) {
 		}
 		case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
 			BleHandler::handleDataLengthRequest(
-					event->evt.gap_evt.conn_handle,
-					event->evt.gap_evt.params.data_length_update_request);
+					event->evt.gap_evt.conn_handle, event->evt.gap_evt.params.data_length_update_request);
 			break;
 		}
 		case BLE_GATTC_EVT_TIMEOUT: {
@@ -246,8 +245,7 @@ void BleHandler::handleEvent(const ble_evt_t* event) {
 		}
 		case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
 			BleHandler::handleMtuRequest(
-					event->evt.gatts_evt.conn_handle,
-					event->evt.gatts_evt.params.exchange_mtu_request);
+					event->evt.gatts_evt.conn_handle, event->evt.gatts_evt.params.exchange_mtu_request);
 			break;
 		}
 		case BLE_GAP_EVT_RSSI_CHANGED:

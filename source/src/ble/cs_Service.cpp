@@ -10,10 +10,6 @@
 
 #include <algorithm>
 
-///! Service //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const char* Service::defaultServiceName = "unnamed";
-
 /** Base class for a BLE service
  */
 Service::Service() : _stack(NULL), _name(""), _service_handle(BLE_CONN_HANDLE_INVALID) {}
