@@ -24,7 +24,8 @@ const uint8_t MAC_ADDRESS_LENGTH                            = 6;
 const uint8_t MAX_BLE_ADV_DATA_LENGTH                       = 31;
 // Defined by the mesh protocol
 const uint8_t MAX_MICROAPP_MESH_PAYLOAD_SIZE                = 7;
-
+// Defined by the service data packet service_data_encrypted_microapp_t
+const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = 8;
 /*
  * Payload and header sizes (may need to be updated when structs are changed)
  */
@@ -36,14 +37,12 @@ const uint8_t MICROAPP_SDK_MAX_PAYLOAD                      = 48;
 const uint8_t MICROAPP_SDK_HEADER_SIZE                      = 2;
 // header + type [1] + flags [1] + size [1]
 const uint8_t MICROAPP_SDK_LOG_HEADER_SIZE                  = MICROAPP_SDK_HEADER_SIZE + 3;
-// max total - (header + twiType [1] + twiAddress [2] + twiFlags [1] + twiPayloadSize [1])
-const uint8_t MICROAPP_SDK_MAX_TWI_PAYLOAD_SIZE             = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 5);
+// max total - (header + twiType [1] + twiAddress [1] + twiFlags [1] + twiPayloadSize [1])
+const uint8_t MICROAPP_SDK_MAX_TWI_PAYLOAD_SIZE             = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 4);
 // max total - log header
 const uint8_t MICROAPP_SDK_MAX_STRING_LENGTH                = MICROAPP_SDK_MAX_PAYLOAD - MICROAPP_SDK_LOG_HEADER_SIZE;
 // max total - log header
 const uint8_t MICROAPP_SDK_MAX_ARRAY_SIZE                   = MICROAPP_SDK_MAX_PAYLOAD - MICROAPP_SDK_LOG_HEADER_SIZE;
-// max total - (header + appUuid [2] + size [1])
-const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 3);
 // max total - (header + protocol [1] + type [2] + size [2])
 const uint8_t MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 5);
 
