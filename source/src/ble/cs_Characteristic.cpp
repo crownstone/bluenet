@@ -8,9 +8,6 @@
 #include <ble/cs_Characteristic.h>
 #include <storage/cs_State.h>
 
-#define LOGCharacteristicDebug LOGvv
-#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
-
 CharacteristicBase::CharacteristicBase()
 		: _handles({}), _status({}) {}
 

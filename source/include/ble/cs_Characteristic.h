@@ -23,6 +23,7 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
+#define LOGCharacteristicDebug LOGvv
 #define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
 
 /**
@@ -65,7 +66,7 @@ class CharacteristicBase {
 public:
 protected:
 	//! Name of this characteristic.
-	const char* _name;
+	const char* _name = nullptr;
 
 	//! UUID of this characteristic.
 	UUID _uuid;
@@ -506,9 +507,11 @@ protected:
 			if (_status.sharedEncryptionBuffer) {
 				uint16_t size;
 				EncryptedBuffer::getInstance().getBuffer(_encryptionBuffer, size, CS_CHAR_BUFFER_DEFAULT_OFFSET);
+				LOGCharacteristicDebug("%s: Use shared encryption buffer=%p size=%u", _name, _encryptionBuffer, size);
 			}
 			else {
 				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+				LOGCharacteristicDebug("%s: Allocated encryption buffer=%p size=%u", _name, _encryptionBuffer, getGattValueMaxLength());
 			}
 		}
 	}
