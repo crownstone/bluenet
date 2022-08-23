@@ -1,10 +1,8 @@
 #pragma once
 
 #include <ble/cs_BleConstants.h>
-#include <cs_MemoryLayout.h>
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
-#include <logging/cs_Logger.h>
 #include <protocol/cs_Packets.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
@@ -59,21 +57,10 @@ struct microapp_soft_interrupt_registration_t {
  */
 class MicroappController : public EventListener {
 private:
-	/*
-	 * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
-	 * deriving from EventListener and adding itself to the EventDispatcher as listener.
-	 */
-	MicroappController() : EventListener(),
-							_tickCounter(0),
-							_softInterruptCounter(0),
-							_consecutiveMicroappCallCounter(0),
-							_microappIsScanning(false) {
-		EventDispatcher::getInstance().addListener(this);
-		LOGi("Microapp end is at %p", microappRamSection._end);
-	}
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
+	MicroappController();
 	MicroappController(MicroappController const&);
 	void operator=(MicroappController const&);
 

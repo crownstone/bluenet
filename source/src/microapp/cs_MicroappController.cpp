@@ -10,8 +10,10 @@
 
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
+#include <cs_MemoryLayout.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
+#include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
@@ -156,24 +158,25 @@ void goIntoMicroapp(void* p) {
 
 }  // extern C
 
-
-MicroappController::MicroappController()
-		: EventListener()
-		, _tickCounter(0)
-		, _softInterruptCounter(0)
-		, _consecutiveMicroappCallCounter(0)
-		, _microappIsScanning(false) {
-
-	EventDispatcher::getInstance().addListener(this);
-
-	LOGi("Microapp end is at %p", microappRamSection._end);
-}
-
 /*
  * Get from digital pin to interrupt.
  */
 int MicroappController::digitalPinToInterrupt(int pin) {
 	return pin;
+}
+
+/*
+ * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
+ * deriving from EventListener and adding itself to the EventDispatcher as listener.
+ */
+MicroappController::MicroappController() :	EventListener(),
+											_tickCounter(0),
+											_softInterruptCounter(0),
+											_consecutiveMicroappCallCounter(0),
+											_microappIsScanning(false) {
+
+	EventDispatcher::getInstance().addListener(this);
+	LOGi("Microapp end is at %p", microappRamSection._end);
 }
 
 /*
@@ -384,13 +387,13 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	outgoingMessage->messageType           = CS_MICROAPP_SDK_TYPE_CONTINUE;
 	outgoingMessage->ack                   = CS_MICROAPP_SDK_ACK_NO_REQUEST;
 	bool callAgain                         = false;
-	bool handleRequest                     = true;
+	bool ignoreRequest                     = false;
 	int8_t repeatCounter                   = 0;
 	do {
 		LogMicroappControllerDebug("tickMicroapp [call %i]", repeatCounter);
 		callMicroapp();
-		handleRequest = handleAck();
-		if (!handleRequest) {
+		ignoreRequest = !handleAck();
+		if (ignoreRequest) {
 			break;
 		}
 		callAgain = handleRequest();
@@ -420,13 +423,13 @@ void MicroappController::generateSoftInterrupt() {
 	// Request an acknowledgement by the microapp indicating status of interrupt
 	outgoingInterrupt->ack                   = CS_MICROAPP_SDK_ACK_REQUEST;
 	bool callAgain                           = false;
-	bool handleRequest                       = true;
+	bool ignoreRequest                       = false;
 	int8_t repeatCounter                     = 0;
 	do {
 		LogMicroappControllerDebug("generateSoftInterrupt [call %i, %i interrupts within tick]", repeatCounter, _softInterruptCounter);
 		callMicroapp();
-		handleRequest = handleAck();
-		if (!handleRequest) {
+		ignoreRequest = !handleAck();
+		if (ignoreRequest) {
 			break;
 		}
 		callAgain = handleRequest();
