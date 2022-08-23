@@ -311,18 +311,19 @@ void MicroappController::callMicroapp() {
 bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
+	LOGv("handleAck: [ack %i]", outgoingHeader->ack);
 	bool inInterruptContext               = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_NO_REQUEST);
 	if (inInterruptContext) {
 		bool interruptDone = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_IN_PROGRESS);
 		if (interruptDone) {
 			bool interruptDropped = (outgoingHeader->ack == CS_MICROAPP_SDK_ACK_ERR_BUSY);
 			if (interruptDropped) {
-				LOGv("Microapp is busy, drop interrupt");
+				LOGi("Microapp is busy, drop interrupt");
 				// Also prevent new interrupts since apparently the microapp has no more space
 				setEmptySoftInterruptSlots(0);
 			}
 			else {
-				LOGv("Finished interrupt with return code %i", outgoingInterrupt->ack);
+				LOGv("Finished interrupt with return code %i", outgoingHeader->ack);
 				// Increment number of empty interrupt slots since we just finished one
 				incrementEmptySoftInterruptSlots();
 			}
@@ -398,7 +399,7 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomin
 			break;
 		}
 		default: {
-			LOGw("Unknown request type: %i", incomingHeader->messageType);
+			LOGi("Unknown request type: %i", incomingHeader->messageType);
 			stop = true;
 			break;
 		}
@@ -418,7 +419,6 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 		return;
 	}
 	_tickCounter = 0;
-	LOGv("Tick microapp");
 	// Reset interrupt counter every microapp tick
 	_softInterruptCounter                      = 0;
 	// Indicate to the microapp that this is a tick entry by writing in outgoing message header
@@ -431,7 +431,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	bool ignoreRequest                     = false;
 	int8_t repeatCounter                   = 0;
 	do {
-		LOGv("Call [%i], within tick", repeatCounter);
+		LOGv("tickMicroapp [call %i]", repeatCounter);
 		callMicroapp();
 		ignoreRequest = !handleAck();
 		if (ignoreRequest) {
@@ -440,6 +440,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 		callAgain = handleRequest();
 		repeatCounter++;
 	} while (callAgain);
+	LOGv("tickMicroapp end");
 }
 
 /*
@@ -466,7 +467,7 @@ void MicroappController::generateSoftInterrupt() {
 	bool ignoreRequest                       = false;
 	int8_t repeatCounter                     = 0;
 	do {
-		LOGv("Call [%i,%i], within interrupt", _softInterruptCounter, repeatCounter);
+		LOGv("generateSoftInterrupt [call %i, %i interrupts within tick]", repeatCounter, _softInterruptCounter);
 		callMicroapp();
 		ignoreRequest = !handleAck();
 		if (ignoreRequest) {
@@ -475,6 +476,7 @@ void MicroappController::generateSoftInterrupt() {
 		callAgain = handleRequest();
 		repeatCounter++;
 	} while (callAgain);
+	LOGv("generateSoftInterrupt end");
 }
 
 /*
@@ -483,7 +485,7 @@ void MicroappController::generateSoftInterrupt() {
  */
 void MicroappController::onGpioUpdate(uint8_t pinIndex) {
 	if (!allowSoftInterrupts()) {
-		LOGi("Interrupts in progress, ignore pin event");
+		LOGv("New interrupts blocked, ignore pin event");
 		return;
 	}
 	uint8_t interruptPin = digitalPinToInterrupt(pinIndex);
@@ -519,7 +521,7 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 #endif
 
 	if (!allowSoftInterrupts()) {
-		LOGi("Interrupts in progress, ignore mesh event");
+		LOGv("New interrupts blocked, ignore ble device event");
 		return;
 	}
 	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE)) {
@@ -544,7 +546,7 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	ble->size = dev->dataSize;
 	memcpy(ble->data, dev->data, dev->dataSize);
 
-	LOGv("Incoming BLE scanned device for microapp (id=%d)", id);
+	LOGv("Incoming BLE scanned device for microapp");
 	generateSoftInterrupt();
 }
 
@@ -567,7 +569,7 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 		event->reply->dataSize = 0;
 	}
 	if (!allowSoftInterrupts()) {
-		LOGi("Interrupts in progress, ignore mesh event");
+		LOGv("New interrupts blocked, ignore mesh event");
 		return;
 	}
 	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ)) {
@@ -596,7 +598,7 @@ void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
 cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id) {
 	// Check if interrupt registration already exists
 	if (softInterruptRegistered(type, id)) {
-		LOGw("Interrupt [%i, %i] already registered", type, id);
+		LOGi("Interrupt [%i, %i] already registered", type, id);
 		return ERR_ALREADY_EXISTS;
 	}
 	// Look for first empty slot, if it exists
@@ -615,6 +617,8 @@ cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkMessageType t
 	_softInterruptRegistrations[emptySlotIndex].registered = true;
 	_softInterruptRegistrations[emptySlotIndex].type       = type;
 	_softInterruptRegistrations[emptySlotIndex].id         = id;
+
+	LOGv("Registered soft interrupt of type %i, id %i", type, id);
 
 	return ERR_SUCCESS;
 }

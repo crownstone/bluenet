@@ -29,7 +29,7 @@ int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
  * Forwards requests from the microapp to the relevant handler
  */
 cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_t* header) {
-	LOGd("handleMicroappRequest: [%i, %i]", header->messageType, header->ack);
+	LOGd("handleMicroappRequest: [messageType %i, ack %i]", header->messageType, header->ack);
 	uint8_t type = header->messageType;
 	switch (type) {
 		case CS_MICROAPP_SDK_TYPE_NONE: {
@@ -187,6 +187,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_t* pin) {
 	MicroappSdkPin pinIndex = (MicroappSdkPin)pin->pin;
+	LOGd("handleMicroappPinRequest: [pin %i, type %i]", pinIndex, pin->type);
 	if (pinIndex > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
 		LOGw("Pin %i out of range", pinIndex);
 		pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE;
@@ -325,7 +326,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_) {
 	MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)switch_->value;
-	LOGd("Sending switch command %u", value);
+	LOGd("handleMicroappSwitchRequest: [value %i]", value);
 	TYPIFY(CMD_SWITCH) switchCommand;
 	switchCommand.switchCmd = value;
 	event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand));
@@ -335,6 +336,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappSwitchRequest(microapp_sdk_s
 }
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_sdk_service_data_t* serviceData) {
+	LOGd("handleMicroappServiceDataRequest: [uuid %i, size %i]", serviceData->appUuid, serviceData->size);
 	if (serviceData->size > MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH) {
 		LOGi("Payload size too large");
 		serviceData->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
@@ -355,9 +357,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_t* twi) {
 	MicroappSdkTwiType type = (MicroappSdkTwiType)twi->type;
+	LOGd("handleMicroappTwiRequest: [type %i]", type);
 	switch (type) {
 		case CS_MICROAPP_SDK_TWI_INIT: {
-			LOGi("Init i2c");
+			LOGd("Init i2c");
 			TYPIFY(EVT_TWI_INIT) twiInit;
 			// no need to write twi.config (is not under control of microapp)
 			event_t event(CS_TYPE::EVT_TWI_INIT, &twiInit, sizeof(twiInit));
@@ -427,14 +430,14 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 			break;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_START: {
-			LOGi("Start scanning");
+			LOGv("Start scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(true);
 			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
-			LOGi("Stop scanning");
+			LOGv("Stop scanning");
 			MicroappController& controller = MicroappController::getInstance();
 			controller.setScanning(false);
 			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
@@ -442,7 +445,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 		}
 		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT: {
 			// Untested
-			LOGi("Initiate BLE connection");
+			LOGv("Initiate BLE connection");
 			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
 			std::reverse_copy(ble->address, ble->address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
@@ -473,6 +476,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 	return ERR_NOT_AVAILABLE;
 #endif
 	MicroappSdkMeshType type = (MicroappSdkMeshType)mesh->type;
+	LOGd("handleMicroappMeshRequest: [type %i]", type);
 	switch (type) {
 		case CS_MICROAPP_SDK_MESH_SEND: {
 			// microapp_mesh_send_cmd_t* cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(mesh);
@@ -517,7 +521,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_LISTEN: {
-			LOGi("Starting to listen for microapp mesh messages");
+			LOGi("Start listening for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
 			int result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
 			if (result != ERR_SUCCESS) {
@@ -529,7 +533,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_READ_CONFIG: {
-			LOGi("Microapp requesting mesh info");
+			LOGd("Microapp requesting mesh info");
 			TYPIFY(CONFIG_CROWNSTONE_ID) id;
 			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 			mesh->stoneId    = id;
@@ -537,7 +541,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 			break;
 		}
 		case CS_MICROAPP_SDK_MESH_READ: {
-			LOGw("Reading from mesh can only be done via interrupts");
+			LOGi("Reading from mesh can only be done via interrupts");
 			mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
 			return ERR_WRONG_OPERATION;
 		}
@@ -560,7 +564,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPowerUsageRequest(microapp_s
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk_presence_t* presence) {
 	if (presence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
-		LOGw("Incorrect profileId");
+		LOGi("Incorrect profileId");
 		presence->header.ack = CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE;
 		return ERR_NOT_FOUND;
 	}
@@ -597,7 +601,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	LOGi("Dispatching control command of type %i", controlCommand->type);
+	LOGv("Dispatching control command of type %i", controlCommand->type);
 	TYPIFY(CMD_CONTROL_CMD) eventData;
 	eventData.protocolVersion = controlCommand->protocol;
 	eventData.data            = controlCommand->payload;
@@ -607,7 +611,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &eventData, sizeof(eventData));
 	event.dispatch();
 	if (event.result.returnCode != ERR_SUCCESS) {
-		LOGi("No success, result code: %u", event.result.returnCode);
+		LOGi("Dispatched control command not successfull, result code: %u", event.result.returnCode);
 		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
 		return event.result.returnCode;
 	}
@@ -616,7 +620,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 }
 
 cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yield_t* yield) {
-	LOGd("Microapp yielded with yieldType %d", yield->type);
+	LOGd("handleMicroappYieldRequest: [type %u, emptySlots %u]", yield->type, yield->emptyInterruptSlots);
 	// Update number of empty interrupt slots the microapp has
 	MicroappController& controller = MicroappController::getInstance();
 	controller.setEmptySoftInterruptSlots(yield->emptyInterruptSlots);
