@@ -1,14 +1,19 @@
 #pragma once
 
 #include <ble/cs_BleConstants.h>
+#include <cs_MemoryLayout.h>
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
+#include <logging/cs_Logger.h>
+#include <protocol/cs_Packets.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
+
+#define LogMicroappControllerDebug LOGvv
 
 static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 
@@ -17,6 +22,12 @@ static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SI
 static_assert(MAC_ADDRESS_LENGTH == MAC_ADDRESS_LEN);
 static_assert(MAX_BLE_ADV_DATA_LENGTH == ADVERTISEMENT_DATA_MAX_SIZE);
 static_assert(MAX_MICROAPP_MESH_PAYLOAD_SIZE == MAX_MESH_MSG_PAYLOAD_SIZE);
+
+static_assert(CS_MICROAPP_SDK_SWITCH_OFF == CS_SWITCH_CMD_VAL_OFF);
+static_assert(CS_MICROAPP_SDK_SWITCH_ON == CS_SWITCH_CMD_VAL_FULLY_ON);
+static_assert(CS_MICROAPP_SDK_SWITCH_TOGGLE == CS_SWITCH_CMD_VAL_TOGGLE);
+static_assert(CS_MICROAPP_SDK_SWITCH_BEHAVIOUR == CS_SWITCH_CMD_VAL_BEHAVIOUR);
+static_assert(CS_MICROAPP_SDK_SWITCH_SMART_ON == CS_SWITCH_CMD_VAL_SMART_ON);
 
 /**
  * The IPC buffers can be used to bootstrap communication between microapp and bluenet. However, when in the microapp
@@ -48,10 +59,21 @@ struct microapp_soft_interrupt_registration_t {
  */
 class MicroappController : public EventListener {
 private:
+	/*
+	 * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
+	 * deriving from EventListener and adding itself to the EventDispatcher as listener.
+	 */
+	MicroappController() : EventListener(),
+							_tickCounter(0),
+							_softInterruptCounter(0),
+							_consecutiveMicroappCallCounter(0),
+							_microappIsScanning(false) {
+		EventDispatcher::getInstance().addListener(this);
+		LOGi("Microapp end is at %p", microappRamSection._end);
+	}
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
-	MicroappController();
 	MicroappController(MicroappController const&);
 	void operator=(MicroappController const&);
 
