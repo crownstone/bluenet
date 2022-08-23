@@ -289,56 +289,55 @@ bool MicroappController::handleAck() {
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 	LogMicroappControllerDebug("handleAck: [ack %i]", outgoingHeader->ack);
 	bool inInterruptContext               = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_NO_REQUEST);
-	if (inInterruptContext) {
-		bool interruptDone = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_IN_PROGRESS);
-		if (interruptDone) {
-			bool interruptDropped = (outgoingHeader->ack == CS_MICROAPP_SDK_ACK_ERR_BUSY);
-			if (interruptDropped) {
-				LogMicroappControllerDebug("Microapp is busy, drop interrupt");
-				// Also prevent new interrupts since apparently the microapp has no more space
-				setEmptySoftInterruptSlots(0);
-			}
-			else {
-				LogMicroappControllerDebug("Finished interrupt with return code %i", outgoingHeader->ack);
-				// Increment number of empty interrupt slots since we just finished one
-				incrementEmptySoftInterruptSlots();
-			}
-			// If interrupt finished, we do not call again and we also don't handle the microapp request
-			_consecutiveMicroappCallCounter = 0;
-			return false;
-		}
+	if (!inInterruptContext) {
+		return true;
 	}
-	return true;
+	bool interruptDone = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_IN_PROGRESS);
+	if (!interruptDone) {
+		return true;
+	}
+	bool interruptDropped = (outgoingHeader->ack == CS_MICROAPP_SDK_ACK_ERR_BUSY);
+	if (interruptDropped) {
+		LogMicroappControllerDebug("Microapp is busy, drop interrupt");
+		// Also prevent new interrupts since apparently the microapp has no more space
+		setEmptySoftInterruptSlots(0);
+	}
+	else {
+		LogMicroappControllerDebug("Finished interrupt with return code %i", outgoingHeader->ack);
+		// Increment number of empty interrupt slots since we just finished one
+		incrementEmptySoftInterruptSlots();
+	}
+	// If interrupt finished, we do not call again and we also don't handle the microapp request
+	_consecutiveMicroappCallCounter = 0;
+	return false;
 }
 
 bool MicroappController::handleRequest() {
 	uint8_t* inputBuffer                        = getInputMicroappBuffer();
 	microapp_sdk_header_t* incomingHeader       = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
-	[[maybe_unused]] static int retrieveCounter = 0;
-	LogMicroappControllerDebug("Retrieve and handle [%i] request %i", ++retrieveCounter, incomingHeader->messageType);
+	LogMicroappControllerDebug("Retrieve and handle request [type %u]", incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
 	if (result != ERR_SUCCESS) {
-		LOGi("Handling request of type %i failed with return code %i", result);
+		LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
 	}
 	bool callAgain = !stopAfterMicroappRequest(incomingHeader);
 	if (!callAgain) {
 		LogMicroappControllerDebug("Do not call again");
 		_consecutiveMicroappCallCounter = 0;
+		return false;
 	}
 	// Also check if the max number of consecutive nonyielding calls is reached
-	else {
-		if (++_consecutiveMicroappCallCounter >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
-			_consecutiveMicroappCallCounter = 0;
-			LOGi("Stop because we've reached a max # of consecutive calls");
-			callAgain = false;
-		}
+	if (_consecutiveMicroappCallCounter >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
+		_consecutiveMicroappCallCounter = 0;
+		LOGi("Stop because we've reached a max # of consecutive calls");
+		return false;
 	}
-	return callAgain;
+	_consecutiveMicroappCallCounter++;
+	return true;
 }
 
 bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomingHeader) {
-	bool stop;
 	switch (incomingHeader->messageType) {
 		case CS_MICROAPP_SDK_TYPE_LOG:
 		case CS_MICROAPP_SDK_TYPE_PIN:
@@ -350,22 +349,18 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomin
 		case CS_MICROAPP_SDK_TYPE_POWER_USAGE:
 		case CS_MICROAPP_SDK_TYPE_PRESENCE:
 		case CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND: {
-			stop = false;
-			break;
+			return false;
 		}
 		case CS_MICROAPP_SDK_TYPE_NONE:
 		case CS_MICROAPP_SDK_TYPE_YIELD:
 		case CS_MICROAPP_SDK_TYPE_CONTINUE: {
-			stop = true;
-			break;
+			return true;
 		}
 		default: {
 			LOGi("Unknown request type: %i", incomingHeader->messageType);
-			stop = true;
-			break;
+			return true;
 		}
 	}
-	return stop;
 }
 
 /*
@@ -389,14 +384,14 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	outgoingMessage->messageType           = CS_MICROAPP_SDK_TYPE_CONTINUE;
 	outgoingMessage->ack                   = CS_MICROAPP_SDK_ACK_NO_REQUEST;
 	bool callAgain                         = false;
-	bool ignoreRequest                     = false;
+	bool handleRequest                     = true;
 	int8_t repeatCounter                   = 0;
 	do {
 		LogMicroappControllerDebug("tickMicroapp [call %i]", repeatCounter);
 		callMicroapp();
-		ignoreRequest = !handleAck();
-		if (ignoreRequest) {
-			return;
+		handleRequest = handleAck();
+		if (!handleRequest) {
+			break;
 		}
 		callAgain = handleRequest();
 		repeatCounter++;
@@ -425,14 +420,14 @@ void MicroappController::generateSoftInterrupt() {
 	// Request an acknowledgement by the microapp indicating status of interrupt
 	outgoingInterrupt->ack                   = CS_MICROAPP_SDK_ACK_REQUEST;
 	bool callAgain                           = false;
-	bool ignoreRequest                       = false;
+	bool handleRequest                       = true;
 	int8_t repeatCounter                     = 0;
 	do {
 		LogMicroappControllerDebug("generateSoftInterrupt [call %i, %i interrupts within tick]", repeatCounter, _softInterruptCounter);
 		callMicroapp();
-		ignoreRequest = !handleAck();
-		if (ignoreRequest) {
-			return;
+		handleRequest = handleAck();
+		if (!handleRequest) {
+			break;
 		}
 		callAgain = handleRequest();
 		repeatCounter++;
@@ -604,7 +599,7 @@ bool MicroappController::softInterruptRegistered(MicroappSdkMessageType type, ui
 bool MicroappController::allowSoftInterrupts() {
 	// if the microapp dropped the last one and hasn't finished an interrupt,
 	// we won't try to call it with a new interrupt
-	if (_emptySoftInterruptSlots <= 0) {
+	if (_emptySoftInterruptSlots == 0) {
 		return false;
 	}
 	// Check if we already exceeded the max number of interrupts in this tick
