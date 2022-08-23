@@ -69,24 +69,39 @@ enum CallbackMicroappOpcode {
  */
 enum MicroappSdkAck {
 	// Ack successfull return value
-	CS_MICROAPP_SDK_ACK_SUCCESS             = 0x00,  // Finished successfully
+	CS_MICROAPP_SDK_ACK_SUCCESS             = 0x00,
 
 	// Ack requests (should not be interpreted as a return value)
-	CS_MICROAPP_SDK_ACK_NO_REQUEST          = 0x01,  // Explicitly do not ask for an acknowledgement
-	CS_MICROAPP_SDK_ACK_REQUEST             = 0x02,  // Request for other process (microapp or bluenet) to overwrite this field
+
+	// Explicitly do not ask for an acknowledgement
+	CS_MICROAPP_SDK_ACK_NO_REQUEST          = 0x01,
+	// Request for other process (microapp or bluenet) to overwrite this field
+	CS_MICROAPP_SDK_ACK_REQUEST             = 0x02,
 
 	// Ack return values
-	CS_MICROAPP_SDK_ACK_IN_PROGRESS         = 0x03,  // So far so good, but not done yet
-	CS_MICROAPP_SDK_ACK_ERROR               = 0x04,  // Unspecified error
-	CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND       = 0x05,  // A requested entity could not be found
-	CS_MICROAPP_SDK_ACK_ERR_UNDEFINED       = 0x06,  // The request cannot be interpreted fully
-	CS_MICROAPP_SDK_ACK_ERR_NO_SPACE        = 0x07,  // There is no space to fulfill a request
-	CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED = 0x08,  // The request can be interpreted but is not implemented yet
-	CS_MICROAPP_SDK_ACK_ERR_BUSY            = 0x09,  // The request cannot be fulfilled because of other ongoing requests
-	CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE    = 0x0A,  // A parameter in the request is out of range
-	CS_MICROAPP_SDK_ACK_ERR_DISABLED        = 0x0B,  // Request requires functionality that is disabled
-	CS_MICROAPP_SDK_ACK_ERR_EMPTY           = 0x0C,  // Request or its parameters are empty
-	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,  // Request or its parameters are too large
+
+	// So far so good, but not done yet
+	CS_MICROAPP_SDK_ACK_IN_PROGRESS         = 0x03,
+	// Unspecified error
+	CS_MICROAPP_SDK_ACK_ERROR               = 0x04,
+	// A requested entity could not be found
+	CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND       = 0x05,
+	// The request cannot be interpreted fully
+	CS_MICROAPP_SDK_ACK_ERR_UNDEFINED       = 0x06,
+	// There is no space to fulfill a request
+	CS_MICROAPP_SDK_ACK_ERR_NO_SPACE        = 0x07,
+	// The request can be interpreted but is not implemented yet
+	CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED = 0x08,
+	// The request cannot be fulfilled because of other ongoing requests
+	CS_MICROAPP_SDK_ACK_ERR_BUSY            = 0x09,
+	// A parameter in the request is out of range
+	CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE    = 0x0A,
+	// Request requires functionality that is disabled
+	CS_MICROAPP_SDK_ACK_ERR_DISABLED        = 0x0B,
+	// Request or its parameters are empty
+	CS_MICROAPP_SDK_ACK_ERR_EMPTY           = 0x0C,
+	// Request or its parameters are too large
+	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,
 };
 
 typedef MicroappSdkAck microapp_sdk_result_t;
@@ -95,41 +110,64 @@ typedef MicroappSdkAck microapp_sdk_result_t;
  * The main opcodes for microapp commands.
  */
 enum MicroappSdkMessageType {
-	CS_MICROAPP_SDK_TYPE_NONE            = 0x00,  // No meaning, should not be used
-	CS_MICROAPP_SDK_TYPE_LOG             = 0x01,  // Microapp logs
-	CS_MICROAPP_SDK_TYPE_PIN             = 0x02,  // GPIO related
-	CS_MICROAPP_SDK_TYPE_SWITCH          = 0x03,  // Switch and dimmer commands
-	CS_MICROAPP_SDK_TYPE_SERVICE_DATA    = 0x04,  // Microapp service data updates
-	CS_MICROAPP_SDK_TYPE_TWI             = 0x05,  // TWI related
-	CS_MICROAPP_SDK_TYPE_BLE             = 0x06,  // BLE related (excluding mesh)
-	CS_MICROAPP_SDK_TYPE_MESH            = 0x07,  // Mesh related
-	CS_MICROAPP_SDK_TYPE_POWER_USAGE     = 0x08,  // Power usage related
-	CS_MICROAPP_SDK_TYPE_PRESENCE        = 0x09,  // Presence related
-	CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND = 0x0A,  // Generic control command according to the control command protocol
-	CS_MICROAPP_SDK_TYPE_YIELD           = 0x0B,  // Microapp yielding to bluenet without expecting a direct return call
-	CS_MICROAPP_SDK_TYPE_CONTINUE        = 0x0C,  // Bluenet calling the microapp on a tick or subsequent call
+	// No meaning, should not be used
+	CS_MICROAPP_SDK_TYPE_NONE            = 0x00,
+	// Microapp logs
+	CS_MICROAPP_SDK_TYPE_LOG             = 0x01,
+	// GPIO related
+	CS_MICROAPP_SDK_TYPE_PIN             = 0x02,
+	// Switch and dimmer commands
+	CS_MICROAPP_SDK_TYPE_SWITCH          = 0x03,
+	// Microapp service data updates
+	CS_MICROAPP_SDK_TYPE_SERVICE_DATA    = 0x04,
+	// TWI related
+	CS_MICROAPP_SDK_TYPE_TWI             = 0x05,
+	// BLE related (excluding mesh)
+	CS_MICROAPP_SDK_TYPE_BLE             = 0x06,
+	// Mesh related
+	CS_MICROAPP_SDK_TYPE_MESH            = 0x07,
+	// Power usage related
+	CS_MICROAPP_SDK_TYPE_POWER_USAGE     = 0x08,
+	// Presence related
+	CS_MICROAPP_SDK_TYPE_PRESENCE        = 0x09,
+	// Generic control command according to the control command protocol
+	CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND = 0x0A,
+	// Microapp yielding to bluenet without expecting a direct return call
+	CS_MICROAPP_SDK_TYPE_YIELD           = 0x0B,
+	// Bluenet calling the microapp on a tick or subsequent call
+	CS_MICROAPP_SDK_TYPE_CONTINUE        = 0x0C,
 };
 
 /**
  * Type of log indicating how to interpret the log payload
  */
 enum MicroappSdkLogType {
-	CS_MICROAPP_SDK_LOG_CHAR   = 0x01,  // Char or byte
-	CS_MICROAPP_SDK_LOG_INT    = 0x02,  // Signed int (32-bit)
-	CS_MICROAPP_SDK_LOG_STR    = 0x03,  // String or char array, same as arr
-	CS_MICROAPP_SDK_LOG_ARR    = 0x04,  // Byte array, same as str
-	CS_MICROAPP_SDK_LOG_FLOAT  = 0x05,  // Float
-	CS_MICROAPP_SDK_LOG_DOUBLE = 0x06,  // Double
-	CS_MICROAPP_SDK_LOG_UINT   = 0x07,  // Unsigned int (32-bit)
-	CS_MICROAPP_SDK_LOG_SHORT  = 0x08,  // Unsigned short (16-bit)
+	// Char or byte
+	CS_MICROAPP_SDK_LOG_CHAR   = 0x01,
+	// Signed int (32-bit)
+	CS_MICROAPP_SDK_LOG_INT    = 0x02,
+	// String or char array, same as arr
+	CS_MICROAPP_SDK_LOG_STR    = 0x03,
+	// Byte array, same as str
+	CS_MICROAPP_SDK_LOG_ARR    = 0x04,
+	// Float
+	CS_MICROAPP_SDK_LOG_FLOAT  = 0x05,
+	// Double
+	CS_MICROAPP_SDK_LOG_DOUBLE = 0x06,
+	// Unsigned int (32-bit)
+	CS_MICROAPP_SDK_LOG_UINT   = 0x07,
+	// Unsigned short (16-bit)
+	CS_MICROAPP_SDK_LOG_SHORT  = 0x08,
 };
 
 /**
  * Flags for logging. Currently only using a newline flag
  */
 enum MicroappSdkLogFlags {
+	// Can be used to clear all flags
 	CS_MICROAPP_SDK_LOG_FLAG_CLEAR   = 0,
-	CS_MICROAPP_SDK_LOG_FLAG_NEWLINE = (1 << 0),  // Add a newline character
+	// Add a newline character
+	CS_MICROAPP_SDK_LOG_FLAG_NEWLINE = (1 << 0),
 };
 
 /**
@@ -161,27 +199,36 @@ enum MicroappSdkPin {
  * Indicates whether the pin is to be initialized (MODE) or perform an action (ACTION)
  */
 enum MicroappSdkPinType {
-	CS_MICROAPP_SDK_PIN_INIT   = 0x01,  // Initialize the pin with a polarity and a direction and register an interrupt
-	CS_MICROAPP_SDK_PIN_ACTION = 0x02,  // An action such as read the value of a pin or write to it
+	// Initialize the pin with a polarity and a direction and register an interrupt
+	CS_MICROAPP_SDK_PIN_INIT   = 0x01,
+	// An action such as read the value of a pin or write to it
+	CS_MICROAPP_SDK_PIN_ACTION = 0x02,
 };
 
 /**
  * Directionality of the GPIO pin (input or output)
  */
 enum MicroappSdkPinDirection {
-	CS_MICROAPP_SDK_PIN_INPUT        = 0x01,  // Set pin as input, but do not use a pulling resistor
-	CS_MICROAPP_SDK_PIN_INPUT_PULLUP = 0x02,  // Set pin as input using a pullup resistor
-	CS_MICROAPP_SDK_PIN_OUTPUT       = 0x03,  // Set pin as output
+	// Set pin as input, but do not use a pulling resistor
+	CS_MICROAPP_SDK_PIN_INPUT        = 0x01,
+	// Set pin as input using a pullup resistor
+	CS_MICROAPP_SDK_PIN_INPUT_PULLUP = 0x02,
+	// Set pin as output
+	CS_MICROAPP_SDK_PIN_OUTPUT       = 0x03,
 };
 
 /**
  * Polarity of pin for initializing pin interrupts (only for input pins)
  */
 enum MicroappSdkPinPolarity {
-	CS_MICROAPP_SDK_PIN_NO_POLARITY = 0x01,  // Not sensing for a specific event
-	CS_MICROAPP_SDK_PIN_CHANGE      = 0x02,  // LOTOHI or HITOLO
-	CS_MICROAPP_SDK_PIN_RISING      = 0x03,  // LOTOHI
-	CS_MICROAPP_SDK_PIN_FALLING     = 0x04,  // HITOLO
+	// Not sensing for a specific event
+	CS_MICROAPP_SDK_PIN_NO_POLARITY = 0x01,
+	// LOTOHI or HITOLO
+	CS_MICROAPP_SDK_PIN_CHANGE      = 0x02,
+	// LOTOHI
+	CS_MICROAPP_SDK_PIN_RISING      = 0x03,
+	// HITOLO
+	CS_MICROAPP_SDK_PIN_FALLING     = 0x04,
 };
 
 /**
@@ -205,11 +252,16 @@ enum MicroappSdkPinValue {
  * Values between 0 and 100 can be used for dimming
  */
 enum MicroappSdkSwitchValue {
-	CS_MICROAPP_SDK_SWITCH_OFF       = 0x00,  // 0   = fully off
-	CS_MICROAPP_SDK_SWITCH_ON        = 0x64,  // 100 = fully on
-	CS_MICROAPP_SDK_SWITCH_TOGGLE    = 0xFD,  // Switch off when currently on, switch to smart on when currently off
-	CS_MICROAPP_SDK_SWITCH_BEHAVIOUR = 0xFE,  // Switch to the value according to behaviour rules
-	CS_MICROAPP_SDK_SWITCH_SMART_ON  = 0xFF,  // Switch on, the value will be determined by behaviour rules
+	// 0 = fully off
+	CS_MICROAPP_SDK_SWITCH_OFF       = 0x00,
+	// 100 = fully on
+	CS_MICROAPP_SDK_SWITCH_ON        = 0x64,
+	// Switch off when currently on, switch to smart on when currently off
+	CS_MICROAPP_SDK_SWITCH_TOGGLE    = 0xFD,
+	// Switch to the value according to behaviour rules
+	CS_MICROAPP_SDK_SWITCH_BEHAVIOUR = 0xFE,
+	// Switch on, the value will be determined by behaviour rules
+	CS_MICROAPP_SDK_SWITCH_SMART_ON  = 0xFF,
 };
 
 /**
@@ -225,55 +277,78 @@ enum MicroappSdkTwiType {
  * Flags for TWI requests
  */
 enum MicroappSdkTwiFlags {
+	// Can be used to clear all flags
 	CS_MICROAPP_SDK_TWI_FLAG_CLEAR = 0,
-	CS_MICROAPP_SDK_TWI_FLAG_STOP  = (1 << 0),  // Stop bit
+	// Stop bit
+	CS_MICROAPP_SDK_TWI_FLAG_STOP  = (1 << 0),
 };
 
 /**
  * Type of BLE request, indicating how to interpret the rest of the request
  */
 enum MicroappSdkBleType {
-	CS_MICROAPP_SDK_BLE_NONE                          = 0x00,  // Invalid type
+	// Invalid type
+	CS_MICROAPP_SDK_BLE_NONE                          = 0x00,
+
 	// Scan related message types
-	CS_MICROAPP_SDK_BLE_SCAN_START                    = 0x01,  // Start forwarding scanned devices to the microapp
-	CS_MICROAPP_SDK_BLE_SCAN_STOP                     = 0x02,  // Stop forwarding scanned devices to the microapp
-	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT       = 0x03,  // Register an interrupt for incoming scanned devices
-	CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE           = 0x04,  // Bluenet has scanned a device. Used for interrupts
+
+	// Start forwarding scanned devices to the microapp
+	CS_MICROAPP_SDK_BLE_SCAN_START                    = 0x01,
+	// Stop forwarding scanned devices to the microapp
+	CS_MICROAPP_SDK_BLE_SCAN_STOP                     = 0x02,
+	// Register an interrupt for incoming scanned devices
+	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT       = 0x03,
+	// Bluenet has scanned a device. Used for interrupts
+	CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE           = 0x04,
+
 	// Connection related message types
-	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT    = 0x05,  // Request a connection to a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_CONNECTED          = 0x06,  // Bluenet -> microapp when connected to a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT = 0x07,  // Request disconnecting from a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECTED = 0x08,  // Bluenet -> microapp when disconnected from a peripheral
+
+	// Request a connection to a peripheral
+	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT    = 0x05,
+	// Bluenet -> microapp when connected to a peripheral
+	CS_MICROAPP_SDK_BLE_CONNECTION_CONNECTED          = 0x06,
+	// Request disconnecting from a peripheral
+	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT = 0x07,
+	// Bluenet -> microapp when disconnected from a peripheral
+	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECTED = 0x08,
 };
 
 /**
  * Mesh request types
  */
 enum MicroappSdkMeshType {
-	CS_MICROAPP_SDK_MESH_SEND        = 0x01,  // Send a mesh message from the microapp
-	CS_MICROAPP_SDK_MESH_LISTEN      = 0x02,  // Start listening for mesh messages of the microapp type, and register an
-											  // interrupt on the bluenet side
-	CS_MICROAPP_SDK_MESH_READ_CONFIG = 0x03,  // Request for information about the mesh configuration. At the moment
-											  // consisting only of the own stone ID
-	CS_MICROAPP_SDK_MESH_READ        = 0x04,  // Received a mesh message. Used for interrupts from bluenet
+	// Send a mesh message from the microapp
+	CS_MICROAPP_SDK_MESH_SEND        = 0x01,
+	// Start listening for mesh messages of the microapp type, and register an interrupt on the bluenet side
+	CS_MICROAPP_SDK_MESH_LISTEN      = 0x02,
+	// Request for information about the mesh configuration. For now consists only of the own stone ID
+	CS_MICROAPP_SDK_MESH_READ_CONFIG = 0x03,
+	// Received a mesh message. Used for interrupts from bluenet
+	CS_MICROAPP_SDK_MESH_READ        = 0x04,
 };
 
 /**
  * Types of power usage to reqeust
  */
 enum MicroappSdkPowerUsageType {
-	CS_MICROAPP_SDK_POWER_USAGE_POWER   = 0x01,  // Get filtered power data in milliWatt
-	CS_MICROAPP_SDK_POWER_USAGE_CURRENT = 0x02,  // Not implemented yet
-	CS_MICROAPP_SDK_POWER_USAGE_VOLTAGE = 0x03,  // Not implemented yet
+	// Get filtered power data in milliWatt
+	CS_MICROAPP_SDK_POWER_USAGE_POWER   = 0x01,
+	// Not implemented yet
+	CS_MICROAPP_SDK_POWER_USAGE_CURRENT = 0x02,
+	// Not implemented yet
+	CS_MICROAPP_SDK_POWER_USAGE_VOLTAGE = 0x03,
 };
 
 /**
  * Type of yield from the microapp to bluenet
  */
 enum MicroappSdkYieldType {
-	CS_MICROAPP_SDK_YIELD_SETUP = 0x01,  // End of setup
-	CS_MICROAPP_SDK_YIELD_LOOP  = 0x02,  // End of loop
-	CS_MICROAPP_SDK_YIELD_ASYNC = 0x03,  // The microapp is doing something asynchronous like a delay call
+	// End of setup
+	CS_MICROAPP_SDK_YIELD_SETUP = 0x01,
+	// End of loop
+	CS_MICROAPP_SDK_YIELD_LOOP  = 0x02,
+	// The microapp is doing something asynchronous like a delay call
+	CS_MICROAPP_SDK_YIELD_ASYNC = 0x03,
 };
 
 /**
