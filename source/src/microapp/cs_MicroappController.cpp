@@ -237,8 +237,6 @@ uint16_t MicroappController::initMemory(uint8_t appIndex) {
 /*
  * Gets the first instruction for the microapp (this is written in its header). We correct for thumb and check its
  * boundaries. Then we call it from a coroutine context and expect it to yield.
- *
- * @param[in]                                    appIndex (currently ignored)
  */
 void MicroappController::callApp(uint8_t appIndex) {
 	LOGi("Call microapp #%i", appIndex);
@@ -261,25 +259,16 @@ void MicroappController::callApp(uint8_t appIndex) {
 	startCoroutine(&_coroutine, goIntoMicroapp, &sharedState);
 }
 
-/*
- * Get incoming microapp buffer (from coroutine_args).
- */
 uint8_t* MicroappController::getInputMicroappBuffer() {
 	uint8_t* payload = sharedState.io_buffers->microapp2bluenet.payload;
 	return payload;
 }
 
-/*
- * Get outgoing microapp buffer (from coroutine_args).
- */
 uint8_t* MicroappController::getOutputMicroappBuffer() {
 	uint8_t* payload = sharedState.io_buffers->bluenet2microapp.payload;
 	return payload;
 }
 
-/*
- * We resume the previously started coroutine.
- */
 void MicroappController::callMicroapp() {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
 	if (nextCoroutine()) {
@@ -300,14 +289,6 @@ void MicroappController::callMicroapp() {
 	LOGi("End of coroutine. Should not happen.")
 }
 
-/**
- * Retrieve ack from the outgoing buffer that the microapp may have overwritten.
- * Particularly check if the microapp exit was on finishing an interrupt.
- * In that case, ignore the request made by the microapp
- *
- * @return true     if the request in the incoming buffer should be handled
- * @return false    if the request in the incoming buffer should be ignored
- */
 bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
@@ -335,15 +316,6 @@ bool MicroappController::handleAck() {
 	return true;
 }
 
-/**
- * Retrieve request from the microapp and let MicroappRequestHandler handle it.
- * Return whether the microapp should be called again immediately or not.
- * This depends on both the type of request (i.e. for YIELDs do not call again)
- * and on whether the max number of consecutive calls has been reached
- *
- * @return true     if the microapp should be called again
- * @return false    if the microapp should not be called again
- */
 bool MicroappController::handleRequest() {
 	uint8_t* inputBuffer                        = getInputMicroappBuffer();
 	microapp_sdk_header_t* incomingHeader       = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
@@ -370,12 +342,6 @@ bool MicroappController::handleRequest() {
 	return callAgain;
 }
 
-/**
- * Check whether the microapp is yielding voluntarily based on the messageType
- *
- * @return true     if the microapp is yielding
- * @return false    if the microapp is not yielding
- */
 bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomingHeader) {
 	bool stop;
 	switch (incomingHeader->messageType) {

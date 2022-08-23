@@ -128,19 +128,41 @@ private:
 
 protected:
 	/**
-	 * Call the loop function (internally).
+	 * Resume the previously started coroutine
 	 */
 	void callMicroapp();
 
 	/**
-	 * Read the ack from the microapp and returns whether to handle its request
+	 * Retrieve ack from the outgoing buffer that the microapp may have overwritten.
+	 * Particularly check if the microapp exit was on finishing an interrupt.
+	 * In that case, ignore the request made by the microapp
+	 *
+	 * @return true     if the request in the incoming buffer should be handled
+	 * @return false    if the request in the incoming buffer should be ignored
 	 */
 	bool handleAck();
 
 	/**
-	 * Get the request from the microapp and let the request handler handle it
+	 * Retrieve request from the microapp and let MicroappRequestHandler handle it.
+	 * Return whether the microapp should be called again immediately or not.
+	 * This depends on both the type of request (i.e. for YIELDs do not call again)
+	 * and on whether the max number of consecutive calls has been reached
+	 *
+	 * @return true     if the microapp should be called again
+	 * @return false    if the microapp should not be called again
 	 */
 	bool handleRequest();
+
+	/**
+	 * After particular microapp requests we want to stop the microapp (end of loop etc.) and continue with bluenet.
+	 * This function returns true for such requests.
+	 *
+	 * @param[in] header     Header of the microapp request
+	 *
+	 * @return true          if the microapp is yielding
+	 * @return false         if the microapp is not yielding
+	 */
+	bool stopAfterMicroappRequest(microapp_sdk_header_t* header);
 
 	/**
 	 * Call the microapp in an interrupt context
@@ -179,14 +201,6 @@ protected:
 	 */
 	void onReceivedMeshMessage(MeshMsgEvent* event);
 
-	/**
-	 * After particular microapp requests we want to stop the microapp (end of loop etc.) and continue with bluenet.
-	 * This function returns true for such requests.
-	 *
-	 * @param[in] header        Header of the microapp request
-	 */
-	bool stopAfterMicroappRequest(microapp_sdk_header_t* header);
-
 public:
 	static MicroappController& getInstance() {
 		static MicroappController instance;
@@ -205,6 +219,8 @@ public:
 
 	/**
 	 * Actually run the app.
+	 *
+	 * @param[in] appIndex (currently ignored)
 	 */
 	void callApp(uint8_t appIndex);
 
