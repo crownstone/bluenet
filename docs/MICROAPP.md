@@ -257,7 +257,8 @@ uint64 | PresenceBitMask | 8 | Bitmask of the requested profile in the locations
 
 ### Control commands
 
-Control commands are defined [here](../docs/protocol/PROTOCOL.md#control-packet). The microapp sdk packet follows the same structure
+Control commands are defined [here](../docs/protocol/PROTOCOL.md#control-packet). The microapp sdk packet follows the same structure.
+From the microapp, only commands with accesslevel `BASIC` are allowed.
 
 ![Microapp control commands](../docs/diagrams/microapp_control_commands.png)
 
