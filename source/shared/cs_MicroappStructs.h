@@ -68,39 +68,39 @@ enum CallbackMicroappOpcode {
  * Acknowledgments from microapp to bluenet or the other way around.
  */
 enum MicroappSdkAck {
-	// Ack successfull return value
+	//! Ack successfull return value
 	CS_MICROAPP_SDK_ACK_SUCCESS             = 0x00,
 
 	// Ack requests (should not be interpreted as a return value)
 
-	// Explicitly do not ask for an acknowledgement
+	//! Explicitly do not ask for an acknowledgement
 	CS_MICROAPP_SDK_ACK_NO_REQUEST          = 0x01,
-	// Request for other process (microapp or bluenet) to overwrite this field
+	//! Request for other process (microapp or bluenet) to overwrite this field
 	CS_MICROAPP_SDK_ACK_REQUEST             = 0x02,
 
 	// Ack return values
 
-	// So far so good, but not done yet
+	//! So far so good, but not done yet
 	CS_MICROAPP_SDK_ACK_IN_PROGRESS         = 0x03,
-	// Unspecified error
+	//! Unspecified error
 	CS_MICROAPP_SDK_ACK_ERROR               = 0x04,
-	// A requested entity could not be found
+	//! A requested entity could not be found
 	CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND       = 0x05,
-	// The request cannot be interpreted fully
+	//! The request cannot be interpreted fully
 	CS_MICROAPP_SDK_ACK_ERR_UNDEFINED       = 0x06,
-	// There is no space to fulfill a request
+	//! There is no space to fulfill a request
 	CS_MICROAPP_SDK_ACK_ERR_NO_SPACE        = 0x07,
-	// The request can be interpreted but is not implemented yet
+	//! The request can be interpreted but is not implemented yet
 	CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED = 0x08,
-	// The request cannot be fulfilled because of other ongoing requests
+	//! The request cannot be fulfilled because of other ongoing requests
 	CS_MICROAPP_SDK_ACK_ERR_BUSY            = 0x09,
-	// A parameter in the request is out of range
+	//! A parameter in the request is out of range
 	CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE    = 0x0A,
-	// Request requires functionality that is disabled
+	//! Request requires functionality that is disabled
 	CS_MICROAPP_SDK_ACK_ERR_DISABLED        = 0x0B,
-	// Request or its parameters are empty
+	//! Request or its parameters are empty
 	CS_MICROAPP_SDK_ACK_ERR_EMPTY           = 0x0C,
-	// Request or its parameters are too large
+	//! Request or its parameters are too large
 	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,
 };
 
@@ -110,31 +110,31 @@ typedef MicroappSdkAck microapp_sdk_result_t;
  * The main opcodes for microapp commands.
  */
 enum MicroappSdkMessageType {
-	// No meaning, should not be used
+	//! No meaning, should not be used
 	CS_MICROAPP_SDK_TYPE_NONE            = 0x00,
-	// Microapp logs
+	//! Microapp logs
 	CS_MICROAPP_SDK_TYPE_LOG             = 0x01,
-	// GPIO related
+	//! GPIO related
 	CS_MICROAPP_SDK_TYPE_PIN             = 0x02,
-	// Switch and dimmer commands
+	//! Switch and dimmer commands
 	CS_MICROAPP_SDK_TYPE_SWITCH          = 0x03,
-	// Microapp service data updates
+	//! Microapp service data updates
 	CS_MICROAPP_SDK_TYPE_SERVICE_DATA    = 0x04,
-	// TWI related
+	//! TWI related
 	CS_MICROAPP_SDK_TYPE_TWI             = 0x05,
-	// BLE related (excluding mesh)
+	//! BLE related (excluding mesh)
 	CS_MICROAPP_SDK_TYPE_BLE             = 0x06,
-	// Mesh related
+	//! Mesh related
 	CS_MICROAPP_SDK_TYPE_MESH            = 0x07,
-	// Power usage related
+	//! Power usage related
 	CS_MICROAPP_SDK_TYPE_POWER_USAGE     = 0x08,
-	// Presence related
+	//! Presence related
 	CS_MICROAPP_SDK_TYPE_PRESENCE        = 0x09,
-	// Generic control command according to the control command protocol
+	//! Generic control command according to the control command protocol
 	CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND = 0x0A,
-	// Microapp yielding to bluenet without expecting a direct return call
+	//! Microapp yielding to bluenet without expecting a direct return call
 	CS_MICROAPP_SDK_TYPE_YIELD           = 0x0B,
-	// Bluenet calling the microapp on a tick or subsequent call
+	//! Bluenet calling the microapp on a tick or subsequent call
 	CS_MICROAPP_SDK_TYPE_CONTINUE        = 0x0C,
 };
 
@@ -142,21 +142,21 @@ enum MicroappSdkMessageType {
  * Type of log indicating how to interpret the log payload
  */
 enum MicroappSdkLogType {
-	// Char or byte
+	//! Char or byte
 	CS_MICROAPP_SDK_LOG_CHAR   = 0x01,
-	// Signed int (32-bit)
+	//! Signed int (32-bit)
 	CS_MICROAPP_SDK_LOG_INT    = 0x02,
-	// String or char array, same as arr
+	//! String or char array, same as arr
 	CS_MICROAPP_SDK_LOG_STR    = 0x03,
-	// Byte array, same as str
+	//! Byte array, same as str
 	CS_MICROAPP_SDK_LOG_ARR    = 0x04,
-	// Float
+	//! Float
 	CS_MICROAPP_SDK_LOG_FLOAT  = 0x05,
-	// Double
+	//! Double
 	CS_MICROAPP_SDK_LOG_DOUBLE = 0x06,
-	// Unsigned int (32-bit)
+	//! Unsigned int (32-bit)
 	CS_MICROAPP_SDK_LOG_UINT   = 0x07,
-	// Unsigned short (16-bit)
+	//! Unsigned short (16-bit)
 	CS_MICROAPP_SDK_LOG_SHORT  = 0x08,
 };
 
@@ -164,9 +164,9 @@ enum MicroappSdkLogType {
  * Flags for logging. Currently only using a newline flag
  */
 enum MicroappSdkLogFlags {
-	// Can be used to clear all flags
+	//! Can be used to clear all flags
 	CS_MICROAPP_SDK_LOG_FLAG_CLEAR   = 0,
-	// Add a newline character
+	//! Add a newline character
 	CS_MICROAPP_SDK_LOG_FLAG_NEWLINE = (1 << 0),
 };
 
@@ -199,9 +199,9 @@ enum MicroappSdkPin {
  * Indicates whether the pin is to be initialized (MODE) or perform an action (ACTION)
  */
 enum MicroappSdkPinType {
-	// Initialize the pin with a polarity and a direction and register an interrupt
+	//! Initialize the pin with a polarity and a direction and register an interrupt
 	CS_MICROAPP_SDK_PIN_INIT   = 0x01,
-	// An action such as read the value of a pin or write to it
+	//! An action such as read the value of a pin or write to it
 	CS_MICROAPP_SDK_PIN_ACTION = 0x02,
 };
 
@@ -209,11 +209,11 @@ enum MicroappSdkPinType {
  * Directionality of the GPIO pin (input or output)
  */
 enum MicroappSdkPinDirection {
-	// Set pin as input, but do not use a pulling resistor
+	//! Set pin as input, but do not use a pulling resistor
 	CS_MICROAPP_SDK_PIN_INPUT        = 0x01,
-	// Set pin as input using a pullup resistor
+	//! Set pin as input using a pullup resistor
 	CS_MICROAPP_SDK_PIN_INPUT_PULLUP = 0x02,
-	// Set pin as output
+	//! Set pin as output
 	CS_MICROAPP_SDK_PIN_OUTPUT       = 0x03,
 };
 
@@ -221,13 +221,13 @@ enum MicroappSdkPinDirection {
  * Polarity of pin for initializing pin interrupts (only for input pins)
  */
 enum MicroappSdkPinPolarity {
-	// Not sensing for a specific event
+	//! Not sensing for a specific event
 	CS_MICROAPP_SDK_PIN_NO_POLARITY = 0x01,
-	// LOTOHI or HITOLO
+	//! Low to high or High to low
 	CS_MICROAPP_SDK_PIN_CHANGE      = 0x02,
-	// LOTOHI
+	//! Low to high
 	CS_MICROAPP_SDK_PIN_RISING      = 0x03,
-	// HITOLO
+	//! High to low
 	CS_MICROAPP_SDK_PIN_FALLING     = 0x04,
 };
 
@@ -252,15 +252,15 @@ enum MicroappSdkPinValue {
  * Values between 0 and 100 can be used for dimming
  */
 enum MicroappSdkSwitchValue {
-	// 0 = fully off
+	//! 0 = fully off
 	CS_MICROAPP_SDK_SWITCH_OFF       = 0x00,
-	// 100 = fully on
+	//! 100 = fully on
 	CS_MICROAPP_SDK_SWITCH_ON        = 0x64,
-	// Switch off when currently on, switch to smart on when currently off
+	//! Switch off when currently on, switch to smart on when currently off
 	CS_MICROAPP_SDK_SWITCH_TOGGLE    = 0xFD,
-	// Switch to the value according to behaviour rules
+	//! Switch to the value according to behaviour rules
 	CS_MICROAPP_SDK_SWITCH_BEHAVIOUR = 0xFE,
-	// Switch on, the value will be determined by behaviour rules
+	//! Switch on, the value will be determined by behaviour rules
 	CS_MICROAPP_SDK_SWITCH_SMART_ON  = 0xFF,
 };
 
@@ -277,9 +277,9 @@ enum MicroappSdkTwiType {
  * Flags for TWI requests
  */
 enum MicroappSdkTwiFlags {
-	// Can be used to clear all flags
+	//! Can be used to clear all flags
 	CS_MICROAPP_SDK_TWI_FLAG_CLEAR = 0,
-	// Stop bit
+	//! Stop bit
 	CS_MICROAPP_SDK_TWI_FLAG_STOP  = (1 << 0),
 };
 
@@ -287,29 +287,29 @@ enum MicroappSdkTwiFlags {
  * Type of BLE request, indicating how to interpret the rest of the request
  */
 enum MicroappSdkBleType {
-	// Invalid type
+	//! Invalid type
 	CS_MICROAPP_SDK_BLE_NONE                          = 0x00,
 
 	// Scan related message types
 
-	// Start forwarding scanned devices to the microapp
+	//! Start forwarding scanned devices to the microapp
 	CS_MICROAPP_SDK_BLE_SCAN_START                    = 0x01,
-	// Stop forwarding scanned devices to the microapp
+	//! Stop forwarding scanned devices to the microapp
 	CS_MICROAPP_SDK_BLE_SCAN_STOP                     = 0x02,
-	// Register an interrupt for incoming scanned devices
+	//! Register an interrupt for incoming scanned devices
 	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT       = 0x03,
-	// Bluenet has scanned a device. Used for interrupts
+	//! Bluenet has scanned a device. Used for interrupts
 	CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE           = 0x04,
 
 	// Connection related message types
 
-	// Request a connection to a peripheral
+	//! Request a connection to a peripheral
 	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT    = 0x05,
-	// Bluenet -> microapp when connected to a peripheral
+	//! Bluenet -> microapp when connected to a peripheral
 	CS_MICROAPP_SDK_BLE_CONNECTION_CONNECTED          = 0x06,
-	// Request disconnecting from a peripheral
+	//! Request disconnecting from a peripheral
 	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT = 0x07,
-	// Bluenet -> microapp when disconnected from a peripheral
+	//! Bluenet -> microapp when disconnected from a peripheral
 	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECTED = 0x08,
 };
 
@@ -317,13 +317,13 @@ enum MicroappSdkBleType {
  * Mesh request types
  */
 enum MicroappSdkMeshType {
-	// Send a mesh message from the microapp
+	//! Send a mesh message from the microapp
 	CS_MICROAPP_SDK_MESH_SEND        = 0x01,
-	// Start listening for mesh messages of the microapp type, and register an interrupt on the bluenet side
+	//! Start listening for mesh messages of the microapp type, and register an interrupt on the bluenet side
 	CS_MICROAPP_SDK_MESH_LISTEN      = 0x02,
-	// Request for information about the mesh configuration. For now consists only of the own stone ID
+	//! Request for information about the mesh configuration. For now consists only of the own stone ID
 	CS_MICROAPP_SDK_MESH_READ_CONFIG = 0x03,
-	// Received a mesh message. Used for interrupts from bluenet
+	//! Received a mesh message. Used for interrupts from bluenet
 	CS_MICROAPP_SDK_MESH_READ        = 0x04,
 };
 
@@ -331,11 +331,11 @@ enum MicroappSdkMeshType {
  * Types of power usage to reqeust
  */
 enum MicroappSdkPowerUsageType {
-	// Get filtered power data in milliWatt
+	//! Get filtered power data in milliWatt
 	CS_MICROAPP_SDK_POWER_USAGE_POWER   = 0x01,
-	// Not implemented yet
+	//! Not implemented yet
 	CS_MICROAPP_SDK_POWER_USAGE_CURRENT = 0x02,
-	// Not implemented yet
+	//! Not implemented yet
 	CS_MICROAPP_SDK_POWER_USAGE_VOLTAGE = 0x03,
 };
 
@@ -343,11 +343,11 @@ enum MicroappSdkPowerUsageType {
  * Type of yield from the microapp to bluenet
  */
 enum MicroappSdkYieldType {
-	// End of setup
+	//! End of setup
 	CS_MICROAPP_SDK_YIELD_SETUP = 0x01,
-	// End of loop
+	//! End of loop
 	CS_MICROAPP_SDK_YIELD_LOOP  = 0x02,
-	// The microapp is doing something asynchronous like a delay call
+	//! The microapp is doing something asynchronous like a delay call
 	CS_MICROAPP_SDK_YIELD_ASYNC = 0x03,
 };
 
@@ -382,36 +382,38 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 };
 
 /**
- * @struct microapp_sdk_header_t
  * Header for io buffers shared between bluenet and microapp. The payload of the io buffer always starts with this
  * header.
- *
- * @var microapp_sdk_header_t::messageType  MicroappSdkMessageType     Specifies the type of message, and how to
- * interpret the rest of the payload
- * @var microapp_sdk_header_t::ack          MicroappSdkAck      Used for requesting and receiving acks. Can be used for
- * identifying requests and interrupts.
  */
 struct __attribute__((packed)) microapp_sdk_header_t {
+	/**
+	 * Specifies the type of message, and how to interpret the rest of the payload.
+	 * See MicroappSdkMessageType.
+	 */
 	uint8_t messageType;
+
+	/**
+	 * Used for requesting and receiving acks. Can be used for identifying requests and interrupts.
+	 * See MicroappSdkAck.
+	 */
 	int8_t ack;
 };
 
 static_assert(sizeof(microapp_sdk_header_t) == MICROAPP_SDK_HEADER_SIZE);
 
 /**
- * @struct microapp_sdk_log_header_t
  * Header for log commands. Excludes the actual log payload, which is different for every log type.
- *
- * @var microapp_sdk_log_header_t::header
- * @var microapp_sdk_log_header_t::type    MicroappSdkLogType   Specifies what type of payload it carries
- * @var microapp_sdk_log_header_t::flags   MicroappSdkLogFlags  Flags for logging. Currently only contains a newline
- * flag
- * @var microapp_sdk_log_header_t::size                         Length of the payload for type STR or ARR
  */
 struct __attribute__((packed)) microapp_sdk_log_header_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies what type of payload it carries. See MicroappSdkLogType.
 	uint8_t type;
+
+	//! Flags for logging. See MicroappSdkLogFlags.
 	uint8_t flags;
+
+	//! Length of the payload for type STR or ARR.
 	uint8_t size;
 };
 
@@ -482,207 +484,197 @@ struct __attribute__((packed)) microapp_sdk_log_array_t {
 static_assert(sizeof(microapp_sdk_log_array_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_pin_t
  * Struct to control GPIO pins. Pins can be initialized, read or written.
- *
- * @var microapp_sdk_pin_t::header
- * @var microapp_sdk_pin_t::pin         MicroappSdkPin             Specifies the GPIO pin, button or led
- * @var microapp_sdk_pin_t::type        MicroappSdkPinType         Specifies whether to initialize (INIT) or read/write
- * (ACTION)
- * @var microapp_sdk_pin_t::direction   MicroappSdkPinDirection    Specifies whether to set the pin as input or output.
- * Only used with INIT
- * @var microapp_sdk_pin_t::polarity    MicroappSdkPinPolarity     Specifies which pin events to watch. Only used
- * with INIT
- * @var microapp_sdk_pin_t::action      MicroappSdkPinActionType   Specifies whether to read from or write to pin. Only
- * used with ACTION
- * @var microapp_sdk_pin_t::value       MicroappSdkPinValue        Specifies value to write to pin, or field to put read
- * value. Only used with ACTION
  */
 struct __attribute__((packed)) microapp_sdk_pin_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies the GPIO pin, button or led. See MicroappSdkPin.
 	uint8_t pin;
+
+	//! Specifies whether to initialize (INIT) or read/write (ACTION). See MicroappSdkPinType.
 	uint8_t type;
+
+	//!  Specifies whether to set the pin as input or output. Only used with type INIT. See MicroappSdkPinDirection.
 	uint8_t direction;
+
+	//! Specifies which pin events to watch. Only used with type INIT. See MicroappSdkPinPolarity.
 	uint8_t polarity;
+
+	//! Specifies whether to read from or write to pin. Only used with type ACTION. See MicroappSdkPinActionType.
 	uint8_t action;
+
+	//! Specifies value to write to pin, or field to put read value. Only used with type ACTION. See MicroappSdkPinValue.
 	uint8_t value;
 };
 
 static_assert(sizeof(microapp_sdk_pin_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_switch_t
  * Struct for switching and dimming the crownstone. Conforms to the general control command protocol
- *
- * @var microapp_sdk_switch_t::header
- * @var microapp_sdk_switch_t::value    MicroappSdkSwitchValue      Specifies what action to take. See enum definition
- * for further info
  */
 struct __attribute__((packed)) microapp_sdk_switch_t {
 	microapp_sdk_header_t header;
+
+	//!  Specifies what action to take. See MicroappSdkSwitchValue.
 	uint8_t value;
 };
 
 static_assert(sizeof(microapp_sdk_switch_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_service_data_t
  * Struct for microapp service data to be advertised by bluenet
- *
- * @var microapp_sdk_service_data_t::header
- * @var microapp_sdk_service_data_t::appUuid       Unique app identifier that will be advertised along with the payload
- * @var microapp_sdk_service_data_t::size          Size of the payload
- * @var microapp_sdk_service_data_t::data          Payload
  */
 struct __attribute__((packed)) microapp_sdk_service_data_t {
 	microapp_sdk_header_t header;
+
+	//! Unique app identifier that will be advertised along with the payload.
 	uint16_t appUuid;
+
+	//! Size of the payload.
 	uint8_t size;
+
+	//! The payload.
 	uint8_t data[MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH];
 };
 
 static_assert(sizeof(microapp_sdk_service_data_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_twi_t
  * Struct for i2c/twi initialization, writes, and reads.
- *
- * @var microapp_sdk_twi_t::header
- * @var microapp_sdk_twi_t::type       MicroappSdkTwiType           Specifies what action to take
- * @var microapp_sdk_twi_t::adress                                  Slave address to write to
- * @var microapp_sdk_twi_t::flags      MicroappSdkTwiFlags          Flags for the command. Currently only includes stop
- * flag
- * @var microapp_sdk_twi_t::size                                    Size of the payload
- * @var microapp_sdk_twi_t::data                                    Payload
  */
 struct __attribute__((packed)) microapp_sdk_twi_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies what action to take. See MicroappSdkTwiType.
 	uint8_t type;
+
+	//! Slave address to write to.
 	uint8_t address;
+
+	//! Flags for the command. See MicroappSdkTwiFlags.
 	uint8_t flags;
+
+	//! Size of the payload.
 	uint8_t size;
+
+	//! The payload.
 	uint8_t buf[MICROAPP_SDK_MAX_TWI_PAYLOAD_SIZE];
 };
 
 static_assert(sizeof(microapp_sdk_twi_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_ble_t
  * Struct for Bluetooth Low Energy related messages, excluding mesh. Includes scanning and connecting
- *
- * @var microapp_sdk_ble_t::header
- * @var microapp_sdk_ble_t::type          MicroappSdkBleType       Specifies the type of message. See enum definition
- * for further info
- * @var microapp_sdk_ble_t::address_type                           Type of address
- * @var microapp_sdk_ble_t::address                                Big-endian MAC address. Context depends on type field
- * @var microapp_sdk_ble_t::rssi                                   Received signal strength. For type SCANNED_DEVICE,
- * this is the rssi of the device
- * @var microapp_sdk_ble_t::size                                   Size of payload
- * @var microapp_sdk_ble_t::data                                   Payload. For type SCANNED_DEVICE, this is the
- * advertisement data
  */
 struct __attribute__((packed)) microapp_sdk_ble_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies the type of message. See MicroappSdkBleType.
 	uint8_t type;
+
+	//! Type of address
 	uint8_t address_type;
+
+	//! Big-endian MAC address. Context depends on type field
 	uint8_t address[MAC_ADDRESS_LENGTH];
+
+	//! Received signal strength. For type SCANNED_DEVICE, this is the RSSI to the device.
 	int8_t rssi;
+
+	//! Size of the payload.
 	uint8_t size;
+
+	//! The payload. For type SCANNED_DEVICE, this is the advertisement data.
 	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
 };
 
 static_assert(sizeof(microapp_sdk_ble_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_mesh_t
  * Struct for mesh message from microapp.
- *
- * @var microapp_sdk_mesh_t::header
- * @var microapp_sdk_mesh_t::type      MicroappSdkMeshType      Specifies the type of message. See enum definition for
- * further info
- * @var microapp_sdk_mesh_t::stoneId                            Indicates the stone id to send to/read from or own stone
- * id. 0 indicates broadcast
- * @var microapp_sdk_mesh_t::size                               Size of payload
- * @var microapp_sdk_mesh_t::data                               Payload.
  */
 struct __attribute__((packed)) microapp_sdk_mesh_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies the type of message. See MicroappSdkMeshType.
 	uint8_t type;
+
+	//! Indicates the stone id to send to/read from or own stone ID. Use ID 0 for a broadcast.
 	uint8_t stoneId;
+
+	//! Size of the payload.
 	uint8_t size;
+
+	//! The payload.
 	uint8_t data[MAX_MICROAPP_MESH_PAYLOAD_SIZE];
 };
 
 static_assert(sizeof(microapp_sdk_mesh_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_power_usage_t
  * Struct for microapp power usage requests
- *
- * @var microapp_sdk_power_usage_t::header
- * @var microapp_sdk_power_usage_t::type         MicroappSdkPowerUsageType     Specifies the type of power usage
- * requested. See enum definition
- * @var microapp_sdk_power_usage_t::powerUsage                                 The power usage. Units vary based on type
  */
 struct __attribute__((packed)) microapp_sdk_power_usage_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies the type of power usage requested. See MicroappSdkPowerUsageType.
 	uint8_t type;
+
+	//!  The power usage. Units vary based on type
 	int32_t powerUsage;
 };
 
 static_assert(sizeof(microapp_sdk_power_usage_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_presence_t
  * Struct for microapp presence requests
- *
- * @var microapp_sdk_presence_t::header
- * @var microapp_sdk_presence_t::profileId          Specifies the profile for which the presence is requested
- * @var microapp_sdk_presence_t::presenceBitmask    A bitmask where each bit indicates the presence of the profile in a
- * specific location
  */
 struct __attribute__((packed)) microapp_sdk_presence_t {
 	microapp_sdk_header_t header;
+
+	//! Specifies the profile for which the presence is requested.
 	uint8_t profileId;
+
+	//! A bitmask where each bit indicates the presence of the profile in a specific location.
 	uint64_t presenceBitmask;
 };
 
 static_assert(sizeof(microapp_sdk_presence_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_control_command_t
  * Struct with payload conforming to control command protocol for direct handling by command handler
  * See https://github.com/crownstoen/bluenet/blob/master/docs/protocol/PROTOCOL.md#control-packet
- *
- * @var microapp_sdk_control_command_t::header
- * @var microapp_sdk_control_command_t::protocol    The protocol of the command
- * @var microapp_sdk_control_command_t::type        The type of command
- * @var microapp_sdk_control_command_t::size        Size of the payload
- * @var microapp_sdk_control_command_t::payload     Payload
  */
 struct __attribute__((packed)) microapp_sdk_control_command_t {
 	microapp_sdk_header_t header;
+
+	//! Control command protocol.
 	uint8_t protocol;
+
+	//! The type of control command.
 	uint16_t type;
+
+	//! Size of the payload.
 	uint16_t size;
+
+	//! The payload.
 	uint8_t payload[MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE];
 };
 
 static_assert(sizeof(microapp_sdk_control_command_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
- * @struct microapp_sdk_yield_t
  * Struct for microapp yielding to bluenet, e.g. upon completing a setup or loop call, or within an async call (e.g.
  * delay)
- *
- * @var microapp_sdk_yield_t::header
- * @var microapp_sdk_yield_t::type                 MicroappSdkYieldType   The type of yield. See the enum definition.
- * @var microapp_sdk_yield_t::emptyInterruptSlots                         Number of empty slots for interrupts the
- * microapp has. If zero, block new interrupts
  */
 struct __attribute__((packed)) microapp_sdk_yield_t {
 	microapp_sdk_header_t header;
+
+	//! The type of yield. See the MicroappSdkYieldType.
 	uint8_t type;
+
+	//! Number of empty slots for interrupts the microapp has. If zero, block new interrupts.
 	uint8_t emptyInterruptSlots;
 };
 
