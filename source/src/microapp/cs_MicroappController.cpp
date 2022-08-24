@@ -11,6 +11,7 @@
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
+#include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
