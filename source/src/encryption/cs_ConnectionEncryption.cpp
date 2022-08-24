@@ -184,10 +184,6 @@ cs_buffer_size_t ConnectionEncryption::getPlaintextBufferSize(
 	}
 }
 
-bool ConnectionEncryption::allowedToWrite() {
-	return Stack::getInstance().isDisconnecting();
-}
-
 void ConnectionEncryption::disconnect() {
 	Stack::getInstance().disconnect();
 }

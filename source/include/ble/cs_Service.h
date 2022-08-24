@@ -20,21 +20,17 @@
 class Stack;
 class CharacteristicBase;
 
-/** Service as defined in the GATT Specification.
+/**
+ * Base class for a BLE service
  */
 class Service : public BaseClass<1> {
 public:
 	enum condition_t { C_SERVICE_INITIALIZED };
 
-	//! The "Generic Service"
-	static const char* defaultServiceName;
-
-	//! A container with characteristics (underlying data format is a std::vector).
-	typedef tuple<CharacteristicBase*> Characteristics_t;
-
 	Service();
 
-	/** Default empty destructor
+	/**
+	 * Default empty destructor
 	 *
 	 * We don't currently delete our characteristics as we don't really support dynamic service destruction.
 	 * If we wanted to allow services to be removed at runtime, we would need to, amongst many other things,
@@ -42,77 +38,59 @@ public:
 	 */
 	virtual ~Service() {}
 
-	/** Set the name of the service.
+	/**
+	 * Set the UUID.
 	 *
-	 * The name of the service is a const char pointer. Setting the parameters can be done in a chained manner, the
-	 * function returns Service again.
+	 * The UUID cannot be set anymore after the service has been initialized.
 	 */
-	Service& setName(const char* const name) {
-		_name = name;
-		return *this;
-	}
-
-	/** Set the UUID.
-	 *
-	 * The UUID cannot be set anymore after the service has been started.
-	 */
-	Service& setUUID(const UUID& uuid);
+	void setUUID(const UUID& uuid);
 
 	Stack* getStack() { return _stack; }
 
 	const UUID& getUUID() const { return _uuid; }
 
-	uint16_t getHandle() { return _service_handle; }
+	uint16_t getHandle() { return _handle; }
 
 protected:
 	friend class Stack;
 
 	//! Back reference to the stack.
-	Stack* _stack;
+	Stack* _stack = nullptr;
 
 	UUID _uuid;
-	std::string _name;
+
 	//! Service handle will be obtained from SoftDevice
-	uint16_t _service_handle;
+	uint16_t _handle = BLE_CONN_HANDLE_INVALID;
 
 	//! List of characteristics
-	Characteristics_t _characteristics;
+	tuple<CharacteristicBase*> _characteristics;
 
 	virtual void createCharacteristics() = 0;
 
-	/** Initialization of the service.
-	 *
-	 * The initialization can be different for each service.
+	/**
+	 * Initialize the service: register it at the softdevice.
 	 */
-	virtual void init(Stack* stack);
+	void init(Stack* stack);
 
-	virtual void on_ble_event(const ble_evt_t* p_ble_evt);
+	void onBleEvent(const ble_evt_t* event);
 
-	virtual void on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt);
+	void onConnect(uint16_t connectionHandle, const ble_gap_evt_connected_t& event);
 
-	virtual void on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected_t& gap_evt);
+	void onDisconnect(uint16_t connectionHandle, const ble_gap_evt_disconnected_t& event);
 
-	virtual bool on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_handle);
+	bool onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle);
 
-	virtual void onTxComplete(const ble_common_evt_t* p_ble_evt);
-
-	/** Get list of characteristics
-	 *
-	 * @return list of characteristics
-	 */
-	virtual Characteristics_t& getCharacteristics() { return _characteristics; }
+	void onTxComplete(const ble_common_evt_t* event);
 
 	/** Add a single characteristic to the list
 	 * @characteristic Characteristic to add
 	 */
-	virtual Service& addCharacteristic(CharacteristicBase* characteristic) {
+	void addCharacteristic(CharacteristicBase* characteristic) {
 		_characteristics.push_back(characteristic);
-		return *this;
 	}
 
-	Service& updatedCharacteristics() {
+	void updatedCharacteristics() {
 		_characteristics.shrink_to_fit();
-		return *this;
 	}
 
 	void setAesEncrypted(bool encrypted);

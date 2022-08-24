@@ -154,13 +154,14 @@ void fds_evt_handler(const fds_evt_t* p_fds_evt) {
 void SocHandler::handleEvent(uint32_t event) {
 	LOGInterruptLevel("handleEvent int=%u", CsUtils::getInterruptLevel());
 	switch (event) {
-		case NRF_EVT_POWER_FAILURE_WARNING:
+		case NRF_EVT_POWER_FAILURE_WARNING: {
 			// Set brownout flag, so next boot we know the cause.
 			// Only works when we reset as well?
 			// Only works when softdevice handler dispatch model is interrupt?
 			GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
 			[[fallthrough]];
-		case NRF_EVT_FLASH_OPERATION_SUCCESS: [[fallthrough]];
+		}
+		case NRF_EVT_FLASH_OPERATION_SUCCESS:
 		case NRF_EVT_FLASH_OPERATION_ERROR: {
 			//			uint32_t gpregret_id = 0;
 			//			uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
@@ -178,10 +179,12 @@ void SocHandler::handleEvent(uint32_t event) {
 #endif
 			break;
 		}
-		case NRF_EVT_RADIO_BLOCKED: [[fallthrough]];
-		case NRF_EVT_RADIO_CANCELED: [[fallthrough]];
-		case NRF_EVT_RADIO_SESSION_IDLE: [[fallthrough]];
-		case NRF_EVT_RADIO_SESSION_CLOSED: break;
+		case NRF_EVT_RADIO_BLOCKED:
+		case NRF_EVT_RADIO_CANCELED:
+		case NRF_EVT_RADIO_SESSION_IDLE:
+		case NRF_EVT_RADIO_SESSION_CLOSED: {
+			break;
+		}
 		default: {
 			LOGd("Unhandled event: %u", event);
 		}
@@ -245,17 +248,17 @@ void BleHandler::handleEvent(const ble_evt_t* event) {
 					event->evt.gatts_evt.conn_handle, event->evt.gatts_evt.params.exchange_mtu_request);
 			break;
 		}
-		case BLE_GAP_EVT_RSSI_CHANGED: [[fallthrough]];
-		case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST: [[fallthrough]];
-		case BLE_GAP_EVT_CONNECTED: [[fallthrough]];
-		case BLE_GAP_EVT_DISCONNECTED: [[fallthrough]];
-		case BLE_GAP_EVT_PASSKEY_DISPLAY: [[fallthrough]];
-		case BLE_GAP_EVT_TIMEOUT: [[fallthrough]];
-		case BLE_EVT_USER_MEM_REQUEST: [[fallthrough]];
-		case BLE_EVT_USER_MEM_RELEASE: [[fallthrough]];
-		case BLE_GATTS_EVT_WRITE: [[fallthrough]];
-		case BLE_GATTS_EVT_HVN_TX_COMPLETE: [[fallthrough]];
-		case BLE_GATTS_EVT_SYS_ATTR_MISSING: [[fallthrough]];
+		case BLE_GAP_EVT_RSSI_CHANGED:
+		case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
+		case BLE_GAP_EVT_CONNECTED:
+		case BLE_GAP_EVT_DISCONNECTED:
+		case BLE_GAP_EVT_PASSKEY_DISPLAY:
+		case BLE_GAP_EVT_TIMEOUT:
+		case BLE_EVT_USER_MEM_REQUEST:
+		case BLE_EVT_USER_MEM_RELEASE:
+		case BLE_GATTS_EVT_WRITE:
+		case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+		case BLE_GATTS_EVT_SYS_ATTR_MISSING:
 		default: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 			uint32_t retVal = app_sched_event_put(event, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_decoupled);
@@ -281,35 +284,45 @@ void BleHandler::handlePhyRequest(
 	phys.tx_phys     = BLE_GAP_PHY_AUTO;
 	uint32_t nrfCode = sd_ble_gap_phy_update(connectionHandle, &phys);
 	switch (nrfCode) {
-		case NRF_SUCCESS: break;
-		case NRF_ERROR_INVALID_STATE:
+		case NRF_SUCCESS: {
+			break;
+		}
+		case NRF_ERROR_INVALID_STATE: {
 			// * @retval ::NRF_ERROR_INVALID_STATE No link has been established.
 			// This can happen, when a phone connect, and disconnect quickly after.
 			// This event is queued, but by the time we process it, the device already disconnected.
 			break;
-		case NRF_ERROR_BUSY:
+		}
+		case NRF_ERROR_BUSY: {
 			// * @retval ::NRF_ERROR_BUSY Procedure is already in progress or not allowed at this time. Process pending
 			// events and wait for the pending procedure to complete and retry. This can happen: when a request is done,
 			// the event is queued, but we haven't processed the event yet. The device does another request, so another
 			// event is queued. Then, when the second event is being handled, we just replied to the first event.
 			break;
-		case BLE_ERROR_INVALID_CONN_HANDLE:
+		}
+		case BLE_ERROR_INVALID_CONN_HANDLE: {
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
 			// This shouldn't happen, but can maybe happen if the device already disconnected.
 			break;
-		case NRF_ERROR_INVALID_ADDR:
+		}
+		case NRF_ERROR_INVALID_ADDR: {
 			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
 			[[fallthrough]];
-		case NRF_ERROR_INVALID_PARAM:
+		}
+		case NRF_ERROR_INVALID_PARAM: {
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
 			// This shouldn't happen: crash.
 			[[fallthrough]];
-		case NRF_ERROR_NOT_SUPPORTED:
+		}
+		case NRF_ERROR_NOT_SUPPORTED: {
 			// * @retval ::NRF_ERROR_NOT_SUPPORTED Unsupported PHYs supplied to the call.
 			// This shouldn't happen: crash.
 			[[fallthrough]];
-		default: APP_ERROR_HANDLER(nrfCode);
+		}
+		default: {
+			APP_ERROR_HANDLER(nrfCode);
+		}
 	}
 }
 
@@ -317,37 +330,45 @@ void BleHandler::handleDataLengthRequest(
 		uint16_t connectionHandle, [[maybe_unused]] const ble_gap_evt_data_length_update_request_t& request) {
 	uint32_t nrfCode = sd_ble_gap_data_length_update(connectionHandle, NULL, NULL);
 	switch (nrfCode) {
-		case NRF_SUCCESS: break;
-		case NRF_ERROR_INVALID_STATE:
+		case NRF_SUCCESS: {
+			break;
+		}
+		case NRF_ERROR_INVALID_STATE: {
 			// * @retval ::NRF_ERROR_INVALID_STATE No link has been established.
 			// This can happen, when a phone connect, and disconnect quickly after.
 			// This event is queued, but by the time we process it, the device already disconnected.
 			break;
-		case NRF_ERROR_BUSY:
+		}
+		case NRF_ERROR_BUSY: {
 			// * @retval ::NRF_ERROR_BUSY Peer has already initiated a Data Length Update Procedure. Process the
 			// *                          pending @ref BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST event to respond.
 			// This can happen: when a request is done, the event is queued, but we haven't processed the event yet.
 			// The device does another request, so another event is queued.
 			// Then, when the second event is being handled, we just replied to the first event.
 			break;
-		case BLE_ERROR_INVALID_CONN_HANDLE:
+		}
+		case BLE_ERROR_INVALID_CONN_HANDLE: {
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle parameter supplied.
 			// This shouldn't happen, but can maybe happen if the device already disconnected.
 			break;
-		case NRF_ERROR_INVALID_ADDR:
+		}
+		case NRF_ERROR_INVALID_ADDR: {
 			// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
 			// This shouldn't happen: crash.
 			[[fallthrough]];
-		case NRF_ERROR_INVALID_PARAM:
+		}
+		case NRF_ERROR_INVALID_PARAM: {
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameters supplied.
 			// This shouldn't happen: crash
 			[[fallthrough]];
-		case NRF_ERROR_NOT_SUPPORTED:
+		}
+		case NRF_ERROR_NOT_SUPPORTED: {
 			// * @retval ::NRF_ERROR_NOT_SUPPORTED The requested parameters are not supported by the SoftDevice. Inspect
 			// *                                   p_dl_limitation to see which parameter is not supported.
 			// This shouldn't happen: crash
 			[[fallthrough]];
-		case NRF_ERROR_RESOURCES:
+		}
+		case NRF_ERROR_RESOURCES: {
 			// * @retval ::NRF_ERROR_RESOURCES The connection event length configured for this link is not sufficient
 			// for the requested parameters.
 			// *                               Use @ref sd_ble_cfg_set with @ref BLE_CONN_CFG_GAP to increase the
@@ -355,7 +376,10 @@ void BleHandler::handleDataLengthRequest(
 			// *                               Inspect p_dl_limitation to see where the limitation is.
 			// This shouldn't happen: crash
 			[[fallthrough]];
-		default: APP_ERROR_HANDLER(nrfCode);
+		}
+		default: {
+			APP_ERROR_HANDLER(nrfCode);
+		}
 	}
 }
 
@@ -364,55 +388,85 @@ void BleHandler::handleMtuRequest(
 	//	uint32_t nrfCode = sd_ble_gatts_exchange_mtu_reply(connectionHandle, BLE_GATT_ATT_MTU_DEFAULT);
 	uint32_t nrfCode = sd_ble_gatts_exchange_mtu_reply(connectionHandle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
 	switch (nrfCode) {
-		case NRF_SUCCESS: break;
-		case NRF_ERROR_INVALID_STATE:
+		case NRF_SUCCESS: {
+			break;
+		}
+		case NRF_ERROR_INVALID_STATE: {
 			// * @retval ::NRF_ERROR_INVALID_STATE Invalid Connection State or no ATT_MTU exchange request pending.
 			// This can happen, when a phone connect, and disconnect quickly after.
 			// This event is queued, but by the time we process it, the device already disconnected.
 			break;
-		case NRF_ERROR_TIMEOUT:
+		}
+		case NRF_ERROR_TIMEOUT: {
 			// * @retval ::NRF_ERROR_TIMEOUT There has been a GATT procedure timeout. No new GATT procedure can be
 			// performed without reestablishing the connection. This doesn't look like an error we should crash at.
 			break;
-		case BLE_ERROR_INVALID_CONN_HANDLE:
+		}
+		case BLE_ERROR_INVALID_CONN_HANDLE: {
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid Connection Handle.
 			// This shouldn't happen, but can maybe happen if the device already disconnected.
 			break;
-		case NRF_ERROR_INVALID_PARAM:
+		}
+		case NRF_ERROR_INVALID_PARAM: {
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid Server RX MTU size supplied.
 			// This shouldn't happen, crash.
 			[[fallthrough]];
-		default: APP_ERROR_HANDLER(nrfCode);
+		}
+		default: {
+			APP_ERROR_HANDLER(nrfCode);
+		}
 	}
 }
 
 void BleHandler::disconnect(uint16_t connectionHandle, uint8_t reason) {
 	uint32_t nrfCode = sd_ble_gap_disconnect(connectionHandle, reason);
 	switch (nrfCode) {
-		case NRF_SUCCESS: break;
-		case NRF_ERROR_INVALID_STATE:
+		case NRF_SUCCESS: {
+			break;
+		}
+		case NRF_ERROR_INVALID_STATE: {
 			// * @retval ::NRF_ERROR_INVALID_STATE Disconnection in progress or link has not been established.
 			// This can happen, when a phone connect, and disconnect quickly after.
 			// This event is queued, but by the time we process it, the device already disconnected.
 			break;
-		case BLE_ERROR_INVALID_CONN_HANDLE:
+		}
+		case BLE_ERROR_INVALID_CONN_HANDLE: {
 			// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied.
 			// This shouldn't happen, but can maybe happen if the device already disconnected.
 			break;
+		}
 		case NRF_ERROR_INVALID_PARAM:
 			// * @retval ::NRF_ERROR_INVALID_PARAM Invalid parameter(s) supplied.
 			// This shouldn't happen: crash.
-		default: APP_ERROR_HANDLER(nrfCode);
+			[[fallthrough]];
+		default: {
+			APP_ERROR_HANDLER(nrfCode);
+		}
 	}
 }
 
 void SdhStateHandler::handleEvent(const nrf_sdh_state_evt_t& event) {
 	LOGInterruptLevel("handleEvent int=%u", CsUtils::getInterruptLevel());
 	switch (event) {
-		case NRF_SDH_EVT_STATE_ENABLE_PREPARE: LOGd("Softdevice is about to be enabled"); break;
-		case NRF_SDH_EVT_STATE_ENABLED: LOGd("Softdevice is now enabled"); break;
-		case NRF_SDH_EVT_STATE_DISABLE_PREPARE: LOGd("Softdevice is about to be disabled"); break;
-		case NRF_SDH_EVT_STATE_DISABLED: LOGd("Softdevice is now disabled"); break;
-		default: LOGd("Unknown state: %u", event);
+		case NRF_SDH_EVT_STATE_ENABLE_PREPARE: {
+			LOGd("Softdevice is about to be enabled");
+			break;
+		}
+		case NRF_SDH_EVT_STATE_ENABLED: {
+			LOGd("Softdevice is now enabled");
+			break;
+		}
+		case NRF_SDH_EVT_STATE_DISABLE_PREPARE: {
+			LOGd("Softdevice is about to be disabled");
+			break;
+		}
+		case NRF_SDH_EVT_STATE_DISABLED: {
+			LOGd("Softdevice is now disabled");
+			break;
+		}
+		default: {
+			LOGw("Softdevice is in unknown state: %u", event);
+			break;
+		}
 	}
 }

@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #define LOGStackDebug LOGvv
+#define LogLevelStackDebug SERIAL_VERY_VERBOSE
 
 Stack::Stack() {
 	_connectionKeepAliveTimerData       = {{0}};
@@ -37,7 +38,6 @@ Stack::Stack() {
 #define CS_STACK_LONG_WRITE_HEADER_SIZE 6
 
 Stack::~Stack() {
-	shutdown();
 }
 
 /**
@@ -160,7 +160,7 @@ void Stack::initRadio() {
 	LOGd("nrf_sdh_ble_enable ram_start=%p", ram_start);
 	nrfCode = nrf_sdh_ble_enable(&ram_start);
 	switch (nrfCode) {
-		case NRF_SUCCESS: LOGi("Softdevice enabled"); break;
+		case NRF_SUCCESS: LOGi("BLE stack enabled"); break;
 		case NRF_ERROR_INVALID_STATE: LOGe("BLE: invalid radio state"); [[fallthrough]];
 		case NRF_ERROR_INVALID_ADDR: LOGe("BLE: invalid memory address"); [[fallthrough]];
 		case NRF_ERROR_NO_MEM:
@@ -194,19 +194,10 @@ void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
 	_clockSource = clockSource;
 }
 
-void Stack::createCharacteristics() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
-		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
-	}
-	LOGd("Create characteristics");
-
-	// Init buffers.
-	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-
-	for (Service* svc : _services) {
-		svc->createCharacteristics();
-	}
+void Stack::addService(Service* svc) {
+	_services.push_back(svc);
+	svc->createCharacteristics();
+	svc->updatedCharacteristics();
 }
 
 void Stack::initServices() {
@@ -220,17 +211,6 @@ void Stack::initServices() {
 	}
 
 	setInitialized(C_SERVICES_INITIALIZED);
-}
-
-void Stack::shutdown() {
-	// 16-sep-2019 TODO: stop advertising
-	// 02-11-2021 TODO: we don't support shutdown.
-	setUninitialized(C_STACK_INITIALIZED);
-}
-
-Stack& Stack::addService(Service* svc) {
-	_services.push_back(svc);
-	return *this;
 }
 
 void Stack::updateMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -421,11 +401,11 @@ void Stack::onBleEvent(const ble_evt_t* p_ble_evt) {
 
 	switch (p_ble_evt->header.evt_id) {
 		case BLE_EVT_USER_MEM_REQUEST: {
-			onMemoryRequest(p_ble_evt->evt.gap_evt.conn_handle);
+			onMemoryRequest(p_ble_evt->evt.common_evt.conn_handle);
 			break;
 		}
 		case BLE_EVT_USER_MEM_RELEASE: {
-			onMemoryRelease(p_ble_evt->evt.gap_evt.conn_handle);
+			onMemoryRelease(p_ble_evt->evt.common_evt.conn_handle);
 			break;
 		}
 
@@ -454,7 +434,7 @@ void Stack::onBleEvent(const ble_evt_t* p_ble_evt) {
 			break;
 		}
 		case BLE_GATTS_EVT_WRITE: {
-			onWrite(p_ble_evt->evt.gatts_evt.params.write);
+			onWrite(p_ble_evt->evt.gatts_evt.conn_handle, p_ble_evt->evt.gatts_evt.params.write);
 			break;
 		}
 		case BLE_GATTS_EVT_HVC: {
@@ -658,10 +638,12 @@ void Stack::onMemoryRequest(uint16_t connectionHandle) {
 	//		BLE_CALL(sd_ble_user_mem_reply, (connectionHandle, NULL));
 
 	ble_user_mem_block_t memBlock;
-	cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(
-			CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
-	memBlock.p_mem   = writeBuffer.data;
-	memBlock.len     = writeBuffer.len;
+	EncryptedBuffer::getInstance().getBuffer(
+			memBlock.p_mem, memBlock.len, CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
+
+	_log(LogLevelStackDebug, false, "mem request: ptr=%p len=%u buf=", memBlock.p_mem, memBlock.len);
+	_logArray(LogLevelStackDebug, true, memBlock.p_mem, memBlock.len);
+
 	uint32_t nrfCode = sd_ble_user_mem_reply(connectionHandle, &memBlock);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
@@ -697,7 +679,7 @@ void Stack::onMemoryRelease([[maybe_unused]] uint16_t connectionHandle) {
 	// No need to do anything
 }
 
-void Stack::onWrite(const ble_gatts_evt_write_t& writeEvt) {
+void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writeEvt) {
 	if (isDisconnecting()) {
 		LOGw("Discard write: disconnect in progress.");
 		return;
@@ -705,22 +687,49 @@ void Stack::onWrite(const ble_gatts_evt_write_t& writeEvt) {
 
 	resetConnectionAliveTimer();
 
-	if (writeEvt.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
-		cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(
-				CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
-		uint16_t* header = (uint16_t*)(writeBuffer.data);
-		for (Service* svc : _services) {
-			// for a long write, don't have the service handle available to check for the correct
-			// service, so we just go through all the services and characteristics until we find
-			// the correct characteristic, then we return
-			if (svc->on_write(writeEvt, header[0])) {
-				return;
-			}
+	switch (writeEvt.op) {
+		case BLE_GATTS_OP_PREP_WRITE_REQ: {
+			// We actually only get this event when we don't provide a buffer in the memory request.
+			_log(LogLevelStackDebug,
+				 false,
+				 "on prepare write req: handle=%u offset=%u len=%u buf=",
+				 writeEvt.handle,
+				 writeEvt.offset,
+				 writeEvt.len);
+			_logArray(LogLevelStackDebug, true, writeEvt.data, writeEvt.len);
+			break;
 		}
-	}
-	else {
-		for (Service* svc : _services) {
-			svc->on_write(writeEvt, writeEvt.handle);
+		case BLE_GATTS_OP_EXEC_WRITE_REQ_NOW: {
+			// Finalize a long write: the data was written to the buffer we provided in the memory request.
+			// However, the buffer has a header and can contain data for multiple handles.
+
+			cs_data_t encryptionBuffer = EncryptedBuffer::getInstance().getBuffer(
+					CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
+			uint16_t* header = (uint16_t*)(encryptionBuffer.data);
+			_log(LogLevelStackDebug,
+				 false,
+				 "on execute write req: handle=%u ptr=%p len=%u buf=",
+				 header[0],
+				 encryptionBuffer.data,
+				 encryptionBuffer.len);
+			_logArray(LogLevelStackDebug, true, encryptionBuffer.data, encryptionBuffer.len);
+
+			for (Service* svc : _services) {
+				// for a long write, don't have the service handle available to check for the correct
+				// service, so we just go through all the services and characteristics until we find
+				// the correct characteristic, then we return
+				if (svc->onWrite(writeEvt, header[0])) {
+					return;
+				}
+			}
+			break;
+		}
+		case BLE_GATTS_OP_WRITE_REQ:
+		case BLE_GATTS_OP_WRITE_CMD: {
+			for (Service* svc : _services) {
+				svc->onWrite(writeEvt, writeEvt.handle);
+			}
+			break;
 		}
 	}
 }
@@ -815,7 +824,7 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 	LOGi("Device connected");
 
 	for (Service* svc : _services) {
-		svc->on_ble_event(p_ble_evt);
+		svc->onBleEvent(p_ble_evt);
 	}
 
 	startConnectionAliveTimer();
@@ -839,7 +848,7 @@ void Stack::onIncomingDisconnected(const ble_evt_t* p_ble_evt) {
 	LOGi("Device disconnected");
 
 	for (Service* svc : _services) {
-		svc->on_ble_event(p_ble_evt);
+		svc->onBleEvent(p_ble_evt);
 	}
 
 	stopConnectionAliveTimer();

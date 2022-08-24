@@ -10,7 +10,7 @@
 
 /**
  * Size of the header used for long write.
- * Has to be a multiple of 4 (word alignment), even though only 6 (CS_STACK_LONG_WRITE_HEADER_SIZE) are needed.
+ * Multiple of 4 so the buffer with offset is aligned.
  */
 #define CS_CHAR_BUFFER_DEFAULT_OFFSET 8
 
@@ -27,19 +27,20 @@
 class CharacteristicBuffer {
 
 protected:
-	buffer_ptr_t _buffer   = NULL;
+	buffer_ptr_t _buffer   = nullptr;
 	cs_buffer_size_t _size = 0;
 	bool _locked           = false;
 
 	CharacteristicBuffer();
 	~CharacteristicBuffer();
 
-public:
-	//	static CharacteristicBuffer& getInstance() {
-	//		static CharacteristicBuffer instance;
-	//		return instance;
-	//	}
+	//! Copy constructor, singleton, thus made private
+	CharacteristicBuffer(CharacteristicBuffer const&)            = delete;
 
+	//! Assignment operator, singleton, thus made private
+	CharacteristicBuffer& operator=(CharacteristicBuffer const&) = delete;
+
+public:
 	/**
 	 * Allocate the buffer.
 	 */
@@ -78,6 +79,15 @@ public:
 	 * @return                    Struct with pointer to the buffer and size of the buffer.
 	 */
 	cs_data_t getBuffer(cs_buffer_size_t offset = CS_CHAR_BUFFER_DEFAULT_OFFSET);
+
+	/**
+	 * Get the buffer.
+	 *
+	 * @param[out] buffer         Will be set to point to the buffer.
+	 * @param[out] size           Will be set to the size of the buffer pointed to.
+	 * @param[in] offset          Returned buffer will have this offset from the internal buffer.
+	 */
+	void getBuffer(buffer_ptr_t& buffer, uint16_t& size, cs_buffer_size_t offset = CS_CHAR_BUFFER_DEFAULT_OFFSET);
 
 	/**
 	 * Get size of the buffer.

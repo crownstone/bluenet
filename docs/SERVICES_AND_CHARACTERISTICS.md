@@ -22,50 +22,54 @@ Right now, only a few different types are used:
 
 Every characteristic needs a read and/or write buffer. This buffer is used by the softdevice, and is what the connected device reads or writes. In the code, these are often called "gattValue".
 
-Because the buffers that the connected device can read or write should be encrypted, these buffers should not be the same as the unencrypted buffers.
+Because the buffers that the connected device can read or write should be encrypted, the characteristics use 2 buffers: one encrypted (gattValue), and one plain text (value).
 
-Which buffers are used, is determined by the service implementation, and the type of characteristic.
+Which buffers are used, is determined on characteristic creation (imjplemented in the service), and the type of characteristic.
 
-To reduce the amount of buffers, there are some buffers that are reused. CrownstoneCentral can use them as well, since there can be only 1 connection: either outgoing or incoming. It is still important though, not to write unencrypted data to the encryption buffer.
+Characteristics of basic types (integers), or string type, simply have the value as member variable and the value buffer is a pointer to that value. By default, these characteristics allocate an encrypted buffer themselves.
+Characteristics of buffer type, need to be provided a buffer on creation. By default, these characteristics share the same encrypted buffer.
 
-### CharacteristicWriteBuffer
+### Shared buffers
+
+To reduce the amount of buffers, there are some buffers that are reused. CrownstoneCentral can use them as well, since there can be only 1 connection: either outgoing or incoming.
+It is still important though, not to write plain text data to the encrypted buffer, because the user can read a characteristic that uses this uncrypted byffer at any time,
+
+Buffers that are reused:
+
+#### CharacteristicWriteBuffer
 
 Initialized by Stack.
 
 Used by:
-- Stack
-    - For incoming long writes, this buffer is returned when the softdevice requests memory.
 - Control characteristic
-    - For incoming writes. I believe this matches the softdevice memory request.
+    - To decrypt incoming writes to.
 - CrownstoneCentral
     - For outgoing writes, since a write goes in chunks, and thus the data to write must be retained.
 
 
-### CharacteristicReadBuffer
+#### CharacteristicReadBuffer
 
 Initialized by Stack.
 
 Used by:
-- Result characteristic
-- Session data characteristic
+- Result characteristic (as plain text buffer, not as gatt value buffer)
+- Session data characteristic (as plain text buffer, not as gatt value buffer)
 - CrownstoneCentral
     - To decrypt the merged incoming notifications to.
 
-### EncryptionBuffer
+#### EncryptedBuffer
 
 Initialized by Crownstone.
 
 Used by:
+- Any encrypted characteristic
+    - That is, if: `(minAccessLevel < ENCRYPTION_DISABLED)`, `sharedEncryptionBuffer`, and `aesEncrypted`.
+- Stack
+    - For incoming long writes, this buffer is returned when the softdevice requests memory.
 - CrownstoneCentral
     - To merge multiple incoming notifications to.
 - BleCentral
     - To read and write (because we usually read and write encrypted data).
-- Any characteristic with `(_minAccessLevel < ENCRYPTION_DISABLED)`, `_status.sharedEncryptionBuffer`, and `_status.aesEncrypted`.
-
-## Usage and implementation details
-
-- When `sharedEncryptionBuffer` is false, a separate encryption buffer will be allocated.
-- updateValue() will encrypt the value of a characteristic to the encrypted buffer. Also, when notifications are enabled, it will start notifying the value.
 
 ## Notifications
 
@@ -81,4 +85,31 @@ When the first request is received, the softdevice will request memory to store 
 Multiple characteristics can be written with a single long write, which is why the execute write request event does not contain an characteristic handle.
 
 Right now, bluenet assumes only 1 characteristic was written.
-Also, bluenet gets the handle from the raw buffer (see [memory layout](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.s132.api.v5.0.0%2Fgroup___b_l_e___g_a_t_t_s___q_u_e_u_e_d___w_r_i_t_e_s___u_s_e_r___m_e_m.html&cp=2_3_1_1_0_2_4_5)) that was given on memory request. The latter could be avoided by using `sd_ble_gatts_value_get()` instead.
+Also, bluenet gets the characteristic handle from the raw buffer (see [memory layout](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.s132.api.v5.0.0%2Fgroup___b_l_e___g_a_t_t_s___q_u_e_u_e_d___w_r_i_t_e_s___u_s_e_r___m_e_m.html&cp=2_3_1_1_0_2_4_5)) that was given on memory request.
+The right way to do this would be to store all the characteristic handles from the prepare write requests.
+
+## Usage
+
+TODO: use control command as example. Add sequence diagram.
+
+### Implementation
+
+Misc:
+
+- When `sharedEncryptionBuffer` is false, a separate encryption buffer will be allocated.
+- updateValue() will encrypt the value of a characteristic to the encrypted buffer. Also, when notifications are enabled, it will start notifying the value.
+
+When the user writes to a characteristic:
+
+- `Stack::onwrite()`
+    - Extracts the characteristic handle from the raw buffer.
+- `Service::onWrite(handle)`
+    - Calls `sd_ble_gatts_value_get()` with NULL as buffer, to get the length that was written.
+- `CharacteristicGeneric::onWrite(length)`
+    - Sets gatt value length to given length.
+    - Sets the value length based on the gatt value length.
+    - Decrypts the gatt value.
+    - Checks access level.
+    - Calls the user callback with the value as data.
+
+
