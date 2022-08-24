@@ -21,9 +21,7 @@ enum cs_cmd_source_type {
  */
 enum cs_cmd_source_id {
 	CS_CMD_SOURCE_NONE         = 0,
-	//	CS_CMD_SOURCE_SAFETY          = 1,        // Safety precautions, for example overcurrent.
 	CS_CMD_SOURCE_INTERNAL     = 2,  // Internal control command, should not be used.
-									 //	CS_CMD_SOURCE_UART            = 3,        // UART.
 	CS_CMD_SOURCE_CONNECTION   = 4,  // BLE connection.
 	CS_CMD_SOURCE_SWITCHCRAFT  = 5,  // Switchcraft trigger.
 	CS_CMD_SOURCE_TAP_TO_TOGLE = 6,  // Tap to toggle trigger.
