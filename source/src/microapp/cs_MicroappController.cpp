@@ -169,12 +169,7 @@ int MicroappController::digitalPinToInterrupt(int pin) {
  * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
-MicroappController::MicroappController() :	EventListener(),
-											_tickCounter(0),
-											_softInterruptCounter(0),
-											_consecutiveMicroappCallCounter(0),
-											_microappIsScanning(false) {
-
+MicroappController::MicroappController() : EventListener() {
 	EventDispatcher::getInstance().addListener(this);
 	LOGi("Microapp end is at %p", microappRamSection._end);
 }

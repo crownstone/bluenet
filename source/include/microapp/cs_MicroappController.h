@@ -98,22 +98,22 @@ private:
 	/**
 	 * To throttle the ticks themselves
 	 */
-	uint8_t _tickCounter;
+	uint8_t _tickCounter = 0;
 
 	/**
 	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK
 	 */
-	int8_t _softInterruptCounter;
+	int8_t _softInterruptCounter = 0;
 
 	/**
 	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
 	 */
-	uint8_t _consecutiveMicroappCallCounter;
+	uint8_t _consecutiveMicroappCallCounter = 0;
 
 	/**
 	 * Flag to indicate whether to forward scanned devices to microapp.
 	 */
-	bool _microappIsScanning;
+	bool _microappIsScanning = false;
 
 	/**
 	 * Keeps track of how many empty interrupt slots are available on the microapp side
