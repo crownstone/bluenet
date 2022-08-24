@@ -11,7 +11,7 @@
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
 #include <drivers/cs_Gpio.h>
-#include <events/cs_EventDispatcher.h>
+#include <events/cs_Event.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappRequestHandler.h>
@@ -29,7 +29,7 @@ int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
  * Forwards requests from the microapp to the relevant handler
  */
 cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_t* header) {
-	LogMicroappRequestHandlerDebug("handleMicroappRequest: [messageType %i, ack %i]", header->messageType, header->ack);
+	LogMicroappRequestHandlerDebug("handleMicroappRequest: [messageType %u, ack %i]", header->messageType, header->ack);
 	uint8_t type = header->messageType;
 	switch (type) {
 		case CS_MICROAPP_SDK_TYPE_NONE: {
@@ -39,47 +39,47 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_
 		}
 		case CS_MICROAPP_SDK_TYPE_LOG: {
 			microapp_sdk_log_header_t* log = reinterpret_cast<microapp_sdk_log_header_t*>(header);
-			return handleMicroappLogRequest(log);
+			return handleRequestLog(log);
 		}
 		case CS_MICROAPP_SDK_TYPE_PIN: {
 			microapp_sdk_pin_t* pin = reinterpret_cast<microapp_sdk_pin_t*>(header);
-			return handleMicroappPinRequest(pin);
+			return handleRequestPin(pin);
 		}
 		case CS_MICROAPP_SDK_TYPE_SWITCH: {
-			microapp_sdk_switch_t* switch_ = reinterpret_cast<microapp_sdk_switch_t*>(header);
-			return handleMicroappSwitchRequest(switch_);
+			microapp_sdk_switch_t* switchRequest = reinterpret_cast<microapp_sdk_switch_t*>(header);
+			return handleRequestSwitch(switchRequest);
 		}
 		case CS_MICROAPP_SDK_TYPE_SERVICE_DATA: {
 			microapp_sdk_service_data_t* serviceData = reinterpret_cast<microapp_sdk_service_data_t*>(header);
-			return handleMicroappServiceDataRequest(serviceData);
+			return handleRequestServiceData(serviceData);
 		}
 		case CS_MICROAPP_SDK_TYPE_TWI: {
 			microapp_sdk_twi_t* twi = reinterpret_cast<microapp_sdk_twi_t*>(header);
-			return handleMicroappTwiRequest(twi);
+			return handleRequestTwi(twi);
 		}
 		case CS_MICROAPP_SDK_TYPE_BLE: {
 			microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(header);
-			return handleMicroappBleRequest(ble);
+			return handleRequestBle(ble);
 		}
 		case CS_MICROAPP_SDK_TYPE_MESH: {
 			microapp_sdk_mesh_t* mesh = reinterpret_cast<microapp_sdk_mesh_t*>(header);
-			return handleMicroappMeshRequest(mesh);
+			return handleRequestMesh(mesh);
 		}
 		case CS_MICROAPP_SDK_TYPE_POWER_USAGE: {
 			microapp_sdk_power_usage_t* powerUsage = reinterpret_cast<microapp_sdk_power_usage_t*>(header);
-			return handleMicroappPowerUsageRequest(powerUsage);
+			return handleRequestPowerUsage(powerUsage);
 		}
 		case CS_MICROAPP_SDK_TYPE_PRESENCE: {
 			microapp_sdk_presence_t* presence = reinterpret_cast<microapp_sdk_presence_t*>(header);
-			return handleMicroappPresenceRequest(presence);
+			return handleRequestPresence(presence);
 		}
 		case CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND: {
 			microapp_sdk_control_command_t* controlCommand = reinterpret_cast<microapp_sdk_control_command_t*>(header);
-			return handleMicroappControlCommandRequest(controlCommand);
+			return handleRequestControlCommand(controlCommand);
 		}
 		case CS_MICROAPP_SDK_TYPE_YIELD: {
 			microapp_sdk_yield_t* yield = reinterpret_cast<microapp_sdk_yield_t*>(header);
-			return handleMicroappYieldRequest(yield);
+			return handleRequestYield(yield);
 		}
 		default: {
 			_log(SERIAL_INFO, true, "Unknown command %u", type);
@@ -94,13 +94,13 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_
 // TODO: establish a proper default log level for microapps
 #define LOCAL_MICROAPP_LOG_LEVEL SERIAL_INFO
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_header_t* log) {
+cs_ret_code_t MicroappRequestHandler::handleRequestLog(microapp_sdk_log_header_t* log) {
 	__attribute__((unused)) bool newLine = false;
 	if (log->flags & CS_MICROAPP_SDK_LOG_FLAG_NEWLINE) {
 		newLine = true;
 	}
 	if (log->size == 0) {
-		_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%s", "");
+		_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "");
 		log->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 		return ERR_SUCCESS;
 	}
@@ -108,37 +108,39 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 		case CS_MICROAPP_SDK_LOG_CHAR: {
 			[[maybe_unused]] microapp_sdk_log_char_t* logChar = reinterpret_cast<microapp_sdk_log_char_t*>(log);
 			[[maybe_unused]] uint32_t val                     = logChar->value;
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i", val);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_SHORT: {
 			[[maybe_unused]] microapp_sdk_log_short_t* logShort = reinterpret_cast<microapp_sdk_log_short_t*>(log);
 			[[maybe_unused]] uint32_t val                       = logShort->value;
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", val);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i", val);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_UINT: {
 			[[maybe_unused]] microapp_sdk_log_uint_t* logUint = reinterpret_cast<microapp_sdk_log_uint_t*>(log);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%u%s", logUint->value);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%u", logUint->value);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_INT: {
 			[[maybe_unused]] microapp_sdk_log_int_t* logInt = reinterpret_cast<microapp_sdk_log_int_t*>(log);
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i%s", logInt->value);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i", logInt->value);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_FLOAT: {
 			[[maybe_unused]] microapp_sdk_log_float_t* logFloat = reinterpret_cast<microapp_sdk_log_float_t*>(log);
 			[[maybe_unused]] int32_t val                        = logFloat->value;
+			[[maybe_unused]] int32_t decimal                    = abs(static_cast<int>(logFloat->value * 1000.0) % 1000);
 			// We automatically cast to int because printf of floats is disabled due to size limitations
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i.%03i", val, decimal);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_DOUBLE: {
 			[[maybe_unused]] microapp_sdk_log_double_t* logDouble = reinterpret_cast<microapp_sdk_log_double_t*>(log);
 			[[maybe_unused]] int32_t val                          = logDouble->value;
+			[[maybe_unused]] int32_t decimal                      = abs(static_cast<int>(logDouble->value * 1000.0) % 1000);
 			// We automatically cast to int because printf of floats is disabled due to size limitations
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i (cast to int) %s", val);
+			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i.%03i", val);
 			break;
 		}
 		case CS_MICROAPP_SDK_LOG_STR: {
@@ -158,10 +160,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 				// Truncate, but don't send an error
 				log->size = MICROAPP_SDK_MAX_ARRAY_SIZE;
 			}
-			for (uint8_t i = 0; i < log->size; ++i) {
-				_log(LOCAL_MICROAPP_LOG_LEVEL, false, "0x%x ", (int)logArray->arr[i]);
-			}
-			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "");
+			_logArray(LOCAL_MICROAPP_LOG_LEVEL, newLine, reinterpret_cast<int8_t*>(&logArray->arr[0]), log->size);
 			break;
 		}
 		default: {
@@ -174,7 +173,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappLogRequest(microapp_sdk_log_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_t* pin) {
+cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) {
 	MicroappSdkPin pinIndex = (MicroappSdkPin)pin->pin;
 	LogMicroappRequestHandlerDebug("handleMicroappPinRequest: [pin %i, type %i]", pinIndex, pin->type);
 	if (pinIndex > GPIO_INDEX_COUNT + BUTTON_COUNT + LED_COUNT) {
@@ -313,18 +312,19 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPinRequest(microapp_sdk_pin_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_) {
-	MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)switch_->value;
+cs_ret_code_t MicroappRequestHandler::handleRequestSwitch(microapp_sdk_switch_t* switchRequest) {
+	MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)switchRequest->value;
 	LogMicroappRequestHandlerDebug("handleMicroappSwitchRequest: [value %i]", value);
 	TYPIFY(CMD_SWITCH) switchCommand;
 	switchCommand.switchCmd = value;
-	event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand));
+	cmd_source_with_counter_t source(CS_CMD_SOURCE_MICROAPP);
+	event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand), source);
 	event.dispatch();
-	switch_->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+	switchRequest->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_sdk_service_data_t* serviceData) {
+cs_ret_code_t MicroappRequestHandler::handleRequestServiceData(microapp_sdk_service_data_t* serviceData) {
 	LogMicroappRequestHandlerDebug("handleMicroappServiceDataRequest: [uuid %i, size %i]", serviceData->appUuid, serviceData->size);
 	if (serviceData->size > MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH) {
 		LOGi("Payload size too large");
@@ -344,7 +344,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappServiceDataRequest(microapp_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_t* twi) {
+cs_ret_code_t MicroappRequestHandler::handleRequestTwi(microapp_sdk_twi_t* twi) {
 	MicroappSdkTwiType type = (MicroappSdkTwiType)twi->type;
 	LogMicroappRequestHandlerDebug("handleMicroappTwiRequest: [type %i]", type);
 	switch (type) {
@@ -376,7 +376,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_
 			twiRead.length  = twi->size;
 			twiRead.stop    = (twi->flags & CS_MICROAPP_SDK_TWI_FLAG_STOP);
 			event_t event(CS_TYPE::EVT_TWI_READ, &twiRead, sizeof(twiRead));
-			EventDispatcher::getInstance().dispatch(event);
+			event.dispatch();
 
 			// Get data back and prepare for microapp
 			twi->header.ack = event.result.returnCode;
@@ -393,7 +393,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappTwiRequest(microapp_sdk_twi_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_t* ble) {
+cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) {
 	MicroappSdkBleType type = (MicroappSdkBleType)ble->type;
 	LogMicroappRequestHandlerDebug("handleMicroappBleRequest: [type %i]", type);
 #if BUILD_MESHING == 0
@@ -457,11 +457,11 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappBleRequest(microapp_sdk_ble_
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mesh_t* mesh) {
+cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mesh) {
 
 #if BUILD_MESHING == 0
 	LOGw("Mesh is disabled. Mesh-related microapp requests are ignored.");
-	ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
+	mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
 	return ERR_NOT_AVAILABLE;
 #endif
 	MicroappSdkMeshType type = (MicroappSdkMeshType)mesh->type;
@@ -543,7 +543,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappMeshRequest(microapp_sdk_mes
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappPowerUsageRequest(microapp_sdk_power_usage_t* powerUsage) {
+cs_ret_code_t MicroappRequestHandler::handleRequestPowerUsage(microapp_sdk_power_usage_t* powerUsage) {
 	TYPIFY(STATE_POWER_USAGE) powerUsageState;
 	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsageState, sizeof(powerUsageState));
 	powerUsage->powerUsage = powerUsageState;
@@ -551,7 +551,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPowerUsageRequest(microapp_s
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk_presence_t* presence) {
+cs_ret_code_t MicroappRequestHandler::handleRequestPresence(microapp_sdk_presence_t* presence) {
 	if (presence->profileId >= MAX_NUMBER_OF_PRESENCE_PROFILES) {
 		LOGi("Incorrect profileId");
 		presence->header.ack = CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE;
@@ -578,7 +578,7 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappPresenceRequest(microapp_sdk
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
+cs_ret_code_t MicroappRequestHandler::handleRequestControlCommand(
 		microapp_sdk_control_command_t* controlCommand) {
 	if (controlCommand->size == 0) {
 		LOGi("No control command");
@@ -590,25 +590,32 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappControlCommandRequest(
 		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	LogMicroappRequestHandlerDebug("Dispatching control command of type %i", controlCommand->type);
+	LogMicroappRequestHandlerDebug("Dispatching control command of type %u", controlCommand->type);
 	TYPIFY(CMD_CONTROL_CMD) eventData;
 	eventData.protocolVersion = controlCommand->protocol;
 	eventData.data            = controlCommand->payload;
 	eventData.size            = controlCommand->size;
-	eventData.type            = (CommandHandlerTypes)controlCommand->type;
-	eventData.accessLevel     = EncryptionAccessLevel::BASIC;
-	event_t event(CS_TYPE::CMD_CONTROL_CMD, &eventData, sizeof(eventData));
+	eventData.type            = static_cast<CommandHandlerTypes>(controlCommand->type);
+	eventData.accessLevel     = EncryptionAccessLevel::MEMBER;
+	cmd_source_with_counter_t source(CS_CMD_SOURCE_MICROAPP);
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &eventData, sizeof(eventData), source);
 	event.dispatch();
-	if (event.result.returnCode != ERR_SUCCESS) {
-		LOGi("Dispatched control command not successfull, result code: %u", event.result.returnCode);
-		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-		return event.result.returnCode;
+	switch (event.result.returnCode) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+		case ERR_WAIT_FOR_SUCCESS:
+			break;
+		default: {
+			LOGi("Dispatched control command not successful, result code: %u", event.result.returnCode);
+			controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+			return event.result.returnCode;
+		}
 	}
 	controlCommand->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleMicroappYieldRequest(microapp_sdk_yield_t* yield) {
+cs_ret_code_t MicroappRequestHandler::handleRequestYield(microapp_sdk_yield_t* yield) {
 	LogMicroappRequestHandlerDebug("handleMicroappYieldRequest: [type %u, emptySlots %u]", yield->type, yield->emptyInterruptSlots);
 	// Update number of empty interrupt slots the microapp has
 	MicroappController& controller = MicroappController::getInstance();

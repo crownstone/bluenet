@@ -29,17 +29,17 @@ protected:
 	 * The incoming header ack always needs to be set in these handlers.
 	 * The microapp may check the result of the request handling via this ack field
 	 */
-	cs_ret_code_t handleMicroappLogRequest(microapp_sdk_log_header_t* log);
-	cs_ret_code_t handleMicroappPinRequest(microapp_sdk_pin_t* pin);
-	cs_ret_code_t handleMicroappSwitchRequest(microapp_sdk_switch_t* switch_);
-	cs_ret_code_t handleMicroappServiceDataRequest(microapp_sdk_service_data_t* serviceData);
-	cs_ret_code_t handleMicroappTwiRequest(microapp_sdk_twi_t* twi);
-	cs_ret_code_t handleMicroappBleRequest(microapp_sdk_ble_t* ble);
-	cs_ret_code_t handleMicroappMeshRequest(microapp_sdk_mesh_t* mesh);
-	cs_ret_code_t handleMicroappPowerUsageRequest(microapp_sdk_power_usage_t* powerUsage);
-	cs_ret_code_t handleMicroappPresenceRequest(microapp_sdk_presence_t* presence);
-	cs_ret_code_t handleMicroappControlCommandRequest(microapp_sdk_control_command_t* controlCommand);
-	cs_ret_code_t handleMicroappYieldRequest(microapp_sdk_yield_t* yield);
+	cs_ret_code_t handleRequestLog(microapp_sdk_log_header_t* log);
+	cs_ret_code_t handleRequestPin(microapp_sdk_pin_t* pin);
+	cs_ret_code_t handleRequestSwitch(microapp_sdk_switch_t* switch_);
+	cs_ret_code_t handleRequestServiceData(microapp_sdk_service_data_t* serviceData);
+	cs_ret_code_t handleRequestTwi(microapp_sdk_twi_t* twi);
+	cs_ret_code_t handleRequestBle(microapp_sdk_ble_t* ble);
+	cs_ret_code_t handleRequestMesh(microapp_sdk_mesh_t* mesh);
+	cs_ret_code_t handleRequestPowerUsage(microapp_sdk_power_usage_t* powerUsage);
+	cs_ret_code_t handleRequestPresence(microapp_sdk_presence_t* presence);
+	cs_ret_code_t handleRequestControlCommand(microapp_sdk_control_command_t* controlCommand);
+	cs_ret_code_t handleRequestYield(microapp_sdk_yield_t* yield);
 
 public:
 	static MicroappRequestHandler& getInstance() {

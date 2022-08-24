@@ -27,8 +27,7 @@ enum cs_cmd_source_id {
 	CS_CMD_SOURCE_CONNECTION   = 4,  // BLE connection.
 	CS_CMD_SOURCE_SWITCHCRAFT  = 5,  // Switchcraft trigger.
 	CS_CMD_SOURCE_TAP_TO_TOGLE = 6,  // Tap to toggle trigger.
-	//  CS_CMD_SOURCE_CONFIG_APPLY    = 7,        // A configuration was changed, resulting in an immediate change. For
-	//  example, dimming is no longer allowed.
+	CS_CMD_SOURCE_MICROAPP     = 7,  // Command comes from a microapp.
 };
 
 /**
