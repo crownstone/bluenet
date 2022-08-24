@@ -1,13 +1,31 @@
 #pragma once
 
+#include <ble/cs_BleConstants.h>
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
+#include <protocol/cs_Packets.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
+#define LogMicroappControllerDebug LOGvv
+
 static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+
+// Do some asserts on the redefinitions in the shared header files
+// These asserts cannot be done where declared since the shared files do not depend on the rest of bluenet
+static_assert(MAC_ADDRESS_LENGTH == MAC_ADDRESS_LEN);
+static_assert(MAX_BLE_ADV_DATA_LENGTH == ADVERTISEMENT_DATA_MAX_SIZE);
+static_assert(MAX_MICROAPP_MESH_PAYLOAD_SIZE == MAX_MESH_MSG_PAYLOAD_SIZE);
+
+static_assert(CS_MICROAPP_SDK_SWITCH_OFF == CS_SWITCH_CMD_VAL_OFF);
+static_assert(CS_MICROAPP_SDK_SWITCH_ON == CS_SWITCH_CMD_VAL_FULLY_ON);
+static_assert(CS_MICROAPP_SDK_SWITCH_TOGGLE == CS_SWITCH_CMD_VAL_TOGGLE);
+static_assert(CS_MICROAPP_SDK_SWITCH_BEHAVIOUR == CS_SWITCH_CMD_VAL_BEHAVIOUR);
+static_assert(CS_MICROAPP_SDK_SWITCH_SMART_ON == CS_SWITCH_CMD_VAL_SMART_ON);
 
 /**
  * The IPC buffers can be used to bootstrap communication between microapp and bluenet. However, when in the microapp
@@ -16,32 +34,21 @@ static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SI
  */
 struct coroutine_args_t {
 	uintptr_t entry;
-	bluenet_io_buffer_t* io_buffer;
+	bluenet_io_buffers_t* io_buffers;
 };
 
 /**
- * Interrupt service routines for pins as registered by the microapp.
+ * @struct microapp_soft_interrupt_registration_t
+ * Struct for keeping track of registered interrupts from the microapp
+ *
+ * @var microapp_soft_interrupt_registration_t::registered indicates whether a registration slot is filled.
+ * @var microapp_soft_interrupt_registration_t::type       indicates the message type for the interrupt
+ * @var microapp_soft_interrupt_registration_t::id         unique identifier for interrupt registrations
  */
-struct microapp_pin_isr_t {
-	uint8_t pin     = 0;
-	bool registered = false;
-};
-
-/**
- * Interrupt service routines for bluetooth events as registered by the microapp.
- */
-struct microapp_ble_isr_t {
-	MicroappBleEventType type;
-	uint8_t id      = 0;
-	bool registered = false;
-};
-
-/**
- * Interrupt service routines for received mesh events as registered by the microapp.
- */
-struct microapp_mesh_isr_t {
-	uint8_t id      = 0;
-	bool registered = false;
+struct microapp_soft_interrupt_registration_t {
+	bool registered             = false;
+	MicroappSdkMessageType type = CS_MICROAPP_SDK_TYPE_NONE;
+	uint8_t id                  = 0;
 };
 
 /**
@@ -58,43 +65,24 @@ private:
 	void operator=(MicroappController const&);
 
 	/**
-	 * Limit maximum number of to be registered service routines for the microapp.
+	 * Limit the number of interrupts in a tick. (if -1 there is no limit)
 	 */
-	static const uint8_t MICROAPP_MAX_PIN_ISR_COUNT        = 8;
+	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK  = 10;
 
 	/**
-	 * Limit maximum number of to be registered service routines for the microapp.
-	 * There can be one registered isr per type of BLE event, of which there are for now 3
-	 * - device scanned
-	 * - device connected
-	 * - device disconnected
+	 * The maximum number of consecutive calls to a microapp
 	 */
-	static const uint8_t MICROAPP_MAX_BLE_ISR_COUNT        = 3;
+	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS = 8;
 
 	/**
-	 * Limit the number of callbacks in a tick (if -1) there is no limit.
+	 * The maximum number of registered interrupts
 	 */
-	const int8_t MAX_CALLBACKS_WITHIN_A_TICK               = 10;
+	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS  = 10;
 
 	/**
-	 * The maximum number of consecutive calls to a microapp.
+	 * Buffer for keeping track of registered interrupts
 	 */
-	const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES = 8;
-
-	/**
-	 * Addressees of pin interrupt service routines.
-	 */
-	microapp_pin_isr_t _pinIsr[MICROAPP_MAX_PIN_ISR_COUNT];
-
-	/**
-	 * Addressees of ble interrupt service routines.
-	 */
-	microapp_ble_isr_t _bleIsr[MICROAPP_MAX_BLE_ISR_COUNT];
-
-	/**
-	 * Addressee of mesh interrupt service routines.
-	 */
-	microapp_mesh_isr_t _meshIsr;
+	microapp_soft_interrupt_registration_t _softInterruptRegistrations[MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS];
 
 	/**
 	 * Coroutine for microapp.
@@ -108,80 +96,92 @@ private:
 	coroutine_args_t sharedState;
 
 	/**
-	 * Call counter
+	 * To throttle the ticks themselves
 	 */
-	uint8_t _callCounter;
+	uint8_t _tickCounter = 0;
 
 	/**
-	 * Soft interrupt counter
+	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK
 	 */
-	int8_t _softInterruptCounter;
+	int8_t _softInterruptCounter = 0;
 
 	/**
-	 * To throttle the ticks themselves.
+	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
 	 */
-	uint8_t _tickCounter;
+	uint8_t _consecutiveMicroappCallCounter = 0;
 
 	/**
 	 * Flag to indicate whether to forward scanned devices to microapp.
 	 */
-	bool _microappIsScanning;
+	bool _microappIsScanning = false;
 
 	/**
-	 * Keeps track of how many empty soft interrupt slots are available on the microapp side
+	 * Keeps track of how many empty interrupt slots are available on the microapp side
 	 */
 	uint8_t _emptySoftInterruptSlots = 1;
 
 	/**
-	 * Maps digital pins to interrupts. See also MicroappCommandHandler::interruptToDigitalPin()
+	 * Maps digital pins to interrupts. See also MicroappRequestHandler::interruptToDigitalPin()
 	 */
 	int digitalPinToInterrupt(int pin);
 
 	/**
+	 * Checks whether an interrupt registration already exists
+	 */
+	bool softInterruptRegistered(MicroappSdkMessageType type, uint8_t id);
+
+	/**
 	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
 	 */
-	bool softInterruptInProgress();
+	bool allowSoftInterrupts();
 
 protected:
 	/**
-	 * Call the loop function (internally).
+	 * Resume the previously started coroutine
 	 */
 	void callMicroapp();
 
 	/**
-	 * Get the command from the microapp.
+	 * Retrieve ack from the outgoing buffer that the microapp may have overwritten.
+	 * Particularly check if the microapp exit was on finishing an interrupt.
+	 * In that case, ignore the request made by the microapp
+	 *
+	 * @return true     if the request in the incoming buffer should be handled
+	 * @return false    if the request in the incoming buffer should be ignored
 	 */
-	bool retrieveCommand();
+	bool handleAck();
 
 	/**
-	 * Write the callback.
+	 * Retrieve request from the microapp and let MicroappRequestHandler handle it.
+	 * Return whether the microapp should be called again immediately or not.
+	 * This depends on both the type of request (i.e. for YIELDs do not call again)
+	 * and on whether the max number of consecutive calls has been reached
+	 *
+	 * @return true     if the microapp should be called again
+	 * @return false    if the microapp should not be called again
 	 */
-	void softInterrupt();
+	bool handleRequest();
+
+	/**
+	 * After particular microapp requests we want to stop the microapp (end of loop etc.) and continue with bluenet.
+	 * This function returns true for such requests.
+	 *
+	 * @param[in] header     Header of the microapp request
+	 *
+	 * @return true          if the microapp is yielding
+	 * @return false         if the microapp is not yielding
+	 */
+	bool stopAfterMicroappRequest(microapp_sdk_header_t* header);
+
+	/**
+	 * Call the microapp in an interrupt context
+	 */
+	void generateSoftInterrupt();
 
 	/**
 	 * Check if start address of the microapp is within the flash boundaries assigned to the microapps.
 	 */
 	cs_ret_code_t checkFlashBoundaries(uint8_t appIndex, uintptr_t address);
-
-	/**
-	 * Register GPIO pin.
-	 */
-	bool registerSoftInterruptSlotGpio(uint8_t pin);
-
-	/**
-	 * Interrupt microapp with GPIO event.
-	 */
-	void softInterruptGpio(uint8_t pin);
-
-	/**
-	 * Interrupt microapp with new BLE event.
-	 */
-	void softInterruptBle(scanned_device_t* dev);
-
-	/**
-	 * Interrupt microapp with new Mesh event
-	 */
-	void softInterruptMesh(MeshMsgEvent* event);
 
 	/**
 	 * Get incoming microapp buffer (from coargs).
@@ -194,6 +194,11 @@ protected:
 	uint8_t* getOutputMicroappBuffer();
 
 	/**
+	 * Handle a GPIO event
+	 */
+	void onGpioUpdate(uint8_t pinIndex);
+
+	/**
 	 * Handle a scanned BLE device.
 	 */
 	void onDeviceScanned(scanned_device_t* dev);
@@ -204,14 +209,6 @@ protected:
 	 * @param event the EVT_RECV_MESH_MSG event data
 	 */
 	void onReceivedMeshMessage(MeshMsgEvent* event);
-
-	/**
-	 * After particular microapp commands we want to stop the microapp (end of loop etc.) and continue with bluenet.
-	 * This function returns true for such commands.
-	 *
-	 * @param[in] cmd                            Any microapp command
-	 */
-	bool stopAfterMicroappCommand(microapp_cmd_t* cmd);
 
 public:
 	static MicroappController& getInstance() {
@@ -231,6 +228,8 @@ public:
 
 	/**
 	 * Actually run the app.
+	 *
+	 * @param[in] appIndex (currently ignored)
 	 */
 	void callApp(uint8_t appIndex);
 
@@ -240,35 +239,29 @@ public:
 	void tickMicroapp(uint8_t appIndex);
 
 	/**
-	 * Shortcut setScanning for MicroappCommandHandler to update state of this instance.
+	 * Register interrupts that allow generation of interrupts to the microapp
 	 */
-	void setScanning(bool scanning);
+	cs_ret_code_t registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id);
 
 	/**
-	 * Set the number of empty softInterrupt slots
+	 * Set the number of empty interrupt slots
 	 *
-	 * @param emptySoftInterruptSlots The new value
+	 * @param emptySlots The new value
 	 */
-	void setEmptySoftInterruptSlots(uint8_t emptySoftInterruptSlots);
+	void setEmptySoftInterruptSlots(uint8_t emptySlots);
 
 	/**
-	 * Increment the number of empty softInterrupt slots
-	 * (can be called when a softInterrupt returns)
+	 * Increment the number of empty interrupt slots
 	 */
 	void incrementEmptySoftInterruptSlots();
 
 	/**
-	 * Register slot for BLE soft interrupt.
+	 * Enable or disable BLE scanned device interrupt calls
 	 */
-	bool registerSoftInterruptSlotBle(uint8_t id);
+	void setScanning(bool scanning);
 
 	/**
-	 * Register slot for Mesh soft interrupt.
-	 */
-	bool registerSoftInterruptSlotMesh(uint8_t id);
-
-	/**
-	 * Receive events (for example for i2c)
+	 * Receive events
 	 */
 	void handleEvent(event_t& event);
 };
