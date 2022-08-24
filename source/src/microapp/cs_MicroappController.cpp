@@ -14,8 +14,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
-#include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappController.h>
+#include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 
@@ -286,7 +286,7 @@ bool MicroappController::handleAck() {
 	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
 	LogMicroappControllerDebug("handleAck: [ack %i]", outgoingHeader->ack);
-	bool inInterruptContext               = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_NO_REQUEST);
+	bool inInterruptContext = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_NO_REQUEST);
 	if (!inInterruptContext) {
 		return true;
 	}
@@ -311,8 +311,8 @@ bool MicroappController::handleAck() {
 }
 
 bool MicroappController::handleRequest() {
-	uint8_t* inputBuffer                        = getInputMicroappBuffer();
-	microapp_sdk_header_t* incomingHeader       = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
+	uint8_t* inputBuffer                  = getInputMicroappBuffer();
+	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
 	LogMicroappControllerDebug("Retrieve and handle request [type %u]", incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
@@ -372,9 +372,9 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	if (_tickCounter < MICROAPP_LOOP_FREQUENCY) {
 		return;
 	}
-	_tickCounter = 0;
+	_tickCounter                           = 0;
 	// Reset interrupt counter every microapp tick
-	_softInterruptCounter                      = 0;
+	_softInterruptCounter                  = 0;
 	// Indicate to the microapp that this is a tick entry by writing in outgoing message header
 	uint8_t* outputBuffer                  = getOutputMicroappBuffer();
 	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
@@ -421,7 +421,8 @@ void MicroappController::generateSoftInterrupt() {
 	bool ignoreRequest                       = false;
 	int8_t repeatCounter                     = 0;
 	do {
-		LogMicroappControllerDebug("generateSoftInterrupt [call %i, %i interrupts within tick]", repeatCounter, _softInterruptCounter);
+		LogMicroappControllerDebug(
+				"generateSoftInterrupt [call %i, %i interrupts within tick]", repeatCounter, _softInterruptCounter);
 		callMicroapp();
 		ignoreRequest = !handleAck();
 		if (ignoreRequest) {

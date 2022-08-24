@@ -37,8 +37,7 @@ Stack::Stack() {
 
 #define CS_STACK_LONG_WRITE_HEADER_SIZE 6
 
-Stack::~Stack() {
-}
+Stack::~Stack() {}
 
 /**
  * Initialize SoftDevice, handlers, and brown-out.

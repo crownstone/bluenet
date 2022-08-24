@@ -80,7 +80,7 @@ protected:
 	//! Status of CharacteristicBase (basically a bunch of 1-bit flags)
 	Status _status;
 
-	buffer_ptr_t _encryptionBuffer = nullptr;
+	buffer_ptr_t _encryptionBuffer        = nullptr;
 
 	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
 	 * allowed userlevel key.
@@ -114,44 +114,28 @@ public:
 	/**
 	 * Set this characteristic to be writable.
 	 */
-	void setWritable(bool writable) {
-		_status.writable = writable;
-	}
+	void setWritable(bool writable) { _status.writable = writable; }
 
 	/** Set this characteristic to be notifiable.
 	 */
-	void setNotifies(bool notifies) {
-		_status.notifies = notifies;
-	}
+	void setNotifies(bool notifies) { _status.notifies = notifies; }
 
-	bool isNotifyingEnabled() {
-		return _status.notifyingEnabled;
-	}
+	bool isNotifyingEnabled() { return _status.notifyingEnabled; }
 
-	void setNotifyingEnabled(bool enabled) {
-		_status.notifyingEnabled = enabled;
-	}
+	void setNotifyingEnabled(bool enabled) { _status.notifyingEnabled = enabled; }
 
-	void setIndicates(bool indicates) {
-		_status.indicates = indicates;
-	}
+	void setIndicates(bool indicates) { _status.indicates = indicates; }
 
 	void setUUID(const UUID& uuid) {
 		if (_status.initialized) BLE_THROW("Already inited.");
 		_uuid = uuid;
 	}
 
-	uint16_t getValueHandle() {
-		return _handles.value_handle;
-	}
+	uint16_t getValueHandle() { return _handles.value_handle; }
 
-	uint16_t getCccdHandle() {
-		return _handles.cccd_handle;
-	}
+	uint16_t getCccdHandle() { return _handles.cccd_handle; }
 
-	void setSharedEncryptionBuffer(bool val) {
-		_status.sharedEncryptionBuffer = val;
-	}
+	void setSharedEncryptionBuffer(bool val) { _status.sharedEncryptionBuffer = val; }
 
 	/** Return the maximum length of the value used by the gatt server
 	 *  In the case of aes encryption, this is the maximum length that
@@ -511,7 +495,11 @@ protected:
 			}
 			else {
 				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
-				LOGCharacteristicDebug("%s: Allocated encryption buffer=%p size=%u", _name, _encryptionBuffer, getGattValueMaxLength());
+				LOGCharacteristicDebug(
+						"%s: Allocated encryption buffer=%p size=%u",
+						_name,
+						_encryptionBuffer,
+						getGattValueMaxLength());
 			}
 		}
 	}

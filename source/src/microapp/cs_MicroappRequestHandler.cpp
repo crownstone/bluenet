@@ -14,8 +14,8 @@
 #include <events/cs_Event.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
-#include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappController.h>
+#include <microapp/cs_MicroappRequestHandler.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Packets.h>
@@ -130,7 +130,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestLog(microapp_sdk_log_header_t
 		case CS_MICROAPP_SDK_LOG_FLOAT: {
 			[[maybe_unused]] microapp_sdk_log_float_t* logFloat = reinterpret_cast<microapp_sdk_log_float_t*>(log);
 			[[maybe_unused]] int32_t val                        = logFloat->value;
-			[[maybe_unused]] int32_t decimal                    = abs(static_cast<int>(logFloat->value * 1000.0) % 1000);
+			[[maybe_unused]] int32_t decimal = abs(static_cast<int>(logFloat->value * 1000.0) % 1000);
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i.%03i", val, decimal);
 			break;
@@ -138,7 +138,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestLog(microapp_sdk_log_header_t
 		case CS_MICROAPP_SDK_LOG_DOUBLE: {
 			[[maybe_unused]] microapp_sdk_log_double_t* logDouble = reinterpret_cast<microapp_sdk_log_double_t*>(log);
 			[[maybe_unused]] int32_t val                          = logDouble->value;
-			[[maybe_unused]] int32_t decimal                      = abs(static_cast<int>(logDouble->value * 1000.0) % 1000);
+			[[maybe_unused]] int32_t decimal = abs(static_cast<int>(logDouble->value * 1000.0) % 1000);
 			// We automatically cast to int because printf of floats is disabled due to size limitations
 			_log(LOCAL_MICROAPP_LOG_LEVEL, newLine, "%i.%03i", val);
 			break;
@@ -191,7 +191,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 			TYPIFY(EVT_GPIO_INIT) gpio;
 			gpio.pin_index = interruptToDigitalPin(pinIndex);
 			gpio.pull      = (direction == CS_MICROAPP_SDK_PIN_INPUT_PULLUP) ? 1 : 0;
-			LogMicroappRequestHandlerDebug("Initializing GPIO pin %i with direction %u and polarity %u", gpio.pin_index, direction, polarity);
+			LogMicroappRequestHandlerDebug(
+					"Initializing GPIO pin %i with direction %u and polarity %u", gpio.pin_index, direction, polarity);
 
 			switch (direction) {
 				case CS_MICROAPP_SDK_PIN_INPUT:
@@ -242,7 +243,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 
 			if (gpio.direction == SENSE) {
 				MicroappController& controller = MicroappController::getInstance();
-				cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
+				cs_ret_code_t result           = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_PIN, pinIndex);
 				if (result != ERR_SUCCESS) {
 					// Either already registered or no space
 					pin->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
@@ -325,7 +326,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestSwitch(microapp_sdk_switch_t*
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestServiceData(microapp_sdk_service_data_t* serviceData) {
-	LogMicroappRequestHandlerDebug("handleMicroappServiceDataRequest: [uuid %i, size %i]", serviceData->appUuid, serviceData->size);
+	LogMicroappRequestHandlerDebug(
+			"handleMicroappServiceDataRequest: [uuid %i, size %i]", serviceData->appUuid, serviceData->size);
 	if (serviceData->size > MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH) {
 		LOGi("Payload size too large");
 		serviceData->header.ack = CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE;
@@ -578,8 +580,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPresence(microapp_sdk_presenc
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleRequestControlCommand(
-		microapp_sdk_control_command_t* controlCommand) {
+cs_ret_code_t MicroappRequestHandler::handleRequestControlCommand(microapp_sdk_control_command_t* controlCommand) {
 	if (controlCommand->size == 0) {
 		LOGi("No control command");
 		controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERR_EMPTY;
@@ -603,8 +604,9 @@ cs_ret_code_t MicroappRequestHandler::handleRequestControlCommand(
 	switch (event.result.returnCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
-		case ERR_WAIT_FOR_SUCCESS:
+		case ERR_WAIT_FOR_SUCCESS: {
 			break;
+		}
 		default: {
 			LOGi("Dispatched control command not successful, result code: %u", event.result.returnCode);
 			controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
@@ -616,7 +618,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestControlCommand(
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestYield(microapp_sdk_yield_t* yield) {
-	LogMicroappRequestHandlerDebug("handleMicroappYieldRequest: [type %u, emptySlots %u]", yield->type, yield->emptyInterruptSlots);
+	LogMicroappRequestHandlerDebug(
+			"handleMicroappYieldRequest: [type %u, emptySlots %u]", yield->type, yield->emptyInterruptSlots);
 	// Update number of empty interrupt slots the microapp has
 	MicroappController& controller = MicroappController::getInstance();
 	controller.setEmptySoftInterruptSlots(yield->emptyInterruptSlots);

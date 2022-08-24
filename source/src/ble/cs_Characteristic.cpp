@@ -8,8 +8,7 @@
 #include <ble/cs_Characteristic.h>
 #include <storage/cs_State.h>
 
-CharacteristicBase::CharacteristicBase()
-		: _handles({}), _status({}) {}
+CharacteristicBase::CharacteristicBase() : _handles({}), _status({}) {}
 
 /**
  * Set the default attributes of every characteristic
@@ -74,7 +73,8 @@ void CharacteristicBase::init(Service* svc) {
 	LOGCharacteristicDebug("init with buffer=%p of len=%u", getGattValuePtr(), getGattValueMaxLength());
 
 	// Add to softdevice.
-	uint32_t nrfCode = sd_ble_gatts_characteristic_add(svc->getHandle(), &characteristicMetadata, &characteristicValue, &_handles);
+	uint32_t nrfCode =
+			sd_ble_gatts_characteristic_add(svc->getHandle(), &characteristicMetadata, &characteristicValue, &_handles);
 	switch (nrfCode) {
 		case NRF_SUCCESS: break;
 		case NRF_ERROR_INVALID_ADDR:

@@ -85,13 +85,9 @@ protected:
 	/** Add a single characteristic to the list
 	 * @characteristic Characteristic to add
 	 */
-	void addCharacteristic(CharacteristicBase* characteristic) {
-		_characteristics.push_back(characteristic);
-	}
+	void addCharacteristic(CharacteristicBase* characteristic) { _characteristics.push_back(characteristic); }
 
-	void updatedCharacteristics() {
-		_characteristics.shrink_to_fit();
-	}
+	void updatedCharacteristics() { _characteristics.shrink_to_fit(); }
 
 	void setAesEncrypted(bool encrypted);
 };

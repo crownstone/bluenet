@@ -310,7 +310,7 @@ enum MicroappSdkBleType {
 	//! Request disconnecting from a peripheral
 	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT = 0x07,
 	//! Bluenet -> microapp when disconnected from a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECTED = 0x08,
+	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECTED       = 0x08,
 };
 
 /**
@@ -504,7 +504,10 @@ struct __attribute__((packed)) microapp_sdk_pin_t {
 	//! Specifies whether to read from or write to pin. Only used with type ACTION. See MicroappSdkPinActionType.
 	uint8_t action;
 
-	//! Specifies value to write to pin, or field to put read value. Only used with type ACTION. See MicroappSdkPinValue.
+	/**
+	 * Specifies value to write to pin, or field to put read value. Only used with type ACTION.
+	 * See MicroappSdkPinValue.
+	 */
 	uint8_t value;
 };
 

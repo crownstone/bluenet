@@ -159,7 +159,7 @@ bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
 				gattValue.offset  = 0;
 				gattValue.p_value = NULL;
 
-				uint32_t nrfCode    = sd_ble_gatts_value_get(
+				uint32_t nrfCode  = sd_ble_gatts_value_get(
                         getStack()->getConnectionHandle(), characteristic->getValueHandle(), &gattValue);
 				switch (nrfCode) {
 					case NRF_SUCCESS:

@@ -67,17 +67,17 @@ private:
 	/**
 	 * Limit the number of interrupts in a tick. (if -1 there is no limit)
 	 */
-	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK  = 10;
+	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK = 10;
 
 	/**
 	 * The maximum number of consecutive calls to a microapp
 	 */
-	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS = 8;
+	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS     = 8;
 
 	/**
 	 * The maximum number of registered interrupts
 	 */
-	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS  = 10;
+	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS = 10;
 
 	/**
 	 * Buffer for keeping track of registered interrupts
@@ -98,12 +98,12 @@ private:
 	/**
 	 * To throttle the ticks themselves
 	 */
-	uint8_t _tickCounter = 0;
+	uint8_t _tickCounter                    = 0;
 
 	/**
 	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK
 	 */
-	int8_t _softInterruptCounter = 0;
+	int8_t _softInterruptCounter            = 0;
 
 	/**
 	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
@@ -113,12 +113,12 @@ private:
 	/**
 	 * Flag to indicate whether to forward scanned devices to microapp.
 	 */
-	bool _microappIsScanning = false;
+	bool _microappIsScanning                = false;
 
 	/**
 	 * Keeps track of how many empty interrupt slots are available on the microapp side
 	 */
-	uint8_t _emptySoftInterruptSlots = 1;
+	uint8_t _emptySoftInterruptSlots        = 1;
 
 	/**
 	 * Maps digital pins to interrupts. See also MicroappRequestHandler::interruptToDigitalPin()
