@@ -284,36 +284,6 @@ enum MicroappSdkTwiFlags {
 };
 
 /**
- * Type of BLE request, indicating how to interpret the rest of the request
- */
-enum MicroappSdkBleType {
-	//! Invalid type
-	CS_MICROAPP_SDK_BLE_NONE                          = 0x00,
-
-	// Scan related message types
-
-	//! Start forwarding scanned devices to the microapp
-	CS_MICROAPP_SDK_BLE_SCAN_START                    = 0x01,
-	//! Stop forwarding scanned devices to the microapp
-	CS_MICROAPP_SDK_BLE_SCAN_STOP                     = 0x02,
-	//! Register an interrupt for incoming scanned devices
-	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT       = 0x03,
-	//! Bluenet has scanned a device. Used for interrupts
-	CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE           = 0x04,
-
-	// Connection related message types
-
-	//! Request a connection to a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT    = 0x05,
-	//! Bluenet -> microapp when connected to a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_CONNECTED          = 0x06,
-	//! Request disconnecting from a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT = 0x07,
-	//! Bluenet -> microapp when disconnected from a peripheral
-	CS_MICROAPP_SDK_BLE_CONNECTION_DISCONNECTED       = 0x08,
-};
-
-/**
  * Mesh request types
  */
 enum MicroappSdkMeshType {
@@ -567,6 +537,294 @@ struct __attribute__((packed)) microapp_sdk_twi_t {
 
 static_assert(sizeof(microapp_sdk_twi_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
+
+struct __attribute__((packed)) microapp_sdk_ble_address_t {
+	//! Type of address.
+	uint8_t addressType;
+
+	//! Big-endian MAC address.
+	uint8_t address[MAC_ADDRESS_LENGTH];
+};
+
+
+struct __attribute__((packed)) microapp_sdk_ble_on_scan_t {
+	//! Address of the scanned advertisement.
+	microapp_sdk_ble_address_t address;
+
+	//! Received signal strength.
+	int8_t rssi;
+
+	//! Size of the advertisement data.
+	uint8_t size;
+
+	//! The advertisement data.
+	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
+};
+
+enum MicroappSdkBleScanType {
+	CS_MICROAPP_SDK_BLE_SCAN_START = 1,
+	CS_MICROAPP_SDK_BLE_SCAN_STOP = 2,
+	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT = 3,
+	CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN = 4,
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_scan_t {
+	uint8_t type;
+
+	union {
+		microapp_sdk_ble_on_scan_t onScan;
+	} payload;
+};
+
+enum MicroappSdkBleUuidType {
+	//! Invalid or empty UUID.
+	CS_MICROAPP_SDK_BLE_UUID_NONE = 0,
+
+	//! Standardized service UUID.
+	CS_MICROAPP_SDK_BLE_UUID_STANDARD = 1,
+
+	/**
+	 * Custom service UUID.
+	 * These have to be registered first.
+	 */
+	CS_MICROAPP_SDK_BLE_UUID_CUSTOM_START = 2,
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_uuid_t {
+	//! The type of UUID.
+	uint8_t uuidType;
+
+	//! The UUID.
+	uint16_t uuid;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_uuid_register_t {
+	//! The custom service UUID to register.
+	uint8_t customUuid[16];
+
+	//! UUID set by bluenet, to be used later.
+	microapp_sdk_ble_uuid_t uuid;
+};
+
+
+
+struct __attribute__((packed)) microapp_sdk_ble_connect_t {
+	microapp_sdk_ble_address_t address;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_event_connect_t {
+	uint16_t handle;
+
+	microapp_sdk_ble_address_t address;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_disconnect_t {
+	uint16_t handle;
+
+	//! HCI error code.
+	uint8_t reason;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_discover_t {
+	//! Number of UUIDs in the list.
+	uint8_t uuidCount;
+
+	//! List of UUIDs to be discovered.
+	microapp_sdk_ble_uuid_t uuids[8];
+};
+
+enum MicroappSdkBleCentralType {
+	CS_MICROAPP_SDK_BLE_CENTRAL_CONNECT = 1,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT = 2,
+
+	CS_MICROAPP_SDK_BLE_CENTRAL_DISCONNECT = 3,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT = 4,
+
+	CS_MICROAPP_SDK_BLE_CENTRAL_DISCOVER = 5,
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_t {
+	uint8_t type;
+
+	union {
+		microapp_sdk_ble_connect_t connect;
+		microapp_sdk_ble_event_connect_t eventConnect;
+		microapp_sdk_ble_disconnect_t disconnect;
+		microapp_sdk_ble_disconnect_t eventDisconnect;
+	} payload;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_service_add_t {
+	//! The UUID of the service.
+	microapp_sdk_ble_uuid_t uuid;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
+	//! Broadcast is not supported.
+	bool broadcast : 1;
+
+	//! Whether the characteristic is readable.
+	bool read : 1;
+
+	//! Whether the characteristic can be written to without response.
+	bool writeNoResponse : 1;
+
+	//! Whether the characteristic can be written to with response.
+	bool write : 1;
+
+	//! Whether the characteristic supports notifications.
+	bool notify : 1;
+
+	//! Whether the characteristic supports indications.
+	bool indicate : 1;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_characteristic_add_t {
+	//! The handle of the service to add this characteristic to.
+	uint16_t serviceHandle;
+
+	//! The UUID of this characteristic.
+	microapp_sdk_ble_uuid_t uuid;
+
+	microapp_sdk_ble_characteristic_options_t options;
+
+	//! Size of the provided buffer.
+	uint16_t bufferSize;
+
+	/**
+	 * Buffer that holds the characteristic value.
+	 * This buffer must be kept valid by the microapp.
+	 */
+	uint8_t* buffer;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_set_long_write_buffer_t {
+	//! Size of the provided buffer.
+	uint16_t bufferSize;
+
+	/**
+	 * Buffer that holds the long write data.
+	 * This buffer must be kept valid by the microapp.
+	 */
+	uint8_t* buffer;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_characteristic_value_set_t {
+	//! Size of the value.
+	uint16_t size;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_characteristic_value_notify_t {
+	/**
+	 * Send the current value starting at given offset.
+	 */
+	uint8_t offset;
+
+	/**
+	 * Size of the data to send.
+	 */
+	uint16_t size;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_event_write_t {
+	//! Size of the value that has been written.
+	uint16_t size;
+};
+
+enum MicroappSdkBlePeripheralType {
+	//! Add a service. Payload is addService.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_ADD_SERVICE = 1,
+
+	//! Add a characteristic. Payload is addCharacteristic.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_ADD_CHARACTERISTIC = 2,
+
+	/**
+	 * Set the buffer to be used for long writes.
+	 * Only 1 long write buffer is required.
+	 * Payload is setLongWriteBuffer.
+	 */
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_SET_LONG_WRITE_BUFFER = 3,
+
+
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REGISTER_INTERRUPT = 4,
+
+	//! Disconnect the client.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_DISCONNECT = 10,
+
+	//! The value has been set. Payload is valueSet.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_VALUE_SET = 11,
+
+	//! Notify data. Payload is notify.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_NOTIFY = 12,
+
+	//! Indicate data. Payload is indicate.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_INDICATE = 13,
+
+
+	//! Client connected.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT = 20,
+
+	//! Client disconnected.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_DISCONNECT = 21,
+
+	//! Data has been written to the characteristic.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_WRITE = 22,
+
+	//! Data has been written to the characteristic.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_READ = 23,
+
+	//! The client subscribed for notifications.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_SUBSCRIBE = 24,
+
+	//! The client unsubscribed for notifications.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_UNSUBSCRIBE = 25,
+
+	//! A notification has been sent.
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_NOTIFICATION_DONE = 26,
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_t {
+	//! See MicroappSdkBlePeripheralType.
+	uint8_t type;
+
+	/**
+	 * The connection handle associated with the command or event.
+	 */
+	uint16_t connectionHandle;
+
+	/**
+	 * The handle of the service of characteristic.
+	 * When adding a service or characteristic, this will be set by bluenet.
+	 */
+	uint16_t handle;
+
+	union {
+		microapp_sdk_ble_service_add_t addService;
+		microapp_sdk_ble_characteristic_add_t addCharacteristic;
+		microapp_sdk_ble_set_long_write_buffer_t setLongWriteBuffer;
+		microapp_sdk_ble_characteristic_value_set_t valueSet;
+		microapp_sdk_ble_characteristic_value_notify_t notify;
+		microapp_sdk_ble_characteristic_value_notify_t indicate;
+		microapp_sdk_ble_disconnect_t disconnect;
+		microapp_sdk_ble_disconnect_t eventDisconnect;
+		microapp_sdk_ble_event_write_t eventWrite;
+	} payload;
+};
+
+
+/**
+ * Type of BLE request, indicating how to interpret the rest of the request
+ */
+enum MicroappSdkBleType {
+	//! Invalid type
+	CS_MICROAPP_SDK_BLE_NONE                          = 0x00,
+
+	CS_MICROAPP_SDK_BLE_UUID_REGISTER                 = 0x01,
+	CS_MICROAPP_SDK_BLE_SCAN                          = 0x02,
+	CS_MICROAPP_SDK_BLE_CENTRAL                       = 0x03,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL                    = 0x04,
+};
+
 /**
  * Struct for Bluetooth Low Energy related messages, excluding mesh. Includes scanning and connecting
  */
@@ -576,23 +834,17 @@ struct __attribute__((packed)) microapp_sdk_ble_t {
 	//! Specifies the type of message. See MicroappSdkBleType.
 	uint8_t type;
 
-	//! Type of address
-	uint8_t address_type;
+	union {
+		microapp_sdk_ble_uuid_register_t uuidRegister;
+		microapp_sdk_ble_scan_t scan;
+		microapp_sdk_ble_central_t central;
+		microapp_sdk_ble_peripheral_t peripheral;
+	} payload;
 
-	//! Big-endian MAC address. Context depends on type field
-	uint8_t address[MAC_ADDRESS_LENGTH];
-
-	//! Received signal strength. For type SCANNED_DEVICE, this is the RSSI to the device.
-	int8_t rssi;
-
-	//! Size of the payload.
-	uint8_t size;
-
-	//! The payload. For type SCANNED_DEVICE, this is the advertisement data.
-	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
 };
 
 static_assert(sizeof(microapp_sdk_ble_t) <= MICROAPP_SDK_MAX_PAYLOAD);
+
 
 /**
  * Struct for mesh message from microapp.
