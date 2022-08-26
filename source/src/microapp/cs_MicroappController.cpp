@@ -480,7 +480,7 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 		LogMicroappControllerDebug("New interrupts blocked, ignore ble device event");
 		return;
 	}
-	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE)) {
+	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN)) {
 		LogMicroappControllerDebug("No interrupt registered");
 		return;
 	}
@@ -489,18 +489,19 @@ void MicroappController::onDeviceScanned(scanned_device_t* dev) {
 	uint8_t* outputBuffer   = getOutputMicroappBuffer();
 	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
 
-	if (dev->dataSize > sizeof(ble->data)) {
+	if (dev->dataSize > sizeof(ble->scan.eventScan.data)) {
 		LOGw("BLE advertisement data too large");
 		return;
 	}
 
 	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type               = CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE;
-	ble->address_type       = dev->addressType;
-	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, ble->address);
-	ble->rssi = dev->rssi;
-	ble->size = dev->dataSize;
-	memcpy(ble->data, dev->data, dev->dataSize);
+	ble->type               = CS_MICROAPP_SDK_BLE_SCAN;
+	ble->scan.type          = CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN;
+	ble->scan.eventScan.address.type = dev->addressType;
+	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, ble->scan.eventScan.address.address);
+	ble->scan.eventScan.rssi = dev->rssi;
+	ble->scan.eventScan.size = dev->dataSize;
+	memcpy(ble->scan.eventScan.data, dev->data, dev->dataSize);
 
 	LogMicroappControllerDebug("Incoming BLE scanned device for microapp");
 	generateSoftInterrupt();
@@ -657,6 +658,42 @@ void MicroappController::handleEvent(event_t& event) {
 			onReceivedMeshMessage(msg);
 			break;
 		}
+
+		// Central
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
+
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY: {
+
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT: {
+
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT: {
+
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT: {
+
+			break;
+		}
+
+		// Peripheral
+		case CS_TYPE::EVT_BLE_CONNECT: {
+			break;
+		}
+		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			break;
+		}
+
+		// Get these from the microapp characteristic:
+		// onWrite --> sub/unsub
+		// onRead
+		// onNotificationWritten
+
 		default: break;
 	}
 }

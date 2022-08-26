@@ -540,7 +540,7 @@ static_assert(sizeof(microapp_sdk_twi_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 struct __attribute__((packed)) microapp_sdk_ble_address_t {
 	//! Type of address.
-	uint8_t addressType;
+	uint8_t type;
 
 	//! Big-endian MAC address.
 	uint8_t address[MAC_ADDRESS_LENGTH];

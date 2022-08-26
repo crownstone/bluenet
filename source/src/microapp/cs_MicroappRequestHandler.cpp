@@ -408,47 +408,66 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 #endif
 
 	switch (type) {
-		case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
-			MicroappController& controller = MicroappController::getInstance();
-			int result =
-					controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE);
-			if (result != ERR_SUCCESS) {
-				LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
-				ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-				return result;
+		case CS_MICROAPP_SDK_BLE_SCAN: {
+			switch (ble->scan.type) {
+				case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
+					MicroappController& controller = MicroappController::getInstance();
+					int result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
+					if (result != ERR_SUCCESS) {
+						LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
+						ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+						return result;
+					}
+					ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_SCAN_START: {
+					LOGv("Start scanning");
+					MicroappController& controller = MicroappController::getInstance();
+					controller.setScanning(true);
+					ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
+					LOGv("Stop scanning");
+					MicroappController& controller = MicroappController::getInstance();
+					controller.setScanning(false);
+					ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+					break;
+				}
+				default: {
+					LOGi("Unknown BLE scan type: %u", ble->scan.type);
+					ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
+					return ERR_UNKNOWN_TYPE;
+				}
 			}
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
-		case CS_MICROAPP_SDK_BLE_SCAN_START: {
-			LOGv("Start scanning");
-			MicroappController& controller = MicroappController::getInstance();
-			controller.setScanning(true);
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+		case CS_MICROAPP_SDK_BLE_CENTRAL: {
+			switch (ble->central.type) {
+				case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT: {
+					// Untested
+					LOGv("Initiate BLE connection");
+					TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
+					std::reverse_copy(ble->central.requestConnect.address.address, ble->central.requestConnect.address.address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
+					event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
+					event.dispatch();
+					ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
+					LOGi("BLE command result: %u", event.result.returnCode);
+					return event.result.returnCode;
+				}
+				case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT: {
+					// Not implemented
+					ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED;
+					return ERR_NOT_IMPLEMENTED;
+				}
+				default: {
+					LOGi("Unknown BLE central type: %u", ble->central.type);
+					ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
+					return ERR_UNKNOWN_TYPE;
+				}
+			}
 			break;
-		}
-		case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
-			LOGv("Stop scanning");
-			MicroappController& controller = MicroappController::getInstance();
-			controller.setScanning(false);
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-			break;
-		}
-		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_CONNECT: {
-			// Untested
-			LOGv("Initiate BLE connection");
-			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
-			std::reverse_copy(ble->address, ble->address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
-			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
-			event.dispatch();
-			ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
-			LOGi("BLE command result: %u", event.result.returnCode);
-			return event.result.returnCode;
-		}
-		case CS_MICROAPP_SDK_BLE_CONNECTION_REQUEST_DISCONNECT: {
-			// Not implemented
-			ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED;
-			return ERR_NOT_IMPLEMENTED;
 		}
 		default: {
 			LOGi("Unknown BLE type: %u", type);
