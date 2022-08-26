@@ -317,6 +317,7 @@ bool MicroappController::handleRequest() {
 	LogMicroappControllerDebug("Retrieve and handle request [type %u]", incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
+	// TODO: put result in ack, instead of letting the handler(s) set the ack.
 	if (result != ERR_SUCCESS) {
 		LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
 	}
@@ -642,6 +643,7 @@ void MicroappController::setScanning(bool scanning) {
  * Listen to events from the microapp that are coupled with (possibly) registered interrupts
  */
 void MicroappController::handleEvent(event_t& event) {
+	// TODO: move to separate file.
 	switch (event.type) {
 		case CS_TYPE::EVT_GPIO_UPDATE: {
 			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);

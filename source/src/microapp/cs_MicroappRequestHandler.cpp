@@ -408,6 +408,22 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 #endif
 
 	switch (type) {
+		case CS_MICROAPP_SDK_BLE_UUID_REGISTER: {
+			LOGi("BLE uuid register");
+			ble_uuid128_t uuid128;
+			memcpy(uuid128.uuid128, ble->requestUuidRegister.customUuid, sizeof(uuid128.uuid128));
+			UUID uuid;
+			cs_ret_code_t result = uuid.fromFullUuid(uuid128);
+			if (result != ERR_SUCCESS) {
+				ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+				return result;
+			}
+
+			ble->requestUuidRegister.uuid.type = uuid.getUuid().type;
+			ble->requestUuidRegister.uuid.uuid = uuid.getUuid().uuid;
+			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			break;
+		}
 		case CS_MICROAPP_SDK_BLE_SCAN: {
 			switch (ble->scan.type) {
 				case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
@@ -446,20 +462,51 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 		case CS_MICROAPP_SDK_BLE_CENTRAL: {
 			switch (ble->central.type) {
 				case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT: {
-					// Untested
-					LOGv("Initiate BLE connection");
+					LOGi("BLE central connect");
 					TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
+					// TODO: don't reverse
 					std::reverse_copy(ble->central.requestConnect.address.address, ble->central.requestConnect.address.address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
 					event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 					event.dispatch();
-					ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
-					LOGi("BLE command result: %u", event.result.returnCode);
+
+					switch (event.result.returnCode) {
+						case ERR_SUCCESS: {
+							ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+							break;
+						}
+						case ERR_WAIT_FOR_SUCCESS: {
+							ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
+							break;
+						}
+						default: {
+							ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+							break;
+						}
+					}
 					return event.result.returnCode;
 				}
 				case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT: {
-					// Not implemented
-					ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED;
-					return ERR_NOT_IMPLEMENTED;
+					LOGi("BLE central disconnect");
+					// Later we should check the connection handle.
+
+					event_t event(CS_TYPE::CMD_BLE_CENTRAL_DISCONNECT);
+					event.dispatch();
+
+					switch (event.result.returnCode) {
+						case ERR_SUCCESS: {
+							ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+							break;
+						}
+						case ERR_WAIT_FOR_SUCCESS: {
+							ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
+							break;
+						}
+						default: {
+							ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+							break;
+						}
+					}
+					return event.result.returnCode;
 				}
 				default: {
 					LOGi("Unknown BLE central type: %u", ble->central.type);
@@ -469,6 +516,38 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 			}
 			break;
 		}
+		case CS_MICROAPP_SDK_BLE_PERIPHERAL: {
+			switch (ble->peripheral.type) {
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_ADD_SERVICE: {
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_ADD_CHARACTERISTIC: {
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_REGISTER_INTERRUPT: {
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_DISCONNECT: {
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_VALUE_SET: {
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY: {
+					break;
+				}
+				case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_INDICATE: {
+					break;
+				}
+				default: {
+					LOGi("Unknown BLE peripheral type: %u", ble->peripheral.type);
+					ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
+					return ERR_UNKNOWN_TYPE;
+				}
+			}
+			break;
+		}
+
 		default: {
 			LOGi("Unknown BLE type: %u", type);
 			ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
