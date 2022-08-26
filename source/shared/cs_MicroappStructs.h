@@ -80,7 +80,7 @@ enum MicroappSdkAck {
 
 	// Ack return values
 
-	//! So far so good, but not done yet
+	//! So far so good, but not done yet. Also used as "wait for success".
 	CS_MICROAPP_SDK_ACK_IN_PROGRESS         = 0x03,
 	//! Unspecified error
 	CS_MICROAPP_SDK_ACK_ERROR               = 0x04,
@@ -547,7 +547,7 @@ struct __attribute__((packed)) microapp_sdk_ble_address_t {
 };
 
 
-struct __attribute__((packed)) microapp_sdk_ble_on_scan_t {
+struct __attribute__((packed)) microapp_sdk_ble_scan_event_t {
 	//! Address of the scanned advertisement.
 	microapp_sdk_ble_address_t address;
 
@@ -572,8 +572,8 @@ struct __attribute__((packed)) microapp_sdk_ble_scan_t {
 	uint8_t type;
 
 	union {
-		microapp_sdk_ble_on_scan_t onScan;
-	} payload;
+		microapp_sdk_ble_scan_event_t eventScan;
+	};
 };
 
 enum MicroappSdkBleUuidType {
@@ -592,13 +592,13 @@ enum MicroappSdkBleUuidType {
 
 struct __attribute__((packed)) microapp_sdk_ble_uuid_t {
 	//! The type of UUID.
-	uint8_t uuidType;
+	uint8_t type;
 
 	//! The UUID.
 	uint16_t uuid;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_uuid_register_t {
+struct __attribute__((packed)) microapp_sdk_ble_request_uuid_register_t {
 	//! The custom service UUID to register.
 	uint8_t customUuid[16];
 
@@ -608,24 +608,17 @@ struct __attribute__((packed)) microapp_sdk_ble_uuid_register_t {
 
 
 
-struct __attribute__((packed)) microapp_sdk_ble_connect_t {
+
+struct __attribute__((packed)) microapp_sdk_ble_central_request_connect_t {
 	microapp_sdk_ble_address_t address;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_event_connect_t {
-	uint16_t handle;
-
-	microapp_sdk_ble_address_t address;
+struct __attribute__((packed)) microapp_sdk_ble_central_event_connect_t {
+	//! Result code: whether the connection attempt was successful.
+	uint8_t result;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_disconnect_t {
-	uint16_t handle;
-
-	//! HCI error code.
-	uint8_t reason;
-};
-
-struct __attribute__((packed)) microapp_sdk_ble_discover_t {
+struct __attribute__((packed)) microapp_sdk_ble_central_request_discover_t {
 	//! Number of UUIDs in the list.
 	uint8_t uuidCount;
 
@@ -633,28 +626,92 @@ struct __attribute__((packed)) microapp_sdk_ble_discover_t {
 	microapp_sdk_ble_uuid_t uuids[8];
 };
 
+struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_t {
+	microapp_sdk_ble_uuid_t uuid;
+	uint16_t valueHandle;
+	uint16_t cccdHandle;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_done_t {
+	uint8_t result;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_request_write_t {
+	uint16_t valueHandle;
+	uint16_t size;
+	uint8_t* buffer;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_event_write_t {
+	uint16_t valueHandle;
+	uint8_t result;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_request_read_t {
+	uint16_t valueHandle;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_event_read_t {
+	uint16_t valueHandle;
+	uint8_t result;
+	uint16_t size;
+	const uint8_t* buffer;
+};
+
 enum MicroappSdkBleCentralType {
-	CS_MICROAPP_SDK_BLE_CENTRAL_CONNECT = 1,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT = 1,
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT = 2,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_DISCONNECT = 3,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT = 3,
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT = 4,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_DISCOVER = 5,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCOVER = 5,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER = 6,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE = 7,
+
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_WRITE = 8,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE = 9,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ = 10,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ = 11,
+
+	//! Subscribe for notifications. Wait for write event with the same handle.
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE = 12,
+
+	//! Unsubscribe for notifications. Wait for write event with the same handle.
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE = 13,
+
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_t {
 	uint8_t type;
 
+	/**
+	 * The connection handle associated with the command or event.
+	 */
+	uint16_t connectionHandle;
+
 	union {
-		microapp_sdk_ble_connect_t connect;
-		microapp_sdk_ble_event_connect_t eventConnect;
-		microapp_sdk_ble_disconnect_t disconnect;
-		microapp_sdk_ble_disconnect_t eventDisconnect;
-	} payload;
+		microapp_sdk_ble_central_request_connect_t requestConnect;
+		microapp_sdk_ble_central_event_connect_t eventConnect;
+		microapp_sdk_ble_central_request_discover_t requestDiscover;
+		microapp_sdk_ble_central_event_discover_t eventDiscover;
+		microapp_sdk_ble_central_event_discover_done_t eventDiscoverDone;
+		microapp_sdk_ble_central_request_write_t requestWrite;
+		microapp_sdk_ble_central_event_write_t eventWrite;
+		microapp_sdk_ble_central_request_read_t requestRead;
+		microapp_sdk_ble_central_event_read_t eventRead;
+	};
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_service_add_t {
+
+
+
+
+
+
+
+
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_service_add_t {
 	//! The UUID of the service.
 	microapp_sdk_ble_uuid_t uuid;
 };
@@ -679,7 +736,7 @@ struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
 	bool indicate : 1;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_characteristic_add_t {
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_characteristic_add_t {
 	//! The handle of the service to add this characteristic to.
 	uint16_t serviceHandle;
 
@@ -698,23 +755,12 @@ struct __attribute__((packed)) microapp_sdk_ble_characteristic_add_t {
 	uint8_t* buffer;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_set_long_write_buffer_t {
-	//! Size of the provided buffer.
-	uint16_t bufferSize;
-
-	/**
-	 * Buffer that holds the long write data.
-	 * This buffer must be kept valid by the microapp.
-	 */
-	uint8_t* buffer;
-};
-
-struct __attribute__((packed)) microapp_sdk_ble_characteristic_value_set_t {
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_characteristic_value_set_t {
 	//! Size of the value.
 	uint16_t size;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_characteristic_value_notify_t {
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_characteristic_value_notify_t {
 	/**
 	 * Send the current value starting at given offset.
 	 */
@@ -726,39 +772,37 @@ struct __attribute__((packed)) microapp_sdk_ble_characteristic_value_notify_t {
 	uint16_t size;
 };
 
-struct __attribute__((packed)) microapp_sdk_ble_event_write_t {
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_event_connect_t {
+	uint16_t handle;
+
+	microapp_sdk_ble_address_t address;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_peripheral_event_write_t {
 	//! Size of the value that has been written.
 	uint16_t size;
 };
 
 enum MicroappSdkBlePeripheralType {
 	//! Add a service. Payload is addService.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_ADD_SERVICE = 1,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_ADD_SERVICE = 1,
 
 	//! Add a characteristic. Payload is addCharacteristic.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_ADD_CHARACTERISTIC = 2,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_ADD_CHARACTERISTIC = 2,
 
-	/**
-	 * Set the buffer to be used for long writes.
-	 * Only 1 long write buffer is required.
-	 * Payload is setLongWriteBuffer.
-	 */
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_SET_LONG_WRITE_BUFFER = 3,
-
-
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_REGISTER_INTERRUPT = 4,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_REGISTER_INTERRUPT = 4,
 
 	//! Disconnect the client.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_DISCONNECT = 10,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_DISCONNECT = 10,
 
 	//! The value has been set. Payload is valueSet.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_VALUE_SET = 11,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_VALUE_SET = 11,
 
 	//! Notify data. Payload is notify.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_NOTIFY = 12,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY = 12,
 
 	//! Indicate data. Payload is indicate.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_INDICATE = 13,
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_INDICATE = 13,
 
 
 	//! Client connected.
@@ -770,7 +814,7 @@ enum MicroappSdkBlePeripheralType {
 	//! Data has been written to the characteristic.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_WRITE = 22,
 
-	//! Data has been written to the characteristic.
+	//! Data has been read from the characteristic.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_READ = 23,
 
 	//! The client subscribed for notifications.
@@ -799,16 +843,14 @@ struct __attribute__((packed)) microapp_sdk_ble_peripheral_t {
 	uint16_t handle;
 
 	union {
-		microapp_sdk_ble_service_add_t addService;
-		microapp_sdk_ble_characteristic_add_t addCharacteristic;
-		microapp_sdk_ble_set_long_write_buffer_t setLongWriteBuffer;
-		microapp_sdk_ble_characteristic_value_set_t valueSet;
-		microapp_sdk_ble_characteristic_value_notify_t notify;
-		microapp_sdk_ble_characteristic_value_notify_t indicate;
-		microapp_sdk_ble_disconnect_t disconnect;
-		microapp_sdk_ble_disconnect_t eventDisconnect;
-		microapp_sdk_ble_event_write_t eventWrite;
-	} payload;
+		microapp_sdk_ble_peripheral_request_service_add_t requestAddService;
+		microapp_sdk_ble_peripheral_request_characteristic_add_t requestAddCharacteristic;
+		microapp_sdk_ble_peripheral_request_characteristic_value_set_t requestValueSet;
+		microapp_sdk_ble_peripheral_request_characteristic_value_notify_t requestNotify;
+		microapp_sdk_ble_peripheral_request_characteristic_value_notify_t requestIndicate;
+		microapp_sdk_ble_peripheral_event_connect_t eventConnect;
+		microapp_sdk_ble_peripheral_event_write_t eventWrite;
+	};
 };
 
 
@@ -835,12 +877,11 @@ struct __attribute__((packed)) microapp_sdk_ble_t {
 	uint8_t type;
 
 	union {
-		microapp_sdk_ble_uuid_register_t uuidRegister;
+		microapp_sdk_ble_request_uuid_register_t requestUuidRegister;
 		microapp_sdk_ble_scan_t scan;
 		microapp_sdk_ble_central_t central;
 		microapp_sdk_ble_peripheral_t peripheral;
-	} payload;
-
+	};
 };
 
 static_assert(sizeof(microapp_sdk_ble_t) <= MICROAPP_SDK_MAX_PAYLOAD);
