@@ -34,8 +34,8 @@ list(APPEND NORDIC_SOURCE_NRF5_REL "components/ble/common/ble_advdata.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/ble/common/ble_srv_common.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/atomic/nrf_atomic.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/atomic_fifo/nrf_atfifo.c")
-list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/crc16/crc16.c")
-list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/crc32/crc32.c")
+
+
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/experimental_section_vars/nrf_section_iter.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/fds/fds.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/fstorage/nrf_fstorage.c")

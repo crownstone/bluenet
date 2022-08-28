@@ -102,34 +102,51 @@ endforeach()
 
 set (INCLUDE_BASE_DIR ${NRF5_HOST_DIR})
 message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
-include(nrf5-sdk-includes.src)
-
-include(nrf5-host.src)
-
 add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
+# headers
+include(nrf5-sdk-includes.src)
+
+###################################################
+# Include nrf5 sdk source files for platform host
+###################################################
+
+# sources
+include(nrf5sdk-platform-independent.src)
+include(nrf5sdk-platform-host.src)
+
+# add platform dependent source files to `SOURCE_NRF5_HOST_ABS`
 if(SOURCE_NRF5_HOST_REL)
-	#loop through NORDIC_SOURCE_REL and convert to absolute paths in SOURCE_NRF5_HOST_ABS
 	foreach(FILE_NRF5_HOST_REL ${SOURCE_NRF5_HOST_REL})
 		list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
 	endforeach()
+endif()
 
+# add platform independent sources to `SOURCE_NRF5_HOST_ABS`
+if(NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL)
+	foreach(FILE_NRF5_HOST_REL ${NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL})
+		list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
+	endforeach()
+endif()
+
+# create lib target
+if(SOURCE_NRF5_HOST_ABS)
 	set(NRF5_HOST_LIB NordicSdkHost)
 	print_list("${NRF5_HOST_LIB} contains: " SOURCE_NRF5_HOST_ABS)
 	add_library(${NRF5_HOST_LIB} STATIC ${SOURCE_NRF5_HOST_ABS})
 else()
-	message(WARNING "No sources provided for NRF5_HOST_LIB")
+	message(WARNING "No sources provided for SOURCE_NRF5_HOST_ABS")
 endif()
 
-#################################################
-# Include crownstone application and mock sources
-#################################################
+###################################################
+# Include crownstone source files for platform host
+###################################################
 
 # Source directory
 set(SOURCE_DIR "../source/src")
 
-include(crownstone-application.src)
-include(crownstone-platform-mock.src)
+include(crownstone-platform-independent.src)
+include(crownstone-platform-host.src)
 
 if(FOLDER_SOURCE)
 	set(BLUENET_HOST_LIB BluenetHost)
@@ -155,7 +172,7 @@ function(add_crownstone_test testpath)
 	endif()
 
 	if(NRF5_HOST_LIB)
-		target_link_libraries(${TESTNAME} {NRF5_HOST_LIB})
+		target_link_libraries(${TESTNAME} ${NRF5_HOST_LIB})
 	endif()
 	
 	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})

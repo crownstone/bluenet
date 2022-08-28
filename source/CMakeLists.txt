@@ -123,22 +123,23 @@ set(SOURCE_DIR "src")
 # Get all includes from nordic
 set(INCLUDE_BASE_DIR ${NRF5_DIR})
 message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
-include(nrf5-sdk-includes.src)
 
+include(nrf5-sdk-includes.src)
 include(mesh-sdk-includes.src)
 
-# include crownstone sources
-include(crownstone.src)                # deprecated: choose appropriate file from crownstone-{application,platform,platform-mock}
-include(crownstone-application.src)
-include(crownstone-platform.src)
+####################################################
+# Include crownstone source files for platform nrf52
+####################################################
+
+include(crownstone.src)                # deprecated: choose appropriate file from crownstone-platform-{independent,nrf52,host}
+include(crownstone-platform-independent.src)
+include(crownstone-platform-nrf52.src)
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
-if(VERBOSITY GREATER 4)
-	foreach(crownstone_file ${FOLDER_SOURCE})
-		message(STATUS "Include Crownstone file: " ${crownstone_file})
-	endforeach()
-endif()
+#if(VERBOSITY GREATER 4)
+	print_list("Include Crownstone file: " FOLDER_SOURCE)
+#endif()
 
 # Be more strict about our own files (then about Nordic's files)
 set(CROWNSTONE_ONLY_FLAGS "-W -Wno-unused-parameter")
@@ -146,17 +147,37 @@ set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS}
 )
 
-# ----------------
-# This will add the required nRF5 code files to a list variable ${NORDIC_SOURCE_NRF5_REL}
-include(nrf5.src)
+###################################################
+# Include nrf5 sdk source files for platform host
+###################################################
 
-#loop through NORDIC_SOURCE_REL and convert to absolute paths in NORDIC_SOURCE
-foreach(NORDIC_FILE_REL ${NORDIC_SOURCE_NRF5_REL})
-	list(APPEND NORDIC_SOURCE ${NRF5_DIR}/${NORDIC_FILE_REL})
+# get source file lists
+include(nrf5.src)
+include(nrf5sdk-platform-independent.src)
+include(nrf5sdk-platform-nrf52.src)
+
+# convert relative to absolute paths
+foreach(FILE_REL IN LISTS NORDIC_SOURCE_NRF5_REL)
+	list(APPEND 
+		NORDIC_SOURCE 
+		${NRF5_DIR}/${FILE_REL})
 endforeach()
 
-print_list("NORDIC_SOURCE: " NORDIC_SOURCE)
-# ----------------
+foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL)
+	list(APPEND 
+		BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_NRF52_SOURCE_REL)
+	list(APPEND 
+		BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+###################################################
+# Include mesh
+###################################################
 
 if(BUILD_MESHING)
 	# This will add the required mesh code files to ${NORDIC_SOURCE}
@@ -165,22 +186,42 @@ else()
 	message(STATUS "Mesh SDK files not being compiled (BUILD_MESHING=OFF)")
 endif()
 
-if(VERBOSITY GREATER 4)
-	foreach(nordic_file ${NORDIC_SOURCE})
-		message(STATUS "Include Nordic file: " ${nordic_file})
-	endforeach()
-endif()
+###################################################
+# Combine all sources into single list
+###################################################
 
-# We now have a variable FOLDER_SOURCE with all source files
-list(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
+# add to folder sources
+list(APPEND FOLDER_SOURCE 
+	${NORDIC_SOURCE} 
+	${BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS} 
+	${BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS})
 
-# For Visual Studio and perhaps other IDEs group the files
-source_group("Source files" FILES ${FOLDER_SOURCE})
-source_group("Header files" FILES ${FOLDER_HEADER})
+#if(VERBOSITY GREATER 4)
+#	print_list("NORDIC_SOURCE: " NORDIC_SOURCE)
+#endif()
+
+print_list("NORDIC_SOURCE: " NORDIC_SOURCE)
+
+###################################################
+# Include softdevice
+###################################################
 
 if(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
 	include_directories(SYSTEM "${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
 endif()
+
+if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
+	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
+	set(${SOFTDEVICE_DIR_HEX}, "hex")
+endif()
+
+###################################################
+# status messages & IDE config
+###################################################
+
+# For Visual Studio and perhaps other IDEs group the files
+source_group("Source files" FILES ${FOLDER_SOURCE})
+source_group("Header files" FILES ${FOLDER_HEADER})
 
 # Show which directories are actually included to the user
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY include_directories)
@@ -188,11 +229,6 @@ if(VERBOSITY GREATER 4)
 	foreach(dir ${dirs})
 		message(STATUS "Add to the include directories: '${dir}'")
 	endforeach()
-endif()
-
-if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
-	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
-	set(${SOFTDEVICE_DIR_HEX}, "hex")
 endif()
 
 if(FOLDER_SOURCE STREQUAL "")
