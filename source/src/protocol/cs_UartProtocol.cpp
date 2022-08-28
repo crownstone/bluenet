@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_Nordic.h>
+#include <crc16.h>
 #include <protocol/cs_UartProtocol.h>
 
 void UartProtocol::escape(uint8_t& val) {

@@ -10,6 +10,8 @@
 
 #include "ble/cs_Nordic.h"
 #include "cfg/cs_Config.h"
+#include <components/libraries/pwm/app_pwm.h>
+#include <nrf_gpiote.h>
 
 #define ERR_PWM_NOT_ENABLED 1
 
