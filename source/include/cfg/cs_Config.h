@@ -7,6 +7,7 @@
 #pragma once
 
 #include <protocol/cs_Typedefs.h>
+#include <nrf_sdh_ble.h>
 
 /**
  * TODO: For now formatting is turned off, but the actual configurations should be:

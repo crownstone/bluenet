@@ -3,4 +3,4 @@
 
 # The source files are added as paths to the  to the list variable NORDIC_SOURCE_NRF5_HOST.
 
-list(APPEND SOURCE_NRF5_HOST_REL "components/libraries/timer/app_timer_host.cpp")
+#list(APPEND SOURCE_NRF5_HOST_REL "components/libraries/timer/app_timer_host.cpp")
