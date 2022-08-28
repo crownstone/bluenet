@@ -9,7 +9,7 @@ message (STATUS "NRF5_HOST_DIR: ${NRF5_HOST_DIR}")
 
 
 option(HOST_TARGET ON)
-option(DISABLE_NRF_HEADERS ON)
+
 
 set(DEFAULT_CXX_FLAGS        "-std=c++17 -Wno-write-strings -fno-exceptions")
 set(DEFAULT_C_FLAGS          "-std=gnu99")
@@ -25,13 +25,8 @@ set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
-
 if(HOST_TARGET)
 	add_compile_definitions("HOST_TARGET")
-endif()
-
-if(DISABLE_NRF_HEADERS)
-	add_compile_definitions("DISABLE_NRF_HEADERS")
 endif()
 
 add_compile_definitions("NRF52832_XXAA")
@@ -116,25 +111,16 @@ include(nrf5sdk-platform-independent.src)
 include(nrf5sdk-platform-host.src)
 
 # add platform dependent source files to `SOURCE_NRF5_HOST_ABS`
-if(SOURCE_NRF5_HOST_REL)
-	foreach(FILE_NRF5_HOST_REL ${SOURCE_NRF5_HOST_REL})
-		list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
-	endforeach()
-endif()
+foreach(FILE_NRF5_HOST_REL IN LISTS SOURCE_NRF5_HOST_REL)
+	list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
+endforeach()
 
 # add platform independent sources to `SOURCE_NRF5_HOST_ABS`
-if(NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL)
-	foreach(FILE_NRF5_HOST_REL ${NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL})
-		list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
-	endforeach()
-endif()
+foreach(FILE_NRF5_HOST_REL IN LISTS NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL)
+	list(APPEND SOURCE_NRF5_HOST_ABS ${NRF5_HOST_DIR}/${FILE_NRF5_HOST_REL})
+endforeach()
 
-# create lib target
-if(SOURCE_NRF5_HOST_ABS)
-	set(NRF5_HOST_LIB NordicSdkHost)
-	print_list("${NRF5_HOST_LIB} contains: " SOURCE_NRF5_HOST_ABS)
-	add_library(${NRF5_HOST_LIB} STATIC ${SOURCE_NRF5_HOST_ABS})
-else()
+if(NOT SOURCE_NRF5_HOST_ABS)
 	message(WARNING "No sources provided for SOURCE_NRF5_HOST_ABS")
 endif()
 
@@ -148,13 +134,24 @@ set(SOURCE_DIR "../source/src")
 include(crownstone-platform-independent.src)
 include(crownstone-platform-host.src)
 
-if(FOLDER_SOURCE)
-	set(BLUENET_HOST_LIB BluenetHost)
-	print_list("${BLUENET_HOST_LIB} contains: " FOLDER_SOURCE)
-	add_library(${BLUENET_HOST_LIB} STATIC ${FOLDER_SOURCE})
-else()
-	message(WARNING "No sources provided for BLUENET_HOST_LIB")
+if(NOT FOLDER_SOURCE)
+	message(WARNING "No crownstone sources provided for host build")
 endif()
+
+###################################################
+# combine sources into a lib
+###################################################
+
+# add to folder sources
+list(APPEND HOSTLIB_SOURCE
+	${SOURCE_NRF5_HOST_ABS} 
+	${FOLDER_SOURCE}
+	)
+
+set(BLUENET_HOST_LIB BluenetHost)
+print_list("${BLUENET_HOST_LIB} contains: " HOSTLIB_SOURCE)
+add_library(${BLUENET_HOST_LIB} STATIC ${HOSTLIB_SOURCE})
+
 
 ##################################################################################
 # This function defines a test executable, links it to the bluenet and
@@ -167,13 +164,7 @@ function(add_crownstone_test testpath)
 	get_filename_component(TESTNAME ${testpath} NAME_WE)
 	add_executable(${TESTNAME} "test/${testpath}")
 
-	if(BLUENET_HOST_LIB)
-		target_link_libraries(${TESTNAME} ${BLUENET_HOST_LIB})
-	endif()
-
-	if(NRF5_HOST_LIB)
-		target_link_libraries(${TESTNAME} ${NRF5_HOST_LIB})
-	endif()
+	target_link_libraries(${TESTNAME} ${BLUENET_HOST_LIB})
 	
 	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
 	install(TARGETS ${TESTNAME} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})
