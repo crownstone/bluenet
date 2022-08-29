@@ -538,8 +538,19 @@ struct __attribute__((packed)) microapp_sdk_twi_t {
 static_assert(sizeof(microapp_sdk_twi_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 
+/**
+ * Address type, matches BLE_GAP_ADDR_TYPE.
+ */
+enum MicroappSdkBleAddressType {
+	MICROAPP_SDK_BLE_ADDRESS_PUBLIC = 0x00,
+	MICROAPP_SDK_BLE_ADDRESS_RANDOM_STATIC = 0x01,
+	MICROAPP_SDK_BLE_ADDRESS_RANDOM_PRIVATE_RESOLVABLE = 0x02,
+	MICROAPP_SDK_BLE_ADDRESS_RANDOM_PRIVATE_NON_RESOLVABLE = 0x03,
+	MICROAPP_SDK_BLE_ADDRESS_ANONYMOUS = 0x7F,
+};
+
 struct __attribute__((packed)) microapp_sdk_ble_address_t {
-	//! Type of address.
+	//! Type of address. See MicroappSdkBleAddressType.
 	uint8_t type;
 
 	//! Big-endian MAC address.
@@ -655,7 +666,7 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_read_t {
 	uint16_t valueHandle;
 	uint8_t result;
 	uint16_t size;
-	const uint8_t* buffer;
+	uint8_t data[0];
 };
 
 enum MicroappSdkBleCentralType {
@@ -773,8 +784,6 @@ struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_characteristi
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_peripheral_event_connect_t {
-	uint16_t handle;
-
 	microapp_sdk_ble_address_t address;
 };
 

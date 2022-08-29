@@ -18,11 +18,6 @@ private:
 	MicroappRequestHandler(MicroappRequestHandler const&);
 	void operator=(MicroappRequestHandler const&);
 
-	/**
-	 * Maps interrupts to digital pins. See also MicroappController::digitalPinToInterrupt()
-	 */
-	int interruptToDigitalPin(int interrupt);
-
 protected:
 	/**
 	 * SDK-type specific handlers. Called from handleMicroappRequest.

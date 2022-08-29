@@ -16,14 +16,11 @@
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappRequestHandler.h>
+#include <microapp/cs_MicroappSdkUtil.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
-
-int MicroappRequestHandler::interruptToDigitalPin(int interrupt) {
-	return interrupt;
-}
 
 /*
  * Forwards requests from the microapp to the relevant handler
@@ -189,10 +186,10 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 			MicroappSdkPinPolarity polarity   = (MicroappSdkPinPolarity)pin->polarity;
 
 			TYPIFY(EVT_GPIO_INIT) gpio;
-			gpio.pin_index = interruptToDigitalPin(pinIndex);
+			gpio.pinIndex = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
 			gpio.pull      = (direction == CS_MICROAPP_SDK_PIN_INPUT_PULLUP) ? 1 : 0;
 			LogMicroappRequestHandlerDebug(
-					"Initializing GPIO pin %i with direction %u and polarity %u", gpio.pin_index, direction, polarity);
+					"Initializing GPIO pin %i with direction %u and polarity %u", gpio.pinIndex, direction, polarity);
 
 			switch (direction) {
 				case CS_MICROAPP_SDK_PIN_INPUT:
@@ -264,11 +261,11 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 				case CS_MICROAPP_SDK_PIN_WRITE: {
 					// Write to a pin
 					TYPIFY(EVT_GPIO_WRITE) gpio;
-					gpio.pin_index            = interruptToDigitalPin(pinIndex);
+					gpio.pinIndex            = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
 					MicroappSdkPinValue value = (MicroappSdkPinValue)pin->value;
 					switch (value) {
 						case CS_MICROAPP_SDK_PIN_ON: {
-							LogMicroappRequestHandlerDebug("Setting GPIO pin %i", gpio.pin_index);
+							LogMicroappRequestHandlerDebug("Setting GPIO pin %i", gpio.pinIndex);
 							gpio.length = 1;
 							uint8_t buf[1];
 							buf[0]   = 1;
@@ -278,7 +275,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 							break;
 						}
 						case CS_MICROAPP_SDK_PIN_OFF: {
-							LogMicroappRequestHandlerDebug("Clearing GPIO pin %i", gpio.pin_index);
+							LogMicroappRequestHandlerDebug("Clearing GPIO pin %i", gpio.pinIndex);
 							gpio.length = 1;
 							uint8_t buf[1];
 							buf[0]   = 0;
@@ -415,12 +412,11 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 			UUID uuid;
 			cs_ret_code_t result = uuid.fromFullUuid(uuid128);
 			if (result != ERR_SUCCESS) {
-				ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+				ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 				return result;
 			}
 
-			ble->requestUuidRegister.uuid.type = uuid.getUuid().type;
-			ble->requestUuidRegister.uuid.uuid = uuid.getUuid().uuid;
+			ble->requestUuidRegister.uuid = MicroappSdkUtil::convertUuid(uuid);
 			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			break;
 		}
@@ -428,10 +424,10 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 			switch (ble->scan.type) {
 				case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
 					MicroappController& controller = MicroappController::getInstance();
-					int result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
+					cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
 					if (result != ERR_SUCCESS) {
 						LOGw("Registering an interrupt for incoming BLE scans failed with %i", result);
-						ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+						ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 						return result;
 					}
 					ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
@@ -439,15 +435,13 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 				}
 				case CS_MICROAPP_SDK_BLE_SCAN_START: {
 					LOGv("Start scanning");
-					MicroappController& controller = MicroappController::getInstance();
-					controller.setScanning(true);
+					MicroappController::getInstance().setScanning(true);
 					ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 					break;
 				}
 				case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
 					LOGv("Stop scanning");
-					MicroappController& controller = MicroappController::getInstance();
-					controller.setScanning(false);
+					MicroappController::getInstance().setScanning(false);
 					ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 					break;
 				}
@@ -469,20 +463,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 					event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 					event.dispatch();
 
-					switch (event.result.returnCode) {
-						case ERR_SUCCESS: {
-							ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-							break;
-						}
-						case ERR_WAIT_FOR_SUCCESS: {
-							ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
-							break;
-						}
-						default: {
-							ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-							break;
-						}
-					}
+					ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
 					return event.result.returnCode;
 				}
 				case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT: {
@@ -492,20 +473,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 					event_t event(CS_TYPE::CMD_BLE_CENTRAL_DISCONNECT);
 					event.dispatch();
 
-					switch (event.result.returnCode) {
-						case ERR_SUCCESS: {
-							ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-							break;
-						}
-						case ERR_WAIT_FOR_SUCCESS: {
-							ble->header.ack = CS_MICROAPP_SDK_ACK_IN_PROGRESS;
-							break;
-						}
-						default: {
-							ble->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-							break;
-						}
-					}
+					ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
 					return event.result.returnCode;
 				}
 				default: {
@@ -564,12 +532,11 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mes
 	mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
 	return ERR_NOT_AVAILABLE;
 #endif
-	MicroappSdkMeshType type = (MicroappSdkMeshType)mesh->type;
+
+	MicroappSdkMeshType type = static_cast<MicroappSdkMeshType>(mesh->type);
 	LogMicroappRequestHandlerDebug("handleMicroappMeshRequest: [type %i]", type);
 	switch (type) {
 		case CS_MICROAPP_SDK_MESH_SEND: {
-			// microapp_mesh_send_cmd_t* cmd = reinterpret_cast<microapp_mesh_send_cmd_t*>(mesh);
-
 			if (mesh->size == 0) {
 				LOGi("No message");
 				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_EMPTY;
@@ -601,25 +568,17 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mes
 			eventData.size                    = mesh->size;
 			event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &eventData, sizeof(eventData));
 			event.dispatch();
-			if (event.result.returnCode != ERR_SUCCESS) {
-				LOGw("Failed to send mesh message, return code: %u", event.result.returnCode);
-				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-				return event.result.returnCode;
-			}
-			mesh->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-			break;
+
+			mesh->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+			return event.result.returnCode;
 		}
 		case CS_MICROAPP_SDK_MESH_LISTEN: {
 			LOGi("Start listening for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
-			int result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
-			if (result != ERR_SUCCESS) {
-				LOGw("Registering an interrupt for incoming mesh messages failed with %i", result);
-				mesh->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-				return result;
-			}
-			mesh->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-			break;
+			cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
+
+			mesh->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
+			return result;
 		}
 		case CS_MICROAPP_SDK_MESH_READ_CONFIG: {
 			LogMicroappRequestHandlerDebug("Microapp requesting mesh info");
@@ -627,12 +586,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mes
 			State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 			mesh->stoneId    = id;
 			mesh->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-			break;
-		}
-		case CS_MICROAPP_SDK_MESH_READ: {
-			LOGi("Reading from mesh can only be done via interrupts");
-			mesh->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
-			return ERR_WRONG_OPERATION;
+			return ERR_SUCCESS;
 		}
 		default: {
 			LOGi("Unknown mesh type: %u", type);
@@ -640,7 +594,6 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mes
 			return ERR_UNKNOWN_TYPE;
 		}
 	}
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestPowerUsage(microapp_sdk_power_usage_t* powerUsage) {
@@ -662,9 +615,10 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPresence(microapp_sdk_presenc
 	event_t event(CS_TYPE::CMD_GET_PRESENCE);
 	event.result.buf = cs_data_t(reinterpret_cast<uint8_t*>(&resultBuf), sizeof(resultBuf));
 	event.dispatch();
+
 	if (event.result.returnCode != ERR_SUCCESS) {
 		LOGi("No success, result code: %u", event.result.returnCode);
-		presence->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
+		presence->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
 		return event.result.returnCode;
 	}
 	if (event.result.dataSize != sizeof(presence_t)) {
@@ -699,20 +653,9 @@ cs_ret_code_t MicroappRequestHandler::handleRequestControlCommand(microapp_sdk_c
 	cmd_source_with_counter_t source(CS_CMD_SOURCE_MICROAPP);
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &eventData, sizeof(eventData), source);
 	event.dispatch();
-	switch (event.result.returnCode) {
-		case ERR_SUCCESS:
-		case ERR_SUCCESS_NO_CHANGE:
-		case ERR_WAIT_FOR_SUCCESS: {
-			break;
-		}
-		default: {
-			LOGi("Dispatched control command not successful, result code: %u", event.result.returnCode);
-			controlCommand->header.ack = CS_MICROAPP_SDK_ACK_ERROR;
-			return event.result.returnCode;
-		}
-	}
-	controlCommand->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-	return ERR_SUCCESS;
+
+	controlCommand->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+	return event.result.returnCode;
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestYield(microapp_sdk_yield_t* yield) {
