@@ -42,7 +42,7 @@ list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/fstorage/nrf_fstorage.c
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/fstorage/nrf_fstorage_sd.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/hardfault/hardfault_implementation.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/hardfault/nrf52/handler/hardfault_handler_gcc.c")
-list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/scheduler/app_scheduler.c")
+
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/strerror/nrf_strerror.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/app_error.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/app_error_handler_gcc.c")
