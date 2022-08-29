@@ -703,7 +703,12 @@ public:
 	uint16_t getGattValueMaxLength() { return _maxGattValueLength; }
 
 	/** @inherit */
-	virtual void setGattValueLength(uint16_t length) { _gattValueLength = length; }
+	virtual void setGattValueLength(uint16_t length) {
+		if (_maxGattValueLength < length) {
+			_gattValueLength = _maxGattValueLength;
+		}
+		_gattValueLength = length;
+	}
 
 	/** @inherit */
 	virtual uint16_t getGattValueLength() { return _gattValueLength; }

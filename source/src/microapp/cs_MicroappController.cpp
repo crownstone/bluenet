@@ -505,11 +505,3 @@ void MicroappController::incrementEmptySoftInterruptSlots() {
 	}
 	_emptySoftInterruptSlots++;
 }
-
-void MicroappController::setScanning(bool scanning) {
-	_microappIsScanning = scanning;
-}
-
-bool MicroappController::isScanning() {
-	return _microappIsScanning;
-}

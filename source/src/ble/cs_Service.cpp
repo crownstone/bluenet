@@ -21,7 +21,9 @@ Service::Service() {}
  *
  */
 void Service::init(Stack* stack) {
-	if (isInitialized(C_SERVICE_INITIALIZED)) return;
+	if (isInitialized(C_SERVICE_INITIALIZED)) {
+		return;
+	}
 
 	_stack                 = stack;
 
@@ -55,6 +57,14 @@ void Service::init(Stack* stack) {
 	}
 
 	setInitialized(C_SERVICE_INITIALIZED);
+}
+
+void Service::addCharacteristic(CharacteristicBase* characteristic) {
+	_characteristics.push_back(characteristic);
+
+	if (isInitialized(C_SERVICE_INITIALIZED)) {
+		characteristic->init(this);
+	}
 }
 
 /** Set encryption.

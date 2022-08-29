@@ -204,11 +204,9 @@ void Stack::initServices() {
 		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
 	}
 	LOGd("Init services");
-
 	for (Service* svc : _services) {
 		svc->init(this);
 	}
-
 	setInitialized(C_SERVICES_INITIALIZED);
 }
 

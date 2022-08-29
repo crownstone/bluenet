@@ -31,5 +31,7 @@ public:
 
 
 	static microapp_sdk_ble_uuid_t convertUuid(const UUID& uuid);
+
+	static UUID convertUuid(const microapp_sdk_ble_uuid_t& uuid);
 };
 

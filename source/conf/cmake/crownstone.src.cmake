@@ -100,6 +100,7 @@ IF (BUILD_MICROAPP_SUPPORT)
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_MicroappRequestHandler.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_MicroappInterruptHandler.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_MicroappSdkUtil.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_MicroappService.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_DoubleStackCoroutine.c")
 ENDIF()
 

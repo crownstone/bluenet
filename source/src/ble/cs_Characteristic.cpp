@@ -25,6 +25,10 @@ CharacteristicBase::CharacteristicBase() : _handles({}), _status({}) {}
  * and is read through another, this will resolve to nonsense to the user.
  */
 void CharacteristicBase::init(Service* svc) {
+	if (_status.initialized) {
+		return;
+	}
+
 	_service = svc;
 
 	// Attribute metadata for client characteristic configuration

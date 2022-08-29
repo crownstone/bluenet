@@ -95,10 +95,10 @@ void MicroappInterruptHandler::handleEvent(event_t& event) {
 
 uint8_t* MicroappInterruptHandler::getOutputBuffer(MicroappSdkMessageType type, uint8_t id) {
 	if (!MicroappController::getInstance().allowSoftInterrupts()) {
-		LogMicroappInterrupDebug("New interrupts blocked, ignore mesh event");
+		LogMicroappInterrupDebug("New interrupts blocked, ignore event");
 		return nullptr;
 	}
-	if (!MicroappController::getInstance().isSoftInterruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL)) {
+	if (!MicroappController::getInstance().isSoftInterruptRegistered(type, id)) {
 		LogMicroappInterrupDebug("No interrupt registered");
 		return nullptr;
 	}
@@ -132,7 +132,7 @@ void MicroappInterruptHandler::onGpioUpdate(cs_gpio_update_t& event) {
  * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
  */
 void MicroappInterruptHandler::onDeviceScanned(scanned_device_t& dev) {
-	if (!MicroappController::getInstance().isScanning()) {
+	if (!MicroappController::getInstance().microappData.isScanning) {
 		return;
 	}
 

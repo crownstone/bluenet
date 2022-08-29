@@ -53,7 +53,15 @@ MicroappSdkAck MicroappSdkUtil::bluenetResultToMicroapp(cs_ret_code_t retCode) {
 microapp_sdk_ble_uuid_t MicroappSdkUtil::convertUuid(const UUID& uuid) {
 	microapp_sdk_ble_uuid_t convertedUuid = {
 			.type = uuid.getUuid().type,
-			.uuid = uuid.getUuid().uuid
+			.uuid = uuid.getUuid().uuid,
 	};
 	return convertedUuid;
+}
+
+UUID MicroappSdkUtil::convertUuid(const microapp_sdk_ble_uuid_t& uuid) {
+	ble_uuid_t bleUuid = {
+			.uuid = uuid.uuid,
+			.type = uuid.type,
+	};
+	return UUID(bleUuid);
 }

@@ -30,11 +30,18 @@ protected:
 	cs_ret_code_t handleRequestServiceData(microapp_sdk_service_data_t* serviceData);
 	cs_ret_code_t handleRequestTwi(microapp_sdk_twi_t* twi);
 	cs_ret_code_t handleRequestBle(microapp_sdk_ble_t* ble);
+
+	cs_ret_code_t handleRequestBleScan(microapp_sdk_ble_t* ble);
+	cs_ret_code_t handleRequestBleCentral(microapp_sdk_ble_t* ble);
+	cs_ret_code_t handleRequestBlePeripheral(microapp_sdk_ble_t* ble);
+
 	cs_ret_code_t handleRequestMesh(microapp_sdk_mesh_t* mesh);
 	cs_ret_code_t handleRequestPowerUsage(microapp_sdk_power_usage_t* powerUsage);
 	cs_ret_code_t handleRequestPresence(microapp_sdk_presence_t* presence);
 	cs_ret_code_t handleRequestControlCommand(microapp_sdk_control_command_t* controlCommand);
 	cs_ret_code_t handleRequestYield(microapp_sdk_yield_t* yield);
+
+	CharacteristicBase* getCharacteristic(uint16_t handle);
 
 public:
 	static MicroappRequestHandler& getInstance() {

@@ -7,6 +7,7 @@
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <ipc/cs_IpcRamData.h>
+#include <services/cs_MicroappService.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
@@ -50,6 +51,17 @@ struct microapp_soft_interrupt_registration_t {
 	bool registered             = false;
 	MicroappSdkMessageType type = CS_MICROAPP_SDK_TYPE_NONE;
 	uint8_t id                  = 0;
+};
+
+/**
+ * Keeps up data for a microapp.
+ */
+struct microapp_data_t {
+	//! Keeps up whether the microapp is scanning, thus whether BLE scans should generate interrupts.
+	bool isScanning = false;
+
+	//! Keeps up the microapp service.
+	Service* service = nullptr;
 };
 
 /**
@@ -110,11 +122,6 @@ private:
 	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
 	 */
 	uint8_t _consecutiveMicroappCallCounter = 0;
-
-	/**
-	 * Flag to indicate whether to forward scanned devices to microapp.
-	 */
-	bool _microappIsScanning                = false;
 
 	/**
 	 * Keeps track of how many empty interrupt slots are available on the microapp side
@@ -235,12 +242,7 @@ public:
 	void generateSoftInterrupt();
 
 	/**
-	 * Enable or disable BLE scanned device interrupt calls.
+	 * Some runtime data we have to store for a microapp.
 	 */
-	void setScanning(bool scanning);
-
-	/**
-	 * Returns true when BLE scanned device interrupt is enabled.
-	 */
-	bool isScanning();
+	microapp_data_t microappData;
 };
