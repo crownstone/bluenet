@@ -65,7 +65,7 @@ void CrownstoneService::addControlCharacteristic(
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
 	_controlCharacteristic->onWrite(
-			[&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+			[&](CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 				// Encryption in the write stage verifies if the key is at the lowest level, command specific
 				// permissions are handled in the CommandHandler.
 				cs_result_t result;
@@ -178,7 +178,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_factoryResetCharacteristic->onWrite(
-			[&](const uint8_t accessLevel, const uint32_t& value, uint16_t length) -> void {
+			[&](CharacteristicBase* characteristic, const uint8_t accessLevel, const uint32_t& value, uint16_t length) -> void {
 				// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
 				// No need to check length, as value is not a pointer.
 				bool success = FactoryReset::getInstance().recover(value);

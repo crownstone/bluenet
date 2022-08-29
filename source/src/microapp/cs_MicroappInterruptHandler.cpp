@@ -351,3 +351,21 @@ void MicroappInterruptHandler::onBlePeripheralDisconnect() {
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
+
+void MicroappInterruptHandler::onBlePeripheralWrite(uint16_t handle, uint16_t size, uint8_t* data) {
+	LogMicroappInterrupDebug("onBlePeripheralWrite");
+	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
+	if (outputBuffer == nullptr) {
+		return;
+	}
+
+	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type = CS_MICROAPP_SDK_BLE_PERIPHERAL;
+	ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_WRITE;
+	ble->peripheral.connectionHandle = 0; // TODO: get connection handle.
+	ble->peripheral.handle = handle;
+	ble->peripheral.eventWrite.size = size;
+
+	MicroappController::getInstance().generateSoftInterrupt();
+}

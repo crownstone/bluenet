@@ -15,6 +15,7 @@
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappController.h>
+#include <microapp/cs_MicroappInterruptHandler.h>
 #include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappSdkUtil.h>
 #include <protocol/cs_CommandTypes.h>
@@ -558,6 +559,15 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			characteristic->setMaxGattValueLength(ble->peripheral.requestAddCharacteristic.bufferSize);
 			characteristic->setValueLength(0);
 
+
+			characteristic->onWrite([&](CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+				uint16_t handle = characteristic->getValueHandle();
+				MicroappInterruptHandler::getInstance().onBlePeripheralWrite(handle, length, value);
+			});
+
+			// TODO: onRead()
+			// TODO: onSubscribe()
+
 			service->addCharacteristic(characteristic);
 
 			ble->peripheral.handle = characteristic->getValueHandle();
@@ -577,6 +587,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			}
 
 			characteristic->setValueLength(ble->peripheral.requestValueSet.size);
+
+			// TODO: updateValue also calls notify()
 			cs_ret_code_t result = characteristic->updateValue();
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
@@ -587,6 +599,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 				ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND;
 				return ERR_WRONG_STATE;
 			}
+
+			// TODO: raw notify, this notify function sends all chunks.
 
 			// Right now, we ignore offset and size.
 			cs_ret_code_t result = characteristic->notify();

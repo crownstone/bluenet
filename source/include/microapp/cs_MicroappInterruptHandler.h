@@ -73,6 +73,8 @@ private:
 
 public:
 
+	void onBlePeripheralWrite(uint16_t handle, uint16_t size, uint8_t* data);
+
 	/**
 	 * Handle events
 	 */

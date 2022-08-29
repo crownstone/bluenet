@@ -365,7 +365,7 @@ class CharacteristicGeneric : public CharacteristicBase {
 
 public:
 	//! Format of callback on write (from user)
-	typedef function<void(const EncryptionAccessLevel, const T&, uint16_t length)> callback_on_write_t;
+	typedef function<void(CharacteristicBase* characteristic, const EncryptionAccessLevel, const T&, uint16_t length)> callback_on_write_t;
 
 protected:
 	/** The generic type is physically located in this field in this class (by value, not just by reference)
@@ -473,7 +473,9 @@ protected:
 		_log(LogLevelCharacteristicDebug, false, "valuePtr=%p valueLen=%u data=", getValuePtr(), getValueLength());
 		_logArray(LogLevelCharacteristicDebug, true, getValuePtr(), getValueLength());
 
-		_callbackOnWrite(accessLevel, getValue(), getValueLength());
+		if (_callbackOnWrite) {
+			_callbackOnWrite(this, accessLevel, getValue(), getValueLength());
+		}
 	}
 
 	/** @inherit */
