@@ -14,5 +14,5 @@ int main() {
 	SwitchAggregator _switchAggregator;
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
-	return -1;
+	return 0;
 }
