@@ -9,3 +9,4 @@ list(APPEND NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL "components/libraries/crc16/
 list(APPEND NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL "components/libraries/crc32/crc32.c")
 
 list(APPEND NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL "components/libraries/scheduler/app_scheduler.c")
+list(APPEND NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL "components/libraries/util/app_util_platform.c")

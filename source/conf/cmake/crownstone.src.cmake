@@ -70,7 +70,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_error_weak.c")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevice.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevices.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartCommandHandler.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")

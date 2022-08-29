@@ -48,7 +48,7 @@ list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/app_error.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/app_error_handler_gcc.c")
 #	list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/app_error_weak.c")
 
-list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/app_util_platform.c")
+
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/libraries/util/nrf_assert.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/softdevice/common/nrf_sdh.c")
 list(APPEND NORDIC_SOURCE_NRF5_REL "components/softdevice/common/nrf_sdh_ble.c")

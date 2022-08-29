@@ -4,3 +4,5 @@
 if(NRF5SDK_PLATFORM_NRF52_SOURCE_REL)
 	status (WARNING "NRF5SDK_PLATFORM_NRF52_SOURCE_REL is non-empty.")
 endif()
+
+list(APPEND NRF5SDK_PLATFORM_NRF52_SOURCE_REL "components/libraries/util/app_util_platform.c")
