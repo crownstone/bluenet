@@ -270,14 +270,15 @@ void CommandHandler::handleCmdGetBootloaderVersion(
 		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get bootloader version");
 
-	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, result.buf.data, result.buf.len, &dataSize);
+	bluenet_ipc_data_header_t header;
+	header.index = IPC_INDEX_BOOTLOADER_VERSION;
+	int retCode  = getRamData(&header, result.buf.data, result.buf.len);
 	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("No IPC data found, error = %i", retCode);
+		LOGw("IPC error = %i", retCode);
 		result.returnCode = ERR_NOT_FOUND;
 		return;
 	}
-	result.dataSize   = dataSize;
+	result.dataSize   = header.dataSize;
 	result.returnCode = ERR_SUCCESS;
 	return;
 }

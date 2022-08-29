@@ -11,6 +11,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 
 // The number of slots for interprocess communication
@@ -18,6 +19,10 @@ extern "C" {
 
 // The size of each slot for interprocess communication
 #define BLUENET_IPC_RAM_DATA_ITEM_SIZE 24
+
+// Default version numbers for major and minor
+#define BLUENET_IPC_MAJOR_DEFAULT 1
+#define BLUENET_IPC_MINOR_DEFAULT 0
 
 enum IpcIndex {
 	IPC_INDEX_RESERVED           = 0,
@@ -34,6 +39,8 @@ enum IpcRetCode {
 	IPC_RET_NOT_FOUND          = 4,
 	IPC_RET_NULL_POINTER       = 5,
 	IPC_RET_DATA_INVALID       = 6,
+	IPC_RET_DATA_MAJOR_DIFF    = 7,
+	IPC_RET_DATA_MINOR_DIFF    = 8,
 };
 
 enum BuildType {
@@ -55,27 +62,54 @@ enum BuildType {
  */
 typedef struct {
 	uint8_t protocol;  // Should be 1.
-	uint16_t dfu_version;
+	uint16_t dfuVersion;
 	uint8_t major;
 	uint8_t minor;
 	uint8_t patch;
-	uint8_t prerelease;  // 255 means it's not a pre-release.
-	uint8_t build_type;  // See BuildType.
+	// A prerelease value. This is 255 for normal releases.
+	uint8_t prerelease;
+	uint8_t buildType;
 } __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
 
 /**
- * One item of data in the IPC ram.
- * The data array is word aligned.
+ * Make data available as union.
+ */
+typedef union {
+	// Raw data
+	uint8_t raw[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+	// The data coming from the bootloader
+	bluenet_ipc_bootloader_data_t bootloaderData;
+} __attribute__((packed, aligned(4))) bluenet_ipc_data_t;
+
+/**
+ * The header of a data item in IPC ram.
  *
- * index      The index of this item, to see if this item has been set.
- * dataSize   How many bytes of useful data is in the data array.
- * checksum   Checksum calculated over the index, data size, and _complete_ data array.
+ * Bump the major version if there's a change that is not backwards-compatible. Bump the minor version if there's a
+ * change that is backwards-compatible, for example the addition of a field within the data object.
  */
 typedef struct {
+	// The major version.
+	uint8_t major;
+	// The minor version.
+	uint8_t minor;
+	// The index of this item, to see if this item has been set.
 	uint8_t index;
+	// How many bytes are informational within the data array.
 	uint8_t dataSize;
+	// Checksum calculated over the data array, but also all fields above.
 	uint16_t checksum;
-	uint8_t data[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+	// Reserve some bytes to be word aligned.
+	uint8_t reserved[2];
+} __attribute__((packed, aligned(4))) bluenet_ipc_data_header_t;
+
+/**
+ * One item of data in the IPC ram. The data is word-aligned.
+ */
+typedef struct {
+	// The header
+	bluenet_ipc_data_header_t header;
+	// The data array
+	bluenet_ipc_data_t data;
 } __attribute__((packed, aligned(4))) bluenet_ipc_ram_data_item_t;
 
 /**
@@ -88,21 +122,31 @@ typedef struct {
 /**
  * Set data in IPC ram.
  *
- * @param[in] index          Index of item.
+ * @param[in] header         Header of which all fields apart from header.checksum and header.reserved are required.
  * @param[in] data           Data pointer.
- * @param[in] dataSize       Size of the data.
+ * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode setRamData(uint8_t index, uint8_t* data, const uint8_t dataSize);
+enum IpcRetCode setRamData(bluenet_ipc_data_header_t* header, uint8_t* data);
 
 /**
  * Get data from IPC ram.
  *
- * @param[in] index          Index of item.
- * @param[out] buf           Buffer to copy the data to.
- * @param[in] length         Size of the buffer.
- * @param[out] dataSize      Size of the data.
+ * @param[inout] header      Header of which header.index is required and header.major and minor are optional. The
+ *                           field header.dataSize will be written with size of the returned data.
+ * @param[out] data          Buffer to copy the data to.
+ * @param[in] max_length     Size of the buffer to copy the data to (should be large enough).
+ * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t* dataSize);
+enum IpcRetCode getRamData(bluenet_ipc_data_header_t* header, uint8_t* data, uint8_t max_length);
+
+/**
+ * Get header for specific data. Calculating the checksum can be omitted.
+ *
+ * @param[in] header         Header of which header.index is required.
+ * @param[in] use_checksum   Calculate the checksum.
+ * @return                   Error code (success is indicated by 0).
+ */
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, bool use_checksum);
 
 /**
  * Get the underlying complete data struct. Do not use if not truly necessary. Its implementation might change.

@@ -105,9 +105,10 @@ void microappCallbackDummy() {
 		// fake setup or loop yields
 		io_buffers.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
 		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
-		uint8_t rd_size                        = 0;
 		bluenet2microapp_ipcdata_t ipc_data;
-		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t), &rd_size);
+		bluenet_ipc_data_header_t header;
+		header.index = IPC_INDEX_CROWNSTONE_APP;
+		getRamData(&header, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t));
 
 		// Perform the actual callback. Should call microappCallback and yield.
 		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffers);
@@ -178,19 +179,28 @@ MicroappController::MicroappController() : EventListener() {
 /*
  * Set the microappCallback in the IPC ram data bank. At a later time it can be used by the microapp to find the
  * address of microappCallback to call back into the bluenet code.
+ *
+ * The bluenet2microapp object can be stored on the stack because setRamData copies the data.
  */
 void MicroappController::setIpcRam() {
 	LOGi("Set IPC info for microapp");
-	bluenet2microapp_ipcdata_t bluenet2microapp;
-	bluenet2microapp.protocol         = 1;
-	bluenet2microapp.length           = sizeof(bluenet2microapp_ipcdata_t);
-	bluenet2microapp.microappCallback = microappCallback;
+	bluenet_ipc_data_cpp_t ipcData;
+	ipcData.bluenet2microappData.microappCallback = microappCallback;
+	ipcData.bluenet2microappData.protocol         = MICROAPP_DATA_PROTOCOL;
 
-	LOGi("Set callback to %p", bluenet2microapp.microappCallback);
+	LOGi("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 
-	[[maybe_unused]] uint32_t retCode =
-			setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&bluenet2microapp, bluenet2microapp.length);
-	LOGi("Set ram data for microapp, retCode=%u", retCode);
+	bluenet_ipc_data_header_t header;
+	header.index     = IPC_INDEX_CROWNSTONE_APP;
+	header.major     = MICROAPP_IPC_CURRENT_PROTOCOL_MAJOR;
+	header.minor     = MICROAPP_IPC_CURRENT_PROTOCOL_MINOR;
+	header.dataSize  = sizeof(bluenet2microapp_ipcdata_t);
+	uint32_t retCode = setRamData(&header, ipcData.raw);
+	if (retCode != ERR_SUCCESS) {
+		LOGw("Microapp IPC RAM data error, retCode=%u", retCode);
+		return;
+	}
+	LOGi("Set ram data for microapp");
 }
 
 /*

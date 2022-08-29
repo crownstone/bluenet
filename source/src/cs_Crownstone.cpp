@@ -108,6 +108,14 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
 
+	// Plain text log for when there are difficulties with the binary log parser.
+	// This means that when a device is returned to us (and binary logging is on) we can derive which firmware
+	// is present on it without having to parse the data coming from the device.
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 1
+	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
+	CLOGi("\r\nGit hash %s", g_GIT_SHA1);
+#endif
+
 	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
 	LOGi("Git hash %s", g_GIT_SHA1);
 	LOGi("Compilation date: %s", g_COMPILATION_DAY);
@@ -317,9 +325,6 @@ void Crownstone::initDrivers1() {
 		// Init UartHandler only now, because it will read State.
 		UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 	}
-
-	// Plain text log.
-	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
 
 	LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
@@ -901,28 +906,27 @@ void Crownstone::printLoadStats() {
 }
 
 void printBootloaderInfo() {
-	bluenet_ipc_bootloader_data_t bootloaderData;
-	uint8_t size = sizeof(bootloaderData);
-	uint8_t dataSize;
-	uint8_t* buf = (uint8_t*)&bootloaderData;
-	int retCode  = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
+	bluenet_ipc_data_t ipcData;
+	bluenet_ipc_data_header_t header;
+	header.index = IPC_INDEX_BOOTLOADER_VERSION;
+	int retCode  = getRamData(&header, ipcData.raw, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
 		LOGw("No IPC data found, error = %i", retCode);
 		return;
 	}
-	if (size != dataSize) {
-		LOGw("IPC data struct incorrect size");
+	if (header.dataSize != sizeof(ipcData.bootloaderData)) {
+		LOGw("IPC data struct has the incorrect size");
 		return;
 	}
 	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
-		 bootloaderData.protocol,
-		 bootloaderData.dfu_version,
-		 bootloaderData.build_type);
+		 ipcData.bootloaderData.protocol,
+		 ipcData.bootloaderData.dfuVersion,
+		 ipcData.bootloaderData.buildType);
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
-		 bootloaderData.major,
-		 bootloaderData.minor,
-		 bootloaderData.patch,
-		 bootloaderData.prerelease);
+		 ipcData.bootloaderData.major,
+		 ipcData.bootloaderData.minor,
+		 ipcData.bootloaderData.patch,
+		 ipcData.bootloaderData.prerelease);
 }
 
 /**********************************************************************************************************************

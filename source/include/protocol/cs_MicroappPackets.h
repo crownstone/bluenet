@@ -25,9 +25,9 @@ constexpr uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
 /**
  * Protocol version of the communication between the user and the firmware: the microapp command and result packets.
  */
-constexpr uint8_t MICROAPP_PROTOCOL               = 1;
+constexpr uint8_t MICROAPP_DATA_PROTOCOL          = 1;
 
-constexpr uint8_t MICROAPP_SDK_MAJOR              = 1;
+constexpr uint8_t MICROAPP_SDK_MAJOR              = 3;
 
 constexpr uint8_t MICROAPP_SDK_MINOR              = 0;
 
@@ -60,7 +60,7 @@ struct __attribute__((__packed__)) microapp_binary_header_t {
 };
 
 struct __attribute__((packed)) microapp_ctrl_header_t {
-	uint8_t protocol;  // Protocol of the microapp command and result packets, should match MICROAPP_PROTOCOL.
+	uint8_t protocol;  // Protocol of the microapp command and result packets, should match MICROAPP_DATA_PROTOCOL.
 	uint8_t index;     // Index of the microapp on the firmware.
 };
 
@@ -125,9 +125,10 @@ struct __attribute__((packed)) microapp_status_t {
  * Packet with all info required to upload a microapp, and to see the status of already uploaded microapps.
  */
 struct __attribute__((packed)) microapp_info_t {
-	uint8_t protocol      = MICROAPP_PROTOCOL;  // Protocol of this packet, and the microapp command packets.
-	uint8_t maxApps       = MAX_MICROAPPS;      // Maximum number of microapps.
-	uint16_t maxAppSize   = MICROAPP_MAX_SIZE;  // Maximum binary size of a microapp.
+	// Protocol of this packet, and the microapp command packets.
+	// uint8_t protocol      = MICROAPP_PROTOCOL;  // Protocol of this packet, and the microapp command packets.
+	uint8_t maxApps       = MAX_MICROAPPS;                   // Maximum number of microapps.
+	uint16_t maxAppSize   = MICROAPP_MAX_SIZE;               // Maximum binary size of a microapp.
 	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;  // Maximum chunk size for uploading a microapp.
 	uint16_t maxRamUsage  = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
 	microapp_sdk_version_t sdkVersion;                       // SDK version the firmware supports.
