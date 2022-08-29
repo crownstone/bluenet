@@ -6,3 +6,4 @@ if(NRF5SDK_PLATFORM_HOST_SOURCE_REL)
 endif()
 
 #list(APPEND NRF5SDK_PLATFORM_HOST_SOURCE_REL "components/libraries/timer/app_timer_host.cpp")
+list(APPEND NRF5SDK_PLATFORM_HOST_SOURCE_REL "components/softdevice/s132/mock/ble_gap.c")

@@ -27,7 +27,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Watchdog.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_ConnectionEncryption.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_KeysAndAccess.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/encryption/cs_RC5.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_MeshTopology.cpp")

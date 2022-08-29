@@ -26,6 +26,10 @@ uint32_t PWM::start(bool onZeroCrossing) {
     return ERR_SUCCESS;
 }
 
+void PWM::start() {
+    _started = true;
+}
+
 void PWM::setValue(uint8_t channel, uint8_t value, uint8_t speed) {
     assert(_initialized, "not initialized");
     assert(channel < CS_PWM_MAX_CHANNELS, "channel out of bounds");
