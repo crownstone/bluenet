@@ -19,7 +19,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_COMP.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_GpRegRet.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_PWM.cpp")
 
 
 
@@ -74,8 +73,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/tracking/cs_TrackedDevices.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Crc16.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Crc32.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 
 
