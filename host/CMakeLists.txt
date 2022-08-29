@@ -25,6 +25,8 @@ set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
+ADD_DEFINITIONS("-DUSE_APP_CONFIG")
+
 if(HOST_TARGET)
 	add_compile_definitions("HOST_TARGET")
 endif()
@@ -49,6 +51,10 @@ load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
 # These should come from a CMakeBuild.config.default file
 add_compile_definitions("SERIAL_VERBOSITY=${SERIAL_VERBOSITY}")
 
+####################################
+# Auto generated/configuration files
+####################################
+
 message(STATUS "Configure cs_Git.cpp file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_BLUENET_BINARY_DIR}/src/cfg/cs_Git.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_BLUENET_BINARY_DIR}/src/cfg/cs_Git.cpp")
@@ -62,6 +68,10 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 
 message(STATUS "Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h")
+
+message(STATUS "current bindir: ${CMAKE_BLUENET_BINARY_DIR}")
+include_directories(${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf)
+#link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL})
 
 
 ##################################
@@ -150,7 +160,7 @@ list(APPEND HOSTLIB_SOURCE
 
 set(BLUENET_HOST_LIB BluenetHost)
 print_list("${BLUENET_HOST_LIB} contains: " HOSTLIB_SOURCE)
-add_library(${BLUENET_HOST_LIB} STATIC ${HOSTLIB_SOURCE})
+add_library(BluenetHost STATIC ${HOSTLIB_SOURCE})
 
 
 ##################################################################################
@@ -164,7 +174,7 @@ function(add_crownstone_test testpath)
 	get_filename_component(TESTNAME ${testpath} NAME_WE)
 	add_executable(${TESTNAME} "test/${testpath}")
 
-	target_link_libraries(${TESTNAME} ${BLUENET_HOST_LIB})
+	target_link_libraries(${TESTNAME} BluenetHost)
 	
 	add_test(NAME ${TESTNAME} COMMAND ${TESTNAME})
 	install(TARGETS ${TESTNAME} RUNTIME DESTINATION ${CMAKE_BINARY_DIR})

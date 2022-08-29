@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <sdk_config.h>
 #include <ble_types.h>
 #include <nrf.h>
 #include <sdk_errors.h>
