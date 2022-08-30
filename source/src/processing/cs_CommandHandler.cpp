@@ -277,6 +277,19 @@ void CommandHandler::handleCmdGetBootloaderVersion(
 		result.returnCode = ERR_NOT_FOUND;
 		return;
 	}
+	bluenet_ipc_bootloader_data_t* bootloaderData = (bluenet_ipc_bootloader_data_t*)result.buf.data;
+	if (bootloaderData->ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Different major. Not known how to parse bootloader IPC data.");
+		return;
+	}
+	if (bootloaderData->ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("New minor. Will parse only part of bootloader IPC data");
+		return;
+	}
+	if (dataSize != sizeof(*bootloaderData)) {
+		// We will go through though, assuming the mismatch comes from a minor increase
+		LOGw("Bootloader IPC data struct has the incorrect size");
+	}
 	result.dataSize   = dataSize;
 	result.returnCode = ERR_SUCCESS;
 	return;

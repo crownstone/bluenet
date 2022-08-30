@@ -242,7 +242,7 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
-	// info->protocol           = MICROAPP_PROTOCOL;
+	info->protocol           = MICROAPP_CONTROL_COMMAND_PROTOCOL;
 	info->maxApps            = MAX_MICROAPPS;
 	info->maxAppSize         = MICROAPP_MAX_SIZE;
 	info->maxChunkSize       = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;
@@ -378,7 +378,7 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
 	LOGMicroappInfo("checkHeader %u", packet->index);
-	if (packet->protocol != MICROAPP_DATA_PROTOCOL) {
+	if (packet->protocol != MICROAPP_CONTROL_COMMAND_PROTOCOL) {
 		LOGw("Unsupported protocol: %u", packet->protocol);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}

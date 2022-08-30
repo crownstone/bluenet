@@ -16,7 +16,9 @@ const char g_BUILD_TYPE[]                     = CS_BUILD_TYPE;
 /*
  * Define a series of integers. Will be filled in by a cmake configure step.
  */
-const uint8_t g_BOOTLOADER_IPC_RAM_PROTOCOL   = ${BOOTLOADER_IPC_RAM_PROTOCOL};
+const uint8_t g_BOOTLOADER_IPC_RAM_MAJOR      = ${BOOTLOADER_IPC_RAM_MAJOR};
+
+const uint8_t g_BOOTLOADER_IPC_RAM_MINOR      = ${BOOTLOADER_IPC_RAM_MINOR};
 
 const uint16_t g_BOOTLOADER_DFU_VERSION       = ${BOOTLOADER_DFU_VERSION};
 

@@ -16,6 +16,12 @@
 
 #include <cstdint>
 
+/**
+ * Protocol version of the contents of the IPC data going back and forth between microapp and bluenet.
+ * This data currently contains a callback and a flag.
+ */
+const uint8_t MICROAPP_IPC_DATA_PROTOCOL                    = 1;
+
 /*
  * Externally determined constant sizes
  */
@@ -375,12 +381,15 @@ typedef microapp_sdk_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io
  * The size is also defined in the parent struct: bluenet_ipc_data_t.
  * The pointer to the coargs struct can be used to switch back from the used coroutine and needs to stored somewhere
  * accessible (not in this struct).
- * The protocol version here is the protocol version of the subsequent data exchange. It is not a version of this
- * struct itself.
+ * The protocol version here is the protocol version of the subsequent data exchange. It is not a version of the IPC
+ * struct header. It is neither the protocol for "command control" (for uploading microapps).
  */
 struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
-	uint8_t protocol;
+	// Data protocol (between bluenet and microapp)
+	uint8_t dataProtocol;
+	// The callback to be registered and used
 	microappCallbackFunc microappCallback;
+	// Flag to indicate that the callback is set by the microapp and the struct can be considered valid
 	uint8_t valid : 1;
 };
 

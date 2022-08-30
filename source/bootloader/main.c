@@ -209,14 +209,15 @@ void set_bootloader_info() {
 
 	bluenet_ipc_data_t ipcData;
 
-	ipcData.bootloaderData.protocol   = g_BOOTLOADER_IPC_RAM_PROTOCOL;
-	ipcData.bootloaderData.dfuVersion = g_BOOTLOADER_DFU_VERSION;
-	ipcData.bootloaderData.major      = g_BOOTLOADER_VERSION_MAJOR;
-	ipcData.bootloaderData.minor      = g_BOOTLOADER_VERSION_MINOR;
-	ipcData.bootloaderData.patch      = g_BOOTLOADER_VERSION_PATCH;
-	ipcData.bootloaderData.prerelease = g_BOOTLOADER_VERSION_PRERELEASE;
-	ipcData.bootloaderData.buildType  = g_BOOTLOADER_BUILD_TYPE;
-	uint8_t dataSize                  = sizeof(ipcData.bootloaderData);
+	ipcData.bootloaderData.ipcDataMajor         = g_BOOTLOADER_IPC_RAM_MAJOR;
+	ipcData.bootloaderData.ipcDataMinor         = g_BOOTLOADER_IPC_RAM_MINOR;
+	ipcData.bootloaderData.dfuVersion           = g_BOOTLOADER_DFU_VERSION;
+	ipcData.bootloaderData.bootloaderMajor      = g_BOOTLOADER_VERSION_MAJOR;
+	ipcData.bootloaderData.bootloaderMinor      = g_BOOTLOADER_VERSION_MINOR;
+	ipcData.bootloaderData.bootloaderPatch      = g_BOOTLOADER_VERSION_PATCH;
+	ipcData.bootloaderData.bootloaderPrerelease = g_BOOTLOADER_VERSION_PRERELEASE;
+	ipcData.bootloaderData.bootloaderBuildType  = g_BOOTLOADER_BUILD_TYPE;
+	uint8_t dataSize                            = sizeof(ipcData.bootloaderData);
 	setRamData(IPC_INDEX_BOOTLOADER_VERSION, dataSize, ipcData.raw);
 }
 

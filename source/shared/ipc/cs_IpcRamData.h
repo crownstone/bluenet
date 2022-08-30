@@ -63,14 +63,16 @@ enum BuildType {
  * that represented the CMAKE_BUILD_TYPE, such as Release or Debug.
  */
 typedef struct {
-	uint8_t protocol;  // Should be 1.
+	// Major version of this struct
+	uint8_t ipcDataMajor;
+	uint8_t ipcDataMinor;
 	uint16_t dfuVersion;
-	uint8_t major;
-	uint8_t minor;
-	uint8_t patch;
+	uint8_t bootloaderMajor;
+	uint8_t bootloaderMinor;
+	uint8_t bootloaderPatch;
 	// A prerelease value. This is 255 for normal releases.
-	uint8_t prerelease;
-	uint8_t buildType;
+	uint8_t bootloaderPrerelease;
+	uint8_t bootloaderBuildType;
 } __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
 
 /**

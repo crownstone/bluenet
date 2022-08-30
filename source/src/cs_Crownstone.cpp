@@ -913,19 +913,26 @@ void printBootloaderInfo() {
 		LOGw("Bootloader IPC data error = %i", retCode);
 		return;
 	}
+	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Different major. Not known how to parse bootloader IPC data.");
+		return;
+	}
+	if (ipcData.bootloaderData.ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("New minor. Will parse only part of bootloader IPC data");
+		return;
+	}
 	if (dataSize != sizeof(ipcData.bootloaderData)) {
 		LOGw("Bootloader IPC data struct has the incorrect size");
 		return;
 	}
-	LOGd("Bootloader version protocol=%u dfuVersion=%u buildType=%u",
-		 ipcData.bootloaderData.protocol,
-		 ipcData.bootloaderData.dfuVersion,
-		 ipcData.bootloaderData.buildType);
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
-		 ipcData.bootloaderData.major,
-		 ipcData.bootloaderData.minor,
-		 ipcData.bootloaderData.patch,
-		 ipcData.bootloaderData.prerelease);
+		 ipcData.bootloaderData.bootloaderMajor,
+		 ipcData.bootloaderData.bootloaderMinor,
+		 ipcData.bootloaderData.bootloaderPatch,
+		 ipcData.bootloaderData.bootloaderPrerelease);
+	LOGd("Bootloader dfuVersion=%u buildType=%u",
+		 ipcData.bootloaderData.dfuVersion,
+		 ipcData.bootloaderData.bootloaderBuildType);
 }
 
 /**********************************************************************************************************************
