@@ -208,11 +208,6 @@ void set_bootloader_info() {
 	NRF_LOG_FLUSH();
 
 	bluenet_ipc_data_t ipcData;
-	bluenet_ipc_data_header_t header;
-	header.index                      = IPC_INDEX_BOOTLOADER_VERSION;
-	header.dataSize                   = sizeof(ipcData.bootloaderData);
-	header.major                      = BLUENET_IPC_MAJOR_DEFAULT;
-	header.minor                      = BLUENET_IPC_MINOR_DEFAULT;
 
 	ipcData.bootloaderData.protocol   = g_BOOTLOADER_IPC_RAM_PROTOCOL;
 	ipcData.bootloaderData.dfuVersion = g_BOOTLOADER_DFU_VERSION;
@@ -221,8 +216,8 @@ void set_bootloader_info() {
 	ipcData.bootloaderData.patch      = g_BOOTLOADER_VERSION_PATCH;
 	ipcData.bootloaderData.prerelease = g_BOOTLOADER_VERSION_PRERELEASE;
 	ipcData.bootloaderData.buildType  = g_BOOTLOADER_BUILD_TYPE;
-
-	setRamData(&header, ipcData.raw);
+	uint8_t dataSize                  = sizeof(ipcData.bootloaderData);
+	setRamData(IPC_INDEX_BOOTLOADER_VERSION, dataSize, ipcData.raw);
 }
 
 /**

@@ -294,9 +294,9 @@ static uint32_t service_changed_send(void) {
 
 /**@brief Function for encoding the beginning of a response.
  *
- * @param[inout] p_buffer  The buffer to encode into.
- * @param[in]    op_code   The opcode of the response.
- * @param[in]    result    The result of the operation.
+ * @param[in,out] p_buffer  The buffer to encode into.
+ * @param[in]     op_code   The opcode of the response.
+ * @param[in]     result    The result of the operation.
  *
  * @return The length added to the buffer.
  */
@@ -312,10 +312,10 @@ static uint32_t response_prepare(uint8_t* p_buffer, uint8_t op_code, uint8_t res
  *
  * The select object response consists of a maximum object size, a firmware offset, and a CRC value.
  *
- * @param[inout] p_buffer   The buffer to encode the response into.
- * @param[in]    max_size   The maximum object size value to encode.
- * @param[in]    fw_offset  The firmware offset value to encode.
- * @param[in]    crc        The CRC value to encode.
+ * @param[in,out] p_buffer   The buffer to encode the response into.
+ * @param[in]     max_size   The maximum object size value to encode.
+ * @param[in]     fw_offset  The firmware offset value to encode.
+ * @param[in]     crc        The CRC value to encode.
  *
  * @return The length added to the buffer.
  */
@@ -330,9 +330,9 @@ static uint32_t response_select_obj_add(uint8_t* p_buffer, uint32_t max_size, ui
  *
  * The CRC response consists of a firmware offset and a CRC value.
  *
- * @param[inout] p_buffer   The buffer to encode the response into.
- * @param[in]    fw_offset  The firmware offset value to encode.
- * @param[in]    crc        The CRC value to encode.
+ * @param[in,out] p_buffer   The buffer to encode the response into.
+ * @param[in]     fw_offset  The firmware offset value to encode.
+ * @param[in]     crc        The CRC value to encode.
  *
  * @return The length added to the buffer.
  */
@@ -344,9 +344,9 @@ static uint32_t response_crc_add(uint8_t* p_buffer, uint32_t fw_offset, uint32_t
 
 /**@brief Function for appending an extended error code to the response buffer.
  *
- * @param[inout] p_buffer    The buffer to append the extended error code to.
- * @param[in]    result      The error code to append.
- * @param[in]    buf_offset  The current length of the buffer.
+ * @param[in,out] p_buffer    The buffer to append the extended error code to.
+ * @param[in]     result      The error code to append.
+ * @param[in]     buf_offset  The current length of the buffer.
  *
  * @return The length added to the buffer.
  */

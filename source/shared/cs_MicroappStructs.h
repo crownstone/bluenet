@@ -17,15 +17,6 @@
 #include <cstdint>
 
 /*
- * Major and minor versions of the current specific code base.
- */
-
-// Major version of the protocol
-const uint8_t MICROAPP_IPC_CURRENT_PROTOCOL_MAJOR           = 1;
-// Minor version of the protocol
-const uint8_t MICROAPP_IPC_CURRENT_PROTOCOL_MINOR           = 0;
-
-/*
  * Externally determined constant sizes
  */
 

@@ -26,6 +26,8 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t* item) {
 	sum += item->header.minor;
 	sum += item->header.index;
 	sum += item->header.dataSize;
+	sum += item->header.reserved[0];
+	sum += item->header.reserved[1];
 
 	for (uint8_t i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
 		sum += item->data.raw[i];
@@ -38,26 +40,32 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t* item) {
 
 /*
  * We will do a memcpy with zero padding. This data has to be absolutely valid in all circumstances.
+ *
+ * Make sure header is initialized with zeros for unused fields when calling this function.
  */
-enum IpcRetCode setRamData(bluenet_ipc_data_header_t* header, uint8_t* data) {
+enum IpcRetCode setRamData(uint8_t index, uint8_t dataSize, uint8_t* data) {
 	if (data == NULL) {
 		return IPC_RET_NULL_POINTER;
 	}
-	uint8_t index = header->index;
+	bluenet_ipc_data_header_t header;
+	header.index       = index;
+	header.dataSize    = dataSize;
+	header.major       = BLUENET_IPC_HEADER_MAJOR;
+	header.minor       = BLUENET_IPC_HEADER_MINOR;
+	header.reserved[0] = 0;
+	header.reserved[1] = 0;
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (header->dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+	if (dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
 		return IPC_RET_DATA_TOO_LARGE;
 	}
 	// Copy header
-	memcpy(&m_bluenet_ipc_ram.item[index].header, header, sizeof(header));
+	memcpy(&m_bluenet_ipc_ram.item[index].header, &header, sizeof(header));
 	// Copy data
-	memcpy(m_bluenet_ipc_ram.item[index].data.raw, data, header->dataSize);
+	memcpy(m_bluenet_ipc_ram.item[index].data.raw, data, dataSize);
 	// Zero padding of the data
-	memset(m_bluenet_ipc_ram.item[index].data.raw + header->dataSize,
-		   0,
-		   BLUENET_IPC_RAM_DATA_ITEM_SIZE - header->dataSize);
+	memset(m_bluenet_ipc_ram.item[index].data.raw + dataSize, 0, BLUENET_IPC_RAM_DATA_ITEM_SIZE - dataSize);
 	// Calculate the checksum ourselves (if present in header parameter it is ignored)
 	m_bluenet_ipc_ram.item[index].header.checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 	return IPC_RET_SUCCESS;
@@ -71,12 +79,11 @@ enum IpcRetCode setRamData(bluenet_ipc_data_header_t* header, uint8_t* data) {
  * in that case allow the developer to retrieve the (hopefully uncorrupted) major field and can call getRamData with
  * another major that it also knows how to parse.
  */
-enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, bool use_checksum) {
-	uint8_t index = header->index;
-	if (header->index > BLUENET_IPC_RAM_DATA_ITEMS) {
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum) {
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (use_checksum) {
+	if (doCalculateChecksum) {
 		uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 		if (checksum != m_bluenet_ipc_ram.item[index].header.checksum) {
 			return IPC_RET_DATA_INVALID;
@@ -87,27 +94,35 @@ enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, bool use_che
 }
 
 /*
- * Note that we do not completely trust the data within RAM either...
+ * From the fields in header, all fields are optional. The index field is not considered within the header because,
+ * potentially, a version update might shift the index field.
  *
- * From the fields in header, the field index is expected to be written. If major and minor are both 0, they will be
- * filled with default values.
+ * If major and minor are both 0, they will be filled with default values.
  *
  * If data is corrupted in this section, which can happen in all kinds of ways, from cosmic rays till stack overflows,
  * this can lead to segfaults. Hence, we are excessively checking stuff here.
  *
- * Ram data will not be returned if the header->major and header->minor arguments are lower than what is stored.
+ * Ram data will not be returned for any different header->major and any lower header->minor argument. The sending
+ * party can increase the minor when fields are added and current fields are preserved. In that way the minor can be
+ * used for future compatibility. When the major is bumped consider communication with previous software to be
+ * absent. It will only be possible to do an upgrade procedure where first the receiving party is able to receive
+ * the new protocol and only after that has been rolled out the sending party can start to send it.
+ *
+ * Note that we do not completely trust the data within RAM either... The value header.dataSize is also checked for
+ * example.
  */
-enum IpcRetCode getRamData(bluenet_ipc_data_header_t* header, uint8_t* data, uint8_t max_length) {
+enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint8_t maxSize) {
 	if (data == NULL) {
 		return IPC_RET_NULL_POINTER;
 	}
-	uint8_t index = header->index;
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (header->major == 0 && header->minor == 0) {
-		header->major = BLUENET_IPC_MAJOR_DEFAULT;
-		header->minor = BLUENET_IPC_MINOR_DEFAULT;
+	if (m_bluenet_ipc_ram.item[index].header.major != BLUENET_IPC_HEADER_MAJOR) {
+		return IPC_RET_DATA_MAJOR_DIFF;
+	}
+	if (m_bluenet_ipc_ram.item[index].header.minor > BLUENET_IPC_HEADER_MINOR) {
+		return IPC_RET_DATA_MINOR_DIFF;
 	}
 	if (m_bluenet_ipc_ram.item[index].header.index != index) {
 		return IPC_RET_NOT_FOUND;
@@ -115,23 +130,16 @@ enum IpcRetCode getRamData(bluenet_ipc_data_header_t* header, uint8_t* data, uin
 	if (m_bluenet_ipc_ram.item[index].header.dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
 		return IPC_RET_DATA_TOO_LARGE;
 	}
-	if (max_length < m_bluenet_ipc_ram.item[index].header.dataSize) {
+	if (m_bluenet_ipc_ram.item[index].header.dataSize > maxSize) {
 		return IPC_RET_BUFFER_TOO_SMALL;
 	}
-	if (header->major < m_bluenet_ipc_ram.item[index].header.major) {
-		return IPC_RET_DATA_MAJOR_DIFF;
-	}
-	if (header->minor < m_bluenet_ipc_ram.item[index].header.minor) {
-		return IPC_RET_DATA_MINOR_DIFF;
-	}
-
 	uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 	if (checksum != m_bluenet_ipc_ram.item[index].header.checksum) {
 		return IPC_RET_DATA_INVALID;
 	}
 
 	memcpy(data, &m_bluenet_ipc_ram.item[index].data, m_bluenet_ipc_ram.item[index].header.dataSize);
-	header->dataSize = m_bluenet_ipc_ram.item[index].header.dataSize;
+	*dataSize = m_bluenet_ipc_ram.item[index].header.dataSize;
 	return IPC_RET_SUCCESS;
 }
 

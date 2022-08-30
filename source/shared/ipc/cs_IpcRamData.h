@@ -20,9 +20,11 @@ extern "C" {
 // The size of each slot for interprocess communication
 #define BLUENET_IPC_RAM_DATA_ITEM_SIZE 24
 
-// Default version numbers for major and minor
-#define BLUENET_IPC_MAJOR_DEFAULT 1
-#define BLUENET_IPC_MINOR_DEFAULT 0
+// Version for major for the IPC header itself
+#define BLUENET_IPC_HEADER_MAJOR 1
+
+// Version for minor for the IPC header itself
+#define BLUENET_IPC_HEADER_MINOR 0
 
 enum IpcIndex {
 	IPC_INDEX_RESERVED           = 0,
@@ -122,31 +124,33 @@ typedef struct {
 /**
  * Set data in IPC ram.
  *
- * @param[in] header         Header of which all fields apart from header.checksum and header.reserved are required.
+ * @param[in] index          Index of IPC segment.
+ * @param[in] dataSize       Size of data.
  * @param[in] data           Data pointer.
  * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode setRamData(bluenet_ipc_data_header_t* header, uint8_t* data);
+enum IpcRetCode setRamData(uint8_t index, uint8_t dataSize, uint8_t* data);
 
 /**
  * Get data from IPC ram.
  *
- * @param[inout] header      Header of which header.index is required and header.major and minor are optional. The
- *                           field header.dataSize will be written with size of the returned data.
+ * @param[in] index          Index of IPC segment.
  * @param[out] data          Buffer to copy the data to.
- * @param[in] max_length     Size of the buffer to copy the data to (should be large enough).
+ * @param[out] dataSize      Size of data.
+ * @param[in] maxSize        Size of the buffer to copy the data to (should be large enough).
  * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode getRamData(bluenet_ipc_data_header_t* header, uint8_t* data, uint8_t max_length);
+enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint8_t maxSize);
 
 /**
  * Get header for specific data. Calculating the checksum can be omitted.
  *
- * @param[in] header         Header of which header.index is required.
- * @param[in] use_checksum   Calculate the checksum.
- * @return                   Error code (success is indicated by 0).
+ * @param[out] header              Get only the header.
+ * @param[in] index                Index of IPC segment.
+ * @param[in] doCalculateChecksum  Calculate the checksum.
+ * @return                         Error code (success is indicated by 0).
  */
-enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, bool use_checksum);
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum);
 
 /**
  * Get the underlying complete data struct. Do not use if not truly necessary. Its implementation might change.

@@ -907,18 +907,17 @@ void Crownstone::printLoadStats() {
 
 void printBootloaderInfo() {
 	bluenet_ipc_data_t ipcData;
-	bluenet_ipc_data_header_t header;
-	header.index = IPC_INDEX_BOOTLOADER_VERSION;
-	int retCode  = getRamData(&header, ipcData.raw, sizeof(ipcData.raw));
+	uint8_t dataSize;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("No IPC data found, error = %i", retCode);
+		LOGw("Bootloader IPC data error = %i", retCode);
 		return;
 	}
-	if (header.dataSize != sizeof(ipcData.bootloaderData)) {
-		LOGw("IPC data struct has the incorrect size");
+	if (dataSize != sizeof(ipcData.bootloaderData)) {
+		LOGw("Bootloader IPC data struct has the incorrect size");
 		return;
 	}
-	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
+	LOGd("Bootloader version protocol=%u dfuVersion=%u buildType=%u",
 		 ipcData.bootloaderData.protocol,
 		 ipcData.bootloaderData.dfuVersion,
 		 ipcData.bootloaderData.buildType);
