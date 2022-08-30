@@ -14,7 +14,12 @@
 #include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
 
-#define LOGUartCommandHandlerDebug LOGvv
+// Overwrite macros (do not reorder)
+#include <util/cs_ResetMacros.h>
+
+#if defined __has_include && __has_include(<uart/cs_UartCommandHandler.local.h>)
+#include <uart/cs_UartCommandHandler.local.h>
+#endif
 
 void UartCommandHandler::handleCommand(
 		UartOpcodeRx opCode,
@@ -22,7 +27,7 @@ void UartCommandHandler::handleCommand(
 		EncryptionAccessLevel accessLevel,
 		bool wasEncrypted,
 		cs_data_t resultBuffer) {
-	LOGUartCommandHandlerDebug("Handle cmd opCode=%u size=%u accessLevel=%u", opCode, commandData.len, accessLevel);
+	LOGDebug("Handle cmd opCode=%u size=%u accessLevel=%u", opCode, commandData.len, accessLevel);
 
 	EncryptionAccessLevel requiredAccess = getRequiredAccessLevel(opCode);
 	if (!KeysAndAccess::getInstance().allowAccess(requiredAccess, accessLevel)) {
@@ -145,7 +150,7 @@ void UartCommandHandler::handleCommandSessionNonce(cs_data_t commandData) {
 }
 
 void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData, bool wasEncrypted) {
-	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND "heartbeat wasEncrypted=%u", wasEncrypted);
+	LOGDebug(STR_HANDLE_COMMAND "heartbeat wasEncrypted=%u", wasEncrypted);
 	if (commandData.len < sizeof(uart_msg_heartbeat_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
@@ -156,7 +161,7 @@ void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData, bool wasE
 }
 
 void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
-	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND "status");
+	LOGDebug(STR_HANDLE_COMMAND "status");
 	if (commandData.len < sizeof(uart_msg_status_user_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);

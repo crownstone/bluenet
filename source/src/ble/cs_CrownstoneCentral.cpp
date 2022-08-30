@@ -11,6 +11,7 @@
 #include <cfg/cs_UuidConfig.h>
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
+#include <logging/cs_Logger.h>
 #include <structs/buffer/cs_CharacteristicBuffer.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
@@ -19,9 +20,12 @@
 #include <structs/cs_ResultPacketAccessor.h>
 #include <util/cs_Utils.h>
 
-#define LOGCsCentralInfo LOGi
-#define LOGCsCentralDebug LOGvv
-#define LogLevelCsCentralDebug SERIAL_VERY_VERBOSE
+// Overwrite macros (do not reorder)
+#include <util/cs_ResetMacros.h>
+
+#if defined __has_include && __has_include(<ble/cs_CrownstoneCentral.local.h>)
+#include <ble/cs_CrownstoneCentral.local.h>
+#endif
 
 cs_ret_code_t CrownstoneCentral::init() {
 	// Make use of the fact ERR_SUCCESS = 0, to avoid many if statements.
@@ -58,7 +62,7 @@ void CrownstoneCentral::resetNotifactionMergerState() {
 
 cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGInfo("Busy");
 		return ERR_BUSY;
 	}
 
@@ -91,7 +95,7 @@ cs_ret_code_t CrownstoneCentral::connect(stone_id_t stoneId, uint16_t timeoutMs)
 
 cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGInfo("Busy");
 		return ERR_BUSY;
 	}
 
@@ -108,7 +112,7 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 
 cs_ret_code_t CrownstoneCentral::disconnect() {
 	if (isBusy()) {
-		LOGCsCentralInfo("Cancel current operation");
+		LOGInfo("Cancel current operation");
 		finalizeOperation(_currentOperation, ERR_CANCELED);
 	}
 	// No need to set current operation: BleCentral will block any other operations for us.
@@ -120,7 +124,7 @@ cs_ret_code_t CrownstoneCentral::disconnect() {
 
 cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size) {
 	if (isBusy()) {
-		LOGCsCentralInfo("Busy");
+		LOGInfo("Busy");
 		return ERR_BUSY;
 	}
 
@@ -242,14 +246,14 @@ void CrownstoneCentral::setStep(WriteControlSteps step) {
 
 void CrownstoneCentral::setStep(uint8_t step) {
 	if (step != _currentStep + 1) {
-		LOGCsCentralDebug("Skipping steps: going from %u to %u", _currentStep, step);
+		LOGDebug("Skipping steps: going from %u to %u", _currentStep, step);
 	}
 	_currentStep = step;
 }
 
 bool CrownstoneCentral::finalizeStep(ConnectSteps step, cs_ret_code_t retCode) {
 	if (_currentOperation != Operation::CONNECT) {
-		LOGCsCentralInfo("Wrong operation: _currentOperation=%u", _currentOperation);
+		LOGInfo("Wrong operation: _currentOperation=%u", _currentOperation);
 		finalizeOperation(Operation::CONNECT, ERR_WRONG_OPERATION);
 		return false;
 	}
@@ -258,7 +262,7 @@ bool CrownstoneCentral::finalizeStep(ConnectSteps step, cs_ret_code_t retCode) {
 
 bool CrownstoneCentral::finalizeStep(WriteControlSteps step, cs_ret_code_t retCode) {
 	if (_currentOperation != Operation::WRITE) {
-		LOGCsCentralInfo("Wrong operation: _currentOperation=%u", _currentOperation);
+		LOGInfo("Wrong operation: _currentOperation=%u", _currentOperation);
 		finalizeOperation(Operation::WRITE, ERR_WRONG_OPERATION);
 		return false;
 	}
@@ -266,19 +270,19 @@ bool CrownstoneCentral::finalizeStep(WriteControlSteps step, cs_ret_code_t retCo
 }
 
 bool CrownstoneCentral::finalizeStep(uint8_t step, cs_ret_code_t retCode) {
-	LOGCsCentralDebug(
+	LOGDebug(
 			"finalizeStep _currentOperation=%u _currentStep=%u step=%u retCode=%u",
 			_currentOperation,
 			_currentStep,
 			step,
 			retCode);
 	if (retCode != ERR_SUCCESS) {
-		LOGCsCentralInfo("No success: retCode=%u", retCode);
+		LOGInfo("No success: retCode=%u", retCode);
 		finalizeOperation(_currentOperation, retCode);
 		return false;
 	}
 	if (_currentStep != step) {
-		LOGCsCentralInfo("Wrong step: _currentStep=%u step=%u", _currentStep, step);
+		LOGInfo("Wrong step: _currentStep=%u step=%u", _currentStep, step);
 		finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
 		return false;
 	}
@@ -301,8 +305,7 @@ void CrownstoneCentral::finalizeOperation(Operation operation, cs_ret_code_t ret
 }
 
 void CrownstoneCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize) {
-	LOGCsCentralDebug(
-			"finalizeOperation operation=%u _currentOperation=%u dataSize=%u", operation, _currentOperation, dataSize);
+	LOGDebug("finalizeOperation operation=%u _currentOperation=%u dataSize=%u", operation, _currentOperation, dataSize);
 	event_t event(CS_TYPE::CONFIG_DO_NOT_USE);
 
 	// Handle error first.
@@ -335,7 +338,7 @@ void CrownstoneCentral::finalizeOperation(Operation operation, uint8_t* data, ui
 	event.size = dataSize;
 	switch (_currentOperation) {
 		case Operation::NONE: {
-			LOGCsCentralDebug("No operation was in progress");
+			LOGDebug("No operation was in progress");
 			break;
 		}
 		case Operation::CONNECT: {
@@ -351,7 +354,7 @@ void CrownstoneCentral::finalizeOperation(Operation operation, uint8_t* data, ui
 }
 
 void CrownstoneCentral::sendOperationResult(event_t& event) {
-	LOGCsCentralDebug("sendOperationResult type=%u size=%u", event.type, event.size);
+	LOGDebug("sendOperationResult type=%u size=%u", event.type, event.size);
 	// Set current operation before dispatching the event, so that a new command can be issued on event.
 	_currentOperation = Operation::NONE;
 	_currentStep      = 0;
@@ -364,7 +367,7 @@ void CrownstoneCentral::sendOperationResult(event_t& event) {
 //////////////////// Handlers ////////////////////
 
 void CrownstoneCentral::onTimeout() {
-	LOGCsCentralInfo("onTimeout");
+	LOGInfo("onTimeout");
 	finalizeOperation(_currentOperation, ERR_TIMEOUT);
 }
 
@@ -427,50 +430,50 @@ void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
 	// Normal mode
 	if (result.uuid == _serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE]) {
 		_opMode = OperationMode::OPERATION_MODE_NORMAL;
-		LOGCsCentralInfo("Crownstone service found");
+		LOGInfo("Crownstone service found");
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], SESSION_DATA_UNENCRYPTED_UUID);
 	if (result.uuid == uuid) {
 		_sessionDataHandle = result.valueHandle;
-		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
+		LOGDebug("Found session data handle: %u", _sessionDataHandle);
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], CONTROL_UUID);
 	if (result.uuid == uuid) {
 		_controlHandle = result.valueHandle;
-		LOGCsCentralDebug("Found control handle: %u", _controlHandle);
+		LOGDebug("Found control handle: %u", _controlHandle);
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_CROWNSTONE], RESULT_UUID);
 	if (result.uuid == uuid) {
 		_resultHandle     = result.valueHandle;
 		_resultCccdHandle = result.cccdHandle;
-		LOGCsCentralDebug("Found result handle: %u", _resultHandle);
+		LOGDebug("Found result handle: %u", _resultHandle);
 	}
 
 	// Setup mode
 	if (result.uuid == _serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP]) {
 		_opMode = OperationMode::OPERATION_MODE_SETUP;
-		LOGCsCentralInfo("Setup service found");
+		LOGInfo("Setup service found");
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_KEY_UUID);
 	if (result.uuid == uuid) {
 		_sessionKeyHandle = result.valueHandle;
-		LOGCsCentralDebug("Found session key handle: %u", _sessionKeyHandle);
+		LOGDebug("Found session key handle: %u", _sessionKeyHandle);
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SESSION_DATA_UNENCRYPTED_UUID);
 	if (result.uuid == uuid) {
 		_sessionDataHandle = result.valueHandle;
-		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
+		LOGDebug("Found session data handle: %u", _sessionDataHandle);
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_CONTROL_UUID);
 	if (result.uuid == uuid) {
 		_controlHandle = result.valueHandle;
-		LOGCsCentralDebug("Found control handle: %u", _controlHandle);
+		LOGDebug("Found control handle: %u", _controlHandle);
 	}
 	uuid.fromBaseUuid(_serviceUuids[ServiceIndex::SERVICE_INDEX_SETUP], SETUP_RESULT_UUID);
 	if (result.uuid == uuid) {
 		_resultHandle     = result.valueHandle;
 		_resultCccdHandle = result.cccdHandle;
-		LOGCsCentralDebug("Found result handle: %u", _resultHandle);
+		LOGDebug("Found result handle: %u", _resultHandle);
 	}
 }
 
@@ -610,17 +613,14 @@ void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
 				finalizeOperation(_currentOperation, retCode);
 				return;
 			}
-			_log(LogLevelCsCentralDebug,
+			_log(LogLevelDebug,
 				 false,
 				 "Result: protocol=%u type=%u result=%u data=",
 				 resultPacketAccessor.getProtocolVersion(),
 				 resultPacketAccessor.getType(),
 				 resultPacketAccessor.getResult());
 			_logArray(
-					LogLevelCsCentralDebug,
-					true,
-					resultPacketAccessor.getPayload().data,
-					resultPacketAccessor.getPayload().len);
+					LogLevelDebug, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
 
 			cs_central_write_result_t result = {.writeRetCode = ERR_SUCCESS, .result = resultPacketAccessor};
 			if (resultPacketAccessor.getResult() == ERR_WAIT_FOR_SUCCESS) {
@@ -677,8 +677,8 @@ cs_ret_code_t CrownstoneCentral::mergeNotification(const cs_const_data_t& data, 
 	if (index == CS_CHARACTERISTIC_NOTIFICATION_PART_LAST) {
 		// Last index.
 		cs_data_t inputBuf(encryptedBuffer.data, _notificationMergedDataSize);
-		_log(LogLevelCsCentralDebug, false, "Merged notification data=");
-		_logArray(LogLevelCsCentralDebug, true, inputBuf.data, inputBuf.len);
+		_log(LogLevelDebug, false, "Merged notification data=");
+		_logArray(LogLevelDebug, true, inputBuf.data, inputBuf.len);
 
 		// Decrypt merged data to read buffer.
 		cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();

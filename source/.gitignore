@@ -16,3 +16,4 @@ docs/html
 .metadata/
 .vimrc
 .ctags/
+*.local.h
