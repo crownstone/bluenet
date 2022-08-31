@@ -105,18 +105,10 @@ void app_error_handler_bare(uint32_t error_code) {
  */
 static void dfu_observer(nrf_dfu_evt_type_t evt_type) {
 	switch (evt_type) {
-		case NRF_DFU_EVT_DFU_FAILED:
-		case NRF_DFU_EVT_DFU_ABORTED:
-		case NRF_DFU_EVT_DFU_INITIALIZED:
-			//            bsp_board_init(BSP_INIT_LEDS);
-			//            bsp_board_led_on(BSP_BOARD_LED_0);
-			//            bsp_board_led_on(BSP_BOARD_LED_1);
-			//            bsp_board_led_off(BSP_BOARD_LED_2);
-			break;
-		case NRF_DFU_EVT_TRANSPORT_ACTIVATED:
-			//            bsp_board_led_off(BSP_BOARD_LED_1);
-			//            bsp_board_led_on(BSP_BOARD_LED_2);
-			break;
+		case NRF_DFU_EVT_DFU_FAILED: break;
+		case NRF_DFU_EVT_DFU_ABORTED: break;
+		case NRF_DFU_EVT_DFU_INITIALIZED: break;
+		case NRF_DFU_EVT_TRANSPORT_ACTIVATED: break;
 		case NRF_DFU_EVT_DFU_STARTED: break;
 		default: break;
 	}
@@ -136,8 +128,7 @@ void cs_gpio_init(boards_config_t* board) {
 		}
 	}
 
-	//	if (IS_CROWNSTONE(board->deviceType)) {
-	// Turn dimmer off.
+	// Turn dimmer off if present
 	if (board->pinDimmer != PIN_NONE) {
 		nrf_gpio_cfg_output(board->pinDimmer);
 		if (board->flags.dimmerInverted) {
@@ -162,7 +153,6 @@ void cs_gpio_init(boards_config_t* board) {
 		nrf_gpio_cfg_output(board->pinRelayOn);
 		nrf_gpio_pin_clear(board->pinRelayOn);
 	}
-	//	}
 }
 
 /** See cs_GpRegRet.h */
@@ -188,10 +178,6 @@ void cs_check_gpregret() {
 		start_dfu = true;
 	}
 	else {
-		// Increase counter, but maintain flags.
-		//		counter += 1;
-		//		gpregret = flags | counter;
-		//		NRF_POWER->GPREGRET = gpregret;
 		NRF_POWER->GPREGRET = gpregret + 1;
 	}
 
@@ -203,11 +189,26 @@ void cs_check_gpregret() {
 	NRF_LOG_INFO("GPREGRET=%u", gpregret);
 }
 
+/*
+ * Writes bootloader information. This is mainly version information about the bootloader. It also contains
+ * information on firmware being just activated or not. The field updateError can be used to commmunicate difficulties
+ * retrieving the IPC ram data. Although this data is written by the bootloader itself it might not be present
+ * (at a cold boot) or there might be other unforeseen error conditions.
+ */
 void set_bootloader_info() {
 	NRF_LOG_INFO("Set bootloader info");
 	NRF_LOG_FLUSH();
 
 	bluenet_ipc_data_t ipcData;
+	uint8_t dataSize;
+	ipcData.bootloaderData.updateError   = 0;
+	ipcData.bootloaderData.justActivated = 0;
+	if (isRamDataPresent(IPC_INDEX_BOOTLOADER_INFO)) {
+		int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+		if (retCode != IPC_RET_SUCCESS) {
+			ipcData.bootloaderData.updateError = 1;
+		}
+	}
 
 	ipcData.bootloaderData.ipcDataMajor         = g_BOOTLOADER_IPC_RAM_MAJOR;
 	ipcData.bootloaderData.ipcDataMinor         = g_BOOTLOADER_IPC_RAM_MINOR;
@@ -217,8 +218,8 @@ void set_bootloader_info() {
 	ipcData.bootloaderData.bootloaderPatch      = g_BOOTLOADER_VERSION_PATCH;
 	ipcData.bootloaderData.bootloaderPrerelease = g_BOOTLOADER_VERSION_PRERELEASE;
 	ipcData.bootloaderData.bootloaderBuildType  = g_BOOTLOADER_BUILD_TYPE;
-	uint8_t dataSize                            = sizeof(ipcData.bootloaderData);
-	setRamData(IPC_INDEX_BOOTLOADER_VERSION, dataSize, ipcData.raw);
+	dataSize                                    = sizeof(ipcData.bootloaderData);
+	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
 }
 
 /**

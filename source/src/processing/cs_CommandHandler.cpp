@@ -271,7 +271,7 @@ void CommandHandler::handleCmdGetBootloaderVersion(
 	LOGi(STR_HANDLE_COMMAND "get bootloader version");
 
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, result.buf.data, &dataSize, result.buf.len);
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, result.buf.data, &dataSize, result.buf.len);
 	if (retCode != IPC_RET_SUCCESS) {
 		LOGw("IPC error = %i", retCode);
 		result.returnCode = ERR_NOT_FOUND;

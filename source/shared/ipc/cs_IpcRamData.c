@@ -43,7 +43,7 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t* item) {
  *
  * Make sure header is initialized with zeros for unused fields when calling this function.
  */
-enum IpcRetCode setRamData(uint8_t index, uint8_t dataSize, uint8_t* data) {
+enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
 	if (data == NULL) {
 		return IPC_RET_NULL_POINTER;
 	}
@@ -94,6 +94,43 @@ enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t inde
 }
 
 /*
+ * To judge if RAM data is present we just assume that both major and minor are still zero. It doesn't tell if the item
+ * is valid. We can't use other fields than major and minor because they can change.
+ */
+bool isRamDataPresent(uint8_t index) {
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
+		return false;
+	}
+	return (!m_bluenet_ipc_ram.item[index].header.major && !m_bluenet_ipc_ram.item[index].header.minor);
+}
+
+/*
+ * Returns true if the entire buffer including the header is empty.
+ */
+bool isRamDataEmpty(uint8_t index) {
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
+		return false;
+	}
+	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
+		if (m_bluenet_ipc_ram.item[index].data.raw[i] != 0) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Clear RAM data
+ */
+enum IpcRetCode clearRamData(uint8_t index) {
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
+		return IPC_RET_INDEX_OUT_OF_BOUND;
+	}
+	memset(m_bluenet_ipc_ram.item[index].data.raw, 0, BLUENET_IPC_RAM_DATA_ITEM_SIZE);
+	return IPC_RET_SUCCESS;
+}
+
+/*
  * From the fields in header, all fields are optional. The index field is not considered within the header because,
  * potentially, a version update might shift the index field.
  *
@@ -110,6 +147,9 @@ enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t inde
  *
  * Note that we do not completely trust the data within RAM either... The value header.dataSize is also checked for
  * example.
+ *
+ * Note also that dataSize is not checked. It is only used as return value. This allows updates to minor versions
+ * that only expand the IPC header struct.
  */
 enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint8_t maxSize) {
 	if (data == NULL) {
@@ -138,7 +178,7 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint
 		return IPC_RET_DATA_INVALID;
 	}
 
-	memcpy(data, &m_bluenet_ipc_ram.item[index].data, m_bluenet_ipc_ram.item[index].header.dataSize);
+	memcpy(data, m_bluenet_ipc_ram.item[index].data.raw, m_bluenet_ipc_ram.item[index].header.dataSize);
 	*dataSize = m_bluenet_ipc_ram.item[index].header.dataSize;
 	return IPC_RET_SUCCESS;
 }

@@ -26,11 +26,19 @@ extern "C" {
 // Version for minor for the IPC header itself
 #define BLUENET_IPC_HEADER_MINOR 0
 
+/**
+ * The IpcIndex indexes an IPC buffer in a particular set of RAM that is maintained across warm reboots.
+ */
 enum IpcIndex {
-	IPC_INDEX_RESERVED           = 0,
-	IPC_INDEX_CROWNSTONE_APP     = 1,
-	IPC_INDEX_BOOTLOADER_VERSION = 2,
-	IPC_INDEX_MICROAPP           = 3,
+	IPC_INDEX_RESERVED        = 0,
+	// To communicate from bluenet towards the microapp
+	IPC_INDEX_CROWNSTONE_APP  = 1,
+	// To communicate from bootloader to bluenet
+	IPC_INDEX_BOOTLOADER_INFO = 2,
+	// To communicate from microapp to bluenet
+	IPC_INDEX_MICROAPP        = 3,
+	// To communicate from bluenet towards bluenet (state across reboots, for now only about microapp state)
+	IPC_INDEX_MICROAPP_STATE  = 4,
 };
 
 enum IpcRetCode {
@@ -73,6 +81,8 @@ typedef struct {
 	// A prerelease value. This is 255 for normal releases.
 	uint8_t bootloaderPrerelease;
 	uint8_t bootloaderBuildType;
+	uint8_t justActivated : 1;
+	uint8_t updateError : 1;
 } __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
 
 /**
@@ -127,11 +137,11 @@ typedef struct {
  * Set data in IPC ram.
  *
  * @param[in] index          Index of IPC segment.
- * @param[in] dataSize       Size of data.
  * @param[in] data           Data pointer.
+ * @param[in] dataSize       Size of data.
  * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode setRamData(uint8_t index, uint8_t dataSize, uint8_t* data);
+enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize);
 
 /**
  * Get data from IPC ram.
@@ -153,6 +163,30 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint
  * @return                         Error code (success is indicated by 0).
  */
 enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum);
+
+/**
+ * Returns whether RAM data present
+ *
+ * @param[in] index                Index of IPC segment.
+ * @return                         Boolean, true if present.
+ */
+bool isRamDataPresent(uint8_t index);
+
+/**
+ * Returns whether RAM data is empty.
+ *
+ * @param[in] index                Index of IPC segment.
+ * @return                         Boolean, true if clear
+ */
+bool isRamDataEmpty(uint8_t index);
+
+/**
+ * Clear RAM data.
+ *
+ * @param[in] index                Index of IPC segment.
+ * @return                         Error code (success is indicated by 0).
+ */
+enum IpcRetCode clearRamData(uint8_t index);
 
 /**
  * Get the underlying complete data struct. Do not use if not truly necessary. Its implementation might change.

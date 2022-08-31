@@ -189,7 +189,7 @@ void MicroappController::setIpcRam() {
 
 	LOGi("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 
-	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, sizeof(bluenet2microapp_ipcdata_t), ipcData.raw);
+	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, ipcData.raw, sizeof(bluenet2microapp_ipcdata_t));
 	if (retCode != ERR_SUCCESS) {
 		LOGw("Microapp IPC RAM data error, retCode=%u", retCode);
 		return;

@@ -42,6 +42,7 @@
 #include "app_scheduler.h"
 #include "boards.h"
 #include "compiler_abstraction.h"
+#include "ipc/cs_IpcRamData.h"
 #include "nrf.h"
 #include "nrf_bootloader_app_start.h"
 #include "nrf_bootloader_dfu_timers.h"
@@ -329,6 +330,30 @@ static bool dfu_enter_check(void) {
 	return false;
 }
 
+/*
+ * Update the IPC data of the bootloader itself.
+ */
+void update_ipc_data() {
+	NRF_LOG_INFO("Update ipc data");
+	NRF_LOG_FLUSH();
+	bluenet_ipc_data_t ipcData;
+	uint8_t dataSize;
+	if (!isRamDataPresent(IPC_INDEX_BOOTLOADER_INFO)) {
+		NRF_LOG_INFO("No bootloader IPC present");
+		NRF_LOG_FLUSH();
+	}
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (retCode != IPC_RET_SUCCESS || sizeof(ipcData.bootloaderData) != dataSize) {
+		NRF_LOG_INFO("Error updating bootloader IPC");
+		NRF_LOG_FLUSH();
+		return;
+	}
+	// We only write here if there is no error
+	ipcData.bootloaderData.justActivated = 1;
+	dataSize                             = sizeof(ipcData.bootloaderData);
+	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+}
+
 #if NRF_BL_DFU_ALLOW_UPDATE_FROM_APP
 static void postvalidate(void) {
 	NRF_LOG_INFO("Postvalidating update after reset.");
@@ -395,6 +420,7 @@ ret_code_t nrf_bootloader_init(nrf_dfu_observer_t observer) {
 			break;
 
 		case ACTIVATION_SUCCESS:
+			update_ipc_data();
 			bootloader_reset(true);
 			NRF_LOG_ERROR("Unreachable");
 			return NRF_ERROR_INTERNAL;  // Should not reach this.
