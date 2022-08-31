@@ -123,27 +123,25 @@ ErrorCodesGeneral BehaviourStore::checkSizeAndType(SwitchBehaviour::Type type, c
 	return ERR_SUCCESS;
 }
 
-void BehaviourStore::allocateBehaviour(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
-	Behaviour* behaviour = nullptr;
+Behaviour* BehaviourStore::allocateBehaviour(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
 	switch (type) {
 		case SwitchBehaviour::Type::Switch: {
 			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
-			behaviour = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(buf, bufSize));
-			break;
+			return new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(buf, bufSize));
 		}
 		case SwitchBehaviour::Type::Twilight: {
 			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
-			behaviour = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(buf, bufSize));
-			break;
+			return new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(buf, bufSize));
 		}
 		case SwitchBehaviour::Type::Extended: {
 			LOGBehaviourStoreDebug("Allocating new ExtendedSwitchBehaviour");
-			behaviour = new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(buf, bufSize));
-			break;
+			return new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(buf, bufSize));
 		}
-		default: return;
+		default: return nullptr;
 	}
+}
 
+void BehaviourStore::assignBehaviour(uint8_t index, Behaviour* behaviour) {
 	// no need to delete previous entry, already checked for nullptr
 	activeBehaviours[index] = behaviour;
 	activeBehaviours[index]->print();
@@ -171,7 +169,8 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	}
 	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, empty_index);
 
-	allocateBehaviour(empty_index, typ, buf, bufSize);
+	Behaviour* behaviour = allocateBehaviour(empty_index, typ, buf, bufSize);
+	assignBehaviour(empty_index, behaviour);
 	StoreUpdate(empty_index, typ, buf, bufSize);
 	index = empty_index;
 	return ERR_SUCCESS;
@@ -223,7 +222,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	auto retCode = ReplaceParameterValidation(evt, index, type);
 	if (retCode == ERR_SUCCESS) {
 		removeBehaviour(index);
-		allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+		Behaviour* behaviour = allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+		assignBehaviour(index, behaviour);
 		StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
 	}
 	evt.result.returnCode = retCode;
