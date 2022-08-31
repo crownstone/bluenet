@@ -52,6 +52,10 @@ public:
 
 	virtual ~BehaviourStore();
 
+
+	ErrorCodesGeneral addBehaviour(uint8_t* buf, Behaviour* behaviour);
+
+
 private:
 	/**
 	 * Add behaviour to a new index.
@@ -95,6 +99,28 @@ private:
 	void handleGetBehaviourIndices(event_t& evt);
 
 	// utilities
+	/**
+	 * call state store for the given switch type and update masterhash.
+	 */
+	void StoreUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize);
+
+	/**
+	 * Heap allocate an instance of given type from the buffer, and assign it to activateBehaviour[index].
+	 *
+	 * Notes:
+	 *  - If bufSize is less than the WireFormat::size for the given type, a default constructed behaviour
+	 *    is allocated.
+	 *  - The index is not checked for preexisting data. That must be deleted before using this function.
+	 */
+	void allocateBehaviour(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize);
+
+	/**
+	 * If `type` is not a valid behaviour type: ERR_WRONG_PARAMETER
+	 * If `bufSize` does not match expected size: ERR_WRONG_PAYLOAD_LENGTH
+	 * Else: ERR_SUCCESS.
+	 */
+	ErrorCodesGeneral checkSizeAndType(SwitchBehaviour::Type type, cs_buffer_size_t bufSize);
+
 	void dispatchBehaviourMutationEvent();
 
 	// checks intermediate state of handleReplaceBehaviour for consistency.
