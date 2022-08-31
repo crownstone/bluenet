@@ -10,6 +10,7 @@
 #include <presence/cs_PresenceHandler.h>
 #include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventDispatcher.h>
+#include <presence/cs_PresenceCondition.h>
 
 #include <iostream>
 #include <string>
@@ -38,14 +39,25 @@ std::ostream & operator<< (std::ostream &out, Time t){
 }
 
 int main() {
-	SwitchAggregator _switchAggregator;
-	BehaviourStore _behaviourStore;
-	BehaviourHandler _behaviourHandler;
-	PresenceHandler _presenceHandler;
+    SwitchAggregator _switchAggregator;
+    BehaviourStore _behaviourStore;
+    BehaviourHandler _behaviourHandler;
+    PresenceHandler _presenceHandler;
 
-	EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
-	SystemTime::setTime(1661966240,true,false);
-	std::cout << "uptime: " << SystemTime::now() << std::endl;
+    EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
+    SystemTime::setTime(1661966240, true, false);
+    std::cout << "uptime: " << SystemTime::now() << std::endl;
 
-	return 0;
+    auto predicate =
+        PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription());
+    uint32_t timeOut = 12345;
+    PresenceCondition presenceCondition(predicate, timeOut);
+
+    auto sBehaviour = new SwitchBehaviour(
+        100, 0xff, 0b11111110, TimeOfDay::Sunrise(), TimeOfDay::Sunset(), presenceCondition);
+    _behaviourStore.addBehaviour(sBehaviour);
+    //	CommandSetTime c(10,0);
+    //	c.dispatch();
+
+    return 0;
 }

@@ -52,9 +52,20 @@ public:
 
 	virtual ~BehaviourStore();
 
-
+	/**
+	 * Add behaviour to the ActiveBehaviours if there is space.
+	 * If null, nothing happens.
+	 * This method takes ownership over the allocated resource
+	 * (removeBehaviour and replaceBehaviour may delete it.)
+	 */
 	ErrorCodesGeneral addBehaviour(Behaviour* behaviour);
 
+	/**
+	 * Add behaviour to the ActiveBehaviours if there is space.
+	 * If null, previous behaviour will be deleted.
+	 * This method takes ownership over the allocated resource
+	 * (removeBehaviour may delete it.)
+	 */
 	ErrorCodesGeneral replaceBehaviour(uint8_t index, Behaviour* behaviour);
 
 	/**
