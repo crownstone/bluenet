@@ -215,13 +215,9 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			}
 
 			removeBehaviour(index);
+			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
 
-			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
-			activeBehaviours[index] = new SwitchBehaviour(
-					WireFormat::deserialize<SwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
-			activeBehaviours[index]->print();
-
-			cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
+			cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, index, dat + indexSize, evt.size - indexSize);
 			State::getInstance().set(data);
 			storeMasterHash();
 			evt.result.returnCode = ERR_SUCCESS;
@@ -234,12 +230,9 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			removeBehaviour(index);
 
-			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
-			activeBehaviours[index] = new TwilightBehaviour(
-					WireFormat::deserialize<TwilightBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
-			activeBehaviours[index]->print();
+			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
 
-			cs_state_data_t data(CS_TYPE::STATE_TWILIGHT_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
+			cs_state_data_t data(CS_TYPE::STATE_TWILIGHT_RULE, index, dat + indexSize, evt.size - indexSize);
 			State::getInstance().set(data);
 			storeMasterHash();
 			evt.result.returnCode = ERR_SUCCESS;
@@ -252,14 +245,10 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			}
 
 			removeBehaviour(index);
-
-			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
-			activeBehaviours[index] = new ExtendedSwitchBehaviour(
-					WireFormat::deserialize<ExtendedSwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
-			activeBehaviours[index]->print();
+			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
 
 			cs_state_data_t data(
-					CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
+					CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, index, dat + indexSize, evt.size - indexSize);
 			State::getInstance().set(data);
 			storeMasterHash();
 			evt.result.returnCode = ERR_SUCCESS;
