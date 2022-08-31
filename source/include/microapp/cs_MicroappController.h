@@ -52,6 +52,14 @@ struct microapp_soft_interrupt_registration_t {
 };
 
 /**
+ * Runtime state of a microapp. For now binary, either running or not running.
+ */
+enum class MicroappRuntimeState {
+	CS_MICROAPP_NOT_RUNNING,
+	CS_MICROAPP_RUNNING,
+};
+
+/**
  * The class MicroappController has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
  */
@@ -134,6 +142,21 @@ private:
 	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
 	 */
 	bool allowSoftInterrupts();
+
+	/**
+	 * Set operating state in IPC ram. This can be used after (an accidental) boot to decide if a microapp has been
+	 * the reason for that reboot. In that case the microapp can be disabled so not to cause more havoc.
+	 *
+	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
+	 * @param[in] state      The state (running or not running) of this microapp.
+	 */
+	void setOperatingState(uint8_t appIndex, MicroappRuntimeState state);
+
+	/**
+	 * Get operating state from IPC ram.
+	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
+	 */
+	MicroappRuntimeState getOperatingState(uint8_t appIndex);
 
 protected:
 	/**

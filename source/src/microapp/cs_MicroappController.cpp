@@ -267,9 +267,60 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 	return payload;
 }
 
+void MicroappController::setOperatingState(uint8_t appIndex, MicroappRuntimeState state) {
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return;
+	}
+	uint8_t runFlag = (state == MicroappRuntimeState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	bluenet_ipc_data_t ipcData;
+	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
+	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
+	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
+	setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+}
+
+MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
+	MicroappRuntimeState state = MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING;
+	if (!isRamDataPresent(IPC_INDEX_MICROAPP_STATE)) {
+		return state;
+	}
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return state;
+	}
+	bluenet_ipc_data_t ipcData;
+	uint8_t dataSize = 0;
+	getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
+		LOGi("Incorrect major version");
+		return state;
+	}
+	if (ipcData.bluenetRebootData.ipcDataMinor != BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
+		LOGi("Incoming minor is older or newer");
+		// do not return
+	}
+	if (dataSize != sizeof(bluenet_ipc_bluenet_data_t)) {
+		LOGi("Incorrect data size");
+		// do not return
+	}
+	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
+		case 1: {
+			state = MicroappRuntimeState::CS_MICROAPP_RUNNING;
+		}
+		default: {
+			// non-running state as default
+		}
+	}
+	return state;
+}
+
 void MicroappController::callMicroapp() {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
+	const uint8_t appIndex = 0;
+	setOperatingState(appIndex, MicroappRuntimeState::CS_MICROAPP_RUNNING);
 	if (nextCoroutine()) {
+		setOperatingState(appIndex, MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING);
 		return;
 	}
 #else
