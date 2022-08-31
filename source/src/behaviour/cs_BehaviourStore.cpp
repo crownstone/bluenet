@@ -223,50 +223,15 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	LOGBehaviourStoreInfo("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
-	switch (type) {
-		case Behaviour::Type::Switch: {
-			if (!ReplaceParameterValidation(evt, index, type)) {
-				break;
-			}
+	if (!ReplaceParameterValidation(evt, index, type)) {
 
-			removeBehaviour(index);
-			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
-			StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
-
-			evt.result.returnCode = ERR_SUCCESS;
-			break;
-		}
-		case Behaviour::Type::Twilight: {
-			if (!ReplaceParameterValidation(evt, index, type)) {
-				break;
-			}
-
-			removeBehaviour(index);
-			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
-			StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
-
-			evt.result.returnCode = ERR_SUCCESS;
-
-			break;
-		}
-		case Behaviour::Type::Extended: {
-			if (!ReplaceParameterValidation(evt, index, type)) {
-				break;
-			}
-
-			removeBehaviour(index);
-			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
-			StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
-
-			evt.result.returnCode = ERR_SUCCESS;
-			break;
-		}
-		default: {
-			LOGe("Invalid behaviour type");
-			evt.result.returnCode = ERR_WRONG_PARAMETER;
-			break;
-		}
+	} else {
+		removeBehaviour(index);
+		allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+		StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
+		evt.result.returnCode = ERR_SUCCESS;
 	}
+
 
 	// Fill return buffer if it's large enough.
 	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
