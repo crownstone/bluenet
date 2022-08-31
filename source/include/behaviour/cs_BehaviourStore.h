@@ -129,8 +129,7 @@ private:
 	void dispatchBehaviourMutationEvent();
 
 	// checks intermediate state of handleReplaceBehaviour for consistency.
-	// returns true if ok, false if nok.
-	bool ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);
+	ErrorCodesGeneral ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);
 
 	// loads the behaviours from state into the 'activeBehaviours' array.
 	// BehaviourType must match BehaviourCsType.

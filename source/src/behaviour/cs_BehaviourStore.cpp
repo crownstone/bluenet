@@ -177,13 +177,12 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	return ERR_SUCCESS;
 }
 
-bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
+ErrorCodesGeneral BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
 	size_t behaviourSize = getBehaviourSize(type);
 
 	if(behaviourSize == 0) {
 		LOGe("Invalid behaviour type");
-		evt.result.returnCode = ERR_WRONG_PARAMETER;
-		return false;
+		return ERR_WRONG_PARAMETER;
 	}
 
 	const uint8_t indexSize                  = sizeof(uint8_t);
@@ -193,17 +192,15 @@ bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, Swi
 	// check size
 	if (evt.size != indexSize + behaviourSize) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH " in replace switchbehaviour", evt.size, (indexSize + behaviourSize));
-		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return false;
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
 	// check parameter
 	if (index >= MaxBehaviours) {
-		evt.result.returnCode = ERR_WRONG_PARAMETER;
-		return false;
+		return ERR_WRONG_PARAMETER;
 	}
 
-	return true;
+	return ERR_SUCCESS;
 }
 
 
@@ -223,15 +220,13 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	LOGBehaviourStoreInfo("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
-	if (!ReplaceParameterValidation(evt, index, type)) {
-
-	} else {
+	auto retCode = ReplaceParameterValidation(evt, index, type);
+	if (retCode == ERR_SUCCESS) {
 		removeBehaviour(index);
 		allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
 		StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
-		evt.result.returnCode = ERR_SUCCESS;
 	}
-
+	evt.result.returnCode = retCode;
 
 	// Fill return buffer if it's large enough.
 	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
