@@ -121,11 +121,16 @@ private:
 	 */
 	ErrorCodesGeneral checkSizeAndType(SwitchBehaviour::Type type, cs_buffer_size_t bufSize);
 
+	/**
+	 * returns 0 for unknown types, else the obvious.
+	 */
+	size_t getBehaviourSize(SwitchBehaviour::Type type);
+
 	void dispatchBehaviourMutationEvent();
 
 	// checks intermediate state of handleReplaceBehaviour for consistency.
 	// returns true if ok, false if nok.
-	bool ReplaceParameterValidation(event_t& evt, uint8_t index, const size_t& behaviourSize);
+	bool ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);
 
 	// loads the behaviours from state into the 'activeBehaviours' array.
 	// BehaviourType must match BehaviourCsType.

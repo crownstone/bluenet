@@ -98,16 +98,22 @@ void BehaviourStore::StoreUpdate(uint8_t index, SwitchBehaviour::Type type, uint
 	storeMasterHash();
 }
 
-ErrorCodesGeneral BehaviourStore::checkSizeAndType(SwitchBehaviour::Type type, cs_buffer_size_t bufSize) {
-	size_t expectedSize = 0;
+size_t BehaviourStore::getBehaviourSize(SwitchBehaviour::Type type) {
 	switch (type) {
-		case SwitchBehaviour::Type::Switch: expectedSize = WireFormat::size<SwitchBehaviour>(); break;
-		case SwitchBehaviour::Type::Twilight: expectedSize = WireFormat::size<TwilightBehaviour>(); break;
-		case SwitchBehaviour::Type::Extended: expectedSize = WireFormat::size<ExtendedSwitchBehaviour>(); break;
+		case SwitchBehaviour::Type::Switch: return WireFormat::size<SwitchBehaviour>();
+		case SwitchBehaviour::Type::Twilight: return WireFormat::size<TwilightBehaviour>();
+		case SwitchBehaviour::Type::Extended: return WireFormat::size<ExtendedSwitchBehaviour>();
 		default: {
 			LOGe("Invalid behaviour type: %d", type);
-			return ERR_WRONG_PARAMETER;
+			return 0;
 		}
+	}
+}
+
+ErrorCodesGeneral BehaviourStore::checkSizeAndType(SwitchBehaviour::Type type, cs_buffer_size_t bufSize) {
+	size_t expectedSize = getBehaviourSize(type);
+	if(expectedSize == 0) {
+		return ERR_WRONG_PARAMETER;
 	}
 
 	if (bufSize != expectedSize) {
@@ -171,7 +177,13 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	return ERR_SUCCESS;
 }
 
-bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, const size_t& behaviourSize) {
+bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
+	size_t behaviourSize = getBehaviourSize(type);
+
+	if(behaviourSize == 0) {
+		return false;
+	}
+
 	const uint8_t indexSize                  = sizeof(uint8_t);
 	TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) hash = calculateMasterHash();
 	State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &hash, sizeof(hash));
@@ -192,6 +204,7 @@ bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, con
 	return true;
 }
 
+
 void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	const uint8_t indexSize = sizeof(uint8_t);
 	const uint8_t typeSize  = sizeof(uint8_t);
@@ -210,7 +223,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	switch (type) {
 		case Behaviour::Type::Switch: {
-			if (!ReplaceParameterValidation(evt, index, WireFormat::size<SwitchBehaviour>())) {
+			if (!ReplaceParameterValidation(evt, index, type)) {
 				break;
 			}
 
@@ -222,7 +235,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			break;
 		}
 		case Behaviour::Type::Twilight: {
-			if (!ReplaceParameterValidation(evt, index, WireFormat::size<TwilightBehaviour>())) {
+			if (!ReplaceParameterValidation(evt, index, type)) {
 				break;
 			}
 
@@ -235,7 +248,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			break;
 		}
 		case Behaviour::Type::Extended: {
-			if (!ReplaceParameterValidation(evt, index, WireFormat::size<ExtendedSwitchBehaviour>())) {
+			if (!ReplaceParameterValidation(evt, index, type)) {
 				break;
 			}
 
