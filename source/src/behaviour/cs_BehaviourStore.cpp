@@ -181,6 +181,8 @@ bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, Swi
 	size_t behaviourSize = getBehaviourSize(type);
 
 	if(behaviourSize == 0) {
+		LOGe("Invalid behaviour type");
+		evt.result.returnCode = ERR_WRONG_PARAMETER;
 		return false;
 	}
 
