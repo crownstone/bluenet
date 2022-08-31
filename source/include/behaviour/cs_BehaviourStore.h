@@ -55,6 +55,8 @@ public:
 
 	ErrorCodesGeneral addBehaviour(uint8_t* buf, Behaviour* behaviour);
 
+	ErrorCodesGeneral replaceBehaviour(uint8_t index, Behaviour* behaviour);
+
 
 private:
 	/**
@@ -103,6 +105,10 @@ private:
 	 * call state store for the given switch type and update masterhash.
 	 */
 	void StoreUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize);
+	/**
+	 * call state store for the given behaviour and update masterhash.
+	 */
+	void StoreUpdate(uint8_t index, Behaviour* behaviour);
 
 	/**
 	 * Heap allocate an instance of given type from the buffer.

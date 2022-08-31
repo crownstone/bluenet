@@ -19,6 +19,18 @@
 #define LOGBehaviourStoreInfo LOGi
 #define LOGBehaviourStoreDebug LOGd
 
+
+// ======================= public interface ========================
+
+ErrorCodesGeneral BehaviourStore::replaceBehaviour(uint8_t index, Behaviour* behaviour) {
+	auto retVal = removeBehaviour(index);
+	if (retVal == ERR_SUCCESS) {
+		assignBehaviour(index, behaviour);
+		StoreUpdate(index, behaviour);
+	}
+	return retVal;
+}
+
 void BehaviourStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::CMD_ADD_BEHAVIOUR: {
@@ -83,6 +95,10 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 }
 
 
+void BehaviourStore::StoreUpdate(uint8_t index, Behaviour* behaviour) {
+	auto serializedBehaviour = behaviour->serialized();
+	StoreUpdate(index, behaviour->getType(), serializedBehaviour.data(), serializedBehaviour.size());
+}
 
 void BehaviourStore::StoreUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
 	CS_TYPE csType;
