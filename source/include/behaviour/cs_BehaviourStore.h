@@ -68,6 +68,8 @@ public:
 	 */
 	ErrorCodesGeneral replaceBehaviour(uint8_t index, Behaviour* behaviour);
 
+	Behaviour* getBehaviour(uint8_t index);
+
 	/**
 	 * returns MaxBehaviours if not found.
 	 */

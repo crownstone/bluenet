@@ -46,6 +46,9 @@ int main() {
 
     EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
     SystemTime::setTime(1661966240, true, false);
+
+    SystemTime::setSunTimes(sun_time_t{});
+
     std::cout << "uptime: " << SystemTime::now() << std::endl;
 
     auto predicate =
@@ -58,6 +61,13 @@ int main() {
     _behaviourStore.addBehaviour(sBehaviour);
     //	CommandSetTime c(10,0);
     //	c.dispatch();
+
+    Behaviour* bP = _behaviourStore.getBehaviour(0);
+    if(bP == nullptr) {
+    	return 1; // fail
+    }
+
+    std::cout << "from: " << bP->from() << " until: " << bP->until() << std::endl;
 
     return 0;
 }

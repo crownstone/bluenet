@@ -40,6 +40,10 @@ ErrorCodesGeneral BehaviourStore::replaceBehaviour(uint8_t index, Behaviour* beh
 	return retVal;
 }
 
+Behaviour* BehaviourStore::getBehaviour(uint8_t index) {
+	return index < MaxBehaviours ? activeBehaviours[index] : nullptr;
+}
+
 void BehaviourStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::CMD_ADD_BEHAVIOUR: {
