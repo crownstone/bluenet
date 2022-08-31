@@ -1,0 +1,456 @@
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Apr 23, 2015
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
+#include <ble/cs_CharacteristicBase.h>
+#include <storage/cs_State.h>
+#include <logging/cs_Logger.h>
+#include <ble/cs_UUID.h>
+#include <ble/cs_Nordic.h>
+#include <ble/cs_Stack.h>
+
+CharacteristicBase::CharacteristicBase() {}
+
+cs_ret_code_t CharacteristicBase::setName(const char* const name) {
+	_name = name;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::setUUID(uint16_t uuid) {
+	if (_initialized) {
+		LOGw("Already initialized");
+		return ERR_WRONG_STATE;
+	}
+	_uuid = uuid;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::setOptions(const characteristic_options_t& options) {
+	if (_initialized) {
+		LOGw("Already initialized");
+		return ERR_WRONG_STATE;
+	}
+	_options = options;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::registerEventHandler(const characteristic_callback_t& closure) {
+	if (_initialized) {
+		LOGw("Already initialized");
+		return ERR_WRONG_STATE;
+	}
+	_callback = closure;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::setValueBuffer(buffer_ptr_t buffer, cs_buffer_size_t size) {
+	if (_initialized) {
+		LOGw("Already initialized");
+		return ERR_WRONG_STATE;
+	}
+	if (buffer == nullptr || size == 0) {
+		return ERR_BUFFER_UNASSIGNED;
+	}
+	_buffer.data = buffer;
+	_buffer.len = size;
+	return ERR_SUCCESS;
+}
+
+/**
+ * Set the default attributes of every characteristic
+ *
+ * There are two settings for the location of the memory of the buffer that is used to communicate with the SoftDevice.
+ *
+ * + BLE_GATTS_VLOC_STACK
+ * + BLE_GATTS_VLOC_USER
+ *
+ * The former makes the SoftDevice allocate the memory (the quantity of which is defined by the user). The latter
+ * leaves it to the user. It is essential that with BLE_GATTS_VLOC_USER the calls to sd_ble_gatts_value_set() are
+ * handed persistent pointers to a buffer. If a temporary value is used, this will screw up the data read by the user.
+ * The same is true if this buffer is reused across characteristics. If it is meant as data for one characteristic
+ * and is read through another, this will resolve to nonsense to the user.
+ */
+cs_ret_code_t CharacteristicBase::init(Service* service) {
+	if (_initialized) {
+		LOGd("Already initialized");
+		return ERR_SUCCESS;
+	}
+
+	_service = service;
+
+	// Attribute metadata for client characteristic configuration
+	ble_gatts_attr_md_t cccdMetadata;
+	memset(&cccdMetadata, 0, sizeof(cccdMetadata));
+	cccdMetadata.vloc = BLE_GATTS_VLOC_STACK;
+	cccdMetadata.vlen = 1;
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccdMetadata.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccdMetadata.write_perm);
+
+	ble_gatts_char_md_t characteristicMetadata;
+	memset(&characteristicMetadata, 0, sizeof(characteristicMetadata));
+	characteristicMetadata.char_props.broadcast     = 0;
+	characteristicMetadata.char_props.read          = _options.read ? 1 : 0;
+	characteristicMetadata.char_props.write_wo_resp = _options.write ? 1 : 0;
+	characteristicMetadata.char_props.write         = _options.write ? 1 : 0;
+	characteristicMetadata.char_props.notify        = _options.notify ? 1 : 0;
+	characteristicMetadata.char_props.indicate      = _options.notify ? 1 : 0;
+//	characteristicMetadata.char_ext_props.reliable_wr = _options.longWrite ? 1 : 0;
+	characteristicMetadata.p_cccd_md                = &cccdMetadata;
+
+	// TODO
+	LOGi("characteristicMetadata.char_ext_props.reliable_wr=%u", characteristicMetadata.char_ext_props.reliable_wr);
+
+	// The user description is optional.
+	characteristicMetadata.p_char_user_desc     = nullptr;
+	characteristicMetadata.p_user_desc_md       = nullptr;
+
+	// Presentation format is optional.
+	characteristicMetadata.p_char_pf            = nullptr;
+
+	ble_gatts_attr_md_t attributeMetadata;
+	memset(&attributeMetadata, 0, sizeof(attributeMetadata));
+	attributeMetadata.vloc = BLE_GATTS_VLOC_USER;
+	attributeMetadata.vlen = 1;
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attributeMetadata.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attributeMetadata.write_perm);
+
+	// Attribute value
+	UUID fullUuid;
+	cs_ret_code_t retCode = fullUuid.fromBaseUuid(_service->getUUID(), _uuid);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+	const ble_uuid_t& uuid = fullUuid.getUuid();
+
+	if (_options.notificationChunker) {
+		_notificationBuffer = (notification_t*)calloc(1, sizeof(notification_t));
+		if (_notificationBuffer == nullptr) {
+			return ERR_NO_SPACE;
+		}
+	}
+
+	retCode = initEncryptedBuffer();
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	ble_gatts_attr_t characteristicValue;
+	memset(&characteristicValue, 0, sizeof(characteristicValue));
+	characteristicValue.p_uuid    = &uuid;
+	characteristicValue.init_offs = 0;
+	characteristicValue.init_len  = getGattValueLength();
+	characteristicValue.max_len   = getGattValueMaxLength();
+	characteristicValue.p_value   = getGattValue();
+	characteristicValue.p_attr_md = &attributeMetadata;
+
+	LOGCharacteristicDebug("init with buffer=%p of len=%u", getGattValue(), getGattValueMaxLength());
+
+	// Add to softdevice.
+	uint32_t nrfCode =
+			sd_ble_gatts_characteristic_add(_service->getHandle(), &characteristicMetadata, &characteristicValue, &_handles);
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			retCode = ERR_SUCCESS;
+			break;
+		}
+		case NRF_ERROR_INVALID_ADDR: {
+			retCode = ERR_BUFFER_UNASSIGNED;
+			break;
+		}
+		case NRF_ERROR_INVALID_PARAM:
+		case NRF_ERROR_INVALID_STATE:
+		case NRF_ERROR_FORBIDDEN:
+		case NRF_ERROR_DATA_SIZE: {
+			retCode = ERR_WRONG_PARAMETER;
+			break;
+		}
+		case NRF_ERROR_NO_MEM: {
+			retCode = ERR_NO_SPACE;
+			break;
+		}
+		default: {
+			retCode = ERR_UNSPECIFIED;
+			break;
+		}
+	}
+
+	if (retCode != ERR_SUCCESS) {
+		LOGe("Failed to add characteristic: nrfCode=%u", nrfCode);
+		// Cleanup
+		deinitEncryptedBuffer();
+		return retCode;
+	}
+
+	_initialized = true;
+	return ERR_SUCCESS;
+}
+
+uint16_t CharacteristicBase::getValueHandle() {
+	return _handles.value_handle;
+}
+
+uint16_t CharacteristicBase::getCccdHandle() {
+	return _handles.cccd_handle;
+}
+
+cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
+
+	if (length > _buffer.len) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	_valueLength = length;
+
+	if (isEncrypted()) {
+		// Encrypt the value (but only the current length).
+		cs_ret_code_t retCode = ConnectionEncryption::getInstance().encrypt(
+				cs_data_t(_buffer.data, _valueLength),
+				_encryptedBuffer,
+				_options.minAccessLevel,
+				_options.encryptionType);
+
+		if (retCode != ERR_SUCCESS) {
+			LOGe("Failed to encrypt data");
+			_encryptedValueLength = 0;
+			return retCode;
+		}
+		_encryptedValueLength = ConnectionEncryption::getEncryptedBufferSize(_valueLength, _options.encryptionType);
+	}
+
+	// Update the value in the softdevice.
+	// As of softdevice 7.0.0 we can use a null pointer as value to avoid a memcpy.
+	// See https://devzone.nordicsemi.com/f/nordic-q-a/934/how-to-use-ble_gatts_vloc_user.
+	ble_gatts_value_t gattsValue;
+	gattsValue.len     = getGattValueLength();
+	gattsValue.offset  = 0;
+	gattsValue.p_value = nullptr;
+
+	uint32_t nrfCode =
+			sd_ble_gatts_value_set(_service->getStack()->getConnectionHandle(), _handles.value_handle, &gattsValue);
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			break;
+		}
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+		case NRF_ERROR_INVALID_ADDR:
+		case NRF_ERROR_INVALID_PARAM:
+		case NRF_ERROR_NOT_FOUND:
+		case NRF_ERROR_FORBIDDEN:
+		case NRF_ERROR_DATA_SIZE:
+		default: {
+			LOGe("Failed to set GATT value: nrfCode=%u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
+
+	if (_options.autoNotify) {
+		_notificationPending = false;
+		_notificationOffset = 0;
+
+		// Ignore result.
+		notify();
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
+	if (!_options.notify) {
+		return ERR_WRONG_STATE;
+	}
+	if (!_subscribedForNotifications && !_subscribedForIndications) {
+		return ERR_WRONG_STATE;
+	}
+	if (!_service->getStack()->isConnectedPeripheral()) {
+		return ERR_WRONG_STATE;
+	}
+
+	if (_options.notificationChunker) {
+		// This ignores the length and offset arguments.
+		return notifyMultipart();
+	}
+
+	uint16_t gattValueLength = getGattValueLength();
+
+	if (offset >= gattValueLength) {
+		return ERR_WRONG_PARAMETER;
+	}
+
+	ble_gatts_hvx_params_t hvx_params;
+	hvx_params.handle = _handles.value_handle;
+	hvx_params.type   = _subscribedForNotifications ? BLE_GATT_HVX_NOTIFICATION : BLE_GATT_HVX_INDICATION;
+	hvx_params.offset = 0;
+	hvx_params.p_len = std::min(gattValueLength, length);
+	hvx_params.p_data = nullptr;
+
+	uint32_t nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			_notificationPending = false;
+			break;
+		}
+		case NRF_ERROR_RESOURCES: {
+			// NRF: Too many notifications queued. Wait for a @ref BLE_GATTS_EVT_HVN_TX_COMPLETE event and retry.
+			// Mark that there is a pending notification, we can retry later.
+			_notificationPending = true;
+			break;
+		}
+		case NRF_ERROR_TIMEOUT:
+		case NRF_ERROR_INVALID_STATE:
+		case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+		default: {
+			_notificationPending = false;
+			LOGe("Failed to notify: nrfCode=%u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
+	}
+
+
+	LOGCharacteristicDebug("Actual number of bytes notified=%u", notificationLength);
+
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::notifyMultipart() {
+	uint16_t gattValueLength = getGattValueLength();
+
+	ble_gatts_hvx_params_t hvx_params;
+	hvx_params.handle = _handles.value_handle;
+	hvx_params.type   = _subscribedForNotifications ? BLE_GATT_HVX_NOTIFICATION : BLE_GATT_HVX_INDICATION;
+	hvx_params.offset = 0;
+
+	// We can queue multiple notifications.
+	while (_notificationOffset < gattValueLength) {
+
+		uint16_t chunkSize = sizeof(_notificationBuffer->data);
+		if (gattValueLength - _notificationOffset > chunkSize) {
+			_notificationBuffer->partNr = _notificationOffset / chunkSize;
+		}
+		else {
+			// Last chunk, recalculate chunk size, as it might be smaller.
+			_notificationBuffer->partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
+			chunkSize = gattValueLength - _notificationOffset;
+		}
+		memcpy(_notificationBuffer->data, getGattValue() + _notificationOffset, chunkSize);
+
+		hvx_params.p_len  = sizeof(_notificationBuffer) - (sizeof(_notificationBuffer->data) - chunkSize);
+		hvx_params.p_data = &_notificationBuffer;
+
+		uint32_t nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
+
+		switch (nrfCode) {
+			case NRF_SUCCESS: {
+				// Notification is queued.
+				_notificationOffset += chunkSize;
+				break;
+			}
+			case NRF_ERROR_RESOURCES: {
+				// NRF: Too many notifications queued. Wait for a @ref BLE_GATTS_EVT_HVN_TX_COMPLETE event and retry.
+				// Mark that there is a pending notification, we can retry later.
+				_notificationPending = true;
+				return ERR_SUCCESS;
+			}
+			case NRF_ERROR_TIMEOUT:
+			case NRF_ERROR_INVALID_STATE:
+			case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+			default: {
+				// Reset the notification state, we can't retry later.
+				_notificationOffset = 0;
+				_notificationPending = false;
+				LOGe("Failed to notify: nrfCode=%u", nrfCode);
+				return ERR_UNSPECIFIED;
+			}
+		}
+
+		LOGCharacteristicDebug("Actual number of bytes notified=%u", notificationLength);
+
+	}
+
+	_notificationOffset = 0;
+	_notificationPending = false;
+	return ERR_SUCCESS;
+}
+
+void CharacteristicBase::onNotificationDone() {
+	// if we have a notification pending, try to send it
+	if (_notificationPending) {
+		notify();
+	}
+}
+
+cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
+	if (!isEncrypted()) {
+		return ERR_SUCCESS;
+	}
+
+	if (_encryptedBuffer.data != nullptr) {
+		LOGw("Already initialized encryption buffer");
+		// Assume the correct buffer of correct size has been set.
+		return ERR_SUCCESS;
+	}
+
+	// The required size of the encrypted buffer depends on the max value size, and the encryption type.
+	uint16_t requiredSize = ConnectionEncryption::getEncryptedBufferSize(_buffer.len, _options.encryptionType);
+
+	if (_options.sharedEncryptionBuffer) {
+		EncryptedBuffer::getInstance().getBuffer(_encryptedBuffer.data, _encryptedBuffer.len, CS_CHAR_BUFFER_DEFAULT_OFFSET);
+		if (requiredSize > _encryptedBuffer.len) {
+			LOGw("Encrypted buffer size too small: size=%u required=%u", _encryptedBuffer.len, requiredSize);
+			_encryptedBuffer.data = nullptr;
+			_encryptedBuffer.len = 0;
+			return ERR_BUFFER_TOO_SMALL;
+		}
+		LOGCharacteristicDebug("%s: Use shared encryption buffer=%p size=%u", _name, _encryptedBuffer.data, _encryptedBuffer.len);
+	}
+	else {
+		_encryptedBuffer.data = (buffer_ptr_t)calloc(requiredSize, sizeof(uint8_t));
+		if (_encryptedBuffer.data == nullptr) {
+			LOGw("Unable to allocate encryption buffer");
+			return ERR_NO_SPACE;
+		}
+		_encryptedBuffer.len = requiredSize;
+		LOGCharacteristicDebug(
+				"%s: Allocated encrypted buffer=%p size=%u",
+				_name,
+				_encryptedBuffer.data,
+				_encryptedBuffer.len);
+	}
+	return ERR_SUCCESS;
+}
+
+void CharacteristicBase::deinitEncryptedBuffer() {
+	if (!_options.sharedEncryptionBuffer && _encryptedBuffer.data != nullptr) {
+		free(_encryptedBuffer.data);
+		_encryptedBuffer.data = nullptr;
+		_encryptedBuffer.len = 0;
+	}
+}
+
+uint16_t CharacteristicBase::getGattValueMaxLength() {
+	if (isEncrypted()) {
+		return _encryptedBuffer.len;
+	}
+	return _buffer.len;
+}
+
+uint16_t CharacteristicBase::getGattValueLength() {
+	if (isEncrypted()) {
+		return _encryptedValueLength;
+	}
+	return _valueLength;
+}
+
+uint8_t* CharacteristicBase::getGattValue() {
+	if (isEncrypted()) {
+		return _encryptedBuffer.data;
+	}
+	return _buffer.data;
+}
+
+
+bool CharacteristicBase::isEncrypted() {
+	return (_options.encrypted && _options.minAccessLevel < ENCRYPTION_DISABLED);
+}
+
