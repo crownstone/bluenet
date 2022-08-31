@@ -216,10 +216,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			removeBehaviour(index);
 			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+			StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
 
-			cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, index, dat + indexSize, evt.size - indexSize);
-			State::getInstance().set(data);
-			storeMasterHash();
 			evt.result.returnCode = ERR_SUCCESS;
 			break;
 		}
@@ -229,12 +227,9 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			}
 
 			removeBehaviour(index);
-
 			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+			StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
 
-			cs_state_data_t data(CS_TYPE::STATE_TWILIGHT_RULE, index, dat + indexSize, evt.size - indexSize);
-			State::getInstance().set(data);
-			storeMasterHash();
 			evt.result.returnCode = ERR_SUCCESS;
 
 			break;
@@ -246,11 +241,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			removeBehaviour(index);
 			allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+			StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
 
-			cs_state_data_t data(
-					CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, index, dat + indexSize, evt.size - indexSize);
-			State::getInstance().set(data);
-			storeMasterHash();
 			evt.result.returnCode = ERR_SUCCESS;
 			break;
 		}
