@@ -22,6 +22,15 @@
 
 // ======================= public interface ========================
 
+ErrorCodesGeneral BehaviourStore::addBehaviour(Behaviour* behaviour) {
+	uint8_t index = FindEmptyIndex();
+	if(index > MaxBehaviours) {
+		return ERR_NO_SPACE;
+	} else {
+		return replaceBehaviour(index, behaviour);
+	}
+}
+
 ErrorCodesGeneral BehaviourStore::replaceBehaviour(uint8_t index, Behaviour* behaviour) {
 	auto retVal = removeBehaviour(index);
 	if (retVal == ERR_SUCCESS) {
@@ -163,6 +172,14 @@ void BehaviourStore::assignBehaviour(uint8_t index, Behaviour* behaviour) {
 	activeBehaviours[index]->print();
 }
 
+uint8_t BehaviourStore::FindEmptyIndex() {
+	uint8_t empty_index = 0;
+	while (activeBehaviours[empty_index] != nullptr && empty_index < MaxBehaviours) {
+		empty_index++;
+	}
+	return empty_index;
+}
+
 ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t& index) {
 	if (bufSize < 1) {
 		LOGe(FMT_ZERO_PAYLOAD_LENGTH, bufSize);
@@ -176,10 +193,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	}
 
 	// find the first empty index.
-	uint8_t empty_index = 0;
-	while (activeBehaviours[empty_index] != nullptr && empty_index < MaxBehaviours) {
-		empty_index++;
-	}
+	uint8_t empty_index = FindEmptyIndex();
 	if (empty_index >= MaxBehaviours) {
 		return ERR_NO_SPACE;
 	}

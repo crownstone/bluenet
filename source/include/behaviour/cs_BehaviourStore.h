@@ -53,9 +53,14 @@ public:
 	virtual ~BehaviourStore();
 
 
-	ErrorCodesGeneral addBehaviour(uint8_t* buf, Behaviour* behaviour);
+	ErrorCodesGeneral addBehaviour(Behaviour* behaviour);
 
 	ErrorCodesGeneral replaceBehaviour(uint8_t index, Behaviour* behaviour);
+
+	/**
+	 * returns MaxBehaviours if not found.
+	 */
+	uint8_t FindEmptyIndex();
 
 
 private:
