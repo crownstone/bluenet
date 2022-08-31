@@ -53,6 +53,13 @@ private:
 	void loadState(uint8_t index);
 
 	/**
+	 * Update state from runtime data in IPC.
+	 *
+	 * For example, when a reboot has happened when a microapp was running, this updates the state accordingly.
+	 */
+	void updateStateFromRuntimeData(uint8_t index);
+
+	/**
 	 * Validates app: compare checksum.
 	 * App state is updated in this call, make sure to store the state afterwards.
 	 */

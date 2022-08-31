@@ -152,12 +152,6 @@ private:
 	 */
 	void setOperatingState(uint8_t appIndex, MicroappRuntimeState state);
 
-	/**
-	 * Get operating state from IPC ram.
-	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
-	 */
-	MicroappRuntimeState getOperatingState(uint8_t appIndex);
-
 protected:
 	/**
 	 * Resume the previously started coroutine
@@ -282,6 +276,12 @@ public:
 	 * Enable or disable BLE scanned device interrupt calls
 	 */
 	void setScanning(bool scanning);
+
+	/**
+	 * Get operating state from IPC ram.
+	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
+	 */
+	MicroappRuntimeState getOperatingState(uint8_t appIndex);
 
 	/**
 	 * Receive events

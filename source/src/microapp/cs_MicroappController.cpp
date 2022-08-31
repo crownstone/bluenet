@@ -182,7 +182,7 @@ MicroappController::MicroappController() : EventListener() {
  * The bluenet2microapp object can be stored on the stack because setRamData copies the data.
  */
 void MicroappController::setIpcRam() {
-	LOGi("Set IPC info for microapp");
+	LOGi("Set IPC from bluenet for microapp");
 	bluenet_ipc_data_cpp_t ipcData;
 	ipcData.bluenet2microappData.microappCallback = microappCallback;
 	ipcData.bluenet2microappData.dataProtocol     = MICROAPP_IPC_DATA_PROTOCOL;
@@ -277,12 +277,16 @@ void MicroappController::setOperatingState(uint8_t appIndex, MicroappRuntimeStat
 	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
 	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
 	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
-	setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+	uint8_t retCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+	if (retCode) {
+		LOGi("Error in setting IPC ram data: %i", retCode);
+	}
 }
 
 MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
 	MicroappRuntimeState state = MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING;
 	if (!isRamDataPresent(IPC_INDEX_MICROAPP_STATE)) {
+		LOGi("No IPC data present");
 		return state;
 	}
 	if (appIndex > 0) {
