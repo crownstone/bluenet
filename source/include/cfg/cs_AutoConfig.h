@@ -100,6 +100,9 @@ extern const int8_t g_LED2_INDEX;
 extern const int8_t g_LED3_INDEX;
 extern const int8_t g_LED4_INDEX;
 
+extern const uint8_t g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR;
+extern const uint8_t g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR;
+
 #ifdef __cplusplus
 }
 #endif

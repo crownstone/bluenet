@@ -108,6 +108,14 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
 
+	// Plain text log for when there are difficulties with the binary log parser.
+	// This means that when a device is returned to us (and binary logging is on) we can derive which firmware
+	// is present on it without having to parse the data coming from the device.
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 1
+	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
+	CLOGi("\r\nGit hash %s", g_GIT_SHA1);
+#endif
+
 	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
 	LOGi("Git hash %s", g_GIT_SHA1);
 	LOGi("Compilation date: %s", g_COMPILATION_DAY);
@@ -317,9 +325,6 @@ void Crownstone::initDrivers1() {
 		// Init UartHandler only now, because it will read State.
 		UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 	}
-
-	// Plain text log.
-	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
 
 	LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
@@ -901,28 +906,33 @@ void Crownstone::printLoadStats() {
 }
 
 void printBootloaderInfo() {
-	bluenet_ipc_bootloader_data_t bootloaderData;
-	uint8_t size = sizeof(bootloaderData);
+	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	uint8_t* buf = (uint8_t*)&bootloaderData;
-	int retCode  = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("No IPC data found, error = %i", retCode);
+		LOGw("Bootloader IPC data error = %i", retCode);
 		return;
 	}
-	if (size != dataSize) {
-		LOGw("IPC data struct incorrect size");
+	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Different major. Not known how to parse bootloader IPC data.");
 		return;
 	}
-	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
-		 bootloaderData.protocol,
-		 bootloaderData.dfu_version,
-		 bootloaderData.build_type);
+	if (ipcData.bootloaderData.ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("New minor. Will parse only part of bootloader IPC data");
+		return;
+	}
+	if (dataSize != sizeof(ipcData.bootloaderData)) {
+		LOGw("Bootloader IPC data struct has the incorrect size");
+		return;
+	}
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
-		 bootloaderData.major,
-		 bootloaderData.minor,
-		 bootloaderData.patch,
-		 bootloaderData.prerelease);
+		 ipcData.bootloaderData.bootloaderMajor,
+		 ipcData.bootloaderData.bootloaderMinor,
+		 ipcData.bootloaderData.bootloaderPatch,
+		 ipcData.bootloaderData.bootloaderPrerelease);
+	LOGd("Bootloader dfuVersion=%u buildType=%u",
+		 ipcData.bootloaderData.dfuVersion,
+		 ipcData.bootloaderData.bootloaderBuildType);
 }
 
 /**********************************************************************************************************************

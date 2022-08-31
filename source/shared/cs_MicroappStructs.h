@@ -8,11 +8,19 @@
  */
 #pragma once
 
-#ifdef __cplusplus
-#include <cstdint>
-#else
-#include <stdint.h>
+#ifndef __cplusplus
+#error "Must be compiled by g++ compiler. This is C++ code"
 #endif
+
+#include <ipc/cs_IpcRamData.h>
+
+#include <cstdint>
+
+/**
+ * Protocol version of the contents of the IPC data going back and forth between microapp and bluenet.
+ * This data currently contains a callback and a flag.
+ */
+const uint8_t MICROAPP_IPC_DATA_PROTOCOL                    = 1;
 
 /*
  * Externally determined constant sizes
@@ -369,17 +377,32 @@ struct __attribute__((packed)) bluenet_io_buffers_t {
 typedef microapp_sdk_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffers_t*);
 
 /*
- * The layout of the struct in ramdata. We set for the microapp a protocol version so it can check itself if it is
- * compatible. The length parameter functions as a extra possible check. The callback can be used by the microapp to
- * call back into bluenet. The pointer to the coargs struct can be used to switch back from the used coroutine and
- * needs to stored somewhere accessible.
+ * The layout of the struct in ramdata. The parent struct contains major and minor for struct changes.
+ * The size is also defined in the parent struct: bluenet_ipc_data_t.
+ * The pointer to the coargs struct can be used to switch back from the used coroutine and needs to stored somewhere
+ * accessible (not in this struct).
+ * The protocol version here is the protocol version of the subsequent data exchange. It is not a version of the IPC
+ * struct header. It is neither the protocol for "command control" (for uploading microapps).
  */
 struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
-	uint8_t protocol;
-	uint8_t length;
+	// Data protocol (between bluenet and microapp)
+	uint8_t dataProtocol;
+	// The callback to be registered and used
 	microappCallbackFunc microappCallback;
-	bool valid;
+	// Flag to indicate that the callback is set by the microapp and the struct can be considered valid
+	uint8_t valid : 1;
 };
+
+/**
+ * Make data available as union again, but now as bluenet_ipc_data_cpp_t struct rather than a bluenet_ipc_data_t struct
+ * because this header file is written as a C++ file.
+ */
+typedef union {
+	// Raw data
+	uint8_t raw[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+	// The data coming from the microapp.
+	bluenet2microapp_ipcdata_t bluenet2microappData;
+} __attribute__((packed, aligned(4))) bluenet_ipc_data_cpp_t;
 
 /**
  * Header for io buffers shared between bluenet and microapp. The payload of the io buffer always starts with this

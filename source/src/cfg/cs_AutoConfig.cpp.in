@@ -98,3 +98,8 @@ const int8_t g_LED1_INDEX                 = ${LED1_INDEX};
 const int8_t g_LED2_INDEX                 = ${LED2_INDEX};
 const int8_t g_LED3_INDEX                 = ${LED3_INDEX};
 const int8_t g_LED4_INDEX                 = ${LED4_INDEX};
+
+const uint8_t g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR = ${BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR};
+const uint8_t g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR = ${BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR};
+
+
