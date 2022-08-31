@@ -159,12 +159,20 @@ void ServiceData::updateServiceData(bool initial) {
 	bool encrypt = fillServiceData(timestamp);
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
-	_log(SERIAL_DEBUG, false, "servideData: ");
-	_logArray(SERIAL_DEBUG, true, _serviceData.array, sizeof(service_data_t));
-//		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type,
-//serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask,
-//serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy,
-//serviceData->params.partialTimestamp);
+	_log(SERIAL_DEBUG,
+		 false,
+		 "serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i",
+		 serviceData->params.type,
+		 serviceData->params.crownstoneId,
+		 serviceData->params.switchState,
+		 serviceData->params.flagBitmask,
+		 serviceData->params.temperature,
+		 serviceData->params.powerUsageReal);
+	_log(SERIAL_DEBUG,
+		 true,
+		 "E=%i time=%u",
+		 serviceData->params.accumulatedEnergy,
+		 serviceData->params.partialTimestamp);
 #endif
 
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(_serviceData.array));

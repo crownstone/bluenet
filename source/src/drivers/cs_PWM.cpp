@@ -64,8 +64,8 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	// Setup timer
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
 	nrf_timer_bit_width_set(CS_PWM_TIMER, NRF_TIMER_BIT_WIDTH_32);
-	//	// Using 16 bit width is a dirty fix for sometimes missing the period compare event. With a 16bit timer it
-	//overflows quicker. 	nrf_timer_bit_width_set(CS_PWM_TIMER, NRF_TIMER_BIT_WIDTH_16);
+	// Using 16 bit width is a dirty fix for sometimes missing the period compare event. With a 16bit timer it
+	// overflows quicker.
 	nrf_timer_frequency_set(CS_PWM_TIMER, CS_PWM_TIMER_FREQ);
 	_maxTickVal = nrf_timer_us_to_ticks(_config.period_us, CS_PWM_TIMER_FREQ);
 	LOGd("maxTicks=%u", _maxTickVal);

@@ -100,8 +100,6 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t* accessMsg) {
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");
 #endif
 	}
-	//	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type ==
-	//NRF_MESH_ADDRESS_TYPE_UNICAST);
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
 	if (ownMsg) {
 		return;

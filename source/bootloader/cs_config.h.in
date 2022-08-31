@@ -4,4 +4,8 @@
 
 #pragma once
 
+// clang-format off
+
 #define CS_SERIAL_NRF_LOG_PIN_TX ${CS_SERIAL_NRF_LOG_PIN_TX}
+
+// clang-format on

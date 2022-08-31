@@ -8,21 +8,10 @@
 #include <ble/cs_Characteristic.h>
 #include <storage/cs_State.h>
 
-#define LOGCharacteristicDebug LOGvv
-#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
-
-CharacteristicBase::CharacteristicBase()
-		: _name(NULL), _handles({}), _service(0), _status({}), _encryptionBuffer(NULL) {}
+CharacteristicBase::CharacteristicBase() : _handles({}), _status({}) {}
 
 /**
- * Set the name of the characteristic. This can only be done before initialization.
- */
-void CharacteristicBase::setName(const char* const name) {
-	if (_status.initialized) BLE_THROW(MSG_BLE_CHAR_INITIALIZED);
-	_name = name;
-}
-
-/** Set the default attributes of every characteristic
+ * Set the default attributes of every characteristic
  *
  * There are two settings for the location of the memory of the buffer that is used to communicate with the SoftDevice.
  *
@@ -38,94 +27,54 @@ void CharacteristicBase::setName(const char* const name) {
 void CharacteristicBase::init(Service* svc) {
 	_service = svc;
 
-	CharacteristicInit ci;
+	// Attribute metadata for client characteristic configuration
+	ble_gatts_attr_md_t cccdMetadata;
+	memset(&cccdMetadata, 0, sizeof(cccdMetadata));
+	cccdMetadata.vloc = BLE_GATTS_VLOC_STACK;
+	cccdMetadata.vlen = 1;
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccdMetadata.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccdMetadata.write_perm);
 
-	memset(&ci.char_md, 0, sizeof(ci.char_md));
-	setupWritePermissions(ci);
+	ble_gatts_char_md_t characteristicMetadata;
+	memset(&characteristicMetadata, 0, sizeof(characteristicMetadata));
+	characteristicMetadata.char_props.read      = 1;  // allow read
+	characteristicMetadata.char_props.broadcast = 0;  // don't allow broadcast
+	characteristicMetadata.char_props.write     = _status.writable ? 1 : 0;
+	characteristicMetadata.char_props.notify    = _status.notifies ? 1 : 0;
+	characteristicMetadata.char_props.indicate  = _status.indicates ? 1 : 0;
+	characteristicMetadata.p_cccd_md            = &cccdMetadata;
 
-	////////////////////////////////////////////////////////////////
-	//! attribute metadata for client characteristic configuration //
-	////////////////////////////////////////////////////////////////
+	// The user description is optional.
+	characteristicMetadata.p_char_user_desc     = nullptr;
+	characteristicMetadata.p_user_desc_md       = nullptr;
 
-	memset(&ci.cccd_md, 0, sizeof(ci.cccd_md));
-	ci.cccd_md.vloc = BLE_GATTS_VLOC_STACK;
-	ci.cccd_md.vlen = 1;
+	// Presentation format is optional.
+	characteristicMetadata.p_char_pf            = nullptr;
 
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
+	ble_gatts_attr_md_t attributeMetadata;
+	memset(&attributeMetadata, 0, sizeof(attributeMetadata));
+	attributeMetadata.vloc = BLE_GATTS_VLOC_USER;
+	attributeMetadata.vlen = 1;
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attributeMetadata.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attributeMetadata.write_perm);
 
-	ci.char_md.p_cccd_md   = &ci.cccd_md;  //! the client characteristic metadata.
-
-	/////////////////////
-	//! attribute value //
-	/////////////////////
-
+	// Attribute value
 	const ble_uuid_t& uuid = _uuid.getUuid();
-	memset(&ci.attr_char_value, 0, sizeof(ci.attr_char_value));
 
-	ci.attr_char_value.p_uuid    = &uuid;
+	ble_gatts_attr_t characteristicValue;
+	memset(&characteristicValue, 0, sizeof(characteristicValue));
+	characteristicValue.p_uuid    = &uuid;
+	characteristicValue.init_offs = 0;
+	characteristicValue.init_len  = getGattValueLength();
+	characteristicValue.max_len   = getGattValueMaxLength();
+	characteristicValue.p_value   = getGattValuePtr();
+	characteristicValue.p_attr_md = &attributeMetadata;
 
-	ci.attr_char_value.init_offs = 0;
-	ci.attr_char_value.init_len  = getGattValueLength();
-	ci.attr_char_value.max_len   = getGattValueMaxLength();
-	ci.attr_char_value.p_value   = getGattValuePtr();
+	LOGCharacteristicDebug("init with buffer=%p of len=%u", getGattValuePtr(), getGattValueMaxLength());
 
-	LOGd("%s init with buffer[%i] at %p", _name, getGattValueMaxLength(), getGattValuePtr());
-
-	////////////////////////
-	//! attribute metadata //
-	////////////////////////
-
-	memset(&ci.attr_md, 0, sizeof(ci.attr_md));
-	ci.attr_md.vloc = BLE_GATTS_VLOC_USER;
-	ci.attr_md.vlen = 1;
-
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
-	ci.attr_char_value.p_attr_md = &ci.attr_md;
-
-	//////////////////////////////////////
-	//! Characteristic User Description //
-	//////////////////////////////////////
-
-	//! these characteristic descriptors are optional, and I gather, not really used by anything.
-	//! we fill them in if the user specifies any of the data (eg name).
-	ci.char_md.p_char_user_desc  = NULL;
-	ci.char_md.p_user_desc_md    = NULL;
-
-	std::string name             = std::string(_name);
-	if (!name.empty()) {
-		ci.char_md.p_char_user_desc        = (uint8_t*)name.c_str();  //! todo utf8 conversion?
-		ci.char_md.char_user_desc_size     = name.length();
-		ci.char_md.char_user_desc_max_size = name.length();
-
-		//! This is the metadata (eg security settings) for the description of this characteristic.
-		memset(&ci.user_desc_metadata_md, 0, sizeof(ci.user_desc_metadata_md));
-
-		ci.user_desc_metadata_md.vloc = BLE_GATTS_VLOC_STACK;
-		ci.user_desc_metadata_md.vlen = 1;
-
-		BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
-
-		BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm);  //! required
-
-		ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
-	}
-
-	/////////////////////////
-	//! Presentation Format //
-	/////////////////////////
-
-	//! presentation format is optional, only fill out if characteristic supports
-
-	ci.char_md.p_char_pf = NULL;
-	if (configurePresentationFormat(ci.presentation_format)) {
-		ci.presentation_format.unit = 0;  //_unit;
-		ci.char_md.p_char_pf        = &ci.presentation_format;
-	}
-
-	//! add all
-	uint32_t nrfCode = sd_ble_gatts_characteristic_add(svc->getHandle(), &ci.char_md, &ci.attr_char_value, &_handles);
+	// Add to softdevice.
+	uint32_t nrfCode =
+			sd_ble_gatts_characteristic_add(svc->getHandle(), &characteristicMetadata, &characteristicValue, &_handles);
 	switch (nrfCode) {
 		case NRF_SUCCESS: break;
 		case NRF_ERROR_INVALID_ADDR:
@@ -151,54 +100,25 @@ void CharacteristicBase::init(Service* svc) {
 			APP_ERROR_HANDLER(nrfCode);
 	}
 
-	//! set initial value (default value)
+	// Set initial value (default value)
 	updateValue();
 	_status.initialized = true;
 }
 
-/** Setup default write permissions.
- *
- * Structure has the following layout:
- *   // Characteristic Properties.
- *   ble_gatt_char_props_t       char_props;
- *   // Characteristic Extended Properties.
- *   ble_gatt_char_ext_props_t   char_ext_props;
- *   // Pointer to a UTF-8, NULL if the descriptor is not required.
- *   uint8_t                    *p_char_user_desc;
- *   // The maximum size in bytes of the user description descriptor.
- *   uint16_t                    char_user_desc_max_size;
- *   // The size of the user description, must be smaller or equal to char_user_desc_max_size.
- *   uint16_t                    char_user_desc_size;
- *   // Pointer to a presentation format structure or NULL if the descriptor is not required.
- *   ble_gatts_char_pf_t*        p_char_pf;
- *   // Attribute metadata for the User Description descriptor, or NULL for default values.
- *   ble_gatts_attr_md_t*        p_user_desc_md;
- *   // Attribute metadata for the Client Characteristic Configuration Descriptor, or NULL for default values.
- *   ble_gatts_attr_md_t*        p_cccd_md;
- *   // Attribute metadata for the Server Characteristic Configuration Descriptor, or NULL for default values.
- *   ble_gatts_attr_md_t*        p_sccd_md;
- */
-void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
-	ci.char_md.char_props.read      = 1;  //! allow read
-	ci.char_md.char_props.broadcast = 0;  //! don't allow broadcast
-	ci.char_md.char_props.write     = _status.writable ? 1 : 0;
-	ci.char_md.char_props.notify    = _status.notifies ? 1 : 0;
-	ci.char_md.char_props.indicate  = _status.indicates ? 1 : 0;
-
-	ci.attr_md.write_perm           = _writeperm;
+void CharacteristicBase::setName(const char* const name) {
+	_name = name;
 }
 
-/** Update characteristic. This is also required when switching to/from encryption.
+/**
+ * Update characteristic value.
+ * This is also required when switching to/from encryption.
  */
 uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType) {
 
-	//	LOGi("[%s] update Value", _name);
-
-	//! get the data length of the value (unencrypted)
+	// get the data length of the value (unencrypted)
 	uint16_t valueLength      = getValueLength();
-	/* get the address where the value should be stored so that the
-	 * gatt server can access it
-	 */
+
+	// get the address where the value should be stored so that the gatt server can access it
 	uint8_t* valueGattAddress = getGattValuePtr();
 
 	if (_status.aesEncrypted && _minAccessLevel < ENCRYPTION_DISABLED) {
@@ -240,7 +160,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 		setGattValueLength(encryptionBufferLength);
 	}
 	else {
-		//! set the data length of the gatt value (when not using encryption)
+		// set the data length of the gatt value (when not using encryption)
 		setGattValueLength(valueLength);
 	}
 

@@ -14,7 +14,7 @@
 #include <structs/buffer/cs_CharacteristicBuffer.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <structs/cs_ControlPacketAccessor.h>
 #include <structs/cs_ResultPacketAccessor.h>
 #include <util/cs_Utils.h>
@@ -663,10 +663,7 @@ cs_ret_code_t CrownstoneCentral::mergeNotification(const cs_const_data_t& data, 
 	}
 
 	// Get the encryption buffer.
-	cs_data_t encryptedBuffer;
-	if (!EncryptionBuffer::getInstance().getBuffer(encryptedBuffer.data, encryptedBuffer.len)) {
-		return ERR_BUFFER_UNASSIGNED;
-	}
+	cs_data_t encryptedBuffer = EncryptedBuffer::getInstance().getBuffer(0);
 
 	if (encryptedBuffer.len < _notificationMergedDataSize + dataSize) {
 		return ERR_BUFFER_TOO_SMALL;

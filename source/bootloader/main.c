@@ -207,22 +207,18 @@ void set_bootloader_info() {
 	NRF_LOG_INFO("Set bootloader info");
 	NRF_LOG_FLUSH();
 
-	bluenet_ipc_bootloader_data_t bootloader_data;
-	bootloader_data.protocol    = g_BOOTLOADER_IPC_RAM_PROTOCOL;
-	bootloader_data.dfu_version = g_BOOTLOADER_DFU_VERSION;
-	bootloader_data.major       = g_BOOTLOADER_VERSION_MAJOR;
-	bootloader_data.minor       = g_BOOTLOADER_VERSION_MINOR;
-	bootloader_data.patch       = g_BOOTLOADER_VERSION_PATCH;
-	bootloader_data.prerelease  = g_BOOTLOADER_VERSION_PRERELEASE;
-	bootloader_data.build_type  = g_BOOTLOADER_BUILD_TYPE;
+	bluenet_ipc_data_t ipcData;
 
-	uint8_t size                = sizeof(bootloader_data);
-
-	// should not happen but we don't want asserts in the bootloader, so we just truncate the struct
-	if (size > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
-		size = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
-	}
-	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)&bootloader_data, size);
+	ipcData.bootloaderData.ipcDataMajor         = g_BOOTLOADER_IPC_RAM_MAJOR;
+	ipcData.bootloaderData.ipcDataMinor         = g_BOOTLOADER_IPC_RAM_MINOR;
+	ipcData.bootloaderData.dfuVersion           = g_BOOTLOADER_DFU_VERSION;
+	ipcData.bootloaderData.bootloaderMajor      = g_BOOTLOADER_VERSION_MAJOR;
+	ipcData.bootloaderData.bootloaderMinor      = g_BOOTLOADER_VERSION_MINOR;
+	ipcData.bootloaderData.bootloaderPatch      = g_BOOTLOADER_VERSION_PATCH;
+	ipcData.bootloaderData.bootloaderPrerelease = g_BOOTLOADER_VERSION_PRERELEASE;
+	ipcData.bootloaderData.bootloaderBuildType  = g_BOOTLOADER_BUILD_TYPE;
+	uint8_t dataSize                            = sizeof(ipcData.bootloaderData);
+	setRamData(IPC_INDEX_BOOTLOADER_VERSION, dataSize, ipcData.raw);
 }
 
 /**

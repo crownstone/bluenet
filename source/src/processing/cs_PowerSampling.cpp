@@ -826,7 +826,8 @@ bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 	//	// Exponential moving average of the median
 	//	int64_t discountCurrent = 200;
 	//	_avgCurrentRmsMilliAmp = ((1000-discountCurrent) * _avgCurrentRmsMilliAmp + discountCurrent *
-	//medianCurrentRmsMilliAmp) / 1000;
+	//  medianCurrentRmsMilliAmp) / 1000;
+
 	// Use median as average
 	_avgCurrentRmsMilliAmp = currentRmsMedianMA;
 
@@ -1424,8 +1425,6 @@ void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
 			buf[j] = AdcBuffer::getInstance().getValue(bufIndex, channel, i);
 			if (++j == 10) {
 				_logArray(SERIAL_DEBUG, true, buf, sizeof(buf));
-				//				LOGd("%4u %4u %4u %4u %4u %4u %4u %4u %4u %4u", buf[0], buf[1], buf[2], buf[3], buf[4],
-				//buf[5], buf[6], buf[7], buf[8], buf[9]);
 				j = 0;
 			}
 		}

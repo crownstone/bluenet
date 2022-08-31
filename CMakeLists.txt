@@ -51,7 +51,6 @@ set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 # With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
 # With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
-set(SUPERUSER_SWITCH                             sudo    CACHE STRING "Switch to superuser")
 
 project(${BOARD_TARGET} NONE)
 
@@ -381,7 +380,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_
 # We have added some commands to remove windows line endings and to set the exec bit
 # Reported at https://devzone.nordicsemi.com/f/nordic-q-a/47429/bug-windows-line-ending-characters
 add_custom_target(micro_eec
-	COMMAND sed -i 's/\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+	COMMAND sed -i 's/\\r//g' build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${COMPILER_PATH}/bin/" "VERBOSE=0 MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMENT "Build micro-eec"

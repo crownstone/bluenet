@@ -198,11 +198,7 @@ cs_ret_code_t getDefault(cs_state_data_t& data, const boards_config_t& boardsCon
 			// The default value will be set by the mesh code.
 			return ERR_NOT_IMPLEMENTED;
 		case CS_TYPE::STATE_IBEACON_CONFIG_ID: {
-			//		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = TYPIFY(STATE_IBEACON_CONFIG_ID)();
 			*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = ibeacon_config_id_packet_t();
-			//		TYPIFY(STATE_IBEACON_CONFIG_ID)* config =
-			//reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value); 		config->timestamp = 0; 		config->interval =
-			//0;
 			return ERR_SUCCESS;
 		}
 		case CS_TYPE::STATE_MICROAPP: {

@@ -146,7 +146,11 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 	MicroappStorage& storage = MicroappStorage::getInstance();
 	storage.getAppHeader(index, header);
 	if (header.sdkVersionMajor != MICROAPP_SDK_MAJOR || header.sdkVersionMinor > MICROAPP_SDK_MINOR) {
-		LOGw("Microapp sdk version %u.%u is not supported", header.sdkVersionMajor, header.sdkVersionMinor);
+		LOGw("Microapp sdk version %u.%u is not supported (it is >%u.%u)",
+			 header.sdkVersionMajor,
+			 header.sdkVersionMinor,
+			 MICROAPP_SDK_MAJOR,
+			 MICROAPP_SDK_MINOR);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 
@@ -238,7 +242,7 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
-	info->protocol           = MICROAPP_PROTOCOL;
+	info->protocol           = MICROAPP_CONTROL_COMMAND_PROTOCOL;
 	info->maxApps            = MAX_MICROAPPS;
 	info->maxAppSize         = MICROAPP_MAX_SIZE;
 	info->maxChunkSize       = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;
@@ -373,7 +377,8 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
-	if (packet->protocol != MICROAPP_PROTOCOL) {
+	LOGMicroappInfo("checkHeader %u", packet->index);
+	if (packet->protocol != MICROAPP_CONTROL_COMMAND_PROTOCOL) {
 		LOGw("Unsupported protocol: %u", packet->protocol);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}

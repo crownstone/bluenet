@@ -116,10 +116,10 @@ public:
 
 private:
 	//! Constructor
-	UartHandler()                   = default;
+	UartHandler()                      = default;
 
 	//! This class is singleton, deny implementation
-	UartHandler(UartHandler const&) = delete;
+	UartHandler(UartHandler const&)    = delete;
 
 	//! This class is singleton, deny implementation
 	void operator=(UartHandler const&) = delete;

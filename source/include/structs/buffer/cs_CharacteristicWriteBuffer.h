@@ -8,6 +8,9 @@
 
 #include "structs/buffer/cs_CharacteristicBuffer.h"
 
+/**
+ * Buffer used to hold plain text characteristic data written by the user.
+ */
 class CharacteristicWriteBuffer : public CharacteristicBuffer {
 public:
 	static CharacteristicWriteBuffer& getInstance() {

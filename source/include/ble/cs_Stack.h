@@ -98,14 +98,6 @@ public:
 
 	void createCharacteristics();
 
-	/** Start the BLE stack
-	 *
-	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is
-	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
-	 * init().
-	 */
-	void initServices();
-
 	/**
 	 * In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8
 	 */
@@ -116,17 +108,6 @@ public:
 	bool isConnectedPeripheral();
 
 	uint16_t getConnectionHandle() { return _connectionHandle; }
-
-	/** Shutdown the BLE stack
-	 *
-	 * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these
-	 * services have actually been started.
-	 *
-	 * It will also stop advertising. The SoftDevice will not be shut down.
-	 *
-	 * After a shutdown() the function start() can be called again.
-	 */
-	void shutdown();
 
 	//! Set initial clock source, not applied unless done before radio init.
 	void setClockSource(nrf_clock_lf_cfg_t clockSource);
@@ -143,9 +124,16 @@ public:
 	/** Set and update the preferred connection supervision timeout in units of 10 ms. */
 	void updateConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms);
 
-	/** Add a service to the stack.
+	/**
+	 * Add a service to the stack.
+	 * This does not yet add it to the softdevice.
 	 */
-	Stack& addService(Service* svc);
+	void addService(Service* svc);
+
+	/**
+	 * Register the added services to the softdevice.
+	 */
+	void initServices();
 
 	/** Start scanning for devices
 	 *
@@ -211,7 +199,7 @@ protected:
 	void onMemoryRequest(uint16_t connectionHandle);
 	void onMemoryRelease(uint16_t connectionHandle);
 
-	void onWrite(const ble_gatts_evt_write_t& writeEvt);
+	void onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writeEvt);
 
 	/** Transmission complete event
 	 *

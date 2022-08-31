@@ -261,9 +261,9 @@ constexpr const char* nordicEventTypeName(uint32_t nordic_type) {
 //    }
 //
 //	LOGf("FATAL ERROR id=%u pc=u line=%u file=%s code=%u", m_error_data.fault_id, m_error_data.pc,
-//m_error_data.line_num, m_error_data.p_file_name, m_error_data.err_code);
+//  m_error_data.line_num, m_error_data.p_file_name, m_error_data.err_code);
 ////	NRF_LOG_ERROR("FATAL ERROR id=%u pc=u line=%u file=%s code=%u", m_error_data.fault_id, m_error_data.pc,
-///m_error_data.line_num, m_error_data.p_file_name, m_error_data.err_code);
+///  m_error_data.line_num, m_error_data.p_file_name, m_error_data.err_code);
 //
 //    UNUSED_VARIABLE(m_error_data);
 //

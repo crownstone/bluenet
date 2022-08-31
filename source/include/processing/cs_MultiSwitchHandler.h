@@ -21,7 +21,7 @@ public:
 		return instance;
 	}
 	MultiSwitchHandler(MultiSwitchHandler const&) = delete;
-	void operator=(MultiSwitchHandler const&) = delete;
+	void operator=(MultiSwitchHandler const&)     = delete;
 
 	void init();
 	void handleMultiSwitch(internal_multi_switch_item_t* cmd, cmd_source_with_counter_t& source);

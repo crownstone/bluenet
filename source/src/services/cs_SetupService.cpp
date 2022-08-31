@@ -20,7 +20,6 @@
 
 SetupService::SetupService() : _macAddressCharacteristic(NULL), _setupKeyCharacteristic(NULL) {
 	setUUID(UUID(SETUP_UUID));
-	setName(BLE_SERVICE_SETUP);
 }
 
 void SetupService::createCharacteristics() {
@@ -46,8 +45,6 @@ void SetupService::createCharacteristics() {
 
 	addSessionDataCharacteristic(readBuf.data, readBuf.len, SETUP);
 	LOGi(FMT_CHAR_ADD STR_CHAR_SESSION_DATA);
-
-	updatedCharacteristics();
 }
 
 void SetupService::addMacAddressCharacteristic() {

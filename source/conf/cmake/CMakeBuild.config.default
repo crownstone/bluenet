@@ -500,7 +500,12 @@ HEAP_SIZE=20000
 RAM_BLUENET_IPC_LENGTH=0x100
 
 # Parameters for IPC with the bootloader
-BOOTLOADER_IPC_RAM_PROTOCOL=1
+BOOTLOADER_IPC_RAM_MAJOR=1
+BOOTLOADER_IPC_RAM_MINOR=0
+
+# Parameters for bluenet to indicate compatibility with the bootloader
+BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR=1
+BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR=0
 
 # Parameters for the microapps
 

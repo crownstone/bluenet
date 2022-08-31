@@ -18,39 +18,23 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <logging/cs_Logger.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <third/std/function.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-/** General BLE name service
+#define LOGCharacteristicDebug LOGvv
+#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
+
+/**
+ * General BLE name service
  *
  * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
  */
 class Service;
 
-/** CharacteristicInit collects fields required to define a BLE characteristic
- */
-struct CharacteristicInit {
-	ble_gatts_attr_t attr_char_value;
-	//! pointer to a presentation format structure (p_char_pf)
-	ble_gatts_char_pf_t presentation_format;
-	//! characteristic metadata
-	ble_gatts_char_md_t char_md;
-	//! attribute metadata for client characteristic configuration  (p_cccd_md)
-	ble_gatts_attr_md_t cccd_md;
-	//! attributed metadata for server characteristic configuration (p_sccd_md)
-	ble_gatts_attr_md_t sccd_md;
-	ble_gatts_attr_md_t attr_md;
-	//! attribute metadata for user description (p_user_desc_md)
-	ble_gatts_attr_md_t user_desc_metadata_md;
-
-	CharacteristicInit() : presentation_format({}), char_md({}), cccd_md({}), attr_md({}) {}
-};
-
-#define STATUS_INITED
-
-/** Status of a Characteristic.
+/**
+ * Status of a Characteristic.
  *
  * The status can be initialized, with notifications, writable, etc.
  */
@@ -81,23 +65,22 @@ class CharacteristicBase {
 
 public:
 protected:
+	//! Name of this characteristic.
+	const char* _name = nullptr;
+
 	//! UUID of this characteristic.
 	UUID _uuid;
-	//! Name (4 bytes)
-	const char* _name;
-	//! Read permission (1 byte)
-	ble_gap_conn_sec_mode_t _readperm;
-	//! Write permission (1 byte)
-	ble_gap_conn_sec_mode_t _writeperm;
-	//! Handles (8 bytes)
+
+	//! Handles
 	ble_gatts_char_handles_t _handles;
-	//! Reference to corresponding service (4 bytes)
-	Service* _service;
+
+	//! Reference to corresponding service
+	Service* _service = nullptr;
 
 	//! Status of CharacteristicBase (basically a bunch of 1-bit flags)
 	Status _status;
 
-	buffer_ptr_t _encryptionBuffer;
+	buffer_ptr_t _encryptionBuffer        = nullptr;
 
 	/** used for encryption. If the characteristic is being read, it will encrypt itself with the lowest
 	 * allowed userlevel key.
@@ -116,28 +99,22 @@ public:
 	 */
 	virtual ~CharacteristicBase() {}
 
-	/** Initialize the characteristic.
-	 * @param svc BLE service this characteristic will belong to.
+	/**
+	 * Initialize the characteristic: add it to the softdevice.
 	 *
-	 * Defaults:
-	 *
-	 * + readable: true
-	 * + notifies: true
-	 * + broadcast: false
-	 * + indicates: false
-	 *
-	 * Side effect: sets member field <_status.inited>.
+	 * Should be done after configuring name, permissions, value, etc.
 	 */
 	void init(Service* svc);
 
-	/** Set this characteristic to be writable.
+	/**
+	 * Set the name of this characteristic.
 	 */
-	void setWritable(bool writable) {
-		_status.writable = writable;
-		setWritePermission(1, 1);
-	}
+	void setName(const char* const name);
 
-	void setupWritePermissions(CharacteristicInit& ci);
+	/**
+	 * Set this characteristic to be writable.
+	 */
+	void setWritable(bool writable) { _status.writable = writable; }
 
 	/** Set this characteristic to be notifiable.
 	 */
@@ -145,32 +122,14 @@ public:
 
 	bool isNotifyingEnabled() { return _status.notifyingEnabled; }
 
-	void setNotifyingEnabled(bool enabled) {
-		//		LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
-		_status.notifyingEnabled = enabled;
-	}
+	void setNotifyingEnabled(bool enabled) { _status.notifyingEnabled = enabled; }
 
 	void setIndicates(bool indicates) { _status.indicates = indicates; }
-
-	/** Security Mode 0 Level 0: No access permissions at all (this level is not defined by the Bluetooth Core
-	 * specification).\n Security Mode 1 Level 1: No security is needed (aka open link).\n Security Mode 1 Level 2:
-	 * Encrypted link required, MITM protection not necessary.\n Security Mode 1 Level 3: MITM protected encrypted link
-	 * required.\n Security Mode 2 Level 1: Signing or encryption required, MITM protection not necessary.\n Security
-	 * Mode 2 Level 2: MITM protected signing required, unless link is MITM protected encrypted.\n
-	 */
-	void setWritePermission(uint8_t securityMode, uint8_t securityLevel) {
-		_writeperm.sm = securityMode;
-		_writeperm.lv = securityLevel;
-	}
 
 	void setUUID(const UUID& uuid) {
 		if (_status.initialized) BLE_THROW("Already inited.");
 		_uuid = uuid;
 	}
-
-	void setName(const char* const name);
-
-	const char* getName() { return _name; }
 
 	uint16_t getValueHandle() { return _handles.value_handle; }
 
@@ -258,7 +217,7 @@ public:
 	 *  BLE.
 	 *  @len the number of bytes that were written
 	 */
-	virtual void written(uint16_t len) = 0;
+	virtual void onWrite(uint16_t len) = 0;
 
 	/** Update the value in the gatt server so that the value can be read over BLE
 	 *  If somebody is also listening to notifications for the characteristic
@@ -461,13 +420,8 @@ protected:
 	 *  updates the length values for dynamic length types, decrypts the value if
 	 *  aes encryption enabled. then calls the on write callback.
 	 */
-	void written(uint16_t len) {
-		// We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
-		// TODO: have this from the stack directly.
-		if (ConnectionEncryption::getInstance().allowedToWrite()) {
-			LOGi("Not allowed to write, disconnect in progress");
-			return;
-		}
+	void onWrite(uint16_t len) {
+		LOGd("onWrite %s", _name);
 
 		setGattValueLength(len);
 
@@ -480,6 +434,14 @@ protected:
 			// there. In the case of a characteristic with a dynamic buffer length we need to set the length ourselves.
 			// To do this we assume the length of the data is the same as the encrypted buffer minus the overhead for
 			// the encryption. The result can be zero padded but generally the payload has it's own length indication.
+
+			_log(LogLevelCharacteristicDebug,
+				 false,
+				 "gattPtr=%p gattLen=%u data=",
+				 getGattValuePtr(),
+				 getGattValueLength());
+			_logArray(LogLevelCharacteristicDebug, true, getGattValuePtr(), getGattValueLength());
+
 			uint16_t decryptionBufferLength =
 					ConnectionEncryption::getPlaintextBufferSize(getGattValueLength(), ConnectionEncryptionType::CTR);
 			setValueLength(decryptionBufferLength);
@@ -508,7 +470,8 @@ protected:
 			setValueLength(len);
 		}
 
-		LOGd("%s: onWrite()", _name);
+		_log(LogLevelCharacteristicDebug, false, "valuePtr=%p valueLen=%u data=", getValuePtr(), getValueLength());
+		_logArray(LogLevelCharacteristicDebug, true, getValuePtr(), getValueLength());
 
 		_callbackOnWrite(accessLevel, getValue(), getValueLength());
 	}
@@ -527,11 +490,16 @@ protected:
 		if (_encryptionBuffer == NULL) {
 			if (_status.sharedEncryptionBuffer) {
 				uint16_t size;
-				EncryptionBuffer::getInstance().getBuffer(_encryptionBuffer, size);
-				assert(_encryptionBuffer != NULL, "need to initialize encryption buffer for aes encryption");
+				EncryptedBuffer::getInstance().getBuffer(_encryptionBuffer, size, CS_CHAR_BUFFER_DEFAULT_OFFSET);
+				LOGCharacteristicDebug("%s: Use shared encryption buffer=%p size=%u", _name, _encryptionBuffer, size);
 			}
 			else {
 				_encryptionBuffer = (buffer_ptr_t)calloc(getGattValueMaxLength(), sizeof(uint8_t));
+				LOGCharacteristicDebug(
+						"%s: Allocated encryption buffer=%p size=%u",
+						_name,
+						_encryptionBuffer,
+						getGattValueMaxLength());
 			}
 		}
 	}
@@ -603,10 +571,14 @@ public:
 #endif
 
 	/** @inherit */
-	uint8_t* getValuePtr() { return (uint8_t*)&this->getValue(); }
+	uint8_t* getValuePtr() {
+		return (uint8_t*)&this->getValue();
+	}
 
 	/** @inherit */
-	uint16_t getValueLength() { return sizeof(T); }
+	uint16_t getValueLength() {
+		return sizeof(T);
+	}
 
 	/** @inherit */
 	uint16_t getGattValueLength() {
@@ -619,7 +591,9 @@ public:
 	}
 
 	/** @inherit */
-	uint16_t getGattValueMaxLength() { return getGattValueLength(); }
+	uint16_t getGattValueMaxLength() {
+		return getGattValueLength();
+	}
 };
 
 /** A characteristic for strings
@@ -733,21 +707,6 @@ public:
 
 	/** @inherit */
 	virtual uint16_t getGattValueLength() { return _gattValueLength; }
-	//
-	//	void initEncryptionBuffer() {
-	//		if (_encryptionBufferUsed) {
-	//
-	//		} else {
-	//			uint16_t size;
-	//			EncryptionBuffer::getInstance().getBuffer(CharacteristicBase::_encryptionBuffer, size);
-	//			assert(CharacteristicBase::_encryptionBuffer != NULL, "need to initialize encryption buffer for aes
-	// encryption");
-	//		}
-	//	}
-	//
-	//	void freeEncryptionBuffer() {
-	//		CharacteristicBase::_encryptionBuffer = NULL;
-	//	}
 
 protected:
 };

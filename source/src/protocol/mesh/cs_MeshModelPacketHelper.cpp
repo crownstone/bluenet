@@ -222,15 +222,23 @@ bool canShortenSource(const cmd_source_with_counter_t& source) {
 			switch (source.source.id) {
 				case CS_CMD_SOURCE_NONE:
 				case CS_CMD_SOURCE_INTERNAL:
-					//				case CS_CMD_SOURCE_UART:
 				case CS_CMD_SOURCE_CONNECTION:
-				case CS_CMD_SOURCE_SWITCHCRAFT: return true;
-				default: return false;
+				case CS_CMD_SOURCE_SWITCHCRAFT:
+				case CS_CMD_SOURCE_TAP_TO_TOGLE:
+				case CS_CMD_SOURCE_MICROAPP: {
+					return true;
+				}
+				default: {
+					return false;
+				}
 			}
 			break;
 		}
-		case CS_CMD_SOURCE_TYPE_BROADCAST: return true;
-		case CS_CMD_SOURCE_TYPE_UART: return true;
+		case CS_CMD_SOURCE_TYPE_BEHAVIOUR:
+		case CS_CMD_SOURCE_TYPE_UART:
+		case CS_CMD_SOURCE_TYPE_BROADCAST: {
+			return true;
+		}
 		default: return false;
 	}
 }
@@ -242,18 +250,30 @@ uint8_t getShortenedSource(const cmd_source_with_counter_t& source) {
 			switch (source.source.id) {
 				case CS_CMD_SOURCE_NONE:
 				case CS_CMD_SOURCE_INTERNAL:
-					//				case CS_CMD_SOURCE_UART:
 				case CS_CMD_SOURCE_CONNECTION:
-				case CS_CMD_SOURCE_SWITCHCRAFT: return source.source.id;
-				default: return CS_CMD_SOURCE_NONE;
+				case CS_CMD_SOURCE_SWITCHCRAFT:
+				case CS_CMD_SOURCE_TAP_TO_TOGLE:
+				case CS_CMD_SOURCE_MICROAPP: {
+					return source.source.id;
+				}
+				default: {
+					return CS_CMD_SOURCE_NONE;
+				}
 			}
 			break;
 		}
-		case CS_CMD_SOURCE_TYPE_UART: return 29;
+		case CS_CMD_SOURCE_TYPE_BEHAVIOUR: {
+			return 28;
+		}
+		case CS_CMD_SOURCE_TYPE_UART: {
+			return 29;
+		}
 		case CS_CMD_SOURCE_TYPE_BROADCAST: {
 			return 30;
 		}
-		default: return CS_CMD_SOURCE_NONE;
+		default: {
+			return CS_CMD_SOURCE_NONE;
+		}
 	}
 }
 
@@ -263,11 +283,18 @@ cmd_source_with_counter_t getInflatedSource(uint8_t sourceId) {
 	switch (sourceId) {
 		case CS_CMD_SOURCE_NONE:
 		case CS_CMD_SOURCE_INTERNAL:
-			//		case CS_CMD_SOURCE_UART:
 		case CS_CMD_SOURCE_CONNECTION:
 		case CS_CMD_SOURCE_SWITCHCRAFT:
+		case CS_CMD_SOURCE_TAP_TO_TOGLE:
+		case CS_CMD_SOURCE_MICROAPP:
 			source.source.type = CS_CMD_SOURCE_TYPE_ENUM;
 			source.source.id   = sourceId;
+			break;
+		case 28:
+			// We can't reconstruct the device id, nor the counter.
+			// So let's just set the default.
+			source.source.type = CS_CMD_SOURCE_TYPE_BEHAVIOUR;
+			source.source.id   = 0;
 			break;
 		case 29:
 			// We can't reconstruct the device id, nor the counter.

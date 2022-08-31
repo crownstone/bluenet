@@ -304,8 +304,8 @@ cs_ret_code_t ADC::initChannel(adc_channel_id_t channel, adc_channel_config_t& c
 	//	ASSERT(p_config->pin_n <= NRF_SAADC_INPUT_VDD);
 
 	nrf_saadc_channel_init(channel, &channelConfig);
-	//	nrf_saadc_channel_input_set(channel, channelConfig.pin_p, channelConfig.pin_n); // Already done by
-	//channel_init()
+
+	// No need to call nrf_saadc_channel_input_set(), this is already done by channel_init().
 
 	return ERR_SUCCESS;
 }

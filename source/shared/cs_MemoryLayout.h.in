@@ -35,7 +35,9 @@ _Static_assert(
 
 _Static_assert(NRF_MBR_PARAMS_PAGE_ADDRESS == ${CS_MBR_PARAMS_PAGE_ADDRESS}, "MBR param page address mismatch");
 
-_Static_assert(${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} == ${FLASH_MICROAPP_BASE}, "Incorrect application max length");
+_Static_assert(
+		${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} == ${FLASH_MICROAPP_BASE},
+		"Incorrect application max length");
 
 /**
  * The SoftDevice and the MBR come together in a Nordic SoftDevice image. Hence, this includes the MBR page.
