@@ -72,6 +72,10 @@ bool SwitchBehaviour::gracePeriodForPresenceIsActive() {
 	return false;
 }
 
+/**
+ * TODO: Factor out the prevInRoomTimeStamp into a function update(presence,uptime)
+ * and have the BehaviourStore periodically update it.
+ */
 bool SwitchBehaviour::isValid(PresenceStateDescription currentPresence) {
 	LOGBehaviour_V("isValid(presence) called");
 	if (!requiresPresence() && !requiresAbsence()) {

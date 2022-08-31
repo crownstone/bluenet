@@ -134,6 +134,18 @@ if(NOT SOURCE_NRF5_HOST_ABS)
 	message(WARNING "No sources provided for SOURCE_NRF5_HOST_ABS")
 endif()
 
+######################################
+# Include crownstone test source files
+######################################
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include(crownstone-testlib.src)
+
+# add test source files to `TEST_SOURCE_ABS`
+foreach(FILE_REL IN LISTS TEST_SOURCE_REL)
+	list(APPEND TEST_SOURCE_ABS ${CMAKE_CURRENT_SOURCE_DIR}/src/${FILE_REL})
+endforeach()
+
 ###################################################
 # Include crownstone source files for platform host
 ###################################################
@@ -156,6 +168,7 @@ endif()
 list(APPEND HOSTLIB_SOURCE
 	${SOURCE_NRF5_HOST_ABS} 
 	${FOLDER_SOURCE}
+	${TEST_SOURCE_ABS}
 	)
 
 set(BLUENET_HOST_LIB BluenetHost)
