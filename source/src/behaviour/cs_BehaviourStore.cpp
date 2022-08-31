@@ -221,8 +221,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	auto retCode = ReplaceParameterValidation(evt, index, type);
 	if (retCode == ERR_SUCCESS) {
-		removeBehaviour(index);
 		Behaviour* behaviour = allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+		removeBehaviour(index);
 		assignBehaviour(index, behaviour);
 		StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
 	}
