@@ -108,7 +108,7 @@ bool BehaviourHandler::update() {
 }
 
 SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(
-		Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) {
+		Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const {
 	if (SwitchBehaviour* switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
 		if (switchbehave->isValid(currentTime, currentPresence)) {
 			return switchbehave;
@@ -119,7 +119,7 @@ SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
-		Time currentTime, PresenceStateDescription currentPresence) {
+		Time currentTime, PresenceStateDescription currentPresence) const {
 	if (!_isActive) {
 		LOGBehaviourHandlerDebug("Behaviour handler is inactive, computed intended state: empty");
 		return {};

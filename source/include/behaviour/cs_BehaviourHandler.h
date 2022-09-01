@@ -115,7 +115,7 @@ private:
 	 * When no behaviours are valid at given time/presence the intended
 	 * value is 0. (house is 'off' by default)
 	 */
-	std::optional<uint8_t> computeIntendedState(Time currenttime, PresenceStateDescription currentpresence);
+	std::optional<uint8_t> computeIntendedState(Time currenttime, PresenceStateDescription currentpresence) const;
 
 	void handleGetBehaviourDebug(event_t& evt);
 
@@ -125,7 +125,7 @@ private:
 	 * Else, returns nullptr.
 	 */
 	SwitchBehaviour* ValidateSwitchBehaviour(
-			Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence);
+			Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const;
 
 	// -----------------------------------------------------------------------
 	// --------------------------- synchronization ---------------------------
