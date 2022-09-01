@@ -38,6 +38,17 @@ std::ostream & operator<< (std::ostream &out, Time t){
 	return out << t.dayOfWeek() << " " << t.timeOfDay();
 }
 
+std::ostream & operator<< (std::ostream &out, PresenceStateDescription p){
+	int i = 0;
+	out << "rooms: {";
+	for (auto bitmask = p.getBitmask(); bitmask != 0; bitmask >>= 1) {
+		out << (i?", ":"") << i;
+		i++;
+	}
+	out << "}";
+	return out;
+}
+
 int main() {
     SwitchAggregator _switchAggregator;
     BehaviourStore _behaviourStore;
@@ -69,5 +80,11 @@ int main() {
 
     std::cout << "from: " << bP->from() << " until: " << bP->until() << std::endl;
 
+    PresenceHandler::ProfileLocation profLoc{.profile = 1, .location = 2};
+    _presenceHandler.registerPresence(profLoc);
+    auto desc = _presenceHandler.getCurrentPresenceDescription();
+
+    auto presenceDesc = PresenceStateDescription(0b111);
+	std::cout << presenceDesc << std::endl;
     return 0;
 }
