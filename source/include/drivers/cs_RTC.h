@@ -8,15 +8,8 @@
 
 #include <stdint.h>
 
-
-/**
- * implementation of some inline functions is deferred to mock .cpp file on host.
- */
-#if !defined HOST_TARGET
-#define INLINE inline
-#else
-#define INLINE
-#endif
+#include <test/cs_ConditionalKeywords.h>
+#include <test/cs_TestAccess.h>
 
 /**
  * Clock frequency of the RTC timer.
@@ -37,13 +30,13 @@
  *
  */
 class RTC {
-
 private:
 	RTC()           = default;
 	RTC(RTC const&) = delete;
 	void operator=(RTC const&) = delete;
 
 public:
+
 	/**
 	 * return number of ticks
 	 */
@@ -78,6 +71,20 @@ public:
 	 * return current clock in ms
 	 */
 	inline static uint32_t now();
+
+#ifdef HOST_TARGET
+	/**
+	 * allows for fast-forward/rewinding rtc time during tests.
+	 */
+	static void offsetMs(int ms);
+	static int _offsetMs;
+
+	/**
+	 * Acquires a start time to base the RTC tick values off of.
+	 */
+	static void start();
+
+#endif
 };
 
 // ----------------- inline implementation details -----------------

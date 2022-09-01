@@ -7,16 +7,31 @@
 
 #include <drivers/cs_RTC.h>
 #include <chrono>
+#include <iostream>
+#include <utils/date.h>
+using namespace date;
 
 uint32_t nsToTicks(uint64_t ns) {
 	return static_cast<uint32_t>((ns * RTC_CLOCK_FREQ) / 1000000000) % MAX_RTC_COUNTER_VAL;
 }
 
+
+int RTC::_offsetMs = 0;
+
+void RTC::offsetMs(int ms) {
+	_offsetMs += ms;
+}
+
+void RTC::start() {
+	getCount();
+}
+
+
 uint32_t RTC::getCount() {
 	static auto starttime = std::chrono::high_resolution_clock::now();
 
 	auto now = std::chrono::high_resolution_clock::now();
-	auto diff = now - starttime;
+	auto diff = now - starttime + std::chrono::milliseconds(_offsetMs);
 	auto rtcDuration = std::chrono::duration_cast<
 			std::chrono::duration<long int, std::ratio<1, RTC_CLOCK_FREQ>>
 		>(diff);
