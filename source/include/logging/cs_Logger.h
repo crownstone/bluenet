@@ -84,24 +84,24 @@
 #include <logging/impl/cs_LogNrf.h>
 
 #else
+	#include <logging/impl/cs_LogUtils.h>
 
-#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
-#include <logging/impl/cs_LogCs.h>
-#else
-#include <logging/impl/cs_LogNone.h>
-#endif
+	#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
+		#include <logging/impl/cs_LogBinaryProtocol.h>
+	#else
+		#include <logging/impl/cs_LogNone.h>
+	#endif
 
-#include <logging/impl/cs_LogUtils.h>
 
-// Write logs as plain text.
-#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
-#include <logging/impl/cs_LogPLain.h>
-#endif
+	// Write logs as plain text.
+	#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
+	#include <logging/impl/cs_LogPlainText.h>
+	#endif
 
-// Write a string with printf functionality.
-#ifdef HOST_TARGET
-#include <logging/impl/cs_LogHost.h>
-#endif
+	// Write a string with printf functionality.
+	#ifdef HOST_TARGET
+	#include <logging/impl/cs_LogStdPrintf.h>
+	#endif
 
 #endif
 

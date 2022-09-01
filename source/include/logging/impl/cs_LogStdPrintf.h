@@ -7,7 +7,6 @@
 
 #pragma once
 
-#pragma message("cs logger impl host target")
 __attribute__((unused)) static bool _logPrefixHost = true;
 
 #define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__) - 30 - 1) : __FILE__)
