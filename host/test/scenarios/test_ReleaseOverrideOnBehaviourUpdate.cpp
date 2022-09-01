@@ -49,6 +49,15 @@ std::ostream & operator<< (std::ostream &out, PresenceStateDescription p){
 	return out;
 }
 
+std::ostream & operator<< (std::ostream &out, std::optional<PresenceStateDescription> p_opt) {
+	if(p_opt) {
+		return out << p_opt.value();
+	} else {
+		return out << "none";
+	}
+
+}
+
 int main() {
     SwitchAggregator _switchAggregator;
     BehaviourStore _behaviourStore;
@@ -60,7 +69,7 @@ int main() {
 
     SystemTime::setSunTimes(sun_time_t{});
 
-    std::cout << "uptime: " << SystemTime::now() << std::endl;
+    std::cout << "uptime: " << SystemTime::up() << std::endl;
 
     auto predicate =
         PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription());
@@ -85,6 +94,6 @@ int main() {
     auto desc = _presenceHandler.getCurrentPresenceDescription();
 
     auto presenceDesc = PresenceStateDescription(0b111);
-	std::cout << presenceDesc << std::endl;
+	std::cout << presenceDesc << " " << desc << std::endl;
     return 0;
 }
