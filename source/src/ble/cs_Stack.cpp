@@ -18,6 +18,7 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <util/cs_Utils.h>
 
 #include <algorithm>
@@ -383,12 +384,6 @@ void Stack::stopScanning() {
 
 bool Stack::isScanning() {
 	return _scanning;
-}
-
-void Stack::setAesEncrypted(bool encrypted) {
-	for (Service* svc : _services) {
-		svc->setAesEncrypted(encrypted);
-	}
 }
 
 void Stack::onBleEvent(const ble_evt_t* p_ble_evt) {

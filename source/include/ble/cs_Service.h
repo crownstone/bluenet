@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include <ble/cs_Characteristic.h>
+#include <ble/cs_CharacteristicBase.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Strings.h>
 #include <common/cs_BaseClass.h>
@@ -76,9 +76,6 @@ public:
 	void addCharacteristic(CharacteristicBase* characteristic);
 
 	void updatedCharacteristics() { _characteristics.shrink_to_fit(); }
-
-	void setAesEncrypted(bool encrypted);
-
 
 private:
 	//! Back reference to the stack.

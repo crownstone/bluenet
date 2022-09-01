@@ -67,19 +67,6 @@ void Service::addCharacteristic(CharacteristicBase* characteristic) {
 	}
 }
 
-/** Set encryption.
- *
- * For encryption AES is used. A symmetric cipher. In a service every characteristic is encrypted in the same way.
- * The encryption has to be done by the characteristic itself.
- */
-void Service::setAesEncrypted(bool encrypted) {
-	// set all characteristics to encrypted
-	LOGd("Enable AES encryption");
-	for (CharacteristicBase* characteristic : _characteristics) {
-		characteristic->setAesEncrypted(encrypted);
-	}
-}
-
 /**
  * Set the UUID. It is only possible to do before starting the service. Nordic does not support removing a service.
  * There is only a sd_ble_gatts_service_changed call. If the UUID needs changed in the mean-time, restart the
@@ -149,9 +136,8 @@ bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
 
 	for (CharacteristicBase* characteristic : _characteristics) {
 
-		if (characteristic->getCccdHandle() == event.handle && event.len == 2) {
-			// received write to enable/disable notification
-			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(event.data));
+		if (characteristic->getCccdHandle() == event.handle) {
+			characteristic->onCccdWrite(event.data, event.len);
 			return true;
 		}
 		else if (characteristic->getValueHandle() == gattHandle) {
@@ -212,6 +198,6 @@ bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
  */
 void Service::onTxComplete(const ble_common_evt_t* event) {
 	for (CharacteristicBase* characteristic : _characteristics) {
-		characteristic->onTxComplete(event);
+		characteristic->onNotificationDone();
 	}
 }
