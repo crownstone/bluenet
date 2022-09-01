@@ -21,6 +21,18 @@
  */
 class PresenceHandler : public EventListener, public Component {
 public:
+	struct __attribute__((__packed__)) ProfileLocation {
+		static const constexpr uint8_t MAX_LOCATION_ID = 63;
+		static const constexpr uint8_t MAX_PROFILE_ID  = 7;
+
+		uint8_t profile;
+		uint8_t location;
+
+		bool operator==(const ProfileLocation& other) { return memcmp(this, &other, sizeof(*this)) == 0; }
+
+		bool isValid() { return profile <= MAX_PROFILE_ID && location <= MAX_LOCATION_ID; }
+	};
+
 	PresenceHandler();
 
 	/**
@@ -34,6 +46,11 @@ public:
 	 * or not.
 	 */
 	std::optional<PresenceStateDescription> getCurrentPresenceDescription();
+
+	/**
+	 * Validates and administrate a presence update.
+	 */
+	void registerPresence(ProfileLocation profileLocation);
 
 private:
 	/** Number of seconds before presence times out. */
@@ -55,20 +72,9 @@ private:
 	 */
 	static const constexpr uint8_t MAX_RECORDS                                   = 20;
 
-	struct __attribute__((__packed__)) profile_location_t {
-		static const constexpr uint8_t MAX_LOCATION_ID = 63;
-		static const constexpr uint8_t MAX_PROFILE_ID  = 7;
-
-		uint8_t profile;
-		uint8_t location;
-
-		bool operator==(const profile_location_t& other) { return memcmp(this, &other, sizeof(*this)) == 0; }
-
-		bool isValid() { return profile <= MAX_PROFILE_ID && location <= MAX_LOCATION_ID; }
-	};
 
 	struct PresenceRecord {
-		profile_location_t profileLocation;
+		ProfileLocation profileLocation;
 		/**
 		 * Used to determine when a record is timed out.
 		 * Decreases every seconds.
@@ -83,7 +89,7 @@ private:
 		uint8_t meshSendCountdownSeconds;
 
 		PresenceRecord(
-				profile_location_t profileLocation = {},
+				ProfileLocation profileLocation = {},
 				uint8_t timeoutSeconds             = PRESENCE_TIMEOUT_SECONDS,
 				uint8_t meshThrottleSeconds        = 0)
 				: profileLocation(profileLocation)
@@ -94,7 +100,7 @@ private:
 
 		bool isValid() { return timeoutCountdownSeconds != 0; }
 
-		profile_location_t id() { return profileLocation; }
+		ProfileLocation id() { return profileLocation; }
 	};
 
 	/**
@@ -106,7 +112,7 @@ private:
 	 * finds oldest record and default constructs its present record,
 	 * then returns the pointer to it.
 	 */
-	PresenceRecord* clearOldestRecord(profile_location_t profileLocation);
+	PresenceRecord* clearOldestRecord(ProfileLocation profileLocation);
 
 	/**
 	 * Handle an incoming profile-location combination.
@@ -114,7 +120,7 @@ private:
 	 * - Calls handleProfileLocation().
 	 * - Dispatches events based on the returned mutation type.
 	 */
-	void handlePresenceEvent(profile_location_t profileLocation, bool forwardToMesh);
+	void handlePresenceEvent(ProfileLocation profileLocation, bool forwardToMesh);
 
 	/**
 	 * Handle an incoming profile-location combination.
@@ -127,7 +133,7 @@ private:
 	 * @param[in] forwardToMesh   If true, the update will be pushed into the mesh (throttled).
 	 * @return                    Mutation type.
 	 */
-	PresenceMutation handleProfileLocation(profile_location_t profileLocation, bool forwardToMesh);
+	PresenceMutation handleProfileLocation(ProfileLocation profileLocation, bool forwardToMesh);
 
 	/**
 	 * Resolves the type of mutation from previous and next descriptions.
@@ -139,7 +145,7 @@ private:
 	/**
 	 * Send a mesh message with profile and location.
 	 */
-	void sendMeshMessage(profile_location_t profileLocation);
+	void sendMeshMessage(ProfileLocation profileLocation);
 
 	/**
 	 * Sends presence change event.
@@ -147,7 +153,7 @@ private:
 	 * @param[in] type                 Type of change.
 	 * @param[in] profileLocation      The relevant profile ID and location.
 	 */
-	void dispatchPresenceChangeEvent(PresenceChange type, profile_location_t profileLocation = {});
+	void dispatchPresenceChangeEvent(PresenceChange type, ProfileLocation profileLocation = {});
 
 	/**
 	 * Sends presence mutation event.
