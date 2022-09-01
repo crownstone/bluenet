@@ -8,8 +8,6 @@
 #include <drivers/cs_RTC.h>
 #include <chrono>
 #include <iostream>
-#include <utils/date.h>
-using namespace date;
 
 uint32_t nsToTicks(uint64_t ns) {
 	return static_cast<uint32_t>((ns * RTC_CLOCK_FREQ) / 1000000000) % MAX_RTC_COUNTER_VAL;
