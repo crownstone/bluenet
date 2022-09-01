@@ -11,11 +11,31 @@
 #include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventDispatcher.h>
 #include <presence/cs_PresenceCondition.h>
+#include <utils/date.h>
 
 #include <iostream>
 #include <string>
-#include <sstream>
 #include <ostream>
+#include <chrono>
+#include <thread>
+
+using namespace date;
+auto now() { return std::chrono::high_resolution_clock::now(); }
+
+template<>
+class TestAccess<SystemTime> {
+public:
+	static void tick(void*) { SystemTime::tick(nullptr); }
+
+	static void fastForwardS(int seconds) {
+		 for(auto i{0}; i < seconds; i++) {
+			RTC::offsetMs(1000);
+			tick(nullptr);
+			tick(nullptr);
+			std::cout << "." << std::flush;
+		}
+	}
+};
 
 std::ostream& operator<<(std::ostream& out, DayOfWeek t) {
     switch (t) {
@@ -55,7 +75,6 @@ std::ostream & operator<< (std::ostream &out, std::optional<PresenceStateDescrip
 	} else {
 		return out << "none";
 	}
-
 }
 
 int main() {
@@ -63,12 +82,15 @@ int main() {
     BehaviourStore _behaviourStore;
     BehaviourHandler _behaviourHandler;
     PresenceHandler _presenceHandler;
-
+    SystemTime _systemTime;
     EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
-    SystemTime::setTime(1661966240, true, false);
 
+    _systemTime.init();
+    SystemTime::setTime(1661966240, true, false);
     SystemTime::setSunTimes(sun_time_t{});
 
+
+    TestAccess<SystemTime>::fastForwardS(60);
     std::cout << "uptime: " << SystemTime::up() << std::endl;
 
     auto predicate =
