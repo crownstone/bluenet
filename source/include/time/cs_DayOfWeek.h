@@ -22,6 +22,15 @@ enum class DayOfWeek : uint8_t {
 
 typedef uint8_t DayOfWeekBitMask;
 
+inline uint8_t dayNumber(DayOfWeek day) {
+	for(auto i{0}; i < 7; i++) {
+		if (day == DayOfWeek(1<<i)) {
+			return i;
+		}
+	}
+	return 0xff;
+}
+
 inline DayOfWeek operator+(DayOfWeek day, int offset) {
 	offset               = CsMath::mod(offset, 7);
 	uint16_t shifted_day = static_cast<uint8_t>(day) << offset;

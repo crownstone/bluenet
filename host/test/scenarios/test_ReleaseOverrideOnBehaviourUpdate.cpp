@@ -14,6 +14,7 @@
 #include <utils/date.h>
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <ostream>
 #include <chrono>
@@ -35,6 +36,10 @@ public:
 			std::cout << "." << std::flush;
 		}
 	}
+
+	static void setTime(Time t) {
+		SystemTime::setTime(t.timestamp(), false, false);
+	}
 };
 
 std::ostream& operator<<(std::ostream& out, DayOfWeek t) {
@@ -51,7 +56,9 @@ std::ostream& operator<<(std::ostream& out, DayOfWeek t) {
 }
 
 std::ostream & operator<< (std::ostream &out, TimeOfDay t){
-	return out << +t.h() << ":" << +t.m() << ":" << +t.s();
+	return out     << std::setw(2) << std::setfill('0') << +t.h()
+			<< ":" << std::setw(2) << std::setfill('0') << +t.m()
+			<< ":" << std::setw(2) << std::setfill('0') << +t.s();
 }
 
 std::ostream & operator<< (std::ostream &out, Time t){
@@ -87,11 +94,12 @@ int main() {
 
     _systemTime.init();
     SystemTime::setTime(1661966240, true, false);
+    TestAccess<SystemTime>::setTime(Time(DayOfWeek::Tuesday, 15,30));
     SystemTime::setSunTimes(sun_time_t{});
 
 
     TestAccess<SystemTime>::fastForwardS(60);
-    std::cout << "uptime: " << SystemTime::up() << std::endl;
+    std::cout << "uptime: " << SystemTime::up() << " now: " << SystemTime::now() << std::endl;
 
     auto predicate =
         PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription());
