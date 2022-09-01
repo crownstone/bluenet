@@ -109,8 +109,6 @@ int main() {
     auto sBehaviour = new SwitchBehaviour(
         100, 0xff, 0b11111110, TimeOfDay::Sunrise(), TimeOfDay::Sunset(), presenceCondition);
     _behaviourStore.addBehaviour(sBehaviour);
-    //	CommandSetTime c(10,0);
-    //	c.dispatch();
 
     Behaviour* bP = _behaviourStore.getBehaviour(0);
     if(bP == nullptr) {
