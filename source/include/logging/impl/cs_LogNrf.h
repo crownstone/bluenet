@@ -1,3 +1,12 @@
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Sep 1, 2022
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
+#pragma once
+
 /**
  * Implementation details for the case
  *
@@ -10,13 +19,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define LOGvv NRF_LOG_DEBUG
-#define LOGv NRF_LOG_DEBUG
-#define LOGd NRF_LOG_DEBUG
-#define LOGi NRF_LOG_INFO
-#define LOGw NRF_LOG_WARNING
-#define LOGe NRF_LOG_ERROR
-#define LOGf NRF_LOG_ERROR
 
 #define _log(level, addNewLine, fmt, ...)  \
 	if (level <= SERIAL_VERBOSITY) {       \

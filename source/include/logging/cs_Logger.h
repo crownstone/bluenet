@@ -57,24 +57,51 @@
 #define LOGnone(fmt, ...)
 
 #if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
-	#define LOG_FLUSH NRF_LOG_FLUSH
+#define LOG_FLUSH NRF_LOG_FLUSH
+
+#define LOGvv NRF_LOG_DEBUG
+#define LOGv NRF_LOG_DEBUG
+#define LOGd NRF_LOG_DEBUG
+#define LOGi NRF_LOG_INFO
+#define LOGw NRF_LOG_WARNING
+#define LOGe NRF_LOG_ERROR
+#define LOGf NRF_LOG_ERROR
+
 #else
-	#define LOG_FLUSH()
+#define LOG_FLUSH()
+
+#define LOGvv(fmt, ...) _log(SERIAL_VERY_VERBOSE, true, fmt, ##__VA_ARGS__)
+#define LOGv(fmt, ...) _log(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)
+#define LOGd(fmt, ...) _log(SERIAL_DEBUG, true, fmt, ##__VA_ARGS__)
+#define LOGi(fmt, ...) _log(SERIAL_INFO, true, fmt, ##__VA_ARGS__)
+#define LOGw(fmt, ...) _log(SERIAL_WARN, true, fmt, ##__VA_ARGS__)
+#define LOGe(fmt, ...) _log(SERIAL_ERROR, true, fmt, ##__VA_ARGS__)
+#define LOGf(fmt, ...) _log(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)
 #endif
 
 #if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
 
-	#include<logging/impl/cs_LogNrf.h>
+#include <logging/impl/cs_LogNrf.h>
 
 #else
 
-	#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
-		#include <logging/impl/cs_LogCs.h>
-	#else
-		#include <logging/impl/cs_LogNone.h>
-	#endif
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
+#include <logging/impl/cs_LogCs.h>
+#else
+#include <logging/impl/cs_LogNone.h>
+#endif
 
-	#include <logging/impl/cs_LogUtils.h>
+#include <logging/impl/cs_LogUtils.h>
+
+// Write logs as plain text.
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
+#include <logging/impl/cs_LogPLain.h>
+#endif
+
+// Write a string with printf functionality.
+#ifdef HOST_TARGET
+#include <logging/impl/cs_LogHost.h>
+#endif
 
 #endif
 

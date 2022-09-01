@@ -1,3 +1,12 @@
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Sep 1, 2022
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
+#pragma once
+
 /**
  * Only to be directly included in cs_Logger.h.
  *
@@ -6,12 +15,10 @@
  *   _logArray, forwarding to cs_log_array.
  */
 
-
 #define _log(level, addNewLine, fmt, ...)                                                                       \
 	if (level <= SERIAL_VERBOSITY) {                                                                            \
 		cs_log_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, fmt, ##__VA_ARGS__); \
 	}
-
 
 // No manual formatting: uses default format based on element type.
 #define _logArray0(level, addNewLine, pointer, size)      \
