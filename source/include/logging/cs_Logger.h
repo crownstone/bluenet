@@ -43,15 +43,33 @@
  * The two ## are e.g. a gcc specific extension that removes the , so that the ... arguments can also be left out.
  */
 
-#ifdef HOST_TARGET
-#include <stdio.h>
-#endif
 
 #include <cfg/cs_Strings.h>     // Should actually be included by the files that use these.
 #include <drivers/cs_Serial.h>  // For SERIAL_VERBOSITY.
 #include <protocol/cs_UartMsgTypes.h>
-
 #include <cstdint>
+
+
+#if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
+#include <logging/impl/cs_LogNrf.h>
+
+#else
+
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
+#include <logging/impl/cs_LogBinaryProtocol.h>
+
+#elif CS_UART_BINARY_PROTOCOL_ENABLED == 0
+#include <logging/impl/cs_LogPlainText.h>
+
+#elif HOST_TARGET
+#include <logging/impl/cs_LogStdPrintf.h>
+
+#else
+#include <logging/impl/cs_LogNone.h>
+#endif
+
+#endif
+
 
 // Deprecated, use LOGvv instead. To disable particular logs, but without commenting it.
 #define LOGnone(fmt, ...)
@@ -79,27 +97,6 @@
 #define LOGf(fmt, ...) _log(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)
 #endif
 
-#if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
-#include <logging/impl/cs_LogNrf.h>
-
-#else
-
-#include <logging/impl/cs_LogUtils.h>
-
-#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
-#include <logging/impl/cs_LogBinaryProtocol.h>
-
-#elif CS_UART_BINARY_PROTOCOL_ENABLED == 0
-#include <logging/impl/cs_LogPlainText.h>
-
-#elif HOST_TARGET
-#include <logging/impl/cs_LogStdPrintf.h>
-
-#else
-#include <logging/impl/cs_LogNone.h>
-#endif
-
-#endif
 
 // undefine macros based on SERIAL_VERBOSITY
 

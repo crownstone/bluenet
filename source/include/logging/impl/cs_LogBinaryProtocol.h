@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <logging/impl/cs_LogUtils.h>
+
 /**
  * Only to be directly included in cs_Logger.h.
  *

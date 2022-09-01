@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <logging/impl/cs_LogUtils.h>
+
 void cs_log_printf(const char* str, ...);
 __attribute__((unused)) static bool _logPrefixPlainText = true;
 
