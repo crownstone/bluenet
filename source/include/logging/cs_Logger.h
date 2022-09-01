@@ -80,28 +80,24 @@
 #endif
 
 #if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
-
 #include <logging/impl/cs_LogNrf.h>
 
 #else
-	#include <logging/impl/cs_LogUtils.h>
 
-	#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
-		#include <logging/impl/cs_LogBinaryProtocol.h>
-	#else
-		#include <logging/impl/cs_LogNone.h>
-	#endif
+#include <logging/impl/cs_LogUtils.h>
 
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
+#include <logging/impl/cs_LogBinaryProtocol.h>
 
-	// Write logs as plain text.
-	#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
-	#include <logging/impl/cs_LogPlainText.h>
-	#endif
+#elif CS_UART_BINARY_PROTOCOL_ENABLED == 0
+#include <logging/impl/cs_LogPlainText.h>
 
-	// Write a string with printf functionality.
-	#ifdef HOST_TARGET
-	#include <logging/impl/cs_LogStdPrintf.h>
-	#endif
+#elif HOST_TARGET
+#include <logging/impl/cs_LogStdPrintf.h>
+
+#else
+#include <logging/impl/cs_LogNone.h>
+#endif
 
 #endif
 

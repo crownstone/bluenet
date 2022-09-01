@@ -13,7 +13,6 @@ __attribute__((unused)) static bool _logPrefixPlainText = true;
 // Adding the file name and line number, adds a lot to the binary size.
 #define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__) - 30 - 1) : __FILE__)
 
-#undef _log
 #define _log(level, addNewLine, fmt, ...)                         \
 	if (level <= SERIAL_VERBOSITY) {                              \
 		if (_logPrefixPlainText) {                                \
@@ -26,5 +25,5 @@ __attribute__((unused)) static bool _logPrefixPlainText = true;
 		_logPrefixPlainText = addNewLine;                         \
 	}
 
-#undef _logArray
+
 #define _logArray(level, addNewLine, pointer, size, ...)

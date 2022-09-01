@@ -11,7 +11,6 @@ __attribute__((unused)) static bool _logPrefixHost = true;
 
 #define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__) - 30 - 1) : __FILE__)
 
-#undef _log
 #define _log(level, addNewLine, fmt, ...)                  \
 	if (level <= SERIAL_VERBOSITY) {                       \
 		if (_logPrefixHost) {                              \
@@ -24,5 +23,4 @@ __attribute__((unused)) static bool _logPrefixHost = true;
 		_logPrefixHost = addNewLine;                       \
 	}
 
-#undef _logArray
 #define _logArray(level, addNewLine, pointer, size, ...)
