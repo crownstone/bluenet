@@ -10,6 +10,8 @@
 
 #include <algorithm>
 
+#define LogLevelServiceDebug SERIAL_DEBUG
+
 Service::Service() {}
 
 /**
@@ -133,59 +135,61 @@ void Service::onDisconnect(
  * the characteristic object is also different.
  */
 bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
-
+	_log(LogLevelServiceDebug, true, "onWrite op=%u handle=%u", event.op, gattHandle);
 	for (CharacteristicBase* characteristic : _characteristics) {
-
-		if (characteristic->getCccdHandle() == event.handle) {
+		_log(LogLevelServiceDebug, true, "  characteristic handles: value=%u cccd=%u", characteristic->getValueHandle(), characteristic->getCccdHandle());
+		if (characteristic->getCccdHandle() == gattHandle) {
 			characteristic->onCccdWrite(event.data, event.len);
 			return true;
 		}
 		else if (characteristic->getValueHandle() == gattHandle) {
+			switch (event.op) {
+				case BLE_GATTS_OP_WRITE_REQ:
+				case BLE_GATTS_OP_WRITE_CMD:
+				case BLE_GATTS_OP_SIGN_WRITE_CMD: {
+					characteristic->onWrite(event.len);
+					break;
+				}
+				case BLE_GATTS_OP_EXEC_WRITE_REQ_NOW: {
+					// get length of data, header does not contain full length but rather the "step size"
+					ble_gatts_value_t gattValue;
+					gattValue.len     = 0;
+					gattValue.offset  = 0;
+					gattValue.p_value = NULL;
 
-			if (event.op == BLE_GATTS_OP_WRITE_REQ || event.op == BLE_GATTS_OP_WRITE_CMD
-				|| event.op == BLE_GATTS_OP_SIGN_WRITE_CMD) {
+					uint32_t nrfCode  = sd_ble_gatts_value_get(
+							getStack()->getConnectionHandle(), characteristic->getValueHandle(), &gattValue);
+					switch (nrfCode) {
+						case NRF_SUCCESS:
+							// * @retval ::NRF_SUCCESS Successfully retrieved the value of the attribute.
+							break;
+						case BLE_ERROR_INVALID_CONN_HANDLE:
+							// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system
+							// attribute. This shouldn't happen, as the connection handle is only set in the main thread.
+							LOGe("Invalid handle");
+							break;
+						case NRF_ERROR_INVALID_ADDR:
+							// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
+							// This shouldn't happen: crash.
+						case NRF_ERROR_NOT_FOUND:
+							// * @retval ::NRF_ERROR_NOT_FOUND Attribute not found.
+							// This shouldn't happen: crash.
+						case NRF_ERROR_INVALID_PARAM:
+							// * @retval ::NRF_ERROR_INVALID_PARAM Invalid attribute offset supplied.
+							// This shouldn't happen: crash.
+						case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+							// * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref
+							// sd_ble_gatts_sys_attr_set to set them to a known value. This shouldn't happen: crash.
+						default:
+							// Crash
+							APP_ERROR_HANDLER(nrfCode);
+					}
 
-				characteristic->onWrite(event.len);
-			}
-			else if (event.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
-
-				// get length of data, header does not contain full length but rather the "step size"
-				ble_gatts_value_t gattValue;
-				gattValue.len     = 0;
-				gattValue.offset  = 0;
-				gattValue.p_value = NULL;
-
-				uint32_t nrfCode  = sd_ble_gatts_value_get(
-                        getStack()->getConnectionHandle(), characteristic->getValueHandle(), &gattValue);
-				switch (nrfCode) {
-					case NRF_SUCCESS:
-						// * @retval ::NRF_SUCCESS Successfully retrieved the value of the attribute.
-						break;
-					case BLE_ERROR_INVALID_CONN_HANDLE:
-						// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system
-						// attribute. This shouldn't happen, as the connection handle is only set in the main thread.
-						LOGe("Invalid handle");
-						break;
-					case NRF_ERROR_INVALID_ADDR:
-						// * @retval ::NRF_ERROR_INVALID_ADDR Invalid pointer supplied.
-						// This shouldn't happen: crash.
-					case NRF_ERROR_NOT_FOUND:
-						// * @retval ::NRF_ERROR_NOT_FOUND Attribute not found.
-						// This shouldn't happen: crash.
-					case NRF_ERROR_INVALID_PARAM:
-						// * @retval ::NRF_ERROR_INVALID_PARAM Invalid attribute offset supplied.
-						// This shouldn't happen: crash.
-					case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
-						// * @retval ::BLE_ERROR_GATTS_SYS_ATTR_MISSING System attributes missing, use @ref
-						// sd_ble_gatts_sys_attr_set to set them to a known value. This shouldn't happen: crash.
-					default:
-						// Crash
-						APP_ERROR_HANDLER(nrfCode);
+					characteristic->onWrite(gattValue.len);
+					break;
 				}
 
-				characteristic->onWrite(gattValue.len);
 			}
-
 			return true;
 		}
 	}

@@ -162,11 +162,6 @@ private:
 	//! Actual length of the (encrypted) data stored in the buffer.
 	uint16_t _encryptedValueLength = 0;
 
-	/**
-	 * Buffer used for chunked notifications.
-	 */
-	notification_t* _notificationBuffer = nullptr;
-
 	//! Flag to indicate if notification or indication is pending to be sent.
 	bool _notificationPending = false;
 

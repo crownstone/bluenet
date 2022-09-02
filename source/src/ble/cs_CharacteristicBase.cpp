@@ -120,11 +120,9 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 	characteristicMetadata.char_props.write         = _options.write ? 1 : 0;
 	characteristicMetadata.char_props.notify        = _options.notify ? 1 : 0;
 	characteristicMetadata.char_props.indicate      = _options.notify ? 1 : 0;
-//	characteristicMetadata.char_ext_props.reliable_wr = _options.longWrite ? 1 : 0;
+	// For some reason it doesn't matter if char_ext_props.reliable_wr = 0
+	// We can still perform long writes.
 	characteristicMetadata.p_cccd_md                = &cccdMetadata;
-
-	// TODO
-	LOGi("characteristicMetadata.char_ext_props.reliable_wr=%u", characteristicMetadata.char_ext_props.reliable_wr);
 
 	// The user description is optional.
 	characteristicMetadata.p_char_user_desc     = nullptr;
@@ -147,13 +145,6 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 		return retCode;
 	}
 	const ble_uuid_t& uuid = fullUuid.getUuid();
-
-	if (_options.notificationChunker) {
-		_notificationBuffer = (notification_t*)calloc(1, sizeof(notification_t));
-		if (_notificationBuffer == nullptr) {
-			return ERR_NO_SPACE;
-		}
-	}
 
 	retCode = initEncryptedBuffer();
 	if (retCode != ERR_SUCCESS) {
@@ -206,6 +197,8 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 		deinitEncryptedBuffer();
 		return retCode;
 	}
+
+	LOGCharacteristicDebug("  added successfully, handles: value=%u cccd=%u", _handles.value_handle, _handles.cccd_handle);
 
 	// Make sure the initial value is encrypted.
 	updateValue(_valueLength);
@@ -516,6 +509,7 @@ void CharacteristicBase::onNotificationDone() {
 }
 
 void CharacteristicBase::onCccdWrite(const uint8_t* data, uint16_t size) {
+	LOGCharacteristicDebug("%s onCccdWrite size=%u", _name, size);
 	if (size == 2) {
 		_subscribedForNotifications = ble_srv_is_notification_enabled(data);
 		_subscribedForIndications = ble_srv_is_indication_enabled(data);
