@@ -4,12 +4,22 @@ project(bluenet-host)
 
 include (cs_list_utils)
 
-message(STATUS "Building bluenet-host project. NORDIC_SDK_HOST_TARGET:=" ${NORDIC_SDK_HOST_TARGET})
-message (STATUS "NRF5_HOST_DIR: ${NRF5_HOST_DIR}")
+message(STATUS "Building bluenet-host project. Given config values:")
+message(STATUS "NORDIC_SDK_HOST_TARGET: " ${NORDIC_SDK_HOST_TARGET})
+message(STATUS "NRF5_HOST_DIR: ${NRF5_HOST_DIR}")
+message(STATUS "WORKSPACE_DIR: " ${WORKSPACE_DIR})
+
+message(STATUS "CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
+message(STATUS "NORDIC_SDK_VERSION_FULL: " ${NORDIC_SDK_VERSION_FULL})
+message(STATUS "SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "DEFAULT_CONFIG_FILE: ${DEFAULT_CONFIG_FILE}")
+
+message(STATUS "---------------------------------------------------")
 
 
 option(HOST_TARGET ON)
-
+message(STATUS "HOST_TARGET: " ${HOST_TARGET})
 
 set(DEFAULT_CXX_FLAGS        "-std=c++17 -Wno-write-strings -fno-exceptions")
 set(DEFAULT_C_FLAGS          "-std=gnu99")
@@ -38,12 +48,17 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
 
-message(STATUS "${CMAKE_MODULE_PATH}")
 
 set(DEFAULT_CONFIG_FILE "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
 
+message(STATUS "*************************************************")
+message(STATUS "SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
 include(load_configuration)
 load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
+message(STATUS "SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
+set (SERIAL_VERBOSITY SERIAL_DEBUG)
+message(STATUS "*************************************************")
+
 
 # Only contains Nordic specific compiler options
 #include(crownstone.defs)

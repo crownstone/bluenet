@@ -341,6 +341,32 @@ configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-sta
 
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
+
+#### DEBUG
+
+include(cs_list_utils) 
+
+message(STATUS "----------------------------------------------")
+message(STATUS "The bluenet add_executable command: ")
+print_list("PROJECT_NAME: " PROJECT_NAME)
+print_list("FOLDER_SOURCE: " FOLDER_SOURCE )
+print_list("GENERATED_SOURCES: " GENERATED_SOURCES )
+print_list("FOLDER_HEADER: " FOLDER_HEADER )
+print_list("OBJECT_FILES: " OBJECT_FILES )
+print_list("TARGET_CONFIG_FILE: " TARGET_CONFIG_FILE)
+message(STATUS "----------------------------------------------")
+#message(STATUS "PROJECT_NAME: " ${PROJECT_NAME} )
+#message(STATUS "FOLDER_SOURCE: " ${FOLDER_SOURCE} )
+#message(STATUS "GENERATED_SOURCES: " ${GENERATED_SOURCES} )
+message(STATUS "FOLDER_HEADER: " ${FOLDER_HEADER} )
+message(STATUS "OBJECT_FILES: " ${OBJECT_FILES} )
+#message(STATUS "TARGET_CONFIG_FILE: " ${TARGET_CONFIG_FILE})
+#message(STATUS "----------------------------------------------")
+#### DEBUG
+
+
+
+
 add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${TARGET_CONFIG_FILE})
 
 # Add path with files like sdk_config.h to include directories

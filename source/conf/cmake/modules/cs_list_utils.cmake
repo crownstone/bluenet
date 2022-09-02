@@ -8,7 +8,11 @@
 
 
 function(print_list preamble listvarname)
-	foreach(F IN LISTS ${listvarname})
-		message(STATUS "${preamble} ${F}")
-	endforeach()
+	if(${listvarname})
+		foreach(F IN LISTS ${listvarname})
+			message(STATUS "${preamble} ${F}")
+		endforeach()
+	else() 
+		message(STATUS "${preamble} << empty >>")
+	endif()
 endfunction()
