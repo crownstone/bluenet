@@ -19,10 +19,17 @@
 
 class Service;
 class CharacteristicBase;
+
+/**
+ * Callback function for events.
+ * @param type               Type of event.
+ * @param characteristic     The characteristic, use this get the data for the event.
+ * @param accessLevel        The access level of the user for a write event.
+ */
 typedef function<void(CharacteristicEventType, CharacteristicBase*, EncryptionAccessLevel)> characteristic_callback_t;
 
 /**
- * Base interface class for characteristics.
+ * Base class for characteristics.
  */
 class CharacteristicBase {
 public:
@@ -94,11 +101,19 @@ public:
 	 */
 	cs_ret_code_t notify(uint16_t length = 0, uint16_t offset = 0);
 
+	/**
+	 * Get the current (plain text) value.
+	 */
 	cs_data_t getValue();
 
+	//! Get the value handle.
 	uint16_t getValueHandle();
 
+	//! Get the CCCD handle.
 	uint16_t getCccdHandle();
+
+	//! Return true when the client subscribed for notifications or indications.
+	bool isSubscribedForNotifications();
 
 protected:
 	friend Service;
@@ -118,10 +133,20 @@ protected:
 	 */
 	void onCccdWrite(const uint8_t* data, uint16_t size);
 
+	/**
+	 * Function to be called by the stack on connect.
+	 */
+	void onConnect();
+
+	/**
+	 * Function to be called by the stack on disconnect.
+	 */
+	void onDisconnect();
+
 private:
-	struct __attribute__((__packed__)) notification_t {
+	struct __attribute__((__packed__)) chunked_notification_t {
 		uint8_t partNr;
-		uint8_t data[MAX_NOTIFICATION_LEN - 1];
+		uint8_t data[MAX_NOTIFICATION_LEN - sizeof(partNr)];
 	};
 
 	//! Whether this characteristic has been initialized.
@@ -144,7 +169,6 @@ private:
 
 	//! Reference to corresponding service, set at init.
 	Service* _service = nullptr;
-
 
 	/**
 	 * The buffer holding the (plain text) characteristic value.
@@ -192,6 +216,9 @@ private:
 	 */
 	cs_ret_code_t setGattValue();
 
+	/**
+	 * Notify the value in parts.
+	 */
 	cs_ret_code_t notifyMultipart();
 
 	/**
@@ -215,8 +242,6 @@ private:
 	 */
 	uint8_t* getGattValue();
 
-
-
+	//! Returns true when the characteristic value is or should be encrypted.
 	bool isEncrypted();
-
 };

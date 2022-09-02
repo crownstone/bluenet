@@ -19,7 +19,7 @@
 #include <structs/cs_PacketsInternal.h>
 #include <events/cs_Event.h>
 
-#define LogLevelCsServiceDebug SERIAL_DEBUG
+#define LogLevelCsServiceDebug SERIAL_VERY_VERBOSE
 
 CrownstoneService::CrownstoneService() : EventListener() {
 	EventDispatcher::getInstance().addListener(this);
@@ -86,16 +86,20 @@ void CrownstoneService::addControlCharacteristic(
 				CommandHandlerTypes type               = CTRL_CMD_UNKNOWN;
 				uint8_t protocol                       = CS_CONNECTION_PROTOCOL_VERSION;
 				LOGd("controlCharacteristic onWrite buf=%p size=%u", characteristic->getValue().data, characteristic->getValue().len);
+				_log(LogLevelCsServiceDebug, false, "data=");
+				_logArray(
+						LogLevelCsServiceDebug,
+						true,
+						characteristic->getValue().data,
+						characteristic->getValue().len);
 
 				protocol = _controlPacketAccessor->getProtocolVersion();
 				type     = (CommandHandlerTypes)_controlPacketAccessor->getType();
-				LOGi(MSG_CHAR_VALUE_WRITE " (command 0x%x=%i)", type, type);
 				cs_data_t payload = _controlPacketAccessor->getPayload();
-				//			if (_resultPacketAccessor != NULL) {
+
 				assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
 				result.buf.data = _resultPacketAccessor->getPayloadBuffer();
 				result.buf.len  = _resultPacketAccessor->getMaxPayloadSize();
-				//			}
 
 				CommandHandler::getInstance().handleCommand(
 						protocol,
@@ -179,8 +183,6 @@ void CrownstoneService::addSessionDataCharacteristic(
 	_sessionDataCharacteristic->setOptions(config);
 	_sessionDataCharacteristic->setValueBuffer(buffer, size);
 
-
-
 	if (_sessionDataUnencryptedCharacteristic != NULL) {
 		LOGe(FMT_CHAR_EXISTS STR_CHAR_SESSION_DATA);
 		return;
@@ -223,17 +225,16 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 			[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {
 		switch(eventType) {
 			case CHARACTERISTIC_EVENT_WRITE: {
-
-
 				uint32_t value = reinterpret_cast<Characteristic<uint32_t>*>(characteristic)->getValue();
+				_log(LogLevelCsServiceDebug, true, "onWrite value=%u", value);
 
 				// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
-				// No need to check length, as value is not a pointer.
 				bool success = FactoryReset::getInstance().recover(value);
 				uint32_t resultValue = 0;
 				if (success) {
 					resultValue = 1;
 				}
+				_log(LogLevelCsServiceDebug, true, "  resultValue=%u", resultValue);
 				reinterpret_cast<Characteristic<uint32_t>*>(characteristic)->setValue(resultValue);
 				break;
 			}

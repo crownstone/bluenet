@@ -70,9 +70,6 @@ enum CharacteristicEventType {
 	 */
 	CHARACTERISTIC_EVENT_WRITE,
 
-	//! The characteristic value was read by the connected device.
-	CHARACTERISTIC_EVENT_READ,
-
 	//! The connected device subscribed or unsubscribed for notifications or indications.
 	CHARACTERISTIC_EVENT_SUBSCRIPTION,
 

@@ -10,7 +10,7 @@
 
 #include <algorithm>
 
-#define LogLevelServiceDebug SERIAL_DEBUG
+#define LogLevelServiceDebug SERIAL_VERY_VERBOSE
 
 Service::Service() {}
 
@@ -110,7 +110,9 @@ void Service::onBleEvent(const ble_evt_t* event) {
  */
 void Service::onConnect(
 		[[maybe_unused]] uint16_t connectionHandle, [[maybe_unused]] const ble_gap_evt_connected_t& event) {
-	// nothing here yet.
+	for (CharacteristicBase* characteristic : _characteristics) {
+		characteristic->onConnect();
+	}
 }
 
 /** On disconnect event for an individual service
@@ -120,7 +122,9 @@ void Service::onConnect(
  */
 void Service::onDisconnect(
 		[[maybe_unused]] uint16_t connectionHandle, [[maybe_unused]] const ble_gap_evt_disconnected_t& event) {
-	// nothing here yet.
+	for (CharacteristicBase* characteristic : _characteristics) {
+		characteristic->onDisconnect();
+	}
 }
 
 /** Write incoming value to data structures on the device.

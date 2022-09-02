@@ -13,8 +13,8 @@
 #include <structs/buffer/cs_EncryptedBuffer.h>
 #include <encryption/cs_KeysAndAccess.h>
 
-#define LOGCharacteristicDebug LOGd
-#define LogLevelCharacteristicDebug SERIAL_DEBUG
+#define LOGCharacteristicDebug LOGvv
+#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
 
 CharacteristicBase::CharacteristicBase() {}
 
@@ -58,14 +58,14 @@ cs_ret_code_t CharacteristicBase::setValueBuffer(buffer_ptr_t buffer, cs_buffer_
 	if (buffer == nullptr || size == 0) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
-	LOGCharacteristicDebug("%s setValueBuffer buf=%p size=%u", _name, buffer, size);
+	LOGCharacteristicDebug("setValueBuffer [%s] buf=%p size=%u", _name, buffer, size);
 	_buffer.data = buffer;
 	_buffer.len = size;
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CharacteristicBase::setInitialValueLength(cs_buffer_size_t size) {
-	LOGCharacteristicDebug("%s setInitialValueLength size=%u", _name, size);
+	LOGCharacteristicDebug("setInitialValueLength [%s] size=%u", _name, size);
 	if (_initialized) {
 		LOGw("Already initialized");
 		return ERR_WRONG_STATE;
@@ -96,7 +96,7 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 	if (_name == nullptr) {
 		_name = "";
 	}
-	LOGCharacteristicDebug("%s init", _name);
+	LOGCharacteristicDebug("Init [%s]", _name);
 	if (_initialized) {
 		LOGd("Already initialized");
 		return ERR_SUCCESS;
@@ -229,7 +229,7 @@ cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
 			_encryptedBuffer.len = 0;
 			return ERR_BUFFER_TOO_SMALL;
 		}
-		LOGCharacteristicDebug("%s: Use shared encryption buffer=%p size=%u", _name, _encryptedBuffer.data, _encryptedBuffer.len);
+		LOGCharacteristicDebug("Use shared encryption [%s] buffer=%p size=%u", _name, _encryptedBuffer.data, _encryptedBuffer.len);
 	}
 	else {
 		_encryptedBuffer.data = (buffer_ptr_t)calloc(requiredSize, sizeof(uint8_t));
@@ -239,7 +239,7 @@ cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
 		}
 		_encryptedBuffer.len = requiredSize;
 		LOGCharacteristicDebug(
-				"%s: Allocated encrypted buffer=%p size=%u",
+				"Allocated encrypted buffer [%s] buffer=%p size=%u",
 				_name,
 				_encryptedBuffer.data,
 				_encryptedBuffer.len);
@@ -261,7 +261,7 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 	}
 	_valueLength = length;
 
-	_log(LogLevelCharacteristicDebug, false, "%s updateValue length=%u data=", _name, length);
+	_log(LogLevelCharacteristicDebug, false, "updateValue [%s] length=%u data=", _name, length);
 	_logArray(LogLevelCharacteristicDebug, true, _buffer.data, _valueLength);
 
 	if (isEncrypted()) {
@@ -342,7 +342,7 @@ cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
 	if (!_options.notify) {
 		return ERR_WRONG_STATE;
 	}
-	if (!_subscribedForNotifications && !_subscribedForIndications) {
+	if (!isSubscribedForNotifications()) {
 		return ERR_WRONG_STATE;
 	}
 	if (!_service->getStack()->isConnectedPeripheral()) {
@@ -399,6 +399,24 @@ cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
 	return ERR_SUCCESS;
 }
 
+/**
+ * Because the softdevice overwrites the gatt value buffer with the notification,
+ * we have to restore a part of the gatt value buffer.
+ * Example:
+ *   Value is:               [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+ *   Size of notification.data = 6
+ *   First notification is:  [  0, 100, 101, 102, 103, 104, 105]
+ *   The value then becomes: [  0, 100, 101, 102, 103, 104, 105, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+ *   Note that 106 is missing.
+ *   Second notification is: [  1, 105, 107, 108, 109, 110, 111]
+ *   The value then becomes: [  1, 105, 107, 108, 109, 110, 111, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+ *   Last notification is:   [255, 112, 113, 114, 115]
+ *   The value then becomes: [  1, 105, 107, 108, 109, 110, 111, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+ * So to get the correct notifications, we only have to copy 106, and place it back after the first notification.
+ * To keep the correct value, we have to copy the first 7 bytes and place that back.
+ * For now, we assume that if the user subscribed for notifications, the value won't be read,
+ * so we dont need to fix the whole value.
+ */
 cs_ret_code_t CharacteristicBase::notifyMultipart() {
 	uint16_t gattValueLength = getGattValueLength();
 
@@ -407,27 +425,11 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 	hvx_params.type   = _subscribedForNotifications ? BLE_GATT_HVX_NOTIFICATION : BLE_GATT_HVX_INDICATION;
 	hvx_params.offset = 0;
 
-	_log(SERIAL_INFO, false, "GATT value before notify:");
-	_logArray(SERIAL_INFO, true, getGattValue(), getGattValueLength());
+	_log(LogLevelCharacteristicDebug, false, "GATT value before notify:");
+	_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
 
-	notification_t notification;
+	chunked_notification_t notification;
 
-	// Because the softdevice overwrites the gatt value buffer with the notification,
-	// we have to restore a part of the gatt value buffer.
-	// Example:
-	//   Value is:               [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]
-	//   Size of notification.data = 6
-	//   First notification is:  [  0, 100, 101, 102, 103, 104, 105]
-	//   The value then becomes: [  0, 100, 101, 102, 103, 104, 105, 107, 108, 109, 110, 111, 112, 113, 114, 115]
-	//   Note that 106 is missing.
-	//   Second notification is: [  1, 105, 107, 108, 109, 110, 111]
-	//   The value then becomes: [  1, 105, 107, 108, 109, 110, 111, 107, 108, 109, 110, 111, 112, 113, 114, 115]
-	//   Last notification is:   [255, 112, 113, 114, 115]
-	//   The value then becomes: [  1, 105, 107, 108, 109, 110, 111, 107, 108, 109, 110, 111, 112, 113, 114, 115]
-	// So to get the correct notifications, we only have to copy 106, and place it back after the first notification.
-	// To keep the correct value, we have to copy the first 7 bytes and place that back.
-	// For now, we assume that if the user subscribed for notifications, the value won't be read,
-	// so we dont need to fix the whole value.
 	uint8_t originalValue[sizeof(notification.partNr)];
 	if (gattValueLength > sizeof(notification.data)) {
 		memcpy(originalValue, getGattValue() + sizeof(notification.data), sizeof(originalValue));
@@ -445,6 +447,7 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 			notification.partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
 			chunkSize = gattValueLength - _notificationOffset;
 		}
+
 		memcpy(notification.data, getGattValue() + _notificationOffset, chunkSize);
 
 		uint16_t notificationLength = sizeof(notification.partNr) + chunkSize;
@@ -506,18 +509,46 @@ void CharacteristicBase::onNotificationDone() {
 	if (_notificationPending) {
 		notify();
 	}
-}
-
-void CharacteristicBase::onCccdWrite(const uint8_t* data, uint16_t size) {
-	LOGCharacteristicDebug("%s onCccdWrite size=%u", _name, size);
-	if (size == 2) {
-		_subscribedForNotifications = ble_srv_is_notification_enabled(data);
-		_subscribedForIndications = ble_srv_is_indication_enabled(data);
+	if (_callback) {
+		_callback(CHARACTERISTIC_EVENT_NOTIFY_DONE, this, NOT_SET);
 	}
 }
 
+void CharacteristicBase::onCccdWrite(const uint8_t* data, uint16_t size) {
+	LOGCharacteristicDebug("onCccdWrite [%s] size=%u", _name, size);
+	if (size != 2) {
+		return;
+	}
+
+	bool wasSubscribed = _subscribedForNotifications;
+	_subscribedForNotifications = ble_srv_is_notification_enabled(data);
+	if (_callback && _subscribedForNotifications != wasSubscribed) {
+		_callback(CHARACTERISTIC_EVENT_SUBSCRIPTION, this, NOT_SET);
+	}
+
+	wasSubscribed = _subscribedForIndications;
+	_subscribedForIndications = ble_srv_is_indication_enabled(data);
+	if (_callback && _subscribedForIndications != wasSubscribed) {
+		_callback(CHARACTERISTIC_EVENT_SUBSCRIPTION, this, NOT_SET);
+	}
+}
+
+void CharacteristicBase::onConnect() {
+}
+
+void CharacteristicBase::onDisconnect() {
+	LOGCharacteristicDebug("onDisconnect [%s]", _name);
+
+	// In principle, we can get the CCCD value with sd_ble_gatts_value_get().
+	// However, this value doesn't seem to be updated yet onCccdWrite, and I'm not sure if it gets updated
+	// on disconnect.
+	// So we'll have to keep up for each connection whether they subscribed for notifications.
+	_subscribedForNotifications = false;
+	_subscribedForIndications = false;
+}
+
 void CharacteristicBase::onWrite(uint16_t length) {
-	LOGd("%s onWrite length=%u", _name, length);
+	LOGd("onWrite [%s] length=%u", _name, length);
 
 	EncryptionAccessLevel accessLevel = NOT_SET;
 
@@ -570,6 +601,10 @@ uint16_t CharacteristicBase::getValueHandle() {
 
 uint16_t CharacteristicBase::getCccdHandle() {
 	return _handles.cccd_handle;
+}
+
+bool CharacteristicBase::isSubscribedForNotifications() {
+	return _subscribedForNotifications || _subscribedForIndications;
 }
 
 uint16_t CharacteristicBase::getGattValueMaxLength() {
