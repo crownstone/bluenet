@@ -13,12 +13,15 @@
 #include <presence/cs_PresenceCondition.h>
 #include <utils/date.h>
 
+#include <cstdio>
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <ostream>
 #include <chrono>
 #include <thread>
+
+#include <logging/cs_Logger.h>
 
 using namespace date;
 auto now() { return std::chrono::high_resolution_clock::now(); }
@@ -85,12 +88,15 @@ std::ostream & operator<< (std::ostream &out, std::optional<PresenceStateDescrip
 }
 
 int main() {
+	LOGd("hello world");
+
     SwitchAggregator _switchAggregator;
     BehaviourStore _behaviourStore;
     BehaviourHandler _behaviourHandler;
     PresenceHandler _presenceHandler;
     SystemTime _systemTime;
     EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
+    std::printf("hi");
 
     _systemTime.init();
     SystemTime::setTime(1661966240, true, false);
