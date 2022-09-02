@@ -54,6 +54,11 @@ set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 project(${BOARD_TARGET} NONE)
 
+if(NOT VERBOSITY)
+	set(VERBOSITY 0)
+endif()
+
+list(APPEND CMAKE_BLUENET_ARGS "-DVERBOSITY:STRING=${VERBOSITY}")
 list(APPEND CMAKE_BLUENET_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 list(APPEND CMAKE_BLUENET_ARGS "-DRELEASE_REPOSITORY:STRING=${RELEASE_REPOSITORY}")
 list(APPEND CMAKE_BLUENET_ARGS "-DRELEASE_CANDIDATE_REPOSITORY:STRING=${RELEASE_CANDIDATE_REPOSITORY}")
@@ -139,6 +144,7 @@ include(ExternalProject)
 include(load_configuration)
 include(git_info)
 include(compilation_info)
+include(cs_list_utils)
 
 #######################################################################################################################
 # Load configuration values from multiple files
@@ -402,6 +408,7 @@ add_custom_target(target_depend
 
 if(NOT FACTORY_IMAGE)
 	# Note that some more dependencies might be added later on by add_dependencies()
+	print_list("CMAKE_BLUENET_ARGS: " CMAKE_BLUENET_ARGS)
 	ExternalProject_Add(bluenet
 		SOURCE_DIR ${WORKSPACE_DIR}/source
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
@@ -726,12 +733,11 @@ endif()
 #######################################################################################################################
 
 # Location of adjusted version of the SDK that can be used on a host system
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DVERBOSITY=${VERBOSITY}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_HOST_DIR:STRING=${NRF5_HOST_DIR}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_TARGET:OPTION=ON")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DSERIAL_VERBOSITY=${SERIAL_VERBOSITY}")
@@ -739,11 +745,14 @@ list(APPEND CMAKE_BLUENET_HOST_ARGS "-DSERIAL_VERBOSITY=${SERIAL_VERBOSITY}")
 
 
 # TODO: this line can be removed as host build folder simply doesn't use the variable
-list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
+#list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
+message(STATUS "main serial verbosity: " ${SERIAL_VERBOSITY})
 
 if(COMPILE_FOR_HOST)
 	message(STATUS "Configure ${NORDIC_SDK_HOST_TARGET} target (tag:=${NORDIC_SDK_HOST_GIT_TAG})")
+
 	
+	print_list("CMAKE_BLUENET_HOST_ARGS: " CMAKE_BLUENET_HOST_ARGS)
 	ExternalProject_Add(${NORDIC_SDK_HOST_TARGET}
 		GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
 		GIT_TAG ${NORDIC_SDK_HOST_GIT_TAG}
