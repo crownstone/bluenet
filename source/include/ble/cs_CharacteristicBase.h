@@ -192,6 +192,11 @@ private:
 	 */
 	void deinitEncryptedBuffer();
 
+	/**
+	 * Update the gatt value in the softdevice.
+	 */
+	cs_ret_code_t setGattValue();
+
 	cs_ret_code_t notifyMultipart();
 
 	/**

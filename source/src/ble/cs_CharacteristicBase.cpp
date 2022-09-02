@@ -272,7 +272,13 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 	_logArray(LogLevelCharacteristicDebug, true, _buffer.data, _valueLength);
 
 	if (isEncrypted()) {
-		// TODO: what if value size is 0 ?
+		// Special case: if value length is 0, we simply want the encrypted value to be 0 as well.
+		// Especially for characteristics that use the shared encrypted buffer. Because encrypting
+		// a length of 0 still would result in some data, that overwrite the shared encrypted buffer.
+		if (length == 0) {
+			_encryptedValueLength = 0;
+			return setGattValue();
+		}
 
 		// Encrypt the value (but only the current length).
 		cs_ret_code_t retCode = ConnectionEncryption::getInstance().encrypt(
@@ -284,14 +290,33 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 		if (retCode != ERR_SUCCESS) {
 			LOGe("Failed to encrypt data");
 			_encryptedValueLength = 0;
+			setGattValue();
 			return retCode;
 		}
-		_encryptedValueLength = ConnectionEncryption::getEncryptedBufferSize(_valueLength, _options.encryptionType);
+		else {
+			_encryptedValueLength = ConnectionEncryption::getEncryptedBufferSize(_valueLength, _options.encryptionType);
+		}
 
-		_log(LogLevelCharacteristicDebug, false, "  encrypted: length=%u data=", length);
+		_log(LogLevelCharacteristicDebug, false, "  encrypted: length=%u data=", _encryptedValueLength);
 		_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
 	}
 
+	cs_ret_code_t retCode = setGattValue();
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	if (_options.autoNotify) {
+		_notificationPending = false;
+		_notificationOffset = 0;
+
+		// Ignore result.
+		notify();
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CharacteristicBase::setGattValue() {
 	// Update the value in the softdevice.
 	// As of softdevice 7.0.0 we can use a null pointer as value to avoid a memcpy.
 	// See https://devzone.nordicsemi.com/f/nordic-q-a/934/how-to-use-ble_gatts_vloc_user.
@@ -316,14 +341,6 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 			LOGe("Failed to set GATT value: nrfCode=%u", nrfCode);
 			return ERR_UNSPECIFIED;
 		}
-	}
-
-	if (_options.autoNotify) {
-		_notificationPending = false;
-		_notificationOffset = 0;
-
-		// Ignore result.
-		notify();
 	}
 	return ERR_SUCCESS;
 }
@@ -359,8 +376,9 @@ cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
 	hvx_params.p_len = &notificationLength;
 	hvx_params.p_data = nullptr;
 
+	_log(LogLevelCharacteristicDebug, false, "notify size=%u data=", *hvx_params.p_len);
+	_logArray(LogLevelCharacteristicDebug, true, hvx_params.p_data, *hvx_params.p_len);
 	uint32_t nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
-
 	switch (nrfCode) {
 		case NRF_SUCCESS: {
 			_notificationPending = false;
@@ -396,29 +414,54 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 	hvx_params.type   = _subscribedForNotifications ? BLE_GATT_HVX_NOTIFICATION : BLE_GATT_HVX_INDICATION;
 	hvx_params.offset = 0;
 
-	_log(SERIAL_INFO, false, "gattValue:");
+	_log(SERIAL_INFO, false, "GATT value before notify:");
 	_logArray(SERIAL_INFO, true, getGattValue(), getGattValueLength());
+
+	notification_t notification;
+
+	// Because the softdevice overwrites the gatt value buffer with the notification,
+	// we have to restore a part of the gatt value buffer.
+	// Example:
+	//   Value is:               [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+	//   Size of notification.data = 6
+	//   First notification is:  [  0, 100, 101, 102, 103, 104, 105]
+	//   The value then becomes: [  0, 100, 101, 102, 103, 104, 105, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+	//   Note that 106 is missing.
+	//   Second notification is: [  1, 105, 107, 108, 109, 110, 111]
+	//   The value then becomes: [  1, 105, 107, 108, 109, 110, 111, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+	//   Last notification is:   [255, 112, 113, 114, 115]
+	//   The value then becomes: [  1, 105, 107, 108, 109, 110, 111, 107, 108, 109, 110, 111, 112, 113, 114, 115]
+	// So to get the correct notifications, we only have to copy 106, and place it back after the first notification.
+	// To keep the correct value, we have to copy the first 7 bytes and place that back.
+	// For now, we assume that if the user subscribed for notifications, the value won't be read,
+	// so we dont need to fix the whole value.
+	uint8_t originalValue[sizeof(notification.partNr)];
+	if (gattValueLength > sizeof(notification.data)) {
+		memcpy(originalValue, getGattValue() + sizeof(notification.data), sizeof(originalValue));
+	}
 
 	// We can queue multiple notifications.
 	while (_notificationOffset < gattValueLength) {
 
-		uint16_t chunkSize = sizeof(_notificationBuffer->data);
+		uint16_t chunkSize = sizeof(notification.data);
 		if (gattValueLength - _notificationOffset > chunkSize) {
-			_notificationBuffer->partNr = _notificationOffset / chunkSize;
+			notification.partNr = _notificationOffset / chunkSize;
 		}
 		else {
 			// Last chunk, recalculate chunk size, as it might be smaller.
-			_notificationBuffer->partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
+			notification.partNr = CS_CHARACTERISTIC_NOTIFICATION_PART_LAST;
 			chunkSize = gattValueLength - _notificationOffset;
 		}
-		memcpy(_notificationBuffer->data, getGattValue() + _notificationOffset, chunkSize);
+		memcpy(notification.data, getGattValue() + _notificationOffset, chunkSize);
 
-		uint16_t notificationLength = sizeof(_notificationBuffer->partNr) + chunkSize;
+		uint16_t notificationLength = sizeof(notification.partNr) + chunkSize;
 
 		hvx_params.p_len  = &notificationLength;
-		hvx_params.p_data = reinterpret_cast<uint8_t*>(_notificationBuffer);
+		hvx_params.p_data = reinterpret_cast<uint8_t*>(&notification);
 
 		// This call will write the notification buffer to the gatt value buffer.
+		_log(LogLevelCharacteristicDebug, false, "notify size=%u data=", *hvx_params.p_len);
+		_logArray(LogLevelCharacteristicDebug, true, hvx_params.p_data, *hvx_params.p_len);
 		uint32_t nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 
 		switch (nrfCode) {
@@ -445,9 +488,16 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 			}
 		}
 
-		// TODO: make sure gatt value is restored
-		_log(SERIAL_INFO, false, "gattValue:");
-		_logArray(SERIAL_INFO, true, getGattValue(), getGattValueLength());
+		_log(LogLevelCharacteristicDebug, false, "GATT value after notify: ");
+		_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
+
+		if (notification.partNr == 0) {
+			// Restore the value.
+			memcpy(getGattValue() + sizeof(notification.data), originalValue, sizeof(originalValue));
+			_log(LogLevelCharacteristicDebug, false, "GATT value after restore:");
+			_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
+		}
+
 
 		LOGCharacteristicDebug("Actual number of bytes notified=%u", notificationLength);
 

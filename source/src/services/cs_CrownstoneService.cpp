@@ -19,6 +19,8 @@
 #include <structs/cs_PacketsInternal.h>
 #include <events/cs_Event.h>
 
+#define LogLevelCsServiceDebug SERIAL_DEBUG
+
 CrownstoneService::CrownstoneService() : EventListener() {
 	EventDispatcher::getInstance().addListener(this);
 	LOGi("Add crownstone service");
@@ -104,16 +106,16 @@ void CrownstoneService::addControlCharacteristic(
 						result);
 
 
-				_log(SERIAL_DEBUG,
+				_log(LogLevelCsServiceDebug,
 						false,
-						"controlcharacteristic onWrite returnCode=0x%x dataSize=%u ",
+						"controlcharacteristic onWrite returnCode=0x%x dataSize=%u data=",
 						result.returnCode,
 						result.dataSize);
 				_logArray(
-						SERIAL_DEBUG,
+						LogLevelCsServiceDebug,
 						true,
-						_resultPacketAccessor->getSerializedBuffer().data,
-						_resultPacketAccessor->getSerializedBuffer().len);
+						result.buf.data,
+						result.dataSize);
 
 				writeResult(protocol, type, result);
 				break;
@@ -274,6 +276,14 @@ void CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, 
 	_resultPacketAccessor->setProtocolVersion(protocol);
 	_resultPacketAccessor->setType(type);
 	_resultPacketAccessor->setResult(retCode);
+
+	_log(LogLevelCsServiceDebug, false, "Result buffer: size=%u data=", _resultPacketAccessor->getSerializedSize());
+	_logArray(
+			LogLevelCsServiceDebug,
+			true,
+			_resultPacketAccessor->getSerializedBuffer().data,
+			_resultPacketAccessor->getSerializedBuffer().len);
+
 	_resultCharacteristic->updateValue(_resultPacketAccessor->getSerializedSize());
 }
 
