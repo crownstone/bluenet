@@ -119,9 +119,7 @@ private:
 	/**
 	 * Removes a 128b UUID from the soft device.
 	 *
-	 * Currently, can only remove the last added UUID.
-	 *
-	 * @return NRF return code.
+	 * @return CS return code.
 	 */
 	static ret_code_t rem(const ble_uuid_t& uuid);
 

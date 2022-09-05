@@ -212,7 +212,7 @@ enum class CS_TYPE : uint16_t {
 	EVT_SCAN_STARTED,               // Scanner started scanning.
 	EVT_SCAN_STOPPED,               // Scanner stopped scanning.
 	EVT_BLE_CONNECT,                // Device connected.
-	EVT_BLE_DISCONNECT,             // Device disconnected.
+	EVT_BLE_DISCONNECT,             // Device disconnected. Payload is connection handle.
 	CMD_ENABLE_ADVERTISEMENT,       // Enable/disable advertising.
 
 	// Switch (aggregator)
@@ -554,7 +554,7 @@ typedef ble_central_discover_t TYPIFY(CMD_BLE_CENTRAL_DISCOVER);
 typedef ble_central_read_t TYPIFY(CMD_BLE_CENTRAL_READ);
 typedef ble_central_write_t TYPIFY(CMD_BLE_CENTRAL_WRITE);
 typedef ble_connected_t TYPIFY(EVT_BLE_CONNECT);
-typedef void TYPIFY(EVT_BLE_DISCONNECT);
+typedef uint16_t TYPIFY(EVT_BLE_DISCONNECT);
 typedef void TYPIFY(EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REQUEST);
 typedef void TYPIFY(EVT_BLE_CENTRAL_CONNECT_CLEARANCE_REPLY);
 typedef cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);

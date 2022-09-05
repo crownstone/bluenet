@@ -483,7 +483,10 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 	// Init buffers, used by characteristics and central.
 	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-	EncryptedBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	// The encrypted buffer needs some extra due to overhead: header and padding.
+	uint16_t encryptedSize = ConnectionEncryption::getInstance().getEncryptedBufferSize(
+			g_MASTER_BUFFER_SIZE, ConnectionEncryptionType::CTR);
+	EncryptedBuffer::getInstance().alloc(encryptedSize);
 
 	// Create services that belong to the new mode.
 	switch (newMode) {
@@ -537,12 +540,6 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 			break;
 		}
 		default: _advertiser->setNormalTxPower();
-	}
-
-	// Enable AES encryption.
-	if (_state->isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
-		LOGi(FMT_ENABLE "AES encryption");
-		_stack->setAesEncrypted(true);
 	}
 
 	//	_operationMode = newMode;

@@ -3,9 +3,11 @@
 #include <ble/cs_BleConstants.h>
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
+#include <ipc/cs_IpcRamData.h>
 #include <protocol/cs_Packets.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
+#include <services/cs_MicroappService.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
@@ -60,10 +62,21 @@ enum class MicroappRuntimeState {
 };
 
 /**
+ * Keeps up data for a microapp.
+ */
+struct microapp_data_t {
+	//! Keeps up whether the microapp is scanning, thus whether BLE scans should generate interrupts.
+	bool isScanning  = false;
+
+	//! Keeps up the microapp service.
+	Service* service = nullptr;
+};
+
+/**
  * The class MicroappController has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
  */
-class MicroappController : public EventListener {
+class MicroappController {
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
@@ -119,29 +132,9 @@ private:
 	uint8_t _consecutiveMicroappCallCounter = 0;
 
 	/**
-	 * Flag to indicate whether to forward scanned devices to microapp.
-	 */
-	bool _microappIsScanning                = false;
-
-	/**
 	 * Keeps track of how many empty interrupt slots are available on the microapp side
 	 */
 	uint8_t _emptySoftInterruptSlots        = 1;
-
-	/**
-	 * Maps digital pins to interrupts. See also MicroappRequestHandler::interruptToDigitalPin()
-	 */
-	int digitalPinToInterrupt(int pin);
-
-	/**
-	 * Checks whether an interrupt registration already exists
-	 */
-	bool softInterruptRegistered(MicroappSdkMessageType type, uint8_t id);
-
-	/**
-	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
-	 */
-	bool allowSoftInterrupts();
 
 	/**
 	 * Set operating state in IPC ram. This can be used after (an accidental) boot to decide if a microapp has been
@@ -191,41 +184,9 @@ protected:
 	bool stopAfterMicroappRequest(microapp_sdk_header_t* header);
 
 	/**
-	 * Call the microapp in an interrupt context
-	 */
-	void generateSoftInterrupt();
-
-	/**
 	 * Check if start address of the microapp is within the flash boundaries assigned to the microapps.
 	 */
 	cs_ret_code_t checkFlashBoundaries(uint8_t appIndex, uintptr_t address);
-
-	/**
-	 * Get incoming microapp buffer (from coargs).
-	 */
-	uint8_t* getInputMicroappBuffer();
-
-	/**
-	 * Get outgoing microapp buffer (from coargs).
-	 */
-	uint8_t* getOutputMicroappBuffer();
-
-	/**
-	 * Handle a GPIO event
-	 */
-	void onGpioUpdate(uint8_t pinIndex);
-
-	/**
-	 * Handle a scanned BLE device.
-	 */
-	void onDeviceScanned(scanned_device_t* dev);
-
-	/**
-	 * Handle a received mesh message and determine whether to forward it to the microapp.
-	 *
-	 * @param event the EVT_RECV_MESH_MSG event data
-	 */
-	void onReceivedMeshMessage(MeshMsgEvent* event);
 
 public:
 	static MicroappController& getInstance() {
@@ -256,9 +217,29 @@ public:
 	void tickMicroapp(uint8_t appIndex);
 
 	/**
+	 * Get incoming microapp buffer (from coargs).
+	 */
+	uint8_t* getInputMicroappBuffer();
+
+	/**
+	 * Get outgoing microapp buffer (from coargs).
+	 */
+	uint8_t* getOutputMicroappBuffer();
+
+	/**
 	 * Register interrupts that allow generation of interrupts to the microapp
 	 */
 	cs_ret_code_t registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id);
+
+	/**
+	 * Checks whether an interrupt registration already exists
+	 */
+	bool isSoftInterruptRegistered(MicroappSdkMessageType type, uint8_t id);
+
+	/**
+	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
+	 */
+	bool allowSoftInterrupts();
 
 	/**
 	 * Set the number of empty interrupt slots
@@ -273,9 +254,9 @@ public:
 	void incrementEmptySoftInterruptSlots();
 
 	/**
-	 * Enable or disable BLE scanned device interrupt calls
+	 * Call the microapp in an interrupt context
 	 */
-	void setScanning(bool scanning);
+	void generateSoftInterrupt();
 
 	/**
 	 * Get operating state from IPC ram.
@@ -284,7 +265,7 @@ public:
 	MicroappRuntimeState getOperatingState(uint8_t appIndex);
 
 	/**
-	 * Receive events
+	 * Some runtime data we have to store for a microapp.
 	 */
-	void handleEvent(event_t& event);
+	microapp_data_t microappData;
 };

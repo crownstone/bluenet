@@ -50,7 +50,7 @@ typedef struct {
  */
 typedef struct {
 	uint8_t running : 1;
-} __attribute__((packed, aligned(4))) microapp_data_t;
+} __attribute__((packed, aligned(4))) microapp_reboot_data_t;
 
 /**
  * Data struct that can be used to communicate from bluenet to bluenet across reboots.
@@ -61,7 +61,7 @@ typedef struct {
 	// Minor version of the data in this struct
 	uint8_t ipcDataMinor;
 	// Currently only 1 app is supported, expand with more bits for more apps
-	microapp_data_t microapp[1];
+	microapp_reboot_data_t microapp[1];
 } __attribute__((packed, aligned(4))) bluenet_ipc_bluenet_data_t;
 
 /**
