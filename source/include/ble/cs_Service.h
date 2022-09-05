@@ -88,6 +88,4 @@ private:
 
 	//! List of characteristics
 	tuple<CharacteristicBase*> _characteristics;
-
-
 };

@@ -3,10 +3,10 @@
 #include <ble/cs_BleConstants.h>
 #include <cs_MicroappStructs.h>
 #include <events/cs_EventListener.h>
+#include <ipc/cs_IpcRamData.h>
 #include <protocol/cs_Packets.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
-#include <ipc/cs_IpcRamData.h>
 #include <services/cs_MicroappService.h>
 
 extern "C" {
@@ -58,7 +58,7 @@ struct microapp_soft_interrupt_registration_t {
  */
 struct microapp_data_t {
 	//! Keeps up whether the microapp is scanning, thus whether BLE scans should generate interrupts.
-	bool isScanning = false;
+	bool isScanning  = false;
 
 	//! Keeps up the microapp service.
 	Service* service = nullptr;

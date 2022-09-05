@@ -69,10 +69,7 @@ private:
 	void onBlePeripheralConnect(ble_connected_t& event);
 	void onBlePeripheralDisconnect(uint16_t connectionHandle);
 
-
-
 public:
-
 	void onBlePeripheralWrite(uint16_t connectionHandle, uint16_t characteristicHandle, cs_data_t value);
 	void onBlePeripheralSubscription(uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed);
 	void onBlePeripheralNotififyDone(uint16_t connectionHandle, uint16_t characteristicHandle);
@@ -82,5 +79,3 @@ public:
 	 */
 	void handleEvent(event_t& event);
 };
-
-

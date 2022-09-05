@@ -141,7 +141,11 @@ void Service::onDisconnect(
 bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
 	_log(LogLevelServiceDebug, true, "onWrite op=%u handle=%u", event.op, gattHandle);
 	for (CharacteristicBase* characteristic : _characteristics) {
-		_log(LogLevelServiceDebug, true, "  characteristic handles: value=%u cccd=%u", characteristic->getValueHandle(), characteristic->getCccdHandle());
+		_log(LogLevelServiceDebug,
+			 true,
+			 "  characteristic handles: value=%u cccd=%u",
+			 characteristic->getValueHandle(),
+			 characteristic->getCccdHandle());
 		if (characteristic->getCccdHandle() == gattHandle) {
 			characteristic->onCccdWrite(event.data, event.len);
 			return true;
@@ -162,14 +166,15 @@ bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
 					gattValue.p_value = NULL;
 
 					uint32_t nrfCode  = sd_ble_gatts_value_get(
-							getStack()->getConnectionHandle(), characteristic->getValueHandle(), &gattValue);
+                            getStack()->getConnectionHandle(), characteristic->getValueHandle(), &gattValue);
 					switch (nrfCode) {
 						case NRF_SUCCESS:
 							// * @retval ::NRF_SUCCESS Successfully retrieved the value of the attribute.
 							break;
 						case BLE_ERROR_INVALID_CONN_HANDLE:
 							// * @retval ::BLE_ERROR_INVALID_CONN_HANDLE Invalid connection handle supplied on a system
-							// attribute. This shouldn't happen, as the connection handle is only set in the main thread.
+							// attribute. This shouldn't happen, as the connection handle is only set in the main
+							// thread.
 							LOGe("Invalid handle");
 							break;
 						case NRF_ERROR_INVALID_ADDR:
@@ -192,7 +197,6 @@ bool Service::onWrite(const ble_gatts_evt_write_t& event, uint16_t gattHandle) {
 					characteristic->onWrite(gattValue.len);
 					break;
 				}
-
 			}
 			return true;
 		}

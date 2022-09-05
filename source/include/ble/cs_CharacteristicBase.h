@@ -12,8 +12,8 @@
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Service.h>
 #include <common/cs_Types.h>
-#include <third/std/function.h>
 #include <structs/cs_CharacteristicStructs.h>
+#include <third/std/function.h>
 
 // This should depend on the MTU instead.
 #define MAX_NOTIFICATION_LEN 20
@@ -158,53 +158,53 @@ private:
 	};
 
 	//! Whether this characteristic has been initialized.
-	bool _initialized = false;
+	bool _initialized                   = false;
 
 	//! Name of this characteristic.
-	const char* _name = nullptr;
+	const char* _name                   = nullptr;
 
 	//! UUID of this characteristic.
-	uint16_t _uuid = 0;
+	uint16_t _uuid                      = 0;
 
 	//! The configuration of the characteristic.
-	characteristic_config_t _config = characteristic_config_t();
+	characteristic_config_t _config     = characteristic_config_t();
 
 	//! The callback to call.
 	characteristic_callback_t _callback = {};
 
 	//! Handles, set by softdevice at init.
-	ble_gatts_char_handles_t _handles = ble_gatts_char_handles_t();
+	ble_gatts_char_handles_t _handles   = ble_gatts_char_handles_t();
 
 	//! Reference to corresponding service, set at init.
-	Service* _service = nullptr;
+	Service* _service                   = nullptr;
 
 	/**
 	 * The buffer holding the (plain text) characteristic value.
 	 */
-	cs_data_t _buffer = {};
+	cs_data_t _buffer                   = {};
 
 	//! Actual length of (plain text) data stored in the buffer.
-	uint16_t _valueLength = 0;
+	uint16_t _valueLength               = 0;
 
 	/**
 	 * The buffer holding the encrypted characteristic value.
 	 */
-	cs_data_t _encryptedBuffer = {};
+	cs_data_t _encryptedBuffer          = {};
 
 	//! Actual length of the (encrypted) data stored in the buffer.
-	uint16_t _encryptedValueLength = 0;
+	uint16_t _encryptedValueLength      = 0;
 
 	//! Flag to indicate if notification or indication is pending to be sent.
-	bool _notificationPending = false;
+	bool _notificationPending           = false;
 
 	//! When using the notification chunker, this is the current offset of the value to notify next.
-	uint16_t _notificationOffset = 0;
+	uint16_t _notificationOffset        = 0;
 
 	//! Whether the central subscribed for notifications.
-	bool _subscribedForNotifications = false;
+	bool _subscribedForNotifications    = false;
 
 	//! Whether the central subscribed for indication.
-	bool _subscribedForIndications = false;
+	bool _subscribedForIndications      = false;
 
 	/**
 	 * Initialize the encrypted buffer.

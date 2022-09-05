@@ -5,12 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
+#include <ble/cs_UUID.h>
+#include <cs_MicroappStructs.h>
 #include <microapp/cs_MicroappSdkUtil.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <cs_MicroappStructs.h>
 #include <protocol/cs_Typedefs.h>
-#include <ble/cs_UUID.h>
 
 uint8_t MicroappSdkUtil::digitalPinToInterrupt(uint8_t pinIndex) {
 	return pinIndex;

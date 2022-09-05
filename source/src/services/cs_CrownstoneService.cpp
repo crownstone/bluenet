@@ -8,6 +8,7 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
@@ -17,7 +18,6 @@
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <structs/cs_PacketsInternal.h>
-#include <events/cs_Event.h>
 
 #define LogLevelCsServiceDebug SERIAL_VERY_VERBOSE
 
@@ -59,15 +59,13 @@ void CrownstoneService::addControlCharacteristic(
 	}
 
 	characteristic_config_t config = {
-			.read = false,
-			.write = true,
-			.notify = false,
-			.encrypted = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED),
+			.read                   = false,
+			.write                  = true,
+			.notify                 = false,
+			.encrypted              = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED),
 			.sharedEncryptionBuffer = true,
-			.minAccessLevel = minimumAccessLevel,
+			.minAccessLevel         = minimumAccessLevel,
 	};
-
-
 
 	_controlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_controlCharacteristic);
@@ -76,59 +74,58 @@ void CrownstoneService::addControlCharacteristic(
 	_controlCharacteristic->setConfig(config);
 	_controlCharacteristic->setValueBuffer(buffer, size);
 	_controlCharacteristic->setEventHandler(
-			[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {
-		switch(eventType) {
-			case CHARACTERISTIC_EVENT_WRITE: {
+			[&](CharacteristicEventType eventType,
+				CharacteristicBase* characteristic,
+				const EncryptionAccessLevel accessLevel) -> void {
+				switch (eventType) {
+					case CHARACTERISTIC_EVENT_WRITE: {
 
-				// Encryption in the write stage verifies if the key is at the lowest level, command specific
-				// permissions are handled in the CommandHandler.
-				cs_result_t result;
-				CommandHandlerTypes type               = CTRL_CMD_UNKNOWN;
-				uint8_t protocol                       = CS_CONNECTION_PROTOCOL_VERSION;
-				LOGd("controlCharacteristic onWrite buf=%p size=%u", characteristic->getValue().data, characteristic->getValue().len);
-				_log(LogLevelCsServiceDebug, false, "data=");
-				_logArray(
-						LogLevelCsServiceDebug,
-						true,
-						characteristic->getValue().data,
-						characteristic->getValue().len);
+						// Encryption in the write stage verifies if the key is at the lowest level, command specific
+						// permissions are handled in the CommandHandler.
+						cs_result_t result;
+						CommandHandlerTypes type = CTRL_CMD_UNKNOWN;
+						uint8_t protocol         = CS_CONNECTION_PROTOCOL_VERSION;
+						LOGd("controlCharacteristic onWrite buf=%p size=%u",
+							 characteristic->getValue().data,
+							 characteristic->getValue().len);
+						_log(LogLevelCsServiceDebug, false, "data=");
+						_logArray(
+								LogLevelCsServiceDebug,
+								true,
+								characteristic->getValue().data,
+								characteristic->getValue().len);
 
-				protocol = _controlPacketAccessor->getProtocolVersion();
-				type     = (CommandHandlerTypes)_controlPacketAccessor->getType();
-				cs_data_t payload = _controlPacketAccessor->getPayload();
+						protocol          = _controlPacketAccessor->getProtocolVersion();
+						type              = (CommandHandlerTypes)_controlPacketAccessor->getType();
+						cs_data_t payload = _controlPacketAccessor->getPayload();
 
-				assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
-				result.buf.data = _resultPacketAccessor->getPayloadBuffer();
-				result.buf.len  = _resultPacketAccessor->getMaxPayloadSize();
+						assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
+						result.buf.data = _resultPacketAccessor->getPayloadBuffer();
+						result.buf.len  = _resultPacketAccessor->getMaxPayloadSize();
 
-				CommandHandler::getInstance().handleCommand(
-						protocol,
-						type,
-						payload,
-						cmd_source_with_counter_t(CS_CMD_SOURCE_CONNECTION),
-						accessLevel,
-						result);
+						CommandHandler::getInstance().handleCommand(
+								protocol,
+								type,
+								payload,
+								cmd_source_with_counter_t(CS_CMD_SOURCE_CONNECTION),
+								accessLevel,
+								result);
 
+						_log(LogLevelCsServiceDebug,
+							 false,
+							 "controlcharacteristic onWrite returnCode=0x%x dataSize=%u data=",
+							 result.returnCode,
+							 result.dataSize);
+						_logArray(LogLevelCsServiceDebug, true, result.buf.data, result.dataSize);
 
-				_log(LogLevelCsServiceDebug,
-						false,
-						"controlcharacteristic onWrite returnCode=0x%x dataSize=%u data=",
-						result.returnCode,
-						result.dataSize);
-				_logArray(
-						LogLevelCsServiceDebug,
-						true,
-						result.buf.data,
-						result.dataSize);
-
-				writeResult(protocol, type, result);
-				break;
-			}
-			default: {
-				break;
-			}
-		}
-	});
+						writeResult(protocol, type, result);
+						break;
+					}
+					default: {
+						break;
+					}
+				}
+			});
 }
 
 void CrownstoneService::addResultCharacteristic(
@@ -139,14 +136,14 @@ void CrownstoneService::addResultCharacteristic(
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = true,
-			.autoNotify = true,
-			.notificationChunker = true,
-			.encrypted = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED),
+			.read                   = true,
+			.write                  = false,
+			.notify                 = true,
+			.autoNotify             = true,
+			.notificationChunker    = true,
+			.encrypted              = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED),
 			.sharedEncryptionBuffer = true,
-			.minAccessLevel = minimumAccessLevel,
+			.minAccessLevel         = minimumAccessLevel,
 	};
 
 	_resultCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -165,15 +162,15 @@ void CrownstoneService::addSessionDataCharacteristic(
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = true,
-			.autoNotify = true,
-			.notificationChunker = true,
-			.encrypted = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED),
+			.read                   = true,
+			.write                  = false,
+			.notify                 = true,
+			.autoNotify             = true,
+			.notificationChunker    = true,
+			.encrypted              = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED),
 			.sharedEncryptionBuffer = true,
-			.minAccessLevel = minimumAccessLevel,
-			.encryptionType = ConnectionEncryptionType::ECB,
+			.minAccessLevel         = minimumAccessLevel,
+			.encryptionType         = ConnectionEncryptionType::ECB,
 	};
 
 	_sessionDataCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -189,12 +186,12 @@ void CrownstoneService::addSessionDataCharacteristic(
 	}
 
 	characteristic_config_t configUnencrypted = {
-			.read = true,
-			.write = false,
-			.notify = true,
-			.autoNotify = true,
+			.read                = true,
+			.write               = false,
+			.notify              = true,
+			.autoNotify          = true,
 			.notificationChunker = true,
-			.encrypted = false,
+			.encrypted           = false,
 	};
 
 	_sessionDataUnencryptedCharacteristic = new Characteristic<buffer_ptr_t>();
@@ -207,12 +204,12 @@ void CrownstoneService::addSessionDataCharacteristic(
 
 void CrownstoneService::addFactoryResetCharacteristic() {
 	characteristic_config_t config = {
-			.read = true,
-			.write = true,
-			.notify = true,
-			.autoNotify = true,
+			.read                = true,
+			.write               = true,
+			.notify              = true,
+			.autoNotify          = true,
 			.notificationChunker = false,
-			.encrypted = false,
+			.encrypted           = false,
 	};
 
 	_factoryResetCharacteristic = new Characteristic<uint32_t>();
@@ -222,27 +219,30 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setConfig(config);
 	_factoryResetCharacteristic->setInitialValue(0);
 	_factoryResetCharacteristic->setEventHandler(
-			[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {
-		switch(eventType) {
-			case CHARACTERISTIC_EVENT_WRITE: {
-				uint32_t value = reinterpret_cast<Characteristic<uint32_t>*>(characteristic)->getValue();
-				_log(LogLevelCsServiceDebug, true, "onWrite value=%u", value);
+			[&](CharacteristicEventType eventType,
+				CharacteristicBase* characteristic,
+				const EncryptionAccessLevel accessLevel) -> void {
+				switch (eventType) {
+					case CHARACTERISTIC_EVENT_WRITE: {
+						uint32_t value = reinterpret_cast<Characteristic<uint32_t>*>(characteristic)->getValue();
+						_log(LogLevelCsServiceDebug, true, "onWrite value=%u", value);
 
-				// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
-				bool success = FactoryReset::getInstance().recover(value);
-				uint32_t resultValue = 0;
-				if (success) {
-					resultValue = 1;
+						// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not
+						// possible.
+						bool success         = FactoryReset::getInstance().recover(value);
+						uint32_t resultValue = 0;
+						if (success) {
+							resultValue = 1;
+						}
+						_log(LogLevelCsServiceDebug, true, "  resultValue=%u", resultValue);
+						reinterpret_cast<Characteristic<uint32_t>*>(characteristic)->setValue(resultValue);
+						break;
+					}
+					default: {
+						break;
+					}
 				}
-				_log(LogLevelCsServiceDebug, true, "  resultValue=%u", resultValue);
-				reinterpret_cast<Characteristic<uint32_t>*>(characteristic)->setValue(resultValue);
-				break;
-			}
-			default: {
-				break;
-			}
-		}
-	});
+			});
 }
 
 void CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t& result) {

@@ -44,7 +44,6 @@
  */
 #define DEVELOPER_OPTION_DISABLE_COROUTINE 0
 
-
 extern "C" {
 
 /*

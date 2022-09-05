@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <ble/cs_CharacteristicBase.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Service.h>
 #include <ble/cs_UUID.h>
@@ -20,7 +21,6 @@
 #include <third/std/function.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
-#include <ble/cs_CharacteristicBase.h>
 
 /**
  * Characteristic of generic type T.
@@ -28,11 +28,9 @@
 template <class T>
 class Characteristic : public CharacteristicBase {
 public:
-	Characteristic() {
-		setValueBuffer(reinterpret_cast<buffer_ptr_t>(&_value), sizeof(_value));
-	};
+	Characteristic() { setValueBuffer(reinterpret_cast<buffer_ptr_t>(&_value), sizeof(_value)); };
 
-	virtual ~Characteristic() {};
+	virtual ~Characteristic(){};
 
 	/**
 	 * Set the initial value.
@@ -69,9 +67,7 @@ protected:
  * The base class is already using a buffer as value
  */
 template <>
-class Characteristic<buffer_ptr_t> : public CharacteristicBase {
-
-};
+class Characteristic<buffer_ptr_t> : public CharacteristicBase {};
 
 /**
  * A string value.
@@ -83,16 +79,14 @@ private:
 	char _value[DEFAULT_CHAR_VALUE_STRING_LENGTH];
 
 public:
-	Characteristic() {
-		setValueBuffer(reinterpret_cast<uint8_t*>(_value), DEFAULT_CHAR_VALUE_STRING_LENGTH);
-	}
+	Characteristic() { setValueBuffer(reinterpret_cast<uint8_t*>(_value), DEFAULT_CHAR_VALUE_STRING_LENGTH); }
 
 	/**
 	 * Set the initial value.
 	 * Must be set before init.
 	 */
 	cs_ret_code_t setInitialValue(const char* value) {
-		uint16_t size = strlen(value);
+		uint16_t size         = strlen(value);
 		cs_ret_code_t retCode = setInitialValueLength(size);
 		if (retCode != ERR_SUCCESS) {
 			return retCode;
@@ -118,5 +112,3 @@ public:
 	 */
 	const char* getValue() { return _value; }
 };
-
-

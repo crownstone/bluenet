@@ -479,7 +479,8 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 	// The encrypted buffer needs some extra due to overhead: header and padding.
-	uint16_t encryptedSize = ConnectionEncryption::getInstance().getEncryptedBufferSize(g_MASTER_BUFFER_SIZE, ConnectionEncryptionType::CTR);
+	uint16_t encryptedSize = ConnectionEncryption::getInstance().getEncryptedBufferSize(
+			g_MASTER_BUFFER_SIZE, ConnectionEncryptionType::CTR);
 	EncryptedBuffer::getInstance().alloc(encryptedSize);
 
 	// Create services that belong to the new mode.

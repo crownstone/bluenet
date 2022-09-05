@@ -7,10 +7,11 @@
 
 #pragma once
 
-#include <cstdint>
-#include <protocol/cs_Typedefs.h>
-#include <cs_MicroappStructs.h>
 #include <ble/cs_UUID.h>
+#include <cs_MicroappStructs.h>
+#include <protocol/cs_Typedefs.h>
+
+#include <cstdint>
 
 class MicroappSdkUtil {
 public:
@@ -29,9 +30,7 @@ public:
 	 */
 	static MicroappSdkAck bluenetResultToMicroapp(cs_ret_code_t retCode);
 
-
 	static microapp_sdk_ble_uuid_t convertUuid(const UUID& uuid);
 
 	static UUID convertUuid(const microapp_sdk_ble_uuid_t& uuid);
 };
-

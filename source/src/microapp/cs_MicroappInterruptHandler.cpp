@@ -5,13 +5,12 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <ble/cs_Stack.h>
+#include <events/cs_Event.h>
+#include <events/cs_EventDispatcher.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappInterruptHandler.h>
 #include <microapp/cs_MicroappSdkUtil.h>
-#include <events/cs_Event.h>
-#include <ble/cs_Stack.h>
-#include <events/cs_EventDispatcher.h>
-
 
 #define LogMicroappInterrupDebug LOGvv
 
@@ -85,10 +84,10 @@ void MicroappInterruptHandler::handleEvent(event_t& event) {
 			break;
 		}
 
-		// Get these from the microapp characteristic:
-		// onWrite --> sub/unsub
-		// onRead
-		// onNotificationWritten
+			// Get these from the microapp characteristic:
+			// onWrite --> sub/unsub
+			// onRead
+			// onNotificationWritten
 
 		default: break;
 	}
@@ -112,7 +111,7 @@ uint8_t* MicroappInterruptHandler::getOutputBuffer(MicroappSdkMessageType type, 
  */
 void MicroappInterruptHandler::onGpioUpdate(cs_gpio_update_t& event) {
 	LogMicroappInterrupDebug("onGpioUpdate");
-	uint8_t interruptPin = MicroappSdkUtil::digitalPinToInterrupt(event.pinIndex);
+	uint8_t interruptPin  = MicroappSdkUtil::digitalPinToInterrupt(event.pinIndex);
 
 	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
 	if (outputBuffer == nullptr) {
@@ -126,7 +125,6 @@ void MicroappInterruptHandler::onGpioUpdate(cs_gpio_update_t& event) {
 	LogMicroappInterrupDebug("Incoming GPIO interrupt for microapp on virtual pin %i", interruptPin);
 	MicroappController::getInstance().generateSoftInterrupt();
 }
-
 
 /*
  * Do some checks to validate if we want to generate an interrupt for the scanned device
@@ -157,9 +155,9 @@ void MicroappInterruptHandler::onDeviceScanned(scanned_device_t& dev) {
 		return;
 	}
 
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type               = CS_MICROAPP_SDK_BLE_SCAN;
-	ble->scan.type          = CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN;
+	ble->header.messageType          = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                        = CS_MICROAPP_SDK_BLE_SCAN;
+	ble->scan.type                   = CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN;
 	ble->scan.eventScan.address.type = dev.addressType;
 	std::reverse_copy(dev.address, dev.address + MAC_ADDRESS_LENGTH, ble->scan.eventScan.address.address);
 	ble->scan.eventScan.rssi = dev.rssi;
@@ -215,11 +213,11 @@ void MicroappInterruptHandler::onBleCentralConnectResult(cs_ret_code_t& retCode)
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT;
-	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle();
+	microapp_sdk_ble_t* ble          = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType          = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                        = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type                = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT;
+	ble->central.connectionHandle    = Stack::getInstance().getConnectionHandle();
 	ble->central.eventConnect.result = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 
 	MicroappController::getInstance().generateSoftInterrupt();
@@ -232,10 +230,10 @@ void MicroappInterruptHandler::onBleCentralDisconnected() {
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT;
+	microapp_sdk_ble_t* ble       = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType       = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                     = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type             = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT;
 	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle();
 
 	MicroappController::getInstance().generateSoftInterrupt();
@@ -248,14 +246,14 @@ void MicroappInterruptHandler::onBleCentralDiscovery(ble_central_discovery_t& ev
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER;
-	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle();
-	ble->central.eventDiscover.uuid = MicroappSdkUtil::convertUuid(event.uuid);
+	microapp_sdk_ble_t* ble                = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType                = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                              = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type                      = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER;
+	ble->central.connectionHandle          = Stack::getInstance().getConnectionHandle();
+	ble->central.eventDiscover.uuid        = MicroappSdkUtil::convertUuid(event.uuid);
 	ble->central.eventDiscover.valueHandle = event.valueHandle;
-	ble->central.eventDiscover.cccdHandle = event.cccdHandle;
+	ble->central.eventDiscover.cccdHandle  = event.cccdHandle;
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
@@ -267,11 +265,11 @@ void MicroappInterruptHandler::onBleCentralDiscoveryResult(cs_ret_code_t& retCod
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE;
-	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle();
+	microapp_sdk_ble_t* ble               = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType               = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                             = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type                     = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE;
+	ble->central.connectionHandle         = Stack::getInstance().getConnectionHandle();
 	ble->central.eventDiscoverDone.result = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 
 	MicroappController::getInstance().generateSoftInterrupt();
@@ -284,13 +282,13 @@ void MicroappInterruptHandler::onBleCentralWriteResult(cs_ret_code_t& retCode) {
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE;
-	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle(); // TODO: get handle from event.
-	ble->central.eventWrite.valueHandle = 0; // TODO: get handle from event.
-	ble->central.eventWrite.result = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
+	microapp_sdk_ble_t* ble             = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType             = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                           = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type                   = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE;
+	ble->central.connectionHandle       = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
+	ble->central.eventWrite.valueHandle = 0;                                           // TODO: get handle from event.
+	ble->central.eventWrite.result      = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
@@ -302,16 +300,16 @@ void MicroappInterruptHandler::onBleCentralReadResult(ble_central_read_result_t&
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ;
-	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle(); // TODO: get handle from event.
-	ble->central.eventRead.valueHandle = 0; // TODO: get handle from event.
-	ble->central.eventRead.result = MicroappSdkUtil::bluenetResultToMicroapp(event.retCode);
+	microapp_sdk_ble_t* ble            = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType            = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                          = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type                  = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ;
+	ble->central.connectionHandle      = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
+	ble->central.eventRead.valueHandle = 0;                                           // TODO: get handle from event.
+	ble->central.eventRead.result      = MicroappSdkUtil::bluenetResultToMicroapp(event.retCode);
 
 	// TODO: check size
-	ble->central.eventRead.size = event.data.len;
+	ble->central.eventRead.size        = event.data.len;
 	memcpy(ble->central.eventRead.data, event.data.data, event.data.len);
 
 	MicroappController::getInstance().generateSoftInterrupt();
@@ -324,11 +322,11 @@ void MicroappInterruptHandler::onBlePeripheralConnect(ble_connected_t& event) {
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_PERIPHERAL;
-	ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT;
-	ble->peripheral.connectionHandle = event.connectionHandle;
+	microapp_sdk_ble_t* ble                   = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType                   = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                                 = CS_MICROAPP_SDK_BLE_PERIPHERAL;
+	ble->peripheral.type                      = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT;
+	ble->peripheral.connectionHandle          = event.connectionHandle;
 
 	// TODO: get mac address
 	ble->peripheral.eventConnect.address.type = MICROAPP_SDK_BLE_ADDRESS_PUBLIC;
@@ -344,34 +342,36 @@ void MicroappInterruptHandler::onBlePeripheralDisconnect(uint16_t connectionHand
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_PERIPHERAL;
-	ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_DISCONNECT;
+	microapp_sdk_ble_t* ble          = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType          = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                        = CS_MICROAPP_SDK_BLE_PERIPHERAL;
+	ble->peripheral.type             = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_DISCONNECT;
 	ble->peripheral.connectionHandle = connectionHandle;
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
 
-void MicroappInterruptHandler::onBlePeripheralWrite(uint16_t connectionHandle, uint16_t characteristicHandle, cs_data_t value) {
+void MicroappInterruptHandler::onBlePeripheralWrite(
+		uint16_t connectionHandle, uint16_t characteristicHandle, cs_data_t value) {
 	LogMicroappInterrupDebug("onBlePeripheralWrite");
 	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 	if (outputBuffer == nullptr) {
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_PERIPHERAL;
-	ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_WRITE;
+	microapp_sdk_ble_t* ble          = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType          = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                        = CS_MICROAPP_SDK_BLE_PERIPHERAL;
+	ble->peripheral.type             = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_WRITE;
 	ble->peripheral.connectionHandle = connectionHandle;
-	ble->peripheral.handle = characteristicHandle;
-	ble->peripheral.eventWrite.size = value.len;
+	ble->peripheral.handle           = characteristicHandle;
+	ble->peripheral.eventWrite.size  = value.len;
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
 
-void MicroappInterruptHandler::onBlePeripheralSubscription(uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed) {
+void MicroappInterruptHandler::onBlePeripheralSubscription(
+		uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed) {
 	LogMicroappInterrupDebug("onBlePeripheralSubscription subscribed=%u", subscribed);
 	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 	if (outputBuffer == nullptr) {
@@ -380,7 +380,7 @@ void MicroappInterruptHandler::onBlePeripheralSubscription(uint16_t connectionHa
 
 	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
 	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_PERIPHERAL;
+	ble->type               = CS_MICROAPP_SDK_BLE_PERIPHERAL;
 	if (subscribed) {
 		ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_SUBSCRIBE;
 	}
@@ -388,7 +388,7 @@ void MicroappInterruptHandler::onBlePeripheralSubscription(uint16_t connectionHa
 		ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_UNSUBSCRIBE;
 	}
 	ble->peripheral.connectionHandle = connectionHandle;
-	ble->peripheral.handle = characteristicHandle;
+	ble->peripheral.handle           = characteristicHandle;
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
@@ -400,12 +400,12 @@ void MicroappInterruptHandler::onBlePeripheralNotififyDone(uint16_t connectionHa
 		return;
 	}
 
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type = CS_MICROAPP_SDK_BLE_PERIPHERAL;
-	ble->peripheral.type = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_NOTIFICATION_DONE;
+	microapp_sdk_ble_t* ble          = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType          = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                        = CS_MICROAPP_SDK_BLE_PERIPHERAL;
+	ble->peripheral.type             = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_NOTIFICATION_DONE;
 	ble->peripheral.connectionHandle = connectionHandle;
-	ble->peripheral.handle = characteristicHandle;
+	ble->peripheral.handle           = characteristicHandle;
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }

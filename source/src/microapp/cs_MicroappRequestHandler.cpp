@@ -7,6 +7,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
 #include <common/cs_Types.h>
 #include <cs_MicroappStructs.h>
@@ -22,7 +23,6 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
-#include <ble/cs_Stack.h>
 
 /*
  * Forwards requests from the microapp to the relevant handler
@@ -189,7 +189,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 
 			TYPIFY(EVT_GPIO_INIT) gpio;
 			gpio.pinIndex = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
-			gpio.pull      = (direction == CS_MICROAPP_SDK_PIN_INPUT_PULLUP) ? 1 : 0;
+			gpio.pull     = (direction == CS_MICROAPP_SDK_PIN_INPUT_PULLUP) ? 1 : 0;
 			LogMicroappRequestHandlerDebug(
 					"Initializing GPIO pin %i with direction %u and polarity %u", gpio.pinIndex, direction, polarity);
 
@@ -263,7 +263,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 				case CS_MICROAPP_SDK_PIN_WRITE: {
 					// Write to a pin
 					TYPIFY(EVT_GPIO_WRITE) gpio;
-					gpio.pinIndex            = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
+					gpio.pinIndex             = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
 					MicroappSdkPinValue value = (MicroappSdkPinValue)pin->value;
 					switch (value) {
 						case CS_MICROAPP_SDK_PIN_ON: {
@@ -412,9 +412,9 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 			ble_uuid128_t uuid128;
 			memcpy(uuid128.uuid128, ble->requestUuidRegister.customUuid, sizeof(uuid128.uuid128));
 			UUID uuid;
-			cs_ret_code_t result = uuid.fromFullUuid(uuid128);
+			cs_ret_code_t result          = uuid.fromFullUuid(uuid128);
 			ble->requestUuidRegister.uuid = MicroappSdkUtil::convertUuid(uuid);
-			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
+			ble->header.ack               = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN: {
@@ -440,19 +440,19 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleScan(microapp_sdk_ble_t* b
 			MicroappController& controller = MicroappController::getInstance();
 			cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
 
-			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
+			ble->header.ack      = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_START: {
 			LOGv("Start scanning");
 			MicroappController::getInstance().microappData.isScanning = true;
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			ble->header.ack                                           = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
 		}
 		case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
 			LOGv("Stop scanning");
 			MicroappController::getInstance().microappData.isScanning = false;
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			ble->header.ack                                           = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
 		}
 		default: {
@@ -467,7 +467,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 	switch (ble->central.type) {
 		case CS_MICROAPP_SDK_BLE_CENTRAL_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
+			cs_ret_code_t result =
+					controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
@@ -476,7 +477,10 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 			LOGi("BLE central connect");
 			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
 			// TODO: don't reverse
-			std::reverse_copy(ble->central.requestConnect.address.address, ble->central.requestConnect.address.address + MAC_ADDRESS_LENGTH, bleConnectCommand.address.address);
+			std::reverse_copy(
+					ble->central.requestConnect.address.address,
+					ble->central.requestConnect.address.address + MAC_ADDRESS_LENGTH,
+					bleConnectCommand.address.address);
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 			event.dispatch();
 
@@ -505,7 +509,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 	switch (ble->peripheral.type) {
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
+			cs_ret_code_t result =
+					controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
@@ -521,7 +526,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			MicroappController::getInstance().microappData.service->init(&Stack::getInstance());
 
 			ble->peripheral.handle = MicroappController::getInstance().microappData.service->getHandle();
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			ble->header.ack        = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_ADD_CHARACTERISTIC: {
@@ -553,48 +558,57 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			}
 
 			characteristic_config_t config = {
-					.read = ble->peripheral.requestAddCharacteristic.options.read,
-					.write = ble->peripheral.requestAddCharacteristic.options.write || ble->peripheral.requestAddCharacteristic.options.writeNoResponse,
-					.notify = ble->peripheral.requestAddCharacteristic.options.notify || ble->peripheral.requestAddCharacteristic.options.indicate,
-					.autoNotify = false,
+					.read  = ble->peripheral.requestAddCharacteristic.options.read,
+					.write = ble->peripheral.requestAddCharacteristic.options.write
+							 || ble->peripheral.requestAddCharacteristic.options.writeNoResponse,
+					.notify = ble->peripheral.requestAddCharacteristic.options.notify
+							  || ble->peripheral.requestAddCharacteristic.options.indicate,
+					.autoNotify          = false,
 					.notificationChunker = false,
-					.encrypted = false,
+					.encrypted           = false,
 			};
 
 			characteristic->setUuid(ble->peripheral.requestAddCharacteristic.uuid.uuid);
 			characteristic->setName("microapp");
 			characteristic->setConfig(config);
-			characteristic->setValueBuffer(ble->peripheral.requestAddCharacteristic.buffer, ble->peripheral.requestAddCharacteristic.bufferSize);
+			characteristic->setValueBuffer(
+					ble->peripheral.requestAddCharacteristic.buffer,
+					ble->peripheral.requestAddCharacteristic.bufferSize);
 
 			characteristic->setEventHandler(
-					[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {
-				uint16_t connectionHandle = Stack::getInstance().getConnectionHandle();
-				uint16_t handle = characteristic->getValueHandle();
-				switch(eventType) {
-					case CHARACTERISTIC_EVENT_WRITE: {
-						cs_data_t value = characteristic->getValue();
-						MicroappInterruptHandler::getInstance().onBlePeripheralWrite(connectionHandle, handle, value);
-						break;
-					}
-					case CHARACTERISTIC_EVENT_SUBSCRIPTION: {
-						bool subscribed = characteristic->isSubscribedForNotifications();
-						MicroappInterruptHandler::getInstance().onBlePeripheralSubscription(connectionHandle, handle, subscribed);
-						break;
-					}
-					case CHARACTERISTIC_EVENT_NOTIFY_DONE: {
-						MicroappInterruptHandler::getInstance().onBlePeripheralNotififyDone(connectionHandle, handle);
-						break;
-					}
-					default: {
-						break;
-					}
-				}
-			});
+					[&](CharacteristicEventType eventType,
+						CharacteristicBase* characteristic,
+						const EncryptionAccessLevel accessLevel) -> void {
+						uint16_t connectionHandle = Stack::getInstance().getConnectionHandle();
+						uint16_t handle           = characteristic->getValueHandle();
+						switch (eventType) {
+							case CHARACTERISTIC_EVENT_WRITE: {
+								cs_data_t value = characteristic->getValue();
+								MicroappInterruptHandler::getInstance().onBlePeripheralWrite(
+										connectionHandle, handle, value);
+								break;
+							}
+							case CHARACTERISTIC_EVENT_SUBSCRIPTION: {
+								bool subscribed = characteristic->isSubscribedForNotifications();
+								MicroappInterruptHandler::getInstance().onBlePeripheralSubscription(
+										connectionHandle, handle, subscribed);
+								break;
+							}
+							case CHARACTERISTIC_EVENT_NOTIFY_DONE: {
+								MicroappInterruptHandler::getInstance().onBlePeripheralNotififyDone(
+										connectionHandle, handle);
+								break;
+							}
+							default: {
+								break;
+							}
+						}
+					});
 
 			service->addCharacteristic(characteristic);
 
 			ble->peripheral.handle = characteristic->getValueHandle();
-			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			ble->header.ack        = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_DISCONNECT: {
@@ -610,7 +624,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			}
 
 			cs_ret_code_t result = characteristic->updateValue(ble->peripheral.requestValueSet.size);
-			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
+			ble->header.ack      = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY: {
@@ -621,7 +635,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			}
 
 			// Right now, we ignore offset and size.
-			cs_ret_code_t result = characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
+			cs_ret_code_t result =
+					characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
@@ -634,7 +649,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			}
 
 			// Right now, we ignore offset and size.
-			cs_ret_code_t result = characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
+			cs_ret_code_t result =
+					characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
@@ -709,7 +725,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mes
 		case CS_MICROAPP_SDK_MESH_LISTEN: {
 			LOGi("Start listening for microapp mesh messages");
 			MicroappController& controller = MicroappController::getInstance();
-			cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
+			cs_ret_code_t result =
+					controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
 
 			mesh->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;

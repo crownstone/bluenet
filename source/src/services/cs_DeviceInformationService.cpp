@@ -13,8 +13,8 @@
 #include <cfg/cs_UuidConfig.h>
 #include <logging/cs_Logger.h>
 #include <services/cs_DeviceInformationService.h>
-#include <util/cs_Utils.h>
 #include <structs/cs_CharacteristicStructs.h>
+#include <util/cs_Utils.h>
 
 #ifdef GIT_BRANCH
 #define SOFTWARE_REVISION_CHARACTERISTIC
@@ -101,13 +101,13 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = false,
+			.read      = true,
+			.write     = false,
+			.notify    = false,
 			.encrypted = false,
 	};
 
-	std::string hardware_revision = get_hardware_revision();
+	std::string hardware_revision   = get_hardware_revision();
 
 	_hardwareRevisionCharacteristic = new Characteristic<const char*>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
@@ -125,9 +125,9 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = false,
+			.read      = true,
+			.write     = false,
+			.notify    = false,
 			.encrypted = false,
 	};
 
@@ -154,9 +154,9 @@ void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = false,
+			.read      = true,
+			.write     = false,
+			.notify    = false,
 			.encrypted = false,
 	};
 

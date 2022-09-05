@@ -7,24 +7,25 @@
 
 #pragma once
 
-#include <protocol/cs_Packets.h>
 #include <encryption/cs_ConnectionEncryption.h>
+#include <protocol/cs_Packets.h>
+
 #include <cstdint>
 
 struct characteristic_config_t {
 	//! Whether the characteristic is readable.
-	bool read = false;
+	bool read                               = false;
 
 	//! Whether the characteristic can be written to with or without response.
-	bool write = false;
+	bool write                              = false;
 
 	//! Whether the characteristic supports notifications and indications.
-	bool notify = false;
+	bool notify                             = false;
 
 	/**
 	 * Whether the characteristic should automatically notify the value when you updated the value.
 	 */
-	bool autoNotify = false;
+	bool autoNotify                         = false;
 
 	/**
 	 * Whether to notify the value in multiple notifications.
@@ -36,10 +37,10 @@ struct characteristic_config_t {
 	 *
 	 * When using a shared buffer, the data on this buffer should not be changed until all notifications are sent.
 	 */
-	bool notificationChunker = false;
+	bool notificationChunker                = false;
 
 	//! Whether to encrypt the characteristic value.
-	bool encrypted = false;
+	bool encrypted                          = false;
 
 	/**
 	 * Whether to use a shared encryption buffer.
@@ -47,7 +48,7 @@ struct characteristic_config_t {
 	 * If true, the global EncryptionBuffer is used.
 	 * This option has no effect when encryption is disabled.
 	 */
-	bool sharedEncryptionBuffer = false;
+	bool sharedEncryptionBuffer             = false;
 
 	/**
 	 * The minimum encryption level to be used for this characteristic.
@@ -55,7 +56,7 @@ struct characteristic_config_t {
 	 * If the characteristic value is set, it will encrypt itself with the key of this access level.
 	 * If the characteristic value was written by the central, the user level must be at least this access level.
 	 */
-	EncryptionAccessLevel minAccessLevel = ADMIN;
+	EncryptionAccessLevel minAccessLevel    = ADMIN;
 
 	/**
 	 * Type of encryption to use.

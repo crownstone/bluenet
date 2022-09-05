@@ -16,9 +16,9 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
-#include <util/cs_BleError.h>
 #include <structs/cs_ControlPacketAccessor.h>
 #include <structs/cs_ResultPacketAccessor.h>
+#include <util/cs_BleError.h>
 
 SetupService::SetupService() : _macAddressCharacteristic(NULL), _setupKeyCharacteristic(NULL) {
 	setUUID(UUID(SETUP_UUID));
@@ -56,9 +56,9 @@ void SetupService::addMacAddressCharacteristic() {
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = false,
+			.read      = true,
+			.write     = false,
+			.notify    = false,
 			.encrypted = false,
 	};
 
@@ -80,9 +80,9 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 	}
 
 	characteristic_config_t config = {
-			.read = true,
-			.write = false,
-			.notify = false,
+			.read      = true,
+			.write     = false,
+			.notify    = false,
 			.encrypted = false,
 	};
 
