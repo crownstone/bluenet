@@ -83,13 +83,9 @@ void MicroappInterruptHandler::handleEvent(event_t& event) {
 			onBlePeripheralDisconnect(*data);
 			break;
 		}
-
-			// Get these from the microapp characteristic:
-			// onWrite --> sub/unsub
-			// onRead
-			// onNotificationWritten
-
-		default: break;
+		default: {
+			break;
+		}
 	}
 }
 
