@@ -917,45 +917,39 @@ void handleBootloaderInfo() {
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
 	LOGi("Get bootloader IPC data info");
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
-	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("Bootloader IPC data error = %i", retCode);
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGw("Bootloader IPC data error: ipcCode=%i", ipcCode);
 		return;
 	}
-	// Only update RAM data if exactly even with bootloader IPC version
-	bool updateRamData = true;
+
 	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
-		LOGi("Different IPC bootloader major: %i != %i.",
+		LOGi("Different IPC bootloader major: major=%u required=%u",
 			 ipcData.bootloaderData.ipcDataMajor,
 			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
 		return;
 	}
-	if (ipcData.bootloaderData.ipcDataMinor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
-		LOGi("Different IPC bootloader minor: %i != %i.",
+
+	// We can change this later to a lower minimal minor version.
+	if (ipcData.bootloaderData.ipcDataMinor < g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("Too old IPC bootloader minor: minor=%u minimum=%u.",
 			 ipcData.bootloaderData.ipcDataMinor,
 			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
-		// no return, continue
-		updateRamData = false;
-	}
-	if (dataSize != sizeof(ipcData.bootloaderData)) {
-		LOGi("Bootloader IPC data has incorrect size. Continue (probably a minor difference, but be careful)");
-		updateRamData = false;
-		// no return, continue
+		return;
 	}
 
 	if (ipcData.bootloaderData.justActivated || ipcData.bootloaderData.updateError) {
 		LOGi("Clear RAM data for microapps.");
 		clearRamData(IPC_INDEX_MICROAPP);
-
-		if (updateRamData) {
-			LOGi("Update RAM data for bootloader");
-			ipcData.bootloaderData.justActivated = 0;
-			setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, sizeof(ipcData.bootloaderData));
-		}
-		else {
-			LOGi("Won't update RAM data");
-		}
 	}
+
+	if (ipcData.bootloaderData.justActivated) {
+		LOGi("Clear the just activated flag");
+		ipcData.bootloaderData.justActivated = 0;
+		// Use the raw buffer, so we keep the possible newer data as well (in case of newer minor version).
+		setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+	}
+
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
 		 ipcData.bootloaderData.bootloaderMajor,
 		 ipcData.bootloaderData.bootloaderMinor,
