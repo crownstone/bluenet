@@ -5,14 +5,15 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <testaccess/cs_SwitchBehaviour.h>
+
 #include <behaviour/cs_BehaviourStore.h>
 #include <presence/cs_PresenceHandler.h>
 #include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventDispatcher.h>
 #include <presence/cs_PresenceCondition.h>
-#include <utils/date.h>
 
-#include <testaccess/cs_SwitchBehaviour.h>
+#include <utils/date.h>
 
 
 int main() {
@@ -25,10 +26,12 @@ int main() {
     EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
 
     TestAccess<SwitchBehaviour> t;
+    t.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
     auto s0 = new SwitchBehaviour(t.get());
     std::cout << *s0 << std::endl;
 
     t.intensity = 90;
+    t.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
     auto s1 = new SwitchBehaviour(t.get());
     std::cout << *s1 << std::endl;
     _behaviourStore.addBehaviour(s0);

@@ -8,6 +8,7 @@
 
 #include <test/cs_TestAccess.h>
 #include <presence/cs_PresenceDescription.h>
+#include <bitset>
 
 template<>
 class TestAccess<PresenceStateDescription> {
@@ -28,4 +29,13 @@ public:
         };
     }
 
+    static std::ostream & toStream(std::ostream &out, PresenceStateDescription& obj) {
+        return out << "{"
+                   << "_bitmask: " << std::bitset<64>(obj._bitmask)
+                   << "}";
+    }
 };
+
+std::ostream & operator<< (std::ostream &out, PresenceStateDescription& obj) {
+    return TestAccess<PresenceStateDescription>::toStream(out,obj);
+}

@@ -9,6 +9,7 @@
 
 #include <logging/cs_Logger.h>
 #include <util/cs_Utils.h>
+#include <test/cs_TestAccess.h>
 
 #include <cstdint>
 
@@ -18,6 +19,7 @@
  * When the Nth bit is set, the profile is present at location N.
  */
 class PresenceStateDescription {
+    friend class TestAccess<PresenceStateDescription>;
 private:
 	uint64_t _bitmask;
 

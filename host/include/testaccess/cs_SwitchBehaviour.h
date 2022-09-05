@@ -7,9 +7,9 @@
 #pragma once
 
 #include <test/cs_TestAccess.h>
-#include <behaviour/cs_SwitchBehaviour.h>
-
 #include <testaccess/cs_PresenceCondition.h>
+
+#include <behaviour/cs_SwitchBehaviour.h>
 #include <utils/cs_iostream.h>
 #include <iostream>
 #include <bitset>
@@ -18,7 +18,7 @@ template<>
 class TestAccess<SwitchBehaviour> {
 public:
     uint8_t intensity;
-    uint8_t profileid;
+    uint8_t profileId;
     DayOfWeekBitMask activedaysofweek;
     TimeOfDay from;
     TimeOfDay until;
@@ -30,7 +30,7 @@ public:
 
     void reset() {
         intensity = 100;
-        profileid = 0;
+        profileId = 0;
         activedaysofweek = 0b01111111;
         from = TimeOfDay::Sunrise();
         until = TimeOfDay::Sunset();
@@ -40,7 +40,7 @@ public:
     SwitchBehaviour get() {
         return {
                  intensity,
-                 profileid,
+                 profileId,
                  activedaysofweek,
                  from,
                  until,
@@ -53,7 +53,8 @@ public:
             << "from: " << s.from() << ", "
             << "until: " << s.until() << ", "
             << "value: " << +s.value() << ", "
-            << "timeout: " <<s.presenceCondition.timeOut << ", "
+            << "profileId:" << s.profileId << ", "
+            << "timeout: " << s.presenceCondition.timeOut << ", "
             << "activeDays: " << std::bitset<8>(s.activeDays)
             << "}";
     }
