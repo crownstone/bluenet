@@ -252,24 +252,26 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 	return payload;
 }
 
-void MicroappController::setOperatingState(uint8_t appIndex, MicroappRuntimeState state) {
+void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingState state) {
 	if (appIndex > 0) {
 		LOGi("Multiple apps not supported yet");
 		return;
 	}
-	uint8_t runFlag = (state == MicroappRuntimeState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	uint8_t runFlag = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
 	bluenet_ipc_data_t ipcData;
 	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
 	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
 	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
-	uint8_t retCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
-	if (retCode) {
-		LOGi("Error in setting IPC ram data: %i", retCode);
+
+	// TODO: this does not handle IPC minor updates well.
+	IpcRetCode ipcCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGi("Error in setting IPC ram data: %i", ipcCode);
 	}
 }
 
-MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
-	MicroappRuntimeState state = MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING;
+MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
+	MicroappOperatingState state = MicroappOperatingState::CS_MICROAPP_NOT_RUNNING;
 	if (!isRamDataPresent(IPC_INDEX_MICROAPP_STATE)) {
 		LOGi("No IPC data present");
 		return state;
@@ -280,7 +282,11 @@ MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
 	}
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize = 0;
-	getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGi("Failed to get IPC data: ipcCode=%i", ipcCode);
+		return state;
+	}
 	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
 		LOGi("Incorrect major version");
 		return state;
@@ -295,7 +301,8 @@ MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
 	}
 	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
 		case 1: {
-			state = MicroappRuntimeState::CS_MICROAPP_RUNNING;
+			state = MicroappOperatingState::CS_MICROAPP_RUNNING;
+			break;
 		}
 		default: {
 			// non-running state as default
@@ -307,9 +314,9 @@ MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
 void MicroappController::callMicroapp() {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
 	const uint8_t appIndex = 0;
-	setOperatingState(appIndex, MicroappRuntimeState::CS_MICROAPP_RUNNING);
+	setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_RUNNING);
 	if (nextCoroutine()) {
-		setOperatingState(appIndex, MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING);
+		setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_NOT_RUNNING);
 		return;
 	}
 #else

@@ -282,7 +282,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	getAppHeader(appIndex, header);
 
 	if (header.size > MICROAPP_MAX_SIZE) {
-		LOGw("Microapp size=%u is too large", header.size);
+		LOGw("Microapp size=%u is too large (ignore on boot, is there because of auto enable)", header.size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 

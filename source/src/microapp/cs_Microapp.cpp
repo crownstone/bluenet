@@ -64,7 +64,7 @@ void Microapp::loadApps() {
 
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
-		updateStateFromRuntimeData(index);
+		updateStateFromOperatingData(index);
 		retCode = validateApp(index);
 		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT && retCode == ERR_SUCCESS) {
 			LOGMicroappInfo("Enable microapp %u", index);
@@ -78,10 +78,10 @@ void Microapp::loadApps() {
 	}
 }
 
-void Microapp::updateStateFromRuntimeData(uint8_t index) {
-	MicroappController& controller = MicroappController::getInstance();
-	MicroappRuntimeState prevState = controller.getOperatingState(index);
-	_states[index].didReboot       = (prevState == MicroappRuntimeState::CS_MICROAPP_RUNNING);
+void Microapp::updateStateFromOperatingData(uint8_t index) {
+	MicroappController& controller   = MicroappController::getInstance();
+	MicroappOperatingState prevState = controller.getOperatingState(index);
+	_states[index].didReboot         = (prevState == MicroappOperatingState::CS_MICROAPP_RUNNING);
 }
 
 void Microapp::loadState(uint8_t index) {

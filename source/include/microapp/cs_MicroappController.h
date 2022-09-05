@@ -54,9 +54,9 @@ struct microapp_soft_interrupt_registration_t {
 };
 
 /**
- * Runtime state of a microapp. For now binary, either running or not running.
+ * Operating state of a microapp. For now binary, either running or not running.
  */
-enum class MicroappRuntimeState {
+enum class MicroappOperatingState {
 	CS_MICROAPP_NOT_RUNNING,
 	CS_MICROAPP_RUNNING,
 };
@@ -143,7 +143,7 @@ private:
 	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
 	 * @param[in] state      The state (running or not running) of this microapp.
 	 */
-	void setOperatingState(uint8_t appIndex, MicroappRuntimeState state);
+	void setOperatingState(uint8_t appIndex, MicroappOperatingState state);
 
 protected:
 	/**
@@ -262,7 +262,7 @@ public:
 	 * Get operating state from IPC ram.
 	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
 	 */
-	MicroappRuntimeState getOperatingState(uint8_t appIndex);
+	MicroappOperatingState getOperatingState(uint8_t appIndex);
 
 	/**
 	 * Some runtime data we have to store for a microapp.
