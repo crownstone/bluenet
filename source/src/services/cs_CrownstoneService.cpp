@@ -58,7 +58,7 @@ void CrownstoneService::addControlCharacteristic(
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = false,
 			.write = true,
 			.notify = false,
@@ -73,7 +73,7 @@ void CrownstoneService::addControlCharacteristic(
 	addCharacteristic(_controlCharacteristic);
 	_controlCharacteristic->setName(BLE_CHAR_CONTROL);
 	_controlCharacteristic->setUuid(charUuid);
-	_controlCharacteristic->setOptions(config);
+	_controlCharacteristic->setConfig(config);
 	_controlCharacteristic->setValueBuffer(buffer, size);
 	_controlCharacteristic->setEventHandler(
 			[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {
@@ -138,7 +138,7 @@ void CrownstoneService::addResultCharacteristic(
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = true,
@@ -153,7 +153,7 @@ void CrownstoneService::addResultCharacteristic(
 	addCharacteristic(_resultCharacteristic);
 	_resultCharacteristic->setName(STR_CHAR_RESULT);
 	_resultCharacteristic->setUuid(charUuid);
-	_resultCharacteristic->setOptions(config);
+	_resultCharacteristic->setConfig(config);
 	_resultCharacteristic->setValueBuffer(buffer, size);
 }
 
@@ -164,7 +164,7 @@ void CrownstoneService::addSessionDataCharacteristic(
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = true,
@@ -180,7 +180,7 @@ void CrownstoneService::addSessionDataCharacteristic(
 	addCharacteristic(_sessionDataCharacteristic);
 	_sessionDataCharacteristic->setName(BLE_CHAR_SESSION_DATA);
 	_sessionDataCharacteristic->setUuid(SESSION_DATA_UUID);
-	_sessionDataCharacteristic->setOptions(config);
+	_sessionDataCharacteristic->setConfig(config);
 	_sessionDataCharacteristic->setValueBuffer(buffer, size);
 
 	if (_sessionDataUnencryptedCharacteristic != NULL) {
@@ -188,7 +188,7 @@ void CrownstoneService::addSessionDataCharacteristic(
 		return;
 	}
 
-	characteristic_options_t configUnencrypted = {
+	characteristic_config_t configUnencrypted = {
 			.read = true,
 			.write = false,
 			.notify = true,
@@ -201,12 +201,12 @@ void CrownstoneService::addSessionDataCharacteristic(
 	addCharacteristic(_sessionDataUnencryptedCharacteristic);
 	_sessionDataUnencryptedCharacteristic->setName(BLE_CHAR_SESSION_DATA);
 	_sessionDataUnencryptedCharacteristic->setUuid(SESSION_DATA_UNENCRYPTED_UUID);
-	_sessionDataUnencryptedCharacteristic->setOptions(configUnencrypted);
+	_sessionDataUnencryptedCharacteristic->setConfig(configUnencrypted);
 	_sessionDataUnencryptedCharacteristic->setValueBuffer(_keySessionDataBuffer, sizeof(_keySessionDataBuffer));
 }
 
 void CrownstoneService::addFactoryResetCharacteristic() {
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = true,
 			.notify = true,
@@ -219,7 +219,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	addCharacteristic(_factoryResetCharacteristic);
 	_factoryResetCharacteristic->setName(BLE_CHAR_FACTORY_RESET);
 	_factoryResetCharacteristic->setUuid(FACTORY_RESET_UUID);
-	_factoryResetCharacteristic->setOptions(config);
+	_factoryResetCharacteristic->setConfig(config);
 	_factoryResetCharacteristic->setInitialValue(0);
 	_factoryResetCharacteristic->setEventHandler(
 			[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {

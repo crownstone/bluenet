@@ -15,6 +15,7 @@
 #include <third/std/function.h>
 #include <structs/cs_CharacteristicStructs.h>
 
+// This should depend on the MTU instead.
 #define MAX_NOTIFICATION_LEN 20
 
 class Service;
@@ -29,7 +30,14 @@ class CharacteristicBase;
 typedef function<void(CharacteristicEventType, CharacteristicBase*, EncryptionAccessLevel)> characteristic_callback_t;
 
 /**
- * Base class for characteristics.
+ * Base class for a BLE characteristic.
+ *
+ * It provides:
+ * - Easy configuration.
+ * - Keeping up the state.
+ * - Chunked notifications.
+ * - An event callback.
+ * - Automatic encryption when setting the value, decryption when receiving a value.
  */
 class CharacteristicBase {
 public:
@@ -54,10 +62,10 @@ public:
 	cs_ret_code_t setUuid(uint16_t uuid);
 
 	/**
-	 * Set options for this characteristic.
+	 * Set configuration for this characteristic.
 	 * Must be done before init.
 	 */
-	cs_ret_code_t setOptions(const characteristic_options_t& options);
+	cs_ret_code_t setConfig(const characteristic_config_t& config);
 
 	/**
 	 * Register an event handler.
@@ -158,8 +166,8 @@ private:
 	//! UUID of this characteristic.
 	uint16_t _uuid = 0;
 
-	//! The configured options of the characteristic.
-	characteristic_options_t _options = characteristic_options_t();
+	//! The configuration of the characteristic.
+	characteristic_config_t _config = characteristic_config_t();
 
 	//! The callback to call.
 	characteristic_callback_t _callback = {};

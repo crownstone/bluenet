@@ -100,7 +100,7 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = false,
@@ -113,7 +113,7 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 	addCharacteristic(_hardwareRevisionCharacteristic);
 	_hardwareRevisionCharacteristic->setName(BLE_CHAR_HARDWARE_REVISION);
 	_hardwareRevisionCharacteristic->setUuid(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
-	_hardwareRevisionCharacteristic->setOptions(config);
+	_hardwareRevisionCharacteristic->setConfig(config);
 	_hardwareRevisionCharacteristic->setInitialValue(hardware_revision.c_str());
 }
 
@@ -124,7 +124,7 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = false,
@@ -135,7 +135,7 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	addCharacteristic(_firmwareRevisionCharacteristic);
 	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);
 	_firmwareRevisionCharacteristic->setUuid(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
-	_firmwareRevisionCharacteristic->setOptions(config);
+	_firmwareRevisionCharacteristic->setConfig(config);
 
 	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
 		_firmwareRevisionCharacteristic->setInitialValue(g_FIRMWARE_VERSION);
@@ -153,7 +153,7 @@ void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = false,
@@ -164,7 +164,7 @@ void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 	addCharacteristic(_softwareRevisionCharacteristic);
 	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
 	_softwareRevisionCharacteristic->setUuid(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
-	_softwareRevisionCharacteristic->setOptions(config);
+	_softwareRevisionCharacteristic->setConfig(config);
 
 	_softwareRevisionCharacteristic->setInitialValue(STRINGIFY(GIT_BRANCH));
 }

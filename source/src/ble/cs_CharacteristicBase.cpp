@@ -32,12 +32,12 @@ cs_ret_code_t CharacteristicBase::setUuid(uint16_t uuid) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t CharacteristicBase::setOptions(const characteristic_options_t& options) {
+cs_ret_code_t CharacteristicBase::setConfig(const characteristic_config_t& config) {
 	if (_initialized) {
 		LOGw("Already initialized");
 		return ERR_WRONG_STATE;
 	}
-	_options = options;
+	_config = config;
 	return ERR_SUCCESS;
 }
 
@@ -115,11 +115,11 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 	ble_gatts_char_md_t characteristicMetadata;
 	memset(&characteristicMetadata, 0, sizeof(characteristicMetadata));
 	characteristicMetadata.char_props.broadcast     = 0;
-	characteristicMetadata.char_props.read          = _options.read ? 1 : 0;
-	characteristicMetadata.char_props.write_wo_resp = _options.write ? 1 : 0;
-	characteristicMetadata.char_props.write         = _options.write ? 1 : 0;
-	characteristicMetadata.char_props.notify        = _options.notify ? 1 : 0;
-	characteristicMetadata.char_props.indicate      = _options.notify ? 1 : 0;
+	characteristicMetadata.char_props.read          = _config.read ? 1 : 0;
+	characteristicMetadata.char_props.write_wo_resp = _config.write ? 1 : 0;
+	characteristicMetadata.char_props.write         = _config.write ? 1 : 0;
+	characteristicMetadata.char_props.notify        = _config.notify ? 1 : 0;
+	characteristicMetadata.char_props.indicate      = _config.notify ? 1 : 0;
 	// For some reason it doesn't matter if char_ext_props.reliable_wr = 0
 	// We can still perform long writes.
 	characteristicMetadata.p_cccd_md                = &cccdMetadata;
@@ -219,9 +219,9 @@ cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
 	}
 
 	// The required size of the encrypted buffer depends on the max value size, and the encryption type.
-	uint16_t requiredSize = ConnectionEncryption::getEncryptedBufferSize(_buffer.len, _options.encryptionType);
+	uint16_t requiredSize = ConnectionEncryption::getEncryptedBufferSize(_buffer.len, _config.encryptionType);
 
-	if (_options.sharedEncryptionBuffer) {
+	if (_config.sharedEncryptionBuffer) {
 		EncryptedBuffer::getInstance().getBuffer(_encryptedBuffer.data, _encryptedBuffer.len, CS_CHAR_BUFFER_DEFAULT_OFFSET);
 		if (requiredSize > _encryptedBuffer.len) {
 			LOGw("Encrypted buffer size too small: size=%u required=%u", _encryptedBuffer.len, requiredSize);
@@ -248,7 +248,7 @@ cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
 }
 
 void CharacteristicBase::deinitEncryptedBuffer() {
-	if (!_options.sharedEncryptionBuffer && _encryptedBuffer.data != nullptr) {
+	if (!_config.sharedEncryptionBuffer && _encryptedBuffer.data != nullptr) {
 		free(_encryptedBuffer.data);
 		_encryptedBuffer.data = nullptr;
 		_encryptedBuffer.len = 0;
@@ -277,8 +277,8 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 		cs_ret_code_t retCode = ConnectionEncryption::getInstance().encrypt(
 				cs_data_t(_buffer.data, _valueLength),
 				_encryptedBuffer,
-				_options.minAccessLevel,
-				_options.encryptionType);
+				_config.minAccessLevel,
+				_config.encryptionType);
 
 		if (retCode != ERR_SUCCESS) {
 			LOGe("Failed to encrypt data");
@@ -287,7 +287,7 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 			return retCode;
 		}
 		else {
-			_encryptedValueLength = ConnectionEncryption::getEncryptedBufferSize(_valueLength, _options.encryptionType);
+			_encryptedValueLength = ConnectionEncryption::getEncryptedBufferSize(_valueLength, _config.encryptionType);
 		}
 
 		_log(LogLevelCharacteristicDebug, false, "  encrypted: length=%u data=", _encryptedValueLength);
@@ -299,7 +299,7 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 		return retCode;
 	}
 
-	if (_options.autoNotify) {
+	if (_config.autoNotify) {
 		_notificationPending = false;
 		_notificationOffset = 0;
 
@@ -339,7 +339,7 @@ cs_ret_code_t CharacteristicBase::setGattValue() {
 }
 
 cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
-	if (!_options.notify) {
+	if (!_config.notify) {
 		return ERR_WRONG_STATE;
 	}
 	if (!isSubscribedForNotifications()) {
@@ -349,7 +349,7 @@ cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
 		return ERR_WRONG_STATE;
 	}
 
-	if (_options.notificationChunker) {
+	if (_config.notificationChunker) {
 		// This ignores the length and offset arguments.
 		return notifyMultipart();
 	}
@@ -553,7 +553,7 @@ void CharacteristicBase::onWrite(uint16_t length) {
 	EncryptionAccessLevel accessLevel = NOT_SET;
 
 	if (isEncrypted()) {
-		uint16_t plainTextSize = ConnectionEncryption::getPlaintextBufferSize(length, _options.encryptionType);
+		uint16_t plainTextSize = ConnectionEncryption::getPlaintextBufferSize(length, _config.encryptionType);
 		_encryptedValueLength = length;
 		_valueLength = plainTextSize;
 
@@ -564,7 +564,7 @@ void CharacteristicBase::onWrite(uint16_t length) {
 				cs_data_t(_encryptedBuffer.data, _encryptedValueLength),
 				_buffer,
 				accessLevel,
-				_options.encryptionType);
+				_config.encryptionType);
 
 		if (retCode != ERR_SUCCESS) {
 			LOGi("Failed to decrypt retCode=%u", retCode);
@@ -572,7 +572,7 @@ void CharacteristicBase::onWrite(uint16_t length) {
 			return;
 		}
 
-		if (!KeysAndAccess::getInstance().allowAccess(_options.minAccessLevel, accessLevel)) {
+		if (!KeysAndAccess::getInstance().allowAccess(_config.minAccessLevel, accessLevel)) {
 			LOGi("Insufficient access");
 			ConnectionEncryption::getInstance().disconnect();
 			return;
@@ -629,6 +629,6 @@ uint8_t* CharacteristicBase::getGattValue() {
 }
 
 bool CharacteristicBase::isEncrypted() {
-	return (_options.encrypted && _options.minAccessLevel < ENCRYPTION_DISABLED);
+	return (_config.encrypted && _config.minAccessLevel < ENCRYPTION_DISABLED);
 }
 

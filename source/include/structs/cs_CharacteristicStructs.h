@@ -11,7 +11,7 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <cstdint>
 
-struct characteristic_options_t {
+struct characteristic_config_t {
 	//! Whether the characteristic is readable.
 	bool read = false;
 

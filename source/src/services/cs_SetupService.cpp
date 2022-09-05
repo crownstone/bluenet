@@ -55,7 +55,7 @@ void SetupService::addMacAddressCharacteristic() {
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = false,
@@ -68,7 +68,7 @@ void SetupService::addMacAddressCharacteristic() {
 	addCharacteristic(_macAddressCharacteristic);
 	_macAddressCharacteristic->setName(BLE_CHAR_MAC_ADDRES);
 	_macAddressCharacteristic->setUuid(MAC_ADDRESS_UUID);
-	_macAddressCharacteristic->setOptions(config);
+	_macAddressCharacteristic->setConfig(config);
 	_macAddressCharacteristic->setValueBuffer(_myAddr.addr, sizeof(_myAddr.addr));
 	_macAddressCharacteristic->setInitialValueLength(sizeof(_myAddr.addr));
 }
@@ -79,7 +79,7 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 		return;
 	}
 
-	characteristic_options_t config = {
+	characteristic_config_t config = {
 			.read = true,
 			.write = false,
 			.notify = false,
@@ -92,7 +92,7 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 	addCharacteristic(_setupKeyCharacteristic);
 	_setupKeyCharacteristic->setName(BLE_CHAR_SETUP_KEY);
 	_setupKeyCharacteristic->setUuid(SETUP_KEY_UUID);
-	_setupKeyCharacteristic->setOptions(config);
+	_setupKeyCharacteristic->setConfig(config);
 	_setupKeyCharacteristic->setValueBuffer(buffer, size);
 }
 
