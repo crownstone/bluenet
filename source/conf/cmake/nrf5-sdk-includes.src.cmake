@@ -6,10 +6,16 @@ set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
 # We have removed include/third/nrf from here. This needs to be specified separately for the firmware versus the
 # bootloader. Both need namely a different sdk_config.h file...
-include_directories("include")
-include_directories("include/ble")
-include_directories("include/third")
-include_directories("shared")
+
+list(APPEND NRF5_SDK_INCLUDES_REL "include")
+list(APPEND NRF5_SDK_INCLUDES_REL "include/ble")
+list(APPEND NRF5_SDK_INCLUDES_REL "include/third")
+list(APPEND NRF5_SDK_INCLUDES_REL "shared")
+
+foreach(REL_FILE IN LISTS NRF5_SDK_INCLUDES_REL)
+	include_directories(${REL_FILE})
+endforeach()
+
 
 message(STATUS "INCLUDE_BASE_DIR for nrf5-sdk-includes: ${INCLUDE_BASE_DIR}")
 

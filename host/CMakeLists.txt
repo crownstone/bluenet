@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(bluenet-host)
 
+if(NOT VERBOSITY)
+	set(VERBOSITY 0)
+endif()
+
 include (cs_list_utils)
 
 message(STATUS "Building bluenet-host project. Given config values:")
@@ -35,11 +39,9 @@ set(CMAKE_BLUENET_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../source)
 
 set(CMAKE_BLUENET_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/bluenet)
 
-ADD_DEFINITIONS("-DUSE_APP_CONFIG")
+add_definitions("-DUSE_APP_CONFIG")
 
-if(HOST_TARGET)
-	add_compile_definitions("HOST_TARGET")
-endif()
+add_compile_definitions("HOST_TARGET")
 
 add_compile_definitions("NRF52832_XXAA")
 
@@ -48,14 +50,16 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/modules")
 
+if(VERBOSITY GREATER 4)
+	print_list("CMAKE_MODULE_PATH: " CMAKE_MODULE_PATH)
+endif()
 
-set(DEFAULT_CONFIG_FILE "${CMAKE_BLUENET_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
-
-message(STATUS "*************************************************")
-message(STATUS "SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
 include(load_configuration)
-load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
-message(STATUS "SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
+load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
+load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
+load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_ARGS)
+
+message(STATUS "*** SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
 set (SERIAL_VERBOSITY SERIAL_DEBUG)
 message(STATUS "*************************************************")
 
@@ -88,20 +92,20 @@ message(STATUS "current bindir: ${CMAKE_BLUENET_BINARY_DIR}")
 include_directories(${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf)
 #link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL})
 
+# these includes don't have the
+include_directories("include" "${CMAKE_BLUENET_BINARY_DIR}/include")
 
 ##################################
 # Get all includes from crownstone
 ##################################
 
-# these includes don't have the
-include_directories("include" "${CMAKE_BLUENET_BINARY_DIR}/include")
-
 # add include directories relative to the CMAKE_BLUENET_SOURCE_DIR here:
 set(HOST_INCLUDE_DIRS "include")
 
-LIST(APPEND HOST_INCLUDE_DIRS "include/third")
-LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf")
-LIST(APPEND HOST_INCLUDE_DIRS "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
+list(APPEND HOST_INCLUDE_DIRS "include/ble")
+list(APPEND HOST_INCLUDE_DIRS "include/third")
+list(APPEND HOST_INCLUDE_DIRS "include/third/nrf")
+list(APPEND HOST_INCLUDE_DIRS "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
 
 # loop over all host includes, adding them and adding a mock include with higher priority.
 foreach(cs_include_dir ${HOST_INCLUDE_DIRS})
@@ -126,6 +130,8 @@ add_compile_definitions("SVCALL_AS_NORMAL_FUNCTION")
 
 # headers
 include(nrf5-sdk-includes.src)
+
+
 
 ###################################################
 # Include nrf5 sdk source files for platform host
