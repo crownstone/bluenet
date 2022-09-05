@@ -17,7 +17,7 @@
 #include <algorithm>
 
 #define LOGBehaviourStoreInfo LOGi
-#define LOGBehaviourStoreDebug LOGd
+#define LOGBehaviourStoreDebug LOGvv
 
 
 // ======================= public interface ========================
@@ -372,7 +372,7 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 	}
 	auto type = activeBehaviours[index]->getType();
 
-	LOGBehaviourStoreDebug("deleting behaviour");
+	LOGBehaviourStoreInfo("deleting behaviour {u}", index);
 	delete activeBehaviours[index];
 	activeBehaviours[index] = nullptr;
 

@@ -5,4 +5,5 @@
 message(STATUS "crownstone testlib source files appended to TEST_SOURCE_REL")
 
 list(APPEND TEST_SOURCE_REL "typedevents/cs_BehaviourEvents.cpp")
+list(APPEND TEST_SOURCE_REL "utils/cs_iostream.cpp")
 
