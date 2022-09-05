@@ -102,23 +102,31 @@ const uint8_t MICROAPP_FUNCTION_NONE = 255;
  * Starts with all fields set to 0.
  */
 struct __attribute__((packed)) microapp_state_t {
-	uint16_t checksum;        // Checksum of the microapp, should be equal to the checksum field of the binary.
-	uint16_t checksumHeader;  // Checksum of the microapp, should be equal to the checksumHeader field of the binary.
-
-	bool hasData : 1;          // Whether the storage space of this app contains data.
-	uint8_t checksumTest : 2;  // values: MICROAPP_TEST_STATE
-	bool enabled : 1;          // Whether the microapp is enabled.
-	uint8_t bootTest : 2;  // Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in
-						   // IPC, and returns to firmware.
-	uint8_t memoryUsage : 1;    // values: ok, excessive
-	uint16_t reservedTest : 9;  // Reserved, must be 0 for now.
-
-	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;  // Index of registered function that didn't pass yet, and that we
-													  // are calling now. MICROAPP_FUNCTION_NONE for none.
-	uint8_t failedFunction = MICROAPP_FUNCTION_NONE;  // Index of registered function that was tried, but didn't pass.
-													  // MICROAPP_FUNCTION_NONE for none.
-	uint32_t
-			passedFunctions;  // Bitmask of registered functions that were called and returned to firmware successfully.
+	// Checksum of the microapp, should be equal to the checksum field of the binary.
+	uint16_t checksum;
+	// Checksum of the microapp, should be equal to the checksumHeader field of the binary.
+	uint16_t checksumHeader;
+	// Whether the storage space of this app contains data.
+	bool hasData : 1;
+	// values: MICROAPP_TEST_STATE
+	uint8_t checksumTest : 2;
+	// Whether the microapp is enabled.
+	bool enabled : 1;
+	// Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in
+	// IPC, and returns to firmware.
+	uint8_t bootTest : 2;
+	// values: ok, excessive
+	uint8_t memoryUsage : 1;
+	// Did reboot
+	uint8_t didReboot : 1;
+	// Reserved, must be 0 for now.
+	uint16_t reservedTest : 8;
+	// Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
+	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;
+	// Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.
+	uint8_t failedFunction = MICROAPP_FUNCTION_NONE;
+	// Bitmask of registered functions that were called and returned to firmware successfully.
+	uint32_t passedFunctions;
 };
 
 /**

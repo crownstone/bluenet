@@ -919,22 +919,25 @@ void Crownstone::printLoadStats() {
 void handleBootloaderInfo() {
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
+	LOGi("Get bootloader IPC data info");
 	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
 		LOGw("Bootloader IPC data error = %i", retCode);
 		return;
 	}
-	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
-		LOGi("Different major. Not known how to parse bootloader IPC data.");
-		return;
-	}
-	if (ipcData.bootloaderData.ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
-		LOGi("New minor. Will parse only part of bootloader IPC data");
-		// no return, continue
-	}
 	// Only update RAM data if exactly even with bootloader IPC version
 	bool updateRamData = true;
+	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Different IPC bootloader major: %i != %i.",
+			 ipcData.bootloaderData.ipcDataMajor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
+		return;
+	}
 	if (ipcData.bootloaderData.ipcDataMinor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("Different IPC bootloader minor: %i != %i.",
+			 ipcData.bootloaderData.ipcDataMinor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
+		// no return, continue
 		updateRamData = false;
 	}
 	if (dataSize != sizeof(ipcData.bootloaderData)) {

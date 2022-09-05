@@ -398,7 +398,7 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
  * because this header file is written as a C++ file.
  */
 typedef union {
-	// Raw data
+	// Raw data, fixed array. This means it is safe to use sizeof(.raw)
 	uint8_t raw[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	// The data coming from the microapp.
 	bluenet2microapp_ipcdata_t bluenet2microappData;

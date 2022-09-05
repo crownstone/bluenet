@@ -64,14 +64,24 @@ void Microapp::loadApps() {
 
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
+		updateStateFromRuntimeData(index);
 		retCode = validateApp(index);
 		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT && retCode == ERR_SUCCESS) {
 			LOGMicroappInfo("Enable microapp %u", index);
 			enableApp(index);
 		}
+		if (_states[index].didReboot) {
+			LOGMicroappInfo("Sorry, reboot while microapp running. App %u will not be started.", index);
+		}
 		storeState(index);
 		startApp(index);
 	}
+}
+
+void Microapp::updateStateFromRuntimeData(uint8_t index) {
+	MicroappController& controller = MicroappController::getInstance();
+	MicroappRuntimeState prevState = controller.getOperatingState(index);
+	_states[index].didReboot       = (prevState == MicroappRuntimeState::CS_MICROAPP_RUNNING);
 }
 
 void Microapp::loadState(uint8_t index) {
@@ -162,11 +172,12 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
 		LOGMicroappInfo(
-				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
+				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u didReboot=%u failedFunction=%u",
 				_states[index].enabled,
 				_states[index].checksumTest,
 				_states[index].memoryUsage,
 				_states[index].bootTest,
+				_states[index].didReboot,
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
@@ -218,11 +229,12 @@ bool Microapp::canRunApp(uint8_t index) {
 			_states[index].enabled,
 			_states[index].checksumTest,
 			_states[index].memoryUsage,
+			_states[index].didReboot,
 			_states[index].bootTest,
 			_states[index].failedFunction);
 	return _states[index].enabled && _states[index].checksumTest == MICROAPP_TEST_STATE_PASSED
 		   && _states[index].memoryUsage != 1 && _states[index].bootTest != MICROAPP_TEST_STATE_FAILED
-		   && _states[index].failedFunction == MICROAPP_FUNCTION_NONE;
+		   && _states[index].didReboot != true && _states[index].failedFunction == MICROAPP_FUNCTION_NONE;
 }
 
 void Microapp::tick() {

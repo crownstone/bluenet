@@ -61,7 +61,7 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
 		return IPC_RET_DATA_TOO_LARGE;
 	}
 	// Copy header
-	memcpy(&m_bluenet_ipc_ram.item[index].header, &header, sizeof(header));
+	memcpy(&m_bluenet_ipc_ram.item[index].header, &header, sizeof(bluenet_ipc_data_header_t));
 	// Copy data
 	memcpy(m_bluenet_ipc_ram.item[index].data.raw, data, dataSize);
 	// Zero padding of the data
@@ -89,7 +89,7 @@ enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t inde
 			return IPC_RET_DATA_INVALID;
 		}
 	}
-	memcpy(header, &m_bluenet_ipc_ram.item[index].header, sizeof(header));
+	memcpy(header, &m_bluenet_ipc_ram.item[index].header, sizeof(bluenet_ipc_data_header_t));
 	return IPC_RET_SUCCESS;
 }
 
@@ -101,7 +101,7 @@ bool isRamDataPresent(uint8_t index) {
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return false;
 	}
-	return (!m_bluenet_ipc_ram.item[index].header.major && !m_bluenet_ipc_ram.item[index].header.minor);
+	return (m_bluenet_ipc_ram.item[index].header.major != 0 || m_bluenet_ipc_ram.item[index].header.minor != 0);
 }
 
 /*
