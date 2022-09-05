@@ -12,7 +12,9 @@ extern const char g_COMPILATION_DAY[];
 
 extern const char g_BUILD_TYPE[];
 
-extern const uint8_t g_BOOTLOADER_IPC_RAM_PROTOCOL;
+extern const uint8_t g_BOOTLOADER_IPC_RAM_MAJOR;
+
+extern const uint8_t g_BOOTLOADER_IPC_RAM_MINOR;
 
 extern const uint16_t g_BOOTLOADER_DFU_VERSION;
 

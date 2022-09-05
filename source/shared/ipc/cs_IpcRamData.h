@@ -11,19 +11,32 @@
 extern "C" {
 #endif
 
+#include <ipc/cs_IpcRamDataContents.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 // The number of slots for interprocess communication
 #define BLUENET_IPC_RAM_DATA_ITEMS 5
 
-// The size of each slot for interprocess communication
-#define BLUENET_IPC_RAM_DATA_ITEM_SIZE 24
+// Version for major for the IPC header itself
+#define BLUENET_IPC_HEADER_MAJOR 1
 
+// Version for minor for the IPC header itself
+#define BLUENET_IPC_HEADER_MINOR 0
+
+/**
+ * The IpcIndex indexes an IPC buffer in a particular set of RAM that is maintained across warm reboots.
+ */
 enum IpcIndex {
-	IPC_INDEX_RESERVED           = 0,
-	IPC_INDEX_CROWNSTONE_APP     = 1,
-	IPC_INDEX_BOOTLOADER_VERSION = 2,
-	IPC_INDEX_MICROAPP           = 3,
+	IPC_INDEX_RESERVED        = 0,
+	// To communicate from bluenet towards the microapp
+	IPC_INDEX_CROWNSTONE_APP  = 1,
+	// To communicate from bootloader to bluenet
+	IPC_INDEX_BOOTLOADER_INFO = 2,
+	// To communicate from microapp to bluenet
+	IPC_INDEX_MICROAPP        = 3,
+	// To communicate from bluenet towards bluenet (state across reboots, for now only about microapp state)
+	IPC_INDEX_MICROAPP_STATE  = 4,
 };
 
 enum IpcRetCode {
@@ -34,6 +47,8 @@ enum IpcRetCode {
 	IPC_RET_NOT_FOUND          = 4,
 	IPC_RET_NULL_POINTER       = 5,
 	IPC_RET_DATA_INVALID       = 6,
+	IPC_RET_DATA_MAJOR_DIFF    = 7,
+	IPC_RET_DATA_MINOR_DIFF    = 8,
 };
 
 enum BuildType {
@@ -45,37 +60,35 @@ enum BuildType {
 };
 
 /**
- * The protocol struct with which the bootloader communicates with the bluenet binary through RAM. The protocol can
- * be bumped when there are changes. The dfu_version is an always increasing number that gets incremented for each
- * new bootloader change. It is the Bootloader Version number that is written in the bootloader settings file through
- * `make build_bootloader_settings`. The major, minor, and patch is e.g. 2.1.0 and is communicated over BLE and
- * used externally to check for compatibility and firmware update processes. There is another prerelease number which
- * can be used as alpha, beta, or rc. Convention for now is something like 2.1.0-rc2. The build type is an integer
- * that represented the CMAKE_BUILD_TYPE, such as Release or Debug.
+ * The header of a data item in IPC ram.
+ *
+ * Bump the major version if there's a change that is not backwards-compatible. Bump the minor version if there's a
+ * change that is backwards-compatible, for example the addition of a field within the data object.
  */
 typedef struct {
-	uint8_t protocol;  // Should be 1.
-	uint16_t dfu_version;
+	// The major version.
 	uint8_t major;
+	// The minor version.
 	uint8_t minor;
-	uint8_t patch;
-	uint8_t prerelease;  // 255 means it's not a pre-release.
-	uint8_t build_type;  // See BuildType.
-} __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
+	// The index of this item, to see if this item has been set.
+	uint8_t index;
+	// How many bytes are informational within the data array.
+	uint8_t dataSize;
+	// Checksum calculated over the data array, but also all fields above.
+	uint16_t checksum;
+	// Reserve some bytes to be word aligned.
+	uint8_t reserved[2];
+} __attribute__((packed, aligned(4))) bluenet_ipc_data_header_t;
 
 /**
- * One item of data in the IPC ram.
- * The data array is word aligned.
- *
- * index      The index of this item, to see if this item has been set.
- * dataSize   How many bytes of useful data is in the data array.
- * checksum   Checksum calculated over the index, data size, and _complete_ data array.
+ * One item of data in the IPC ram. The data is word-aligned.
+ * The types of data are specified in ipc/cs_IpcRamDataContents.h
  */
 typedef struct {
-	uint8_t index;
-	uint8_t dataSize;
-	uint16_t checksum;
-	uint8_t data[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+	// The header
+	bluenet_ipc_data_header_t header;
+	// The data array
+	bluenet_ipc_data_t data;
 } __attribute__((packed, aligned(4))) bluenet_ipc_ram_data_item_t;
 
 /**
@@ -88,21 +101,57 @@ typedef struct {
 /**
  * Set data in IPC ram.
  *
- * @param[in] index          Index of item.
+ * @param[in] index          Index of IPC segment.
  * @param[in] data           Data pointer.
- * @param[in] dataSize       Size of the data.
+ * @param[in] dataSize       Size of data.
+ * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode setRamData(uint8_t index, uint8_t* data, const uint8_t dataSize);
+enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize);
 
 /**
  * Get data from IPC ram.
  *
- * @param[in] index          Index of item.
- * @param[out] buf           Buffer to copy the data to.
- * @param[in] length         Size of the buffer.
- * @param[out] dataSize      Size of the data.
+ * @param[in] index          Index of IPC segment.
+ * @param[out] data          Buffer to copy the data to.
+ * @param[out] dataSize      Size of data.
+ * @param[in] maxSize        Size of the buffer to copy the data to (should be large enough).
+ * @return                   Error code (success is indicated by 0).
  */
-enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t* dataSize);
+enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint8_t maxSize);
+
+/**
+ * Get header for specific data. Calculating the checksum can be omitted.
+ *
+ * @param[out] header              Get only the header.
+ * @param[in] index                Index of IPC segment.
+ * @param[in] doCalculateChecksum  Calculate the checksum.
+ * @return                         Error code (success is indicated by 0).
+ */
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum);
+
+/**
+ * Returns whether RAM data present
+ *
+ * @param[in] index                Index of IPC segment.
+ * @return                         Boolean, true if present.
+ */
+bool isRamDataPresent(uint8_t index);
+
+/**
+ * Returns whether RAM data is empty.
+ *
+ * @param[in] index                Index of IPC segment.
+ * @return                         Boolean, true if clear
+ */
+bool isRamDataEmpty(uint8_t index);
+
+/**
+ * Clear RAM data.
+ *
+ * @param[in] index                Index of IPC segment.
+ * @return                         Error code (success is indicated by 0).
+ */
+enum IpcRetCode clearRamData(uint8_t index);
 
 /**
  * Get the underlying complete data struct. Do not use if not truly necessary. Its implementation might change.

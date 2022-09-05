@@ -288,7 +288,7 @@ configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-sta
 
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
-add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
+add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${TARGET_CONFIG_FILE})
 
 # Add path with files like sdk_config.h to include directories
 # The include/third/nrf file dir is required for files in the sdk (e.g. link "sdk_config.h" without path prefix)
@@ -297,7 +297,7 @@ set(THIRD_PARTY_NRF_INCLUDE_PATH "include/third/nrf")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
 set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
-target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include""${CMAKE_CURRENT_BINARY_DIR}/shared")
+target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/shared")
 
 # Save intermediate files, these are used for binary logging.
 target_compile_options(${PROJECT_NAME} PRIVATE -save-temps=obj)
@@ -322,27 +322,32 @@ set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}
 set(INCLUDE_ONLY_SECTIONS "")
 
 # https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
-add_custom_command(OUTPUT ${PROJECT_NAME}.bin
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
 	COMMAND stat -t ${PROJECT_NAME}.bin | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
-	DEPENDS
-		display_build_status
-		${PROJECT_NAME}
-	COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
+	COMMENT "Object copy ${PROJECT_NAME}.elf to ${PROJECT_NAME}.bin")
 
-add_custom_command(OUTPUT ${PROJECT_NAME}.hex
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
-	DEPENDS
-		${PROJECT_NAME}
-	COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.hex")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+	COMMENT "Object copy ${PROJECT_NAME}.elf to ${PROJECT_NAME}.hex")
 
-add_custom_command(OUTPUT ${PROJECT_NAME}.elf
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
 	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DCMAKE_SIZE=${CMAKE_SIZE} -DBINARY=${PROJECT_NAME}.elf -DOFFSET=${APPLICATION_START_ADDRESS} -DMAX_SIZE=${FLASH_MICROAPP_BASE} -P ${DEFAULT_MODULES_PATH}/check_sizes.cmake
-	DEPENDS
-		${PROJECT_NAME}
-	COMMENT "Copy ${PROJECT_NAME} to ${PROJECT_NAME}.elf")
+	COMMENT "Show size and check them")
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
+	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	DEPENDS display_build_status
+	COMMENT "Display build status"
+)
+
+add_custom_target(display_build_status
+	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
+	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	COMMENT "Display build status"
+)
 
 add_custom_target(generate_dat
 	COMMAND echo
@@ -361,7 +366,7 @@ add_custom_target(merge_all
 	COMMAND echo
 	COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.hex -intel bootloader-settings.hex -intel -exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant 0x0007E000 4 -o combined.hex -intel"
 	COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.hex -intel bootloader-settings.hex -intel -exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant 0x0007E000 4 -o combined.hex -intel
-	DEPENDS ${PROJECT_NAME}.bin
+	DEPENDS ${PROJECT_NAME}
 	COMMENT "Merge all but board version into one hex"
 	)
 
@@ -376,15 +381,9 @@ add_custom_target(analyze
 	COMMAND echo
 	COMMAND echo "** Show size of sections"
 	COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
-	DEPENDS ${PROJECT_NAME}.elf
+	DEPENDS ${PROJECT_NAME}
 	COMMENT "Read headers ${PROJECT_NAME}.elf"
 	)
-
-add_custom_target(display_build_status
-	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
-	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
-	COMMENT "Display build status"
-)
 
 # The reason to - again - write all those parameters is that at runtime they are not available. If we want
 # them to be available we will have to send them as arguments like this.
@@ -415,8 +414,6 @@ add_custom_target(write_runtime_config
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
 	COMMENT "Write runtime config"
 )
-
-
 
 add_custom_target(debug_server
 	COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
@@ -782,14 +779,15 @@ set(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
 set(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
 set(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 set(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
 # We actually do not need the file without extension
-#install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
 
 # TARGETS are not accepted from other directoreis
 install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
-install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
 install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
 install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
 install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
@@ -797,8 +795,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
 	install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
 endif()
 install(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
-install(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
-	
+install(DIRECTORY "${CMAKE_BINARY_DIR}/dfu" DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
+
 set(FILE_LIST_VARIABLES "${CMAKE_BINARY_DIR}/list_variables.txt")
 file(WRITE ${FILE_LIST_VARIABLES} "")
 message(STATUS "Write variables to ${FILE_LIST_VARIABLES}")

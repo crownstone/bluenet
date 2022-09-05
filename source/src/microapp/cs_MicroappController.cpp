@@ -98,9 +98,9 @@ void microappCallbackDummy() {
 		// fake setup or loop yields
 		io_buffers.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
 		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
-		uint8_t rd_size                        = 0;
 		bluenet2microapp_ipcdata_t ipc_data;
-		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t), &rd_size);
+		uint8_t dataSize;
+		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, &dataSize, sizeof(bluenet2microapp_ipcdata_t));
 
 		// Perform the actual callback. Should call microappCallback and yield.
 		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffers);
@@ -163,19 +163,23 @@ MicroappController::MicroappController() {
 /*
  * Set the microappCallback in the IPC ram data bank. At a later time it can be used by the microapp to find the
  * address of microappCallback to call back into the bluenet code.
+ *
+ * The bluenet2microapp object can be stored on the stack because setRamData copies the data.
  */
 void MicroappController::setIpcRam() {
-	LOGi("Set IPC info for microapp");
-	bluenet2microapp_ipcdata_t bluenet2microapp;
-	bluenet2microapp.protocol         = 1;
-	bluenet2microapp.length           = sizeof(bluenet2microapp_ipcdata_t);
-	bluenet2microapp.microappCallback = microappCallback;
+	LOGi("Set IPC from bluenet for microapp");
+	bluenet_ipc_data_cpp_t ipcData;
+	ipcData.bluenet2microappData.microappCallback = microappCallback;
+	ipcData.bluenet2microappData.dataProtocol     = MICROAPP_IPC_DATA_PROTOCOL;
 
-	LOGi("Set callback to %p", bluenet2microapp.microappCallback);
+	LOGi("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 
-	[[maybe_unused]] uint32_t retCode =
-			setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&bluenet2microapp, bluenet2microapp.length);
-	LOGi("Set ram data for microapp, retCode=%u", retCode);
+	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, ipcData.raw, sizeof(bluenet2microapp_ipcdata_t));
+	if (retCode != ERR_SUCCESS) {
+		LOGw("Microapp IPC RAM data error, retCode=%u", retCode);
+		return;
+	}
+	LOGi("Set ram data for microapp");
 }
 
 /*
@@ -248,9 +252,64 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 	return payload;
 }
 
+void MicroappController::setOperatingState(uint8_t appIndex, MicroappRuntimeState state) {
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return;
+	}
+	uint8_t runFlag = (state == MicroappRuntimeState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	bluenet_ipc_data_t ipcData;
+	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
+	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
+	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
+	uint8_t retCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+	if (retCode) {
+		LOGi("Error in setting IPC ram data: %i", retCode);
+	}
+}
+
+MicroappRuntimeState MicroappController::getOperatingState(uint8_t appIndex) {
+	MicroappRuntimeState state = MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING;
+	if (!isRamDataPresent(IPC_INDEX_MICROAPP_STATE)) {
+		LOGi("No IPC data present");
+		return state;
+	}
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return state;
+	}
+	bluenet_ipc_data_t ipcData;
+	uint8_t dataSize = 0;
+	getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
+		LOGi("Incorrect major version");
+		return state;
+	}
+	if (ipcData.bluenetRebootData.ipcDataMinor != BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
+		LOGi("Incoming minor is older or newer");
+		// do not return
+	}
+	if (dataSize != sizeof(bluenet_ipc_bluenet_data_t)) {
+		LOGi("Incorrect data size");
+		// do not return
+	}
+	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
+		case 1: {
+			state = MicroappRuntimeState::CS_MICROAPP_RUNNING;
+		}
+		default: {
+			// non-running state as default
+		}
+	}
+	return state;
+}
+
 void MicroappController::callMicroapp() {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
+	const uint8_t appIndex = 0;
+	setOperatingState(appIndex, MicroappRuntimeState::CS_MICROAPP_RUNNING);
 	if (nextCoroutine()) {
+		setOperatingState(appIndex, MicroappRuntimeState::CS_MICROAPP_NOT_RUNNING);
 		return;
 	}
 #else

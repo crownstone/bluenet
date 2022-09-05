@@ -12,7 +12,7 @@
 /**
  * Max number of microapps.
  */
-constexpr uint8_t MAX_MICROAPPS                   = 1;
+constexpr uint8_t MAX_MICROAPPS                     = 1;
 
 /**
  * Max allowed chunk size when uploading a microapp.
@@ -20,22 +20,28 @@ constexpr uint8_t MAX_MICROAPPS                   = 1;
  * We could calculate this from MTU or characteristic buffer size for BLE, and UART RX buffer size for UART.
  * But let's just start with a number that fits in both.
  */
-constexpr uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
+constexpr uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE   = 256;
 
 /**
- * Protocol version of the communication between the user and the firmware: the microapp command and result packets.
+ * Protocol version of the communication over the command handler, the microapp command and result packets.
  */
-constexpr uint8_t MICROAPP_PROTOCOL               = 1;
+constexpr uint8_t MICROAPP_CONTROL_COMMAND_PROTOCOL = 1;
 
-constexpr uint8_t MICROAPP_SDK_MAJOR              = 1;
+/**
+ * SDK major version of the data going back and forth between microapp and bluenet within the mutually shared buffers.
+ */
+constexpr uint8_t MICROAPP_SDK_MAJOR                = 1;
 
-constexpr uint8_t MICROAPP_SDK_MINOR              = 0;
+/**
+ * SDK minor version of the data going back and forth between microapp and bluenet within the mutually shared buffers.
+ */
+constexpr uint8_t MICROAPP_SDK_MINOR                = 0;
 
-constexpr uint16_t CS_FLASH_PAGE_SIZE             = 0x1000;  // Size of 1 flash page.
+constexpr uint16_t CS_FLASH_PAGE_SIZE               = 0x1000;  // Size of 1 flash page.
 
-constexpr uint16_t MICROAPP_MAX_SIZE              = (1 * CS_FLASH_PAGE_SIZE);  // Must be a multiple of flash page size.
+constexpr uint16_t MICROAPP_MAX_SIZE = (1 * CS_FLASH_PAGE_SIZE);  // Must be a multiple of flash page size.
 
-constexpr uint16_t MICROAPP_MAX_RAM               = 0x200;  // Something for now.
+constexpr uint16_t MICROAPP_MAX_RAM  = 0x200;  // Something for now.
 
 /**
  * Header of a microapp binary.
@@ -60,14 +66,17 @@ struct __attribute__((__packed__)) microapp_binary_header_t {
 };
 
 struct __attribute__((packed)) microapp_ctrl_header_t {
-	uint8_t protocol;  // Protocol of the microapp command and result packets, should match MICROAPP_PROTOCOL.
-	uint8_t index;     // Index of the microapp on the firmware.
+	// Protocol of the microapp command and result packets.
+	uint8_t protocol;
+	// Index of the microapp on the firmware.
+	uint8_t index;
 };
 
 struct __attribute__((packed)) microapp_upload_t {
 	microapp_ctrl_header_t header;
-	uint16_t offset;  // Offset in bytes of this chunk of data. Must be a multiple of 4.
-					  // Followed by a chunk of the microapp binary.
+	// Offset in bytes of this chunk of data. Must be a multiple of 4.
+	uint16_t offset;
+	// Followed by a chunk of the microapp binary.
 };
 
 /**
@@ -93,23 +102,31 @@ const uint8_t MICROAPP_FUNCTION_NONE = 255;
  * Starts with all fields set to 0.
  */
 struct __attribute__((packed)) microapp_state_t {
-	uint16_t checksum;        // Checksum of the microapp, should be equal to the checksum field of the binary.
-	uint16_t checksumHeader;  // Checksum of the microapp, should be equal to the checksumHeader field of the binary.
-
-	bool hasData : 1;          // Whether the storage space of this app contains data.
-	uint8_t checksumTest : 2;  // values: MICROAPP_TEST_STATE
-	bool enabled : 1;          // Whether the microapp is enabled.
-	uint8_t bootTest : 2;  // Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in
-						   // IPC, and returns to firmware.
-	uint8_t memoryUsage : 1;    // values: ok, excessive
-	uint16_t reservedTest : 9;  // Reserved, must be 0 for now.
-
-	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;  // Index of registered function that didn't pass yet, and that we
-													  // are calling now. MICROAPP_FUNCTION_NONE for none.
-	uint8_t failedFunction = MICROAPP_FUNCTION_NONE;  // Index of registered function that was tried, but didn't pass.
-													  // MICROAPP_FUNCTION_NONE for none.
-	uint32_t
-			passedFunctions;  // Bitmask of registered functions that were called and returned to firmware successfully.
+	// Checksum of the microapp, should be equal to the checksum field of the binary.
+	uint16_t checksum;
+	// Checksum of the microapp, should be equal to the checksumHeader field of the binary.
+	uint16_t checksumHeader;
+	// Whether the storage space of this app contains data.
+	bool hasData : 1;
+	// values: MICROAPP_TEST_STATE
+	uint8_t checksumTest : 2;
+	// Whether the microapp is enabled.
+	bool enabled : 1;
+	// Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in
+	// IPC, and returns to firmware.
+	uint8_t bootTest : 2;
+	// values: ok, excessive
+	uint8_t memoryUsage : 1;
+	// Did reboot
+	uint8_t didReboot : 1;
+	// Reserved, must be 0 for now.
+	uint16_t reservedTest : 8;
+	// Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
+	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;
+	// Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.
+	uint8_t failedFunction = MICROAPP_FUNCTION_NONE;
+	// Bitmask of registered functions that were called and returned to firmware successfully.
+	uint32_t passedFunctions;
 };
 
 /**
@@ -125,9 +142,10 @@ struct __attribute__((packed)) microapp_status_t {
  * Packet with all info required to upload a microapp, and to see the status of already uploaded microapps.
  */
 struct __attribute__((packed)) microapp_info_t {
-	uint8_t protocol      = MICROAPP_PROTOCOL;  // Protocol of this packet, and the microapp command packets.
-	uint8_t maxApps       = MAX_MICROAPPS;      // Maximum number of microapps.
-	uint16_t maxAppSize   = MICROAPP_MAX_SIZE;  // Maximum binary size of a microapp.
+	// Protocol of this packet, and the microapp command packets.
+	uint8_t protocol      = MICROAPP_CONTROL_COMMAND_PROTOCOL;
+	uint8_t maxApps       = MAX_MICROAPPS;                   // Maximum number of microapps.
+	uint16_t maxAppSize   = MICROAPP_MAX_SIZE;               // Maximum binary size of a microapp.
 	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;  // Maximum chunk size for uploading a microapp.
 	uint16_t maxRamUsage  = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
 	microapp_sdk_version_t sdkVersion;                       // SDK version the firmware supports.

@@ -64,14 +64,24 @@ void Microapp::loadApps() {
 
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
+		updateStateFromRuntimeData(index);
 		retCode = validateApp(index);
 		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT && retCode == ERR_SUCCESS) {
 			LOGMicroappInfo("Enable microapp %u", index);
 			enableApp(index);
 		}
+		if (_states[index].didReboot) {
+			LOGMicroappInfo("Sorry, reboot while microapp running. App %u will not be started.", index);
+		}
 		storeState(index);
 		startApp(index);
 	}
+}
+
+void Microapp::updateStateFromRuntimeData(uint8_t index) {
+	MicroappController& controller = MicroappController::getInstance();
+	MicroappRuntimeState prevState = controller.getOperatingState(index);
+	_states[index].didReboot       = (prevState == MicroappRuntimeState::CS_MICROAPP_RUNNING);
 }
 
 void Microapp::loadState(uint8_t index) {
@@ -146,7 +156,11 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 	MicroappStorage& storage = MicroappStorage::getInstance();
 	storage.getAppHeader(index, header);
 	if (header.sdkVersionMajor != MICROAPP_SDK_MAJOR || header.sdkVersionMinor > MICROAPP_SDK_MINOR) {
-		LOGw("Microapp sdk version %u.%u is not supported", header.sdkVersionMajor, header.sdkVersionMinor);
+		LOGw("Microapp sdk version %u.%u is not supported (it is >%u.%u)",
+			 header.sdkVersionMajor,
+			 header.sdkVersionMinor,
+			 MICROAPP_SDK_MAJOR,
+			 MICROAPP_SDK_MINOR);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 
@@ -158,11 +172,12 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
 		LOGMicroappInfo(
-				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
+				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u didReboot=%u failedFunction=%u",
 				_states[index].enabled,
 				_states[index].checksumTest,
 				_states[index].memoryUsage,
 				_states[index].bootTest,
+				_states[index].didReboot,
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
@@ -214,11 +229,12 @@ bool Microapp::canRunApp(uint8_t index) {
 			_states[index].enabled,
 			_states[index].checksumTest,
 			_states[index].memoryUsage,
+			_states[index].didReboot,
 			_states[index].bootTest,
 			_states[index].failedFunction);
 	return _states[index].enabled && _states[index].checksumTest == MICROAPP_TEST_STATE_PASSED
 		   && _states[index].memoryUsage != 1 && _states[index].bootTest != MICROAPP_TEST_STATE_FAILED
-		   && _states[index].failedFunction == MICROAPP_FUNCTION_NONE;
+		   && _states[index].didReboot != true && _states[index].failedFunction == MICROAPP_FUNCTION_NONE;
 }
 
 void Microapp::tick() {
@@ -238,7 +254,7 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
-	info->protocol           = MICROAPP_PROTOCOL;
+	info->protocol           = MICROAPP_CONTROL_COMMAND_PROTOCOL;
 	info->maxApps            = MAX_MICROAPPS;
 	info->maxAppSize         = MICROAPP_MAX_SIZE;
 	info->maxChunkSize       = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;
@@ -373,7 +389,8 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
-	if (packet->protocol != MICROAPP_PROTOCOL) {
+	LOGMicroappInfo("checkHeader %u", packet->index);
+	if (packet->protocol != MICROAPP_CONTROL_COMMAND_PROTOCOL) {
 		LOGw("Unsupported protocol: %u", packet->protocol);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}

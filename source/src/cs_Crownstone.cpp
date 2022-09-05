@@ -108,6 +108,14 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
 
+	// Plain text log for when there are difficulties with the binary log parser.
+	// This means that when a device is returned to us (and binary logging is on) we can derive which firmware
+	// is present on it without having to parse the data coming from the device.
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 1
+	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
+	CLOGi("\r\nGit hash %s", g_GIT_SHA1);
+#endif
+
 	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
 	LOGi("Git hash %s", g_GIT_SHA1);
 	LOGi("Compilation date: %s", g_COMPILATION_DAY);
@@ -317,9 +325,6 @@ void Crownstone::initDrivers1() {
 		// Init UartHandler only now, because it will read State.
 		UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 	}
-
-	// Plain text log.
-	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
 
 	LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
@@ -897,29 +902,68 @@ void Crownstone::printLoadStats() {
 	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
 
-void printBootloaderInfo() {
-	bluenet_ipc_bootloader_data_t bootloaderData;
-	uint8_t size = sizeof(bootloaderData);
+/*
+ * Handle bootloader information. If a firmware is just activated, IPC RAM for managing error conditions around
+ * reboots (esp. with respect to the microapps) will be cleared. If the IPC version is exactly the same between
+ * bootloader and firmware the justActivated flag is subsequently cleared.
+ *
+ * Caution is required if there's an updateError which is not cleared by the bootloader across reboots. This means
+ * that RAM data for the microapps will always be cleared. That subsequently means that misbehaving microapps can not
+ * be properly detected.
+ *
+ * To fix this, it should be possible by the user to clear IPC ram.
+ */
+void handleBootloaderInfo() {
+	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	uint8_t* buf = (uint8_t*)&bootloaderData;
-	int retCode  = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
+	LOGi("Get bootloader IPC data info");
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("No IPC data found, error = %i", retCode);
+		LOGw("Bootloader IPC data error = %i", retCode);
 		return;
 	}
-	if (size != dataSize) {
-		LOGw("IPC data struct incorrect size");
+	// Only update RAM data if exactly even with bootloader IPC version
+	bool updateRamData = true;
+	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Different IPC bootloader major: %i != %i.",
+			 ipcData.bootloaderData.ipcDataMajor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
 		return;
 	}
-	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
-		 bootloaderData.protocol,
-		 bootloaderData.dfu_version,
-		 bootloaderData.build_type);
+	if (ipcData.bootloaderData.ipcDataMinor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("Different IPC bootloader minor: %i != %i.",
+			 ipcData.bootloaderData.ipcDataMinor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
+		// no return, continue
+		updateRamData = false;
+	}
+	if (dataSize != sizeof(ipcData.bootloaderData)) {
+		LOGi("Bootloader IPC data has incorrect size. Continue (probably a minor difference, but be careful)");
+		updateRamData = false;
+		// no return, continue
+	}
+
+	if (ipcData.bootloaderData.justActivated || ipcData.bootloaderData.updateError) {
+		LOGi("Clear RAM data for microapps.");
+		clearRamData(IPC_INDEX_MICROAPP);
+
+		if (updateRamData) {
+			LOGi("Update RAM data for bootloader");
+			ipcData.bootloaderData.justActivated = 0;
+			setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, sizeof(ipcData.bootloaderData));
+		}
+		else {
+			LOGi("Won't update RAM data");
+		}
+	}
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
-		 bootloaderData.major,
-		 bootloaderData.minor,
-		 bootloaderData.patch,
-		 bootloaderData.prerelease);
+		 ipcData.bootloaderData.bootloaderMajor,
+		 ipcData.bootloaderData.bootloaderMinor,
+		 ipcData.bootloaderData.bootloaderPatch,
+		 ipcData.bootloaderData.bootloaderPrerelease);
+	LOGd("Bootloader dfuVersion=%u buildType=%u",
+		 ipcData.bootloaderData.dfuVersion,
+		 ipcData.bootloaderData.bootloaderBuildType);
 }
 
 /**********************************************************************************************************************
@@ -998,23 +1042,7 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-	printBootloaderInfo();
-
-	//	// Make a "clicker"
-	//	nrf_delay_ms(1000);
-	//	nrf_gpio_pin_set(board.pinGpioRelayOn);
-	//	nrf_delay_ms(RELAY_HIGH_DURATION);
-	//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
-	//	while (true) {
-	//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
-	//		nrf_gpio_pin_set(board.pinGpioRelayOff);
-	//		nrf_delay_ms(RELAY_HIGH_DURATION);
-	//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
-	//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
-	//		nrf_gpio_pin_set(board.pinGpioRelayOn);
-	//		nrf_delay_ms(RELAY_HIGH_DURATION);
-	//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
-	//	}
+	handleBootloaderInfo();
 
 	Crownstone crownstone(board);
 
