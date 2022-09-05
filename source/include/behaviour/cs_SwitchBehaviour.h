@@ -13,6 +13,8 @@
 #include <util/cs_WireFormat.h>
 
 #include <optional>
+#include <test/cs_TestAccess.h>
+#include <logging/cs_Logger.h>
 
 /**
  * Object that defines when a state transition should occur.
@@ -21,11 +23,12 @@
  * "fade to 100% in 10 minutes, starting 30 minutes before sunrise, if anyone is in this room"
  */
 class SwitchBehaviour : public Behaviour {
+    friend class TestAccess<SwitchBehaviour>;
 public:
 	typedef std::array<uint8_t, WireFormat::size<Behaviour>() + WireFormat::size<PresenceCondition>()>
 			SerializedDataType;
 
-	virtual ~SwitchBehaviour() = default;
+	virtual ~SwitchBehaviour() { LOGw("destroying switchbehahviour"); };
 
 	SwitchBehaviour(
 			uint8_t intensity,

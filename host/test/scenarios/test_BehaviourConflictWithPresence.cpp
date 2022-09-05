@@ -12,6 +12,9 @@
 #include <presence/cs_PresenceCondition.h>
 #include <utils/date.h>
 
+#include <testaccess/cs_SwitchBehaviour.h>
+
+
 int main() {
 
     SwitchAggregator _switchAggregator;
@@ -20,6 +23,16 @@ int main() {
     PresenceHandler _presenceHandler;
     SystemTime _systemTime;
     EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
+
+    TestAccess<SwitchBehaviour> t;
+    auto s0 = new SwitchBehaviour(t.get());
+    std::cout << *s0 << std::endl;
+
+    t.intensity = 90;
+    auto s1 = new SwitchBehaviour(t.get());
+    std::cout << *s1 << std::endl;
+    _behaviourStore.addBehaviour(s0);
+    _behaviourStore.addBehaviour(s1);
 
     return 0;
 }

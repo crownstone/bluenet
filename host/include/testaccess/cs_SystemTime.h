@@ -7,6 +7,7 @@
 #pragma once
 
 #include <test/cs_TestAccess.h>
+#include <time/cs_SystemTime.h>
 
 template<>
 class TestAccess<SystemTime> {

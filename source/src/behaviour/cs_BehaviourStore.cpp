@@ -458,5 +458,6 @@ void BehaviourStore::clearActiveBehavioursArray() {
 }
 
 BehaviourStore::~BehaviourStore() {
+    LOGw("destroying BehaviourStore");
 	clearActiveBehavioursArray();
 }
