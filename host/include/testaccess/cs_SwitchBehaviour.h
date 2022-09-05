@@ -13,6 +13,7 @@
 #include <utils/cs_iostream.h>
 #include <iostream>
 #include <bitset>
+#include <iomanip>
 
 template<>
 class TestAccess<SwitchBehaviour> {
@@ -52,10 +53,10 @@ public:
         return out << "{"
             << "from: " << s.from() << ", "
             << "until: " << s.until() << ", "
-            << "value: " << +s.value() << ", "
-            << "profileId:" << s.profileId << ", "
-            << "timeout: " << s.presenceCondition.timeOut << ", "
-            << "activeDays: " << std::bitset<8>(s.activeDays)
+            << "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
+            << "profileId:" << +s.profileId << ", "
+            << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
+            << "presenceCondition: " << s.presenceCondition
             << "}";
     }
 };
