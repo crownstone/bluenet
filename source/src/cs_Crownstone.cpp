@@ -269,14 +269,16 @@ void Crownstone::init1() {
 	_stack->initServices();
 	LOG_FLUSH();
 
-	LOGi(FMT_HEADER "init central");
-	_bleCentral->init();
-	_crownstoneCentral->init();
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		LOGi(FMT_HEADER "init central");
+		_bleCentral->init();
+		_crownstoneCentral->init();
 
 #if BUILD_MICROAPP_SUPPORT == 1
-	LOGi(FMT_HEADER "init microapp");
-	_microapp->init();
+		LOGi(FMT_HEADER "init microapp");
+		_microapp->init();
 #endif
+	}
 }
 
 void Crownstone::initDrivers0() {
@@ -924,7 +926,7 @@ void handleBootloaderInfo() {
 	}
 
 	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
-		LOGi("Different IPC bootloader major: major=%u required=%u",
+		LOGw("Different IPC bootloader major: major=%u required=%u",
 			 ipcData.bootloaderData.ipcDataMajor,
 			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
 		return;
@@ -932,7 +934,7 @@ void handleBootloaderInfo() {
 
 	// We can change this later to a lower minimal minor version.
 	if (ipcData.bootloaderData.ipcDataMinor < g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
-		LOGi("Too old IPC bootloader minor: minor=%u minimum=%u.",
+		LOGw("Too old IPC bootloader minor: minor=%u minimum=%u.",
 			 ipcData.bootloaderData.ipcDataMinor,
 			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
 		return;
