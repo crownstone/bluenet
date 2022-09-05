@@ -905,10 +905,21 @@ void Crownstone::printLoadStats() {
 	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
 
-void printBootloaderInfo() {
+/*
+ * Handle bootloader information. If a firmware is just activated, IPC RAM for managing error conditions around
+ * reboots (esp. with respect to the microapps) will be cleared. If the IPC version is exactly the same between
+ * bootloader and firmware the justActivated flag is subsequently cleared.
+ *
+ * Caution is required if there's an updateError which is not cleared by the bootloader across reboots. This means
+ * that RAM data for the microapps will always be cleared. That subsequently means that misbehaving microapps can not
+ * be properly detected.
+ *
+ * To fix this, it should be possible by the user to clear IPC ram.
+ */
+void handleBootloaderInfo() {
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
 		LOGw("Bootloader IPC data error = %i", retCode);
 		return;
@@ -919,11 +930,31 @@ void printBootloaderInfo() {
 	}
 	if (ipcData.bootloaderData.ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
 		LOGi("New minor. Will parse only part of bootloader IPC data");
-		return;
+		// no return, continue
+	}
+	// Only update RAM data if exactly even with bootloader IPC version
+	bool updateRamData = true;
+	if (ipcData.bootloaderData.ipcDataMinor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		updateRamData = false;
 	}
 	if (dataSize != sizeof(ipcData.bootloaderData)) {
-		LOGw("Bootloader IPC data struct has the incorrect size");
-		return;
+		LOGi("Bootloader IPC data has incorrect size. Continue (probably a minor difference, but be careful)");
+		updateRamData = false;
+		// no return, continue
+	}
+
+	if (ipcData.bootloaderData.justActivated || ipcData.bootloaderData.updateError) {
+		LOGi("Clear RAM data for microapps.");
+		clearRamData(IPC_INDEX_MICROAPP);
+
+		if (updateRamData) {
+			LOGi("Update RAM data for bootloader");
+			ipcData.bootloaderData.justActivated = 0;
+			setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, sizeof(ipcData.bootloaderData));
+		}
+		else {
+			LOGi("Won't update RAM data");
+		}
 	}
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
 		 ipcData.bootloaderData.bootloaderMajor,
@@ -1011,23 +1042,7 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-	printBootloaderInfo();
-
-	//	// Make a "clicker"
-	//	nrf_delay_ms(1000);
-	//	nrf_gpio_pin_set(board.pinGpioRelayOn);
-	//	nrf_delay_ms(RELAY_HIGH_DURATION);
-	//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
-	//	while (true) {
-	//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
-	//		nrf_gpio_pin_set(board.pinGpioRelayOff);
-	//		nrf_delay_ms(RELAY_HIGH_DURATION);
-	//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
-	//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
-	//		nrf_gpio_pin_set(board.pinGpioRelayOn);
-	//		nrf_delay_ms(RELAY_HIGH_DURATION);
-	//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
-	//	}
+	handleBootloaderInfo();
 
 	Crownstone crownstone(board);
 
