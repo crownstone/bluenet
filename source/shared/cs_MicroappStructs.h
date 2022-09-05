@@ -730,9 +730,6 @@ struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_service_add_t
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
-	//! Broadcast is not supported.
-	bool broadcast : 1;
-
 	//! Whether the characteristic is readable.
 	bool read : 1;
 
@@ -826,7 +823,7 @@ enum MicroappSdkBlePeripheralType {
 	//! Data has been written to the characteristic.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_WRITE = 22,
 
-	//! Data has been read from the characteristic.
+	//! Data has been read from the characteristic. Not implemented.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_READ = 23,
 
 	//! The client subscribed for notifications.

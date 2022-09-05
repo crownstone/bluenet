@@ -548,25 +548,48 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 
 			// Make sure to perform all checks before creating the characteristic on the heap.
 			Characteristic<buffer_ptr_t>* characteristic = new Characteristic<buffer_ptr_t>();
+			if (characteristic == nullptr) {
+				return ERR_NO_SPACE;
+			}
 
-			// For now: just ignore the UUID type: assume it's the same as the service.
-			characteristic->setUUID(UUID(service->getUUID(), ble->peripheral.requestAddCharacteristic.uuid.uuid));
+			characteristic_config_t config = {
+					.read = ble->peripheral.requestAddCharacteristic.options.read,
+					.write = ble->peripheral.requestAddCharacteristic.options.write || ble->peripheral.requestAddCharacteristic.options.writeNoResponse,
+					.notify = ble->peripheral.requestAddCharacteristic.options.notify || ble->peripheral.requestAddCharacteristic.options.indicate,
+					.autoNotify = false,
+					.notificationChunker = false,
+					.encrypted = false,
+			};
+
+			characteristic->setUuid(ble->peripheral.requestAddCharacteristic.uuid.uuid);
 			characteristic->setName("microapp");
-			characteristic->setWritable(ble->peripheral.requestAddCharacteristic.options.write);
-			characteristic->setNotifies(ble->peripheral.requestAddCharacteristic.options.notify);
-			characteristic->setValue(ble->peripheral.requestAddCharacteristic.buffer);
-			characteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-			characteristic->setMaxGattValueLength(ble->peripheral.requestAddCharacteristic.bufferSize);
-			characteristic->setValueLength(0);
+			characteristic->setConfig(config);
+			characteristic->setValueBuffer(ble->peripheral.requestAddCharacteristic.buffer, ble->peripheral.requestAddCharacteristic.bufferSize);
 
-
-			characteristic->onWrite([&](CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+			characteristic->setEventHandler(
+					[&](CharacteristicEventType eventType, CharacteristicBase* characteristic, const EncryptionAccessLevel accessLevel) -> void {
+				uint16_t connectionHandle = Stack::getInstance().getConnectionHandle();
 				uint16_t handle = characteristic->getValueHandle();
-				MicroappInterruptHandler::getInstance().onBlePeripheralWrite(handle, length, value);
+				switch(eventType) {
+					case CHARACTERISTIC_EVENT_WRITE: {
+						cs_data_t value = characteristic->getValue();
+						MicroappInterruptHandler::getInstance().onBlePeripheralWrite(connectionHandle, handle, value);
+						break;
+					}
+					case CHARACTERISTIC_EVENT_SUBSCRIPTION: {
+						bool subscribed = characteristic->isSubscribedForNotifications();
+						MicroappInterruptHandler::getInstance().onBlePeripheralSubscription(connectionHandle, handle, subscribed);
+						break;
+					}
+					case CHARACTERISTIC_EVENT_NOTIFY_DONE: {
+						MicroappInterruptHandler::getInstance().onBlePeripheralNotififyDone(connectionHandle, handle);
+						break;
+					}
+					default: {
+						break;
+					}
+				}
 			});
-
-			// TODO: onRead()
-			// TODO: onSubscribe()
 
 			service->addCharacteristic(characteristic);
 
@@ -586,10 +609,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 				return ERR_WRONG_STATE;
 			}
 
-			characteristic->setValueLength(ble->peripheral.requestValueSet.size);
-
-			// TODO: updateValue also calls notify()
-			cs_ret_code_t result = characteristic->updateValue();
+			cs_ret_code_t result = characteristic->updateValue(ble->peripheral.requestValueSet.size);
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
@@ -600,15 +620,23 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 				return ERR_WRONG_STATE;
 			}
 
-			// TODO: raw notify, this notify function sends all chunks.
-
 			// Right now, we ignore offset and size.
-			cs_ret_code_t result = characteristic->notify();
+			cs_ret_code_t result = characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_INDICATE: {
-			return ERR_NOT_IMPLEMENTED;
+			// Same as notify.
+			CharacteristicBase* characteristic = getCharacteristic(ble->peripheral.handle);
+			if (characteristic == nullptr) {
+				ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND;
+				return ERR_WRONG_STATE;
+			}
+
+			// Right now, we ignore offset and size.
+			cs_ret_code_t result = characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
+			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
+			return result;
 		}
 		default: {
 			LOGi("Unknown BLE peripheral type: %u", ble->peripheral.type);

@@ -67,13 +67,15 @@ private:
 	void onBleCentralWriteResult(cs_ret_code_t& retCode);
 	void onBleCentralReadResult(ble_central_read_result_t& event);
 	void onBlePeripheralConnect(ble_connected_t& event);
-	void onBlePeripheralDisconnect();
+	void onBlePeripheralDisconnect(uint16_t connectionHandle);
 
 
 
 public:
 
-	void onBlePeripheralWrite(uint16_t handle, uint16_t size, uint8_t* data);
+	void onBlePeripheralWrite(uint16_t connectionHandle, uint16_t characteristicHandle, cs_data_t value);
+	void onBlePeripheralSubscription(uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed);
+	void onBlePeripheralNotififyDone(uint16_t connectionHandle, uint16_t characteristicHandle);
 
 	/**
 	 * Handle events

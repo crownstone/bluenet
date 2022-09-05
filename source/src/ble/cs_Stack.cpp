@@ -845,7 +845,8 @@ void Stack::onIncomingDisconnected(const ble_evt_t* p_ble_evt) {
 
 	stopConnectionAliveTimer();
 
-	event_t event(CS_TYPE::EVT_BLE_DISCONNECT);
+	TYPIFY(EVT_BLE_DISCONNECT) eventData = p_ble_evt->evt.gatts_evt.conn_handle;
+	event_t event(CS_TYPE::EVT_BLE_DISCONNECT, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
