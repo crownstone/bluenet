@@ -1,5 +1,14 @@
 #include <behaviour/cs_Behaviour.h>
 #include <time/cs_Time.h>
+#include <presence/cs_PresencePredicate.h>
+
+/**
+ * Returns true if lhs has stronger specificity.
+ */
+bool PresenceIsMoreRelevant(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs);
+
+
+bool PresenceIsMoreRelevant(Behaviour* lhs, Behaviour* rhs);
 
 /**
  * Returns true if;

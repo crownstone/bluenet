@@ -67,6 +67,7 @@ public:
 	virtual bool requiresPresence() { return false; }
 	virtual bool requiresAbsence() { return false; }
 
+
 	// =========== Getters ===========
 
 	/**

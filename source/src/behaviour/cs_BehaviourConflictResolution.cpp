@@ -1,5 +1,18 @@
 #include <behaviour/cs_BehaviourConflictResolution.h>
 
+bool PresenceIsMoreRelevant(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs) {
+    // TODO
+//    if(lhs == PresencePredicate::VacuouslyTrue) return false;
+//    if(lsh == PresencePredicate::AnyoneInSelectedRooms) return rhs ==
+//    VacuouslyTrue         = 0,
+//    AnyoneInSelectedRooms = 1,
+//    NooneInSelectedRooms  = 2,
+//    AnyoneInSphere        = 3,
+//    NooneInSphere         = 4
+
+    return false;
+}
+
 bool FromUntilIntervalIsMoreRelevantOrEqual(
 		int32_t lhsFrom, int32_t lhsUntil, int32_t rhsFrom, int32_t rhsUntil, int32_t currentTimeOfDay) {
 	constexpr uint32_t secondsPerDay = 24 * 60 * 60;

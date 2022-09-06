@@ -9,6 +9,7 @@
 
 #include <behaviour/cs_Behaviour.h>
 #include <presence/cs_PresenceCondition.h>
+#include <presence/cs_PresencePredicate.h>
 #include <stdint.h>
 #include <util/cs_WireFormat.h>
 
@@ -56,6 +57,7 @@ public:
 
 	virtual bool requiresPresence() override;
 	virtual bool requiresAbsence() override;
+    virtual PresencePredicate::Condition currentPresenceCondition();
 
 	/**
 	 * Does the behaviour apply to the current situation?
