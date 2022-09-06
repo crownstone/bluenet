@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#define LOGBehaviourStoreInfo LOGi
+#define LOGBehaviourStoreInfo LOGvv
 #define LOGBehaviourStoreDebug LOGvv
 
 
@@ -458,6 +458,6 @@ void BehaviourStore::clearActiveBehavioursArray() {
 }
 
 BehaviourStore::~BehaviourStore() {
-    LOGw("destroying BehaviourStore");
+    LOGBehaviourStoreInfo("destroying BehaviourStore");
 	clearActiveBehavioursArray();
 }

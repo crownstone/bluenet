@@ -16,9 +16,45 @@
 
 #include <utils/date.h>
 
+uint64_t roomBitmask() {
+    return 0b001;
+}
+
+PresenceStateDescription present() {
+    TestAccess<PresenceStateDescription> testAccessPresenceDesc;
+    testAccessPresenceDesc._bitmask |= roomBitmask();
+    return testAccessPresenceDesc.get();
+}
+
+PresenceStateDescription absent() {
+    TestAccess<PresenceStateDescription> testAccessPresenceDesc;
+    testAccessPresenceDesc._bitmask = 0;
+    return testAccessPresenceDesc.get();
+}
+
+SwitchBehaviour* getBehaviourPresent(){
+    TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
+
+    testAccessSwitchBehaviour.intensity = 95;
+    testAccessSwitchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
+    testAccessSwitchBehaviour.presencecondition.predicate._presence._bitmask = roomBitmask();
+    auto switchBehaviourInRoom = new SwitchBehaviour(testAccessSwitchBehaviour.get());
+//    std::cout << "switchBehaviourInRoom: " << *switchBehaviourInRoom << std::endl;
+    return switchBehaviourInRoom;
+}
+
+SwitchBehaviour* getBehaviourAbsent() {
+    TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
+
+    testAccessSwitchBehaviour.intensity = 90;
+    testAccessSwitchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
+    auto switchBehaviourPresenceIrrelevant = new SwitchBehaviour(testAccessSwitchBehaviour.get());
+//    std::cout << "switchBehaviourPresenceIrrelevant: " << *switchBehaviourPresenceIrrelevant << std::endl;
+    return switchBehaviourPresenceIrrelevant;
+}
+
 
 int main() {
-
     SwitchAggregator _switchAggregator;
     BehaviourStore _behaviourStore;
     BehaviourHandler _behaviourHandler;
@@ -26,31 +62,29 @@ int main() {
     SystemTime _systemTime;
     EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
 
-    TestAccess<SwitchBehaviour> t;
-    t.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
-    auto s0 = new SwitchBehaviour(t.get());
-    std::cout << *s0 << std::endl;
-
-    t.intensity = 90;
-    t.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
-    auto s1 = new SwitchBehaviour(t.get());
-    std::cout << *s1 << std::endl;
-    _behaviourStore.addBehaviour(s0);
-    _behaviourStore.addBehaviour(s1);
-
-    TestAccess<PresenceStateDescription> t_presenceDesc;
-    t_presenceDesc._bitmask |= 0b001;
-
-    // Time(DayOfWeek day, uint8_t hours, uint8_t minutes, uint8_t seconds=0)
-    Time testTime(DayOfWeek::Tuesday, 12, 30);
-    // set time, check resolution
     TestAccess<BehaviourHandler>::setup(_behaviourHandler, &_presenceHandler, &_behaviourStore);
-    SwitchBehaviour* resolved = TestAccess<BehaviourHandler>::resolveSwitchBehaviour(_behaviourHandler, testTime, t_presenceDesc.get());
 
-    if(resolved)  {
-        std::cout << "resolved! " << *resolved << std::endl;
-    } else {
-        std::cout << "nope :(" << std::endl;
+    SwitchBehaviour* behaviourPresent = getBehaviourPresent();
+    SwitchBehaviour* behaviourAbsent = getBehaviourAbsent();
+    _behaviourStore.addBehaviour(behaviourPresent);
+    _behaviourStore.addBehaviour(behaviourAbsent);
+
+    Time testTimeActive(DayOfWeek::Tuesday, 12, 30);
+
+    SwitchBehaviour* resolved = nullptr;
+
+    // if absent there's only one active behaviour.
+    resolved = TestAccess<BehaviourHandler>::resolveSwitchBehaviour(_behaviourHandler, testTimeActive, absent());
+    if(resolved != behaviourAbsent) {
+        std::cout << "FAILED: should resolve to non-presence behaviour. It is the only active one" << std::endl;
+        return 1;
+    }
+
+    // if present, there are two behaviours -- one of which is more time-specific, one is more presence-specific.
+    resolved = TestAccess<BehaviourHandler>::resolveSwitchBehaviour(_behaviourHandler, testTimeActive, present());
+    if(resolved != behaviourPresent) {
+        std::cout << "FAILED: should resolve to presence behaviour. It has better presence specificity." << std::endl;
+        return 1;
     }
 
     return 0;

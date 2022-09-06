@@ -18,8 +18,8 @@
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
 
-#define LOGBehaviourHandlerDebug LOGnone
-#define LOGBehaviourHandlerVerbose LOGnone
+#define LOGBehaviourHandlerDebug LOGvv
+#define LOGBehaviourHandlerVerbose LOGvv
 
 cs_ret_code_t BehaviourHandler::init() {
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;

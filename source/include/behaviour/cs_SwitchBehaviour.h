@@ -28,7 +28,7 @@ public:
 	typedef std::array<uint8_t, WireFormat::size<Behaviour>() + WireFormat::size<PresenceCondition>()>
 			SerializedDataType;
 
-	virtual ~SwitchBehaviour() { LOGw("destroying switchbehahviour"); };
+	virtual ~SwitchBehaviour() = default;
 
 	SwitchBehaviour(
 			uint8_t intensity,
