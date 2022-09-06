@@ -169,8 +169,8 @@ MicroappController::MicroappController() {
 void MicroappController::setIpcRam() {
 	LOGi("Set IPC from bluenet for microapp");
 	bluenet_ipc_data_cpp_t ipcData;
-	ipcData.bluenet2microappData.microappCallback = microappCallback;
 	ipcData.bluenet2microappData.dataProtocol     = MICROAPP_IPC_DATA_PROTOCOL;
+	ipcData.bluenet2microappData.microappCallback = microappCallback;
 
 	LOGi("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 

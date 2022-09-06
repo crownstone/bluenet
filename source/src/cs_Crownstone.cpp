@@ -940,13 +940,9 @@ void handleBootloaderInfo() {
 		return;
 	}
 
-	if (ipcData.bootloaderData.justActivated || ipcData.bootloaderData.updateError) {
-		LOGi("Clear RAM data for microapps.");
-		clearRamData(IPC_INDEX_MICROAPP);
-	}
-
 	if (ipcData.bootloaderData.justActivated) {
-		LOGi("Clear the just activated flag");
+		LOGi("This is the time this version of bluenet runs.");
+		LOGd("Clear the just activated flag");
 		ipcData.bootloaderData.justActivated = 0;
 		// Use the raw buffer, so we keep the possible newer data as well (in case of newer minor version).
 		setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
