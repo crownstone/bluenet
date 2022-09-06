@@ -15,27 +15,43 @@
  */
 bluenet_ipc_ram_data_t m_bluenet_ipc_ram __attribute__((section(".bluenet_ipc_ram"))) __attribute__((used));
 
+/**
+ * Calculates a djb2 hash of given data.
+ *
+ * This is a simple hashing function that is position dependent, and doesn't return 0 when all data is 0.
+ * See http://www.cse.yorku.ca/~oz/hash.html for implementation details.
+ * See https://softwareengineering.stackexchange.com/questions/49550 for some benchmarks.
+ *
+ * @param[in] value     The input value.
+ * @param[in] hash      The previous hash.
+ * @return              The updated hash.
+ */
+uint16_t ipcHash(uint8_t value, uint16_t hash) {
+	// hash = hash * 33 + value
+	hash = ((hash << 5) + hash) + value;
+	return hash;
+}
+
+uint16_t ipcHashInit() {
+	return 5381;
+}
+
 /*
- * A simple additive checksum with inversion of the result to detect all zeros. This is the checksum used in IP
- * headers. The only difference is that here we run it over 8-bit data items rather than 16-bit words.
+ * Calculates the checksum of an IPC ram item.
  */
 uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t* item) {
-	uint16_t sum = 0;
-
-	sum += item->header.major;
-	sum += item->header.minor;
-	sum += item->header.index;
-	sum += item->header.dataSize;
-	sum += item->header.reserved[0];
-	sum += item->header.reserved[1];
+	uint16_t hash = ipcHashInit();
+	hash = ipcHash(item->header.major, hash);
+	hash = ipcHash(item->header.minor, hash);
+	hash = ipcHash(item->header.index, hash);
+	hash = ipcHash(item->header.dataSize, hash);
+	hash = ipcHash(item->header.reserved[0], hash);
+	hash = ipcHash(item->header.reserved[1], hash);
 
 	for (uint8_t i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
-		sum += item->data.raw[i];
+		hash = ipcHash(item->data.raw[i], hash);
 	}
-	sum = (sum >> 8) + (sum & 0xFF);
-	sum += sum >> 8;
-
-	return ~sum;
+	return hash;
 }
 
 /*
