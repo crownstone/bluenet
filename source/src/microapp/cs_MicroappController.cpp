@@ -253,52 +253,54 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 }
 
 void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingState state) {
+	LOGd("setOperatingState appIndex=%u state=%u", appIndex, state);
 	if (appIndex > 0) {
 		LOGi("Multiple apps not supported yet");
 		return;
 	}
 	uint8_t runFlag = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
 	bluenet_ipc_data_t ipcData;
+
+	// We can just overwrite all, as a newer IPC version will be written and read by bluenet only.
 	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
 	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
+
+	memset(ipcData.bluenetRebootData.microapp, 0, sizeof(ipcData.bluenetRebootData.microapp));
 	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
 
-	// TODO: this does not handle IPC minor updates well.
-	IpcRetCode ipcCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+	IpcRetCode ipcCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(ipcData.bluenetRebootData));
 	if (ipcCode != IPC_RET_SUCCESS) {
-		LOGi("Error in setting IPC ram data: %i", ipcCode);
+		LOGw("Failed to set IPC data: ipcCode=%i", ipcCode);
 	}
 }
 
 MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
+	LOGd("getOperatingState appIndex=%u", appIndex);
 	MicroappOperatingState state = MicroappOperatingState::CS_MICROAPP_NOT_RUNNING;
-	if (!isRamDataPresent(IPC_INDEX_MICROAPP_STATE)) {
-		LOGi("No IPC data present");
-		return state;
-	}
 	if (appIndex > 0) {
 		LOGi("Multiple apps not supported yet");
 		return state;
 	}
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize = 0;
+
+	// We might read the IPC data of a previous bluenet version.
 	IpcRetCode ipcCode = getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (ipcCode != IPC_RET_SUCCESS) {
 		LOGi("Failed to get IPC data: ipcCode=%i", ipcCode);
 		return state;
 	}
 	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
-		LOGi("Incorrect major version");
+		LOGw("Incorrect major version: major=%u required=%u", ipcData.bluenetRebootData.ipcDataMajor, BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR);
 		return state;
 	}
-	if (ipcData.bluenetRebootData.ipcDataMinor != BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
-		LOGi("Incoming minor is older or newer");
-		// do not return
-	}
-	if (dataSize != sizeof(bluenet_ipc_bluenet_data_t)) {
-		LOGi("Incorrect data size");
-		// do not return
-	}
+	// Normally we would check here for: minor < minimumMinor.
+	// That gives a compiler error though, as the minimum is 0, making the statement always false.
+	// if (ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
+	//   LOGw("Minor version too low: minor=%u minimum=%u", ipcData.bluenetRebootData.ipcDataMinor, BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
+	//   return state;
+	// }
+
 	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
 		case 1: {
 			state = MicroappOperatingState::CS_MICROAPP_RUNNING;
