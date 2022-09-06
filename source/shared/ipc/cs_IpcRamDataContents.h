@@ -41,7 +41,11 @@ typedef struct {
 	// A prerelease value. This is 255 for normal releases.
 	uint8_t bootloaderPrerelease;
 	uint8_t bootloaderBuildType;
+
+	// When true, this is the first time this application version is running.
 	uint8_t justActivated : 1;
+
+	// When true there was an error setting or getting the IPC by the bootloader.
 	uint8_t updateError : 1;
 } __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
 

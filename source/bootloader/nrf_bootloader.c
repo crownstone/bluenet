@@ -59,6 +59,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_power.h"
 #include "sdk_config.h"
+#include "cs_BootloaderConfig.h"
 
 static nrf_dfu_observer_t m_user_observer;  //<! Observer callback set by the user.
 static volatile bool m_flash_write_done;
@@ -336,21 +337,26 @@ static bool dfu_enter_check(void) {
 void update_ipc_data() {
 	NRF_LOG_INFO("Update ipc data");
 	NRF_LOG_FLUSH();
+
+	// We only want to set the "justActivated" field, so first get the current data.
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	if (!isRamDataPresent(IPC_INDEX_BOOTLOADER_INFO)) {
-		NRF_LOG_INFO("No bootloader IPC present");
-		NRF_LOG_FLUSH();
-	}
 	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
-	if (retCode != IPC_RET_SUCCESS || sizeof(ipcData.bootloaderData) != dataSize) {
-		NRF_LOG_INFO("Error updating bootloader IPC");
+	if (retCode != IPC_RET_SUCCESS) {
+		NRF_LOG_WARNING("Failed to get IPC ram: retCode=%i", retCode);
 		NRF_LOG_FLUSH();
 		return;
 	}
+
+	// The IPC data should be set on boot, so the version and size should match exactly.
+	if (ipcData.bootloaderData.ipcDataMajor != g_BOOTLOADER_IPC_RAM_MAJOR || ipcData.bootloaderData.ipcDataMinor != g_BOOTLOADER_IPC_RAM_MINOR  || dataSize != sizeof(ipcData.bootloaderData)) {
+		NRF_LOG_WARNING("Version or size mismatch: %u.%u != %u.%u size=%u", ipcData.bootloaderData.ipcDataMajor, g_BOOTLOADER_IPC_RAM_MAJOR, ipcData.bootloaderData.ipcDataMinor, g_BOOTLOADER_IPC_RAM_MINOR, dataSize);
+		NRF_LOG_FLUSH();
+		return;
+	}
+
 	// We only write here if there is no error
 	ipcData.bootloaderData.justActivated = 1;
-	dataSize                             = sizeof(ipcData.bootloaderData);
 	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
 }
 

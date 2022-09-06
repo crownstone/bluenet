@@ -201,14 +201,31 @@ void set_bootloader_info() {
 
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	ipcData.bootloaderData.updateError   = 0;
+
 	ipcData.bootloaderData.justActivated = 0;
-	if (isRamDataPresent(IPC_INDEX_BOOTLOADER_INFO)) {
-		int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
-		if (retCode != IPC_RET_SUCCESS) {
-			ipcData.bootloaderData.updateError = 1;
+	ipcData.bootloaderData.updateError   = 0;
+
+	// First get previous ram data.
+	// We don't want to overwrite "justActivated" for example.
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (retCode != IPC_RET_SUCCESS) {
+		NRF_LOG_INFO("Failed to get bootloader info: retCode=%i", retCode);
+		// This can also happen when there is random data in ram.
+		// In this case: overwrite all data.
+		ipcData.bootloaderData.justActivated = 0;
+		ipcData.bootloaderData.updateError   = 0;
+	}
+	else {
+		if (ipcData.bootloaderData.ipcDataMajor != g_BOOTLOADER_IPC_RAM_MAJOR) {
+			// We don't know how to parse this, so don't use it.
+			// Once we update the major, we can add backwards compatibility here.
+			ipcData.bootloaderData.justActivated = 0;
+			ipcData.bootloaderData.updateError   = 1;
 		}
 	}
+
+	// Since we may have a newer minor version, use the latest dataSize.
+	dataSize = sizeof(ipcData.bootloaderData);
 
 	ipcData.bootloaderData.ipcDataMajor         = g_BOOTLOADER_IPC_RAM_MAJOR;
 	ipcData.bootloaderData.ipcDataMinor         = g_BOOTLOADER_IPC_RAM_MINOR;
@@ -218,7 +235,6 @@ void set_bootloader_info() {
 	ipcData.bootloaderData.bootloaderPatch      = g_BOOTLOADER_VERSION_PATCH;
 	ipcData.bootloaderData.bootloaderPrerelease = g_BOOTLOADER_VERSION_PRERELEASE;
 	ipcData.bootloaderData.bootloaderBuildType  = g_BOOTLOADER_BUILD_TYPE;
-	dataSize                                    = sizeof(ipcData.bootloaderData);
 	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
 }
 
