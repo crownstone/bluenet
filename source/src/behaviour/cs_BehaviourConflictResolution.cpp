@@ -1,18 +1,32 @@
 #include <behaviour/cs_BehaviourConflictResolution.h>
 
-bool PresenceIsMoreRelevant(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs) {
-    // TODO
-//    if(lhs == PresencePredicate::VacuouslyTrue) return false;
-//    if(lsh == PresencePredicate::AnyoneInSelectedRooms) return rhs ==
-//    VacuouslyTrue         = 0,
-//    AnyoneInSelectedRooms = 1,
-//    NooneInSelectedRooms  = 2,
-//    AnyoneInSphere        = 3,
-//    NooneInSphere         = 4
+/*
+ * returns a 'relevance', lower is less relevant.
+ *  - VacuouslyTrue is least relevant.
+ *  - 'in Sphere' is less relevant than 'In room'.
+ *  - 'presence' is less relevant than 'absence'.
+ */
+auto getRelevance(PresencePredicate::Condition c) {
+    switch(c) {
+        case PresencePredicate::Condition::VacuouslyTrue: return 0;
+        case PresencePredicate::Condition::AnyoneInSphere: return 1;
+        case PresencePredicate::Condition::NooneInSphere: return 2;
+        case PresencePredicate::Condition::AnyoneInSelectedRooms: return 3;
+        case PresencePredicate::Condition::NooneInSelectedRooms: return 4;
+        default: return -1; // worst relevance: unknown enum value
+    }
+};
 
-    return false;
+bool PresenceIsMoreRelevant(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs) {
+    return getRelevance(lhs) > getRelevance(rhs);
 }
 
+bool PresenceIsMoreRelevantOrEqual(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs) {
+    return getRelevance(lhs) >= getRelevance(rhs);
+}
+
+// Warning: be careful about integer underflow in the subtraction. Changed the signature to
+// _signed_ integers in order to circumvent extra casting here.
 bool FromUntilIntervalIsMoreRelevantOrEqual(
 		int32_t lhsFrom, int32_t lhsUntil, int32_t rhsFrom, int32_t rhsUntil, int32_t currentTimeOfDay) {
 	constexpr uint32_t secondsPerDay = 24 * 60 * 60;
@@ -28,11 +42,8 @@ bool FromUntilIntervalIsMoreRelevantOrEqual(
 	// First we normalize the from/until times so that current_tod corresponds to '0'.
 	// That way, comparisons like lhs_from < rhs_from do not suffer from subtleties concerning
 	// midnight roll over and unsigned integer over/underflow.
-	//
-	// Warning: be careful about integer underflow in the subtraction. Changed the signature to
-	// _signed_ integers in order to circumvent extra casting here.
-	uint32_t lhsFromNormalized       = CsMath::mod(lhsFrom - currentTimeOfDay, secondsPerDay);
-	uint32_t rhsFromNormalized       = CsMath::mod(rhsFrom - currentTimeOfDay, secondsPerDay);
+    uint32_t lhsFromNormalized       = CsMath::mod(lhsFrom - currentTimeOfDay, secondsPerDay);
+    uint32_t rhsFromNormalized       = CsMath::mod(rhsFrom - currentTimeOfDay, secondsPerDay);
 	uint32_t lhsUntilNormalized      = CsMath::mod(lhsUntil - currentTimeOfDay, secondsPerDay);
 	uint32_t rhsUntilNormalized      = CsMath::mod(rhsUntil - currentTimeOfDay, secondsPerDay);
 

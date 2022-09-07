@@ -39,7 +39,7 @@ SwitchBehaviour* getBehaviourPresent(){
     testAccessSwitchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
     testAccessSwitchBehaviour.presencecondition.predicate._presence._bitmask = roomBitmask();
     auto switchBehaviourInRoom = new SwitchBehaviour(testAccessSwitchBehaviour.get());
-//    std::cout << "switchBehaviourInRoom: " << *switchBehaviourInRoom << std::endl;
+    std::cout << "switchBehaviourInRoom: " << *switchBehaviourInRoom << std::endl;
     return switchBehaviourInRoom;
 }
 
@@ -49,7 +49,7 @@ SwitchBehaviour* getBehaviourAbsent() {
     testAccessSwitchBehaviour.intensity = 90;
     testAccessSwitchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
     auto switchBehaviourPresenceIrrelevant = new SwitchBehaviour(testAccessSwitchBehaviour.get());
-//    std::cout << "switchBehaviourPresenceIrrelevant: " << *switchBehaviourPresenceIrrelevant << std::endl;
+    std::cout << "switchBehaviourPresenceIrrelevant: " << *switchBehaviourPresenceIrrelevant << std::endl;
     return switchBehaviourPresenceIrrelevant;
 }
 
@@ -68,6 +68,14 @@ int main() {
     SwitchBehaviour* behaviourAbsent = getBehaviourAbsent();
     _behaviourStore.addBehaviour(behaviourPresent);
     _behaviourStore.addBehaviour(behaviourAbsent);
+
+    for (auto storedBehaviour : _behaviourStore.getActiveBehaviours()) {
+        if(auto sBehaviour = dynamic_cast<SwitchBehaviour*>(storedBehaviour)) {
+            std::cout << "stored behaviour: " << *sBehaviour
+                      << " condition: " << +static_cast<uint8_t>(sBehaviour->currentPresenceCondition())
+                      << std::endl;
+        }
+    }
 
     Time testTimeActive(DayOfWeek::Tuesday, 12, 30);
 

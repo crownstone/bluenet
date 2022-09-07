@@ -138,12 +138,13 @@ SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
         if (candidateSwitchBehaviour == nullptr) {
             continue;
         }
+        LOGd("*");
 
         // conflict resolve:
 
         // presence first.
         auto candidateCondition = candidateSwitchBehaviour->currentPresenceCondition();
-        auto currentBestCondition = candidateSwitchBehaviour->currentPresenceCondition();
+        auto currentBestCondition = currentBestSwitchBehaviour->currentPresenceCondition();
 
         if(PresenceIsMoreRelevant(candidateCondition, currentBestCondition)) {
             currentBestSwitchBehaviour = candidateSwitchBehaviour;
@@ -156,7 +157,7 @@ SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
 
         // if presence is not decisive, time interval decides
         if (FromUntilIntervalIsEqual(currentBestSwitchBehaviour, candidateSwitchBehaviour)) {
-            // when interval coincides, lowest intensity behaviour wins:
+            // when interval is equal too, lowest intensity behaviour wins:
             if (candidateSwitchBehaviour->value() < currentBestSwitchBehaviour->value()) {
                 currentBestSwitchBehaviour = candidateSwitchBehaviour;
             }
