@@ -32,11 +32,6 @@ std::ostream & operator<< (std::ostream &out, TimeOfDay t);
 std::ostream & operator<< (std::ostream &out, Time t);
 
 /**
- * Allows streaming PresenceStateDescription objects to std::cout and other streams.
- */
-std::ostream & operator<< (std::ostream &out, PresenceStateDescription p);
-
-/**
  * Allows streaming std::optional<T> objects to std::cout and other streams, given T is a type for which
  * the relevant operator<< has been implemented.
  */

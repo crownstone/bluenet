@@ -34,6 +34,19 @@ public:
                    << "_bitmask: " << std::bitset<64>(obj._bitmask)
                    << "}";
     }
+
+    static std::ostream &toStreamVerbose(std::ostream &out, PresenceStateDescription p){
+        int i = 0;
+        out << "rooms: {";
+        for (auto bitmask = p.getBitmask(); bitmask != 0; bitmask >>= 1) {
+            out << (i?", ":"") << i;
+            i++;
+        }
+        out << "}";
+        return out;
+    }
+
+
 };
 
 std::ostream & operator<< (std::ostream &out, PresenceStateDescription& obj) {

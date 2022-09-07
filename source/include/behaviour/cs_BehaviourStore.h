@@ -14,6 +14,8 @@
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
 
+#include <test/cs_TestAccess.h>
+
 #include <array>
 #include <optional>
 #include <vector>
@@ -22,6 +24,7 @@
  * Keeps track of the behaviours that are active on this crownstone.
  */
 class BehaviourStore : public EventListener, public Component {
+    friend class TestAccess<BehaviourStore>;
 public:
 	static constexpr size_t MaxBehaviours = 50;
 

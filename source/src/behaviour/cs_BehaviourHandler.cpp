@@ -138,7 +138,6 @@ SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
         if (candidateSwitchBehaviour == nullptr) {
             continue;
         }
-        LOGd("*");
 
         // conflict resolve:
 

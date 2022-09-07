@@ -35,13 +35,4 @@ std::ostream & operator<< (std::ostream &out, Time t){
     return out << t.dayOfWeek() << " " << t.timeOfDay();
 }
 
-std::ostream & operator<< (std::ostream &out, PresenceStateDescription p){
-    int i = 0;
-    out << "rooms: {";
-    for (auto bitmask = p.getBitmask(); bitmask != 0; bitmask >>= 1) {
-        out << (i?", ":"") << i;
-        i++;
-    }
-    out << "}";
-    return out;
-}
+

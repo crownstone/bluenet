@@ -14,6 +14,7 @@
 #include <utils/date.h>
 
 #include <testaccess/cs_SystemTime.h>
+#include <testaccess/cs_PresenceDescription.h>
 #include <utils/cs_iostream.h>
 
 #include <cstdio>
