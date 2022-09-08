@@ -37,7 +37,7 @@ A smartphone when setting up a connection has to perform a service discovery pro
 characteristics are obtained from the bluenet device. This process takes a while, a couple of seconds. The reason for this is that it is not truly possible to reliably cache the services and characteristics properly across all devices. If
 the device running bluenet that you want to connect to is not in the proximity of the smartphone, the connection process can take quite some while or fail altogether.
 
-For this, the so-called [ConstellationAPI](https://github.com/crownstone/crownstone-app/blob/master/docs/bleTasks/ConstellationAPI.MD) has been implemented. It sorts bluenet devices on their proximity and is able to set up a connection to a couple of them in parallel. The sessions are time-limited. You can send a series of different dim commands while using the dim slider without connecting and disconnecting within a certain time period.
+For this, the so-called [ConstellationAPI](https://github.com/crownstone/crownstone-app/blob/master/docs/ConstellationAPI.MD) has been implemented. It sorts bluenet devices on their proximity and is able to set up a connection to a couple of them in parallel. The sessions are time-limited. You can send a series of different dim commands while using the dim slider without connecting and disconnecting within a certain time period.
 
 There are no permanent connections. This might be something for the future to further remove delays.
 
