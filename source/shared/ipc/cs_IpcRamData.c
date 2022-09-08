@@ -95,11 +95,11 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
  * in that case allow the developer to retrieve the (hopefully uncorrupted) major field and can call getRamData with
  * another major that it also knows how to parse.
  */
-enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum) {
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool verifyChecksum) {
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (doCalculateChecksum) {
+	if (verifyChecksum) {
 		uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 		if (checksum != m_bluenet_ipc_ram.item[index].header.checksum) {
 			return IPC_RET_DATA_INVALID;
@@ -107,32 +107,6 @@ enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t inde
 	}
 	memcpy(header, &m_bluenet_ipc_ram.item[index].header, sizeof(bluenet_ipc_data_header_t));
 	return IPC_RET_SUCCESS;
-}
-
-/*
- * To judge if RAM data is present we just assume that both major and minor are still zero. It doesn't tell if the item
- * is valid. We can't use other fields than major and minor because they can change.
- */
-bool isRamDataPresent(uint8_t index) {
-	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
-		return false;
-	}
-	return (m_bluenet_ipc_ram.item[index].header.major != 0 || m_bluenet_ipc_ram.item[index].header.minor != 0);
-}
-
-/*
- * Returns true if the entire buffer including the header is empty.
- */
-bool isRamDataEmpty(uint8_t index) {
-	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
-		return false;
-	}
-	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
-		if (m_bluenet_ipc_ram.item[index].data.raw[i] != 0) {
-			return false;
-		}
-	}
-	return true;
 }
 
 /**

@@ -15,6 +15,21 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+/**
+ * IPC ram is a reserved section in ram to communicate between bootloader, application, and microapp.
+ * It is also used to store data over reboots.
+ *
+ * The ram is split up into items. Each item serves for communication between 1 or 2 of the mentioned programs.
+ * For example, the item at index bootloader info is for communication from the bootloader to the application.
+ *
+ * Note that we cannot assume the ram is zero initialized. This makes it harder to quickly check if an item has
+ * valid data, we need to at least verify the checksum.
+ *
+ * Also, since IPC ram survives reboots, this also means we have to deal with data from a previous firmware version.
+ *
+ * Each item has a fixed maximum size. If we want to increase this, we break all the following items as well.
+ */
+
 // The number of slots for interprocess communication
 #define BLUENET_IPC_RAM_DATA_ITEMS 5
 
@@ -120,30 +135,15 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize);
 enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint8_t maxSize);
 
 /**
- * Get header for specific data. Calculating the checksum can be omitted.
+ * Get the IPC ram header.
+ * Useful for debug, when getRamData failed.
  *
- * @param[out] header              Get only the header.
+ * @param[out] header              Buffer to copy the header to.
  * @param[in] index                Index of IPC segment.
- * @param[in] doCalculateChecksum  Calculate the checksum.
+ * @param[in] verifyChecksum       Whether to verify the checksum.
  * @return                         Error code (success is indicated by 0).
  */
-enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum);
-
-/**
- * Returns whether RAM data present
- *
- * @param[in] index                Index of IPC segment.
- * @return                         Boolean, true if present.
- */
-bool isRamDataPresent(uint8_t index);
-
-/**
- * Returns whether RAM data is empty.
- *
- * @param[in] index                Index of IPC segment.
- * @return                         Boolean, true if clear
- */
-bool isRamDataEmpty(uint8_t index);
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool verifyChecksum);
 
 /**
  * Clear RAM data.
