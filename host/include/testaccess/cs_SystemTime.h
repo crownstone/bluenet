@@ -19,7 +19,6 @@ public:
             RTC::offsetMs(1000);
             tick(nullptr);
             tick(nullptr);
-            std::cout << "." << std::flush;
         }
     }
 

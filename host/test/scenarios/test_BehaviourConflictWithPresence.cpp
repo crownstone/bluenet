@@ -19,13 +19,16 @@
 
 #include <utils/date.h>
 
-uint64_t roomBitmask() {
+uint64_t roomBitmaskSingle() {
     return 0b001;
+}
+uint64_t roomBitmaskMulti() {
+    return 0b011;
 }
 
 PresenceStateDescription present() {
     TestAccess<PresenceStateDescription> testAccessPresenceDesc;
-    testAccessPresenceDesc._bitmask |= roomBitmask();
+    testAccessPresenceDesc._bitmask |= roomBitmaskSingle();
     return testAccessPresenceDesc.get();
 }
 
@@ -35,12 +38,13 @@ PresenceStateDescription absent() {
     return testAccessPresenceDesc.get();
 }
 
-SwitchBehaviour* getBehaviourPresent(PresencePredicate::Condition condition){
+SwitchBehaviour* getBehaviourPresent(PresencePredicate::Condition condition, bool multipleRooms = false){
     TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
 
     testAccessSwitchBehaviour.intensity = 95;
     testAccessSwitchBehaviour.presencecondition.predicate._condition = condition;
-    testAccessSwitchBehaviour.presencecondition.predicate._presence._bitmask = roomBitmask();
+    testAccessSwitchBehaviour.presencecondition.predicate._presence._bitmask =
+            multipleRooms ? roomBitmaskSingle() : roomBitmaskMulti();
     auto switchBehaviourInRoom = new SwitchBehaviour(testAccessSwitchBehaviour.get());
     //std::cout << "switchBehaviourInRoom: " << *switchBehaviourInRoom << std::endl;
     return switchBehaviourInRoom;
@@ -58,6 +62,12 @@ SwitchBehaviour* getBehaviourNarrowTimesWithTrivialPresence() {
     return switchBehaviourPresenceIrrelevant;
 }
 
+/**
+ * Checks if the _behaviourHandler resolves to the switch behaviour in the _behaviourStore with the given
+ * expectedBehaviourIndex and presence. If not, print a message with the line number for reference.
+
+ * @return true on correct resolution, false otherwise.
+ */
 bool checkCase(BehaviourHandler& _behaviourHandler, BehaviourStore& _behaviourStore, int expectedBehaviourIndex, PresenceStateDescription presence, int line) {
     Time testTime(DayOfWeek::Tuesday, 12, 0);
     SwitchBehaviour* expected = dynamic_cast<SwitchBehaviour*>(_behaviourStore.getBehaviour(expectedBehaviourIndex));
@@ -85,12 +95,15 @@ bool checkCase(BehaviourHandler& _behaviourHandler, BehaviourStore& _behaviourSt
 }
 
 struct TestBehaviours {
+    // the index in the behaviourstore where this behaviour will be put.
     static constexpr int verySpecific = 0;
     static constexpr int vacuouslyTrue = 1;
     static constexpr int anyoneInSphere = 2;
     static constexpr int nooneInSphere = 3;
     static constexpr int anyoneInRoom = 4;
     static constexpr int nooneInRoom = 5;
+    static constexpr int anyoneInRoomMulti = 6;
+    static constexpr int nooneInRoomMulti = 7;
 
     /**
      * this method allocates on the heap. no need to clean up, the behaviourstore will take ownership and
@@ -104,6 +117,8 @@ struct TestBehaviours {
             case nooneInSphere: return getBehaviourPresent(PresencePredicate::Condition::NooneInSphere);
             case anyoneInRoom: return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSelectedRooms);
             case nooneInRoom: return getBehaviourPresent(PresencePredicate::Condition::NooneInSelectedRooms);
+            case anyoneInRoomMulti: return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSelectedRooms, true);
+            case nooneInRoomMulti: return getBehaviourPresent(PresencePredicate::Condition::NooneInSelectedRooms, true);
             default: return nullptr;
         }
     }
@@ -170,6 +185,37 @@ int main() {
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, absent(), __LINE__)) return 1;
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInSphere, present(), __LINE__)) return 1;
 
+//
+    setupBehaviourStore(_behaviourStore, {
+            TestBehaviours::vacuouslyTrue,
+            TestBehaviours::anyoneInSphere,
+            TestBehaviours::nooneInSphere,
+            TestBehaviours::anyoneInRoomMulti
+    });
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoomMulti, present(), __LINE__)) return 1;
+
+    setupBehaviourStore(_behaviourStore, {
+            TestBehaviours::vacuouslyTrue,
+            TestBehaviours::anyoneInSphere,
+            TestBehaviours::nooneInSphere,
+            TestBehaviours::anyoneInRoomMulti,
+            TestBehaviours::nooneInRoomMulti
+    });
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInRoomMulti, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoomMulti, present(), __LINE__)) return 1;
+//
+    setupBehaviourStore(_behaviourStore, {
+            TestBehaviours::vacuouslyTrue,
+            TestBehaviours::anyoneInSphere,
+            TestBehaviours::nooneInSphere,
+            TestBehaviours::anyoneInRoomMulti,
+            TestBehaviours::nooneInRoomMulti,
+            TestBehaviours::anyoneInRoom
+    });
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoomMulti, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, present(), __LINE__)) return 1;
+
     setupBehaviourStore(_behaviourStore, {
             TestBehaviours::vacuouslyTrue,
             TestBehaviours::anyoneInSphere,
@@ -177,6 +223,18 @@ int main() {
             TestBehaviours::anyoneInRoom
     });
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, present(), __LINE__)) return 1;
+
+    setupBehaviourStore(_behaviourStore, {
+            TestBehaviours::vacuouslyTrue,
+            TestBehaviours::anyoneInSphere,
+            TestBehaviours::nooneInSphere,
+            TestBehaviours::anyoneInRoomMulti,
+            TestBehaviours::nooneInRoomMulti,
+            TestBehaviours::anyoneInRoom,
+            TestBehaviours::nooneInRoom
+    });
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInRoom, absent(), __LINE__)) return 1;
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, present(), __LINE__)) return 1;
 
     setupBehaviourStore(_behaviourStore, {
