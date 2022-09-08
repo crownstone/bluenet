@@ -14,6 +14,24 @@ template<>
 class TestAccess<BehaviourStore> {
 public:
 
+    static void clearActiveBehavioursArray(BehaviourStore& store) {
+        store.clearActiveBehavioursArray();
+    }
+    // prints list of valid behaviours
+    static std::ostream& toStream(std::ostream& out, BehaviourStore& store, Time currentTime, PresenceStateDescription currentPresence) {
+        // TODO: only prints switch behaviours for now.  implement twilight.
+        out << "{" << std::endl;
+        for (auto i{0}; i < BehaviourStore::MaxBehaviours; i++){
+            if(auto switchBehaviour = dynamic_cast<SwitchBehaviour*>(store.activeBehaviours[i])) {
+                if (switchBehaviour->isValid(currentTime, currentPresence)) {
+                    out << i << ": " << *switchBehaviour << std::endl;
+                }
+            }
+        }
+        out << "}";
+        return out;
+    }
+
     static std::ostream& toStream(std::ostream& out, BehaviourStore& store) {
         // TODO: only prints switch behaviours for now.  implement twilight.
         out << "{" << std::endl;

@@ -57,7 +57,9 @@ public:
             << "profileId:" << +s.profileId << ", "
             << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
             << "presenceCondition: " << s.presenceCondition
-            << "}";
+            << "}"
+            << "[gracePeriodForPresenceIsActive(): "<< s.gracePeriodForPresenceIsActive() <<"]"
+            ;
     }
 };
 
