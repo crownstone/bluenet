@@ -174,7 +174,6 @@ public:
 	void onBleEventInterrupt(const ble_evt_t* p_ble_evt, bool isInterrupt);
 
 	void secReqTimeoutHandler(void* p_context);
-	void setAesEncrypted(bool encrypted);
 	void disconnect();
 
 	bool checkCondition(condition_t condition, bool expectation);

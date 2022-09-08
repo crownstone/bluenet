@@ -11,8 +11,6 @@
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
-#include <events/cs_Event.h>
-#include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappController.h>
@@ -45,11 +43,6 @@
  * Disable coroutines and use direct calls by setting this macro to 1. Default is 0.
  */
 #define DEVELOPER_OPTION_DISABLE_COROUTINE 0
-
-/*
- * Enable throttling of BLE scanned devices by rssi.
- */
-#define DEVELOPER_OPTION_THROTTLE_BY_RSSI
 
 extern "C" {
 
@@ -160,18 +153,10 @@ void goIntoMicroapp(void* p) {
 }  // extern C
 
 /*
- * Get from digital pin to interrupt.
- */
-int MicroappController::digitalPinToInterrupt(int pin) {
-	return pin;
-}
-
-/*
  * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
-MicroappController::MicroappController() : EventListener() {
-	EventDispatcher::getInstance().addListener(this);
+MicroappController::MicroappController() {
 	LOGi("Microapp end is at %p", microappRamSection._end);
 }
 
@@ -182,14 +167,14 @@ MicroappController::MicroappController() : EventListener() {
  * The bluenet2microapp object can be stored on the stack because setRamData copies the data.
  */
 void MicroappController::setIpcRam() {
-	LOGi("Set IPC info for microapp");
+	LOGi("Set IPC from bluenet for microapp");
 	bluenet_ipc_data_cpp_t ipcData;
 	ipcData.bluenet2microappData.microappCallback = microappCallback;
 	ipcData.bluenet2microappData.dataProtocol     = MICROAPP_IPC_DATA_PROTOCOL;
 
 	LOGi("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 
-	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, sizeof(bluenet2microapp_ipcdata_t), ipcData.raw);
+	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, ipcData.raw, sizeof(bluenet2microapp_ipcdata_t));
 	if (retCode != ERR_SUCCESS) {
 		LOGw("Microapp IPC RAM data error, retCode=%u", retCode);
 		return;
@@ -267,9 +252,71 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 	return payload;
 }
 
+void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingState state) {
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return;
+	}
+	uint8_t runFlag = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	bluenet_ipc_data_t ipcData;
+	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
+	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
+	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
+
+	// TODO: this does not handle IPC minor updates well.
+	IpcRetCode ipcCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(bluenet_ipc_bluenet_data_t));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGi("Error in setting IPC ram data: %i", ipcCode);
+	}
+}
+
+MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
+	MicroappOperatingState state = MicroappOperatingState::CS_MICROAPP_NOT_RUNNING;
+	if (!isRamDataPresent(IPC_INDEX_MICROAPP_STATE)) {
+		LOGi("No IPC data present");
+		return state;
+	}
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return state;
+	}
+	bluenet_ipc_data_t ipcData;
+	uint8_t dataSize = 0;
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGi("Failed to get IPC data: ipcCode=%i", ipcCode);
+		return state;
+	}
+	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
+		LOGi("Incorrect major version");
+		return state;
+	}
+	if (ipcData.bluenetRebootData.ipcDataMinor != BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
+		LOGi("Incoming minor is older or newer");
+		// do not return
+	}
+	if (dataSize != sizeof(bluenet_ipc_bluenet_data_t)) {
+		LOGi("Incorrect data size");
+		// do not return
+	}
+	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
+		case 1: {
+			state = MicroappOperatingState::CS_MICROAPP_RUNNING;
+			break;
+		}
+		default: {
+			// non-running state as default
+		}
+	}
+	return state;
+}
+
 void MicroappController::callMicroapp() {
 #if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
+	const uint8_t appIndex = 0;
+	setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_RUNNING);
 	if (nextCoroutine()) {
+		setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_NOT_RUNNING);
 		return;
 	}
 #else
@@ -321,6 +368,7 @@ bool MicroappController::handleRequest() {
 	LogMicroappControllerDebug("Retrieve and handle request [type %u]", incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
+	// TODO: put result in ack, instead of letting the handler(s) set the ack.
 	if (result != ERR_SUCCESS) {
 		LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
 	}
@@ -440,124 +488,13 @@ void MicroappController::generateSoftInterrupt() {
 }
 
 /*
- * Do some checks to validate if we want to generate an interrupt for the pin event
- * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
- */
-void MicroappController::onGpioUpdate(uint8_t pinIndex) {
-	if (!allowSoftInterrupts()) {
-		LogMicroappControllerDebug("New interrupts blocked, ignore pin event");
-		return;
-	}
-	uint8_t interruptPin = digitalPinToInterrupt(pinIndex);
-	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_PIN, interruptPin)) {
-		LogMicroappControllerDebug("No interrupt registered for virtual pin %d", interruptPin);
-		return;
-	}
-	// Write pin data into the buffer.
-	uint8_t* outputBuffer   = getOutputMicroappBuffer();
-	microapp_sdk_pin_t* pin = reinterpret_cast<microapp_sdk_pin_t*>(outputBuffer);
-	pin->header.messageType = CS_MICROAPP_SDK_TYPE_PIN;
-	pin->pin                = interruptPin;
-
-	LogMicroappControllerDebug("Incoming GPIO interrupt for microapp on virtual pin %i", interruptPin);
-	generateSoftInterrupt();
-}
-
-/*
- * Do some checks to validate if we want to generate an interrupt for the scanned device
- * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
- */
-void MicroappController::onDeviceScanned(scanned_device_t* dev) {
-	if (!_microappIsScanning) {
-		// Microapp not scanning, so not forwarding scanned device
-		return;
-	}
-
-#ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
-	// Throttle by rssi by default to limit number of scanned devices forwarded
-	if (dev->rssi < -50) {
-		return;
-	}
-#endif
-
-	if (!allowSoftInterrupts()) {
-		LogMicroappControllerDebug("New interrupts blocked, ignore ble device event");
-		return;
-	}
-	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE)) {
-		LogMicroappControllerDebug("No interrupt registered");
-		return;
-	}
-
-	// Write bluetooth device to buffer
-	uint8_t* outputBuffer   = getOutputMicroappBuffer();
-	microapp_sdk_ble_t* ble = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-
-	if (dev->dataSize > sizeof(ble->data)) {
-		LOGw("BLE advertisement data too large");
-		return;
-	}
-
-	ble->header.messageType = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type               = CS_MICROAPP_SDK_BLE_SCAN_SCANNED_DEVICE;
-	ble->address_type       = dev->addressType;
-	std::reverse_copy(dev->address, dev->address + MAC_ADDRESS_LENGTH, ble->address);
-	ble->rssi = dev->rssi;
-	ble->size = dev->dataSize;
-	memcpy(ble->data, dev->data, dev->dataSize);
-
-	LogMicroappControllerDebug("Incoming BLE scanned device for microapp");
-	generateSoftInterrupt();
-}
-
-/*
- * Do some checks to validate if we want to generate an interrupt for the received message
- * and if so, prepare the outgoing buffer and call generateSoftInterrupt()
- */
-void MicroappController::onReceivedMeshMessage(MeshMsgEvent* event) {
-	if (event->type != CS_MESH_MODEL_TYPE_MICROAPP) {
-		// Mesh message received, but not for the microapp.
-		return;
-	}
-	if (event->isReply) {
-		// We received the empty reply.
-		return;
-	}
-	if (event->reply != nullptr) {
-		// Send an empty reply.
-		event->reply->type     = CS_MESH_MODEL_TYPE_MICROAPP;
-		event->reply->dataSize = 0;
-	}
-	if (!allowSoftInterrupts()) {
-		LogMicroappControllerDebug("New interrupts blocked, ignore mesh event");
-		return;
-	}
-	if (!softInterruptRegistered(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ)) {
-		LogMicroappControllerDebug("No interrupt registered");
-		return;
-	}
-	// Write mesh message to buffer
-	uint8_t* outputBuffer        = getOutputMicroappBuffer();
-	microapp_sdk_mesh_t* meshMsg = reinterpret_cast<microapp_sdk_mesh_t*>(outputBuffer);
-
-	meshMsg->header.messageType  = CS_MICROAPP_SDK_TYPE_MESH;
-	meshMsg->type                = CS_MICROAPP_SDK_MESH_READ;
-	meshMsg->stoneId             = event->srcStoneId;
-	meshMsg->size                = event->msg.len;
-	memcpy(meshMsg->data, event->msg.data, event->msg.len);
-
-	LogMicroappControllerDebug("Incoming mesh message for microapp");
-	generateSoftInterrupt();
-}
-
-/*
  * Attempt registration of an interrupt. An interrupt registration is uniquely identified
  * by a type (=messageType, see enum MicroappSdkMessageType) and an id which identifies the interrupt
  * registration within the scope of the type.
  */
 cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id) {
 	// Check if interrupt registration already exists
-	if (softInterruptRegistered(type, id)) {
+	if (isSoftInterruptRegistered(type, id)) {
 		LOGi("Interrupt [%i, %i] already registered", type, id);
 		return ERR_ALREADY_EXISTS;
 	}
@@ -586,7 +523,7 @@ cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkMessageType t
 /*
  * Check whether an interrupt registration already exists
  */
-bool MicroappController::softInterruptRegistered(MicroappSdkMessageType type, uint8_t id) {
+bool MicroappController::isSoftInterruptRegistered(MicroappSdkMessageType type, uint8_t id) {
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
 		if (_softInterruptRegistrations[i].registered) {
 			if (_softInterruptRegistrations[i].type == type && _softInterruptRegistrations[i].id == id) {
@@ -632,35 +569,4 @@ void MicroappController::incrementEmptySoftInterruptSlots() {
 		return;
 	}
 	_emptySoftInterruptSlots++;
-}
-
-/*
- * Set the internal scanning flag
- */
-void MicroappController::setScanning(bool scanning) {
-	_microappIsScanning = scanning;
-}
-
-/**
- * Listen to events from the microapp that are coupled with (possibly) registered interrupts
- */
-void MicroappController::handleEvent(event_t& event) {
-	switch (event.type) {
-		case CS_TYPE::EVT_GPIO_UPDATE: {
-			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);
-			onGpioUpdate(gpio->pin_index);
-			break;
-		}
-		case CS_TYPE::EVT_DEVICE_SCANNED: {
-			auto dev = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
-			onDeviceScanned(dev);
-			break;
-		}
-		case CS_TYPE::EVT_RECV_MESH_MSG: {
-			auto msg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
-			onReceivedMeshMessage(msg);
-			break;
-		}
-		default: break;
-	}
 }

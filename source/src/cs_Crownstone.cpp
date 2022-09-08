@@ -269,14 +269,16 @@ void Crownstone::init1() {
 	_stack->initServices();
 	LOG_FLUSH();
 
-	LOGi(FMT_HEADER "init central");
-	_bleCentral->init();
-	_crownstoneCentral->init();
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		LOGi(FMT_HEADER "init central");
+		_bleCentral->init();
+		_crownstoneCentral->init();
 
 #if BUILD_MICROAPP_SUPPORT == 1
-	LOGi(FMT_HEADER "init microapp");
-	_microapp->init();
+		LOGi(FMT_HEADER "init microapp");
+		_microapp->init();
 #endif
+	}
 }
 
 void Crownstone::initDrivers0() {
@@ -483,7 +485,10 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 	// Init buffers, used by characteristics and central.
 	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
-	EncryptedBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	// The encrypted buffer needs some extra due to overhead: header and padding.
+	uint16_t encryptedSize = ConnectionEncryption::getInstance().getEncryptedBufferSize(
+			g_MASTER_BUFFER_SIZE, ConnectionEncryptionType::CTR);
+	EncryptedBuffer::getInstance().alloc(encryptedSize);
 
 	// Create services that belong to the new mode.
 	switch (newMode) {
@@ -537,12 +542,6 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 			break;
 		}
 		default: _advertiser->setNormalTxPower();
-	}
-
-	// Enable AES encryption.
-	if (_state->isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
-		LOGi(FMT_ENABLE "AES encryption");
-		_stack->setAesEncrypted(true);
 	}
 
 	//	_operationMode = newMode;
@@ -905,26 +904,54 @@ void Crownstone::printLoadStats() {
 	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
 
-void printBootloaderInfo() {
+/*
+ * Handle bootloader information. If a firmware is just activated, IPC RAM for managing error conditions around
+ * reboots (esp. with respect to the microapps) will be cleared. If the IPC version is exactly the same between
+ * bootloader and firmware the justActivated flag is subsequently cleared.
+ *
+ * Caution is required if there's an updateError which is not cleared by the bootloader across reboots. This means
+ * that RAM data for the microapps will always be cleared. That subsequently means that misbehaving microapps can not
+ * be properly detected.
+ *
+ * To fix this, it should be possible by the user to clear IPC ram.
+ */
+void handleBootloaderInfo() {
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, ipcData.raw, &dataSize, sizeof(ipcData.raw));
-	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("Bootloader IPC data error = %i", retCode);
+	LOGi("Get bootloader IPC data info");
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGw("Bootloader IPC data error: ipcCode=%i", ipcCode);
 		return;
 	}
+
 	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
-		LOGi("Different major. Not known how to parse bootloader IPC data.");
+		LOGw("Different IPC bootloader major: major=%u required=%u",
+			 ipcData.bootloaderData.ipcDataMajor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
 		return;
 	}
-	if (ipcData.bootloaderData.ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
-		LOGi("New minor. Will parse only part of bootloader IPC data");
+
+	// We can change this later to a lower minimal minor version.
+	if (ipcData.bootloaderData.ipcDataMinor < g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGw("Too old IPC bootloader minor: minor=%u minimum=%u.",
+			 ipcData.bootloaderData.ipcDataMinor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
 		return;
 	}
-	if (dataSize != sizeof(ipcData.bootloaderData)) {
-		LOGw("Bootloader IPC data struct has the incorrect size");
-		return;
+
+	if (ipcData.bootloaderData.justActivated || ipcData.bootloaderData.updateError) {
+		LOGi("Clear RAM data for microapps.");
+		clearRamData(IPC_INDEX_MICROAPP);
 	}
+
+	if (ipcData.bootloaderData.justActivated) {
+		LOGi("Clear the just activated flag");
+		ipcData.bootloaderData.justActivated = 0;
+		// Use the raw buffer, so we keep the possible newer data as well (in case of newer minor version).
+		setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+	}
+
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
 		 ipcData.bootloaderData.bootloaderMajor,
 		 ipcData.bootloaderData.bootloaderMinor,
@@ -1011,23 +1038,7 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-	printBootloaderInfo();
-
-	//	// Make a "clicker"
-	//	nrf_delay_ms(1000);
-	//	nrf_gpio_pin_set(board.pinGpioRelayOn);
-	//	nrf_delay_ms(RELAY_HIGH_DURATION);
-	//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
-	//	while (true) {
-	//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
-	//		nrf_gpio_pin_set(board.pinGpioRelayOff);
-	//		nrf_delay_ms(RELAY_HIGH_DURATION);
-	//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
-	//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
-	//		nrf_gpio_pin_set(board.pinGpioRelayOn);
-	//		nrf_delay_ms(RELAY_HIGH_DURATION);
-	//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
-	//	}
+	handleBootloaderInfo();
 
 	Crownstone crownstone(board);
 

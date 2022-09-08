@@ -18,6 +18,7 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <util/cs_Utils.h>
 
 #include <algorithm>
@@ -193,10 +194,10 @@ void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
 	_clockSource = clockSource;
 }
 
-void Stack::addService(Service* svc) {
-	_services.push_back(svc);
-	svc->createCharacteristics();
-	svc->updatedCharacteristics();
+void Stack::addService(Service* service) {
+	_services.push_back(service);
+	service->createCharacteristics();
+	service->updatedCharacteristics();
 }
 
 void Stack::initServices() {
@@ -204,11 +205,9 @@ void Stack::initServices() {
 		APP_ERROR_HANDLER(NRF_ERROR_INVALID_STATE);
 	}
 	LOGd("Init services");
-
-	for (Service* svc : _services) {
-		svc->init(this);
+	for (Service* service : _services) {
+		service->init(this);
 	}
-
 	setInitialized(C_SERVICES_INITIALIZED);
 }
 
@@ -385,12 +384,6 @@ void Stack::stopScanning() {
 
 bool Stack::isScanning() {
 	return _scanning;
-}
-
-void Stack::setAesEncrypted(bool encrypted) {
-	for (Service* svc : _services) {
-		svc->setAesEncrypted(encrypted);
-	}
 }
 
 void Stack::onBleEvent(const ble_evt_t* p_ble_evt) {
@@ -713,11 +706,11 @@ void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writ
 				 encryptionBuffer.len);
 			_logArray(LogLevelStackDebug, true, encryptionBuffer.data, encryptionBuffer.len);
 
-			for (Service* svc : _services) {
+			for (Service* service : _services) {
 				// for a long write, don't have the service handle available to check for the correct
 				// service, so we just go through all the services and characteristics until we find
 				// the correct characteristic, then we return
-				if (svc->onWrite(writeEvt, header[0])) {
+				if (service->onWrite(writeEvt, header[0])) {
 					return;
 				}
 			}
@@ -725,8 +718,8 @@ void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writ
 		}
 		case BLE_GATTS_OP_WRITE_REQ:
 		case BLE_GATTS_OP_WRITE_CMD: {
-			for (Service* svc : _services) {
-				svc->onWrite(writeEvt, writeEvt.handle);
+			for (Service* service : _services) {
+				service->onWrite(writeEvt, writeEvt.handle);
 			}
 			break;
 		}
@@ -822,8 +815,8 @@ void Stack::onGapTimeout(uint8_t src) {
 void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 	LOGi("Device connected");
 
-	for (Service* svc : _services) {
-		svc->onBleEvent(p_ble_evt);
+	for (Service* service : _services) {
+		service->onBleEvent(p_ble_evt);
 	}
 
 	startConnectionAliveTimer();
@@ -846,13 +839,14 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 void Stack::onIncomingDisconnected(const ble_evt_t* p_ble_evt) {
 	LOGi("Device disconnected");
 
-	for (Service* svc : _services) {
-		svc->onBleEvent(p_ble_evt);
+	for (Service* service : _services) {
+		service->onBleEvent(p_ble_evt);
 	}
 
 	stopConnectionAliveTimer();
 
-	event_t event(CS_TYPE::EVT_BLE_DISCONNECT);
+	TYPIFY(EVT_BLE_DISCONNECT) eventData = p_ble_evt->evt.gatts_evt.conn_handle;
+	event_t event(CS_TYPE::EVT_BLE_DISCONNECT, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
@@ -905,7 +899,7 @@ bool Stack::isConnectedPeripheral() {
 }
 
 void Stack::onTxComplete(const ble_evt_t* p_ble_evt) {
-	for (Service* svc : _services) {
-		svc->onTxComplete(&p_ble_evt->evt.common_evt);
+	for (Service* service : _services) {
+		service->onTxComplete(&p_ble_evt->evt.common_evt);
 	}
 }

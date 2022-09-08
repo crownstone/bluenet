@@ -32,7 +32,7 @@ protected:
 	void addSoftwareRevisionCharacteristic();
 
 private:
-	Characteristic<std::string>* _hardwareRevisionCharacteristic;
-	Characteristic<std::string>* _firmwareRevisionCharacteristic;
-	Characteristic<std::string>* _softwareRevisionCharacteristic;
+	Characteristic<const char*>* _hardwareRevisionCharacteristic = nullptr;
+	Characteristic<const char*>* _firmwareRevisionCharacteristic = nullptr;
+	Characteristic<const char*>* _softwareRevisionCharacteristic = nullptr;
 };

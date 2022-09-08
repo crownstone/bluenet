@@ -9,7 +9,7 @@
  */
 #pragma once
 
-#include <ble/cs_Characteristic.h>
+#include <ble/cs_CharacteristicBase.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Strings.h>
 #include <common/cs_BaseClass.h>
@@ -39,6 +39,11 @@ public:
 	virtual ~Service() {}
 
 	/**
+	 * Initialize the service: register it at the softdevice.
+	 */
+	void init(Stack* stack);
+
+	/**
 	 * Set the UUID.
 	 *
 	 * The UUID cannot be set anymore after the service has been initialized.
@@ -51,26 +56,9 @@ public:
 
 	uint16_t getHandle() { return _handle; }
 
-protected:
-	friend class Stack;
-
-	//! Back reference to the stack.
-	Stack* _stack = nullptr;
-
-	UUID _uuid;
-
-	//! Service handle will be obtained from SoftDevice
-	uint16_t _handle = BLE_CONN_HANDLE_INVALID;
-
-	//! List of characteristics
-	tuple<CharacteristicBase*> _characteristics;
+	tuple<CharacteristicBase*> getCharacteristics() { return _characteristics; }
 
 	virtual void createCharacteristics() = 0;
-
-	/**
-	 * Initialize the service: register it at the softdevice.
-	 */
-	void init(Stack* stack);
 
 	void onBleEvent(const ble_evt_t* event);
 
@@ -85,9 +73,19 @@ protected:
 	/** Add a single characteristic to the list
 	 * @characteristic Characteristic to add
 	 */
-	void addCharacteristic(CharacteristicBase* characteristic) { _characteristics.push_back(characteristic); }
+	void addCharacteristic(CharacteristicBase* characteristic);
 
 	void updatedCharacteristics() { _characteristics.shrink_to_fit(); }
 
-	void setAesEncrypted(bool encrypted);
+private:
+	//! Back reference to the stack.
+	Stack* _stack = nullptr;
+
+	UUID _uuid;
+
+	//! Service handle will be obtained from SoftDevice
+	uint16_t _handle = BLE_CONN_HANDLE_INVALID;
+
+	//! List of characteristics
+	tuple<CharacteristicBase*> _characteristics;
 };

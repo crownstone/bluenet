@@ -2,6 +2,7 @@
 
 This document describes how services and characteristics are implemented in bluenet.
 
+An introduction to BLE services and characteristics can also be found [here](https://devzone.nordicsemi.com/guides/short-range-guides/b/bluetooth-low-energy/posts/ble-characteristics-a-beginners-tutorial).
 
 ## Services
 

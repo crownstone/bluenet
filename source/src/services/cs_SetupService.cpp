@@ -16,6 +16,8 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
+#include <structs/cs_ControlPacketAccessor.h>
+#include <structs/cs_ResultPacketAccessor.h>
 #include <util/cs_BleError.h>
 
 SetupService::SetupService() : _macAddressCharacteristic(NULL), _setupKeyCharacteristic(NULL) {
@@ -52,18 +54,23 @@ void SetupService::addMacAddressCharacteristic() {
 		LOGe(FMT_CHAR_EXISTS STR_CHAR_MAC_ADDRESS);
 		return;
 	}
+
+	characteristic_config_t config = {
+			.read      = true,
+			.write     = false,
+			.notify    = false,
+			.encrypted = false,
+	};
+
 	sd_ble_gap_addr_get(&_myAddr);
 
 	_macAddressCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_macAddressCharacteristic);
-
-	_macAddressCharacteristic->setUUID(UUID(getUUID(), MAC_ADDRESS_UUID));
 	_macAddressCharacteristic->setName(BLE_CHAR_MAC_ADDRES);
-	_macAddressCharacteristic->setWritable(false);
-	_macAddressCharacteristic->setValue(_myAddr.addr);
-	_macAddressCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_macAddressCharacteristic->setMaxGattValueLength(BLE_GAP_ADDR_LEN);
-	_macAddressCharacteristic->setValueLength(BLE_GAP_ADDR_LEN);
+	_macAddressCharacteristic->setUuid(MAC_ADDRESS_UUID);
+	_macAddressCharacteristic->setConfig(config);
+	_macAddressCharacteristic->setValueBuffer(_myAddr.addr, sizeof(_myAddr.addr));
+	_macAddressCharacteristic->setInitialValueLength(sizeof(_myAddr.addr));
 }
 
 void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size) {
@@ -71,16 +78,22 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 		LOGe(FMT_CHAR_EXISTS STR_CHAR_SETUP_KEY);
 		return;
 	}
+
+	characteristic_config_t config = {
+			.read      = true,
+			.write     = false,
+			.notify    = false,
+			.encrypted = false,
+	};
+
+	sd_ble_gap_addr_get(&_myAddr);
+
 	_setupKeyCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_setupKeyCharacteristic);
-
-	_setupKeyCharacteristic->setUUID(UUID(getUUID(), SETUP_KEY_UUID));
 	_setupKeyCharacteristic->setName(BLE_CHAR_SETUP_KEY);
-	_setupKeyCharacteristic->setWritable(false);
-	_setupKeyCharacteristic->setValue(buffer);
-	_setupKeyCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_setupKeyCharacteristic->setMaxGattValueLength(size);
-	_setupKeyCharacteristic->setValueLength(0);
+	_setupKeyCharacteristic->setUuid(SETUP_KEY_UUID);
+	_setupKeyCharacteristic->setConfig(config);
+	_setupKeyCharacteristic->setValueBuffer(buffer, size);
 }
 
 void SetupService::handleEvent(event_t& event) {
@@ -89,10 +102,9 @@ void SetupService::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_SESSION_DATA_SET: {
 			cs_data_t key = KeysAndAccess::getInstance().getSetupKey();
-			if (key.data != nullptr) {
-				_setupKeyCharacteristic->setValueLength(key.len);
-				_setupKeyCharacteristic->setValue(key.data);
-				_setupKeyCharacteristic->updateValue();
+			if (key.data != nullptr && sizeof(_keyBuffer) == key.len) {
+				memcpy(_keyBuffer, key.data, sizeof(_keyBuffer));
+				_setupKeyCharacteristic->updateValue(key.len);
 			}
 			break;
 		}

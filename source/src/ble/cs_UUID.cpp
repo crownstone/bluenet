@@ -119,29 +119,39 @@ ret_code_t UUID::add(const ble_uuid128_t& fullUuid) {
 }
 
 ret_code_t UUID::rem(const ble_uuid_t& uuid) {
-	// If the type is set to @ref BLE_UUID_TYPE_UNKNOWN, or the pointer is NULL,
-	// the last Vendor Specific base UUID will be removed.
 	if (uuid.type < BLE_UUID_TYPE_VENDOR_BEGIN) {
 		return ERR_WRONG_PARAMETER;
 	}
 
-	// The remove function changes the type, we don't want that.
+	// Use a temporary variable, to keep uuid constant.
 	uint8_t type     = uuid.type;
 
 	uint32_t nrfCode = sd_ble_uuid_vs_remove(&type);
-	return nrfCode;
+	return fromNrfCode(nrfCode);
 }
 
 cs_ret_code_t UUID::fromNrfCode(ret_code_t nrfCode) {
 	switch (nrfCode) {
-		case NRF_SUCCESS: return ERR_SUCCESS;
-		case NRF_ERROR_NO_MEM: return ERR_NO_SPACE;
-		case NRF_ERROR_NOT_FOUND: return ERR_NOT_FOUND;
+		case NRF_SUCCESS: {
+			return ERR_SUCCESS;
+		}
+		case NRF_ERROR_NO_MEM: {
+			return ERR_NO_SPACE;
+		}
+		case NRF_ERROR_NOT_FOUND: {
+			return ERR_NOT_FOUND;
+		}
 
 		// We only get these in rem()
-		case NRF_ERROR_INVALID_PARAM: return ERR_WRONG_PARAMETER;
-		case NRF_ERROR_FORBIDDEN: return ERR_BUSY;
-		default: return ERR_UNSPECIFIED;
+		case NRF_ERROR_INVALID_PARAM: {
+			return ERR_WRONG_PARAMETER;
+		}
+		case NRF_ERROR_FORBIDDEN: {
+			return ERR_BUSY;
+		}
+		default: {
+			return ERR_UNSPECIFIED;
+		}
 	}
 }
 

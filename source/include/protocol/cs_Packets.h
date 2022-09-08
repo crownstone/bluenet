@@ -506,50 +506,16 @@ struct __attribute__((packed)) cs_ram_stats_t {
 	uint32_t numSbrkFails = 0;
 };
 
-struct __attribute__((packed)) cs_twi_init_t {
-	uint8_t scl;
-	uint8_t sda;
-	uint8_t freq;
-};
-
-struct __attribute__((packed)) cs_twi_write_t {
-	uint8_t address;
-	uint8_t length;
-	uint8_t* buf;
-	bool stop;
-};
-
-struct __attribute__((packed)) cs_twi_read_t {
-	uint8_t address;
-	uint8_t length;
-	uint8_t* buf;
-	bool stop;
-};
-
-struct __attribute__((packed)) cs_gpio_init_t {
-	uint8_t pin_index;
-	uint8_t direction;
-	uint8_t pull;
-	uint8_t polarity;
-	uintptr_t callback;
-};
-
-struct __attribute__((packed)) cs_gpio_write_t {
-	uint8_t pin_index;
-	uint8_t length;
-	uint8_t* buf;
-};
-
-struct __attribute__((packed)) cs_gpio_read_t {
-	uint8_t pin_index;
-	uint8_t length;
-	uint8_t* buf;
-};
-
-struct __attribute__((packed)) cs_gpio_update_t {
-	uint8_t pin_index;
-	uint8_t length;
-	uint8_t* buf;
+struct __attribute__((packed)) cs_bootloader_info_t {
+	// Version of this struct.
+	uint8_t protocol;
+	uint16_t dfuVersion;
+	uint8_t bootloaderMajor;
+	uint8_t bootloaderMinor;
+	uint8_t bootloaderPatch;
+	// A prerelease value. This is 255 for normal releases.
+	uint8_t bootloaderPrerelease;
+	uint8_t bootloaderBuildType;
 };
 
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;

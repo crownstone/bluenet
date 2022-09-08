@@ -223,10 +223,11 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Data type | Description | A     | M     | B
 -------------- | ---- | --------- | ----------- | :---: | :---: | :---:
-Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  | ECB
+Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB
+Session nonce  | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x
-Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). | | | 
+Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). | | |
 
 Every command written to the control characteristic returns a [result packet](#result-packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).

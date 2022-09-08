@@ -1033,8 +1033,9 @@ void PowerSampling::calculateEnergy() {
 	// Assume we process every buffer, so simply only multiple power with the buffer duration.
 	// Only add negative energy when power is below the threshold.
 	if (_slowAvgPowerMilliWatt > 0.0f || _slowAvgPowerMilliWatt < _negativePowerThresholdMilliWatt) {
-		_energyUsedmicroJoule +=
-				_slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * AdcBuffer::getChannelLength());
+		// This has to be casted manually, otherwise the += is done in float, and the result converted to int64_t afterwards.
+		_energyUsedmicroJoule += static_cast<int64_t>(
+				_slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * AdcBuffer::getChannelLength()));
 	}
 }
 

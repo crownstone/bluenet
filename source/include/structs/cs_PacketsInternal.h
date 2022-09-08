@@ -380,3 +380,49 @@ struct mesh_topo_mac_result_t {
 	uint8_t stoneId;
 	uint8_t macAddress[MAC_ADDRESS_LEN];
 };
+
+struct __attribute__((packed)) cs_twi_init_t {
+	uint8_t scl;
+	uint8_t sda;
+	uint8_t freq;
+};
+
+struct __attribute__((packed)) cs_twi_write_t {
+	uint8_t address;
+	uint8_t length;
+	uint8_t* buf;
+	bool stop;
+};
+
+struct __attribute__((packed)) cs_twi_read_t {
+	uint8_t address;
+	uint8_t length;
+	uint8_t* buf;
+	bool stop;
+};
+
+struct __attribute__((packed)) cs_gpio_init_t {
+	uint8_t pinIndex;
+	uint8_t direction;
+	uint8_t pull;
+	uint8_t polarity;
+	uintptr_t callback;
+};
+
+struct __attribute__((packed)) cs_gpio_write_t {
+	uint8_t pinIndex;
+	uint8_t length;
+	uint8_t* buf;
+};
+
+struct __attribute__((packed)) cs_gpio_read_t {
+	uint8_t pinIndex;
+	uint8_t length;
+	uint8_t* buf;
+};
+
+struct __attribute__((packed)) cs_gpio_update_t {
+	uint8_t pinIndex;
+	uint8_t length;
+	uint8_t* buf;
+};

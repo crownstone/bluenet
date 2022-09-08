@@ -270,27 +270,44 @@ void CommandHandler::handleCmdGetBootloaderVersion(
 		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get bootloader version");
 
+	cs_bootloader_info_t* bootloaderInfo = reinterpret_cast<cs_bootloader_info_t*>(result.buf.data);
+	if (result.buf.len < sizeof(cs_bootloader_info_t)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+	}
+
+	// Get the bootloader info from IPC.
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, result.buf.data, &dataSize, result.buf.len);
-	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("IPC error = %i", retCode);
+	bluenet_ipc_bootloader_data_t ipcData;
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, reinterpret_cast<uint8_t*>(&ipcData), &dataSize, sizeof(ipcData));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGw("IPC error = %i", ipcCode);
 		result.returnCode = ERR_NOT_FOUND;
 		return;
 	}
-	bluenet_ipc_bootloader_data_t* bootloaderData = (bluenet_ipc_bootloader_data_t*)result.buf.data;
-	if (bootloaderData->ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
-		LOGi("Different major. Not known how to parse bootloader IPC data.");
+
+	if (ipcData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Major version unsupported: major=%u required=%u", ipcData.ipcDataMajor, g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
+		result.returnCode = ERR_MISMATCH;
 		return;
 	}
-	if (bootloaderData->ipcDataMinor > g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
-		LOGi("New minor. Will parse only part of bootloader IPC data");
+
+	// This check could later use a different minimum. Because at version 1.0 we already have all the info we need.
+	if (ipcData.ipcDataMinor < g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("Minor version too low: minor=%u minimum=%u", ipcData.ipcDataMinor, g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
+		result.returnCode = ERR_MISMATCH;
 		return;
 	}
-	if (dataSize != sizeof(*bootloaderData)) {
-		// We will go through though, assuming the mismatch comes from a minor increase
-		LOGw("Bootloader IPC data struct has the incorrect size");
-	}
-	result.dataSize   = dataSize;
+
+	// Copy the info we need from IPC to the result packet.
+	bootloaderInfo->protocol = 1;
+	bootloaderInfo->dfuVersion = ipcData.dfuVersion;
+	bootloaderInfo->bootloaderMajor = ipcData.bootloaderMajor;
+	bootloaderInfo->bootloaderMinor = ipcData.bootloaderMinor;
+	bootloaderInfo->bootloaderPatch = ipcData.bootloaderPatch;
+	bootloaderInfo->bootloaderPrerelease = ipcData.bootloaderPrerelease;
+	bootloaderInfo->bootloaderBuildType = ipcData.bootloaderBuildType;
+
+	result.dataSize   = sizeof(cs_bootloader_info_t);
 	result.returnCode = ERR_SUCCESS;
 	return;
 }
