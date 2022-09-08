@@ -57,7 +57,7 @@ public:
 
 	virtual bool requiresPresence() override;
 	virtual bool requiresAbsence() override;
-    virtual PresencePredicate::Condition currentPresenceCondition();
+    virtual PresencePredicate currentPresencePredicate();
 
 	/**
 	 * Does the behaviour apply to the current situation?

@@ -61,8 +61,8 @@ bool SwitchBehaviour::requiresAbsence() {
 	return presenceCondition.predicate.requiresAbsence();
 }
 
-PresencePredicate::Condition SwitchBehaviour::currentPresenceCondition() {
-    return presenceCondition.predicate._condition;
+PresencePredicate SwitchBehaviour::currentPresencePredicate() {
+    return presenceCondition.predicate;
 }
 
 bool SwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {

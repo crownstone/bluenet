@@ -8,13 +8,7 @@
  *  - 'in Sphere' is less relevant than 'In room'.
  *  - 'presence' is less relevant than 'absence'..
  */
-bool PresenceIsMoreRelevant(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs);
-
-/**
- * Returns true if lhs is strictly more relevant than rhs, or they have equal relevance.
- *
- */
-bool PresenceIsMoreRelevantOrEqual(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs);
+bool PresenceIsMoreRelevant(PresencePredicate lhs, PresencePredicate rhs);
 
 /**
  * Returns true if;

@@ -6,8 +6,8 @@
  *  - 'in Sphere' is less relevant than 'In room'.
  *  - 'presence' is less relevant than 'absence'.
  */
-auto getRelevance(PresencePredicate::Condition c) {
-    switch(c) {
+auto getRelevance(PresencePredicate::Condition condition) {
+    switch(condition) {
         case PresencePredicate::Condition::VacuouslyTrue: return 0;
         case PresencePredicate::Condition::AnyoneInSphere: return 1;
         case PresencePredicate::Condition::NooneInSphere: return 2;
@@ -17,13 +17,30 @@ auto getRelevance(PresencePredicate::Condition c) {
     }
 };
 
-bool PresenceIsMoreRelevant(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs) {
-    return getRelevance(lhs) > getRelevance(rhs);
+bool isRoomBased(PresencePredicate predicate) {
+    return predicate._condition == PresencePredicate::Condition::AnyoneInSelectedRooms
+        || predicate._condition == PresencePredicate::Condition::NooneInSelectedRooms;
 }
 
-bool PresenceIsMoreRelevantOrEqual(PresencePredicate::Condition lhs, PresencePredicate::Condition rhs) {
-    return getRelevance(lhs) >= getRelevance(rhs);
+int numberOfRooms(PresencePredicate predicate) {
+    uint64_t bitmask = predicate._presence.getBitmask();
+    int count = 0;
+    for (auto i{0}; i<8; i++){
+        if(bitmask == 0) { break; }
+        count += ((bitmask & 0x01) ? 1 : 0);
+        bitmask>>=1;
+    }
+    return count;
 }
+
+bool PresenceIsMoreRelevant(PresencePredicate lhs, PresencePredicate rhs) {
+    return getRelevance(lhs._condition) > getRelevance(rhs._condition)
+        || (lhs._condition == rhs._condition
+            && isRoomBased(lhs)
+            && numberOfRooms(lhs) > numberOfRooms(rhs)
+            );
+}
+
 
 // Warning: be careful about integer underflow in the subtraction. Changed the signature to
 // _signed_ integers in order to circumvent extra casting here.

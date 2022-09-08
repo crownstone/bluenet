@@ -142,8 +142,8 @@ SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
         // conflict resolve:
 
         // presence first.
-        auto candidateCondition = candidateSwitchBehaviour->currentPresenceCondition();
-        auto currentBestCondition = currentBestSwitchBehaviour->currentPresenceCondition();
+        auto candidateCondition = candidateSwitchBehaviour->currentPresencePredicate();
+        auto currentBestCondition = currentBestSwitchBehaviour->currentPresencePredicate();
 
         if(PresenceIsMoreRelevant(candidateCondition, currentBestCondition)) {
             currentBestSwitchBehaviour = candidateSwitchBehaviour;

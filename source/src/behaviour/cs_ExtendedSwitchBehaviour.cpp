@@ -59,9 +59,8 @@ bool ExtendedSwitchBehaviour::requiresAbsence() {
 							 : extensionCondition.predicate.requiresAbsence();
 }
 
-PresencePredicate::Condition ExtendedSwitchBehaviour::currentPresenceCondition() {
-    return extensionIsActive ? presenceCondition.predicate._condition
-                             : extensionCondition.predicate._condition;
+PresencePredicate ExtendedSwitchBehaviour::currentPresencePredicate() {
+    return extensionIsActive ? presenceCondition.predicate : extensionCondition.predicate;
 }
 
 bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {

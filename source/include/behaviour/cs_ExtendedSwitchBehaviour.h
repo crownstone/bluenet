@@ -44,7 +44,7 @@ public:
 
     // currentPresenceCondition depends on corebehaviour, extensionIsActive and extensionCondition.
     // it assumes that extensionIsActive is up to date.
-    virtual PresencePredicate::Condition currentPresenceCondition() override;
+    virtual PresencePredicate currentPresencePredicate() override;
 
 	// See SwitchBehaviour for more elaborate explanation why this is necessary.
 	using SwitchBehaviour::isValid;
