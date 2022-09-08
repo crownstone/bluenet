@@ -124,6 +124,10 @@ struct TestBehaviours {
     }
 };
 
+/**
+ * clears the store, then adds the behaviours specified in the indices vector constructing them using
+ * TestBehaviours::makeTestSwitchBehaviour.
+ */
 void setupBehaviourStore(BehaviourStore& store, std::vector<int> indices) {
     TestAccess<BehaviourStore>::clearActiveBehavioursArray(store);
     store.replaceBehaviour(TestBehaviours::verySpecific,
@@ -185,7 +189,6 @@ int main() {
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, absent(), __LINE__)) return 1;
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInSphere, present(), __LINE__)) return 1;
 
-//
     setupBehaviourStore(_behaviourStore, {
             TestBehaviours::vacuouslyTrue,
             TestBehaviours::anyoneInSphere,
@@ -204,7 +207,7 @@ int main() {
     });
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInRoomMulti, absent(), __LINE__)) return 1;
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoomMulti, present(), __LINE__)) return 1;
-//
+
     setupBehaviourStore(_behaviourStore, {
             TestBehaviours::vacuouslyTrue,
             TestBehaviours::anyoneInSphere,
@@ -213,7 +216,7 @@ int main() {
             TestBehaviours::nooneInRoomMulti,
             TestBehaviours::anyoneInRoom
     });
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoomMulti, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInRoomMulti, absent(), __LINE__)) return 1;
     if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, present(), __LINE__)) return 1;
 
     setupBehaviourStore(_behaviourStore, {
