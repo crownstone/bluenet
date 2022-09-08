@@ -294,12 +294,15 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 		LOGw("Incorrect major version: major=%u required=%u", ipcData.bluenetRebootData.ipcDataMajor, BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR);
 		return state;
 	}
-	// Normally we would check here for: minor < minimumMinor.
-	// That gives a compiler error though, as the minimum is 0, making the statement always false.
-	// if (ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
-	//   LOGw("Minor version too low: minor=%u minimum=%u", ipcData.bluenetRebootData.ipcDataMinor, BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
-	//   return state;
-	// }
+
+	// We need to ignore this warning, it's triggered because the minimum minor is 0, making the statement always false.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
+	if (ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
+		LOGw("Minor version too low: minor=%u minimum=%u", ipcData.bluenetRebootData.ipcDataMinor, BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
+		return state;
+	}
+#pragma GCC diagnostic pop
 
 	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
 		case 1: {

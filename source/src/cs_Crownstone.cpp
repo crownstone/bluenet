@@ -941,7 +941,7 @@ void handleBootloaderInfo() {
 	}
 
 	if (ipcData.bootloaderData.justActivated) {
-		LOGi("This is the time this version of bluenet runs.");
+		LOGi("This is the first time this version of bluenet runs.");
 		LOGd("Clear the just activated flag");
 		ipcData.bootloaderData.justActivated = 0;
 		// Use the raw buffer, so we keep the possible newer data as well (in case of newer minor version).
