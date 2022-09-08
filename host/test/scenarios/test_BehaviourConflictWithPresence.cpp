@@ -18,7 +18,6 @@
 #include <presence/cs_PresenceCondition.h>
 
 #include <utils/date.h>
-#include "../../../source/include/protocol/cs_Packets.h"
 
 uint64_t roomBitmask() {
     return 0b001;
@@ -59,9 +58,8 @@ SwitchBehaviour* getBehaviourNarrowTimesWithTrivialPresence() {
     return switchBehaviourPresenceIrrelevant;
 }
 
-bool checkCase(BehaviourHandler& _behaviourHandler, BehaviourStore& _behaviourStore, int expectedBehaviourIndex, bool isPresent, int line) {
+bool checkCase(BehaviourHandler& _behaviourHandler, BehaviourStore& _behaviourStore, int expectedBehaviourIndex, PresenceStateDescription presence, int line) {
     Time testTime(DayOfWeek::Tuesday, 12, 0);
-    auto presence = isPresent? present() : absent();
     SwitchBehaviour* expected = dynamic_cast<SwitchBehaviour*>(_behaviourStore.getBehaviour(expectedBehaviourIndex));
     SwitchBehaviour* resolved = TestAccess<BehaviourHandler>::resolveSwitchBehaviour(_behaviourHandler, testTime, presence);
 
@@ -86,25 +84,6 @@ bool checkCase(BehaviourHandler& _behaviourHandler, BehaviourStore& _behaviourSt
     }
 }
 
-/**
- * Clears the store from any previous behaviours. Then,
- * adds switchbehaviours with the given conditions into the store.
- *
- * behaviour index [0] will contain a switch behaviour constructed through getBehaviourNarrowTimesWithTrivialPresence().
- * conditions[i] will have behaviour index [i+1]
- */
-//template<class T>
-//void setupBehaviourStore(BehaviourStore& _behaviourStore, std::vector<PresencePredicate::Condition> conditions) {
-//    TestAccess<BehaviourStore>::clearActiveBehavioursArray(_behaviourStore);
-//
-//    SwitchBehaviour* verySpecific = getBehaviourNarrowTimesWithTrivialPresence();
-//    _behaviourStore.addBehaviour(verySpecific);
-//
-//    for(auto i{0}; i < conditions.length(); i++) {
-//        _behaviourStore.replaceBehaviour(i, getBehaviourPresent(condition));
-//    }
-//}
-
 struct TestBehaviours {
     static constexpr int verySpecific = 0;
     static constexpr int vacuouslyTrue = 1;
@@ -113,6 +92,10 @@ struct TestBehaviours {
     static constexpr int anyoneInRoom = 4;
     static constexpr int nooneInRoom = 5;
 
+    /**
+     * this method allocates on the heap. no need to clean up, the behaviourstore will take ownership and
+     * delete items properly.
+     */
     static SwitchBehaviour* makeTestSwitchBehaviour(int index) {
         switch(index) {
             case verySpecific: return getBehaviourNarrowTimesWithTrivialPresence();
@@ -151,38 +134,32 @@ int main() {
     SystemTime _systemTime;
     EventDispatcher &_eventDispatcher = EventDispatcher::getInstance();
 
-
     TestAccess<BehaviourHandler>::setup(_behaviourHandler, &_presenceHandler, &_behaviourStore);
     TestAccess<SystemTime>::fastForwardS(120);
 
-    // common variables.
-    Time testTimeActive(DayOfWeek::Tuesday, 12, 30);
-    Time testTimeActiveSpecific(DayOfWeek::Tuesday, 12, 0);
-    SwitchBehaviour *resolved = nullptr;
-
-    // add behaviours in increasing priority, and check if the resolution picks the correct one.
+    // test cases
 
     // any presence based behaviour must win from this specific behaviour when it is valid
     setupBehaviourStore(_behaviourStore, {
         // no presence behaviours added
     });
-    if (!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, false, __LINE__)) return 1;
-    if (!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, true, __LINE__)) return 1;
+    if (!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, absent(), __LINE__)) return 1;
+    if (!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, present(), __LINE__)) return 1;
 
     // add unspecific, non-presence. should still resolve to the verySpecific one.
     setupBehaviourStore(_behaviourStore, {
         TestBehaviours::vacuouslyTrue
     });
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, false, __LINE__)) return 1;
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, true, __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, present(), __LINE__)) return 1;
 
     // should only resolve to the verySpecific one when not in sphere.
     setupBehaviourStore(_behaviourStore, {
         TestBehaviours::vacuouslyTrue,
         TestBehaviours::anyoneInSphere
     });
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, false, __LINE__)) return 1;
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInSphere, true, __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::verySpecific, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInSphere, present(), __LINE__)) return 1;
 
     // adding the opposite presence based behaviour, overriding verySpecific.
     setupBehaviourStore(_behaviourStore, {
@@ -190,9 +167,8 @@ int main() {
             TestBehaviours::anyoneInSphere,
             TestBehaviours::nooneInSphere
     });
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, false, __LINE__)) return 1;
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInSphere, true, __LINE__)) return 1;
-
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInSphere, present(), __LINE__)) return 1;
 
     setupBehaviourStore(_behaviourStore, {
             TestBehaviours::vacuouslyTrue,
@@ -200,9 +176,16 @@ int main() {
             TestBehaviours::nooneInSphere,
             TestBehaviours::anyoneInRoom
     });
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, false, __LINE__)) return 1;
-    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, true, __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInSphere, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, present(), __LINE__)) return 1;
 
-    //    SwitchBehaviour* nooneInRoom = getBehaviourPresent(PresencePredicate::Condition::NooneInSelectedRooms);
-//    _behaviourStore.addBehaviour(nooneInRoom);
+    setupBehaviourStore(_behaviourStore, {
+            TestBehaviours::vacuouslyTrue,
+            TestBehaviours::anyoneInSphere,
+            TestBehaviours::nooneInSphere,
+            TestBehaviours::anyoneInRoom,
+            TestBehaviours::nooneInRoom
+    });
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::nooneInRoom, absent(), __LINE__)) return 1;
+    if(!checkCase(_behaviourHandler, _behaviourStore, TestBehaviours::anyoneInRoom, present(), __LINE__)) return 1;
 }
