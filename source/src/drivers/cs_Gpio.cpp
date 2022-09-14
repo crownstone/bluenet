@@ -51,64 +51,64 @@ void Gpio::init(const boards_config_t& board) {
 	LOGi("Configured %i GPIO pins", activePins);
 }
 
-bool Gpio::pinExists(uint8_t pin_index) {
+bool Gpio::pinExists(uint8_t pinIndex) {
 	if (!_initialized) {
 		LOGi("GPIO driver not initialized");
 		return false;
 	}
-	if (pin_index >= TOTAL_PIN_COUNT) {
-		LOGi("Pin index %i out of max pin range (max %i)", pin_index, TOTAL_PIN_COUNT);
+	if (pinIndex >= TOTAL_PIN_COUNT) {
+		LOGi("Pin index %i out of max pin range (max %i)", pinIndex, TOTAL_PIN_COUNT);
 		return false;
 	}
-	if (pin_index < GPIO_INDEX_COUNT) {
-		if (_boardConfig->pinGpio[pin_index] != PIN_NONE) {
+	if (pinIndex < GPIO_INDEX_COUNT) {
+		if (_boardConfig->pinGpio[pinIndex] != PIN_NONE) {
 			return true;
 		}
 	}
-	else if (pin_index < GPIO_INDEX_COUNT + BUTTON_COUNT) {
-		if (_boardConfig->pinButton[pin_index - GPIO_INDEX_COUNT] != PIN_NONE) {
+	else if (pinIndex < GPIO_INDEX_COUNT + BUTTON_COUNT) {
+		if (_boardConfig->pinButton[pinIndex - GPIO_INDEX_COUNT] != PIN_NONE) {
 			return true;
 		}
 	}
 	else {
-		if (_boardConfig->pinLed[pin_index - GPIO_INDEX_COUNT - BUTTON_COUNT] != PIN_NONE) {
+		if (_boardConfig->pinLed[pinIndex - GPIO_INDEX_COUNT - BUTTON_COUNT] != PIN_NONE) {
 			return true;
 		}
 	}
-	LOGi("Pin index %i not defined for this board", pin_index);
+	LOGi("Pin index %i not defined for this board", pinIndex);
 	return false;
 }
 
-pin_t Gpio::getPin(uint8_t pin_index) {
+pin_t Gpio::getPin(uint8_t pinIndex) {
 
-	if (!pinExists(pin_index)) {
+	if (!pinExists(pinIndex)) {
 		return PIN_NONE;
 	}
-	if (pin_index < GPIO_INDEX_COUNT) {
-		return _boardConfig->pinGpio[pin_index];
+	if (pinIndex < GPIO_INDEX_COUNT) {
+		return _boardConfig->pinGpio[pinIndex];
 	}
-	else if (pin_index < GPIO_INDEX_COUNT + BUTTON_COUNT) {
-		return _boardConfig->pinButton[pin_index - GPIO_INDEX_COUNT];
+	else if (pinIndex < GPIO_INDEX_COUNT + BUTTON_COUNT) {
+		return _boardConfig->pinButton[pinIndex - GPIO_INDEX_COUNT];
 	}
 	else {
-		return _boardConfig->pinLed[pin_index - GPIO_INDEX_COUNT - BUTTON_COUNT];
+		return _boardConfig->pinLed[pinIndex - GPIO_INDEX_COUNT - BUTTON_COUNT];
 	}
 }
 
-bool Gpio::isLedPin(uint8_t pin_index) {
-	if (!pinExists(pin_index)) {
+bool Gpio::isLedPin(uint8_t pinIndex) {
+	if (!pinExists(pinIndex)) {
 		return false;
 	}
 	else {
-		return (pin_index >= GPIO_INDEX_COUNT + BUTTON_COUNT);
+		return (pinIndex >= GPIO_INDEX_COUNT + BUTTON_COUNT);
 	}
 }
 
-void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity) {
+void Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity) {
 
-	pin_t pin = getPin(pin_index);
+	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
-		LOGi("Can't configure pin with pin index %i", pin_index);
+		LOGi("Can't configure pin with pin index %i", pinIndex);
 		return;
 	}
 
@@ -116,15 +116,15 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 	switch (pull) {
 		case GpioPullResistor::NONE:
 			nrf_pull = NRF_GPIO_PIN_NOPULL;
-			LOGi("Set pin %i with index %i to use no pull-up", pin, pin_index);
+			LOGi("Set pin %i with index %i to use no pull-up", pin, pinIndex);
 			break;
 		case GpioPullResistor::UP:
 			nrf_pull = NRF_GPIO_PIN_PULLUP;
-			LOGi("Set pin %i with index %i to use pull-up", pin, pin_index);
+			LOGi("Set pin %i with index %i to use pull-up", pin, pinIndex);
 			break;
 		case GpioPullResistor::DOWN:
 			nrf_pull = NRF_GPIO_PIN_PULLDOWN;
-			LOGi("Set pin %i with index %i to use pull-down", pin, pin_index);
+			LOGi("Set pin %i with index %i to use pull-down", pin, pinIndex);
 			break;
 		default: LOGw("Huh? No such pull registor construction exists"); return;
 	}
@@ -181,37 +181,37 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 /*
  * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
  */
-void Gpio::write(uint8_t pin_index, uint8_t* buf, uint8_t& length) {
+void Gpio::write(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
 
-	pin_t pin = getPin(pin_index);
+	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
-		LOGi("Can't write pin with pin index %i", pin_index);
+		LOGi("Can't write pin with pin index %i", pinIndex);
 		return;
 	}
 
 	// TODO: limit length
 	for (int i = 0; i < length; ++i) {
 		// Invert value to write if leds are inverted
-		if (isLedPin(pin_index) && _boardConfig->flags.ledInverted) {
+		if (isLedPin(pinIndex) && _boardConfig->flags.ledInverted) {
 			buf[i] = !buf[i];
 		}
-		LOGi("Write value %i to pin %i (pin index %i)", buf[i], pin, pin_index);
+		LOGi("Write value %i to pin %i (pin index %i)", buf[i], pin, pinIndex);
 		nrf_gpio_pin_write(pin, buf[i]);
 	}
 }
 
-void Gpio::read(uint8_t pin_index, uint8_t* buf, uint8_t& length) {
+void Gpio::read(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
 
-	pin_t pin = getPin(pin_index);
+	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
-		LOGi("Can't read pin with pin index %i", pin_index);
+		LOGi("Can't read pin with pin index %i", pinIndex);
 		return;
 	}
 
 	// TODO: limit length
 	for (int i = 0; i < length; ++i) {
 		buf[i] = nrf_gpio_pin_read(pin);
-		LOGi("Read value %i from pin %i (pin index %i)", buf[i], pin, pin_index);
+		LOGi("Read value %i from pin %i (pin index %i)", buf[i], pin, pinIndex);
 	}
 }
 
@@ -247,9 +247,9 @@ void Gpio::tick() {
 			_pins[i].event = false;
 			TYPIFY(EVT_GPIO_UPDATE) gpio;
 			// we send back the pin index, not the pin number
-			gpio.pin_index = i;
+			gpio.pinIndex = i;
 			gpio.length    = 0;
-			LOGd("Send GPIO event at index %i", gpio.pin_index);
+			LOGd("Send GPIO event at index %i", gpio.pinIndex);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);
 		}
@@ -264,7 +264,7 @@ void Gpio::handleEvent(event_t& event) {
 			GpioPolarity polarity      = (GpioPolarity)gpio.polarity;
 			GpioDirection direction    = (GpioDirection)gpio.direction;
 			GpioPullResistor pull      = (GpioPullResistor)gpio.pull;
-			configure(gpio.pin_index, direction, pull, polarity);
+			configure(gpio.pinIndex, direction, pull, polarity);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_WRITE: {
@@ -273,12 +273,12 @@ void Gpio::handleEvent(event_t& event) {
 				LOGw("Buffer is null");
 				return;
 			}
-			write(gpio.pin_index, gpio.buf, gpio.length);
+			write(gpio.pinIndex, gpio.buf, gpio.length);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_READ: {
 			TYPIFY(EVT_GPIO_READ) gpio = *(TYPIFY(EVT_GPIO_READ)*)event.data;
-			read(gpio.pin_index, gpio.buf, gpio.length);
+			read(gpio.pinIndex, gpio.buf, gpio.length);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

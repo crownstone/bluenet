@@ -23,6 +23,7 @@
 #include <microapp/cs_Microapp.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappStorage.h>
+#include <microapp/cs_MicroappInterruptHandler.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
@@ -46,6 +47,9 @@ void Microapp::init() {
 	// Set callback handler in IPC ram
 	MicroappController& controller = MicroappController::getInstance();
 	controller.setIpcRam();
+
+	// Create an instance of the interrupt handler.
+	MicroappInterruptHandler::getInstance();
 
 	loadApps();
 
