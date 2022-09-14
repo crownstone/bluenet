@@ -101,7 +101,7 @@ typedef struct {
 	};
 	// Checksum calculated over the header above, and the following data array.
 	uint16_t checksum;
-} __attribute__((packed, aligned(4))) bluenet_ipc_data_header_t;
+} __attribute__((packed)) bluenet_ipc_data_header_t;
 
 /**
  * One item of data in the IPC ram. The data is word-aligned.

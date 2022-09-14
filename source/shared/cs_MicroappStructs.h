@@ -378,7 +378,7 @@ typedef union {
 	uint8_t raw[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	// The data coming from the microapp.
 	bluenet2microapp_ipcdata_t bluenet2microappData;
-} __attribute__((packed, aligned(4))) bluenet_ipc_data_cpp_t;
+} __attribute__((packed)) bluenet_ipc_data_cpp_t;
 
 /**
  * Header for io buffers shared between bluenet and microapp. The payload of the io buffer always starts with this

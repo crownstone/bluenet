@@ -55,14 +55,14 @@ typedef struct {
 		} __attribute__((packed)) flags;
 		uint8_t flagsRaw;
 	};
-} __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
+} __attribute__((packed)) bluenet_ipc_bootloader_data_t;
 
 /**
  * For now only running or not running is stored as process information.
  */
 typedef struct {
 	uint8_t running : 1;
-} __attribute__((packed, aligned(4))) microapp_reboot_data_t;
+} __attribute__((packed)) microapp_reboot_data_t;
 
 /**
  * Data struct that can be used to communicate from bluenet to bluenet across reboots.
@@ -74,7 +74,7 @@ typedef struct {
 	uint8_t ipcDataMinor;
 	// Currently only 1 app is supported, expand with more bits for more apps
 	microapp_reboot_data_t microapp[1];
-} __attribute__((packed, aligned(4))) bluenet_ipc_bluenet_data_t;
+} __attribute__((packed)) bluenet_ipc_bluenet_data_t;
 
 /**
  * Make data available as union.
@@ -86,7 +86,7 @@ typedef union {
 	bluenet_ipc_bootloader_data_t bootloaderData;
 	// The data from bluenet to bluenet firmware
 	bluenet_ipc_bluenet_data_t bluenetRebootData;
-} __attribute__((packed, aligned(4))) bluenet_ipc_data_t;
+} __attribute__((packed)) bluenet_ipc_data_t;
 
 #ifdef __cplusplus
 }
