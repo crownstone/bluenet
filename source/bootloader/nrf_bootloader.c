@@ -356,7 +356,7 @@ void update_ipc_data() {
 	}
 
 	// We only write here if there is no error
-	ipcData.bootloaderData.justActivated = 1;
+	ipcData.bootloaderData.flags.justActivated = 1;
 	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
 }
 

@@ -42,11 +42,19 @@ typedef struct {
 	uint8_t bootloaderPrerelease;
 	uint8_t bootloaderBuildType;
 
-	// When true, this is the first time this application version is running.
-	uint8_t justActivated : 1;
+	union {
+		struct {
+			// When true, this is the first time this application version is running.
+			uint8_t justActivated : 1;
 
-	// When true there was an error setting or getting the IPC by the bootloader.
-	uint8_t updateError : 1;
+			// When true there was an IPC version that could not be parsed by the bootloader.
+			uint8_t versionError : 1;
+
+			// When the bootloader failed to get ram data. This is normal on a cold boot.
+			uint8_t readError : 1;
+		} __attribute__((packed)) flags;
+		uint8_t flagsRaw;
+	};
 } __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
 
 /**

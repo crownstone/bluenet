@@ -79,20 +79,28 @@ enum BuildType {
  *
  * Bump the major version if there's a change that is not backwards-compatible. Bump the minor version if there's a
  * change that is backwards-compatible, for example the addition of a field within the data object.
+ *
+ * Reserved bytes so that it's word aligned.
  */
 typedef struct {
-	// The major version.
-	uint8_t major;
-	// The minor version.
-	uint8_t minor;
-	// The index of this item, to see if this item has been set.
-	uint8_t index;
-	// How many bytes are informational within the data array.
-	uint8_t dataSize;
-	// Checksum calculated over the data array, but also all fields above.
+	// The header fields excluding the checksum, added like this so it's easy to calculate the checksum.
+	union {
+		struct {
+			// The major version.
+			uint8_t major;
+			// The minor version.
+			uint8_t minor;
+			// The index of this item, to see if this item has been set.
+			uint8_t index;
+			// How many bytes are informational within the data array.
+			uint8_t dataSize;
+			// Reserved, should be 0 for now.
+			uint8_t reserved[2];
+		} __attribute__((packed)) header;
+		uint8_t headerRaw[6];
+	};
+	// Checksum calculated over the header above, and the following data array.
 	uint16_t checksum;
-	// Reserve some bytes to be word aligned.
-	uint8_t reserved[2];
 } __attribute__((packed, aligned(4))) bluenet_ipc_data_header_t;
 
 /**
@@ -115,6 +123,8 @@ typedef struct {
 
 /**
  * Set data in IPC ram.
+ *
+ * If data size is smaller than the maximum size, the remaining bytes will be set to 0.
  *
  * @param[in] index          Index of IPC segment.
  * @param[in] data           Data pointer.

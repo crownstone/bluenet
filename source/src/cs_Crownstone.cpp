@@ -940,11 +940,20 @@ void handleBootloaderInfo() {
 		return;
 	}
 
-	if (ipcData.bootloaderData.justActivated) {
+	if (ipcData.bootloaderData.flags.readError) {
+		LOGi("Bootloader had an IPC read error");
+	}
+
+	if (ipcData.bootloaderData.flags.versionError) {
+		LOGi("Bootloader had an IPC version error");
+	}
+
+	if (ipcData.bootloaderData.flags.justActivated) {
 		LOGi("This is the first time this version of bluenet runs.");
 		LOGd("Clear the just activated flag");
-		ipcData.bootloaderData.justActivated = 0;
-		// Use the raw buffer, so we keep the possible newer data as well (in case of newer minor version).
+		ipcData.bootloaderData.flags.justActivated = 0;
+		// Use the raw buffer, so we keep the possible newer data as well
+		// (in case of newer minor version set by the bootloader).
 		setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
 	}
 

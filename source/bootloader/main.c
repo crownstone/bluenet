@@ -202,8 +202,7 @@ void set_bootloader_info() {
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
 
-	ipcData.bootloaderData.justActivated = 0;
-	ipcData.bootloaderData.updateError   = 0;
+	ipcData.bootloaderData.flagsRaw = 0;
 
 	// First get previous ram data.
 	// We don't want to overwrite "justActivated" for example.
@@ -212,15 +211,17 @@ void set_bootloader_info() {
 		NRF_LOG_INFO("Failed to get bootloader info: retCode=%i", retCode);
 		// This can also happen when there is random data in ram.
 		// In this case: overwrite all data.
-		ipcData.bootloaderData.justActivated = 0;
-		ipcData.bootloaderData.updateError   = 0;
+		ipcData.bootloaderData.flags.justActivated = 0;
+		ipcData.bootloaderData.flags.versionError  = 0;
+		ipcData.bootloaderData.flags.readError     = 1;
 	}
 	else {
 		if (ipcData.bootloaderData.ipcDataMajor != g_BOOTLOADER_IPC_RAM_MAJOR) {
 			// We don't know how to parse this, so don't use it.
 			// Once we update the major, we can add backwards compatibility here.
-			ipcData.bootloaderData.justActivated = 0;
-			ipcData.bootloaderData.updateError   = 1;
+			ipcData.bootloaderData.flags.justActivated = 0;
+			ipcData.bootloaderData.flags.versionError  = 1;
+			ipcData.bootloaderData.flags.readError     = 0;
 		}
 	}
 

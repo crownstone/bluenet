@@ -41,12 +41,10 @@ uint16_t ipcHashInit() {
  */
 uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t* item) {
 	uint16_t hash = ipcHashInit();
-	hash = ipcHash(item->header.major, hash);
-	hash = ipcHash(item->header.minor, hash);
-	hash = ipcHash(item->header.index, hash);
-	hash = ipcHash(item->header.dataSize, hash);
-	hash = ipcHash(item->header.reserved[0], hash);
-	hash = ipcHash(item->header.reserved[1], hash);
+
+	for (uint8_t i = 0; i < sizeof(item->header.headerRaw); ++i) {
+		hash = ipcHash(item->header.headerRaw[i], hash);
+	}
 
 	for (uint8_t i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
 		hash = ipcHash(item->data.raw[i], hash);
@@ -64,12 +62,12 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
 		return IPC_RET_NULL_POINTER;
 	}
 	bluenet_ipc_data_header_t header;
-	header.index       = index;
-	header.dataSize    = dataSize;
-	header.major       = BLUENET_IPC_HEADER_MAJOR;
-	header.minor       = BLUENET_IPC_HEADER_MINOR;
-	header.reserved[0] = 0;
-	header.reserved[1] = 0;
+	header.header.index       = index;
+	header.header.dataSize    = dataSize;
+	header.header.major       = BLUENET_IPC_HEADER_MAJOR;
+	header.header.minor       = BLUENET_IPC_HEADER_MINOR;
+	header.header.reserved[0] = 0;
+	header.header.reserved[1] = 0;
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
@@ -148,19 +146,19 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.major != BLUENET_IPC_HEADER_MAJOR) {
+	if (m_bluenet_ipc_ram.item[index].header.header.major != BLUENET_IPC_HEADER_MAJOR) {
 		return IPC_RET_DATA_MAJOR_DIFF;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.minor > BLUENET_IPC_HEADER_MINOR) {
+	if (m_bluenet_ipc_ram.item[index].header.header.minor > BLUENET_IPC_HEADER_MINOR) {
 		return IPC_RET_DATA_MINOR_DIFF;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.index != index) {
+	if (m_bluenet_ipc_ram.item[index].header.header.index != index) {
 		return IPC_RET_NOT_FOUND;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+	if (m_bluenet_ipc_ram.item[index].header.header.dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
 		return IPC_RET_DATA_TOO_LARGE;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.dataSize > maxSize) {
+	if (m_bluenet_ipc_ram.item[index].header.header.dataSize > maxSize) {
 		return IPC_RET_BUFFER_TOO_SMALL;
 	}
 	uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
@@ -168,8 +166,8 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint
 		return IPC_RET_DATA_INVALID;
 	}
 
-	memcpy(data, m_bluenet_ipc_ram.item[index].data.raw, m_bluenet_ipc_ram.item[index].header.dataSize);
-	*dataSize = m_bluenet_ipc_ram.item[index].header.dataSize;
+	memcpy(data, m_bluenet_ipc_ram.item[index].data.raw, m_bluenet_ipc_ram.item[index].header.header.dataSize);
+	*dataSize = m_bluenet_ipc_ram.item[index].header.header.dataSize;
 	return IPC_RET_SUCCESS;
 }
 
