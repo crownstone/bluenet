@@ -359,8 +359,14 @@ struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 	uint8_t dataProtocol;
 	// The callback to be registered and used
 	microappCallbackFunc microappCallback;
-	// Flag to indicate that the callback is set by the microapp and the struct can be considered valid
-	uint8_t valid : 1;
+
+	union {
+		struct {
+			// Flag to indicate that the callback is set by the microapp and the struct can be considered valid
+			uint8_t valid : 1;
+		} __attribute__((packed)) flags;
+		uint8_t flagsRaw;
+	};
 };
 
 /**
