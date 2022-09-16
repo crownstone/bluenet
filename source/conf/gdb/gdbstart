@@ -3,7 +3,8 @@
 #   Would have been nice, but requires Python support for gdb
 
 set remote memory-write-packet-size 1024
-load
+load crownstone.elf
+load bootloader/bootloader.elf
 
 info files
 
@@ -11,6 +12,7 @@ monitor reset
 
 # Add breakpoints here
 b app_error_handler
+b on_exit
 
 continue
 
