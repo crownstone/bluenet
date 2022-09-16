@@ -919,7 +919,7 @@ void handleBootloaderInfo() {
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
 	LOGi("Get bootloader IPC data info");
-	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (ipcCode != IPC_RET_SUCCESS) {
 		LOGw("Bootloader IPC data error: ipcCode=%i", ipcCode);
 		return;
@@ -954,7 +954,7 @@ void handleBootloaderInfo() {
 		ipcData.bootloaderData.flags.justActivated = 0;
 		// Use the raw buffer, so we keep the possible newer data as well
 		// (in case of newer minor version set by the bootloader).
-		setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+		setRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, dataSize);
 	}
 
 	LOGi("Bootloader version: %u.%u.%u-RC%u",

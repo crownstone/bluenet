@@ -341,7 +341,7 @@ void update_ipc_data() {
 	// We only want to set the "justActivated" field, so first get the current data.
 	bluenet_ipc_data_t ipcData;
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
 		NRF_LOG_WARNING("Failed to get IPC ram: retCode=%i", retCode);
 		NRF_LOG_FLUSH();
@@ -357,7 +357,7 @@ void update_ipc_data() {
 
 	// We only write here if there is no error
 	ipcData.bootloaderData.flags.justActivated = 1;
-	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+	setRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, dataSize);
 }
 
 #if NRF_BL_DFU_ALLOW_UPDATE_FROM_APP

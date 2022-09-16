@@ -99,10 +99,10 @@ void microappCallbackDummy() {
 		bluenet_io_buffers_t io_buffers;
 		// fake setup or loop yields
 		io_buffers.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
-		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
+		// Get the ram data of ourselves.
 		bluenet2microapp_ipcdata_t ipc_data;
 		uint8_t dataSize;
-		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, &dataSize, sizeof(bluenet2microapp_ipcdata_t));
+		getRamData(IPC_INDEX_BLUENET_TO_MICROAPP, (uint8_t*)&ipc_data, &dataSize, sizeof(bluenet2microapp_ipcdata_t));
 
 		// Perform the actual callback. Should call microappCallback and yield.
 		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffers);
@@ -176,7 +176,7 @@ void MicroappController::setIpcRam() {
 
 	LOGi("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 
-	uint32_t retCode = setRamData(IPC_INDEX_CROWNSTONE_APP, ipcData.raw, sizeof(bluenet2microapp_ipcdata_t));
+	uint32_t retCode = setRamData(IPC_INDEX_BLUENET_TO_MICROAPP, ipcData.raw, sizeof(bluenet2microapp_ipcdata_t));
 	if (retCode != ERR_SUCCESS) {
 		LOGw("Microapp IPC RAM data error, retCode=%u", retCode);
 		return;
@@ -270,7 +270,7 @@ void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingSt
 	memset(ipcData.bluenetRebootData.microapp, 0, sizeof(ipcData.bluenetRebootData.microapp));
 	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
 
-	IpcRetCode ipcCode = setRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, sizeof(ipcData.bluenetRebootData));
+	IpcRetCode ipcCode = setRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, sizeof(ipcData.bluenetRebootData));
 	if (ipcCode != IPC_RET_SUCCESS) {
 		LOGw("Failed to set IPC data: ipcCode=%i", ipcCode);
 	}
@@ -287,7 +287,7 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 	uint8_t dataSize = 0;
 
 	// We might read the IPC data of a previous bluenet version.
-	IpcRetCode ipcCode = getRamData(IPC_INDEX_MICROAPP_STATE, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (ipcCode != IPC_RET_SUCCESS) {
 		LOGi("Failed to get IPC data: ipcCode=%i", ipcCode);
 		return state;

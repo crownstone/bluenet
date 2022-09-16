@@ -44,14 +44,12 @@ extern "C" {
  */
 enum IpcIndex {
 	IPC_INDEX_RESERVED        = 0,
-	// To communicate from bluenet towards the microapp
-	IPC_INDEX_CROWNSTONE_APP  = 1,
-	// To communicate from bootloader to bluenet
-	IPC_INDEX_BOOTLOADER_INFO = 2,
-	// To communicate from microapp to bluenet
-	IPC_INDEX_MICROAPP        = 3,
-	// To communicate from bluenet towards bluenet (state across reboots, for now only about microapp state)
-	IPC_INDEX_MICROAPP_STATE  = 4,
+	// To communicate from bluenet towards the microapp.
+	IPC_INDEX_BLUENET_TO_MICROAPP  = 1,
+	// To communicate from bootloader to bluenet.
+	IPC_INDEX_BOOTLOADER_TO_BLUENET = 2,
+	// To communicate from bluenet towards bluenet, across reboots.
+	IPC_INDEX_BLUENET_TO_BLUENET  = 3,
 };
 
 enum IpcRetCode {

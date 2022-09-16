@@ -206,7 +206,7 @@ void set_bootloader_info() {
 
 	// First get previous ram data.
 	// We don't want to overwrite "justActivated" for example.
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
 		NRF_LOG_INFO("Failed to get bootloader info: retCode=%i", retCode);
 		// This can also happen when there is random data in ram.
@@ -236,7 +236,7 @@ void set_bootloader_info() {
 	ipcData.bootloaderData.bootloaderPatch      = g_BOOTLOADER_VERSION_PATCH;
 	ipcData.bootloaderData.bootloaderPrerelease = g_BOOTLOADER_VERSION_PRERELEASE;
 	ipcData.bootloaderData.bootloaderBuildType  = g_BOOTLOADER_BUILD_TYPE;
-	setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+	setRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, dataSize);
 }
 
 /**
