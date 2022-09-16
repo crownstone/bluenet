@@ -64,14 +64,6 @@ enum IpcRetCode {
 	IPC_RET_DATA_MINOR_DIFF    = 8,
 };
 
-enum BuildType {
-	BUILD_TYPE_RESERVED       = 0,
-	BUILD_TYPE_DEBUG          = 1,
-	BUILD_TYPE_RELEASE        = 2,
-	BUILD_TYPE_RELWITHDEBINFO = 3,
-	BUILD_TYPE_MINSIZEREL     = 4,
-};
-
 /**
  * The header of a data item in IPC ram.
  *
