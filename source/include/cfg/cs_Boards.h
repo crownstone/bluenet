@@ -351,6 +351,11 @@ typedef struct {
 
 } boards_config_t;
 
+/**
+ * initializes a board config to default values.
+ */
+void init(boards_config_t* config);
+
 /** Configure board.
  *
  * This function reads a board type id from UICR. This is a dedicated part in memory that is preserved across firmware
