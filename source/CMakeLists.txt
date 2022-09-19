@@ -41,6 +41,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_M
 
 message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
+set(COMPILE_FOR_HOST FALSE)
+
 # Get compilation day, this will be used in the binary itself
 string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 
