@@ -52,7 +52,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_WireFormat.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BitmaskVarSize.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Hash.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Dimmer.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Relay.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartCommandHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Crc16.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Crc32.cpp")
