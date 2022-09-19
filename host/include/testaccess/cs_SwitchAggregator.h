@@ -18,7 +18,7 @@ public:
 	// the object that this test class instance will operate on.
 	SwitchAggregator& _switchAggregator;
 
-	TestAccess(SwitchAggregator switchAggregator) : _switchAggregator(switchAggregator) {}
+	TestAccess(SwitchAggregator& switchAggregator) : _switchAggregator(switchAggregator) {}
 
 	// assumes the aggregator is already attached to the event bus.
 	void setOverrideState(std::optional<uint8_t> override) {
@@ -28,11 +28,10 @@ public:
 		}
 
 		internal_multi_switch_item_cmd_t switchCmdPacket = {
-				.swithcCmd = override.value
+				.switchCmd = override.value()
 		};
 		event_t switchEvent(CS_TYPE::CMD_SWITCH, &switchCmdPacket, sizeof(switchCmdPacket));
 
 		_switchAggregator.handleEvent(switchEvent);
 	}
-
 };

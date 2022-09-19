@@ -32,6 +32,12 @@ private:
 	std::array<Behaviour*, MaxBehaviours> activeBehaviours = {};
 
 public:
+	// delete copy and move constructor to prevent double deletions etc.
+	BehaviourStore(BehaviourStore& other) = delete;
+	BehaviourStore(BehaviourStore&& other) = delete;
+	// default is not implicitly generated when copy constructors are deleted.
+	BehaviourStore() = default;
+
 	/**
 	 * handles events concerning updates of the active behaviours on this crownstone.
 	 */

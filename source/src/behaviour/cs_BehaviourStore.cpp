@@ -372,7 +372,7 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 	}
 	auto type = activeBehaviours[index]->getType();
 
-	LOGBehaviourStoreInfo("deleting behaviour {u}", index);
+	LOGBehaviourStoreInfo("deleting behaviour #%u", index);
 	delete activeBehaviours[index];
 	activeBehaviours[index] = nullptr;
 
@@ -460,4 +460,5 @@ void BehaviourStore::clearActiveBehavioursArray() {
 BehaviourStore::~BehaviourStore() {
 	LOGBehaviourStoreInfo("destroying BehaviourStore");
 	clearActiveBehavioursArray();
+	LOGBehaviourStoreInfo("destroying BehaviourStore -- done");
 }
