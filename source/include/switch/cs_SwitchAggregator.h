@@ -13,7 +13,7 @@
 #include <events/cs_EventListener.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <switch/cs_SmartSwitch.h>
-
+#include <test/cs_TestAccess.h>
 #include <optional>
 
 /**
@@ -22,6 +22,7 @@
  * this object decides what state to set the SmartSwitch to.
  */
 class SwitchAggregator : public EventListener, public Component {
+	friend class TestAccess<SwitchAggregator>;
 public:
 	SwitchAggregator();
 

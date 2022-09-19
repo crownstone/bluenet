@@ -26,8 +26,9 @@ SwitchAggregator::SwitchAggregator() : _switchHistory(_maxSwitchHistoryItems) {}
 
 void SwitchAggregator::init(const boards_config_t& board) {
 	LOGi("init");
-	_smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void { handleSwitchStateChange(newState); });
 	_smartSwitch.init(board);
+
+	_smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void { handleSwitchStateChange(newState); });
 
 	// Allocate buffer.
 	_switchHistory.init();

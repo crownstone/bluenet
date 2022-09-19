@@ -38,16 +38,23 @@ public:
 
 	SwitchBehaviour get() { return {intensity, profileId, activedaysofweek, from, until, presencecondition.get()}; }
 
-	static std::ostream& toStream(std::ostream& out, SwitchBehaviour& s) {
-		return out << "{"
-				   << "from: " << s.from() << ", "
-				   << "until: " << s.until() << ", "
-				   << "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
-				   << "profileId:" << +s.profileId << ", "
-				   << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
-				   << "presenceCondition: " << s.presenceCondition << "}"
-				   << "[gracePeriodForPresenceIsActive(): " << s.gracePeriodForPresenceIsActive() << "]";
-	}
+    // same as get, but allocate object on the heap.
+    SwitchBehaviour* getNew() {
+    	return new auto(get());
+    }
+
+    static std::ostream & toStream(std::ostream &out, SwitchBehaviour& s) {
+        return out << "{"
+            << "from: " << s.from() << ", "
+            << "until: " << s.until() << ", "
+            << "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
+            << "profileId:" << +s.profileId << ", "
+            << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
+            << "presenceCondition: " << s.presenceCondition
+            << "}"
+            << "[gracePeriodForPresenceIsActive(): "<< s.gracePeriodForPresenceIsActive() <<"]"
+            ;
+    }
 };
 
 /**
