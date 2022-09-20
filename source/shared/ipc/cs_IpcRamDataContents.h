@@ -100,8 +100,9 @@ typedef union {
 	bluenet_ipc_bootloader_data_t bootloaderData;
 	// The data from bluenet to bluenet firmware
 	bluenet_ipc_bluenet_data_t bluenetRebootData;
-} __attribute__((packed)) bluenet_ipc_data_t;
+} __attribute__((packed)) bluenet_ipc_data_payload_t;
 
 #ifdef __cplusplus
 }
 #endif
+

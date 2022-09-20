@@ -199,7 +199,7 @@ void set_bootloader_info() {
 	NRF_LOG_INFO("Set bootloader info");
 	NRF_LOG_FLUSH();
 
-	bluenet_ipc_data_t ipcData;
+	bluenet_ipc_data_payload_t ipcData;
 	uint8_t dataSize;
 
 	ipcData.bootloaderData.flagsRaw = 0;

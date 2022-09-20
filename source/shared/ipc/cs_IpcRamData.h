@@ -101,7 +101,7 @@ typedef struct {
 	// The header
 	bluenet_ipc_data_header_t header;
 	// The data array
-	bluenet_ipc_data_t data;
+	bluenet_ipc_data_payload_t data;
 } __attribute__((packed, aligned(4))) bluenet_ipc_ram_data_item_t;
 
 /**

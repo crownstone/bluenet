@@ -261,7 +261,7 @@ void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingSt
 		return;
 	}
 	uint8_t runFlag = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
-	bluenet_ipc_data_t ipcData;
+	bluenet_ipc_data_payload_t ipcData;
 
 	// We can just overwrite all, as a newer IPC version will be written and read by bluenet only.
 	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
@@ -283,7 +283,7 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 		LOGi("Multiple apps not supported yet");
 		return state;
 	}
-	bluenet_ipc_data_t ipcData;
+	bluenet_ipc_data_payload_t ipcData;
 	uint8_t dataSize = 0;
 
 	// We might read the IPC data of a previous bluenet version.

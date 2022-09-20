@@ -339,7 +339,7 @@ void update_ipc_data() {
 	NRF_LOG_FLUSH();
 
 	// We only want to set the "justActivated" field, so first get the current data.
-	bluenet_ipc_data_t ipcData;
+	bluenet_ipc_data_payload_t ipcData;
 	uint8_t dataSize;
 	int retCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (retCode != IPC_RET_SUCCESS) {
