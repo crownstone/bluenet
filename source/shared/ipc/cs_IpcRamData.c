@@ -15,27 +15,41 @@
  */
 bluenet_ipc_ram_data_t m_bluenet_ipc_ram __attribute__((section(".bluenet_ipc_ram"))) __attribute__((used));
 
+/**
+ * Calculates a djb2 hash of given data.
+ *
+ * This is a simple hashing function that is position dependent, and doesn't return 0 when all data is 0.
+ * See http://www.cse.yorku.ca/~oz/hash.html for implementation details.
+ * See https://softwareengineering.stackexchange.com/questions/49550 for some benchmarks.
+ *
+ * @param[in] value     The input value.
+ * @param[in] hash      The previous hash.
+ * @return              The updated hash.
+ */
+uint16_t ipcHash(uint8_t value, uint16_t hash) {
+	// hash = hash * 33 + value
+	hash = ((hash << 5) + hash) + value;
+	return hash;
+}
+
+uint16_t ipcHashInit() {
+	return 5381;
+}
+
 /*
- * A simple additive checksum with inversion of the result to detect all zeros. This is the checksum used in IP
- * headers. The only difference is that here we run it over 8-bit data items rather than 16-bit words.
+ * Calculates the checksum of an IPC ram item.
  */
 uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t* item) {
-	uint16_t sum = 0;
+	uint16_t hash = ipcHashInit();
 
-	sum += item->header.major;
-	sum += item->header.minor;
-	sum += item->header.index;
-	sum += item->header.dataSize;
-	sum += item->header.reserved[0];
-	sum += item->header.reserved[1];
+	for (uint8_t i = 0; i < sizeof(item->header.headerRaw); ++i) {
+		hash = ipcHash(item->header.headerRaw[i], hash);
+	}
 
 	for (uint8_t i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
-		sum += item->data.raw[i];
+		hash = ipcHash(item->data.raw[i], hash);
 	}
-	sum = (sum >> 8) + (sum & 0xFF);
-	sum += sum >> 8;
-
-	return ~sum;
+	return hash;
 }
 
 /*
@@ -48,12 +62,12 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
 		return IPC_RET_NULL_POINTER;
 	}
 	bluenet_ipc_data_header_t header;
-	header.index       = index;
-	header.dataSize    = dataSize;
-	header.major       = BLUENET_IPC_HEADER_MAJOR;
-	header.minor       = BLUENET_IPC_HEADER_MINOR;
-	header.reserved[0] = 0;
-	header.reserved[1] = 0;
+	header.header.index       = index;
+	header.header.dataSize    = dataSize;
+	header.header.major       = BLUENET_IPC_HEADER_MAJOR;
+	header.header.minor       = BLUENET_IPC_HEADER_MINOR;
+	header.header.reserved[0] = 0;
+	header.header.reserved[1] = 0;
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
@@ -79,11 +93,11 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
  * in that case allow the developer to retrieve the (hopefully uncorrupted) major field and can call getRamData with
  * another major that it also knows how to parse.
  */
-enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool doCalculateChecksum) {
+enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t index, bool verifyChecksum) {
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (doCalculateChecksum) {
+	if (verifyChecksum) {
 		uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 		if (checksum != m_bluenet_ipc_ram.item[index].header.checksum) {
 			return IPC_RET_DATA_INVALID;
@@ -91,32 +105,6 @@ enum IpcRetCode getRamDataHeader(bluenet_ipc_data_header_t* header, uint8_t inde
 	}
 	memcpy(header, &m_bluenet_ipc_ram.item[index].header, sizeof(bluenet_ipc_data_header_t));
 	return IPC_RET_SUCCESS;
-}
-
-/*
- * To judge if RAM data is present we just assume that both major and minor are still zero. It doesn't tell if the item
- * is valid. We can't use other fields than major and minor because they can change.
- */
-bool isRamDataPresent(uint8_t index) {
-	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
-		return false;
-	}
-	return (m_bluenet_ipc_ram.item[index].header.major != 0 || m_bluenet_ipc_ram.item[index].header.minor != 0);
-}
-
-/*
- * Returns true if the entire buffer including the header is empty.
- */
-bool isRamDataEmpty(uint8_t index) {
-	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
-		return false;
-	}
-	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
-		if (m_bluenet_ipc_ram.item[index].data.raw[i] != 0) {
-			return false;
-		}
-	}
-	return true;
 }
 
 /**
@@ -158,19 +146,19 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.major != BLUENET_IPC_HEADER_MAJOR) {
+	if (m_bluenet_ipc_ram.item[index].header.header.major != BLUENET_IPC_HEADER_MAJOR) {
 		return IPC_RET_DATA_MAJOR_DIFF;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.minor > BLUENET_IPC_HEADER_MINOR) {
+	if (m_bluenet_ipc_ram.item[index].header.header.minor > BLUENET_IPC_HEADER_MINOR) {
 		return IPC_RET_DATA_MINOR_DIFF;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.index != index) {
+	if (m_bluenet_ipc_ram.item[index].header.header.index != index) {
 		return IPC_RET_NOT_FOUND;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+	if (m_bluenet_ipc_ram.item[index].header.header.dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
 		return IPC_RET_DATA_TOO_LARGE;
 	}
-	if (m_bluenet_ipc_ram.item[index].header.dataSize > maxSize) {
+	if (m_bluenet_ipc_ram.item[index].header.header.dataSize > maxSize) {
 		return IPC_RET_BUFFER_TOO_SMALL;
 	}
 	uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
@@ -178,8 +166,8 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* data, uint8_t* dataSize, uint
 		return IPC_RET_DATA_INVALID;
 	}
 
-	memcpy(data, m_bluenet_ipc_ram.item[index].data.raw, m_bluenet_ipc_ram.item[index].header.dataSize);
-	*dataSize = m_bluenet_ipc_ram.item[index].header.dataSize;
+	memcpy(data, m_bluenet_ipc_ram.item[index].data.raw, m_bluenet_ipc_ram.item[index].header.header.dataSize);
+	*dataSize = m_bluenet_ipc_ram.item[index].header.header.dataSize;
 	return IPC_RET_SUCCESS;
 }
 

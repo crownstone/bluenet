@@ -916,10 +916,10 @@ void Crownstone::printLoadStats() {
  * To fix this, it should be possible by the user to clear IPC ram.
  */
 void handleBootloaderInfo() {
-	bluenet_ipc_data_t ipcData;
+	bluenet_ipc_data_payload_t ipcData;
 	uint8_t dataSize;
 	LOGi("Get bootloader IPC data info");
-	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
 	if (ipcCode != IPC_RET_SUCCESS) {
 		LOGw("Bootloader IPC data error: ipcCode=%i", ipcCode);
 		return;
@@ -940,16 +940,30 @@ void handleBootloaderInfo() {
 		return;
 	}
 
-	if (ipcData.bootloaderData.justActivated || ipcData.bootloaderData.updateError) {
-		LOGi("Clear RAM data for microapps.");
-		clearRamData(IPC_INDEX_MICROAPP);
+	bool setData = false;
+	if (ipcData.bootloaderData.flags.readError) {
+		LOGi("Bootloader had an IPC read error");
+		ipcData.bootloaderData.flags.readError = 0;
+		setData = true;
 	}
 
-	if (ipcData.bootloaderData.justActivated) {
-		LOGi("Clear the just activated flag");
-		ipcData.bootloaderData.justActivated = 0;
-		// Use the raw buffer, so we keep the possible newer data as well (in case of newer minor version).
-		setRamData(IPC_INDEX_BOOTLOADER_INFO, ipcData.raw, dataSize);
+	if (ipcData.bootloaderData.flags.versionError) {
+		LOGi("Bootloader had an IPC version error");
+		ipcData.bootloaderData.flags.versionError = 0;
+		setData = true;
+	}
+
+	if (ipcData.bootloaderData.flags.justActivated) {
+		LOGi("This is the first time this version of bluenet runs.");
+		LOGd("Clear the just activated flag");
+		ipcData.bootloaderData.flags.justActivated = 0;
+		setData = true;
+	}
+
+	if (setData) {
+		// Use the raw buffer, so we keep the possible newer data as well
+		// (in case of newer minor version set by the bootloader).
+		setRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, dataSize);
 	}
 
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
