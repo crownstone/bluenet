@@ -82,6 +82,15 @@ cs_ram_stats_t Crownstone::_ramStats;
  */
 void startHFClock() {
 	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+#ifdef NRF_SDH_CLOCK_LF_SRC
+#if NRF_SDH_CLOCK_LF_SRC == 0
+	LOGd("LF clock driven by internal RC oscillator");
+#elif NRF_SDH_CLOCK_LF_SRC == 1
+	LOGd("LF clock driven by external crystal");
+#elif NRF_SDH_CLOCK_LF_SRC == 2
+	LOGd("LF clock to be synthesized from HF clock");
+#endif
+#endif
 
 	// Start the external high frequency crystal
 	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
