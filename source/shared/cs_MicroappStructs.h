@@ -630,6 +630,23 @@ struct __attribute__((packed)) microapp_sdk_ble_uuid_t {
 	uint16_t uuid;
 };
 
+struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
+	//! Whether the characteristic is readable.
+	bool read : 1;
+
+	//! Whether the characteristic can be written to without response.
+	bool writeNoResponse : 1;
+
+	//! Whether the characteristic can be written to with response.
+	bool write : 1;
+
+	//! Whether the characteristic supports notifications.
+	bool notify : 1;
+
+	//! Whether the characteristic supports indications.
+	bool indicate : 1;
+};
+
 struct __attribute__((packed)) microapp_sdk_ble_request_uuid_register_t {
 	//! The custom service UUID to register.
 	uint8_t customUuid[16];
@@ -656,9 +673,16 @@ struct __attribute__((packed)) microapp_sdk_ble_central_request_discover_t {
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_t {
+	//! UUID of the service.
+	microapp_sdk_ble_uuid_t serviceUuid;
+	//! UUID of the service or characteristic.
 	microapp_sdk_ble_uuid_t uuid;
+	//! Handle for the value, 0 for none.
 	uint16_t valueHandle;
+	//! Handle for the CCCD, 0 for none.
 	uint16_t cccdHandle;
+	//! Supported options.
+	microapp_sdk_ble_characteristic_options_t options;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_done_t {
@@ -687,6 +711,12 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_read_t {
 	uint8_t data[0];
 };
 
+struct __attribute__((packed)) microapp_sdk_ble_central_event_notification_t {
+	uint16_t valueHandle;
+	uint16_t size;
+	uint8_t data[0];
+};
+
 enum MicroappSdkBleCentralType {
 	CS_MICROAPP_SDK_BLE_CENTRAL_REGISTER_INTERRUPT  = 1,
 
@@ -706,11 +736,12 @@ enum MicroappSdkBleCentralType {
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ          = 12,
 
 	//! Subscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE   = 12,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE   = 13,
 
 	//! Unsubscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE = 13,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE = 14,
 
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION  = 15,
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_t {
@@ -731,29 +762,13 @@ struct __attribute__((packed)) microapp_sdk_ble_central_t {
 		microapp_sdk_ble_central_event_write_t eventWrite;
 		microapp_sdk_ble_central_request_read_t requestRead;
 		microapp_sdk_ble_central_event_read_t eventRead;
+		microapp_sdk_ble_central_event_notification_t eventNotification;
 	};
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_service_add_t {
 	//! The UUID of the service.
 	microapp_sdk_ble_uuid_t uuid;
-};
-
-struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
-	//! Whether the characteristic is readable.
-	bool read : 1;
-
-	//! Whether the characteristic can be written to without response.
-	bool writeNoResponse : 1;
-
-	//! Whether the characteristic can be written to with response.
-	bool write : 1;
-
-	//! Whether the characteristic supports notifications.
-	bool notify : 1;
-
-	//! Whether the characteristic supports indications.
-	bool indicate : 1;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_characteristic_add_t {

@@ -247,17 +247,27 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 
 			// Send an event for the service
 			ble_central_discovery_t packet = {
+					.serviceUuid = UUID(event.params.discovered_db.srv_uuid),
 					.uuid        = UUID(event.params.discovered_db.srv_uuid),
 					.valueHandle = BLE_GATT_HANDLE_INVALID,
-					.cccdHandle  = BLE_GATT_HANDLE_INVALID};
+					.cccdHandle  = BLE_GATT_HANDLE_INVALID,
+					.flags = {}};
 			event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 			eventOut.dispatch();
 
 			// Send an event for each characteristic
 			for (uint8_t i = 0; i < event.params.discovered_db.char_count; ++i) {
+				packet.serviceUuid = UUID(event.params.discovered_db.srv_uuid);
 				packet.uuid        = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
 				packet.valueHandle = event.params.discovered_db.charateristics[i].characteristic.handle_value;
 				packet.cccdHandle  = event.params.discovered_db.charateristics[i].cccd_handle;
+				packet.flags.broadcast = event.params.discovered_db.charateristics[i].characteristic.char_props.broadcast;
+				packet.flags.read = event.params.discovered_db.charateristics[i].characteristic.char_props.read;
+				packet.flags.write_no_ack = event.params.discovered_db.charateristics[i].characteristic.char_props.write_wo_resp;
+				packet.flags.write_with_ack = event.params.discovered_db.charateristics[i].characteristic.char_props.write;
+				packet.flags.notify = event.params.discovered_db.charateristics[i].characteristic.char_props.notify;
+				packet.flags.indicate = event.params.discovered_db.charateristics[i].characteristic.char_props.indicate;
+				packet.flags.write_signed = event.params.discovered_db.charateristics[i].characteristic.char_props.auth_signed_wr;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 				eventOut.dispatch();
 			}
