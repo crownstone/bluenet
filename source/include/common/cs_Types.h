@@ -562,7 +562,7 @@ typedef void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
 typedef ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
 typedef cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
 typedef ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
-typedef cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef ble_central_write_result_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
 typedef ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
 typedef cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
 typedef void TYPIFY(CMD_CS_CENTRAL_DISCONNECT);

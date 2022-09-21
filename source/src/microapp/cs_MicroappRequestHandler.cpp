@@ -563,7 +563,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 							 || ble->peripheral.requestAddCharacteristic.options.writeNoResponse,
 					.notify = ble->peripheral.requestAddCharacteristic.options.notify
 							  || ble->peripheral.requestAddCharacteristic.options.indicate,
-					.autoNotify          = false,
+					.autoNotify          = ble->peripheral.requestAddCharacteristic.options.autoNotify,
 					.notificationChunker = false,
 					.encrypted           = false,
 			};
@@ -628,20 +628,6 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			return result;
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY: {
-			CharacteristicBase* characteristic = getCharacteristic(ble->peripheral.handle);
-			if (characteristic == nullptr) {
-				ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND;
-				return ERR_WRONG_STATE;
-			}
-
-			// Right now, we ignore offset and size.
-			cs_ret_code_t result =
-					characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
-			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
-			return result;
-		}
-		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_INDICATE: {
-			// Same as notify.
 			CharacteristicBase* characteristic = getCharacteristic(ble->peripheral.handle);
 			if (characteristic == nullptr) {
 				ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_FOUND;

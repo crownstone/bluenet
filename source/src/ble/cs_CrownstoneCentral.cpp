@@ -550,25 +550,28 @@ void CrownstoneCentral::onReadDuringConnect(ble_central_read_result_t& result) {
 			setStep(ConnectSteps::SESSION_DATA);
 			return;
 		}
-		default: finalizeOperation(_currentOperation, ERR_WRONG_OPERATION); return;
+		default: {
+			finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
+			return;
+		}
 	}
 }
 
-void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
-	if (retCode != ERR_SUCCESS) {
-		finalizeOperation(_currentOperation, retCode);
+void CrownstoneCentral::onWrite(ble_central_write_result_t& result) {
+	if (result.retCode != ERR_SUCCESS) {
+		finalizeOperation(_currentOperation, result.retCode);
 		return;
 	}
 	switch (_currentOperation) {
 		case Operation::CONNECT: {
-			if (!finalizeStep(ConnectSteps::ENABLE_NOTIFICATIONS, retCode)) {
+			if (!finalizeStep(ConnectSteps::ENABLE_NOTIFICATIONS, result.retCode)) {
 				return;
 			}
 			readSessionData();
 			break;
 		}
 		case Operation::WRITE: {
-			if (!finalizeStep(WriteControlSteps::WRITE, retCode)) {
+			if (!finalizeStep(WriteControlSteps::WRITE, result.retCode)) {
 				return;
 			}
 			// Wait for notifications.

@@ -282,7 +282,7 @@ void MicroappInterruptHandler::onBleCentralDiscoveryResult(cs_ret_code_t& retCod
 	MicroappController::getInstance().generateSoftInterrupt();
 }
 
-void MicroappInterruptHandler::onBleCentralWriteResult(cs_ret_code_t& retCode) {
+void MicroappInterruptHandler::onBleCentralWriteResult(ble_central_write_result_t& event) {
 	LogMicroappInterrupDebug("onBleCentralWriteResult");
 	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 	if (outputBuffer == nullptr) {
@@ -294,8 +294,8 @@ void MicroappInterruptHandler::onBleCentralWriteResult(cs_ret_code_t& retCode) {
 	ble->type                           = CS_MICROAPP_SDK_BLE_CENTRAL;
 	ble->central.type                   = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE;
 	ble->central.connectionHandle       = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
-	ble->central.eventWrite.valueHandle = 0;                                           // TODO: get handle from event.
-	ble->central.eventWrite.result      = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
+	ble->central.eventWrite.valueHandle = event.handle;
+	ble->central.eventWrite.result      = MicroappSdkUtil::bluenetResultToMicroapp(event.retCode);
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
@@ -312,12 +312,11 @@ void MicroappInterruptHandler::onBleCentralReadResult(ble_central_read_result_t&
 	ble->type                          = CS_MICROAPP_SDK_BLE_CENTRAL;
 	ble->central.type                  = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ;
 	ble->central.connectionHandle      = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
-	ble->central.eventRead.valueHandle = 0;                                           // TODO: get handle from event.
+	ble->central.eventRead.valueHandle = event.handle;
 	ble->central.eventRead.result      = MicroappSdkUtil::bluenetResultToMicroapp(event.retCode);
 
-	// TODO: check size
-	ble->central.eventRead.size        = event.data.len;
-	memcpy(ble->central.eventRead.data, event.data.data, event.data.len);
+	ble->central.eventRead.size        = std::min(event.data.len, MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE);
+	memcpy(ble->central.eventRead.data, event.data.data, ble->central.eventRead.size);
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
@@ -336,9 +335,8 @@ void MicroappInterruptHandler::onBleCentralNotification(ble_central_notification
 	ble->central.connectionHandle      = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
 	ble->central.eventNotification.valueHandle = event.handle;
 
-	// TODO: check size
-	ble->central.eventNotification.size      = event.data.len;
-	memcpy(ble->central.eventNotification.data, event.data.data, event.data.len);
+	ble->central.eventNotification.size = std::min(event.data.len, MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE);
+	memcpy(ble->central.eventNotification.data, event.data.data, ble->central.eventNotification.size);
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }

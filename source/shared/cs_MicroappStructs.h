@@ -15,6 +15,7 @@
 #include <ipc/cs_IpcRamData.h>
 
 #include <cstdint>
+#include <cstddef>
 
 /**
  * Protocol version of the contents of the IPC data going back and forth between microapp and bluenet.
@@ -645,6 +646,12 @@ struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
 
 	//! Whether the characteristic supports indications.
 	bool indicate : 1;
+
+	/**
+	 * Whether the characteristic should automatically notify the value when you updated the value.
+	 * This currently only sends the first 20 bytes of the value.
+	 */
+	bool autoNotify : 1;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_request_uuid_register_t {
@@ -708,12 +715,16 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_read_t {
 	uint16_t valueHandle;
 	uint8_t result;
 	uint16_t size;
+
+	//! The read data. Maximum size is MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE.
 	uint8_t data[0];
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_notification_t {
 	uint16_t valueHandle;
 	uint16_t size;
+
+	//! The notification data. Maximum size is MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE
 	uint8_t data[0];
 };
 
@@ -834,9 +845,6 @@ enum MicroappSdkBlePeripheralType {
 	//! Notify data. Payload is notify.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY             = 12,
 
-	//! Indicate data. Payload is indicate.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_INDICATE           = 13,
-
 	//! Client connected.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT              = 20,
 
@@ -915,7 +923,12 @@ struct __attribute__((packed)) microapp_sdk_ble_t {
 	};
 };
 
+// The ble struct includes the microapp sdk header, so we can check the size.
 static_assert(sizeof(microapp_sdk_ble_t) <= MICROAPP_SDK_MAX_PAYLOAD);
+
+// Calculate max payload sizes.
+const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE = MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventRead.data);
+const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE = MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventNotification.data);
 
 /**
  * Struct for mesh message from microapp.

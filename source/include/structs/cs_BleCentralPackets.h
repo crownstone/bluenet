@@ -62,8 +62,14 @@ struct ble_central_discovery_t {
 	} flags;
 };
 
+struct ble_central_write_result_t {
+	cs_ret_code_t retCode;
+	uint16_t handle;
+};
+
 struct ble_central_read_result_t {
 	cs_ret_code_t retCode;
+	uint16_t handle;
 	cs_data_t data;
 };
 
