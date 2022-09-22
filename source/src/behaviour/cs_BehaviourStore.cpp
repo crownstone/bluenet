@@ -23,7 +23,7 @@
 // ======================= public interface ========================
 
 ErrorCodesGeneral BehaviourStore::addBehaviour(Behaviour* behaviour) {
-	uint8_t index = FindEmptyIndex();
+	uint8_t index = findEmptyIndex();
 	if(index > MaxBehaviours) {
 		return ERR_NO_SPACE;
 	} else {
@@ -32,10 +32,11 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(Behaviour* behaviour) {
 }
 
 ErrorCodesGeneral BehaviourStore::replaceBehaviour(uint8_t index, Behaviour* behaviour) {
+	// This also checks the index.
 	auto retVal = removeBehaviour(index);
 	if (retVal == ERR_SUCCESS) {
 		assignBehaviour(index, behaviour);
-		StoreUpdate(index, behaviour);
+		storeUpdate(index, behaviour);
 	}
 	return retVal;
 }
@@ -108,12 +109,12 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 }
 
 
-void BehaviourStore::StoreUpdate(uint8_t index, Behaviour* behaviour) {
+void BehaviourStore::storeUpdate(uint8_t index, Behaviour* behaviour) {
 	auto serializedBehaviour = behaviour->serialized();
-	StoreUpdate(index, behaviour->getType(), serializedBehaviour.data(), serializedBehaviour.size());
+	storeUpdate(index, behaviour->getType(), serializedBehaviour.data(), serializedBehaviour.size());
 }
 
-void BehaviourStore::StoreUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
+void BehaviourStore::storeUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
 	CS_TYPE csType;
 	switch(type) {
 		case SwitchBehaviour::Type::Switch: csType = CS_TYPE::STATE_BEHAVIOUR_RULE; break;
@@ -176,12 +177,12 @@ void BehaviourStore::assignBehaviour(uint8_t index, Behaviour* behaviour) {
 	activeBehaviours[index]->print();
 }
 
-uint8_t BehaviourStore::FindEmptyIndex() {
-	uint8_t empty_index = 0;
-	while (activeBehaviours[empty_index] != nullptr && empty_index < MaxBehaviours) {
-		empty_index++;
+uint8_t BehaviourStore::findEmptyIndex() {
+	uint8_t emptyIndex = 0;
+	while (activeBehaviours[emptyIndex] != nullptr && emptyIndex < MaxBehaviours) {
+		emptyIndex++;
 	}
-	return empty_index;
+	return emptyIndex;
 }
 
 ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t& index) {
@@ -197,20 +198,20 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	}
 
 	// find the first empty index.
-	uint8_t empty_index = FindEmptyIndex();
-	if (empty_index >= MaxBehaviours) {
+	uint8_t emptyIndex = findEmptyIndex();
+	if (emptyIndex >= MaxBehaviours) {
 		return ERR_NO_SPACE;
 	}
-	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, empty_index);
+	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, emptyIndex);
 
-	Behaviour* behaviour = allocateBehaviour(empty_index, typ, buf, bufSize);
-	assignBehaviour(empty_index, behaviour);
-	StoreUpdate(empty_index, typ, buf, bufSize);
-	index = empty_index;
+	Behaviour* behaviour = allocateBehaviour(emptyIndex, typ, buf, bufSize);
+	assignBehaviour(emptyIndex, behaviour);
+	storeUpdate(emptyIndex, typ, buf, bufSize);
+	index = emptyIndex;
 	return ERR_SUCCESS;
 }
 
-ErrorCodesGeneral BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
+ErrorCodesGeneral BehaviourStore::replaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
 	size_t behaviourSize = getBehaviourSize(type);
 
 	if(behaviourSize == 0) {
@@ -253,12 +254,12 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	LOGBehaviourStoreInfo("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
-	auto retCode = ReplaceParameterValidation(evt, index, type);
+	auto retCode = replaceParameterValidation(evt, index, type);
 	if (retCode == ERR_SUCCESS) {
 		Behaviour* behaviour = allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
 		removeBehaviour(index);
 		assignBehaviour(index, behaviour);
-		StoreUpdate(index, type, dat + indexSize, evt.size - indexSize);
+		storeUpdate(index, type, dat + indexSize, evt.size - indexSize);
 	}
 	evt.result.returnCode = retCode;
 

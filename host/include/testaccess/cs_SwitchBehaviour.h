@@ -11,13 +11,13 @@
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <utils/cs_iostream.h>
-#include <iostream>
 #include <bitset>
 #include <iomanip>
+#include <iostream>
 
-template<>
+template <>
 class TestAccess<SwitchBehaviour> {
-public:
+   public:
     uint8_t intensity;
     uint8_t profileId;
     DayOfWeekBitMask activedaysofweek;
@@ -25,9 +25,7 @@ public:
     TimeOfDay until;
     TestAccess<PresenceCondition> presencecondition;
 
-    TestAccess() : from(TimeOfDay::Sunrise()), until(TimeOfDay::Sunset()){
-        reset();
-    }
+    TestAccess() : from(TimeOfDay::Sunrise()), until(TimeOfDay::Sunset()) { reset(); }
 
     void reset() {
         intensity = 100;
@@ -39,27 +37,19 @@ public:
     }
 
     SwitchBehaviour get() {
-        return {
-                 intensity,
-                 profileId,
-                 activedaysofweek,
-                 from,
-                 until,
-                 presencecondition.get()
-        };
+        return {intensity, profileId, activedaysofweek, from, until, presencecondition.get()};
     }
 
-    static std::ostream & toStream(std::ostream &out, SwitchBehaviour& s) {
+    static std::ostream& toStream(std::ostream& out, SwitchBehaviour& s) {
         return out << "{"
-            << "from: " << s.from() << ", "
-            << "until: " << s.until() << ", "
-            << "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
-            << "profileId:" << +s.profileId << ", "
-            << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
-            << "presenceCondition: " << s.presenceCondition
-            << "}"
-            << "[gracePeriodForPresenceIsActive(): "<< s.gracePeriodForPresenceIsActive() <<"]"
-            ;
+                   << "from: " << s.from() << ", "
+                   << "until: " << s.until() << ", "
+                   << "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
+                   << "profileId:" << +s.profileId << ", "
+                   << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
+                   << "presenceCondition: " << s.presenceCondition << "}"
+                   << "[gracePeriodForPresenceIsActive(): " << s.gracePeriodForPresenceIsActive()
+                   << "]";
     }
 };
 
@@ -67,6 +57,6 @@ public:
  * Allows streaming SwitchBehaviour objects to std::cout and other streams.
  * global definition forwards to TestAccess to elevate access rights for inspection.
  */
-std::ostream & operator<< (std::ostream &out, SwitchBehaviour& s){
-    return TestAccess<SwitchBehaviour>::toStream(out,s);
+std::ostream& operator<<(std::ostream& out, SwitchBehaviour& s) {
+    return TestAccess<SwitchBehaviour>::toStream(out, s);
 }

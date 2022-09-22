@@ -85,8 +85,6 @@ void cs_log_args_no_fmt(
 	cs_log_end();
 }
 
-/** \section Foo Dit is een section */
-
 // This function takes an unused argument "fmt".
 // This fmt ends up in the .ii file (preprocessed .cpp file), and is then used to gather all log strings.
 // To make it easier for the compiler to optimize out the fmt string, we only call cs_log_args without the fmt arg here.

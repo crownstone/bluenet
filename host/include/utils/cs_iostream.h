@@ -7,10 +7,10 @@
 #pragma once
 
 #include <behaviour/cs_BehaviourStore.h>
-#include <presence/cs_PresenceHandler.h>
-#include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventDispatcher.h>
 #include <presence/cs_PresenceCondition.h>
+#include <presence/cs_PresenceHandler.h>
+#include <switch/cs_SwitchAggregator.h>
 #include <utils/date.h>
 
 #include <iostream>
@@ -19,23 +19,23 @@
 /**
  * Allows streaming DayOfWeek objects to std::cout and other streams.
  */
-std::ostream& operator<<(std::ostream& out, DayOfWeek t) ;
+std::ostream& operator<<(std::ostream& out, DayOfWeek t);
 
 /**
  * Allows streaming TimeOfDay objects to std::cout and other streams.
  */
-std::ostream & operator<< (std::ostream &out, TimeOfDay t);
+std::ostream& operator<<(std::ostream& out, TimeOfDay t);
 
 /**
  * Allows streaming Time objects to std::cout and other streams.
  */
-std::ostream & operator<< (std::ostream &out, Time t);
+std::ostream& operator<<(std::ostream& out, Time t);
 
 /**
- * Allows streaming std::optional<T> objects to std::cout and other streams, given T is a type for which
- * the relevant operator<< has been implemented.
+ * Allows streaming std::optional<T> objects to std::cout and other streams, given T is a type for
+ * which the relevant operator<< has been implemented.
  */
-template<class T>
-std::ostream & operator<< (std::ostream &out, std::optional<T> p_opt) {
+template <class T>
+std::ostream& operator<<(std::ostream& out, std::optional<T> p_opt) {
     return p_opt ? out << p_opt.value() : out << "std::nullopt";
 }

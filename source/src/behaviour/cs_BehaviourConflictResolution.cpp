@@ -23,14 +23,16 @@ bool isRoomBased(PresencePredicate predicate) {
 }
 
 int numberOfRooms(PresencePredicate predicate) {
-    uint64_t bitmask = predicate._presence.getBitmask();
-    int count = 0;
-    for (auto i{0}; i<8; i++){
-        if(bitmask == 0) { break; }
-        count += ((bitmask & 0x01) ? 1 : 0);
-        bitmask>>=1;
-    }
-    return count;
+	uint64_t bitmask = predicate._presence.getBitmask();
+	if (bitmask == 0) {
+		return 0;
+	}
+	int count = 0;
+	for (size_t i = 0; i < sizeof(bitmask); i++) {
+		count += (bitmask & 0x01);
+		bitmask >>= 1;
+	}
+	return count;
 }
 
 bool PresenceIsMoreRelevant(PresencePredicate lhs, PresencePredicate rhs) {

@@ -5,34 +5,34 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #include <behaviour/cs_BehaviourStore.h>
-#include <presence/cs_PresenceHandler.h>
-#include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventDispatcher.h>
 #include <presence/cs_PresenceCondition.h>
+#include <presence/cs_PresenceHandler.h>
+#include <switch/cs_SwitchAggregator.h>
 #include <utils/date.h>
 
-#include <testaccess/cs_SystemTime.h>
 #include <testaccess/cs_PresenceDescription.h>
+#include <testaccess/cs_SystemTime.h>
 #include <utils/cs_iostream.h>
 
-#include <cstdio>
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <ostream>
 #include <chrono>
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <ostream>
+#include <string>
 #include <thread>
 
 #include <logging/cs_Logger.h>
 
 using namespace date;
-auto now() { return std::chrono::high_resolution_clock::now(); }
-
+auto now() {
+    return std::chrono::high_resolution_clock::now();
+}
 
 int main() {
-	LOGd("hello world");
+    LOGd("hello world");
 
     SwitchAggregator _switchAggregator;
     BehaviourStore _behaviourStore;
@@ -44,9 +44,8 @@ int main() {
 
     _systemTime.init();
     SystemTime::setTime(1661966240, true, false);
-    TestAccess<SystemTime>::setTime(Time(DayOfWeek::Tuesday, 15,30));
+    TestAccess<SystemTime>::setTime(Time(DayOfWeek::Tuesday, 15, 30));
     SystemTime::setSunTimes(sun_time_t{});
-
 
     TestAccess<SystemTime>::fastForwardS(60);
     std::cout << "uptime: " << SystemTime::up() << " now: " << SystemTime::now() << std::endl;
@@ -61,8 +60,8 @@ int main() {
     _behaviourStore.addBehaviour(sBehaviour);
 
     Behaviour* bP = _behaviourStore.getBehaviour(0);
-    if(bP == nullptr) {
-    	return 1; // fail
+    if (bP == nullptr) {
+        return 1;  // fail
     }
 
     std::cout << "from: " << bP->from() << " until: " << bP->until() << std::endl;
@@ -72,6 +71,6 @@ int main() {
     auto desc = _presenceHandler.getCurrentPresenceDescription();
 
     auto presenceDesc = PresenceStateDescription(0b111);
-	std::cout << presenceDesc << " " << desc << std::endl;
+    std::cout << presenceDesc << " " << desc << std::endl;
     return 0;
 }

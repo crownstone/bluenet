@@ -58,8 +58,10 @@ public:
 	/**
 	 * Add behaviour to the ActiveBehaviours if there is space.
 	 * If null, nothing happens.
-	 * This method takes ownership over the allocated resource
-	 * (removeBehaviour and replaceBehaviour may delete it.)
+	 *
+	 * The object pointed to by `behaviour` must to be allocated on the heap.
+	 * Its lifetime will be managed by BehaviourStore and  will be destroyed and deleted
+	 * if/when necessary, for example when replaceBehaviour is called.
 	 */
 	ErrorCodesGeneral addBehaviour(Behaviour* behaviour);
 
@@ -76,7 +78,7 @@ public:
 	/**
 	 * returns MaxBehaviours if not found.
 	 */
-	uint8_t FindEmptyIndex();
+	uint8_t findEmptyIndex();
 
 
 private:
@@ -125,11 +127,11 @@ private:
 	/**
 	 * call state store for the given switch type and update masterhash.
 	 */
-	void StoreUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize);
+	void storeUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize);
 	/**
 	 * call state store for the given behaviour and update masterhash.
 	 */
-	void StoreUpdate(uint8_t index, Behaviour* behaviour);
+	void storeUpdate(uint8_t index, Behaviour* behaviour);
 
 	/**
 	 * Heap allocate an instance of given type from the buffer.
@@ -161,7 +163,7 @@ private:
 	void dispatchBehaviourMutationEvent();
 
 	// checks intermediate state of handleReplaceBehaviour for consistency.
-	ErrorCodesGeneral ReplaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);
+	ErrorCodesGeneral replaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);
 
 	// loads the behaviours from state into the 'activeBehaviours' array.
 	// BehaviourType must match BehaviourCsType.

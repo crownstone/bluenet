@@ -9,7 +9,7 @@
 #include <behaviour/cs_Behaviour.h>
 #include <cstdint>
 
-template<class T>
+template <class T>
 class CmdReplaceBehaviourData {
    public:
     uint8_t _index;

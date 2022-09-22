@@ -9,20 +9,18 @@
 #include <test/cs_TestAccess.h>
 #include <time/cs_SystemTime.h>
 
-template<>
+template <>
 class TestAccess<SystemTime> {
-public:
+   public:
     static void tick(void*) { SystemTime::tick(nullptr); }
 
     static void fastForwardS(int seconds) {
-        for(auto i{0}; i < seconds; i++) {
+        for (auto i{0}; i < seconds; i++) {
             RTC::offsetMs(1000);
             tick(nullptr);
             tick(nullptr);
         }
     }
 
-    static void setTime(Time t) {
-        SystemTime::setTime(t.timestamp(), false, false);
-    }
+    static void setTime(Time t) { SystemTime::setTime(t.timestamp(), false, false); }
 };

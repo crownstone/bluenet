@@ -6,45 +6,36 @@
  */
 #pragma once
 
+#include <presence/cs_PresenceCondition.h>
 #include <test/cs_TestAccess.h>
 #include <testaccess/cs_PresencePredicate.h>
-#include <presence/cs_PresenceCondition.h>
 
-template<>
+template <>
 class TestAccess<PresenceCondition> {
-public:
+   public:
     TestAccess<PresencePredicate> predicate;
     uint32_t timeOut;
 
-    TestAccess() {
-        reset();
-    }
+    TestAccess() { reset(); }
 
     void reset() {
-       predicate.reset();
-       timeOut = 60*5;
+        predicate.reset();
+        timeOut = 60 * 5;
     }
 
-    PresenceCondition get() {
-        return {
-            predicate.get(),
-            timeOut
-        };
-    }
+    PresenceCondition get() { return {predicate.get(), timeOut}; }
 
-    static std::ostream & toStream(std::ostream &out, PresenceCondition& obj) {
+    static std::ostream& toStream(std::ostream& out, PresenceCondition& obj) {
         return out << "{"
-                    << "predicate: " << obj.predicate << ", "
-                    << "timeOut: " << +obj.timeOut
-                    << "}";
+                   << "predicate: " << obj.predicate << ", "
+                   << "timeOut: " << +obj.timeOut << "}";
     }
 };
-
 
 /**
  * Allows streaming PresenceCondition objects to std::cout and other streams.
  * global definition forwards to TestAccess to elevate access rights for inspection.
  */
-std::ostream & operator<< (std::ostream &out, PresenceCondition& s){
-    return TestAccess<PresenceCondition>::toStream(out,s);
+std::ostream& operator<<(std::ostream& out, PresenceCondition& s) {
+    return TestAccess<PresenceCondition>::toStream(out, s);
 }

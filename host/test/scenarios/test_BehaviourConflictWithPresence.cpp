@@ -38,27 +38,27 @@ PresenceStateDescription absent() {
     return testAccessPresenceDesc.get();
 }
 
-SwitchBehaviour* getBehaviourPresent(PresencePredicate::Condition condition, bool multipleRooms = false){
+SwitchBehaviour* getBehaviourPresent(
+    PresencePredicate::Condition condition, bool multipleRooms = false) {
     TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
 
     testAccessSwitchBehaviour.intensity = 95;
     testAccessSwitchBehaviour.presencecondition.predicate._condition = condition;
     testAccessSwitchBehaviour.presencecondition.predicate._presence._bitmask =
-            multipleRooms ? roomBitmaskSingle() : roomBitmaskMulti();
+        multipleRooms ? roomBitmaskSingle() : roomBitmaskMulti();
     auto switchBehaviourInRoom = new SwitchBehaviour(testAccessSwitchBehaviour.get());
-    //std::cout << "switchBehaviourInRoom: " << *switchBehaviourInRoom << std::endl;
     return switchBehaviourInRoom;
 }
 
 SwitchBehaviour* getBehaviourNarrowTimesWithTrivialPresence() {
     TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
 
-    testAccessSwitchBehaviour.from = TimeOfDay(11,59,0);
-    testAccessSwitchBehaviour.until = TimeOfDay(12,1,0);
+    testAccessSwitchBehaviour.from = TimeOfDay(11, 59, 0);
+    testAccessSwitchBehaviour.until = TimeOfDay(12, 1, 0);
     testAccessSwitchBehaviour.intensity = 1;
-    testAccessSwitchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
+    testAccessSwitchBehaviour.presencecondition.predicate._condition =
+        PresencePredicate::Condition::VacuouslyTrue;
     auto switchBehaviourPresenceIrrelevant = new SwitchBehaviour(testAccessSwitchBehaviour.get());
-    //std::cout << "getBehaviourNarrowTimesWithTrivialPresence: " << *switchBehaviourPresenceIrrelevant << std::endl;
     return switchBehaviourPresenceIrrelevant;
 }
 
@@ -106,38 +106,48 @@ struct TestBehaviours {
     static constexpr int nooneInRoomMulti = 7;
 
     /**
-     * this method allocates on the heap. no need to clean up, the behaviourstore will take ownership and
-     * delete items properly.
+     * this method allocates on the heap. no need to clean up, the behaviourstore will take
+     * ownership and delete items properly.
      */
     static SwitchBehaviour* makeTestSwitchBehaviour(int index) {
-        switch(index) {
-            case verySpecific: return getBehaviourNarrowTimesWithTrivialPresence();
-            case vacuouslyTrue: return getBehaviourPresent(PresencePredicate::Condition::VacuouslyTrue);
-            case anyoneInSphere: return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSphere);
-            case nooneInSphere: return getBehaviourPresent(PresencePredicate::Condition::NooneInSphere);
-            case anyoneInRoom: return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSelectedRooms);
-            case nooneInRoom: return getBehaviourPresent(PresencePredicate::Condition::NooneInSelectedRooms);
-            case anyoneInRoomMulti: return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSelectedRooms, true);
-            case nooneInRoomMulti: return getBehaviourPresent(PresencePredicate::Condition::NooneInSelectedRooms, true);
-            default: return nullptr;
+        switch (index) {
+            case verySpecific:
+                return getBehaviourNarrowTimesWithTrivialPresence();
+            case vacuouslyTrue:
+                return getBehaviourPresent(PresencePredicate::Condition::VacuouslyTrue);
+            case anyoneInSphere:
+                return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSphere);
+            case nooneInSphere:
+                return getBehaviourPresent(PresencePredicate::Condition::NooneInSphere);
+            case anyoneInRoom:
+                return getBehaviourPresent(PresencePredicate::Condition::AnyoneInSelectedRooms);
+            case nooneInRoom:
+                return getBehaviourPresent(PresencePredicate::Condition::NooneInSelectedRooms);
+            case anyoneInRoomMulti:
+                return getBehaviourPresent(
+                    PresencePredicate::Condition::AnyoneInSelectedRooms, true);
+            case nooneInRoomMulti:
+                return getBehaviourPresent(
+                    PresencePredicate::Condition::NooneInSelectedRooms, true);
+            default:
+                return nullptr;
         }
     }
 };
 
 /**
- * clears the store, then adds the behaviours specified in the indices vector constructing them using
- * TestBehaviours::makeTestSwitchBehaviour.
+ * clears the store, then adds the behaviours specified in the indices vector constructing them
+ * using TestBehaviours::makeTestSwitchBehaviour.
  */
 void setupBehaviourStore(BehaviourStore& store, std::vector<int> indices) {
     TestAccess<BehaviourStore>::clearActiveBehavioursArray(store);
-    store.replaceBehaviour(TestBehaviours::verySpecific,
-                           TestBehaviours::makeTestSwitchBehaviour(TestBehaviours::verySpecific));
-    for(int index : indices) {
-        store.replaceBehaviour(index,
-                               TestBehaviours::makeTestSwitchBehaviour(index));
+    store.replaceBehaviour(
+        TestBehaviours::verySpecific,
+        TestBehaviours::makeTestSwitchBehaviour(TestBehaviours::verySpecific));
+    for (int index : indices) {
+        store.replaceBehaviour(index, TestBehaviours::makeTestSwitchBehaviour(index));
     }
 }
-
 
 /**
  * This test asserts correct conflict resolution when the only difference in stored behaviours
@@ -151,7 +161,7 @@ int main() {
     BehaviourHandler _behaviourHandler;
     PresenceHandler _presenceHandler;
     SystemTime _systemTime;
-    EventDispatcher &_eventDispatcher = EventDispatcher::getInstance();
+    EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
 
     TestAccess<BehaviourHandler>::setup(_behaviourHandler, &_presenceHandler, &_behaviourStore);
     TestAccess<SystemTime>::fastForwardS(120);
