@@ -43,6 +43,18 @@ public:
     	return new auto(get());
     }
 
+    struct BehaviourStoreItem {
+    	uint8_t _index;
+    	SwitchBehaviour* _behaviour;
+    };
+
+    BehaviourStoreItem getItem(uint8_t index) {
+    	return BehaviourStoreItem{
+    		._index = index,
+			._behaviour = getNew()
+    	};
+    }
+
     static std::ostream & toStream(std::ostream &out, SwitchBehaviour& s) {
         return out << "{"
             << "from: " << s.from() << ", "

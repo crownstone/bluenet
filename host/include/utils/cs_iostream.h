@@ -14,6 +14,7 @@
 #include <utils/date.h>
 
 #include <iostream>
+#include <type_traits>
 #include <optional>
 
 /**
@@ -35,7 +36,11 @@ std::ostream& operator<<(std::ostream& out, Time t);
  * Allows streaming std::optional<T> objects to std::cout and other streams, given T is a type for
  * which the relevant operator<< has been implemented.
  */
-template <class T>
-std::ostream& operator<<(std::ostream& out, std::optional<T> p_opt) {
-	return p_opt ? out << p_opt.value() : out << "std::nullopt";
+template<class T>
+std::ostream & operator<< (std::ostream &out, std::optional<T> p_opt) {
+    if (p_opt ){
+    	return out << "{" << (std::is_unsigned<T>::value ? +p_opt.value() : p_opt.value()) << "}";
+    } else {
+    	return out << "std::nullopt";
+    }
 }

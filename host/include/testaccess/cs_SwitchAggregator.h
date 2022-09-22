@@ -22,16 +22,20 @@ public:
 
 	// assumes the aggregator is already attached to the event bus.
 	void setOverrideState(std::optional<uint8_t> override) {
-		if(!override.has_value()){
-			// assumes a #DEBUG build.
-			override = CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE;
+		if(override.has_value()){
+			internal_multi_switch_item_cmd_t switchCmdPacket = {
+					.switchCmd = override.value()
+			};
+			event_t switchEvent(CS_TYPE::CMD_SWITCH, &switchCmdPacket, sizeof(switchCmdPacket));
+
+			_switchAggregator.handleEvent(switchEvent);
+		} else {
+			_switchAggregator._overrideState.reset();
 		}
 
-		internal_multi_switch_item_cmd_t switchCmdPacket = {
-				.switchCmd = override.value()
-		};
-		event_t switchEvent(CS_TYPE::CMD_SWITCH, &switchCmdPacket, sizeof(switchCmdPacket));
+	}
 
-		_switchAggregator.handleEvent(switchEvent);
+	std::optional<uint8_t> getOverrideState() {
+		return _switchAggregator._overrideState;
 	}
 };

@@ -5,39 +5,23 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <behaviour/cs_BehaviourStore.h>
-#include <events/cs_EventDispatcher.h>
-#include <presence/cs_PresenceCondition.h>
-#include <presence/cs_PresenceHandler.h>
-#include <switch/cs_SwitchAggregator.h>
-#include <testaccess/cs_BehaviourHandler.h>
-#include <testaccess/cs_BehaviourStore.h>
+#include <utils/cs_checks.h>
 #include <testaccess/cs_PresenceDescription.h>
 #include <testaccess/cs_SwitchBehaviour.h>
 #include <testaccess/cs_SystemTime.h>
+
+#include <behaviour/cs_BehaviourStore.h>
+#include <presence/cs_PresenceHandler.h>
+#include <switch/cs_SwitchAggregator.h>
+#include <events/cs_EventDispatcher.h>
+#include <presence/cs_PresenceCondition.h>
+
+#include <utils/cs_PresenceBuilder.h>
 #include <utils/date.h>
 
-uint64_t roomBitmaskSingle() {
-	return 0b001;
-}
-uint64_t roomBitmaskMulti() {
-	return 0b011;
-}
 
-PresenceStateDescription present() {
-	TestAccess<PresenceStateDescription> testAccessPresenceDesc;
-	testAccessPresenceDesc._bitmask |= roomBitmaskSingle();
-	return testAccessPresenceDesc.get();
-}
-
-PresenceStateDescription absent() {
-	TestAccess<PresenceStateDescription> testAccessPresenceDesc;
-	testAccessPresenceDesc._bitmask = 0;
-	return testAccessPresenceDesc.get();
-}
-
-SwitchBehaviour* getBehaviourPresent(PresencePredicate::Condition condition, bool multipleRooms = false) {
-	TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
+SwitchBehaviour* getBehaviourPresent(PresencePredicate::Condition condition, bool multipleRooms = false){
+    TestAccess<SwitchBehaviour> testAccessSwitchBehaviour;
 
 	testAccessSwitchBehaviour.intensity                              = 95;
 	testAccessSwitchBehaviour.presencecondition.predicate._condition = condition;
@@ -58,48 +42,7 @@ SwitchBehaviour* getBehaviourNarrowTimesWithTrivialPresence() {
 	return switchBehaviourPresenceIrrelevant;
 }
 
-/**
- * Checks if the _behaviourHandler resolves to the switch behaviour in the _behaviourStore with the given
- * expectedBehaviourIndex and presence. If not, print a message with the line number for reference.
- * @return true on correct resolution, false otherwise.
- */
-bool checkCase(
-		BehaviourHandler& _behaviourHandler,
-		BehaviourStore& _behaviourStore,
-		int expectedBehaviourIndex,
-		PresenceStateDescription presence,
-		int line) {
-	Time testTime(DayOfWeek::Tuesday, 12, 0);
-	SwitchBehaviour* expected = dynamic_cast<SwitchBehaviour*>(_behaviourStore.getBehaviour(expectedBehaviourIndex));
-	SwitchBehaviour* resolved =
-			TestAccess<BehaviourHandler>::resolveSwitchBehaviour(_behaviourHandler, testTime, presence);
 
-	if (resolved == expected && expected != nullptr) {
-		return true;
-	}
-	else {
-		std::cout << "FAILED test at line: " << line << std::endl;
-		if (expected != nullptr) {
-			std::cout << "expected:" << *expected << std::endl;
-		}
-		else {
-			std::cout << "expected:"
-					  << "nullptr"
-					  << "(index " << expectedBehaviourIndex << ")" << std::endl;
-		}
-		if (resolved != nullptr) {
-			std::cout << "resolved:" << *resolved << std::endl;
-		}
-		else {
-			std::cout << "resolved:"
-					  << "nullptr" << std::endl;
-		}
-		std::cout << "time: " << testTime << std::endl;
-		std::cout << "presence" << presence << std::endl;
-
-		return false;
-	}
-}
 
 struct TestBehaviours {
 	// the index in the behaviourstore where this behaviour will be put.
