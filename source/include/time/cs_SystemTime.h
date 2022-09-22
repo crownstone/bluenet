@@ -143,7 +143,7 @@ private:
 	static void scheduleNextTick();
 
 	/**
-	 * must be called at least once per second to update upTimeSec.
+	 * Must be called at least once per second to update upTimeSec.
 	 */
 	static void tick(void* unused);
 
