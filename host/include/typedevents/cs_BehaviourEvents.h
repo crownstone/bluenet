@@ -7,13 +7,14 @@
 #pragma once
 
 #include <behaviour/cs_Behaviour.h>
+
 #include <cstdint>
 
 template <class T>
 class CmdReplaceBehaviourData {
-   public:
-    uint8_t _index;
-    T _behaviour;
+public:
+	uint8_t _index;
+	T _behaviour;
 
-    CmdReplaceBehaviourData() = default;
+	CmdReplaceBehaviourData() = default;
 };

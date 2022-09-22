@@ -23,8 +23,8 @@ enum class DayOfWeek : uint8_t {
 typedef uint8_t DayOfWeekBitMask;
 
 inline uint8_t dayNumber(DayOfWeek day) {
-	for(auto i{0}; i < 7; i++) {
-		if (day == DayOfWeek(1<<i)) {
+	for (int i = 0; i < 7; i++) {
+		if (day == DayOfWeek(1 << i)) {
 			return i;
 		}
 	}

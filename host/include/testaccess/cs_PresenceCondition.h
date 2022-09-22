@@ -12,24 +12,24 @@
 
 template <>
 class TestAccess<PresenceCondition> {
-   public:
-    TestAccess<PresencePredicate> predicate;
-    uint32_t timeOut;
+public:
+	TestAccess<PresencePredicate> predicate;
+	uint32_t timeOut;
 
-    TestAccess() { reset(); }
+	TestAccess() { reset(); }
 
-    void reset() {
-        predicate.reset();
-        timeOut = 60 * 5;
-    }
+	void reset() {
+		predicate.reset();
+		timeOut = 60 * 5;
+	}
 
-    PresenceCondition get() { return {predicate.get(), timeOut}; }
+	PresenceCondition get() { return {predicate.get(), timeOut}; }
 
-    static std::ostream& toStream(std::ostream& out, PresenceCondition& obj) {
-        return out << "{"
-                   << "predicate: " << obj.predicate << ", "
-                   << "timeOut: " << +obj.timeOut << "}";
-    }
+	static std::ostream& toStream(std::ostream& out, PresenceCondition& obj) {
+		return out << "{"
+				   << "predicate: " << obj.predicate << ", "
+				   << "timeOut: " << +obj.timeOut << "}";
+	}
 };
 
 /**
@@ -37,5 +37,5 @@ class TestAccess<PresenceCondition> {
  * global definition forwards to TestAccess to elevate access rights for inspection.
  */
 std::ostream& operator<<(std::ostream& out, PresenceCondition& s) {
-    return TestAccess<PresenceCondition>::toStream(out, s);
+	return TestAccess<PresenceCondition>::toStream(out, s);
 }

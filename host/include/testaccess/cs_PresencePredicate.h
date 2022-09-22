@@ -11,29 +11,29 @@
 #include <testaccess/cs_PresenceDescription.h>
 
 std::ostream& operator<<(std::ostream& out, PresencePredicate::Condition& c) {
-    return out << +static_cast<uint8_t>(c);
+	return out << +static_cast<uint8_t>(c);
 }
 
 template <>
 class TestAccess<PresencePredicate> {
-   public:
-    PresencePredicate::Condition _condition;
-    TestAccess<PresenceStateDescription> _presence;
+public:
+	PresencePredicate::Condition _condition;
+	TestAccess<PresenceStateDescription> _presence;
 
-    TestAccess() { reset(); }
+	TestAccess() { reset(); }
 
-    void reset() {
-        _condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
-        _presence.reset();
-    }
+	void reset() {
+		_condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
+		_presence.reset();
+	}
 
-    PresencePredicate get() { return {_condition, _presence.get()}; }
+	PresencePredicate get() { return {_condition, _presence.get()}; }
 
-    static std::ostream& toStream(std::ostream& out, PresencePredicate& obj) {
-        return out << "{"
-                   << "_condition: " << obj._condition << ", "
-                   << "_presence: " << obj._presence << "}";
-    }
+	static std::ostream& toStream(std::ostream& out, PresencePredicate& obj) {
+		return out << "{"
+				   << "_condition: " << obj._condition << ", "
+				   << "_presence: " << obj._presence << "}";
+	}
 };
 
 /**
@@ -41,5 +41,5 @@ class TestAccess<PresencePredicate> {
  * global definition forwards to TestAccess to elevate access rights for inspection.
  */
 std::ostream& operator<<(std::ostream& out, PresencePredicate& s) {
-    return TestAccess<PresencePredicate>::toStream(out, s);
+	return TestAccess<PresencePredicate>::toStream(out, s);
 }

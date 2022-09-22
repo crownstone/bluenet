@@ -11,16 +11,16 @@
 
 template <>
 class TestAccess<SystemTime> {
-   public:
-    static void tick(void*) { SystemTime::tick(nullptr); }
+public:
+	static void tick(void*) { SystemTime::tick(nullptr); }
 
-    static void fastForwardS(int seconds) {
-        for (auto i{0}; i < seconds; i++) {
-            RTC::offsetMs(1000);
-            tick(nullptr);
-            tick(nullptr);
-        }
-    }
+	static void fastForwardS(int seconds) {
+		for (auto i{0}; i < seconds; i++) {
+			RTC::offsetMs(1000);
+			tick(nullptr);
+			tick(nullptr);
+		}
+	}
 
-    static void setTime(Time t) { SystemTime::setTime(t.timestamp(), false, false); }
+	static void setTime(Time t) { SystemTime::setTime(t.timestamp(), false, false); }
 };

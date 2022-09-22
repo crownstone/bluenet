@@ -37,5 +37,5 @@ std::ostream& operator<<(std::ostream& out, Time t);
  */
 template <class T>
 std::ostream& operator<<(std::ostream& out, std::optional<T> p_opt) {
-    return p_opt ? out << p_opt.value() : out << "std::nullopt";
+	return p_opt ? out << p_opt.value() : out << "std::nullopt";
 }

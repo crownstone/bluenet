@@ -11,26 +11,22 @@
 
 template <>
 class TestAccess<BehaviourHandler> {
-   public:
-    static SwitchBehaviour* resolveSwitchBehaviour(
-        BehaviourHandler& behaviourHandler,
-        Time currentTime,
-        PresenceStateDescription currentPresence) {
-        return behaviourHandler.resolveSwitchBehaviour(currentTime, currentPresence);
-    }
+public:
+	static SwitchBehaviour* resolveSwitchBehaviour(
+			BehaviourHandler& behaviourHandler, Time currentTime, PresenceStateDescription currentPresence) {
+		return behaviourHandler.resolveSwitchBehaviour(currentTime, currentPresence);
+	}
 
-    /**
-     * A very non-standard setup method. This needs to be upgraded to better match what bluenet
-     * does.
-     * @param behaviourHandler
-     * @param presenceHandler
-     * @param behaviourStore
-     */
-    static void setup(
-        BehaviourHandler& behaviourHandler,
-        PresenceHandler* presenceHandler,
-        BehaviourStore* behaviourStore) {
-        behaviourHandler._behaviourStore = behaviourStore;
-        behaviourHandler._presenceHandler = presenceHandler;
-    }
+	/**
+	 * A very non-standard setup method. This needs to be upgraded to better match what bluenet
+	 * does.
+	 * @param behaviourHandler
+	 * @param presenceHandler
+	 * @param behaviourStore
+	 */
+	static void setup(
+			BehaviourHandler& behaviourHandler, PresenceHandler* presenceHandler, BehaviourStore* behaviourStore) {
+		behaviourHandler._behaviourStore  = behaviourStore;
+		behaviourHandler._presenceHandler = presenceHandler;
+	}
 };
