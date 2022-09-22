@@ -8,7 +8,7 @@
 #pragma once
 
 #include <cfg/cs_Strings.h>     // Should actually be included by the files that use these.
-#include <cfg/cs_SerialConfig.h>
+#include <protocol/cs_SerialTypes.h>
 #include <protocol/cs_UartMsgTypes.h>
 #include <cstdint>
 

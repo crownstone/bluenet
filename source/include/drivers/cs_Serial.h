@@ -16,7 +16,7 @@
 extern "C" {
 #endif
 
-#include <cfg/cs_SerialConfig.h>
+#include <protocol/cs_SerialTypes.h>
 #include <stdbool.h>
 #include <stdint.h>
 
