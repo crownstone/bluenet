@@ -241,6 +241,10 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 			}
 			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
 			event.dispatch();
+			if (event.result.returnCode != ERR_SUCCESS) {
+				pin->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+				return event.result.returnCode;
+			}
 
 			if (gpio.direction == SENSE) {
 				MicroappController& controller = MicroappController::getInstance();
@@ -274,32 +278,27 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 
 					pin->value = buf[0];
 					pin->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
-					break;
+					return event.result.returnCode;
 				}
 				case CS_MICROAPP_SDK_PIN_WRITE: {
 					// Write to a pin
 					TYPIFY(EVT_GPIO_WRITE) gpio;
 					gpio.pinIndex             = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
 					MicroappSdkPinValue value = (MicroappSdkPinValue)pin->value;
+
+					uint8_t buf[1];
+					gpio.length = sizeof(buf);
+					gpio.buf = buf;
+
 					switch (value) {
 						case CS_MICROAPP_SDK_PIN_ON: {
 							LogMicroappRequestHandlerDebug("Setting GPIO pin %i", gpio.pinIndex);
-							gpio.length = 1;
-							uint8_t buf[1];
 							buf[0]   = 1;
-							gpio.buf = buf;
-							event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
-							event.dispatch();
 							break;
 						}
 						case CS_MICROAPP_SDK_PIN_OFF: {
 							LogMicroappRequestHandlerDebug("Clearing GPIO pin %i", gpio.pinIndex);
-							gpio.length = 1;
-							uint8_t buf[1];
 							buf[0]   = 0;
-							gpio.buf = buf;
-							event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
-							event.dispatch();
 							break;
 						}
 						default: {
@@ -308,7 +307,10 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 							return ERR_UNKNOWN_TYPE;
 						}
 					}
-					break;
+					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
+					event.dispatch();
+					pin->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+					return event.result.returnCode;
 				}
 				default: {
 					LOGw("Unknown pin action: %u", action);
