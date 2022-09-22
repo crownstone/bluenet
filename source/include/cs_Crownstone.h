@@ -6,10 +6,6 @@
  */
 #pragma once
 
-/** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
- **** *** *** *** *** *** *** *** *** ** General includes
- ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
- **** *** *** *** *** *** *** *** *** */
 
 #include <behaviour/cs_BehaviourStore.h>
 #include <ble/cs_Advertiser.h>
@@ -36,6 +32,7 @@
 #include <switch/cs_SwitchAggregator.h>
 #include <time/cs_SystemTime.h>
 #include <tracking/cs_TrackedDevices.h>
+#include <test/cs_TestAccess.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -57,15 +54,11 @@
 #include <drivers/cs_Gpio.h>
 #endif
 
-/** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
- **** *** *** *** *** *** *** *** *** ** Main functionality
- ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
- **** *** *** *** *** *** *** *** *** */
-
 /**
  * Crownstone encapsulates all functionality, stack, services, and configuration.
  */
 class Crownstone : public EventListener, public Component {
+	friend class TestAccess<Crownstone>;
 public:
 	enum ServiceEvent {
 		CREATE_DEVICE_INFO_SERVICE,

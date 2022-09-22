@@ -204,5 +204,7 @@ private:
 	void addToSwitchHistory(const cs_switch_history_item_t& cmd);
 	void printSwitchHistory();
 
+	void printStates(uint32_t lineNumber);
+
 	void pushTestDataToHost();
 };

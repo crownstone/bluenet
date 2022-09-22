@@ -32,7 +32,10 @@ public:
 		} else {
 			_switchAggregator._overrideState.reset();
 		}
+	}
 
+	void setAllowDimming(bool isAllowed) {
+		// TODO
 	}
 
 	std::optional<uint8_t> getOverrideState() {

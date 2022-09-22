@@ -8,7 +8,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
