@@ -13,7 +13,6 @@ uint32_t nsToTicks(uint64_t ns) {
 	return static_cast<uint32_t>((ns * RTC_CLOCK_FREQ) / 1000000000) % MAX_RTC_COUNTER_VAL;
 }
 
-
 int RTC::_offsetMs = 0;
 
 void RTC::offsetMs(int ms) {
@@ -23,7 +22,6 @@ void RTC::offsetMs(int ms) {
 void RTC::start() {
 	getCount();
 }
-
 
 uint32_t RTC::getCount() {
 	static auto starttime = std::chrono::high_resolution_clock::now();
@@ -43,4 +41,22 @@ uint32_t RTC::ticksToMs(uint32_t ticks) {
 
 uint32_t RTC::msToTicks(uint32_t ms) {
 	return nsToTicks(1000000*ms);
+}
+
+// Platform independent methods
+
+uint32_t RTC::difference(uint32_t ticksTo, uint32_t ticksFrom) {
+	return ((ticksTo - ticksFrom) & MAX_RTC_COUNTER_VAL);
+}
+
+uint32_t RTC::differenceMs(uint32_t ticksTo, uint32_t ticksFrom) {
+	return ticksToMs(difference(ticksTo, ticksFrom));
+}
+
+uint32_t RTC::msPassedSince(uint32_t ticksFrom) {
+	return ticksToMs(difference(getCount(), ticksFrom));
+}
+
+uint32_t RTC::now() {
+	return ticksToMs(getCount());
 }
