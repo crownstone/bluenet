@@ -12,8 +12,6 @@
 #include <mesh/cs_MeshMsgEvent.h>
 #include <structs/cs_PacketsInternal.h>
 
-#define LogMicroappRequestHandlerDebug LOGvv
-
 /**
  * The class MicroappRequestHandler has functionality to store a second app (and perhaps in the future even more apps)
  * on another part of the flash memory.

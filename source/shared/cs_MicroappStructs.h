@@ -348,20 +348,16 @@ struct __attribute__((packed)) bluenet_io_buffers_t {
 typedef microapp_sdk_result_t (*microappCallbackFunc)(uint8_t opcode, bluenet_io_buffers_t*);
 
 /*
- * The layout of the struct in ramdata. The parent struct contains major and minor for struct changes.
- * The size is also defined in the parent struct: bluenet_ipc_data_t.
+ * The layout of the struct in ramdata.
  * The pointer to the coargs struct can be used to switch back from the used coroutine and needs to stored somewhere
  * accessible (not in this struct).
- * The protocol version here is the protocol version of the subsequent data exchange. It is not a version of the IPC
- * struct header. It is neither the protocol for "command control" (for uploading microapps).
+ * The protocol version here is the version of this struct.
  */
 struct __attribute__((packed)) bluenet2microapp_ipcdata_t {
 	// Data protocol (between bluenet and microapp)
 	uint8_t dataProtocol;
 	// The callback to be registered and used
 	microappCallbackFunc microappCallback;
-	// Flag to indicate that the callback is set by the microapp and the struct can be considered valid
-	uint8_t valid : 1;
 };
 
 /**
@@ -373,7 +369,7 @@ typedef union {
 	uint8_t raw[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	// The data coming from the microapp.
 	bluenet2microapp_ipcdata_t bluenet2microappData;
-} __attribute__((packed, aligned(4))) bluenet_ipc_data_cpp_t;
+} __attribute__((packed)) bluenet_ipc_data_cpp_t;
 
 /**
  * Header for io buffers shared between bluenet and microapp. The payload of the io buffer always starts with this

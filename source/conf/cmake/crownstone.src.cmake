@@ -20,6 +20,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_ServiceData.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Stack.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_UUID.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/../shared/ipc/cs_IpcRamData.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/../shared/ipc/cs_IpcRamDataChecks.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Component.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")
 

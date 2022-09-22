@@ -114,8 +114,9 @@ void MicroappInterruptHandler::onGpioUpdate(cs_gpio_update_t& event) {
 	LogMicroappInterrupDebug("onGpioUpdate");
 	uint8_t interruptPin  = MicroappSdkUtil::digitalPinToInterrupt(event.pinIndex);
 
-	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
+	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_PIN, interruptPin);
 	if (outputBuffer == nullptr) {
+		LogMicroappInterrupDebug("No output buffer");
 		return;
 	}
 

@@ -392,6 +392,11 @@ add_custom_target(target_depend
 
 if(NOT FACTORY_IMAGE)
 	# Note that some more dependencies might be added later on by add_dependencies()
+	if(VERBOSITY GREATER 5)
+		foreach(VAL IN LISTS CMAKE_BLUENET_ARGS)
+			message(STATUS "CMAKE_BLUENET_ARGS: " ${VAL})
+		endforeach()
+	endif()
 	ExternalProject_Add(bluenet
 		SOURCE_DIR ${WORKSPACE_DIR}/source
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
