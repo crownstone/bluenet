@@ -24,6 +24,8 @@
 #include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
 
+#define LogMicroappRequestHandlerDebug LOGvv
+
 /*
  * Forwards requests from the microapp to the relevant handler
  */
@@ -191,7 +193,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 			gpio.pinIndex = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
 			gpio.pull     = (direction == CS_MICROAPP_SDK_PIN_INPUT_PULLUP) ? 1 : 0;
 			LogMicroappRequestHandlerDebug(
-					"Initializing GPIO pin %i with direction %u and polarity %u", gpio.pinIndex, direction, polarity);
+					"Initializing GPIO pin %u with direction %u and polarity %u", gpio.pinIndex, direction, polarity);
 
 			switch (direction) {
 				case CS_MICROAPP_SDK_PIN_INPUT:
@@ -256,9 +258,23 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 			MicroappSdkPinActionType action = (MicroappSdkPinActionType)pin->action;
 			switch (action) {
 				case CS_MICROAPP_SDK_PIN_READ: {
-					// Read from a pin. Not implemented
-					pin->header.ack = CS_MICROAPP_SDK_ACK_ERR_NOT_IMPLEMENTED;
-					return ERR_NOT_IMPLEMENTED;
+					LogMicroappControllerDebug("CS_MICROAPP_SDK_PIN_READ pin=%u", pin->pin);
+
+					TYPIFY(EVT_GPIO_READ) gpio;
+
+					// TODO: use result buffer for this.
+					uint8_t buf[1];
+
+					gpio.pinIndex = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
+					gpio.length = sizeof(buf);
+					gpio.buf = buf;
+
+					event_t event(CS_TYPE::EVT_GPIO_READ, &gpio, sizeof(gpio));
+					event.dispatch();
+
+					pin->value = buf[0];
+					pin->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+					break;
 				}
 				case CS_MICROAPP_SDK_PIN_WRITE: {
 					// Write to a pin
