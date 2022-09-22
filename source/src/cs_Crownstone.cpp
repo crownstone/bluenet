@@ -282,11 +282,6 @@ void Crownstone::init1() {
 		LOGi(FMT_HEADER "init central");
 		_bleCentral->init();
 		_crownstoneCentral->init();
-
-#if BUILD_MICROAPP_SUPPORT == 1
-		LOGi(FMT_HEADER "init microapp");
-		_microapp->init();
-#endif
 	}
 }
 
@@ -687,6 +682,11 @@ void Crownstone::startUp() {
 		}
 
 		_behaviourStore.init();
+
+#if BUILD_MICROAPP_SUPPORT == 1
+		LOGi(FMT_HEADER "init microapp");
+		_microapp->init();
+#endif
 	}
 
 	uint32_t err_code;
