@@ -22,7 +22,7 @@
 
 #define LOGNearestCrownstoneTrackerVerbose LOGvv
 #define LOGNearestCrownstoneTrackerDebug LOGvv
-#define LOGNearestCrownstoneTrackerInfo LOGd
+#define LOGNearestCrownstoneTrackerInfo LOGvv
 
 cs_ret_code_t NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myStoneId, sizeof(_myStoneId));

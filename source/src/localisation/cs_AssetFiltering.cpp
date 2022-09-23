@@ -9,7 +9,7 @@
 #include <util/cs_Utils.h>
 
 #define LOGAssetFilteringWarn LOGw
-#define LOGAssetFilteringInfo LOGd
+#define LOGAssetFilteringInfo LOGi
 #define LOGAssetFilteringDebug LOGvv
 #define LOGAssetFilteringVerbose LOGvv
 #define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE

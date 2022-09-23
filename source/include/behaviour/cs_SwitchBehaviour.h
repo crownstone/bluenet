@@ -9,10 +9,13 @@
 
 #include <behaviour/cs_Behaviour.h>
 #include <presence/cs_PresenceCondition.h>
+#include <presence/cs_PresencePredicate.h>
 #include <stdint.h>
 #include <util/cs_WireFormat.h>
 
 #include <optional>
+#include <test/cs_TestAccess.h>
+#include <logging/cs_Logger.h>
 
 /**
  * Object that defines when a state transition should occur.
@@ -21,6 +24,7 @@
  * "fade to 100% in 10 minutes, starting 30 minutes before sunrise, if anyone is in this room"
  */
 class SwitchBehaviour : public Behaviour {
+    friend class TestAccess<SwitchBehaviour>;
 public:
 	typedef std::array<uint8_t, WireFormat::size<Behaviour>() + WireFormat::size<PresenceCondition>()>
 			SerializedDataType;
@@ -53,6 +57,7 @@ public:
 
 	virtual bool requiresPresence() override;
 	virtual bool requiresAbsence() override;
+    virtual PresencePredicate currentPresencePredicate();
 
 	/**
 	 * Does the behaviour apply to the current situation?

@@ -27,6 +27,10 @@ cs_ret_code_t PresenceHandler::init() {
 	return ERR_SUCCESS;
 }
 
+void PresenceHandler::registerPresence(ProfileLocation profileLocation) {
+	handlePresenceEvent(profileLocation, false);
+}
+
 void PresenceHandler::handleEvent(event_t& event) {
 
 	switch (event.type) {
@@ -37,7 +41,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 				return;
 			}
 
-			profile_location_t profileLocation = {
+			ProfileLocation profileLocation = {
 					.profile = parsedAdvEventData->profileId, .location = parsedAdvEventData->locationId};
 			bool forwardToMesh = true;
 
@@ -52,7 +56,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION: {
 			auto profileLocationEventData      = reinterpret_cast<TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*>(event.data);
 
-			profile_location_t profileLocation = {
+			ProfileLocation profileLocation = {
 					.profile = profileLocationEventData->profileId, .location = profileLocationEventData->locationId};
 			bool forwardToMesh = !profileLocationEventData->fromMesh;
 
@@ -67,7 +71,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_ASSET_ACCEPTED: {
 			auto acceptedAssetEventData        = reinterpret_cast<TYPIFY(EVT_ASSET_ACCEPTED)*>(event.data);
 
-			profile_location_t profileLocation = {
+			ProfileLocation profileLocation = {
 					.profile  = *acceptedAssetEventData->_primaryFilter.filterdata().metadata().profileId(),
 					.location = 0  // Location 0 signifies 'in sphere, no specific room'
 			};
@@ -117,7 +121,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 	}
 }
 
-void PresenceHandler::handlePresenceEvent(profile_location_t profileLocation, bool forwardToMesh) {
+void PresenceHandler::handlePresenceEvent(ProfileLocation profileLocation, bool forwardToMesh) {
 	// Validate data.
 	if (!profileLocation.isValid()) {
 		if (profileLocation.profile != 0xFF) {
@@ -147,7 +151,7 @@ void PresenceHandler::handlePresenceEvent(profile_location_t profileLocation, bo
 	}
 }
 
-PresenceMutation PresenceHandler::handleProfileLocation(profile_location_t profileLocation, bool forwardToMesh) {
+PresenceMutation PresenceHandler::handleProfileLocation(ProfileLocation profileLocation, bool forwardToMesh) {
 	LOGPresenceHandlerDebug(
 			"handleProfileLocation profile=%u location=%u forwardToMesh=%u",
 			profileLocation.profile,
@@ -251,7 +255,7 @@ void PresenceHandler::dispatchPresenceMutationEvent(PresenceMutation mutation) {
 	presence_event.dispatch();
 }
 
-void PresenceHandler::dispatchPresenceChangeEvent(PresenceChange type, profile_location_t profileLocation) {
+void PresenceHandler::dispatchPresenceChangeEvent(PresenceChange type, ProfileLocation profileLocation) {
 	LOGi("dispatchPresenceChangeEvent type=%u profile=%u location=%u",
 		 type,
 		 profileLocation.profile,
@@ -264,7 +268,7 @@ void PresenceHandler::dispatchPresenceChangeEvent(PresenceChange type, profile_l
 	event.dispatch();
 }
 
-void PresenceHandler::sendMeshMessage(profile_location_t profileLocation) {
+void PresenceHandler::sendMeshMessage(ProfileLocation profileLocation) {
 	LOGPresenceHandlerDebug(
 			"sendMeshMessage profile=%u location=%u", profileLocation.profile, profileLocation.location);
 	TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
@@ -321,7 +325,7 @@ void PresenceHandler::tickSecond() {
 	}
 }
 
-PresenceHandler::PresenceRecord* PresenceHandler::clearOldestRecord(profile_location_t profileLocation) {
+PresenceHandler::PresenceRecord* PresenceHandler::clearOldestRecord(ProfileLocation profileLocation) {
 	// Last option, overwrite oldest record.
 	auto oldestRecord = _store.begin();
 	for (auto record = _store.begin(); record != _store.end(); record++) {
