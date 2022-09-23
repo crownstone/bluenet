@@ -278,7 +278,7 @@ void CommandHandler::handleCmdGetBootloaderVersion(
 	// Get the bootloader info from IPC.
 	uint8_t dataSize;
 	bluenet_ipc_bootloader_data_t ipcData;
-	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_INFO, reinterpret_cast<uint8_t*>(&ipcData), &dataSize, sizeof(ipcData));
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, reinterpret_cast<uint8_t*>(&ipcData), &dataSize, sizeof(ipcData));
 	if (ipcCode != IPC_RET_SUCCESS) {
 		LOGw("IPC error = %i", ipcCode);
 		result.returnCode = ERR_NOT_FOUND;
