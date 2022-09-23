@@ -4,7 +4,7 @@
  * Date: 15 Aug., 2022
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#pragma message("hello from rng mock")
+
 #include <drivers/cs_RNG.h>
 
 #include <random>

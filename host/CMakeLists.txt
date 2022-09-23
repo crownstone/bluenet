@@ -21,7 +21,8 @@ LOGd("SERIAL_VERBOSITY: " ${SERIAL_VERBOSITY})
 LOGd("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 LOGd("DEFAULT_CONFIG_FILE: ${DEFAULT_CONFIG_FILE}")
 
-set(DEFAULT_CXX_FLAGS        "-std=c++17 -Wno-write-strings -fno-exceptions")
+
+set(DEFAULT_CXX_FLAGS        "-std=c++17 -Wno-write-strings -fno-exceptions -Wformat=0")
 set(DEFAULT_C_FLAGS          "-std=gnu99")
 set(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
 
