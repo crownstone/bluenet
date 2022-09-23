@@ -5,21 +5,21 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
-#include <drivers/cs_RTC.h>
 #include <app_util.h>
 #include <cs_Nordic.h>
+#include <drivers/cs_RTC.h>
 
 uint32_t RTC::getCount() {
 	return NRF_RTC0->COUNTER;
 }
 
 uint32_t RTC::ticksToMs(uint32_t ticks) {
-	// To increase precision: multiply both sides of the division by a large number (multiple of 2 for speed).
+	// To increase precision: multiply both sides of the division by a large factor (multiple of 2 for speed).
 	// Cast them to uint64_t to prevent overflow.
 	// TODO: We have hardware floating points now. Get rid of ROUNDED_DIV macro, etc.
+	uint64_t largeFactor = sizeof(uint16_t);
 	return (uint32_t)ROUNDED_DIV(
-			(uint64_t)65536 * ticks, (uint64_t)65536 * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
+			(uint64_t)largeFactor * ticks, (uint64_t)largeFactor * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 }
 
 uint32_t RTC::msToTicks(uint32_t ms) {
