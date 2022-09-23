@@ -408,7 +408,7 @@ add_custom_target(target_depend
 
 if(NOT FACTORY_IMAGE)
 	# Note that some more dependencies might be added later on by add_dependencies()
-	print_list("CMAKE_BLUENET_ARGS: " CMAKE_BLUENET_ARGS)
+	LogListV("CMAKE_BLUENET_ARGS: " CMAKE_BLUENET_ARGS)
 	ExternalProject_Add(bluenet
 		SOURCE_DIR ${WORKSPACE_DIR}/source
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
@@ -748,7 +748,7 @@ if(COMPILE_FOR_HOST)
 	message(STATUS "Configure ${NORDIC_SDK_HOST_TARGET} target (tag:=${NORDIC_SDK_HOST_GIT_TAG})")
 
 	
-	print_list("CMAKE_BLUENET_HOST_ARGS: " CMAKE_BLUENET_HOST_ARGS)
+	LogListV("CMAKE_BLUENET_HOST_ARGS: " CMAKE_BLUENET_HOST_ARGS)
 	ExternalProject_Add(${NORDIC_SDK_HOST_TARGET}
 		GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
 		GIT_TAG ${NORDIC_SDK_HOST_GIT_TAG}

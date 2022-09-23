@@ -52,7 +52,7 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 message(STATUS "Git branch ${GIT_REFSPEC} at hash ${GIT_SHA1}")
 
-include (cs_list_utils)
+include(cs_list_utils)
 
 #######################################################################################################################
 
@@ -139,9 +139,7 @@ include(crownstone-platform-nrf52.src)
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
-#if(VERBOSITY GREATER 4)
-	print_list("Include Crownstone file: " FOLDER_SOURCE)
-#endif()
+LogListV("Include Crownstone file: " FOLDER_SOURCE)
 
 # Be more strict about our own files (then about Nordic's files)
 set(CROWNSTONE_ONLY_FLAGS "-W -Wno-unused-parameter")
@@ -198,11 +196,7 @@ list(APPEND FOLDER_SOURCE
 	${BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS} 
 	${BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS})
 
-#if(VERBOSITY GREATER 4)
-#	print_list("NORDIC_SOURCE: " NORDIC_SOURCE)
-#endif()
-
-print_list("NORDIC_SOURCE: " NORDIC_SOURCE)
+LogListV("NORDIC_SOURCE: " NORDIC_SOURCE)
 
 ###################################################
 # Include softdevice
@@ -286,18 +280,25 @@ if(NOT EXISTS "${TARGET_CONFIG_FILE}")
 	message(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
 endif()
 
-set_source_files_properties(${NORDIC_SOURCE}
-	PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
-)
-
 set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_FILE}
 )
+
 if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 	set_source_files_properties(${FOLDER_SOURCE}
 		PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE}
 	)
+	message(STATUS "TARGET_CONFIG_OVERWRITE_FILE: " ${TARGET_CONFIG_OVERWRITE_FILE})
+else()
+	message(STATUS "TARGET_CONFIG_OVERWRITE_FILE: not found")
 endif()
+
+message(STATUS "TARGET_CONFIG_OVERWRITE_FILE" ${TARGET_CONFIG_OVERWRITE_FILE})
+message(STATUS "ARENDS_TEST_VARIABLE" ${ARENDS_TEST_VARIABLE})
+
+set_source_files_properties(${NORDIC_SOURCE}
+	PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
+)
 
 # calculate some values that are to be used in the auto-generated files below
 
@@ -343,16 +344,13 @@ configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-sta
 
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
-if(VERBOSITY GREATER 4)
-	include(cs_list_utils)
-	message(STATUS "The bluenet add_executable command: ")
-	print_list("PROJECT_NAME: " PROJECT_NAME)
-	print_list("FOLDER_SOURCE: " FOLDER_SOURCE )
-	print_list("GENERATED_SOURCES: " GENERATED_SOURCES )
-	print_list("FOLDER_HEADER: " FOLDER_HEADER )
-	print_list("OBJECT_FILES: " OBJECT_FILES )
-	print_list("TARGET_CONFIG_FILE: " TARGET_CONFIG_FILE)
-endif()
+LOGd("The bluenet add_executable command: ")
+LogListD("PROJECT_NAME: " PROJECT_NAME)
+LogListD("FOLDER_SOURCE: " FOLDER_SOURCE )
+LogListD("GENERATED_SOURCES: " GENERATED_SOURCES )
+LogListD("FOLDER_HEADER: " FOLDER_HEADER )
+LogListD("OBJECT_FILES: " OBJECT_FILES )
+LogListD("TARGET_CONFIG_FILE: " TARGET_CONFIG_FILE)
 
 add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${TARGET_CONFIG_FILE})
 
