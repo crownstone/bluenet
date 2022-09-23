@@ -9,6 +9,7 @@
 
 #include <behaviour/cs_BehaviourStore.h>
 #include <test/cs_TestAccess.h>
+#include <testaccess/cs_SwitchBehaviour.h>
 
 template <>
 class TestAccess<BehaviourStore> {
