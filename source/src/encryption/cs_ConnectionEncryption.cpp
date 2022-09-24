@@ -60,12 +60,11 @@ cs_ret_code_t ConnectionEncryption::encrypt(
 			return retCode;
 		}
 		case ConnectionEncryptionType::ECB: {
-			conv8_32 validationKey;
-			validationKey.asInt = DEFAULT_VALIDATION_KEY;
+			uint32_t validationKey = DEFAULT_VALIDATION_KEY;
 			cs_buffer_size_t writtenSize;
 			cs_ret_code_t retCode = AES::getInstance().encryptEcb(
 					cs_data_t(key, sizeof(key)),
-					cs_data_t(validationKey.asBuf, sizeof(validationKey.asBuf)),
+					cs_data_t(reinterpret_cast<uint8_t*>(&validationKey), sizeof(validationKey)),
 					input,
 					output,
 					writtenSize);

@@ -41,6 +41,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_M
 
 message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
+set(COMPILE_FOR_HOST FALSE)
+
 # Get compilation day, this will be used in the binary itself
 string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 
@@ -49,6 +51,8 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 message(STATUS "Git branch ${GIT_REFSPEC} at hash ${GIT_SHA1}")
+
+include(cs_list_utils)
 
 #######################################################################################################################
 
@@ -108,11 +112,6 @@ if(VERBOSITY GREATER 4)
 	message(STATUS "Linked libraries: ${LIBS}")
 endif()
 
-# Source directory
-set(SOURCE_DIR "src")
-
-# Get all includes from nordic
-include(nordic.src)
 
 set(BOOTLOADER "_bootloader_.hex")
 
@@ -120,17 +119,27 @@ set(BOOTLOADER "_bootloader_.hex")
 # Include source files
 #######################################################################################################################
 
-include(crownstone.src)
-include(crownstone-application.src)
-include(crownstone-platform.src)
+# Source directory
+set(SOURCE_DIR "src")
+
+# Get all includes from nordic
+set(INCLUDE_BASE_DIR ${NRF5_DIR})
+message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
+
+include(nrf5-sdk-includes.src)
+include(mesh-sdk-includes.src)
+
+####################################################
+# Include crownstone source files for platform nrf52
+####################################################
+
+include(crownstone.src)                # deprecated: choose appropriate file from crownstone-platform-{independent,nrf52,host}
+include(crownstone-platform-independent.src)
+include(crownstone-platform-nrf52.src)
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
-if(VERBOSITY GREATER 4)
-	foreach(crownstone_file ${FOLDER_SOURCE})
-		message(STATUS "Include Crownstone file: " ${crownstone_file})
-	endforeach()
-endif()
+LogListV("Include Crownstone file: " FOLDER_SOURCE)
 
 # Be more strict about our own files (then about Nordic's files)
 set(CROWNSTONE_ONLY_FLAGS "-W -Wno-unused-parameter")
@@ -138,8 +147,37 @@ set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS}
 )
 
-# This will add the required nRF5 code files to ${NORDIC_SOURCE}
+###################################################
+# Include nrf5 sdk source files for platform host
+###################################################
+
+# get source file lists
 include(nrf5.src)
+include(nrf5sdk-platform-independent.src)
+include(nrf5sdk-platform-nrf52.src)
+
+# convert relative to absolute paths
+foreach(FILE_REL IN LISTS NORDIC_SOURCE_NRF5_REL)
+	list(APPEND 
+		NORDIC_SOURCE 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL)
+	list(APPEND 
+		BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_NRF52_SOURCE_REL)
+	list(APPEND 
+		BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+###################################################
+# Include mesh
+###################################################
 
 if(BUILD_MESHING)
 	# This will add the required mesh code files to ${NORDIC_SOURCE}
@@ -148,22 +186,38 @@ else()
 	message(STATUS "Mesh SDK files not being compiled (BUILD_MESHING=OFF)")
 endif()
 
-if(VERBOSITY GREATER 4)
-	foreach(nordic_file ${NORDIC_SOURCE})
-		message(STATUS "Include Nordic file: " ${nordic_file})
-	endforeach()
-endif()
+###################################################
+# Combine all sources into single list
+###################################################
 
-# We now have a variable FOLDER_SOURCE with all source files
-list(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
+# add to folder sources
+list(APPEND FOLDER_SOURCE 
+	${NORDIC_SOURCE} 
+	${BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS} 
+	${BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS})
 
-# For Visual Studio and perhaps other IDEs group the files
-source_group("Source files" FILES ${FOLDER_SOURCE})
-source_group("Header files" FILES ${FOLDER_HEADER})
+LogListV("NORDIC_SOURCE: " NORDIC_SOURCE)
+
+###################################################
+# Include softdevice
+###################################################
 
 if(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
 	include_directories(SYSTEM "${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
 endif()
+
+if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
+	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
+	set(${SOFTDEVICE_DIR_HEX}, "hex")
+endif()
+
+###################################################
+# status messages & IDE config
+###################################################
+
+# For Visual Studio and perhaps other IDEs group the files
+source_group("Source files" FILES ${FOLDER_SOURCE})
+source_group("Header files" FILES ${FOLDER_HEADER})
 
 # Show which directories are actually included to the user
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY include_directories)
@@ -171,11 +225,6 @@ if(VERBOSITY GREATER 4)
 	foreach(dir ${dirs})
 		message(STATUS "Add to the include directories: '${dir}'")
 	endforeach()
-endif()
-
-if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
-	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
-	set(${SOFTDEVICE_DIR_HEX}, "hex")
 endif()
 
 if(FOLDER_SOURCE STREQUAL "")
@@ -231,18 +280,25 @@ if(NOT EXISTS "${TARGET_CONFIG_FILE}")
 	message(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
 endif()
 
-set_source_files_properties(${NORDIC_SOURCE}
-	PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
-)
-
 set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_FILE}
 )
+
 if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 	set_source_files_properties(${FOLDER_SOURCE}
 		PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE}
 	)
+	message(STATUS "TARGET_CONFIG_OVERWRITE_FILE: " ${TARGET_CONFIG_OVERWRITE_FILE})
+else()
+	message(STATUS "TARGET_CONFIG_OVERWRITE_FILE: not found")
 endif()
+
+message(STATUS "TARGET_CONFIG_OVERWRITE_FILE" ${TARGET_CONFIG_OVERWRITE_FILE})
+message(STATUS "ARENDS_TEST_VARIABLE" ${ARENDS_TEST_VARIABLE})
+
+set_source_files_properties(${NORDIC_SOURCE}
+	PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
+)
 
 # calculate some values that are to be used in the auto-generated files below
 
@@ -287,6 +343,14 @@ message(STATUS "Generate build-status.txt script")
 configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-status.txt)
 
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
+
+LOGd("The bluenet add_executable command: ")
+LogListD("PROJECT_NAME: " PROJECT_NAME)
+LogListD("FOLDER_SOURCE: " FOLDER_SOURCE )
+LogListD("GENERATED_SOURCES: " GENERATED_SOURCES )
+LogListD("FOLDER_HEADER: " FOLDER_HEADER )
+LogListD("OBJECT_FILES: " OBJECT_FILES )
+LogListD("TARGET_CONFIG_FILE: " TARGET_CONFIG_FILE)
 
 add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${TARGET_CONFIG_FILE})
 

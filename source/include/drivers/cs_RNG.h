@@ -8,18 +8,6 @@
 
 #include <cstdint>
 
-//! convert uint8_t to uint32_t
-typedef union {
-	uint8_t asBuf[4];
-	uint32_t asInt;
-} conv8_32;
-
-//! convert from uint8_t to uint16_t and back
-typedef union {
-	uint8_t asBuf[2];
-	uint16_t asInt;
-} conv8_16;
-
 /**
  * Random number generator using softdevice called peripheral.
  */
@@ -31,14 +19,15 @@ public:
 		return instance;
 	}
 
-	uint8_t _randomBytes[4];
-
 	static void fillBuffer(uint8_t* buffer, uint8_t length);
+
 	uint32_t getRandom32();
 	uint16_t getRandom16();
 	uint8_t getRandom8();
 
 private:
+	uint8_t _randomBytes[4];
+
 	// Constructor
 	RNG();
 

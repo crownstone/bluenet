@@ -59,6 +59,10 @@ bool ExtendedSwitchBehaviour::requiresAbsence() {
 							 : extensionCondition.predicate.requiresAbsence();
 }
 
+PresencePredicate ExtendedSwitchBehaviour::currentPresencePredicate() {
+    return extensionIsActive ? presenceCondition.predicate : extensionCondition.predicate;
+}
+
 bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
 	// implementation detail:
 	// SwitchBehaviour::isValid(PresenceStateDescription) caches the last valid presence timestamp.

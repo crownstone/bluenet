@@ -12,7 +12,8 @@
 
 #include <algorithm>
 
-#define LOGBehaviour_V LOGnone
+#define LOGBehaviour_V LOGvv
+#define LOGSwitchBehaviourDebug LOGvv
 
 SwitchBehaviour::SwitchBehaviour(
 		uint8_t intensity,
@@ -60,6 +61,10 @@ bool SwitchBehaviour::requiresAbsence() {
 	return presenceCondition.predicate.requiresAbsence();
 }
 
+PresencePredicate SwitchBehaviour::currentPresencePredicate() {
+    return presenceCondition.predicate;
+}
+
 bool SwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
 	return isValid(currentTime) && isValid(currentPresence);
 }
@@ -72,6 +77,10 @@ bool SwitchBehaviour::gracePeriodForPresenceIsActive() {
 	return false;
 }
 
+/**
+ * TODO: Factor out the prevInRoomTimeStamp into a function update(presence,uptime)
+ * and have the BehaviourStore periodically update it.
+ */
 bool SwitchBehaviour::isValid(PresenceStateDescription currentPresence) {
 	LOGBehaviour_V("isValid(presence) called");
 	if (!requiresPresence() && !requiresAbsence()) {
@@ -157,7 +166,7 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentPresence) {
 
 void SwitchBehaviour::print() {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
-	LOGd("SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) "
+    LOGSwitchBehaviourDebug("SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) "
 		 "isValid(%u)",
 		 from().h(),
 		 from().m(),

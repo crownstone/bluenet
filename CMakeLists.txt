@@ -54,6 +54,11 @@ set(ADD_TO_DEFAULT_BUILD_TARGET                  ALL)
 
 project(${BOARD_TARGET} NONE)
 
+if(NOT VERBOSITY)
+	set(VERBOSITY 0)
+endif()
+
+list(APPEND CMAKE_BLUENET_ARGS "-DVERBOSITY:STRING=${VERBOSITY}")
 list(APPEND CMAKE_BLUENET_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 list(APPEND CMAKE_BLUENET_ARGS "-DRELEASE_REPOSITORY:STRING=${RELEASE_REPOSITORY}")
 list(APPEND CMAKE_BLUENET_ARGS "-DRELEASE_CANDIDATE_REPOSITORY:STRING=${RELEASE_CANDIDATE_REPOSITORY}")
@@ -136,9 +141,10 @@ endif()
 
 include(ExternalProject)
 
-include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
-include(${DEFAULT_MODULES_PATH}/git_info.cmake)
-include(${DEFAULT_MODULES_PATH}/compilation_info.cmake)
+include(load_configuration)
+include(git_info)
+include(compilation_info)
+include(cs_list_utils)
 
 #######################################################################################################################
 # Load configuration values from multiple files
@@ -160,12 +166,11 @@ load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_BLUENET_
 
 # Create full semver string to be used to store patches and patched files
 set(NORDIC_SDK_VERSION_FULL "${NORDIC_SDK_VERSION_MAJOR}.${NORDIC_SDK_VERSION_MINOR}.${NORDIC_SDK_VERSION_PATCH}")
+list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
 # Create full semver string for mesh
 set(MESH_SDK_VERSION_FULL "${MESH_SDK_VERSION_MAJOR}.${MESH_SDK_VERSION_MINOR}.${MESH_SDK_VERSION_PATCH}")
-
-# Location of adjusted version of the SDK that can be used on a host system
-set(HOST_NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_host_sdk/${NORDIC_SDK_VERSION_FULL}")
+list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
 
 #######################################################################################################################
 # Print some important configuration values that have been loaded above
@@ -179,40 +184,65 @@ else()
 endif()
 
 #######################################################################################################################
-# Download urls and hashes
+# Config variables for external git repositories (tags / hashes)
 #######################################################################################################################
 
-set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
+# input parameters: 
+#  - NORDIC_SDK_GIT_TAG:        override for nrf5 sdk version linked to bluenet. (defaults to NORDIC_SDK_VERSION_FULL)
+#  - NORDIC_SDK_HOST_GIT_TAG    override for nrf5 sdk version linked to host.    (defaults to NORDIC_SDK_VERSION_FULL-host)
+#  - MESH_SDK_GIT_HASH          override for mesh sdk version                    (defaults to MESH_SDK_VERSION_FULL)
 
-set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+# output variables:
+#  - NORDIC_SDK_TARGET:      name for external project of sdk library target of bluenet.
+#  - NORDIC_SDK_HOST_TARGET: name for external project of sdk library target of host.
+#  - MESH_SDK_TARGET:        name for external project of sdk library for mesh.
+#  - NRF5_DIR:               source dir for respective lib.
+#  - NRF5_HOST_DIR:          source dir for respective lib.
+#  - MESH_SDK_DIR: 
 
-#######################################################################################################################
-# Get proper git tags / hashes
-#######################################################################################################################
+if(NOT NRF5_SDK_REPOSITORY)
+	set(NRF5_SDK_REPOSITORY "https://github.com/crownstone/nRF5_SDK")
+endif()
+
+if(NOT MESH_SDK_REPOSITORY) 
+	set(MESH_SDK_REPOSITORY "https://github.com/crownstone/nRF5-SDK-for-Mesh")
+endif()
 
 # The Nordic SDK
+
 if (NORDIC_SDK_VERSION EQUAL 15 AND NORDIC_SDK_VERSION_MINOR EQUAL 3 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
 elseif (NORDIC_SDK_VERSION EQUAL 17 AND NORDIC_SDK_VERSION_MINOR EQUAL 1 AND NORDIC_SDK_VERSION_PATCH EQUAL 0)
 else()
 	message(FATAL_ERROR "Unknown SDK version: ${NORDIC_SDK_VERSION}")
 endif()
 
-if(NORDIC_SDK_GIT_HASH)
-	message(STATUS "Will use git hash ${NORDIC_SDK_GIT_HASH} of repos ${NORDIC_SDK_REPOSITORY}")
-	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_GIT_HASH})
-	set(NORDIC_SDK_GIT_TAG "${NORDIC_SDK_GIT_HASH}")
-	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_GIT_HASH}")
+if(NORDIC_SDK_GIT_TAG)
+	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_GIT_TAG})
+	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_GIT_TAG}")
 else()
-	message(STATUS "Use git tag ${NORDIC_SDK_VERSION_FULL} of repos ${NRF5_SDK_REPOSITORY}")
-	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_VERSION_FULL})
 	set(NORDIC_SDK_GIT_TAG "origin/${NORDIC_SDK_VERSION_FULL}")
+	set(NORDIC_SDK_TARGET nordic_sdk_${NORDIC_SDK_VERSION_FULL})
 	set(NRF5_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}")
 endif()
 
-# Make some more variables available to the bluenet build
-list(APPEND CMAKE_BLUENET_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
+message(STATUS "Will use git tag/hash ${NORDIC_SDK_GIT_TAG} from repository ${NRF5_SDK_REPOSITORY} for bluenet")
+
+# The Nordic SDK (for host)
+
+if(NORDIC_SDK_HOST_GIT_TAG)
+	set(NORDIC_SDK_HOST_TARGET nordic_sdk_${NORDIC_SDK_HOST_GIT_TAG})
+	set(NRF5_HOST_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_HOST_GIT_TAG}")
+else()
+	set(NORDIC_SDK_HOST_GIT_TAG "origin/${NORDIC_SDK_VERSION_FULL}-host")
+
+	set(NORDIC_SDK_HOST_TARGET nordic_sdk_${NORDIC_SDK_VERSION_FULL}-host)
+	set(NRF5_HOST_DIR "${WORKSPACE_DIR}/tools/nrf5_sdk/${NORDIC_SDK_VERSION_FULL}-host")
+endif()
+
+message(STATUS "Will use git tag/hash ${NORDIC_SDK_HOST_GIT_TAG} from repository ${NRF5_SDK_REPOSITORY} for host")
 
 # The mesh
+
 if(MESH_SDK_VERSION_MAJOR EQUAL 3 AND MESH_SDK_VERSION_MINOR EQUAL 2 AND MESH_SDK_VERSION_PATCH EQUAL 0)
 elseif(MESH_SDK_VERSION_MAJOR EQUAL 5 AND MESH_SDK_VERSION_MINOR EQUAL 0 AND MESH_SDK_VERSION_PATCH EQUAL 0)
 else()
@@ -220,19 +250,20 @@ else()
 endif()
 
 if(MESH_SDK_GIT_HASH)
-	message(STATUS "Will use git hash ${MESH_SDK_GIT_HASH} of repos ${MESH_SDK_REPOSITORY}")
 	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_GIT_HASH})
 	set(MESH_SDK_GIT_TAG "${MESH_SDK_GIT_HASH}")
 	set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_GIT_HASH}")
 else()
-	message(STATUS "Will use git tag ${MESH_SDK_VERSION_FULL} of repos ${MESH_SDK_REPOSITORY}")
-	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_VERSION_FULL})
 	set(MESH_SDK_GIT_TAG "origin/${MESH_SDK_VERSION_FULL}")
+	set(MESH_SDK_TARGET nordic_mesh_sdk_${MESH_SDK_VERSION_FULL})
 	set(MESH_SDK_DIR "${WORKSPACE_DIR}/tools/mesh_sdk/${MESH_SDK_VERSION_FULL}")
 endif()
 
-# Make some more variables available to the bluenet build
-list(APPEND CMAKE_BLUENET_ARGS "-DMESH_SDK_VERSION_FULL:STRING=${MESH_SDK_VERSION_FULL}")
+message(STATUS "Will use git tag ${MESH_SDK_GIT_TAG} from repository ${MESH_SDK_REPOSITORY} for mesh")
+
+#######################################################################################################################
+# Programming tools
+#######################################################################################################################
 
 # Check for nrfjprog on a system from which we want to flash (not required for cloud-only tests)
 if (REQUIRE_NRFJPROG)
@@ -280,21 +311,6 @@ ExternalProject_Add(${NORDIC_SDK_TARGET}
 	BUILD_COMMAND ""
 	INSTALL_COMMAND ""
 	)
-
-if(COMPILE_FOR_HOST)
-	set(NORDIC_HOST_SDK_TARGET nordic_host_sdk${NORDIC_SDK_VERSION_FULL})
-	message(STATUS "Configure ${NORDIC_HOST_SDK_TARGET} target")
-	ExternalProject_Add(${NORDIC_HOST_SDK_TARGET}
-		GIT_REPOSITORY https://github.com/mrquincle/nrf5_sdk
-		GIT_TAG host
-		GIT_CONFIG advice.detachedHead=false
-		SOURCE_DIR ${HOST_NRF5_DIR}
-		CONFIGURE_COMMAND ""
-		BUILD_COMMAND ""
-		INSTALL_COMMAND ""
-		PATCH_COMMAND ""
-		)
-endif()
 
 list(APPEND CMAKE_BLUENET_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
@@ -392,11 +408,7 @@ add_custom_target(target_depend
 
 if(NOT FACTORY_IMAGE)
 	# Note that some more dependencies might be added later on by add_dependencies()
-	if(VERBOSITY GREATER 5)
-		foreach(VAL IN LISTS CMAKE_BLUENET_ARGS)
-			message(STATUS "CMAKE_BLUENET_ARGS: " ${VAL})
-		endforeach()
-	endif()
+	LogListV("CMAKE_BLUENET_ARGS: " CMAKE_BLUENET_ARGS)
 	ExternalProject_Add(bluenet
 		SOURCE_DIR ${WORKSPACE_DIR}/source
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
@@ -598,8 +610,8 @@ add_custom_target(nrfconnect_programmer
 # We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions
 # do not support hexadecimal values either
 if(FACTORY_IMAGE)
-	include(${DEFAULT_MODULES_PATH}/hex.cmake)
-	include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
+	include(hex)
+	include(load_hardware_version_mapping)
 
 	message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
 	load_hardware_version(${CMAKE_SOURCE_DIR}/source/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
@@ -720,17 +732,39 @@ endif()
 # Build/compile for host
 #######################################################################################################################
 
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DHOST_TARGET:OPTION=ON")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDISABLE_NRF_HEADERS:OPTION=OFF")
-list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_DIR:STRING=${HOST_NRF5_DIR}")
+# Location of adjusted version of the SDK that can be used on a host system
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_MODULE_PATH:STRING=${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNRF5_HOST_DIR:STRING=${NRF5_HOST_DIR}")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
+
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 list(APPEND CMAKE_BLUENET_HOST_ARGS "-DNORDIC_SDK_VERSION_FULL:STRING=${NORDIC_SDK_VERSION_FULL}")
 
-list(REMOVE_ITEM CMAKE_BLUENET_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DDEFAULT_CONFIGURATION_FILE:PATH=${DEFAULT_CONFIGURATION_FILE}")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DBOARD_TARGET_CONFIGURATION_FILE:PATH=${BOARD_TARGET_CONFIGURATION_FILE}")
+list(APPEND CMAKE_BLUENET_HOST_ARGS "-DBOARD_TARGET_OVERWRITE_CONFIGURATION_FILE:PATH=${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}")
 
 if(COMPILE_FOR_HOST)
+	message(STATUS "Configure ${NORDIC_SDK_HOST_TARGET} target (tag:=${NORDIC_SDK_HOST_GIT_TAG})")
+
+	
+	LogListV("CMAKE_BLUENET_HOST_ARGS: " CMAKE_BLUENET_HOST_ARGS)
+	ExternalProject_Add(${NORDIC_SDK_HOST_TARGET}
+		GIT_REPOSITORY ${NRF5_SDK_REPOSITORY}
+		GIT_TAG ${NORDIC_SDK_HOST_GIT_TAG}
+		GIT_CONFIG advice.detachedHead=false
+		SOURCE_DIR ${NRF5_HOST_DIR}
+		CMAKE_CACHE_ARGS "${CMAKE_BLUENET_HOST_ARGS}"
+		CMAKE_ARGS "${CMAKE_BLUENET_HOST_ARGS}"
+		CONFIGURE_COMMAND ""
+		BUILD_COMMAND ""
+		INSTALL_COMMAND ""
+		PATCH_COMMAND ""
+		)
+
 	set(BLUENET_HOST_TARGET bluenet_host)
 	message(STATUS "Configure ${BLUENET_HOST_TARGET} target")
+
 	ExternalProject_Add(${BLUENET_HOST_TARGET}
 		SOURCE_DIR ${WORKSPACE_DIR}/host
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}
@@ -739,7 +773,6 @@ if(COMPILE_FOR_HOST)
 		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/host/${BOARD_TARGET}/tmp
 		CMAKE_ARGS "${CMAKE_BLUENET_HOST_ARGS}"
 		BUILD_ALWAYS 1
-		DEPENDS ${NORDIC_HOST_SDK_TARGET}
+		DEPENDS ${NORDIC_SDK_HOST_TARGET}
 		)
 endif()
-

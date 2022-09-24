@@ -1,5 +1,14 @@
 #include <behaviour/cs_Behaviour.h>
 #include <time/cs_Time.h>
+#include <presence/cs_PresencePredicate.h>
+
+/**
+ * Returns true if lhs is strictly more relevant than rhs.
+ *  - VacuouslyTrue is least relevant.
+ *  - 'in Sphere' is less relevant than 'In room'.
+ *  - 'presence' is less relevant than 'absence'..
+ */
+bool PresenceIsMoreRelevant(PresencePredicate lhs, PresencePredicate rhs);
 
 /**
  * Returns true if;

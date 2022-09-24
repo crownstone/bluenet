@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <ble/cs_Nordic.h>
+#include <nrf_soc.h>
 #include <structs/cs_PacketsInternal.h>
 
 /**

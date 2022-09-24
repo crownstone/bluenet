@@ -1,28 +1,24 @@
-#include <iostream>
-
 #include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventListener.h>
-
 #include <util/cs_Error.h>
 
+#include <iostream>
 
 class TestListener : public EventListener {
-	private:
+private:
 	bool _receivedEvent = false;
-	std::string _name = "";
-	public:
+	std::string _name   = "";
 
+public:
 	TestListener(std::string name) : _name(name) {}
 
-	virtual void handleEvent(event_t & event) override {
+	virtual void handleEvent(event_t& event) override {
 		printf("handle event in %s\n", _name.c_str());
 		_receivedEvent = true;
 	}
 
-	bool receivedEvent () {
-		return _receivedEvent;
-	}
+	bool receivedEvent() { return _receivedEvent; }
 };
 
 int main() {

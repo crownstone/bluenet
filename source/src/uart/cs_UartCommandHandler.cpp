@@ -258,7 +258,7 @@ void UartCommandHandler::handleCommandInjectEvent(cs_data_t commandData) {
 	CS_TYPE csType = toCsType(*type);
 
 	if (csType == CS_TYPE::CONFIG_DO_NOT_USE) {
-		LOGw("Invalid type: %u", type);
+		LOGw("Invalid type: %u", csType);
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}

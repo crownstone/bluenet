@@ -16,6 +16,8 @@
 #include <time/cs_TimeSyncMessage.h>
 #include <util/cs_Coroutine.h>
 
+#include <test/cs_TestAccess.h>
+
 /**
  * This class keeps track of the real time in the current time zone.
  * It may obtain its data through the mesh, or some other way and try
@@ -46,6 +48,7 @@
  * Not sure if this is necessary.
  */
 class SystemTime : public EventListener {
+	friend class TestAccess<SystemTime>;
 public:
 	/**
 	 * Creates and starts the first tick timer.
@@ -138,6 +141,10 @@ private:
 	static app_timer_id_t appTimerId;
 
 	static void scheduleNextTick();
+
+	/**
+	 * Must be called at least once per second to update upTimeSec.
+	 */
 	static void tick(void* unused);
 
 	// ===================== mesh posix time sync implementation =====================
