@@ -17,7 +17,7 @@ uint32_t RTC::ticksToMs(uint32_t ticks) {
 	// To increase precision: multiply both sides of the division by a large factor (multiple of 2 for speed).
 	// Cast them to uint64_t to prevent overflow.
 	// TODO: We have hardware floating points now. Get rid of ROUNDED_DIV macro, etc.
-	uint64_t largeFactor = sizeof(uint16_t);
+	uint64_t largeFactor = 1 << 16;
 	return (uint32_t)ROUNDED_DIV(
 			(uint64_t)largeFactor * ticks, (uint64_t)largeFactor * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 }
