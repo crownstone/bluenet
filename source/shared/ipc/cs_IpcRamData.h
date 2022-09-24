@@ -43,13 +43,13 @@ extern "C" {
  * The IpcIndex indexes an IPC buffer in a particular set of RAM that is maintained across warm reboots.
  */
 enum IpcIndex {
-	IPC_INDEX_RESERVED        = 0,
+	IPC_INDEX_RESERVED              = 0,
 	// To communicate from bluenet towards the microapp.
-	IPC_INDEX_BLUENET_TO_MICROAPP  = 1,
+	IPC_INDEX_BLUENET_TO_MICROAPP   = 1,
 	// To communicate from bootloader to bluenet.
 	IPC_INDEX_BOOTLOADER_TO_BLUENET = 2,
 	// To communicate from bluenet towards bluenet, across reboots.
-	IPC_INDEX_BLUENET_TO_BLUENET  = 3,
+	IPC_INDEX_BLUENET_TO_BLUENET    = 3,
 };
 
 enum IpcRetCode {

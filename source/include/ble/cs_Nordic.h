@@ -78,7 +78,6 @@ typedef uint32_t ret_code_t;
 #include <nrf_uart.h>
 #endif
 
-
 #ifdef __cplusplus
 }
 #endif

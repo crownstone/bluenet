@@ -19,14 +19,14 @@
 #define LOGBehaviourStoreInfo LOGvv
 #define LOGBehaviourStoreDebug LOGvv
 
-
 // ======================= public interface ========================
 
 ErrorCodesGeneral BehaviourStore::addBehaviour(Behaviour* behaviour) {
 	uint8_t index = findEmptyIndex();
-	if(index > MaxBehaviours) {
+	if (index > MaxBehaviours) {
 		return ERR_NO_SPACE;
-	} else {
+	}
+	else {
 		return replaceBehaviour(index, behaviour);
 	}
 }
@@ -108,7 +108,6 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 	}
 }
 
-
 void BehaviourStore::storeUpdate(uint8_t index, Behaviour* behaviour) {
 	auto serializedBehaviour = behaviour->serialized();
 	storeUpdate(index, behaviour->getType(), serializedBehaviour.data(), serializedBehaviour.size());
@@ -116,7 +115,7 @@ void BehaviourStore::storeUpdate(uint8_t index, Behaviour* behaviour) {
 
 void BehaviourStore::storeUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
 	CS_TYPE csType;
-	switch(type) {
+	switch (type) {
 		case SwitchBehaviour::Type::Switch: csType = CS_TYPE::STATE_BEHAVIOUR_RULE; break;
 		case SwitchBehaviour::Type::Twilight: csType = CS_TYPE::STATE_TWILIGHT_RULE; break;
 		case SwitchBehaviour::Type::Extended: csType = CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE; break;
@@ -142,7 +141,7 @@ size_t BehaviourStore::getBehaviourSize(SwitchBehaviour::Type type) {
 
 ErrorCodesGeneral BehaviourStore::checkSizeAndType(SwitchBehaviour::Type type, cs_buffer_size_t bufSize) {
 	size_t expectedSize = getBehaviourSize(type);
-	if(expectedSize == 0) {
+	if (expectedSize == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
 
@@ -153,7 +152,8 @@ ErrorCodesGeneral BehaviourStore::checkSizeAndType(SwitchBehaviour::Type type, c
 	return ERR_SUCCESS;
 }
 
-Behaviour* BehaviourStore::allocateBehaviour(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
+Behaviour* BehaviourStore::allocateBehaviour(
+		uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
 	switch (type) {
 		case SwitchBehaviour::Type::Switch: {
 			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
@@ -192,7 +192,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	}
 	Behaviour::Type typ = static_cast<Behaviour::Type>(buf[0]);
 
-	auto retval = checkSizeAndType(typ, bufSize);
+	auto retval         = checkSizeAndType(typ, bufSize);
 	if (retval != ERR_SUCCESS) {
 		return retval;
 	}
@@ -214,7 +214,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 ErrorCodesGeneral BehaviourStore::replaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
 	size_t behaviourSize = getBehaviourSize(type);
 
-	if(behaviourSize == 0) {
+	if (behaviourSize == 0) {
 		LOGe("Invalid behaviour type");
 		return ERR_WRONG_PARAMETER;
 	}
@@ -236,7 +236,6 @@ ErrorCodesGeneral BehaviourStore::replaceParameterValidation(event_t& evt, uint8
 
 	return ERR_SUCCESS;
 }
-
 
 void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	const uint8_t indexSize = sizeof(uint8_t);
@@ -459,6 +458,6 @@ void BehaviourStore::clearActiveBehavioursArray() {
 }
 
 BehaviourStore::~BehaviourStore() {
-    LOGBehaviourStoreInfo("destroying BehaviourStore");
+	LOGBehaviourStoreInfo("destroying BehaviourStore");
 	clearActiveBehavioursArray();
 }

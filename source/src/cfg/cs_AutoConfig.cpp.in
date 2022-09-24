@@ -74,32 +74,30 @@ const int8_t g_CONFIG_LOW_TX_POWER_DEFAULT                        = ${LOW_TX_POW
 #define SERIAL_ENABLE_RX_ONLY 1
 #define SERIAL_ENABLE_RX_AND_TX 3
 
-const uint8_t g_CS_SERIAL_ENABLED         = ${CS_SERIAL_ENABLED};
+const uint8_t g_CS_SERIAL_ENABLED                       = ${CS_SERIAL_ENABLED};
 
-const bool g_ENABLE_RSSI_FOR_CONNECTION   = ${ENABLE_RSSI_FOR_CONNECTION};
+const bool g_ENABLE_RSSI_FOR_CONNECTION                 = ${ENABLE_RSSI_FOR_CONNECTION};
 
-const uint8_t g_TWI_SCL_INDEX             = ${TWI_SCL_INDEX};
+const uint8_t g_TWI_SCL_INDEX                           = ${TWI_SCL_INDEX};
 
-const uint8_t g_TWI_SDA_INDEX             = ${TWI_SDA_INDEX};
+const uint8_t g_TWI_SDA_INDEX                           = ${TWI_SDA_INDEX};
 
-const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT = ${AUTO_ENABLE_MICROAPP_ON_BOOT};
+const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT               = ${AUTO_ENABLE_MICROAPP_ON_BOOT};
 
-const int8_t g_GPIO_PIN1_INDEX            = ${GPIO_PIN1_INDEX};
-const int8_t g_GPIO_PIN2_INDEX            = ${GPIO_PIN2_INDEX};
-const int8_t g_GPIO_PIN3_INDEX            = ${GPIO_PIN3_INDEX};
-const int8_t g_GPIO_PIN4_INDEX            = ${GPIO_PIN4_INDEX};
+const int8_t g_GPIO_PIN1_INDEX                          = ${GPIO_PIN1_INDEX};
+const int8_t g_GPIO_PIN2_INDEX                          = ${GPIO_PIN2_INDEX};
+const int8_t g_GPIO_PIN3_INDEX                          = ${GPIO_PIN3_INDEX};
+const int8_t g_GPIO_PIN4_INDEX                          = ${GPIO_PIN4_INDEX};
 
-const int8_t g_BUTTON1_INDEX              = ${BUTTON1_INDEX};
-const int8_t g_BUTTON2_INDEX              = ${BUTTON2_INDEX};
-const int8_t g_BUTTON3_INDEX              = ${BUTTON3_INDEX};
-const int8_t g_BUTTON4_INDEX              = ${BUTTON4_INDEX};
+const int8_t g_BUTTON1_INDEX                            = ${BUTTON1_INDEX};
+const int8_t g_BUTTON2_INDEX                            = ${BUTTON2_INDEX};
+const int8_t g_BUTTON3_INDEX                            = ${BUTTON3_INDEX};
+const int8_t g_BUTTON4_INDEX                            = ${BUTTON4_INDEX};
 
-const int8_t g_LED1_INDEX                 = ${LED1_INDEX};
-const int8_t g_LED2_INDEX                 = ${LED2_INDEX};
-const int8_t g_LED3_INDEX                 = ${LED3_INDEX};
-const int8_t g_LED4_INDEX                 = ${LED4_INDEX};
+const int8_t g_LED1_INDEX                               = ${LED1_INDEX};
+const int8_t g_LED2_INDEX                               = ${LED2_INDEX};
+const int8_t g_LED3_INDEX                               = ${LED3_INDEX};
+const int8_t g_LED4_INDEX                               = ${LED4_INDEX};
 
 const uint8_t g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR = ${BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR};
 const uint8_t g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR = ${BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR};
-
-

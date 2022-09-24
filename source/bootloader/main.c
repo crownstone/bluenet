@@ -226,7 +226,7 @@ void set_bootloader_info() {
 	}
 
 	// Since we may have a newer minor version, use the latest dataSize.
-	dataSize = sizeof(ipcData.bootloaderData);
+	dataSize                                    = sizeof(ipcData.bootloaderData);
 
 	ipcData.bootloaderData.ipcDataMajor         = g_BOOTLOADER_IPC_RAM_MAJOR;
 	ipcData.bootloaderData.ipcDataMinor         = g_BOOTLOADER_IPC_RAM_MINOR;

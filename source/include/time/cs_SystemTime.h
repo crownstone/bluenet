@@ -11,12 +11,11 @@
 #include <events/cs_EventListener.h>
 #include <protocol/cs_Typedefs.h>
 #include <stdint.h>
+#include <test/cs_TestAccess.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_TimeSyncMessage.h>
 #include <util/cs_Coroutine.h>
-
-#include <test/cs_TestAccess.h>
 
 /**
  * This class keeps track of the real time in the current time zone.
@@ -49,6 +48,7 @@
  */
 class SystemTime : public EventListener {
 	friend class TestAccess<SystemTime>;
+
 public:
 	/**
 	 * Creates and starts the first tick timer.

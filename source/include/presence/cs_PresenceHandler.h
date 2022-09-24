@@ -72,7 +72,6 @@ private:
 	 */
 	static const constexpr uint8_t MAX_RECORDS                                   = 20;
 
-
 	struct PresenceRecord {
 		ProfileLocation profileLocation;
 		/**
@@ -90,8 +89,8 @@ private:
 
 		PresenceRecord(
 				ProfileLocation profileLocation = {},
-				uint8_t timeoutSeconds             = PRESENCE_TIMEOUT_SECONDS,
-				uint8_t meshThrottleSeconds        = 0)
+				uint8_t timeoutSeconds          = PRESENCE_TIMEOUT_SECONDS,
+				uint8_t meshThrottleSeconds     = 0)
 				: profileLocation(profileLocation)
 				, timeoutCountdownSeconds(timeoutSeconds)
 				, meshSendCountdownSeconds(meshThrottleSeconds) {}

@@ -5,9 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <cfg/cs_StaticConfig.h>
 #include <ipc/cs_IpcRamData.h>
 #include <ipc/cs_IpcRamDataContents.h>
-#include <cfg/cs_StaticConfig.h>
 
 // Check if contents are not too large.
 static_assert(sizeof(bluenet_ipc_data_payload_t) == BLUENET_IPC_RAM_DATA_ITEM_SIZE, "Wrong IPC ram data payload size.");

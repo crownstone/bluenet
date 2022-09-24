@@ -5,9 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #pragma once
 
-
-template<class T>
+template <class T>
 class TestAccess {};

@@ -6,8 +6,8 @@
  */
 
 #include <tracking/cs_TrackedDevice.h>
-#include <util/cs_Utils.h>
 #include <util/cs_Error.h>
+#include <util/cs_Utils.h>
 
 device_id_t TrackedDevice::id() {
 	return data.data.deviceId;

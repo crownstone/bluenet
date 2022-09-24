@@ -1,6 +1,6 @@
 #include <behaviour/cs_Behaviour.h>
-#include <time/cs_Time.h>
 #include <presence/cs_PresencePredicate.h>
+#include <time/cs_Time.h>
 
 /**
  * Returns true if lhs is strictly more relevant than rhs.

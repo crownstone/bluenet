@@ -7,19 +7,19 @@
  *  - 'presence' is less relevant than 'absence'.
  */
 auto getRelevance(PresencePredicate::Condition condition) {
-    switch(condition) {
-        case PresencePredicate::Condition::VacuouslyTrue: return 0;
-        case PresencePredicate::Condition::AnyoneInSphere: return 1;
-        case PresencePredicate::Condition::NooneInSphere: return 2;
-        case PresencePredicate::Condition::AnyoneInSelectedRooms: return 3;
-        case PresencePredicate::Condition::NooneInSelectedRooms: return 4;
-        default: return -1; // worst relevance: unknown enum value
-    }
+	switch (condition) {
+		case PresencePredicate::Condition::VacuouslyTrue: return 0;
+		case PresencePredicate::Condition::AnyoneInSphere: return 1;
+		case PresencePredicate::Condition::NooneInSphere: return 2;
+		case PresencePredicate::Condition::AnyoneInSelectedRooms: return 3;
+		case PresencePredicate::Condition::NooneInSelectedRooms: return 4;
+		default: return -1;  // worst relevance: unknown enum value
+	}
 };
 
 bool isRoomBased(PresencePredicate predicate) {
-    return predicate._condition == PresencePredicate::Condition::AnyoneInSelectedRooms
-        || predicate._condition == PresencePredicate::Condition::NooneInSelectedRooms;
+	return predicate._condition == PresencePredicate::Condition::AnyoneInSelectedRooms
+		   || predicate._condition == PresencePredicate::Condition::NooneInSelectedRooms;
 }
 
 int numberOfRooms(PresencePredicate predicate) {
@@ -36,13 +36,9 @@ int numberOfRooms(PresencePredicate predicate) {
 }
 
 bool PresenceIsMoreRelevant(PresencePredicate lhs, PresencePredicate rhs) {
-    return getRelevance(lhs._condition) > getRelevance(rhs._condition)
-        || (lhs._condition == rhs._condition
-            && isRoomBased(lhs)
-            && numberOfRooms(lhs) > numberOfRooms(rhs)
-            );
+	return getRelevance(lhs._condition) > getRelevance(rhs._condition)
+		   || (lhs._condition == rhs._condition && isRoomBased(lhs) && numberOfRooms(lhs) > numberOfRooms(rhs));
 }
-
 
 // Warning: be careful about integer underflow in the subtraction. Changed the signature to
 // _signed_ integers in order to circumvent extra casting here.
@@ -61,8 +57,8 @@ bool FromUntilIntervalIsMoreRelevantOrEqual(
 	// First we normalize the from/until times so that current_tod corresponds to '0'.
 	// That way, comparisons like lhs_from < rhs_from do not suffer from subtleties concerning
 	// midnight roll over and unsigned integer over/underflow.
-    uint32_t lhsFromNormalized       = CsMath::mod(lhsFrom - currentTimeOfDay, secondsPerDay);
-    uint32_t rhsFromNormalized       = CsMath::mod(rhsFrom - currentTimeOfDay, secondsPerDay);
+	uint32_t lhsFromNormalized       = CsMath::mod(lhsFrom - currentTimeOfDay, secondsPerDay);
+	uint32_t rhsFromNormalized       = CsMath::mod(rhsFrom - currentTimeOfDay, secondsPerDay);
 	uint32_t lhsUntilNormalized      = CsMath::mod(lhsUntil - currentTimeOfDay, secondsPerDay);
 	uint32_t rhsUntilNormalized      = CsMath::mod(rhsUntil - currentTimeOfDay, secondsPerDay);
 

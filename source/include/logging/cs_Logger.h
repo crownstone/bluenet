@@ -7,11 +7,11 @@
 
 #pragma once
 
-#include <cfg/cs_Strings.h>     // Should actually be included by the files that use these.
+#include <cfg/cs_Strings.h>  // Should actually be included by the files that use these.
 #include <protocol/cs_SerialTypes.h>
 #include <protocol/cs_UartMsgTypes.h>
-#include <cstdint>
 
+#include <cstdint>
 
 #if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
 #include <logging/impl/cs_LogNrf.h>
@@ -93,7 +93,6 @@
 #define LOGe(fmt, ...) _log(SERIAL_ERROR, true, fmt, ##__VA_ARGS__)
 #define LOGf(fmt, ...) _log(SERIAL_FATAL, true, fmt, ##__VA_ARGS__)
 #endif
-
 
 // undefine macros based on SERIAL_VERBOSITY
 
