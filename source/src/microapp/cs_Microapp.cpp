@@ -22,8 +22,8 @@
 #include <logging/cs_Logger.h>
 #include <microapp/cs_Microapp.h>
 #include <microapp/cs_MicroappController.h>
-#include <microapp/cs_MicroappStorage.h>
 #include <microapp/cs_MicroappInterruptHandler.h>
+#include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>

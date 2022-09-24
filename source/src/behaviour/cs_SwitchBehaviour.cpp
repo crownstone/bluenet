@@ -62,7 +62,7 @@ bool SwitchBehaviour::requiresAbsence() {
 }
 
 PresencePredicate SwitchBehaviour::currentPresencePredicate() {
-    return presenceCondition.predicate;
+	return presenceCondition.predicate;
 }
 
 bool SwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
@@ -166,19 +166,20 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentPresence) {
 
 void SwitchBehaviour::print() {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
-    LOGSwitchBehaviourDebug("SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) "
-		 "isValid(%u)",
-		 from().h(),
-		 from().m(),
-		 from().s(),
-		 until().h(),
-		 until().m(),
-		 until().s(),
-		 activeIntensity,
-		 activeDays,
-		 presenceCondition.predicate._condition,
-		 presenceCondition.timeOut,
-		 isValid(SystemTime::now()));
+	LOGSwitchBehaviourDebug(
+			"SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) "
+			"isValid(%u)",
+			from().h(),
+			from().m(),
+			from().s(),
+			until().h(),
+			until().m(),
+			until().s(),
+			activeIntensity,
+			activeDays,
+			presenceCondition.predicate._condition,
+			presenceCondition.timeOut,
+			isValid(SystemTime::now()));
 	presenceCondition.predicate._presence.print();
 #endif
 }

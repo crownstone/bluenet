@@ -6,12 +6,12 @@
  */
 #pragma once
 
+#include <test/cs_TestAccess.h>
 #include <time/cs_DayOfWeek.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 
 #include <vector>
-#include <test/cs_TestAccess.h>
 
 /**
  * Class to derrive behaviours from, centralizing common variables
@@ -66,7 +66,6 @@ public:
 
 	virtual bool requiresPresence() { return false; }
 	virtual bool requiresAbsence() { return false; }
-
 
 	// =========== Getters ===========
 

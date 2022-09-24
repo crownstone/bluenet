@@ -42,6 +42,7 @@
 #include "app_scheduler.h"
 #include "boards.h"
 #include "compiler_abstraction.h"
+#include "cs_BootloaderConfig.h"
 #include "ipc/cs_IpcRamData.h"
 #include "nrf.h"
 #include "nrf_bootloader_app_start.h"
@@ -59,7 +60,6 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_power.h"
 #include "sdk_config.h"
-#include "cs_BootloaderConfig.h"
 
 static nrf_dfu_observer_t m_user_observer;  //<! Observer callback set by the user.
 static volatile bool m_flash_write_done;
@@ -349,8 +349,16 @@ void update_ipc_data() {
 	}
 
 	// The IPC data should be set on boot, so the version and size should match exactly.
-	if (ipcData.bootloaderData.ipcDataMajor != g_BOOTLOADER_IPC_RAM_MAJOR || ipcData.bootloaderData.ipcDataMinor != g_BOOTLOADER_IPC_RAM_MINOR  || dataSize != sizeof(ipcData.bootloaderData)) {
-		NRF_LOG_WARNING("Version or size mismatch: %u.%u != %u.%u size=%u", ipcData.bootloaderData.ipcDataMajor, g_BOOTLOADER_IPC_RAM_MAJOR, ipcData.bootloaderData.ipcDataMinor, g_BOOTLOADER_IPC_RAM_MINOR, dataSize);
+	if (ipcData.bootloaderData.ipcDataMajor != g_BOOTLOADER_IPC_RAM_MAJOR
+		|| ipcData.bootloaderData.ipcDataMinor != g_BOOTLOADER_IPC_RAM_MINOR
+		|| dataSize != sizeof(ipcData.bootloaderData)) {
+		NRF_LOG_WARNING(
+				"Version or size mismatch: %u.%u != %u.%u size=%u",
+				ipcData.bootloaderData.ipcDataMajor,
+				g_BOOTLOADER_IPC_RAM_MAJOR,
+				ipcData.bootloaderData.ipcDataMinor,
+				g_BOOTLOADER_IPC_RAM_MINOR,
+				dataSize);
 		NRF_LOG_FLUSH();
 		return;
 	}

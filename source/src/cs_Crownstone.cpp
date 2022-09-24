@@ -953,20 +953,20 @@ void handleBootloaderInfo() {
 	if (ipcData.bootloaderData.flags.readError) {
 		LOGi("Bootloader had an IPC read error");
 		ipcData.bootloaderData.flags.readError = 0;
-		setData = true;
+		setData                                = true;
 	}
 
 	if (ipcData.bootloaderData.flags.versionError) {
 		LOGi("Bootloader had an IPC version error");
 		ipcData.bootloaderData.flags.versionError = 0;
-		setData = true;
+		setData                                   = true;
 	}
 
 	if (ipcData.bootloaderData.flags.justActivated) {
 		LOGi("This is the first time this version of bluenet runs.");
 		LOGd("Clear the just activated flag");
 		ipcData.bootloaderData.flags.justActivated = 0;
-		setData = true;
+		setData                                    = true;
 	}
 
 	if (setData) {

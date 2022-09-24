@@ -27,5 +27,4 @@ __attribute__((unused)) static bool _logPrefixPlainText = true;
 		_logPrefixPlainText = addNewLine;                         \
 	}
 
-
 #define _logArray(level, addNewLine, pointer, size, ...)

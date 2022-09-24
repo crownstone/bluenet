@@ -9,7 +9,6 @@
 #include <drivers/cs_RNG.h>
 #include <util/cs_BleError.h>
 
-
 //! convert uint8_t to uint32_t
 typedef union {
 	uint8_t asBuf[4];
@@ -21,7 +20,6 @@ typedef union {
 	uint8_t asBuf[2];
 	uint16_t asInt;
 } conv8_16;
-
 
 RNG::RNG(){};
 

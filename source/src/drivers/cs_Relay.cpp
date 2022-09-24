@@ -8,11 +8,11 @@
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Relay.h>
 #include <logging/cs_Logger.h>
+#include <nrf_delay.h>
+#include <nrf_gpio.h>
 #include <storage/cs_State.h>
 #include <test/cs_Test.h>
 #include <util/cs_Error.h>
-#include <nrf_gpio.h>
-#include <nrf_delay.h>
 
 void Relay::init(const boards_config_t& board) {
 	_initialized = true;

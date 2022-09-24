@@ -54,7 +54,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 			return;
 		}
 		case CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION: {
-			auto profileLocationEventData      = reinterpret_cast<TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*>(event.data);
+			auto profileLocationEventData   = reinterpret_cast<TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*>(event.data);
 
 			ProfileLocation profileLocation = {
 					.profile = profileLocationEventData->profileId, .location = profileLocationEventData->locationId};
@@ -69,7 +69,7 @@ void PresenceHandler::handleEvent(event_t& event) {
 			return;
 		}
 		case CS_TYPE::EVT_ASSET_ACCEPTED: {
-			auto acceptedAssetEventData        = reinterpret_cast<TYPIFY(EVT_ASSET_ACCEPTED)*>(event.data);
+			auto acceptedAssetEventData     = reinterpret_cast<TYPIFY(EVT_ASSET_ACCEPTED)*>(event.data);
 
 			ProfileLocation profileLocation = {
 					.profile  = *acceptedAssetEventData->_primaryFilter.filterdata().metadata().profileId(),

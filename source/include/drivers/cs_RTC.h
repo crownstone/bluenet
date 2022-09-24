@@ -7,7 +7,6 @@
 #pragma once
 
 #include <stdint.h>
-
 #include <test/cs_TestAccess.h>
 
 /**
@@ -30,12 +29,11 @@
  */
 class RTC {
 private:
-	RTC()           = default;
-	RTC(RTC const&) = delete;
+	RTC()                      = default;
+	RTC(RTC const&)            = delete;
 	void operator=(RTC const&) = delete;
 
 public:
-
 	/**
 	 * return number of ticks
 	 */

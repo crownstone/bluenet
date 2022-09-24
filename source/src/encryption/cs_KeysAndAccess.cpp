@@ -7,8 +7,8 @@
 
 #include <drivers/cs_RNG.h>
 #include <encryption/cs_KeysAndAccess.h>
-#include <storage/cs_State.h>
 #include <nrf_soc.h>
+#include <storage/cs_State.h>
 
 #define LOGKeysAndAccessDebug LOGnone
 
