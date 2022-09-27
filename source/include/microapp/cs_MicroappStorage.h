@@ -50,9 +50,10 @@ public:
 	 *
 	 * @param[in] appIndex   Index of the microapp, validity is not checked.
 	 *
-	 * @return ERR_SUCCESS_NO_CHANGE        The storage is already erased.
+	 * @return ERR_SUCCESS                  The storage is already erased.
 	 * @return ERR_WAIT_FOR_SUCCESS         The storage will be written erased, wait for
 	 * CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
+	 * @return ERR_BUSY                     Retry again later.
 	 */
 	cs_ret_code_t erase(uint8_t appIndex);
 
@@ -99,7 +100,7 @@ private:
 	void operator=(MicroappStorage const&)  = delete;
 
 	/**
-	 * Keep up whether or not we are currently writing to flash.
+	 * Keep up whether or not we are currently writing to (or erasing) flash.
 	 */
 	bool _writing                           = false;
 

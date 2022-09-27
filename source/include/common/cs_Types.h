@@ -364,14 +364,15 @@ enum class CS_TYPE : uint16_t {
 	CMD_GET_ADC_CHANNEL_SWAPS,   // Get number of detected ADC channel swaps.
 	CMD_GET_RAM_STATS,           // Get RAM statistics.
 
-	CMD_MICROAPP_GET_INFO,   // Microapp control command.
-	CMD_MICROAPP_UPLOAD,     // Microapp control command. The data pointer is assume to remain valid until write is
-							 // completed!
-	CMD_MICROAPP_VALIDATE,   // Microapp control command.
-	CMD_MICROAPP_REMOVE,     // Microapp control command.
-	CMD_MICROAPP_ENABLE,     // Microapp control command.
-	CMD_MICROAPP_DISABLE,    // Microapp control command.
-	CMD_MICROAPP_ADVERTISE,  // A microapp wants to advertise something.
+	CMD_MICROAPP_GET_INFO,           // Microapp control command.
+	CMD_MICROAPP_UPLOAD,             // Microapp control command. The data pointer is assume to remain valid until write is
+							         // completed!
+	CMD_MICROAPP_VALIDATE,           // Microapp control command.
+	CMD_MICROAPP_REMOVE,             // Microapp control command.
+	CMD_MICROAPP_ENABLE,             // Microapp control command.
+	CMD_MICROAPP_DISABLE,            // Microapp control command.
+	CMD_MICROAPP_ADVERTISE,          // A microapp wants to advertise something.
+	EVT_MICROAPP_FACTORY_RESET_DONE, // All microapps have been erased.
 
 	CMD_BLE_CENTRAL_CONNECT,     // Connect to a device.       See BleCentral::connect().
 	CMD_BLE_CENTRAL_DISCONNECT,  // Disconnect from device.    See BleCentral::disconnect().
@@ -695,6 +696,7 @@ typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
+typedef void TYPIFY(EVT_MICROAPP_FACTORY_RESET_DONE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);

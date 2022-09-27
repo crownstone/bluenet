@@ -527,7 +527,6 @@ void Crownstone::switchMode(const OperationMode& newMode) {
 			_mesh->init(_boardsConfig);
 			_mesh->start();
 #endif
-			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 			_advertiser->setNormalTxPower();
 			break;
 		}
@@ -682,12 +681,17 @@ void Crownstone::startUp() {
 		}
 
 		_behaviourStore.init();
+	}
 
 #if BUILD_MICROAPP_SUPPORT == 1
-		LOGi(FMT_HEADER "init microapp");
-		_microapp->init();
+		LOGi(FMT_HEADER "start microapp");
+		_microapp->init(_operationMode);
 #endif
+
+	if (_operationMode == OperationMode::OPERATION_MODE_FACTORY_RESET) {
+		FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 	}
+
 
 	uint32_t err_code;
 	ble_gap_addr_t address;

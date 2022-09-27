@@ -149,7 +149,7 @@ bool FactoryReset::performFactoryReset() {
 
 void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
 	CsUtils::setBit(_successfullyFactoryResetBitmask, bit);
-	LOGi("onClassFactoryResetDone bit=%u bitmask=%u", bit, _successfullyFactoryResetBitmask);
+	LOGi("onClassFactoryResetDone bit=%u bitmask: done=%08b all=%08b", bit, _successfullyFactoryResetBitmask, FACTORY_RESET_MASK_ALL);
 
 	if ((_successfullyFactoryResetBitmask & FACTORY_RESET_MASK_ALL) == FACTORY_RESET_MASK_ALL) {
 		LOGi("All classes factory reset, rebooting device");
@@ -181,6 +181,12 @@ void FactoryReset::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_MESH_FACTORY_RESET_DONE: {
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 			onClassFactoryResetDone(FACTORY_RESET_BIT_MESH);
+#endif
+			break;
+		}
+		case CS_TYPE::EVT_MICROAPP_FACTORY_RESET_DONE: {
+#if BUILD_MICROAPP_SUPPORT == 1
+			onClassFactoryResetDone(FACTORY_RESET_BIT_MICROAPP);
 #endif
 			break;
 		}

@@ -23,9 +23,6 @@ uint32_t g_RAM_R1_BASE                                            = ${RAM_R1_BAS
 
 uint32_t g_RAM_APPLICATION_AMOUNT                                 = ${RAM_APPLICATION_AMOUNT};
 
-// Number of microapps supported
-uint8_t g_MICROAPP_COUNT                                          = ${MICROAPP_COUNT};
-
 int8_t g_MAX_CHIP_TEMPERATURE                                     = ${MAX_CHIP_TEMP};
 
 uint16_t g_BOOT_DELAY                                             = ${BOOT_DELAY};
@@ -83,6 +80,8 @@ const uint8_t g_TWI_SCL_INDEX                           = ${TWI_SCL_INDEX};
 const uint8_t g_TWI_SDA_INDEX                           = ${TWI_SDA_INDEX};
 
 const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT               = ${AUTO_ENABLE_MICROAPP_ON_BOOT};
+
+const uint16_t g_RAM_MICROAPP_AMOUNT                    = ${RAM_MICROAPP_AMOUNT};
 
 const int8_t g_GPIO_PIN1_INDEX                          = ${GPIO_PIN1_INDEX};
 const int8_t g_GPIO_PIN2_INDEX                          = ${GPIO_PIN2_INDEX};

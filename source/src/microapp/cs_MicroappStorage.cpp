@@ -104,10 +104,19 @@ cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
 	LOGMicroappInfo("erase addr=0x%08X size=%u", flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE);
 	uint32_t nrfCode =
 			nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE, nullptr);
-	if (nrfCode != NRF_SUCCESS) {
-		LOGe("Failed to start erase: %u", nrfCode);
-		return ERR_UNSPECIFIED;
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			break;
+		}
+		case NRFX_ERROR_NO_MEM: {
+			return ERR_BUSY;
+		}
+		default: {
+			LOGe("Failed to start erase: %u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
 	}
+	_writing = true;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -261,9 +270,9 @@ bool MicroappStorage::isErased(uint32_t flashAddress, uint16_t size) {
 		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, readBuf, readSize);
 		_logArray(LOGMicroappVerboseLevel, true, readBuf, readSize);
 		if (nrfCode != NRF_SUCCESS) {
-			LOGw("Error reading fstorage: %u. flashAddress=0x%08X buf=0x%X readSize=%u",
+			LOGw("Error reading fstorage: nrfCode=%u flashAddress=0x%08X buf=0x%X readSize=%u",
 				 nrfCode,
-				 flashAddress,
+				 addr,
 				 readBuf,
 				 readSize);
 			return false;
@@ -381,6 +390,7 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t* evt) {
 		}
 		case NRF_FSTORAGE_EVT_ERASE_RESULT: {
 			LOGMicroappInfo("Flash erase result=%u addr=0x%08X len=%u", evt->result, evt->addr, evt->len);
+			_writing = false;
 			TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_MICROAPP_REMOVE, retCode);
 			event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
 			eventResult.dispatch();

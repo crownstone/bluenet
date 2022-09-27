@@ -35,6 +35,9 @@ const uint16_t g_ADVERTISEMENT_INTERVAL  = ${ADVERTISEMENT_INTERVAL};
 
 const uintptr_t g_RAM_BLUENET_IPC_LENGTH = ${RAM_BLUENET_IPC_LENGTH};
 
+//! Number of microapps supported.
+const uint8_t g_MICROAPP_COUNT           = ${MICROAPP_COUNT};
+
 #ifdef __cplusplus
 }
 #endif

@@ -95,7 +95,7 @@ void CommandHandler::resolveAsyncCommand(cs_async_result_t* result) {
 		 result->resultCode,
 		 result->resultData.len);
 	if (result->commandType != _awaitingCommandResult.type) {
-		LOGw("Resolving different type: resolving=%u, awaiting=%u", result->commandType, _awaitingCommandResult.type);
+		LOGw("Awaiting different type to resolve: resolving=%u, awaiting=%u", result->commandType, _awaitingCommandResult.type);
 		return;
 	}
 	switch (_awaitingCommandResult.source.source.type) {
