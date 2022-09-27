@@ -467,20 +467,20 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 
 cs_ret_code_t MicroappRequestHandler::handleRequestBleScan(microapp_sdk_ble_t* ble) {
 	switch (ble->scan.type) {
-		case CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT: {
+		case CS_MICROAPP_SDK_BLE_SCAN_REQUEST_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
 			cs_ret_code_t result = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
 
 			ble->header.ack      = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
-		case CS_MICROAPP_SDK_BLE_SCAN_START: {
+		case CS_MICROAPP_SDK_BLE_SCAN_REQUEST_START: {
 			LOGv("Start scanning");
 			MicroappController::getInstance().microappData.isScanning = true;
 			ble->header.ack                                           = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
 		}
-		case CS_MICROAPP_SDK_BLE_SCAN_STOP: {
+		case CS_MICROAPP_SDK_BLE_SCAN_REQUEST_STOP: {
 			LOGv("Stop scanning");
 			MicroappController::getInstance().microappData.isScanning = false;
 			ble->header.ack                                           = CS_MICROAPP_SDK_ACK_SUCCESS;
@@ -496,7 +496,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleScan(microapp_sdk_ble_t* b
 
 cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t* ble) {
 	switch (ble->central.type) {
-		case CS_MICROAPP_SDK_BLE_CENTRAL_REGISTER_INTERRUPT: {
+		case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
 			cs_ret_code_t result =
 					controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);

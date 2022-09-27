@@ -111,6 +111,12 @@ enum MicroappSdkAck {
 	CS_MICROAPP_SDK_ACK_ERR_EMPTY           = 0x0C,
 	//! Request or its parameters are too large
 	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,
+	//! Request cannot be fulfilled again
+	CS_MICROAPP_SDK_ACK_ERR_ALREADY_EXISTS  = 0x0E,
+	//! Request parameters are wrong
+	CS_MICROAPP_SDK_ACK_ERR_WRONG_PARAM     = 0x0F,
+	//! Request timed out
+	CS_MICROAPP_SDK_ACK_ERR_TIMEOUT         = 0x10,
 };
 
 typedef MicroappSdkAck microapp_sdk_result_t;
@@ -386,7 +392,7 @@ struct __attribute__((packed)) microapp_sdk_header_t {
 	 * Used for requesting and receiving acks. Can be used for identifying requests and interrupts.
 	 * See MicroappSdkAck.
 	 */
-	int8_t ack;
+	uint8_t ack;
 };
 
 static_assert(sizeof(microapp_sdk_header_t) == MICROAPP_SDK_HEADER_SIZE);
@@ -591,10 +597,10 @@ struct __attribute__((packed)) microapp_sdk_ble_scan_event_t {
 };
 
 enum MicroappSdkBleScanType {
-	CS_MICROAPP_SDK_BLE_SCAN_START              = 1,
-	CS_MICROAPP_SDK_BLE_SCAN_STOP               = 2,
-	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT = 3,
-	CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN         = 4,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_REGISTER_INTERRUPT = 1,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_START              = 2,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_STOP               = 3,
+	CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN                 = 4,
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_scan_t {
@@ -730,7 +736,7 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_notification_t {
 };
 
 enum MicroappSdkBleCentralType {
-	CS_MICROAPP_SDK_BLE_CENTRAL_REGISTER_INTERRUPT  = 1,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_REGISTER_INTERRUPT  = 1,
 
 	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT     = 2,
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT       = 3,
