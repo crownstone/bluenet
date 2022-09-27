@@ -646,6 +646,7 @@ struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
 	/**
 	 * Whether the characteristic should automatically notify the value when you updated the value.
 	 * This currently only sends the first 20 bytes of the value.
+	 * Peripheral only option.
 	 */
 	bool autoNotify : 1;
 };
@@ -656,6 +657,10 @@ struct __attribute__((packed)) microapp_sdk_ble_request_uuid_register_t {
 
 	//! UUID set by bluenet, to be used later.
 	microapp_sdk_ble_uuid_t uuid;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_request_mac_t {
+	microapp_sdk_ble_address_t address;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_request_connect_t {
@@ -900,6 +905,7 @@ enum MicroappSdkBleType {
 	CS_MICROAPP_SDK_BLE_SCAN          = 0x02,
 	CS_MICROAPP_SDK_BLE_CENTRAL       = 0x03,
 	CS_MICROAPP_SDK_BLE_PERIPHERAL    = 0x04,
+	CS_MICROAPP_SDK_BLE_MAC           = 0x05,
 };
 
 /**
@@ -916,6 +922,7 @@ struct __attribute__((packed)) microapp_sdk_ble_t {
 		microapp_sdk_ble_scan_t scan;
 		microapp_sdk_ble_central_t central;
 		microapp_sdk_ble_peripheral_t peripheral;
+		microapp_sdk_ble_request_mac_t requestMac;
 	};
 };
 

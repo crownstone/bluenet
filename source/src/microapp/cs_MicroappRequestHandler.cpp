@@ -435,6 +435,19 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 			ble->header.ack               = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
 		}
+		case CS_MICROAPP_SDK_BLE_MAC: {
+			LOGi("BLE get MAC");
+			ble_gap_addr_t macAddress;
+			uint32_t nrfCode = sd_ble_gap_addr_get(&macAddress);
+			if (nrfCode != NRF_SUCCESS) {
+				ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(ERR_UNSPECIFIED);
+				return ERR_UNSPECIFIED;
+			}
+			memcpy(ble->requestMac.address.address, macAddress.addr, sizeof(macAddress.addr));
+			ble->requestMac.address.type = macAddress.addr_type;
+			ble->header.ack              = MicroappSdkUtil::bluenetResultToMicroapp(ERR_SUCCESS);
+			return ERR_SUCCESS;
+		}
 		case CS_MICROAPP_SDK_BLE_SCAN: {
 			return handleRequestBleScan(ble);
 		}
