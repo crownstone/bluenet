@@ -7,9 +7,10 @@
 
 #pragma once
 
-#include <cstdint>
-#include <cfg/cs_StaticConfig.h>
 #include <cfg/cs_AutoConfig.h>
+#include <cfg/cs_StaticConfig.h>
+
+#include <cstdint>
 
 /**
  * Max allowed chunk size when uploading a microapp.

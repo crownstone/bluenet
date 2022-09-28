@@ -112,7 +112,12 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 	if (pin == PIN_NONE) {
 		return ERR_NOT_FOUND;
 	}
-	LOGi("Configure pinIndex=%u pin=%u direction=%i pullResistor=%i polarity=%i", pinIndex, pin, direction, pull, polarity);
+	LOGi("Configure pinIndex=%u pin=%u direction=%i pullResistor=%i polarity=%i",
+		 pinIndex,
+		 pin,
+		 direction,
+		 pull,
+		 polarity);
 
 	nrf_gpio_pin_pull_t nrfPull;
 	switch (pull) {
@@ -295,7 +300,7 @@ void Gpio::handleEvent(event_t& event) {
 			GpioPolarity polarity      = (GpioPolarity)gpio.polarity;
 			GpioDirection direction    = (GpioDirection)gpio.direction;
 			GpioPullResistor pull      = (GpioPullResistor)gpio.pull;
-			event.result.returnCode = configure(gpio.pinIndex, direction, pull, polarity);
+			event.result.returnCode    = configure(gpio.pinIndex, direction, pull, polarity);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_WRITE: {
@@ -309,7 +314,7 @@ void Gpio::handleEvent(event_t& event) {
 		}
 		case CS_TYPE::EVT_GPIO_READ: {
 			TYPIFY(EVT_GPIO_READ) gpio = *(TYPIFY(EVT_GPIO_READ)*)event.data;
-			event.result.returnCode = read(gpio.pinIndex, gpio.buf, gpio.length);
+			event.result.returnCode    = read(gpio.pinIndex, gpio.buf, gpio.length);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

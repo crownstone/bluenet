@@ -248,20 +248,20 @@ void MicroappInterruptHandler::onBleCentralDiscovery(ble_central_discovery_t& ev
 		return;
 	}
 
-	microapp_sdk_ble_t* ble                = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType                = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type                              = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type                      = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER;
-	ble->central.connectionHandle          = Stack::getInstance().getConnectionHandle();
-	ble->central.eventDiscover.serviceUuid = MicroappSdkUtil::convertUuid(event.serviceUuid);
-	ble->central.eventDiscover.uuid        = MicroappSdkUtil::convertUuid(event.uuid);
-	ble->central.eventDiscover.valueHandle = event.valueHandle;
-	ble->central.eventDiscover.cccdHandle  = event.cccdHandle;
-	ble->central.eventDiscover.options.read = event.flags.read;
+	microapp_sdk_ble_t* ble                            = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType                            = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                                          = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type                                  = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER;
+	ble->central.connectionHandle                      = Stack::getInstance().getConnectionHandle();
+	ble->central.eventDiscover.serviceUuid             = MicroappSdkUtil::convertUuid(event.serviceUuid);
+	ble->central.eventDiscover.uuid                    = MicroappSdkUtil::convertUuid(event.uuid);
+	ble->central.eventDiscover.valueHandle             = event.valueHandle;
+	ble->central.eventDiscover.cccdHandle              = event.cccdHandle;
+	ble->central.eventDiscover.options.read            = event.flags.read;
 	ble->central.eventDiscover.options.writeNoResponse = event.flags.write_no_ack;
-	ble->central.eventDiscover.options.write = event.flags.write_with_ack;
-	ble->central.eventDiscover.options.notify = event.flags.notify;
-	ble->central.eventDiscover.options.indicate = event.flags.indicate;
+	ble->central.eventDiscover.options.write           = event.flags.write_with_ack;
+	ble->central.eventDiscover.options.notify          = event.flags.notify;
+	ble->central.eventDiscover.options.indicate        = event.flags.indicate;
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }
@@ -329,14 +329,15 @@ void MicroappInterruptHandler::onBleCentralNotification(ble_central_notification
 		return;
 	}
 
-	microapp_sdk_ble_t* ble            = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
-	ble->header.messageType            = CS_MICROAPP_SDK_TYPE_BLE;
-	ble->type                          = CS_MICROAPP_SDK_BLE_CENTRAL;
-	ble->central.type                  = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION;
-	ble->central.connectionHandle      = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
+	microapp_sdk_ble_t* ble       = reinterpret_cast<microapp_sdk_ble_t*>(outputBuffer);
+	ble->header.messageType       = CS_MICROAPP_SDK_TYPE_BLE;
+	ble->type                     = CS_MICROAPP_SDK_BLE_CENTRAL;
+	ble->central.type             = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION;
+	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
 	ble->central.eventNotification.valueHandle = event.handle;
 
-	ble->central.eventNotification.size = std::min(event.data.len, MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE);
+	ble->central.eventNotification.size =
+			std::min(event.data.len, MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE);
 	memcpy(ble->central.eventNotification.data, event.data.data, ble->central.eventNotification.size);
 
 	MicroappController::getInstance().generateSoftInterrupt();

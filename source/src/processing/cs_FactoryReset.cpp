@@ -149,7 +149,10 @@ bool FactoryReset::performFactoryReset() {
 
 void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
 	CsUtils::setBit(_successfullyFactoryResetBitmask, bit);
-	LOGi("onClassFactoryResetDone bit=%u bitmask: done=%08b all=%08b", bit, _successfullyFactoryResetBitmask, FACTORY_RESET_MASK_ALL);
+	LOGi("onClassFactoryResetDone bit=%u bitmask: done=%08b all=%08b",
+		 bit,
+		 _successfullyFactoryResetBitmask,
+		 FACTORY_RESET_MASK_ALL);
 
 	if ((_successfullyFactoryResetBitmask & FACTORY_RESET_MASK_ALL) == FACTORY_RESET_MASK_ALL) {
 		LOGi("All classes factory reset, rebooting device");

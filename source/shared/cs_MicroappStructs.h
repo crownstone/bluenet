@@ -14,8 +14,8 @@
 
 #include <ipc/cs_IpcRamData.h>
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 /**
  * Protocol version of the contents of the IPC data going back and forth between microapp and bluenet.
@@ -736,30 +736,30 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_notification_t {
 };
 
 enum MicroappSdkBleCentralType {
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_REGISTER_INTERRUPT  = 1,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_REGISTER_INTERRUPT = 1,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT     = 2,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT       = 3,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT            = 2,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT              = 3,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT  = 4,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT    = 5,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT         = 4,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT           = 5,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCOVER    = 6,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER      = 7,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE = 8,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCOVER           = 6,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER             = 7,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE        = 8,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_WRITE       = 9,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE         = 10,
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ        = 11,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ          = 12,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_WRITE              = 9,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE                = 10,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ               = 11,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ                 = 12,
 
 	//! Subscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE   = 13,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE          = 13,
 
 	//! Unsubscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE = 14,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE        = 14,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION  = 15,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION         = 15,
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_t {
@@ -936,8 +936,10 @@ struct __attribute__((packed)) microapp_sdk_ble_t {
 static_assert(sizeof(microapp_sdk_ble_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 // Calculate max payload sizes.
-const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE = MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventRead.data);
-const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE = MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventNotification.data);
+const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventRead.data);
+const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventNotification.data);
 
 /**
  * Struct for mesh message from microapp.

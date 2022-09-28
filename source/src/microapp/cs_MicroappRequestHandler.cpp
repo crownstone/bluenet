@@ -288,17 +288,17 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 
 					uint8_t buf[1];
 					gpio.length = sizeof(buf);
-					gpio.buf = buf;
+					gpio.buf    = buf;
 
 					switch (value) {
 						case CS_MICROAPP_SDK_PIN_ON: {
 							LogMicroappRequestHandlerDebug("Setting GPIO pin %i", gpio.pinIndex);
-							buf[0]   = 1;
+							buf[0] = 1;
 							break;
 						}
 						case CS_MICROAPP_SDK_PIN_OFF: {
 							LogMicroappRequestHandlerDebug("Clearing GPIO pin %i", gpio.pinIndex);
-							buf[0]   = 0;
+							buf[0] = 0;
 							break;
 						}
 						default: {

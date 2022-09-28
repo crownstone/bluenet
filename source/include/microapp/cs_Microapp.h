@@ -46,7 +46,7 @@ private:
 	/**
 	 * Local flag to indicate that ram section has been loaded.
 	 */
-	bool _loaded = false;
+	bool _loaded                  = false;
 
 	/**
 	 * Keep up which microapp is currently being operated on.
@@ -58,7 +58,7 @@ private:
 	/**
 	 * Whether we are in factory reset mode.
 	 */
-	bool _factoryResetMode = false;
+	bool _factoryResetMode        = false;
 
 	void loadApps();
 

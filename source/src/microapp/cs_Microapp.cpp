@@ -17,6 +17,7 @@
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
+#include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
@@ -31,7 +32,6 @@
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
-#include <events/cs_Event.h>
 
 #include <algorithm>
 
