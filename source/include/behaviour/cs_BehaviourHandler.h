@@ -11,10 +11,13 @@
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
 #include <presence/cs_PresenceHandler.h>
+#include <test/cs_TestAccess.h>
 
 #include <optional>
 
 class BehaviourHandler : public EventListener, public Component {
+	friend class TestAccess<BehaviourHandler>;
+
 public:
 	/**
 	 * Obtains a pointer to presence handler, if it exists.
@@ -115,7 +118,16 @@ private:
 	 * When no behaviours are valid at given time/presence the intended
 	 * value is 0. (house is 'off' by default)
 	 */
-	std::optional<uint8_t> computeIntendedState(Time currenttime, PresenceStateDescription currentpresence);
+	std::optional<uint8_t> computeIntendedState(Time currenttime, PresenceStateDescription currentpresence) const;
+
+	/**
+	 * Returns most specific active switch behaviour, resolving conflicts. None if no behaviours are active.
+	 * Requires _behaviourStore to be non-null and currentTime.isValid() == true.
+	 * @param currentTime
+	 * @param currentPresence
+	 * @return
+	 */
+	SwitchBehaviour* resolveSwitchBehaviour(Time currentTime, PresenceStateDescription currentPresence) const;
 
 	void handleGetBehaviourDebug(event_t& evt);
 
@@ -125,7 +137,7 @@ private:
 	 * Else, returns nullptr.
 	 */
 	SwitchBehaviour* ValidateSwitchBehaviour(
-			Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence);
+			Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const;
 
 	// -----------------------------------------------------------------------
 	// --------------------------- synchronization ---------------------------

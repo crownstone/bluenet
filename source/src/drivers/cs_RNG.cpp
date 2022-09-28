@@ -9,6 +9,18 @@
 #include <drivers/cs_RNG.h>
 #include <util/cs_BleError.h>
 
+//! convert uint8_t to uint32_t
+typedef union {
+	uint8_t asBuf[4];
+	uint32_t asInt;
+} conv8_32;
+
+//! convert from uint8_t to uint16_t and back
+typedef union {
+	uint8_t asBuf[2];
+	uint16_t asInt;
+} conv8_16;
+
 RNG::RNG(){};
 
 void RNG::fillBuffer(uint8_t* buffer, uint8_t length) {
@@ -30,14 +42,9 @@ uint32_t RNG::getRandom32() {
 		APP_ERROR_CHECK(err_code);
 	}
 
-	err_code = sd_rand_application_vector_get(_randomBytes, 4);
-	APP_ERROR_CHECK(err_code);
-
 	conv8_32 converter;
-	converter.asBuf[0] = _randomBytes[0];
-	converter.asBuf[1] = _randomBytes[1];
-	converter.asBuf[2] = _randomBytes[2];
-	converter.asBuf[3] = _randomBytes[3];
+	err_code = sd_rand_application_vector_get(converter.asBuf, 4);
+	APP_ERROR_CHECK(err_code);
 
 	return converter.asInt;
 };
@@ -50,13 +57,9 @@ uint16_t RNG::getRandom16() {
 		APP_ERROR_CHECK(err_code);
 	}
 
-	err_code = sd_rand_application_vector_get(_randomBytes, 2);
-	APP_ERROR_CHECK(err_code);
-
 	conv8_16 converter;
-
-	converter.asBuf[0] = _randomBytes[0];
-	converter.asBuf[1] = _randomBytes[1];
+	err_code = sd_rand_application_vector_get(converter.asBuf, 2);
+	APP_ERROR_CHECK(err_code);
 
 	return converter.asInt;
 };
@@ -69,7 +72,9 @@ uint8_t RNG::getRandom8() {
 		APP_ERROR_CHECK(err_code);
 	}
 
-	err_code = sd_rand_application_vector_get(_randomBytes, 1);
+	uint8_t val;
+	err_code = sd_rand_application_vector_get(&val, 1);
 	APP_ERROR_CHECK(err_code);
-	return _randomBytes[0];
+
+	return val;
 };

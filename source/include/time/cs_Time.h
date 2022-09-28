@@ -18,6 +18,12 @@ private:
 public:
 	Time(uint32_t posixTime) : posixTimeStamp(posixTime) {}
 
+	Time(DayOfWeek day, uint8_t hours, uint8_t minutes, uint8_t seconds = 0)
+			: Time(dayNumber(day + (7 - 4)) * 24 * 60 * 60 + hours * 60 * 60 + minutes * 60 + seconds) {
+		// add (7-4) days because epoch is on a thursday in order to get
+		// dayNumber(thursday + (7-4)) == 0
+	}
+
 	uint32_t timestamp() { return posixTimeStamp; }
 
 	bool isValid() { return posixTimeStamp != 0; }

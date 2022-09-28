@@ -9,16 +9,6 @@
 #include <logging/cs_CLogger.h>
 #include <util/cs_Error.h>
 
-// Used to be undefined in cs_Nordic.h, another header.
-// That introduces the issue that those headers have to included in the right order.
-#ifdef APP_ERROR_CHECK
-#undef APP_ERROR_CHECK
-#endif
-
-#ifdef APP_ERROR_HANDLER
-#undef APP_ERROR_HANDLER
-#endif
-
 // These macros can end up in C code, so use the C logger.
 
 #ifdef __cplusplus
@@ -53,6 +43,9 @@ void mesh_assertion_handler(uint32_t pc);
  *
  * @param[in] cs_ret_code_t Error code supplied to the error handler.
  */
+#ifdef APP_ERROR_HANDLER
+#undef APP_ERROR_HANDLER
+#endif
 #define APP_ERROR_HANDLER(cs_ret_code_t)                                  \
 	do {                                                                  \
 		app_error_handler((cs_ret_code_t), __LINE__, (uint8_t*)__FILE__); \
@@ -62,6 +55,9 @@ void mesh_assertion_handler(uint32_t pc);
  *
  * @param[in] cs_ret_code_t Error code supplied to the error handler.
  */
+#ifdef APP_ERROR_CHECK
+#undef APP_ERROR_CHECK
+#endif
 #define APP_ERROR_CHECK(cs_ret_code_t)                                                                    \
 	do {                                                                                                  \
 		const uint32_t LOCAL_cs_ret_code_t = (cs_ret_code_t);                                             \

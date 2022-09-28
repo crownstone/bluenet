@@ -10,7 +10,6 @@
 extern "C" {
 #endif
 
-#ifndef DISABLE_NRF_HEADERS
 #include <app_util_platform.h>
 typedef uint32_t ret_code_t;
 
@@ -77,26 +76,6 @@ typedef uint32_t ret_code_t;
 #include <nrf_saadc.h>
 #include <nrf_timer.h>
 #include <nrf_uart.h>
-#endif
-
-#else  // DISABLE_NRF_HEADERS
-
-#ifndef __ALIGN
-#define __ALIGN(n) __attribute__((aligned(n)))
-#endif
-
-#include <nrf.h>
-
-#define BLE_GAP_PASSKEY_LEN 6
-
-#if __clang__
-#define STRINGIFY(str) #str
-#else
-#define STRINGIFY(str) str
-#endif
-
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 #endif
 
 #ifdef __cplusplus

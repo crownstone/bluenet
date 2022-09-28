@@ -6,6 +6,11 @@
  */
 #pragma once
 
+#include <modules/nrfx/hal/nrf_gpiote.h>
+#include <modules/nrfx/hal/nrf_ppi.h>
+#include <modules/nrfx/hal/nrf_timer.h>
+#include <nrf_gpiote.h>
+
 #include <cstdint>
 
 #include "ble/cs_Nordic.h"
@@ -78,9 +83,6 @@ public:
 
 	//! Function to be called on a zero crossing interrupt.
 	void onZeroCrossingInterrupt();
-
-	//! Internal use! Called when started from a zero crossing.
-	void _zeroCrossingStart();
 
 	//! Interrupt handler: internal function, implementation specific.
 	void _handleInterrupt();

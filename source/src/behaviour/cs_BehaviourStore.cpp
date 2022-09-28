@@ -16,8 +16,34 @@
 
 #include <algorithm>
 
-#define LOGBehaviourStoreInfo LOGi
-#define LOGBehaviourStoreDebug LOGd
+#define LOGBehaviourStoreInfo LOGvv
+#define LOGBehaviourStoreDebug LOGvv
+
+// ======================= public interface ========================
+
+ErrorCodesGeneral BehaviourStore::addBehaviour(Behaviour* behaviour) {
+	uint8_t index = findEmptyIndex();
+	if (index > MaxBehaviours) {
+		return ERR_NO_SPACE;
+	}
+	else {
+		return replaceBehaviour(index, behaviour);
+	}
+}
+
+ErrorCodesGeneral BehaviourStore::replaceBehaviour(uint8_t index, Behaviour* behaviour) {
+	// This also checks the index.
+	auto retVal = removeBehaviour(index);
+	if (retVal == ERR_SUCCESS) {
+		assignBehaviour(index, behaviour);
+		storeUpdate(index, behaviour);
+	}
+	return retVal;
+}
+
+Behaviour* BehaviourStore::getBehaviour(uint8_t index) {
+	return index < MaxBehaviours ? activeBehaviours[index] : nullptr;
+}
 
 void BehaviourStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
@@ -82,6 +108,83 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 	}
 }
 
+void BehaviourStore::storeUpdate(uint8_t index, Behaviour* behaviour) {
+	auto serializedBehaviour = behaviour->serialized();
+	storeUpdate(index, behaviour->getType(), serializedBehaviour.data(), serializedBehaviour.size());
+}
+
+void BehaviourStore::storeUpdate(uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
+	CS_TYPE csType;
+	switch (type) {
+		case SwitchBehaviour::Type::Switch: csType = CS_TYPE::STATE_BEHAVIOUR_RULE; break;
+		case SwitchBehaviour::Type::Twilight: csType = CS_TYPE::STATE_TWILIGHT_RULE; break;
+		case SwitchBehaviour::Type::Extended: csType = CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE; break;
+		default: return;
+	}
+
+	cs_state_data_t data(csType, index, buf, bufSize);
+	State::getInstance().set(data);
+	storeMasterHash();
+}
+
+size_t BehaviourStore::getBehaviourSize(SwitchBehaviour::Type type) {
+	switch (type) {
+		case SwitchBehaviour::Type::Switch: return WireFormat::size<SwitchBehaviour>();
+		case SwitchBehaviour::Type::Twilight: return WireFormat::size<TwilightBehaviour>();
+		case SwitchBehaviour::Type::Extended: return WireFormat::size<ExtendedSwitchBehaviour>();
+		default: {
+			LOGe("Invalid behaviour type: %d", type);
+			return 0;
+		}
+	}
+}
+
+ErrorCodesGeneral BehaviourStore::checkSizeAndType(SwitchBehaviour::Type type, cs_buffer_size_t bufSize) {
+	size_t expectedSize = getBehaviourSize(type);
+	if (expectedSize == 0) {
+		return ERR_WRONG_PARAMETER;
+	}
+
+	if (bufSize != expectedSize) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)", bufSize, expectedSize, type);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	return ERR_SUCCESS;
+}
+
+Behaviour* BehaviourStore::allocateBehaviour(
+		uint8_t index, SwitchBehaviour::Type type, uint8_t* buf, cs_buffer_size_t bufSize) {
+	switch (type) {
+		case SwitchBehaviour::Type::Switch: {
+			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
+			return new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(buf, bufSize));
+		}
+		case SwitchBehaviour::Type::Twilight: {
+			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
+			return new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(buf, bufSize));
+		}
+		case SwitchBehaviour::Type::Extended: {
+			LOGBehaviourStoreDebug("Allocating new ExtendedSwitchBehaviour");
+			return new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(buf, bufSize));
+		}
+		default: return nullptr;
+	}
+}
+
+void BehaviourStore::assignBehaviour(uint8_t index, Behaviour* behaviour) {
+	// no need to delete previous entry, already checked for nullptr
+	activeBehaviours[index] = behaviour;
+	activeBehaviours[index]->print();
+}
+
+uint8_t BehaviourStore::findEmptyIndex() {
+	uint8_t emptyIndex = 0;
+	while (activeBehaviours[emptyIndex] != nullptr && emptyIndex < MaxBehaviours) {
+		emptyIndex++;
+	}
+	return emptyIndex;
+}
+
 ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t& index) {
 	if (bufSize < 1) {
 		LOGe(FMT_ZERO_PAYLOAD_LENGTH, bufSize);
@@ -89,83 +192,33 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	}
 	Behaviour::Type typ = static_cast<Behaviour::Type>(buf[0]);
 
-	// find the first empty index.
-	uint8_t empty_index = 0;
-	while (activeBehaviours[empty_index] != nullptr && empty_index < MaxBehaviours) {
-		empty_index++;
+	auto retval         = checkSizeAndType(typ, bufSize);
+	if (retval != ERR_SUCCESS) {
+		return retval;
 	}
-	if (empty_index >= MaxBehaviours) {
+
+	// find the first empty index.
+	uint8_t emptyIndex = findEmptyIndex();
+	if (emptyIndex >= MaxBehaviours) {
 		return ERR_NO_SPACE;
 	}
-	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, empty_index);
-	switch (typ) {
-		case SwitchBehaviour::Type::Switch: {
-			if (bufSize != WireFormat::size<SwitchBehaviour>()) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
-					 bufSize,
-					 WireFormat::size<SwitchBehaviour>(),
-					 typ);
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
-			// no need to delete previous entry, already checked for nullptr
-			activeBehaviours[empty_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(buf, bufSize));
-			activeBehaviours[empty_index]->print();
+	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, emptyIndex);
 
-			cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, empty_index, buf, bufSize);
-			State::getInstance().set(data);
-			index = empty_index;
-			storeMasterHash();
-			return ERR_SUCCESS;
-		}
-		case SwitchBehaviour::Type::Twilight: {  // check size
-			if (bufSize != WireFormat::size<TwilightBehaviour>()) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
-					 bufSize,
-					 WireFormat::size<TwilightBehaviour>(),
-					 typ);
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
-			// no need to delete previous entry, already checked for nullptr
-			activeBehaviours[empty_index] =
-					new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(buf, bufSize));
-			activeBehaviours[empty_index]->print();
-
-			cs_state_data_t data(CS_TYPE::STATE_TWILIGHT_RULE, empty_index, buf, bufSize);
-			State::getInstance().set(data);
-			index = empty_index;
-			storeMasterHash();
-			return ERR_SUCCESS;
-		}
-		case SwitchBehaviour::Type::Extended: {
-			if (bufSize != WireFormat::size<ExtendedSwitchBehaviour>()) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
-					 bufSize,
-					 WireFormat::size<ExtendedSwitchBehaviour>(),
-					 typ);
-				return ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			LOGBehaviourStoreDebug("Allocating new ExtendedSwitchBehaviour");
-			// no need to delete previous entry, already checked for nullptr
-			activeBehaviours[empty_index] =
-					new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(buf, bufSize));
-			activeBehaviours[empty_index]->print();
-
-			cs_state_data_t data(CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, empty_index, buf, bufSize);
-			State::getInstance().set(data);
-			index = empty_index;
-			storeMasterHash();
-			return ERR_SUCCESS;
-		}
-		default: {
-			LOGe("Invalid behaviour type: %d", typ);
-			return ERR_WRONG_PARAMETER;
-		}
-	}
+	Behaviour* behaviour = allocateBehaviour(emptyIndex, typ, buf, bufSize);
+	assignBehaviour(emptyIndex, behaviour);
+	storeUpdate(emptyIndex, typ, buf, bufSize);
+	index = emptyIndex;
+	return ERR_SUCCESS;
 }
 
-bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, const size_t& behaviourSize) {
+ErrorCodesGeneral BehaviourStore::replaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type) {
+	size_t behaviourSize = getBehaviourSize(type);
+
+	if (behaviourSize == 0) {
+		LOGe("Invalid behaviour type");
+		return ERR_WRONG_PARAMETER;
+	}
+
 	const uint8_t indexSize                  = sizeof(uint8_t);
 	TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) hash = calculateMasterHash();
 	State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &hash, sizeof(hash));
@@ -173,17 +226,15 @@ bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, con
 	// check size
 	if (evt.size != indexSize + behaviourSize) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH " in replace switchbehaviour", evt.size, (indexSize + behaviourSize));
-		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return false;
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
 	// check parameter
 	if (index >= MaxBehaviours) {
-		evt.result.returnCode = ERR_WRONG_PARAMETER;
-		return false;
+		return ERR_WRONG_PARAMETER;
 	}
 
-	return true;
+	return ERR_SUCCESS;
 }
 
 void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
@@ -202,69 +253,14 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	LOGBehaviourStoreInfo("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
-	switch (type) {
-		case Behaviour::Type::Switch: {
-			if (!ReplaceParameterValidation(evt, index, WireFormat::size<SwitchBehaviour>())) {
-				break;
-			}
-
-			removeBehaviour(index);
-
-			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
-			activeBehaviours[index] = new SwitchBehaviour(
-					WireFormat::deserialize<SwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
-			activeBehaviours[index]->print();
-
-			cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
-			State::getInstance().set(data);
-			storeMasterHash();
-			evt.result.returnCode = ERR_SUCCESS;
-			break;
-		}
-		case Behaviour::Type::Twilight: {
-			if (!ReplaceParameterValidation(evt, index, WireFormat::size<TwilightBehaviour>())) {
-				break;
-			}
-
-			removeBehaviour(index);
-
-			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
-			activeBehaviours[index] = new TwilightBehaviour(
-					WireFormat::deserialize<TwilightBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
-			activeBehaviours[index]->print();
-
-			cs_state_data_t data(CS_TYPE::STATE_TWILIGHT_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
-			State::getInstance().set(data);
-			storeMasterHash();
-			evt.result.returnCode = ERR_SUCCESS;
-
-			break;
-		}
-		case Behaviour::Type::Extended: {
-			if (!ReplaceParameterValidation(evt, index, WireFormat::size<ExtendedSwitchBehaviour>())) {
-				break;
-			}
-
-			removeBehaviour(index);
-
-			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
-			activeBehaviours[index] = new ExtendedSwitchBehaviour(
-					WireFormat::deserialize<ExtendedSwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
-			activeBehaviours[index]->print();
-
-			cs_state_data_t data(
-					CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
-			State::getInstance().set(data);
-			storeMasterHash();
-			evt.result.returnCode = ERR_SUCCESS;
-			break;
-		}
-		default: {
-			LOGe("Invalid behaviour type");
-			evt.result.returnCode = ERR_WRONG_PARAMETER;
-			break;
-		}
+	auto retCode = replaceParameterValidation(evt, index, type);
+	if (retCode == ERR_SUCCESS) {
+		Behaviour* behaviour = allocateBehaviour(index, type, dat + indexSize, evt.size - indexSize);
+		removeBehaviour(index);
+		assignBehaviour(index, behaviour);
+		storeUpdate(index, type, dat + indexSize, evt.size - indexSize);
 	}
+	evt.result.returnCode = retCode;
 
 	// Fill return buffer if it's large enough.
 	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
@@ -376,7 +372,7 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 	}
 	auto type = activeBehaviours[index]->getType();
 
-	LOGBehaviourStoreDebug("deleting behaviour");
+	LOGBehaviourStoreInfo("deleting behaviour {u}", index);
 	delete activeBehaviours[index];
 	activeBehaviours[index] = nullptr;
 
@@ -462,5 +458,6 @@ void BehaviourStore::clearActiveBehavioursArray() {
 }
 
 BehaviourStore::~BehaviourStore() {
+	LOGBehaviourStoreInfo("destroying BehaviourStore");
 	clearActiveBehavioursArray();
 }

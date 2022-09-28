@@ -16,7 +16,7 @@
 
 #include <cmath>
 
-#define LOGMeshTopologyResearchDebug LOGd
+#define LOGMeshTopologyResearchDebug LOGvv
 #define LOGMeshTopologyResearchVerbose LOGnone
 
 MeshTopologyResearch::MeshTopologyResearch() : flushRoutine([this]() { return flushAggregatedRssiData(); }) {}

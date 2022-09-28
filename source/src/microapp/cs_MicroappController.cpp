@@ -264,8 +264,8 @@ void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingSt
 	bluenet_ipc_data_payload_t ipcData;
 
 	// We can just overwrite all, as a newer IPC version will be written and read by bluenet only.
-	ipcData.bluenetRebootData.ipcDataMajor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
-	ipcData.bluenetRebootData.ipcDataMinor               = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
+	ipcData.bluenetRebootData.ipcDataMajor = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
+	ipcData.bluenetRebootData.ipcDataMinor = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
 
 	memset(ipcData.bluenetRebootData.microapp, 0, sizeof(ipcData.bluenetRebootData.microapp));
 	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
@@ -284,7 +284,7 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 		return state;
 	}
 	bluenet_ipc_data_payload_t ipcData;
-	uint8_t dataSize = 0;
+	uint8_t dataSize   = 0;
 
 	// We might read the IPC data of a previous bluenet version.
 	IpcRetCode ipcCode = getRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
@@ -293,7 +293,9 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 		return state;
 	}
 	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
-		LOGw("Incorrect major version: major=%u required=%u", ipcData.bluenetRebootData.ipcDataMajor, BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR);
+		LOGw("Incorrect major version: major=%u required=%u",
+			 ipcData.bluenetRebootData.ipcDataMajor,
+			 BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR);
 		return state;
 	}
 
@@ -301,7 +303,9 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
 	if (ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
-		LOGw("Minor version too low: minor=%u minimum=%u", ipcData.bluenetRebootData.ipcDataMinor, BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
+		LOGw("Minor version too low: minor=%u minimum=%u",
+			 ipcData.bluenetRebootData.ipcDataMinor,
+			 BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
 		return state;
 	}
 #pragma GCC diagnostic pop

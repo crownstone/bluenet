@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <test/cs_TestAccess.h>
 #include <time/cs_DayOfWeek.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>

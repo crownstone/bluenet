@@ -266,13 +266,13 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 					uint8_t buf[1];
 
 					gpio.pinIndex = MicroappSdkUtil::interruptToDigitalPin(pinIndex);
-					gpio.length = sizeof(buf);
-					gpio.buf = buf;
+					gpio.length   = sizeof(buf);
+					gpio.buf      = buf;
 
 					event_t event(CS_TYPE::EVT_GPIO_READ, &gpio, sizeof(gpio));
 					event.dispatch();
 
-					pin->value = buf[0];
+					pin->value      = buf[0];
 					pin->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
 					break;
 				}

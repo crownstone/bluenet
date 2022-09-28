@@ -8,9 +8,12 @@
 #pragma once
 
 #include <logging/cs_Logger.h>
+#include <test/cs_TestAccess.h>
 #include <util/cs_Utils.h>
 
 #include <cstdint>
+
+#define LOGPresenceDescriptionDebug LOGvv
 
 /**
  * Class that holds the presence of a profile.
@@ -18,6 +21,8 @@
  * When the Nth bit is set, the profile is present at location N.
  */
 class PresenceStateDescription {
+	friend class TestAccess<PresenceStateDescription>;
+
 private:
 	uint64_t _bitmask;
 
@@ -42,6 +47,6 @@ public:
 	void print() {
 		[[maybe_unused]] uint32_t bitmasks[2] = {
 				static_cast<uint32_t>(_bitmask >> 0), static_cast<uint32_t>(_bitmask >> 32)};
-		LOGd("PresenceDesc(0x%04x 0x%04x)", bitmasks[1], bitmasks[0]);
+		LOGPresenceDescriptionDebug("PresenceDesc(0x%04x 0x%04x)", bitmasks[1], bitmasks[0]);
 	}
 };

@@ -18,8 +18,8 @@
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
 
-#define LOGBehaviourHandlerDebug LOGnone
-#define LOGBehaviourHandlerVerbose LOGnone
+#define LOGBehaviourHandlerDebug LOGvv
+#define LOGBehaviourHandlerVerbose LOGvv
 
 cs_ret_code_t BehaviourHandler::init() {
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) settings;
@@ -108,7 +108,7 @@ bool BehaviourHandler::update() {
 }
 
 SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(
-		Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) {
+		Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const {
 	if (SwitchBehaviour* switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
 		if (switchbehave->isValid(currentTime, currentPresence)) {
 			return switchbehave;
@@ -118,21 +118,8 @@ SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(
 	return nullptr;
 }
 
-std::optional<uint8_t> BehaviourHandler::computeIntendedState(
-		Time currentTime, PresenceStateDescription currentPresence) {
-	if (!_isActive) {
-		LOGBehaviourHandlerDebug("Behaviour handler is inactive, computed intended state: empty");
-		return {};
-	}
-	if (!currentTime.isValid()) {
-		LOGBehaviourHandlerDebug("Current time invalid, computed intended state: empty");
-		return {};
-	}
-	if (_behaviourStore == nullptr) {
-		LOGBehaviourHandlerDebug("BehaviourStore is nullptr, computed intended state: empty");
-		return {};
-	}
-
+SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
+		Time currentTime, PresenceStateDescription currentPresence) const {
 	LOGBehaviourHandlerDebug("BehaviourHandler computeIntendedState resolves");
 
 	// 'best' meaning most relevant considering from/until time window.
@@ -153,8 +140,23 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		}
 
 		// conflict resolve:
+
+		// presence first.
+		auto candidateCondition   = candidateSwitchBehaviour->currentPresencePredicate();
+		auto currentBestCondition = currentBestSwitchBehaviour->currentPresencePredicate();
+
+		if (PresenceIsMoreRelevant(candidateCondition, currentBestCondition)) {
+			currentBestSwitchBehaviour = candidateSwitchBehaviour;
+			continue;
+		}
+		if (PresenceIsMoreRelevant(currentBestCondition, candidateCondition)) {
+			// candidate lost.
+			continue;
+		}
+
+		// if presence is not decisive, time interval decides
 		if (FromUntilIntervalIsEqual(currentBestSwitchBehaviour, candidateSwitchBehaviour)) {
-			// when interval coincides, lowest intensity behaviour wins:
+			// when interval is equal too, lowest intensity behaviour wins:
 			if (candidateSwitchBehaviour->value() < currentBestSwitchBehaviour->value()) {
 				currentBestSwitchBehaviour = candidateSwitchBehaviour;
 			}
@@ -166,8 +168,27 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 		}
 	}
 
-	if (currentBestSwitchBehaviour) {
-		return currentBestSwitchBehaviour->value();
+	return currentBestSwitchBehaviour;
+}
+
+std::optional<uint8_t> BehaviourHandler::computeIntendedState(
+		Time currentTime, PresenceStateDescription currentPresence) const {
+	if (!_isActive) {
+		LOGBehaviourHandlerDebug("Behaviour handler is inactive, computed intended state: empty");
+		return {};
+	}
+	if (!currentTime.isValid()) {
+		LOGBehaviourHandlerDebug("Current time invalid, computed intended state: empty");
+		return {};
+	}
+	if (_behaviourStore == nullptr) {
+		LOGBehaviourHandlerDebug("BehaviourStore is nullptr, computed intended state: empty");
+		return {};
+	}
+
+	Behaviour* bestMatchinSwitchBehaviour = resolveSwitchBehaviour(currentTime, currentPresence);
+	if (bestMatchinSwitchBehaviour) {
+		return bestMatchinSwitchBehaviour->value();
 	}
 
 	return 0;

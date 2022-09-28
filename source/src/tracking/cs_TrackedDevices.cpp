@@ -10,6 +10,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <tracking/cs_TrackedDevices.h>
 #include <util/cs_BleError.h>
+#include <util/cs_Error.h>
 #include <util/cs_Math.h>
 #include <util/cs_Utils.h>
 

@@ -248,7 +248,7 @@ void Gpio::tick() {
 			TYPIFY(EVT_GPIO_UPDATE) gpio;
 			// we send back the pin index, not the pin number
 			gpio.pinIndex = i;
-			gpio.length    = 0;
+			gpio.length   = 0;
 			LOGd("Send GPIO event at index %i", gpio.pinIndex);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);

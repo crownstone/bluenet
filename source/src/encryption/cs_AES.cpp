@@ -7,6 +7,7 @@
 
 #include <encryption/cs_AES.h>
 #include <logging/cs_Logger.h>
+#include <nrf_sdm.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 

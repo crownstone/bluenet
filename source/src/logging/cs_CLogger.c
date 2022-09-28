@@ -8,6 +8,7 @@
 #include <drivers/cs_Serial.h>
 #include <logging/cs_CLogger.h>
 #include <stdarg.h>
+#include <stddef.h>
 
 #define C_LOGGER_BUF_SIZE 16
 

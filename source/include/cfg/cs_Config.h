@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <nrf_sdh_ble.h>
 #include <protocol/cs_Typedefs.h>
 
 /**

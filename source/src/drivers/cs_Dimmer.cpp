@@ -9,6 +9,7 @@
 #include <drivers/cs_Dimmer.h>
 #include <drivers/cs_PWM.h>
 #include <logging/cs_Logger.h>
+#include <nrf_gpio.h>
 #include <storage/cs_State.h>
 #include <test/cs_Test.h>
 #include <util/cs_Error.h>

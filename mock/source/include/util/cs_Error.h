@@ -6,5 +6,5 @@
 #define assert(expr, message) \
 	if (!(expr)) { \
 		printf(message);\
-		exit(-1); \
+		exit(1); \
 	}

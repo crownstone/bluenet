@@ -11,6 +11,7 @@
 #include <events/cs_EventListener.h>
 #include <protocol/cs_Typedefs.h>
 #include <stdint.h>
+#include <test/cs_TestAccess.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_TimeSyncMessage.h>
@@ -46,6 +47,8 @@
  * Not sure if this is necessary.
  */
 class SystemTime : public EventListener {
+	friend class TestAccess<SystemTime>;
+
 public:
 	/**
 	 * Creates and starts the first tick timer.
@@ -138,6 +141,10 @@ private:
 	static app_timer_id_t appTimerId;
 
 	static void scheduleNextTick();
+
+	/**
+	 * Must be called at least once per second to update upTimeSec.
+	 */
 	static void tick(void* unused);
 
 	// ===================== mesh posix time sync implementation =====================
