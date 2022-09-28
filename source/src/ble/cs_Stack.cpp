@@ -830,7 +830,10 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 			.advertisementBuffer =
 					cs_data_t(connectedData.adv_data.adv_data.p_data, connectedData.adv_data.adv_data.len),
 			.scanResponseBuffer =
-					cs_data_t(connectedData.adv_data.scan_rsp_data.p_data, connectedData.adv_data.scan_rsp_data.len)};
+					cs_data_t(connectedData.adv_data.scan_rsp_data.p_data, connectedData.adv_data.scan_rsp_data.len),
+			.address = {}};
+	memcpy(eventData.address.address, connectedData.peer_addr.addr, sizeof(eventData.address.address));
+	eventData.address.addressType = connectedData.peer_addr.addr_type;
 
 	event_t event(CS_TYPE::EVT_BLE_CONNECT, &eventData, sizeof(eventData));
 	event.dispatch();

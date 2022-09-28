@@ -161,7 +161,7 @@ void MicroappInterruptHandler::onDeviceScanned(scanned_device_t& dev) {
 	ble->type                        = CS_MICROAPP_SDK_BLE_SCAN;
 	ble->scan.type                   = CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN;
 	ble->scan.eventScan.address.type = dev.addressType;
-	std::reverse_copy(dev.address, dev.address + MAC_ADDRESS_LENGTH, ble->scan.eventScan.address.address);
+	memcpy(ble->scan.eventScan.address.address, dev.address, MAC_ADDRESS_LENGTH);
 	ble->scan.eventScan.rssi = dev.rssi;
 	ble->scan.eventScan.size = dev.dataSize;
 	memcpy(ble->scan.eventScan.data, dev.data, dev.dataSize);
@@ -356,9 +356,8 @@ void MicroappInterruptHandler::onBlePeripheralConnect(ble_connected_t& event) {
 	ble->peripheral.type                      = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT;
 	ble->peripheral.connectionHandle          = event.connectionHandle;
 
-	// TODO: get mac address
-	ble->peripheral.eventConnect.address.type = MICROAPP_SDK_BLE_ADDRESS_PUBLIC;
-	memset(ble->peripheral.eventConnect.address.address, 0, sizeof(ble->peripheral.eventConnect.address));
+	ble->peripheral.eventConnect.address.type = event.address.addressType;
+	memcpy(ble->peripheral.eventConnect.address.address, event.address.address, sizeof(ble->peripheral.eventConnect.address.address));
 
 	MicroappController::getInstance().generateSoftInterrupt();
 }

@@ -507,11 +507,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 		case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT: {
 			LOGi("BLE central connect");
 			TYPIFY(CMD_BLE_CENTRAL_CONNECT) bleConnectCommand;
-			// TODO: don't reverse
-			std::reverse_copy(
-					ble->central.requestConnect.address.address,
-					ble->central.requestConnect.address.address + MAC_ADDRESS_LENGTH,
-					bleConnectCommand.address.address);
+			memcpy(bleConnectCommand.address.address, ble->central.requestConnect.address.address, MAC_ADDRESS_LENGTH);
+			bleConnectCommand.address.addressType = ble->central.requestConnect.address.type;
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_CONNECT, &bleConnectCommand, sizeof(bleConnectCommand));
 			event.dispatch();
 

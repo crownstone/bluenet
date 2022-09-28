@@ -216,6 +216,8 @@ struct ble_connected_t {
 	uint8_t advertisementHandle;    // Advertisement handle that stopped advertising.
 	cs_data_t advertisementBuffer;  // Buffer that's no longer in use.
 	cs_data_t scanResponseBuffer;   // Buffer that's no longer in use.
+	//! Address of the connected device.
+	device_address_t address;
 };
 
 /**
