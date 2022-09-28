@@ -42,6 +42,7 @@ jobs:
         run: |
           echo "🍏 This job's status is ${{ job.status }}."
   Test:
+    if: ${{ github.repository_owner == 'crownstone' }}
     runs-on: [self-hosted, Linux, X64]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
