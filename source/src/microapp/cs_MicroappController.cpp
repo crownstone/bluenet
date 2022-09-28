@@ -376,9 +376,10 @@ bool MicroappController::handleAck() {
 bool MicroappController::handleRequest() {
 	uint8_t* inputBuffer                  = getInputMicroappBuffer();
 	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
-	LogMicroappControllerDebug("Retrieve and handle request [type %u]", incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
+	LogMicroappControllerDebug("  ack=%u", incomingHeader->ack);
+
 	// TODO: put result in ack, instead of letting the handler(s) set the ack.
 	if (result != ERR_SUCCESS) {
 		LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);

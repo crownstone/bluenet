@@ -331,7 +331,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestSwitch(microapp_sdk_switch_t* packet) {
-	LogMicroappRequestHandlerDebug("handleMicroappSwitchRequest: type=%u", type);
+	LogMicroappRequestHandlerDebug("handleMicroappSwitchRequest: type=%u", packet->type);
 	switch (packet->type) {
 		case CS_MICROAPP_SDK_SWITCH_REQUEST_SET: {
 			MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)packet->set;
@@ -465,14 +465,6 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 	MicroappSdkBleType type = (MicroappSdkBleType)ble->type;
 	LogMicroappRequestHandlerDebug("handleMicroappBleRequest: [type %i]", type);
 
-#if BUILD_MESHING == 0
-	if (type == CS_MICROAPP_SDK_BLE_SCAN) {
-		LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
-		ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
-		return ERR_NOT_AVAILABLE;
-	}
-#endif
-
 	switch (type) {
 		case CS_MICROAPP_SDK_BLE_UUID_REGISTER: {
 			LOGi("BLE UUID register");
@@ -515,6 +507,14 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBle(microapp_sdk_ble_t* ble) 
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestBleScan(microapp_sdk_ble_t* ble) {
+	LogMicroappRequestHandlerDebug("handleRequestBleScan: type=%u", ble->scan.type);
+
+#if BUILD_MESHING == 0
+	LOGw("Scanning is done within the mesh code. No scans will be received because mesh is disabled");
+	ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_DISABLED;
+	return ERR_NOT_AVAILABLE;
+#endif
+
 	switch (ble->scan.type) {
 		case CS_MICROAPP_SDK_BLE_SCAN_REQUEST_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
@@ -544,6 +544,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleScan(microapp_sdk_ble_t* b
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t* ble) {
+	LogMicroappRequestHandlerDebug("handleRequestBleCentral: type=%u", ble->central.type);
 	switch (ble->central.type) {
 		case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
@@ -583,6 +584,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_ble_t* ble) {
+	LogMicroappRequestHandlerDebug("handleRequestBlePeripheral: type=%u", ble->peripheral.type);
 	switch (ble->peripheral.type) {
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();

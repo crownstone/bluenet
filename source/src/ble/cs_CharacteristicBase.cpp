@@ -96,7 +96,7 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 	if (_name == nullptr) {
 		_name = "";
 	}
-	LOGCharacteristicDebug("Init [%s]", _name);
+	LOGd("Init [%s] uuid=%u", _name, _uuid);
 	if (_initialized) {
 		LOGd("Already initialized");
 		return ERR_SUCCESS;
