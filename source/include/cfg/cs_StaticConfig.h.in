@@ -38,6 +38,9 @@ const uintptr_t g_RAM_BLUENET_IPC_LENGTH = ${RAM_BLUENET_IPC_LENGTH};
 //! Number of microapps supported.
 const uint8_t g_MICROAPP_COUNT           = ${MICROAPP_COUNT};
 
+//! Number of flash pages that can be used per microapp.
+const uint16_t g_FLASH_MICROAPP_PAGES    = ${FLASH_MICROAPP_PAGES};
+
 #ifdef __cplusplus
 }
 #endif
