@@ -161,7 +161,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestLog(microapp_sdk_log_header_t
 				// Truncate, but don't send an error
 				log->size = MICROAPP_SDK_MAX_ARRAY_SIZE;
 			}
-			_logArray(LOCAL_MICROAPP_LOG_LEVEL, newLine, reinterpret_cast<int8_t*>(&logArray->arr[0]), log->size);
+			_logArray(LOCAL_MICROAPP_LOG_LEVEL, newLine, reinterpret_cast<uint8_t*>(&logArray->arr[0]), log->size);
 			break;
 		}
 		default: {
@@ -330,16 +330,65 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MicroappRequestHandler::handleRequestSwitch(microapp_sdk_switch_t* switchRequest) {
-	MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)switchRequest->value;
-	LogMicroappRequestHandlerDebug("handleMicroappSwitchRequest: [value %i]", value);
-	TYPIFY(CMD_SWITCH) switchCommand;
-	switchCommand.switchCmd = value;
-	cmd_source_with_counter_t source(CS_CMD_SOURCE_MICROAPP);
-	event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand), source);
-	event.dispatch();
-	switchRequest->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
-	return ERR_SUCCESS;
+cs_ret_code_t MicroappRequestHandler::handleRequestSwitch(microapp_sdk_switch_t* packet) {
+	LogMicroappRequestHandlerDebug("handleMicroappSwitchRequest: type=%u", type);
+	switch (packet->type) {
+		case CS_MICROAPP_SDK_SWITCH_REQUEST_SET: {
+			MicroappSdkSwitchValue value = (MicroappSdkSwitchValue)packet->set;
+			TYPIFY(CMD_SWITCH) switchCommand;
+			switch (value) {
+				case CS_MICROAPP_SDK_SWITCH_OFF: {
+					switchCommand.switchCmd = CS_SWITCH_CMD_VAL_OFF;
+					break;
+				}
+				case CS_MICROAPP_SDK_SWITCH_ON: {
+					switchCommand.switchCmd = CS_SWITCH_CMD_VAL_FULLY_ON;
+					break;
+				}
+				case CS_MICROAPP_SDK_SWITCH_TOGGLE: {
+					switchCommand.switchCmd = CS_SWITCH_CMD_VAL_TOGGLE;
+					break;
+				}
+				case CS_MICROAPP_SDK_SWITCH_SMART_ON: {
+					switchCommand.switchCmd = CS_SWITCH_CMD_VAL_SMART_ON;
+					break;
+				}
+				case CS_MICROAPP_SDK_SWITCH_BEHAVIOUR: {
+					switchCommand.switchCmd = CS_SWITCH_CMD_VAL_BEHAVIOUR;
+					break;
+				}
+				default: {
+					if (CS_SWITCH_CMD_VAL_OFF < value && value < CS_SWITCH_CMD_VAL_FULLY_ON) {
+						switchCommand.switchCmd = value;
+					}
+					else {
+						packet->header.ack = CS_MICROAPP_SDK_ACK_ERR_OUT_OF_RANGE;
+						return ERR_WRONG_PARAMETER;
+					}
+					break;
+				}
+			}
+
+			cmd_source_with_counter_t source(CS_CMD_SOURCE_MICROAPP);
+			event_t event(CS_TYPE::CMD_SWITCH, &switchCommand, sizeof(switchCommand), source);
+			event.dispatch();
+			packet->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			return ERR_SUCCESS;
+		}
+		case CS_MICROAPP_SDK_SWITCH_REQUEST_GET: {
+			TYPIFY(STATE_SWITCH_STATE) switchState;
+			State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+			packet->get.relay = (switchState.state.relay != 0);
+			packet->get.dimmer = switchState.state.dimmer;
+			packet->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			return ERR_SUCCESS;
+		}
+		default: {
+			LOGw("Unknown switch type: %u", packet->type);
+			packet->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
+			return ERR_UNKNOWN_TYPE;
+		}
+	}
 }
 
 cs_ret_code_t MicroappRequestHandler::handleRequestServiceData(microapp_sdk_service_data_t* serviceData) {

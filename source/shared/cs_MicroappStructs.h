@@ -262,6 +262,11 @@ enum MicroappSdkPinValue {
 	CS_MICROAPP_SDK_PIN_ON  = 0x01,
 };
 
+enum MicroappSdkSwitchType {
+	CS_MICROAPP_SDK_SWITCH_REQUEST_SET = 1,
+	CS_MICROAPP_SDK_SWITCH_REQUEST_GET = 2,
+};
+
 /**
  * Switch value according to same protocol as switch command value over BLE and UART
  * Values between 0 and 100 can be used for dimming
@@ -509,14 +514,27 @@ struct __attribute__((packed)) microapp_sdk_pin_t {
 
 static_assert(sizeof(microapp_sdk_pin_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
+struct __attribute__((packed)) microapp_sdk_switch_state_t {
+	uint8_t dimmer : 7;
+	bool relay : 1;
+};
+
 /**
  * Struct for switching and dimming the crownstone. Conforms to the general control command protocol
  */
 struct __attribute__((packed)) microapp_sdk_switch_t {
 	microapp_sdk_header_t header;
 
-	//!  Specifies what action to take. See MicroappSdkSwitchValue.
-	uint8_t value;
+	//! The type of switch command, see MicroappSdkSwitchType.
+	uint8_t type;
+
+	union {
+		//! See MicroappSdkSwitchValue.
+		uint8_t set;
+
+		//! Switch state set by bluenet.
+		microapp_sdk_switch_state_t get;
+	};
 };
 
 static_assert(sizeof(microapp_sdk_switch_t) <= MICROAPP_SDK_MAX_PAYLOAD);
