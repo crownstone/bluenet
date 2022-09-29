@@ -600,7 +600,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 			// Later we should check the connection handle.
 
 			TYPIFY(CMD_BLE_CENTRAL_WRITE) writeCommand;
-			writeCommand.handle = ble->central.requestWrite.valueHandle;
+			writeCommand.handle = ble->central.requestWrite.handle;
 			writeCommand.data.len = ble->central.requestWrite.size;
 			writeCommand.data.data = ble->central.requestWrite.buffer;
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_WRITE, &writeCommand, sizeof(writeCommand));

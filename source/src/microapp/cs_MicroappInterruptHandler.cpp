@@ -295,7 +295,7 @@ void MicroappInterruptHandler::onBleCentralWriteResult(ble_central_write_result_
 	ble->type                           = CS_MICROAPP_SDK_BLE_CENTRAL;
 	ble->central.type                   = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE;
 	ble->central.connectionHandle       = Stack::getInstance().getConnectionHandle();  // TODO: get handle from event.
-	ble->central.eventWrite.valueHandle = event.handle;
+	ble->central.eventWrite.handle      = event.handle;
 	ble->central.eventWrite.result      = MicroappSdkUtil::bluenetResultToMicroapp(event.retCode);
 
 	MicroappController::getInstance().generateSoftInterrupt();
