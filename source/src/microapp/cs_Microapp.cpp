@@ -201,8 +201,7 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
-	MicroappController& protocol = MicroappController::getInstance();
-	protocol.callApp(index);
+	MicroappController::getInstance().callApp(index);
 	return ERR_SUCCESS;
 }
 
@@ -351,12 +350,18 @@ cs_ret_code_t Microapp::handleValidate(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
-	LOGMicroappInfo("handleRemove %u", packet->index);
+	LOGMicroappInfo("handleRemove index=%u", packet->index);
 	cs_ret_code_t retCode = checkHeader(packet);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 	uint8_t index            = packet->index;
+
+	// First, stop running the microapp.
+	_states[index].enabled = false;
+
+	// Clean up the microapp.
+	MicroappController::getInstance().clear(index);
 
 	MicroappStorage& storage = MicroappStorage::getInstance();
 	retCode                  = storage.erase(index);

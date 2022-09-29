@@ -224,7 +224,7 @@ uint16_t MicroappController::initMemory(uint8_t appIndex) {
  * boundaries. Then we call it from a coroutine context and expect it to yield.
  */
 void MicroappController::callApp(uint8_t appIndex) {
-	LOGi("Call microapp #%i", appIndex);
+	LOGi("Call microapp index=%u", appIndex);
 
 	initMemory(appIndex);
 
@@ -237,20 +237,20 @@ void MicroappController::callApp(uint8_t appIndex) {
 	}
 
 	// The entry function is this immediate address (no correction for thumb mode)
-	sharedState.entry = address;
+	_sharedState.entry = address;
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
 	LOGi("Setup coroutine and configure it");
-	startCoroutine(&_coroutine, goIntoMicroapp, &sharedState);
+	startCoroutine(&_coroutine, goIntoMicroapp, &_sharedState);
 }
 
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffers->microapp2bluenet.payload;
+	uint8_t* payload = _sharedState.io_buffers->microapp2bluenet.payload;
 	return payload;
 }
 
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffers->bluenet2microapp.payload;
+	uint8_t* payload = _sharedState.io_buffers->bluenet2microapp.payload;
 	return payload;
 }
 
@@ -335,8 +335,8 @@ void MicroappController::callMicroapp() {
 	// just do it from current coroutine context
 	if (!start) {
 		start = true;
-		LOGi("Call address: %p", sharedState->entry);
-		jumpToAddress(sharedState->entry);
+		LOGi("Call address: %p", _sharedState->entry);
+		jumpToAddress(_sharedState->entry);
 		LOGi("Microapp might have run, but this statement is never reached (no coroutine used).");
 	}
 	return;
@@ -581,4 +581,14 @@ void MicroappController::incrementEmptySoftInterruptSlots() {
 		return;
 	}
 	_emptySoftInterruptSlots++;
+}
+
+void MicroappController::clear(uint8_t appIndex) {
+	LOGi("Clear appIndex=%u", appIndex);
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		_softInterruptRegistrations[i] = {};
+	}
+	_emptySoftInterruptSlots = 1;
+
+
 }

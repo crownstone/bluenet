@@ -112,7 +112,7 @@ private:
 	 * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can
 	 * later be used to get information back and forth between microapp and bluenet.
 	 */
-	coroutine_args_t sharedState;
+	coroutine_args_t _sharedState;
 
 	/**
 	 * To throttle the ticks themselves
@@ -261,6 +261,12 @@ public:
 	 * @param[in] appIndex   Currently, only appIndex 0 is supported.
 	 */
 	MicroappOperatingState getOperatingState(uint8_t appIndex);
+
+	/**
+	 * Clear a microapp state:
+	 * - Remove all registered interrupts.
+	 */
+	void clear(uint8_t appIndex);
 
 	/**
 	 * Some runtime data we have to store for a microapp.

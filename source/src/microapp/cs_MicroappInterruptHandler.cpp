@@ -421,6 +421,7 @@ void MicroappInterruptHandler::onBlePeripheralSubscription(
 }
 
 void MicroappInterruptHandler::onBlePeripheralNotififyDone(uint16_t connectionHandle, uint16_t characteristicHandle) {
+	// Right now, this doesn't filter out events for the crownstone service.
 	LogMicroappInterrupDebug("onBlePeripheralNotififyDone");
 	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 	if (outputBuffer == nullptr) {
