@@ -725,13 +725,15 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_done_t {
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_request_write_t {
-	uint16_t valueHandle;
+	//! Value or CCCD handle.
+	uint16_t handle;
 	uint16_t size;
 	uint8_t* buffer;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_write_t {
-	uint16_t valueHandle;
+	//! Value or CCCD handle.
+	uint16_t handle;
 	uint8_t result;
 };
 
@@ -773,12 +775,6 @@ enum MicroappSdkBleCentralType {
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE                = 10,
 	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ               = 11,
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ                 = 12,
-
-	//! Subscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE          = 13,
-
-	//! Unsubscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE        = 14,
 
 	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION         = 15,
 };
