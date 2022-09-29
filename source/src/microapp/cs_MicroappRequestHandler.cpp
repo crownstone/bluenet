@@ -575,6 +575,52 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
 			return event.result.returnCode;
 		}
+		case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCOVER: {
+			LOGi("BLE central discover");
+			// Later we should check the connection handle.
+
+			uint8_t count = ble->central.requestDiscover.uuidCount;
+
+			UUID uuids[sizeof(ble->central.requestDiscover.uuids) / sizeof(ble->central.requestDiscover.uuids[0])];
+			for (uint8_t i = 0; i < count; ++i) {
+				uuids[i] = UUID(ble_uuid_t({.uuid = ble->central.requestDiscover.uuids[i].uuid, .type = ble->central.requestDiscover.uuids[i].type}));
+			}
+
+			TYPIFY(CMD_BLE_CENTRAL_DISCOVER) discoverCommand;
+			discoverCommand.uuids = uuids;
+			discoverCommand.uuidCount = count;
+			event_t event(CS_TYPE::CMD_BLE_CENTRAL_DISCOVER, &discoverCommand, sizeof(discoverCommand));
+			event.dispatch();
+
+			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+			return event.result.returnCode;
+		}
+		case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_WRITE: {
+			LOGi("BLE central write");
+			// Later we should check the connection handle.
+
+			TYPIFY(CMD_BLE_CENTRAL_WRITE) writeCommand;
+			writeCommand.handle = ble->central.requestWrite.valueHandle;
+			writeCommand.data.len = ble->central.requestWrite.size;
+			writeCommand.data.data = ble->central.requestWrite.buffer;
+			event_t event(CS_TYPE::CMD_BLE_CENTRAL_WRITE, &writeCommand, sizeof(writeCommand));
+			event.dispatch();
+
+			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+			return event.result.returnCode;
+		}
+		case CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ: {
+			LOGi("BLE central read");
+			// Later we should check the connection handle.
+
+			TYPIFY(CMD_BLE_CENTRAL_READ) readCommand;
+			readCommand.handle = ble->central.requestRead.valueHandle;
+			event_t event(CS_TYPE::CMD_BLE_CENTRAL_READ, &readCommand, sizeof(readCommand));
+			event.dispatch();
+
+			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(event.result.returnCode);
+			return event.result.returnCode;
+		}
 		default: {
 			LOGi("Unknown BLE central type: %u", ble->central.type);
 			ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_UNDEFINED;
