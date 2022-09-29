@@ -68,6 +68,7 @@ protected:
 
 	app_timer_t _connectionKeepAliveTimerData;
 	app_timer_id_t _connectionKeepAliveTimerId = NULL;
+	bool _connectionKeepAliveTimerRunning = false;
 
 	uint8_t _scanBuffer[31];  // Same size as buffer in cs_stack_scan_t.
 	ble_data_t _scanBufferStruct = {_scanBuffer, sizeof(_scanBuffer)};
@@ -106,6 +107,12 @@ public:
 	bool isConnected();
 
 	bool isConnectedPeripheral();
+
+	/**
+	 * Bluenet will automatically disconnect after nothing has been written for some time.
+	 * This function will reset that timeout.
+	 */
+	void resetConnectionAliveTimer();
 
 	uint16_t getConnectionHandle() { return _connectionHandle; }
 
@@ -208,7 +215,6 @@ protected:
 
 	void startConnectionAliveTimer();
 	void stopConnectionAliveTimer();
-	void resetConnectionAliveTimer();
 
 private:
 	/** Constructor of the BLE stack on the NRF5 series.

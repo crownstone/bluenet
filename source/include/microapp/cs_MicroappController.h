@@ -13,8 +13,6 @@ extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
 }
 
-#define LogMicroappControllerDebug LOGvv
-
 static_assert(sizeof(bluenet2microapp_ipcdata_t) <= BLUENET_IPC_RAM_DATA_ITEM_SIZE);
 
 // Do some asserts on the redefinitions in the shared header files

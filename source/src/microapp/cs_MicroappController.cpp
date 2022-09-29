@@ -18,7 +18,7 @@
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 
-#define LogMicroappDebug LOGvv
+#define LogMicroappControllerDebug LOGvv
 
 /**
  * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
@@ -255,7 +255,7 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
 }
 
 void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingState state) {
-	LogMicroappDebug("setOperatingState appIndex=%u state=%u", appIndex, state);
+	LogMicroappControllerDebug("setOperatingState appIndex=%u state=%u", appIndex, state);
 	if (appIndex > 0) {
 		LOGi("Multiple apps not supported yet");
 		return;

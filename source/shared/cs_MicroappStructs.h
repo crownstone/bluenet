@@ -32,6 +32,7 @@ const uint8_t MAC_ADDRESS_LENGTH                            = 6;
 // Defined by the BLE SIG
 const uint8_t MAX_BLE_ADV_DATA_LENGTH                       = 31;
 // Defined by the mesh protocol
+// TODO: single target mesh messages may be longer.
 const uint8_t MAX_MICROAPP_MESH_PAYLOAD_SIZE                = 7;
 // Defined by the service data packet service_data_encrypted_microapp_t
 const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = 8;
@@ -42,6 +43,8 @@ const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = 8;
 // Maximum total payload (somewhat arbitrary, should be able to contain most-used data structures e.g. BLE
 // advertisements)
 const uint8_t MICROAPP_SDK_MAX_PAYLOAD                      = 48;
+
+// TODO: use sizeof() and offsetof() instead. See MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE
 // messageType [1] + ack [1]
 const uint8_t MICROAPP_SDK_HEADER_SIZE                      = 2;
 // header + type [1] + flags [1] + size [1]
@@ -869,6 +872,14 @@ enum MicroappSdkBlePeripheralType {
 
 	//! Notify data. Payload is notify.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY             = 12,
+
+	/**
+	 * Keep the connection open for some more time.
+	 * By default, bluenet may disconnect after some time being connected.
+	 * See CONNECTION_ALIVE_TIMEOUT.
+	 * Send this request regularly to keep the connection alive.
+	 */
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_CONNECTION_ALIVE   = 13,
 
 	//! Client connected.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT              = 20,

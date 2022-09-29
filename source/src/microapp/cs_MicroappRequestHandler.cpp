@@ -262,7 +262,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestPin(microapp_sdk_pin_t* pin) 
 			MicroappSdkPinActionType action = (MicroappSdkPinActionType)pin->action;
 			switch (action) {
 				case CS_MICROAPP_SDK_PIN_READ: {
-					LogMicroappControllerDebug("CS_MICROAPP_SDK_PIN_READ pin=%u", pin->pin);
+					LogMicroappRequestHandlerDebug("CS_MICROAPP_SDK_PIN_READ pin=%u", pin->pin);
 
 					TYPIFY(EVT_GPIO_READ) gpio;
 
@@ -718,6 +718,11 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 					characteristic->notify(ble->peripheral.requestNotify.offset, ble->peripheral.requestNotify.size);
 			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(result);
 			return result;
+		}
+		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_CONNECTION_ALIVE: {
+			Stack::getInstance().resetConnectionAliveTimer();
+			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
+			return ERR_SUCCESS;
 		}
 		default: {
 			LOGi("Unknown BLE peripheral type: %u", ble->peripheral.type);

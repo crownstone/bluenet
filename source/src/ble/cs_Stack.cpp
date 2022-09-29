@@ -606,14 +606,18 @@ static void connection_keep_alive_timeout([[maybe_unused]] void* p_context) {
 void Stack::startConnectionAliveTimer() {
 	Timer::getInstance().createSingleShot(_connectionKeepAliveTimerId, connection_keep_alive_timeout);
 	Timer::getInstance().start(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
+	_connectionKeepAliveTimerRunning = true;
 }
 
 void Stack::stopConnectionAliveTimer() {
 	Timer::getInstance().stop(_connectionKeepAliveTimerId);
+	_connectionKeepAliveTimerRunning = false;
 }
 
 void Stack::resetConnectionAliveTimer() {
-	Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
+	if (_connectionKeepAliveTimerRunning) {
+		Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
+	}
 }
 
 void Stack::onMemoryRequest(uint16_t connectionHandle) {
