@@ -249,7 +249,7 @@ void CrownstoneCentral::setStep(uint8_t step) {
 
 bool CrownstoneCentral::finalizeStep(ConnectSteps step, cs_ret_code_t retCode) {
 	if (_currentOperation != Operation::CONNECT) {
-		LOGCsCentralInfo("Wrong operation: _currentOperation=%u", _currentOperation);
+		LOGCsCentralDebug("Wrong operation: _currentOperation=%u", _currentOperation);
 		finalizeOperation(Operation::CONNECT, ERR_WRONG_OPERATION);
 		return false;
 	}
@@ -587,7 +587,7 @@ void CrownstoneCentral::onWrite(ble_central_write_result_t& result) {
 
 void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
 	if (result.handle != _resultHandle) {
-		LOGw("Unexpected handle=%u", result.handle);
+		LOGCsCentralDebug("Unexpected handle=%u", result.handle);
 		return;
 	}
 
