@@ -381,8 +381,19 @@ bool MicroappController::handleRequest() {
 	LogMicroappControllerDebug("  ack=%u", incomingHeader->ack);
 
 	// TODO: put result in ack, instead of letting the handler(s) set the ack.
-	if (result != ERR_SUCCESS) {
-		LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+	switch (result) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE: {
+			break;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			LOGi("Handling request of type %u is in progress", incomingHeader->messageType);
+			break;
+		}
+		default: {
+			LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+			break;
+		}
 	}
 	bool callAgain = !stopAfterMicroappRequest(incomingHeader);
 	if (!callAgain) {
