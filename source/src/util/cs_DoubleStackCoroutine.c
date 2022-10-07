@@ -1,9 +1,9 @@
-#include <cfg/cs_StaticConfig.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <util/cs_DoubleStackCoroutine.h>
+#include <logging/cs_CLogger.h>
 
-enum { WORKING = 1, YIELDING_MICROAPP0 = 2, DONE };
+enum { WORKING = 1, YIELDING_COROUTINE = 2, DONE };
 
 // Get stack pointer
 #define getStackPointer(p) asm volatile("mov %0, sp" : "=r"(p) : :)
@@ -11,34 +11,30 @@ enum { WORKING = 1, YIELDING_MICROAPP0 = 2, DONE };
 // Set stack pointer
 #define setStackPointer(p) asm volatile("mov sp, %0" : : "r"(p))
 
-// We hardcode the stack at the end of the RAM dedicated to the microapp
-stack_params_t* const stackParams = (stack_params_t*)(uintptr_t)(g_RAM_MICROAPP_END);
-
-stack_params_t* getStackParams() {
-	return stackParams;
-}
+stack_params_t _stackParams;
 
 /*
  * Starts a new coroutine. We store the parameters that we need when we switch back again to the current stack.
  */
-void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg) {
-	// Save parameters before the coroutine stack (in hardcoded area, see above).
-	stackParams->coroutine         = coroutine;
-	stackParams->coroutineFunction = coroutineFunction;
-	stackParams->arg               = arg;
+void startCoroutine(coroutine_function_t coroutineFunction, void* argument, const uintptr_t ramEnd) {
+	_stackParams.coroutineFunction  = coroutineFunction;
+	_stackParams.coroutineArguments = argument;
+
 	// Store current stack pointer in oldStackPointer.
-	getStackPointer(stackParams->oldStackPointer);
+	getStackPointer(_stackParams.oldStackPointer);
 
 	// Set the stack pointer for the microapp to where we want it.
-	size_t move_down = sizeof(stack_params_t);
-	setStackPointer(stackParams - move_down);
+	setStackPointer(ramEnd);
+	CLOGi("setStackPointer %p", ramEnd);
+
 
 	// Save current context (registers) for the microapp.
-	int ret = setjmp(stackParams->coroutine->microapp0Context);
+	int ret = setjmp(_stackParams.coroutine.coroutineContext);
 	if (ret == 0) {
 		// We have saved the context for the microapp, but set stack pointer back.
 		// We first continue with bluenet as usual.
-		setStackPointer(stackParams->oldStackPointer);
+		setStackPointer(_stackParams.oldStackPointer);
+		CLOGi("setStackPointer %p", _stackParams.oldStackPointer);
 		return;
 	}
 
@@ -46,10 +42,10 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
 	// The stack pointer is now again at stackParams - move_down.
 
 	// Call the very first function in the microapp. This will in the end yield.
-	(*stackParams->coroutineFunction)(stackParams->arg);
+	(*_stackParams.coroutineFunction)(_stackParams.coroutineArguments);
 
 	// We should not end up here. This means that the microapp function actually returns while it should always yield.
-	longjmp(stackParams->coroutine->bluenetContext, DONE);
+	longjmp(_stackParams.coroutine.bluenetContext, DONE);
 }
 
 /*
@@ -60,30 +56,32 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
  */
 int nextCoroutine() {
 	// Save current context (registers) for bluenet.
-	coroutine_t* coroutine = stackParams->coroutine;
-	int ret                = setjmp(coroutine->bluenetContext);
+	int ret = setjmp(_stackParams.coroutine.bluenetContext);
 	if (ret == 0) {
 		// The bluenet registers are saved, fine now to jump to the microapp.
-		longjmp(coroutine->microapp0Context, WORKING);
+		longjmp(_stackParams.coroutine.coroutineContext, WORKING);
 	}
 	else {
-		// We come back from a longjmp from the microapp.
-		// For now, there's only one yieldCoroutine which will return:
-		//   ret = YIELDING_MICROAPP0
+		// We come back from a longjmp from the coroutine.
+		// For now, ret should be YIELDING_COROUTINE.
 		return ret;
 	}
+	return 0;
 }
 
 /*
  * This function is always preceded by nextCoroutine. That's where it will be yielding to.
  */
 void yieldCoroutine() {
-	// Save current context (registers) for microapp 0.
-	coroutine_t* coroutine = stackParams->coroutine;
-	int ret                = setjmp(coroutine->microapp0Context);
+	// Save current context (registers) for the coroutine.
+	int ret                = setjmp(_stackParams.coroutine.coroutineContext);
 	if (ret == 0) {
 		// Context (registers) have been saved. Jump to bluenet.
-		longjmp(coroutine->bluenetContext, YIELDING_MICROAPP0);
+		longjmp(_stackParams.coroutine.bluenetContext, YIELDING_COROUTINE);
 	}
 	// continue with microapp code
+}
+
+void* getCoroutineArguments() {
+	return _stackParams.coroutineArguments;
 }

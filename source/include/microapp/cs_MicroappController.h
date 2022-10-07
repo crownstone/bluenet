@@ -32,9 +32,9 @@ static_assert(CS_MICROAPP_SDK_SWITCH_SMART_ON == CS_SWITCH_CMD_VAL_SMART_ON);
  * coroutine context it is convenient if we can immediately yield towards the other context. For this we reserve a bit
  * of space on the stack (apart from stack pointer etc.).
  */
-struct coroutine_args_t {
+struct microapp_coroutine_args_t {
 	uintptr_t entry;
-	bluenet_io_buffers_t* io_buffers;
+	bluenet_io_buffers_t* ioBuffers;
 };
 
 /**
@@ -103,16 +103,11 @@ private:
 	 */
 	microapp_soft_interrupt_registration_t _softInterruptRegistrations[MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS];
 
-	/**
-	 * Coroutine for microapp.
-	 */
-	coroutine_t _coroutine;
-
 	/*
 	 * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can
 	 * later be used to get information back and forth between microapp and bluenet.
 	 */
-	coroutine_args_t _sharedState;
+	microapp_coroutine_args_t _sharedState;
 
 	/**
 	 * To throttle the ticks themselves
@@ -207,7 +202,7 @@ public:
 	 *
 	 * @param[in] appIndex (currently ignored)
 	 */
-	void callApp(uint8_t appIndex);
+	void startMicroapp(uint8_t appIndex);
 
 	/**
 	 * Tick microapp

@@ -201,7 +201,7 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
-	MicroappController::getInstance().callApp(index);
+	MicroappController::getInstance().startMicroapp(index);
 	return ERR_SUCCESS;
 }
 
