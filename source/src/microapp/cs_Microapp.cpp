@@ -217,6 +217,7 @@ void Microapp::resetTestState(uint8_t index) {
 	_states[index].tryingFunction  = MICROAPP_FUNCTION_NONE;
 	_states[index].failedFunction  = MICROAPP_FUNCTION_NONE;
 	_states[index].passedFunctions = 0;
+	_states[index].didReboot       = false;
 }
 
 cs_ret_code_t Microapp::storeState(uint8_t index) {
@@ -418,7 +419,7 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
-	LOGMicroappInfo("checkHeader %u", packet->index);
+	LOGMicroappDebug("checkHeader %u", packet->index);
 	if (packet->protocol != MICROAPP_CONTROL_COMMAND_PROTOCOL) {
 		LOGw("Unsupported protocol: %u", packet->protocol);
 		return ERR_PROTOCOL_UNSUPPORTED;

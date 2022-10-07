@@ -142,15 +142,28 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 		}
 	}
 
+	// Always deinit the gpiote for this pin.
+	if (nrfx_gpiote_is_init()) {
+		if (_pins[pinIndex].direction == GpioDirection::SENSE) {
+			LOGd("  unregister event handler for pin=%u", pin);
+			nrfx_gpiote_in_uninit(pin);
+		}
+	}
+
+	_pins[pinIndex].direction = 0;
+	_pins[pinIndex].event = false;
+
 	switch (direction) {
 		case GpioDirection::INPUT: {
 			LOGd("  direction: input");
 			nrf_gpio_cfg_input(pin, nrfPull);
+			_pins[pinIndex].direction = direction;
 			break;
 		}
 		case GpioDirection::OUTPUT: {
 			LOGd("  direction: output");
 			nrf_gpio_cfg_output(pin);
+			_pins[pinIndex].direction = direction;
 			break;
 		}
 		case GpioDirection::SENSE: {
@@ -195,7 +208,7 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 			gpioteConfig.is_watcher      = false;
 			gpioteConfig.skip_gpio_setup = false;
 
-			LOGd("  register event handler", pin, polarity);
+			LOGd("  register event handler");
 
 			nrfCode = nrfx_gpiote_in_init(pin, &gpioteConfig, gpioEventHandler);
 			if (nrfCode != NRF_SUCCESS) {
@@ -203,7 +216,7 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 				return ERR_UNSPECIFIED;
 			}
 			nrfx_gpiote_in_event_enable(pin, true);
-
+			_pins[pinIndex].direction = direction;
 			break;
 		}
 		default: {

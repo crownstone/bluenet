@@ -601,5 +601,6 @@ void MicroappController::clear(uint8_t appIndex) {
 	}
 	_emptySoftInterruptSlots = 1;
 
+	microappData.isScanning = false;
 
 }

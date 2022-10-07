@@ -642,6 +642,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_ADD_SERVICE: {
 			if (MicroappController::getInstance().microappData.service != nullptr) {
+				LOGw("Service already exists, removing a service can only be done with a reboot");
 				ble->header.ack = CS_MICROAPP_SDK_ACK_ERR_NO_SPACE;
 				return ERR_NO_SPACE;
 			}
@@ -681,6 +682,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			if (characteristic == nullptr) {
 				return ERR_NO_SPACE;
 			}
+			LOGd("Allocated characteristic=%p", characteristic);
 
 			characteristic_config_t config = {
 					.read  = ble->peripheral.requestAddCharacteristic.options.read,
