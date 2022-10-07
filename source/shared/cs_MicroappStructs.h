@@ -656,26 +656,26 @@ struct __attribute__((packed)) microapp_sdk_ble_uuid_t {
 
 struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
 	//! Whether the characteristic is readable.
-	bool read : 1;
+	bool read;
 
 	//! Whether the characteristic can be written to without response.
-	bool writeNoResponse : 1;
+	bool writeNoResponse;
 
 	//! Whether the characteristic can be written to with response.
-	bool write : 1;
+	bool write;
 
 	//! Whether the characteristic supports notifications.
-	bool notify : 1;
+	bool notify;
 
 	//! Whether the characteristic supports indications.
-	bool indicate : 1;
+	bool indicate;
 
 	/**
 	 * Whether the characteristic should automatically notify the value when you updated the value.
 	 * This currently only sends the first 20 bytes of the value.
 	 * Peripheral only option.
 	 */
-	bool autoNotify : 1;
+	bool autoNotify;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_request_uuid_register_t {
