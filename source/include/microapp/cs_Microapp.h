@@ -130,12 +130,12 @@ private:
 	cs_ret_code_t checkHeader(microapp_ctrl_header_t* packet);
 
 	/**
-	 * Removes all microapps and sends an event when done.
+	 * Removes all microapps and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.
 	 */
 	cs_ret_code_t factoryReset();
 
 	/**
-	 * Remove next microapp and sends an event when done.
+	 * Remove next microapp and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.
 	 */
 	cs_ret_code_t resumeFactoryReset();
 
