@@ -467,7 +467,7 @@ cs_ret_code_t Microapp::resumeFactoryReset() {
 			break;
 		}
 		default: {
-			// Now what? Just assume success for now.
+			// Now what? Just assume success for now, because we don't want to get stuck.
 			LOGe("Erase failed, but assuming success retCode=%u", retCode);
 			_currentMicroappIndex++;
 			return resumeFactoryReset();

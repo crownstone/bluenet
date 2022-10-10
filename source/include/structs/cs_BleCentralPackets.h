@@ -36,7 +36,7 @@ struct ble_central_write_t {
 // Events:
 
 /**
- * A service or characteristic has been discovered.
+ * Describes a service or characteristic that has been discovered.
  */
 struct ble_central_discovery_t {
 	//! The service UUID.
