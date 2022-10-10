@@ -9,6 +9,7 @@
 
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_StaticConfig.h>
+#include <cs_MemoryLayout.h>
 
 #include <cstdint>
 
@@ -34,9 +35,6 @@ constexpr uint8_t MICROAPP_SDK_MAJOR                = 1;
  * SDK minor version of the data going back and forth between microapp and bluenet within the mutually shared buffers.
  */
 constexpr uint8_t MICROAPP_SDK_MINOR                = 0;
-
-//! Size of 1 flash page.
-constexpr uint16_t CS_FLASH_PAGE_SIZE               = 0x1000;
 
 //! Max flash size of a microapp, must be a multiple of flash page size.
 constexpr uint16_t MICROAPP_MAX_SIZE = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
