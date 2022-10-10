@@ -31,6 +31,10 @@ typedef void (*coroutine_function_t)(void*);
  * Struct with all the state we need for a coroutine.
  */
 typedef struct {
+	/**
+	 * When implementing memory protection, the coroutine context data should not be in bluenet memory,
+	 * as it is read out while in coroutine context.
+	 */
 	coroutine_t coroutine;
 	coroutine_function_t coroutineFunction;
 	void* coroutineArguments;
