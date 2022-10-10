@@ -433,6 +433,8 @@ cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
 
 cs_ret_code_t Microapp::factoryReset() {
 	if (!_factoryResetMode) {
+		// Should not happen.
+		// Maybe send event done with this as result code instead.
 		return ERR_WRONG_MODE;
 	}
 	_currentMicroappIndex = 0;

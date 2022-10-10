@@ -42,7 +42,7 @@ public:
 	bool factoryReset(uint32_t resetCode);
 
 	/* Function to actually wipe the memory */
-	bool finishFactoryReset(uint8_t deviceType);
+	void finishFactoryReset(uint8_t deviceType);
 
 	/* Enable/disable ability to recover */
 	void enableRecovery(bool enable);

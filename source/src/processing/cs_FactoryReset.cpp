@@ -165,14 +165,17 @@ void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
 }
 
 /**
- * The reset itself. This clears out the code and will again reboot the device so default configuration is applied
- * again.
+ * Simply send out the factory reset command event and wait for the result event(s).
+ *
+ * Suggestion:
+ * - Check result codes of the result events.
+ * - Add a timeout.
+ * - Make all the result events the same type, and add the bitmask, or bitpos as value.
  */
-bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
+void FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	_successfullyFactoryResetBitmask = 0;
 	event_t factoryReset(CS_TYPE::CMD_FACTORY_RESET);
 	EventDispatcher::getInstance().dispatch(factoryReset);
-	return true;
 }
 
 void FactoryReset::handleEvent(event_t& event) {
