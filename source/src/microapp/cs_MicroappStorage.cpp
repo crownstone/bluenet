@@ -59,7 +59,7 @@ static void fs_evt_handler(nrf_fstorage_evt_t* event) {
 }
 
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-NRF_FSTORAGE_DEF(nrf_fstorage_t nrf_microapp_storage) = {
+NRF_FSTORAGE_DEF(nrf_fstorage_t fStorage) = {
 		.evt_handler = fs_evt_handler,
 		.start_addr  = microappFlashSection._start,
 		.end_addr    = microappFlashSection._end,
@@ -70,15 +70,15 @@ MicroappStorage::MicroappStorage() {}
 
 cs_ret_code_t MicroappStorage::init() {
 	uint32_t nrfCode;
-	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, nullptr);
-	LOGMicroappInfo("init addr=0x%08X", nrf_microapp_storage.start_addr);
+	nrfCode = nrf_fstorage_init(&fStorage, &nrf_fstorage_sd, nullptr);
+	LOGMicroappInfo("init addr=0x%08X", fStorage.start_addr);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			// * @retval  NRF_SUCCESS         If initialization was successful.
 			LOGMicroappInfo(
 					"Successfully initialized from 0x%08X to 0x%08X",
-					nrf_microapp_storage.start_addr,
-					nrf_microapp_storage.end_addr);
+					fStorage.start_addr,
+					fStorage.end_addr);
 			break;
 		case NRF_ERROR_NULL:
 			// * @retval  NRF_ERROR_NULL      If @p p_fs or @p p_api field in @p p_fs is NULL.
@@ -92,7 +92,7 @@ cs_ret_code_t MicroappStorage::init() {
 }
 
 cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
-	if (_writing) {
+	if (nrf_fstorage_is_busy(&fStorage)) {
 		return ERR_BUSY;
 	}
 
@@ -100,10 +100,9 @@ cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
 		return ERR_SUCCESS;
 	}
 
-	uint32_t flashAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	uint32_t flashAddress = fStorage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	LOGMicroappInfo("erase addr=0x%08X size=%u", flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE);
-	uint32_t nrfCode =
-			nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE, nullptr);
+	uint32_t nrfCode = nrf_fstorage_erase(&fStorage, flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE, nullptr);
 	switch (nrfCode) {
 		case NRF_SUCCESS: {
 			break;
@@ -116,12 +115,11 @@ cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
 			return ERR_UNSPECIFIED;
 		}
 	}
-	_writing = true;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
 cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, const uint8_t* data, uint16_t size) {
-	uint32_t flashAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE + offset;
+	uint32_t flashAddress = fStorage.start_addr + appIndex * MICROAPP_MAX_SIZE + offset;
 	LOGMicroappInfo("Write chunk at 0x%08X of size %u", flashAddress, size);
 
 	if (offset + size > MICROAPP_MAX_SIZE) {
@@ -177,16 +175,15 @@ cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data,
 	LOGMicroappDebug("write %u bytes from 0x%X to 0x%08X", size, data, flashAddress);
 	_logArray(LOGMicroappVerboseLevel, true, data, size);
 	// Only allow 1 write to flash at a time.
-	if (_writing) {
+	if (nrf_fstorage_is_busy(&fStorage)) {
 		LOGw("Busy writing");
 		return ERR_BUSY;
 	}
 
 	// Write will only work if the flashAddress, and data pointer are word aligned, and when size is word sized.
-	uint32_t nrfCode = nrf_fstorage_write(&nrf_microapp_storage, flashAddress, data, size, nullptr);
+	uint32_t nrfCode = nrf_fstorage_write(&fStorage, flashAddress, data, size, nullptr);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
-			_writing = true;
 			LOGMicroappDebug("Success");
 			return ERR_SUCCESS;
 		case NRF_ERROR_NO_MEM: LOGw("Write queue is full"); return ERR_BUSY;
@@ -198,7 +195,6 @@ cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data,
 
 void MicroappStorage::onFlashWritten(cs_ret_code_t retCode) {
 	LOGMicroappDebug("onFlashWritten retCode=%u", retCode);
-	_writing = false;
 	if (retCode != ERR_SUCCESS) {
 		resetChunkVars();
 		LOGw("Failed to complete write to flash, dispatch event with result %u", retCode);
@@ -231,11 +227,11 @@ void MicroappStorage::resetChunkVars() {
 
 void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t& header) {
 	LOGMicroappDebug("Get app header");
-	const uint32_t addr = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	const uint32_t addr = fStorage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	const uint8_t size  = sizeof(header);
 
 	LOGMicroappDebug("read %u bytes from 0x%08X to 0x%X", size, addr, header);
-	uint32_t nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, &header, size);
+	uint32_t nrfCode = nrf_fstorage_read(&fStorage, addr, &header, size);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGw("Failed to read app header");
 	}
@@ -243,7 +239,7 @@ void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t& h
 }
 
 uint32_t MicroappStorage::getStartInstructionAddress(uint8_t appIndex) {
-	uint32_t startAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	uint32_t startAddress = fStorage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	microapp_binary_header_t header;
 	getAppHeader(appIndex, header);
 
@@ -252,7 +248,7 @@ uint32_t MicroappStorage::getStartInstructionAddress(uint8_t appIndex) {
 }
 
 bool MicroappStorage::isErased(uint8_t appIndex) {
-	const uint32_t addr = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	const uint32_t addr = fStorage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	return isErased(addr, MICROAPP_MAX_SIZE);
 }
 
@@ -267,7 +263,7 @@ bool MicroappStorage::isErased(uint32_t flashAddress, uint16_t size) {
 	for (uint32_t addr = flashAddress; addr < endAddress; addr += bufSize) {
 		uint16_t readSize = std::min(bufSize, endAddress - addr);
 		_log(LOGMicroappVerboseLevel, true, "read %u bytes from 0x%08X to 0x%X", readSize, addr, readBuf);
-		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, readBuf, readSize);
+		nrfCode = nrf_fstorage_read(&fStorage, addr, readBuf, readSize);
 		_logArray(LOGMicroappVerboseLevel, true, readBuf, readSize);
 		if (nrfCode != NRF_SUCCESS) {
 			LOGw("Error reading fstorage: nrfCode=%u flashAddress=0x%08X buf=0x%X readSize=%u",
@@ -295,7 +291,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	uint32_t startAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	uint32_t startAddress = fStorage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	uint32_t endAddress   = startAddress + header.size;
 	LOGMicroappDebug("startAddress=0x%08X endAddress=0x%08X", startAddress, endAddress);
 
@@ -331,7 +327,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	for (uint32_t flashAddress = binStartAddress; flashAddress < endAddress; flashAddress += bufSize) {
 		uint16_t readSize = std::min(bufSize, endAddress - flashAddress);
 		_log(LOGMicroappVerboseLevel, true, "read %u bytes from 0x%08X to 0x%X", readSize, flashAddress, buf);
-		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, readSize);
+		nrfCode = nrf_fstorage_read(&fStorage, flashAddress, buf, readSize);
 		if (nrfCode != NRF_SUCCESS) {
 			LOGw("Error reading fstorage: %u. flashAddress=0x%08X buf=0x%X readSize=%u",
 				 nrfCode,
@@ -390,7 +386,6 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t* evt) {
 		}
 		case NRF_FSTORAGE_EVT_ERASE_RESULT: {
 			LOGMicroappInfo("Flash erase result=%u addr=0x%08X len=%u", evt->result, evt->addr, evt->len);
-			_writing = false;
 			TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_MICROAPP_REMOVE, retCode);
 			event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
 			eventResult.dispatch();
