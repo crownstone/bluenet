@@ -100,11 +100,6 @@ private:
 	void operator=(MicroappStorage const&)  = delete;
 
 	/**
-	 * Keep up whether or not we are currently writing to (or erasing) flash.
-	 */
-	bool _writing                           = false;
-
-	/**
 	 * The buffer is required to perform writes to flash, as the data has to
 	 * be aligned, and stay in memory until the write is done.
 	 */

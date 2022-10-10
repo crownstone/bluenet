@@ -516,7 +516,7 @@ AUTO_ENABLE_MICROAPP_ON_BOOT=0
 FLASH_MICROAPP_BASE=0x69000
 
 # The number of pages for a single microapp (each page is 0x1000 / 4096 bytes)
-FLASH_MICROAPP_PAGES=3
+FLASH_MICROAPP_PAGES=4
 
 # The number of microapps supported
 MICROAPP_COUNT=1

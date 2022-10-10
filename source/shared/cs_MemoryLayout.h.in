@@ -30,6 +30,9 @@ struct MemorySection {
 	enum MemoryType _type;
 };
 
+//! Size of 1 flash page.
+const uint16_t CS_FLASH_PAGE_SIZE = 0x1000;
+
 _Static_assert(
 		BOOTLOADER_SETTINGS_ADDRESS == ${CS_BOOTLOADER_SETTINGS_ADDRESS}, "Bootloader settings address mismatch");
 
