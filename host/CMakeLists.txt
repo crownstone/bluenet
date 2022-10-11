@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(bluenet-host)
 
-#set(VERBOSITY 4)
+set(VERBOSITY 4)
 
 if(NOT VERBOSITY)
 	set(VERBOSITY 0)

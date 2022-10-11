@@ -12,7 +12,7 @@
 #include <storage/cs_StateData.h>
 #include <util/cs_Utils.h>
 
-#include <string>
+
 #include <vector>
 
 enum cs_storage_operation_t {
@@ -288,9 +288,9 @@ public:
 	void handleFlashOperationError();
 
 private:
-	Storage();
-	Storage(Storage const&);
-	void operator=(Storage const&);
+	Storage() = default;
+	Storage(Storage const&) = delete;
+	void operator=(Storage const&) = delete;
 
 	bool _initialized                          = false;
 	bool _registeredFds                        = false;
@@ -408,6 +408,4 @@ private:
 	void handleRemoveRecordEvent(fds_evt_t const* p_fds_evt);
 	void handleRemoveFileEvent(fds_evt_t const* p_fds_evt);
 	void handleGarbageCollectionEvent(fds_evt_t const* p_fds_evt);
-
-	//	inline void print(const std::string & prefix, CS_TYPE type);
 };
