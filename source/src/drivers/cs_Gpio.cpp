@@ -229,11 +229,7 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 	return ERR_SUCCESS;
 }
 
-/*
- * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
- */
 cs_ret_code_t Gpio::write(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
-
 	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
 		LogGpioInfo("Can't write pin with pin index %u", pinIndex);
