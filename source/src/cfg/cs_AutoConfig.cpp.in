@@ -33,7 +33,7 @@ uint16_t g_SCAN_BREAK_DURATION                                    = ${SCAN_BREAK
 
 const int8_t g_TX_POWER                                           = ${TX_POWER};
 
-const uint32_t g_CONNECTION_ALIVE_TIMEOUT                         = ${CONNECTION_ALIVE_TIMEOUT};
+const uint32_t g_CONNECTION_WATCHDOG_TIMEOUT                      = ${CONNECTION_WATCHDOG_TIMEOUT};
 
 const uint16_t g_MASTER_BUFFER_SIZE                               = ${MASTER_BUFFER_SIZE};
 

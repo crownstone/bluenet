@@ -173,11 +173,11 @@ MAX_CHIP_TEMP=75
 # Time (ms) to wait with during booting
 BOOT_DELAY=400
 
-# Connection alive timeout.
+# Connection watchdog timeout.
 # If no valid control command is received within timeout,
 # the connection is closed by the device.
 # Set to 0 to disable the timeout.
-CONNECTION_ALIVE_TIMEOUT=20000
+CONNECTION_WATCHDOG_TIMEOUT=20000
 
 # Twi / i2c defaults (maps to GPIO 0 and 1 by default, see board configuration for which physical pins those are)
 TWI_SCL_INDEX=0

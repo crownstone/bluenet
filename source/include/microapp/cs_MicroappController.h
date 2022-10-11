@@ -125,7 +125,8 @@ private:
 	uint8_t _consecutiveMicroappCallCounter = 0;
 
 	/**
-	 * Keeps track of how many empty interrupt slots are available on the microapp side
+	 * Keeps track of how many empty interrupt slots are available on the microapp side.
+	 * Start with 1, but will be set to the correct value in the request handler.
 	 */
 	uint8_t _emptySoftInterruptSlots        = 1;
 

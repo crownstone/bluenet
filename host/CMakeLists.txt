@@ -76,6 +76,9 @@ configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "$
 LOGi("Configure cs_config.h file")
 configure_file("${CMAKE_BLUENET_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf/cs_config.h")
 
+LOGi("Configure cs_MemoryLayout.h file")
+configure_file("${CMAKE_BLUENET_SOURCE_DIR}/shared/cs_MemoryLayout.h.in" "${CMAKE_BLUENET_BINARY_DIR}/include/cs_MemoryLayout.h")
+
 LOGi("current bindir: ${CMAKE_BLUENET_BINARY_DIR}")
 include_directories(${CMAKE_BLUENET_BINARY_DIR}/include/third/nrf)
 #link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL})

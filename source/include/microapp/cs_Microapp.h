@@ -27,6 +27,7 @@ public:
 
 	/**
 	 * Initialize storage, and load microapps in normal mode.
+	 * Checks operation mode and only actually initializes for some modes.
 	 */
 	void init(OperationMode operationMode);
 

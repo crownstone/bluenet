@@ -39,7 +39,7 @@ extern uint16_t g_SCAN_BREAK_DURATION;
 
 extern const int8_t g_TX_POWER;
 
-extern const uint32_t g_CONNECTION_ALIVE_TIMEOUT;
+extern const uint32_t g_CONNECTION_WATCHDOG_TIMEOUT;
 
 extern const uint16_t g_MASTER_BUFFER_SIZE;
 

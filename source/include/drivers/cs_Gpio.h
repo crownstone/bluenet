@@ -75,6 +75,10 @@ private:
 	cs_ret_code_t configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity);
 
 	//! Write to pin
+	/**
+	 * Write to pin.
+	 * Assumes pin has been configured as output.
+	 */
 	cs_ret_code_t write(uint8_t pin_index, uint8_t* buf, uint8_t& length);
 
 	//! Read from pin
