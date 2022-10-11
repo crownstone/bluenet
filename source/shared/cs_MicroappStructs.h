@@ -872,7 +872,7 @@ enum MicroappSdkBlePeripheralType {
 	/**
 	 * Keep the connection open for some more time.
 	 * By default, bluenet may disconnect after some time being connected.
-	 * See CONNECTION_ALIVE_TIMEOUT.
+	 * See CONNECTION_WATCHDOG_TIMEOUT.
 	 * Send this request regularly to keep the connection alive.
 	 */
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_CONNECTION_ALIVE   = 13,

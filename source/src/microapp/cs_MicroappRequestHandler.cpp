@@ -768,7 +768,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBlePeripheral(microapp_sdk_bl
 			return result;
 		}
 		case CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_CONNECTION_ALIVE: {
-			Stack::getInstance().resetConnectionAliveTimer();
+			Stack::getInstance().resetConnectionWatchdog();
 			ble->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
 		}

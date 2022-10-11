@@ -255,7 +255,7 @@ void CommandHandler::_handleCommand(
 
 void CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	// A no operation command to keep the connection alive.
-	// No need to do anything here, the connection keep alive is handled in the stack.
+	// No need to do anything here, the connection watchdog is handled in the stack.
 	result.returnCode = ERR_SUCCESS;
 }
 
