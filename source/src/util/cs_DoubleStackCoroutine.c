@@ -12,7 +12,7 @@ enum { WORKING = 1, YIELDING_MICROAPP0 = 2, DONE };
 #define setStackPointer(p) asm volatile("mov sp, %0" : : "r"(p))
 
 // We hardcode the stack at the end of the RAM dedicated to the microapp
-stack_params_t* const stackParams = (stack_params_t*)(uintptr_t)(g_RAM_MICROAPP_END);
+stack_params_t* const stackParams = (stack_params_t*)(uintptr_t)(g_RAM_MICROAPP_END) - 1;
 
 stack_params_t* getStackParams() {
 	return stackParams;
@@ -20,6 +20,8 @@ stack_params_t* getStackParams() {
 
 /*
  * Starts a new coroutine. We store the parameters that we need when we switch back again to the current stack.
+ * As soon as setStackPointer is called, only fields through stackParams are valid. Between setStackPointer and
+ * setjmp local variables should not be used (for example for logging).
  */
 void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg) {
 	// Save parameters before the coroutine stack (in hardcoded area, see above).
@@ -29,23 +31,24 @@ void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, voi
 	// Store current stack pointer in oldStackPointer.
 	getStackPointer(stackParams->oldStackPointer);
 
-	// Set the stack pointer for the microapp to where we want it.
-	size_t move_down = sizeof(stack_params_t);
-	setStackPointer(stackParams - move_down);
+	// Set the stack pointer for the microapp to the end of the microapp RAM space just below the stackParams struct.
+	setStackPointer(stackParams);
 
 	// Save current context (registers) for the microapp.
 	int ret = setjmp(stackParams->coroutine->microapp0Context);
 	if (ret == 0) {
-		// We have saved the context for the microapp, but set stack pointer back.
+		// We have saved the context for the microapp, but set the stack pointer back.
 		// We first continue with bluenet as usual.
 		setStackPointer(stackParams->oldStackPointer);
 		return;
 	}
 
 	// We now come here from the first call to nextCoroutine.
-	// The stack pointer is now again at stackParams - move_down.
+	// The stack pointer is now again at stackParams (at the end of the stack)
 
-	// Call the very first function in the microapp. This will in the end yield.
+	// Call the very first instruction of this coroutine.
+	// This is the function `goIntoMicroapp()` and is given the address `coargs->entry` to jump to.
+	// This method will - in the end - yield, but it should never return. The microapp has an infinite loop.
 	(*stackParams->coroutineFunction)(stackParams->arg);
 
 	// We should not end up here. This means that the microapp function actually returns while it should always yield.
