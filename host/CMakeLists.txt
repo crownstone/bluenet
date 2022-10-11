@@ -212,12 +212,9 @@ endfunction()
 
 enable_testing()
 
-# actual test definitions
-add_crownstone_test(test_InterleavedBuffer.cpp)
-add_crownstone_test(test_HashFletcher32.cpp)
-add_crownstone_test(test_BitmaskVarSize.cpp)
-add_crownstone_test(test_SystemTimeSync.cpp)
-add_crownstone_test(test_EventDispatcher.cpp)
-add_crownstone_test(test_BoardMap.cpp)
-add_crownstone_test(scenarios/test_ReleaseOverrideOnBehaviourUpdate.cpp)
-add_crownstone_test(scenarios/test_BehaviourConflictWithPresence.cpp)
+include(crownstone-tests.src)
+
+foreach(TEST_FILE IN LISTS TEST_SOURCE_FILES)
+	LOGd("Adding testfile: " ${TEST_FILE})
+	add_crownstone_test(${TEST_FILE})
+endforeach()
