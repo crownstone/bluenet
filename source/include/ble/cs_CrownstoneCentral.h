@@ -237,7 +237,7 @@ private:
 	void onDiscoveryDone(cs_ret_code_t retCode);
 	void onRead(ble_central_read_result_t& result);
 	void onReadDuringConnect(ble_central_read_result_t& result);
-	void onWrite(cs_ret_code_t result);
+	void onWrite(ble_central_write_result_t& result);
 	void onNotification(ble_central_notification_t& result);
 
 public:

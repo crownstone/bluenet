@@ -16,6 +16,7 @@
 #pragma once
 
 #include <components/libraries/bootloader/dfu/nrf_dfu_types.h>
+#include <components/libraries/util/app_util.h>
 #include <stdint.h>
 
 enum MemoryType {
@@ -30,12 +31,15 @@ struct MemorySection {
 	enum MemoryType _type;
 };
 
-_Static_assert(
+//! Size of 1 flash page.
+const uint16_t CS_FLASH_PAGE_SIZE = 0x1000;
+
+STATIC_ASSERT(
 		BOOTLOADER_SETTINGS_ADDRESS == ${CS_BOOTLOADER_SETTINGS_ADDRESS}, "Bootloader settings address mismatch");
 
-_Static_assert(NRF_MBR_PARAMS_PAGE_ADDRESS == ${CS_MBR_PARAMS_PAGE_ADDRESS}, "MBR param page address mismatch");
+STATIC_ASSERT(NRF_MBR_PARAMS_PAGE_ADDRESS == ${CS_MBR_PARAMS_PAGE_ADDRESS}, "MBR param page address mismatch");
 
-_Static_assert(
+STATIC_ASSERT(
 		${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} == ${FLASH_MICROAPP_BASE},
 		"Incorrect application max length");
 

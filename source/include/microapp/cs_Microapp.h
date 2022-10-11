@@ -26,9 +26,10 @@ public:
 	}
 
 	/**
-	 * Initialize storage, and load microapps.
+	 * Initialize storage, and load microapps in normal mode.
+	 * Checks operation mode and only actually initializes for some modes.
 	 */
-	void init();
+	void init(OperationMode operationMode);
 
 private:
 	/**
@@ -41,12 +42,24 @@ private:
 	/**
 	 * The state of each microapp.
 	 */
-	microapp_state_t _states[MAX_MICROAPPS];
+	microapp_state_t _states[g_MICROAPP_COUNT];
 
 	/**
 	 * Local flag to indicate that ram section has been loaded.
 	 */
-	bool _loaded = false;
+	bool _loaded                  = false;
+
+	/**
+	 * Keep up which microapp is currently being operated on.
+	 * Used for factory reset.
+	 * Set to -1 when not operating on anything.
+	 */
+	int16_t _currentMicroappIndex = -1;
+
+	/**
+	 * Whether we are in factory reset mode.
+	 */
+	bool _factoryResetMode        = false;
 
 	void loadApps();
 
@@ -116,6 +129,24 @@ private:
 	 * Checks if control command header is ok.
 	 */
 	cs_ret_code_t checkHeader(microapp_ctrl_header_t* packet);
+
+	/**
+	 * Removes all microapps and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.
+	 */
+	cs_ret_code_t factoryReset();
+
+	/**
+	 * Remove next microapp and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.
+	 */
+	cs_ret_code_t resumeFactoryReset();
+
+	/**
+	 * Handle microapp storage event.
+	 *
+	 * For now, this just handles CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
+	 * We should register an event handler instead.
+	 */
+	void onStorageEvent(cs_async_result_t& event);
 
 	/**
 	 * Handle incoming events.

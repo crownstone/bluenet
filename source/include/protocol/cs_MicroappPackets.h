@@ -7,12 +7,11 @@
 
 #pragma once
 
-#include <cstdint>
+#include <cfg/cs_AutoConfig.h>
+#include <cfg/cs_StaticConfig.h>
+#include <cs_MemoryLayout.h>
 
-/**
- * Max number of microapps.
- */
-constexpr uint8_t MAX_MICROAPPS                     = 1;
+#include <cstdint>
 
 /**
  * Max allowed chunk size when uploading a microapp.
@@ -37,11 +36,8 @@ constexpr uint8_t MICROAPP_SDK_MAJOR                = 1;
  */
 constexpr uint8_t MICROAPP_SDK_MINOR                = 0;
 
-constexpr uint16_t CS_FLASH_PAGE_SIZE               = 0x1000;  // Size of 1 flash page.
-
-constexpr uint16_t MICROAPP_MAX_SIZE = (1 * CS_FLASH_PAGE_SIZE);  // Must be a multiple of flash page size.
-
-constexpr uint16_t MICROAPP_MAX_RAM  = 0x200;  // Something for now.
+//! Max flash size of a microapp, must be a multiple of flash page size.
+constexpr uint16_t MICROAPP_MAX_SIZE = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
 
 /**
  * Header of a microapp binary.
@@ -144,10 +140,10 @@ struct __attribute__((packed)) microapp_status_t {
 struct __attribute__((packed)) microapp_info_t {
 	// Protocol of this packet, and the microapp command packets.
 	uint8_t protocol      = MICROAPP_CONTROL_COMMAND_PROTOCOL;
-	uint8_t maxApps       = MAX_MICROAPPS;                   // Maximum number of microapps.
+	uint8_t maxApps       = g_MICROAPP_COUNT;                // Maximum number of microapps.
 	uint16_t maxAppSize   = MICROAPP_MAX_SIZE;               // Maximum binary size of a microapp.
 	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;  // Maximum chunk size for uploading a microapp.
-	uint16_t maxRamUsage  = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
+	uint16_t maxRamUsage  = g_RAM_MICROAPP_AMOUNT;           // Maximum RAM usage of a microapp.
 	microapp_sdk_version_t sdkVersion;                       // SDK version the firmware supports.
-	microapp_status_t appsStatus[MAX_MICROAPPS];             // Status of each microapp.
+	microapp_status_t appsStatus[g_MICROAPP_COUNT];          // Status of each microapp.
 };

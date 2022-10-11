@@ -2,6 +2,11 @@
 #include <cfg/cs_AutoConfig.h>
 #include <drivers/cs_Gpio.h>
 #include <events/cs_EventDispatcher.h>
+#include <logging/cs_Logger.h>
+
+#define LogGpioInfo LOGi
+#define LogGpioDebug LOGd
+#define LogGpioInterrupt LOGvv
 
 static void gpioEventHandler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t polarity) {
 	Gpio::getInstance().registerEvent(pin);
@@ -48,16 +53,16 @@ void Gpio::init(const boards_config_t& board) {
 
 	_initialized = true;
 	_boardConfig = &board;
-	LOGi("Configured %i GPIO pins", activePins);
+	LogGpioInfo("Configured %i GPIO pins", activePins);
 }
 
 bool Gpio::pinExists(uint8_t pinIndex) {
 	if (!_initialized) {
-		LOGi("GPIO driver not initialized");
+		LogGpioInfo("GPIO driver not initialized");
 		return false;
 	}
 	if (pinIndex >= TOTAL_PIN_COUNT) {
-		LOGi("Pin index %i out of max pin range (max %i)", pinIndex, TOTAL_PIN_COUNT);
+		LOGw("Pin index %u out of max pin range (max %i)", pinIndex, TOTAL_PIN_COUNT);
 		return false;
 	}
 	if (pinIndex < GPIO_INDEX_COUNT) {
@@ -75,7 +80,7 @@ bool Gpio::pinExists(uint8_t pinIndex) {
 			return true;
 		}
 	}
-	LOGi("Pin index %i not defined for this board", pinIndex);
+	LogGpioInfo("Pin index %u not defined for this board", pinIndex);
 	return false;
 }
 
@@ -104,89 +109,131 @@ bool Gpio::isLedPin(uint8_t pinIndex) {
 	}
 }
 
-void Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity) {
-
+cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity) {
 	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
-		LOGi("Can't configure pin with pin index %i", pinIndex);
-		return;
+		return ERR_NOT_FOUND;
+	}
+	LogGpioInfo("Configure pinIndex=%u pin=%u direction=%i pullResistor=%i polarity=%i",
+		 pinIndex,
+		 pin,
+		 direction,
+		 pull,
+		 polarity);
+
+	nrf_gpio_pin_pull_t nrfPull;
+	switch (pull) {
+		case GpioPullResistor::NONE: {
+			nrfPull = NRF_GPIO_PIN_NOPULL;
+			LogGpioDebug("  resistor: none");
+			break;
+		}
+		case GpioPullResistor::UP: {
+			nrfPull = NRF_GPIO_PIN_PULLUP;
+			LogGpioDebug("  resistor: pull-up");
+			break;
+		}
+		case GpioPullResistor::DOWN: {
+			nrfPull = NRF_GPIO_PIN_PULLDOWN;
+			LogGpioDebug("  resistor: pull-down");
+			break;
+		}
+		default: {
+			LOGw("Invalid pull resistor config: %i", pull);
+			return ERR_WRONG_PARAMETER;
+		}
 	}
 
-	nrf_gpio_pin_pull_t nrf_pull;
-	switch (pull) {
-		case GpioPullResistor::NONE:
-			nrf_pull = NRF_GPIO_PIN_NOPULL;
-			LOGi("Set pin %i with index %i to use no pull-up", pin, pinIndex);
-			break;
-		case GpioPullResistor::UP:
-			nrf_pull = NRF_GPIO_PIN_PULLUP;
-			LOGi("Set pin %i with index %i to use pull-up", pin, pinIndex);
-			break;
-		case GpioPullResistor::DOWN:
-			nrf_pull = NRF_GPIO_PIN_PULLDOWN;
-			LOGi("Set pin %i with index %i to use pull-down", pin, pinIndex);
-			break;
-		default: LOGw("Huh? No such pull registor construction exists"); return;
+	// Always deinit the gpiote for this pin.
+	if (nrfx_gpiote_is_init()) {
+		if (_pins[pinIndex].direction == GpioDirection::SENSE) {
+			LogGpioDebug("  unregister event handler for pin=%u", pin);
+			nrfx_gpiote_in_uninit(pin);
+		}
 	}
+
+	_pins[pinIndex].direction = 0;
+	_pins[pinIndex].event = false;
 
 	switch (direction) {
-		case GpioDirection::INPUT:
-			LOGi("Configure pin %i as input", pin);
-			nrf_gpio_cfg_input(pin, nrf_pull);
+		case GpioDirection::INPUT: {
+			LogGpioDebug("  direction: input");
+			nrf_gpio_cfg_input(pin, nrfPull);
+			_pins[pinIndex].direction = direction;
 			break;
-		case GpioDirection::OUTPUT:
-			LOGi("Configure pin %i as output", pin);
+		}
+		case GpioDirection::OUTPUT: {
+			LogGpioDebug("  direction: output");
 			nrf_gpio_cfg_output(pin);
+			_pins[pinIndex].direction = direction;
 			break;
-		case GpioDirection::SENSE:
+		}
+		case GpioDirection::SENSE: {
+			LogGpioDebug("  direction: sense");
 			// enable GPIOTE in general
-			uint32_t err_code;
+			uint32_t nrfCode;
 			if (!nrfx_gpiote_is_init()) {
-				err_code = nrfx_gpiote_init();
-				if (err_code != NRF_SUCCESS) {
-					LOGw("Error initializing GPIOTE");
-					return;
+				nrfCode = nrfx_gpiote_init();
+				if (nrfCode != NRF_SUCCESS) {
+					LOGw("Error initializing GPIOTE: nrfCode=%u", nrfCode);
+					return ERR_UNSPECIFIED;
 				}
 			}
 
-			nrfx_gpiote_in_config_t config;
+			nrfx_gpiote_in_config_t gpioteConfig;
 			switch (polarity) {
-				case GpioPolarity::HITOLO: config.sense = NRF_GPIOTE_POLARITY_HITOLO; break;
-				case GpioPolarity::LOTOHI: config.sense = NRF_GPIOTE_POLARITY_LOTOHI; break;
-				case GpioPolarity::TOGGLE: config.sense = NRF_GPIOTE_POLARITY_TOGGLE; break;
-				default: LOGw("Huh? No such polarity exists"); return;
+				case GpioPolarity::HITOLO: {
+					LogGpioDebug("  polarity: high to low");
+					gpioteConfig.sense = NRF_GPIOTE_POLARITY_HITOLO;
+					break;
+				}
+				case GpioPolarity::LOTOHI: {
+					LogGpioDebug("  polarity: low to high");
+					gpioteConfig.sense = NRF_GPIOTE_POLARITY_LOTOHI;
+					break;
+				}
+				case GpioPolarity::TOGGLE: {
+					LogGpioDebug("  polarity: toggle");
+					gpioteConfig.sense = NRF_GPIOTE_POLARITY_TOGGLE;
+					break;
+				}
+				default: {
+					LOGw("Invalid polarity: %i", polarity);
+					return ERR_WRONG_PARAMETER;
+				}
 			}
-			config.pull            = nrf_pull;
+			gpioteConfig.pull            = nrfPull;
 
 			// With high accuracy, nrfx_gpiote will make use of GPIOTE channels.
 			// These channels might already be used by our own PWM class.
-			config.hi_accuracy     = false;
-			config.is_watcher      = false;
-			config.skip_gpio_setup = false;
+			gpioteConfig.hi_accuracy     = false;
+			gpioteConfig.is_watcher      = false;
+			gpioteConfig.skip_gpio_setup = false;
 
-			LOGi("Register pin %i using polarity %i with event handler", pin, polarity);
+			LogGpioDebug("  register event handler");
 
-			err_code = nrfx_gpiote_in_init(pin, &config, gpioEventHandler);
-			if (err_code != NRF_SUCCESS) {
-				LOGw("Cannot initialize GPIOTE on this pin");
-				return;
+			nrfCode = nrfx_gpiote_in_init(pin, &gpioteConfig, gpioEventHandler);
+			if (nrfCode != NRF_SUCCESS) {
+				LOGw("Cannot initialize GPIOTE for pin=%u nrfCode=%u", pin, nrfCode);
+				return ERR_UNSPECIFIED;
 			}
 			nrfx_gpiote_in_event_enable(pin, true);
-
+			_pins[pinIndex].direction = direction;
 			break;
-		default: LOGw("Unknown pin action"); break;
+		}
+		default: {
+			LOGw("Invalid direction: %i", direction);
+			return ERR_WRONG_PARAMETER;
+		}
 	}
+	return ERR_SUCCESS;
 }
 
-/*
- * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
- */
-void Gpio::write(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
-
+cs_ret_code_t Gpio::write(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
 	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
-		LOGi("Can't write pin with pin index %i", pinIndex);
-		return;
+		LogGpioInfo("Can't write pin with pin index %u", pinIndex);
+		return ERR_NOT_FOUND;
 	}
 
 	// TODO: limit length
@@ -195,32 +242,33 @@ void Gpio::write(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
 		if (isLedPin(pinIndex) && _boardConfig->flags.ledInverted) {
 			buf[i] = !buf[i];
 		}
-		LOGi("Write value %i to pin %i (pin index %i)", buf[i], pin, pinIndex);
+		LogGpioInfo("Write value %u to pin %u (pin index %u)", buf[i], pin, pinIndex);
 		nrf_gpio_pin_write(pin, buf[i]);
 	}
+	return ERR_SUCCESS;
 }
 
-void Gpio::read(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
+cs_ret_code_t Gpio::read(uint8_t pinIndex, uint8_t* buf, uint8_t& length) {
 
 	pin_t pin = getPin(pinIndex);
 	if (pin == PIN_NONE) {
-		LOGi("Can't read pin with pin index %i", pinIndex);
-		return;
+		LogGpioInfo("Can't read pin with pin index %u", pinIndex);
+		return ERR_NOT_FOUND;
 	}
 
 	// TODO: limit length
 	for (int i = 0; i < length; ++i) {
 		buf[i] = nrf_gpio_pin_read(pin);
-		LOGi("Read value %i from pin %i (pin index %i)", buf[i], pin, pinIndex);
+		LogGpioInfo("Read value %u from pin %u (pin index %u)", buf[i], pin, pinIndex);
 	}
+	return ERR_SUCCESS;
 }
 
 /*
  * Called from interrupt service routine, only write which pin is fired and return immediately.
  */
 void Gpio::registerEvent(pin_t pin) {
-
-	LOGd("GPIO event on pin %i", pin);
+	LogGpioInterrupt("GPIO event on pin %u", pin);
 	for (uint8_t i = 0; i < GPIO_INDEX_COUNT; ++i) {
 		if (_boardConfig->pinGpio[i] == pin) {
 			_pins[i].event = true;
@@ -249,7 +297,7 @@ void Gpio::tick() {
 			// we send back the pin index, not the pin number
 			gpio.pinIndex = i;
 			gpio.length   = 0;
-			LOGd("Send GPIO event at index %i", gpio.pinIndex);
+			LogGpioDebug("Send GPIO event at index %u", gpio.pinIndex);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);
 		}
@@ -259,12 +307,11 @@ void Gpio::tick() {
 void Gpio::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_GPIO_INIT: {
-			LOGi("Configure pin in GPIO module");
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
 			GpioPolarity polarity      = (GpioPolarity)gpio.polarity;
 			GpioDirection direction    = (GpioDirection)gpio.direction;
 			GpioPullResistor pull      = (GpioPullResistor)gpio.pull;
-			configure(gpio.pinIndex, direction, pull, polarity);
+			event.result.returnCode    = configure(gpio.pinIndex, direction, pull, polarity);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_WRITE: {
@@ -273,12 +320,12 @@ void Gpio::handleEvent(event_t& event) {
 				LOGw("Buffer is null");
 				return;
 			}
-			write(gpio.pinIndex, gpio.buf, gpio.length);
+			event.result.returnCode = write(gpio.pinIndex, gpio.buf, gpio.length);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_READ: {
 			TYPIFY(EVT_GPIO_READ) gpio = *(TYPIFY(EVT_GPIO_READ)*)event.data;
-			read(gpio.pinIndex, gpio.buf, gpio.length);
+			event.result.returnCode    = read(gpio.pinIndex, gpio.buf, gpio.length);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

@@ -149,7 +149,10 @@ bool FactoryReset::performFactoryReset() {
 
 void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
 	CsUtils::setBit(_successfullyFactoryResetBitmask, bit);
-	LOGi("onClassFactoryResetDone bit=%u bitmask=%u", bit, _successfullyFactoryResetBitmask);
+	LOGi("onClassFactoryResetDone bit=%u bitmask: done=%08b all=%08b",
+		 bit,
+		 _successfullyFactoryResetBitmask,
+		 FACTORY_RESET_MASK_ALL);
 
 	if ((_successfullyFactoryResetBitmask & FACTORY_RESET_MASK_ALL) == FACTORY_RESET_MASK_ALL) {
 		LOGi("All classes factory reset, rebooting device");
@@ -162,14 +165,17 @@ void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
 }
 
 /**
- * The reset itself. This clears out the code and will again reboot the device so default configuration is applied
- * again.
+ * Simply send out the factory reset command event and wait for the result event(s).
+ *
+ * Suggestion:
+ * - Check result codes of the result events.
+ * - Add a timeout.
+ * - Make all the result events the same type, and add the bitmask, or bitpos as value.
  */
-bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
+void FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	_successfullyFactoryResetBitmask = 0;
 	event_t factoryReset(CS_TYPE::CMD_FACTORY_RESET);
 	EventDispatcher::getInstance().dispatch(factoryReset);
-	return true;
 }
 
 void FactoryReset::handleEvent(event_t& event) {
@@ -181,6 +187,12 @@ void FactoryReset::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_MESH_FACTORY_RESET_DONE: {
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 			onClassFactoryResetDone(FACTORY_RESET_BIT_MESH);
+#endif
+			break;
+		}
+		case CS_TYPE::EVT_MICROAPP_FACTORY_RESET_DONE: {
+#if BUILD_MICROAPP_SUPPORT == 1
+			onClassFactoryResetDone(FACTORY_RESET_BIT_MICROAPP);
 #endif
 			break;
 		}

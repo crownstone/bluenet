@@ -159,6 +159,9 @@ private:
 
 	uint16_t _connectionHandle = BLE_CONN_HANDLE_INVALID;
 
+	//! Keep up the handle of the current write or read operation.
+	uint16_t _currentHandle    = BLE_GATT_HANDLE_INVALID;
+
 	ble_db_discovery_t _discoveryModule;
 
 #if NORDIC_SDK_VERSION > 15

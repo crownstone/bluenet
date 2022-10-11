@@ -13,8 +13,10 @@
 #include <logging/cs_Logger.h>
 #include <structs/buffer/cs_EncryptedBuffer.h>
 
-#define LOGCharacteristicDebug LOGvv
-#define LogLevelCharacteristicDebug SERIAL_VERY_VERBOSE
+#define LOGCharacteristicInfo LOGi
+#define LOGCharacteristicDebug LOGd
+#define LOGCharacteristicVerbose LOGvv
+#define LogLevelCharacteristicVerbose SERIAL_VERY_VERBOSE
 
 CharacteristicBase::CharacteristicBase() {}
 
@@ -58,14 +60,14 @@ cs_ret_code_t CharacteristicBase::setValueBuffer(buffer_ptr_t buffer, cs_buffer_
 	if (buffer == nullptr || size == 0) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
-	LOGCharacteristicDebug("setValueBuffer [%s] buf=%p size=%u", _name, buffer, size);
+	LOGCharacteristicVerbose("setValueBuffer [%s] buf=%p size=%u", _name, buffer, size);
 	_buffer.data = buffer;
 	_buffer.len  = size;
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CharacteristicBase::setInitialValueLength(cs_buffer_size_t size) {
-	LOGCharacteristicDebug("setInitialValueLength [%s] size=%u", _name, size);
+	LOGCharacteristicVerbose("setInitialValueLength [%s] size=%u", _name, size);
 	if (_initialized) {
 		LOGw("Already initialized");
 		return ERR_WRONG_STATE;
@@ -96,9 +98,9 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 	if (_name == nullptr) {
 		_name = "";
 	}
-	LOGCharacteristicDebug("Init [%s]", _name);
+	LOGCharacteristicDebug("Init [%s] uuid=%u", _name, _uuid);
 	if (_initialized) {
-		LOGd("Already initialized");
+		LOGCharacteristicDebug("Already initialized");
 		return ERR_SUCCESS;
 	}
 
@@ -160,7 +162,7 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 	characteristicValue.p_value   = getGattValue();
 	characteristicValue.p_attr_md = &attributeMetadata;
 
-	LOGCharacteristicDebug(
+	LOGCharacteristicVerbose(
 			"  add with gatt buffer=%p of size=%u and value length=%u",
 			getGattValue(),
 			getGattValueMaxLength(),
@@ -202,7 +204,7 @@ cs_ret_code_t CharacteristicBase::init(Service* service) {
 		return retCode;
 	}
 
-	LOGCharacteristicDebug(
+	LOGCharacteristicVerbose(
 			"  added successfully, handles: value=%u cccd=%u", _handles.value_handle, _handles.cccd_handle);
 
 	// Make sure the initial value is encrypted.
@@ -235,7 +237,7 @@ cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
 			_encryptedBuffer.len  = 0;
 			return ERR_BUFFER_TOO_SMALL;
 		}
-		LOGCharacteristicDebug(
+		LOGCharacteristicVerbose(
 				"Use shared encryption [%s] buffer=%p size=%u", _name, _encryptedBuffer.data, _encryptedBuffer.len);
 	}
 	else {
@@ -245,7 +247,7 @@ cs_ret_code_t CharacteristicBase::initEncryptedBuffer() {
 			return ERR_NO_SPACE;
 		}
 		_encryptedBuffer.len = requiredSize;
-		LOGCharacteristicDebug(
+		LOGCharacteristicVerbose(
 				"Allocated encrypted buffer [%s] buffer=%p size=%u",
 				_name,
 				_encryptedBuffer.data,
@@ -268,8 +270,8 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 	}
 	_valueLength = length;
 
-	_log(LogLevelCharacteristicDebug, false, "updateValue [%s] length=%u data=", _name, length);
-	_logArray(LogLevelCharacteristicDebug, true, _buffer.data, _valueLength);
+	_log(LogLevelCharacteristicVerbose, false, "updateValue [%s] length=%u data=", _name, length);
+	_logArray(LogLevelCharacteristicVerbose, true, _buffer.data, _valueLength);
 
 	if (isEncrypted()) {
 		// Special case: if value length is 0, we simply want the encrypted value to be 0 as well.
@@ -297,8 +299,8 @@ cs_ret_code_t CharacteristicBase::updateValue(uint16_t length) {
 			_encryptedValueLength = ConnectionEncryption::getEncryptedBufferSize(_valueLength, _config.encryptionType);
 		}
 
-		_log(LogLevelCharacteristicDebug, false, "  encrypted: length=%u data=", _encryptedValueLength);
-		_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
+		_log(LogLevelCharacteristicVerbose, false, "  encrypted: length=%u data=", _encryptedValueLength);
+		_logArray(LogLevelCharacteristicVerbose, true, getGattValue(), getGattValueLength());
 	}
 
 	cs_ret_code_t retCode = setGattValue();
@@ -376,8 +378,8 @@ cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
 	hvx_params.p_len  = &notificationLength;
 	hvx_params.p_data = nullptr;
 
-	_log(LogLevelCharacteristicDebug, false, "notify size=%u data=", *hvx_params.p_len);
-	_logArray(LogLevelCharacteristicDebug, true, hvx_params.p_data, *hvx_params.p_len);
+	_log(LogLevelCharacteristicVerbose, false, "notify size=%u data=", *hvx_params.p_len);
+	_logArray(LogLevelCharacteristicVerbose, true, hvx_params.p_data, *hvx_params.p_len);
 	uint32_t nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 	switch (nrfCode) {
 		case NRF_SUCCESS: {
@@ -400,7 +402,7 @@ cs_ret_code_t CharacteristicBase::notify(uint16_t length, uint16_t offset) {
 		}
 	}
 
-	LOGCharacteristicDebug("Actual number of bytes notified=%u", notificationLength);
+	LOGCharacteristicVerbose("Actual number of bytes notified=%u", notificationLength);
 
 	return ERR_SUCCESS;
 }
@@ -431,8 +433,8 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 	hvx_params.type   = _subscribedForNotifications ? BLE_GATT_HVX_NOTIFICATION : BLE_GATT_HVX_INDICATION;
 	hvx_params.offset = 0;
 
-	_log(LogLevelCharacteristicDebug, false, "GATT value before notify:");
-	_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
+	_log(LogLevelCharacteristicVerbose, false, "GATT value before notify:");
+	_logArray(LogLevelCharacteristicVerbose, true, getGattValue(), getGattValueLength());
 
 	chunked_notification_t notification;
 
@@ -462,8 +464,8 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 		hvx_params.p_data           = reinterpret_cast<uint8_t*>(&notification);
 
 		// This call will write the notification buffer to the gatt value buffer.
-		_log(LogLevelCharacteristicDebug, false, "notify size=%u data=", *hvx_params.p_len);
-		_logArray(LogLevelCharacteristicDebug, true, hvx_params.p_data, *hvx_params.p_len);
+		_log(LogLevelCharacteristicVerbose, false, "notify size=%u data=", *hvx_params.p_len);
+		_logArray(LogLevelCharacteristicVerbose, true, hvx_params.p_data, *hvx_params.p_len);
 		uint32_t nrfCode = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 
 		switch (nrfCode) {
@@ -490,17 +492,17 @@ cs_ret_code_t CharacteristicBase::notifyMultipart() {
 			}
 		}
 
-		_log(LogLevelCharacteristicDebug, false, "GATT value after notify: ");
-		_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
+		_log(LogLevelCharacteristicVerbose, false, "GATT value after notify: ");
+		_logArray(LogLevelCharacteristicVerbose, true, getGattValue(), getGattValueLength());
 
 		if (notification.partNr == 0) {
 			// Restore the value.
 			memcpy(getGattValue() + sizeof(notification.data), originalValue, sizeof(originalValue));
-			_log(LogLevelCharacteristicDebug, false, "GATT value after restore:");
-			_logArray(LogLevelCharacteristicDebug, true, getGattValue(), getGattValueLength());
+			_log(LogLevelCharacteristicVerbose, false, "GATT value after restore:");
+			_logArray(LogLevelCharacteristicVerbose, true, getGattValue(), getGattValueLength());
 		}
 
-		LOGCharacteristicDebug("Actual number of bytes notified=%u", notificationLength);
+		LOGCharacteristicVerbose("Actual number of bytes notified=%u", notificationLength);
 	}
 
 	_notificationOffset  = 0;
@@ -519,7 +521,7 @@ void CharacteristicBase::onNotificationDone() {
 }
 
 void CharacteristicBase::onCccdWrite(const uint8_t* data, uint16_t size) {
-	LOGCharacteristicDebug("onCccdWrite [%s] size=%u", _name, size);
+	LOGCharacteristicVerbose("onCccdWrite [%s] size=%u", _name, size);
 	if (size != 2) {
 		return;
 	}
@@ -540,7 +542,7 @@ void CharacteristicBase::onCccdWrite(const uint8_t* data, uint16_t size) {
 void CharacteristicBase::onConnect() {}
 
 void CharacteristicBase::onDisconnect() {
-	LOGCharacteristicDebug("onDisconnect [%s]", _name);
+	LOGCharacteristicVerbose("onDisconnect [%s]", _name);
 
 	// In principle, we can get the CCCD value with sd_ble_gatts_value_get().
 	// However, this value doesn't seem to be updated yet onCccdWrite, and I'm not sure if it gets updated
@@ -551,7 +553,7 @@ void CharacteristicBase::onDisconnect() {
 }
 
 void CharacteristicBase::onWrite(uint16_t length) {
-	LOGd("onWrite [%s] length=%u", _name, length);
+	LOGCharacteristicDebug("onWrite [%s] length=%u", _name, length);
 
 	EncryptionAccessLevel accessLevel = NOT_SET;
 
@@ -560,24 +562,24 @@ void CharacteristicBase::onWrite(uint16_t length) {
 		_encryptedValueLength  = length;
 		_valueLength           = plainTextSize;
 
-		_log(LogLevelCharacteristicDebug,
+		_log(LogLevelCharacteristicVerbose,
 			 false,
 			 "Encrypted valuePtr=%p valueLen=%u data=",
 			 _encryptedBuffer.data,
 			 _encryptedValueLength);
-		_logArray(LogLevelCharacteristicDebug, true, _encryptedBuffer.data, _encryptedValueLength);
+		_logArray(LogLevelCharacteristicVerbose, true, _encryptedBuffer.data, _encryptedValueLength);
 
 		cs_ret_code_t retCode = ConnectionEncryption::getInstance().decrypt(
 				cs_data_t(_encryptedBuffer.data, _encryptedValueLength), _buffer, accessLevel, _config.encryptionType);
 
 		if (retCode != ERR_SUCCESS) {
-			LOGi("Failed to decrypt retCode=%u", retCode);
+			LOGCharacteristicInfo("Failed to decrypt retCode=%u", retCode);
 			ConnectionEncryption::getInstance().disconnect();
 			return;
 		}
 
 		if (!KeysAndAccess::getInstance().allowAccess(_config.minAccessLevel, accessLevel)) {
-			LOGi("Insufficient access");
+			LOGCharacteristicInfo("Insufficient access");
 			ConnectionEncryption::getInstance().disconnect();
 			return;
 		}
@@ -587,8 +589,8 @@ void CharacteristicBase::onWrite(uint16_t length) {
 		accessLevel  = ENCRYPTION_DISABLED;
 	}
 
-	_log(LogLevelCharacteristicDebug, false, "valuePtr=%p valueLen=%u data=", _buffer.data, _valueLength);
-	_logArray(LogLevelCharacteristicDebug, true, _buffer.data, _valueLength);
+	_log(LogLevelCharacteristicVerbose, false, "valuePtr=%p valueLen=%u data=", _buffer.data, _valueLength);
+	_logArray(LogLevelCharacteristicVerbose, true, _buffer.data, _valueLength);
 
 	if (_callback) {
 		_callback(CHARACTERISTIC_EVENT_WRITE, this, accessLevel);

@@ -27,8 +27,8 @@
 #define LogLevelStackDebug SERIAL_VERY_VERBOSE
 
 Stack::Stack() {
-	_connectionKeepAliveTimerData       = {{0}};
-	_connectionKeepAliveTimerId         = &_connectionKeepAliveTimerData;
+	_connectionWatchdogTimerData       = {{0}};
+	_connectionWatchdogTimerId         = &_connectionWatchdogTimerData;
 
 	_connectionParams.min_conn_interval = MIN_CONNECTION_INTERVAL;
 	_connectionParams.max_conn_interval = MAX_CONNECTION_INTERVAL;
@@ -598,22 +598,26 @@ void Stack::onBleEventInterrupt(const ble_evt_t* p_ble_evt, bool isInterrupt) {
 	}
 }
 
-static void connection_keep_alive_timeout([[maybe_unused]] void* p_context) {
-	LOGi("connection keep alive timeout!");
+static void connection_watchdog_timeout([[maybe_unused]] void* p_context) {
+	LOGi("connection watchdog timeout!");
 	Stack::getInstance().disconnect();
 }
 
-void Stack::startConnectionAliveTimer() {
-	Timer::getInstance().createSingleShot(_connectionKeepAliveTimerId, connection_keep_alive_timeout);
-	Timer::getInstance().start(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
+void Stack::startConnectionWatchdog() {
+	Timer::getInstance().createSingleShot(_connectionWatchdogTimerId, connection_watchdog_timeout);
+	Timer::getInstance().start(_connectionWatchdogTimerId, MS_TO_TICKS(g_CONNECTION_WATCHDOG_TIMEOUT), NULL);
+	_connectionWatchdogRunning = true;
 }
 
-void Stack::stopConnectionAliveTimer() {
-	Timer::getInstance().stop(_connectionKeepAliveTimerId);
+void Stack::stopConnectionWatchdog() {
+	Timer::getInstance().stop(_connectionWatchdogTimerId);
+	_connectionWatchdogRunning = false;
 }
 
-void Stack::resetConnectionAliveTimer() {
-	Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
+void Stack::resetConnectionWatchdog() {
+	if (_connectionWatchdogRunning) {
+		Timer::getInstance().reset(_connectionWatchdogTimerId, MS_TO_TICKS(g_CONNECTION_WATCHDOG_TIMEOUT), NULL);
+	}
 }
 
 void Stack::onMemoryRequest(uint16_t connectionHandle) {
@@ -677,7 +681,7 @@ void Stack::onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writ
 		return;
 	}
 
-	resetConnectionAliveTimer();
+	resetConnectionWatchdog();
 
 	switch (writeEvt.op) {
 		case BLE_GATTS_OP_PREP_WRITE_REQ: {
@@ -819,7 +823,7 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 		service->onBleEvent(p_ble_evt);
 	}
 
-	startConnectionAliveTimer();
+	startConnectionWatchdog();
 
 	const ble_gap_evt_connected_t& connectedData = p_ble_evt->evt.gap_evt.params.connected;
 
@@ -830,7 +834,10 @@ void Stack::onIncomingConnected(const ble_evt_t* p_ble_evt) {
 			.advertisementBuffer =
 					cs_data_t(connectedData.adv_data.adv_data.p_data, connectedData.adv_data.adv_data.len),
 			.scanResponseBuffer =
-					cs_data_t(connectedData.adv_data.scan_rsp_data.p_data, connectedData.adv_data.scan_rsp_data.len)};
+					cs_data_t(connectedData.adv_data.scan_rsp_data.p_data, connectedData.adv_data.scan_rsp_data.len),
+			.address = {}};
+	memcpy(eventData.address.address, connectedData.peer_addr.addr, sizeof(eventData.address.address));
+	eventData.address.addressType = connectedData.peer_addr.addr_type;
 
 	event_t event(CS_TYPE::EVT_BLE_CONNECT, &eventData, sizeof(eventData));
 	event.dispatch();
@@ -843,7 +850,7 @@ void Stack::onIncomingDisconnected(const ble_evt_t* p_ble_evt) {
 		service->onBleEvent(p_ble_evt);
 	}
 
-	stopConnectionAliveTimer();
+	stopConnectionWatchdog();
 
 	TYPIFY(EVT_BLE_DISCONNECT) eventData = p_ble_evt->evt.gatts_evt.conn_handle;
 	event_t event(CS_TYPE::EVT_BLE_DISCONNECT, &eventData, sizeof(eventData));

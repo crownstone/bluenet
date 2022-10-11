@@ -372,6 +372,7 @@ enum class CS_TYPE : uint16_t {
 	CMD_MICROAPP_ENABLE,     // Microapp control command.
 	CMD_MICROAPP_DISABLE,    // Microapp control command.
 	CMD_MICROAPP_ADVERTISE,  // A microapp wants to advertise something.
+	EVT_MICROAPP_FACTORY_RESET_DONE,  // All microapps have been erased.
 
 	CMD_BLE_CENTRAL_CONNECT,     // Connect to a device.       See BleCentral::connect().
 	CMD_BLE_CENTRAL_DISCONNECT,  // Disconnect from device.    See BleCentral::disconnect().
@@ -562,7 +563,7 @@ typedef void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
 typedef ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
 typedef cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
 typedef ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
-typedef cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef ble_central_write_result_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
 typedef ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
 typedef cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
 typedef void TYPIFY(CMD_CS_CENTRAL_DISCONNECT);
@@ -695,6 +696,7 @@ typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
+typedef void TYPIFY(EVT_MICROAPP_FACTORY_RESET_DONE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);

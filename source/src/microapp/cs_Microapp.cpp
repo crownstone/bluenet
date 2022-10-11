@@ -17,6 +17,7 @@
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
+#include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
 #include <logging/cs_Logger.h>
@@ -40,18 +41,33 @@
 
 Microapp::Microapp() : EventListener() {}
 
-void Microapp::init() {
+void Microapp::init(OperationMode operationMode) {
+	switch (operationMode) {
+		case OperationMode::OPERATION_MODE_NORMAL: {
+			break;
+		}
+		case OperationMode::OPERATION_MODE_FACTORY_RESET: {
+			_factoryResetMode = true;
+			break;
+		}
+		default: {
+			return;
+		}
+	}
+
 	MicroappStorage& storage = MicroappStorage::getInstance();
 	storage.init();
 
-	// Set callback handler in IPC ram
-	MicroappController& controller = MicroappController::getInstance();
-	controller.setIpcRam();
+	if (!_factoryResetMode) {
+		// Set callback handler in IPC ram
+		MicroappController& controller = MicroappController::getInstance();
+		controller.setIpcRam();
 
-	// Create an instance of the interrupt handler.
-	MicroappInterruptHandler::getInstance();
+		// Create an instance of the interrupt handler.
+		MicroappInterruptHandler::getInstance();
 
-	loadApps();
+		loadApps();
+	}
 
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -66,7 +82,7 @@ void Microapp::loadApps() {
 		LOGMicroappInfo("Auto-enabling of apps on boot turned off");
 	}
 
-	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
+	for (uint8_t index = 0; index < g_MICROAPP_COUNT; ++index) {
 		loadState(index);
 		updateStateFromOperatingData(index);
 		retCode = validateApp(index);
@@ -185,8 +201,7 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
-	MicroappController& protocol = MicroappController::getInstance();
-	protocol.callApp(index);
+	MicroappController::getInstance().callApp(index);
 	return ERR_SUCCESS;
 }
 
@@ -202,6 +217,7 @@ void Microapp::resetTestState(uint8_t index) {
 	_states[index].tryingFunction  = MICROAPP_FUNCTION_NONE;
 	_states[index].failedFunction  = MICROAPP_FUNCTION_NONE;
 	_states[index].passedFunctions = 0;
+	_states[index].didReboot       = false;
 }
 
 cs_ret_code_t Microapp::storeState(uint8_t index) {
@@ -243,10 +259,14 @@ bool Microapp::canRunApp(uint8_t index) {
 
 void Microapp::tick() {
 	MicroappController& controller = MicroappController::getInstance();
-	for (uint8_t i = 0; i < MAX_MICROAPPS; ++i) {
+	for (uint8_t i = 0; i < g_MICROAPP_COUNT; ++i) {
 		if (canRunApp(i)) {
 			controller.tickMicroapp(i);
 		}
+	}
+	if (_factoryResetMode && _currentMicroappIndex >= 0) {
+		// We can just try to resume all the time, as it will just return BUSY otherwise.
+		resumeFactoryReset();
 	}
 }
 
@@ -259,16 +279,16 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 	}
 
 	info->protocol           = MICROAPP_CONTROL_COMMAND_PROTOCOL;
-	info->maxApps            = MAX_MICROAPPS;
+	info->maxApps            = g_MICROAPP_COUNT;
 	info->maxAppSize         = MICROAPP_MAX_SIZE;
 	info->maxChunkSize       = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;
-	info->maxRamUsage        = MICROAPP_MAX_RAM;
+	info->maxRamUsage        = g_RAM_MICROAPP_AMOUNT;
 	info->sdkVersion.major   = MICROAPP_SDK_MAJOR;
 	info->sdkVersion.minor   = MICROAPP_SDK_MINOR;
 
 	MicroappStorage& storage = MicroappStorage::getInstance();
 	microapp_binary_header_t appHeader;
-	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
+	for (uint8_t index = 0; index < g_MICROAPP_COUNT; ++index) {
 		storage.getAppHeader(index, appHeader);
 		info->appsStatus[index].buildVersion     = appHeader.appBuildVersion;
 		info->appsStatus[index].sdkVersion.major = appHeader.sdkVersionMajor;
@@ -331,12 +351,18 @@ cs_ret_code_t Microapp::handleValidate(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
-	LOGMicroappInfo("handleRemove %u", packet->index);
+	LOGMicroappInfo("handleRemove index=%u", packet->index);
 	cs_ret_code_t retCode = checkHeader(packet);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 	uint8_t index            = packet->index;
+
+	// First, stop running the microapp.
+	_states[index].enabled = false;
+
+	// Clean up the microapp.
+	MicroappController::getInstance().clear(index);
 
 	MicroappStorage& storage = MicroappStorage::getInstance();
 	retCode                  = storage.erase(index);
@@ -393,16 +419,80 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
-	LOGMicroappInfo("checkHeader %u", packet->index);
+	LOGMicroappDebug("checkHeader %u", packet->index);
 	if (packet->protocol != MICROAPP_CONTROL_COMMAND_PROTOCOL) {
 		LOGw("Unsupported protocol: %u", packet->protocol);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
-	if (packet->index > MAX_MICROAPPS) {
+	if (packet->index > g_MICROAPP_COUNT) {
 		LOGw("Index too large: %u", packet->index);
 		return ERR_WRONG_PARAMETER;
 	}
 	return ERR_SUCCESS;
+}
+
+cs_ret_code_t Microapp::factoryReset() {
+	if (!_factoryResetMode) {
+		// Should not happen.
+		// Maybe send event done with this as result code instead.
+		return ERR_WRONG_MODE;
+	}
+	_currentMicroappIndex = 0;
+	return resumeFactoryReset();
+}
+
+cs_ret_code_t Microapp::resumeFactoryReset() {
+	LOGd("resumeFactoryReset index=%u", _currentMicroappIndex);
+	if (_currentMicroappIndex < 0) {
+		return ERR_WRONG_STATE;
+	}
+	if (_currentMicroappIndex == g_MICROAPP_COUNT) {
+		// Done
+		_currentMicroappIndex = -1;
+		event_t event(CS_TYPE::EVT_MICROAPP_FACTORY_RESET_DONE);
+		event.dispatch();
+		return ERR_SUCCESS;
+	}
+	cs_ret_code_t retCode = MicroappStorage::getInstance().erase(_currentMicroappIndex);
+	switch (retCode) {
+		case ERR_SUCCESS: {
+			// Page was already erased, continue immediately.
+			_currentMicroappIndex++;
+			return resumeFactoryReset();
+		}
+		case ERR_BUSY: {
+			// Retry again later, done in tick();
+			break;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			// Wait for storage event.
+			break;
+		}
+		default: {
+			// Now what? Just assume success for now, because we don't want to get stuck.
+			LOGe("Erase failed, but assuming success retCode=%u", retCode);
+			_currentMicroappIndex++;
+			return resumeFactoryReset();
+		}
+	}
+	return ERR_WAIT_FOR_SUCCESS;
+}
+
+void Microapp::onStorageEvent(cs_async_result_t& event) {
+	if (event.commandType != CTRL_CMD_MICROAPP_REMOVE) {
+		return;
+	}
+
+	if (!_factoryResetMode) {
+		return;
+	}
+
+	if (_currentMicroappIndex < 0) {
+		return;
+	}
+
+	_currentMicroappIndex++;
+	resumeFactoryReset();
 }
 
 void Microapp::handleEvent(event_t& evt) {
@@ -438,6 +528,15 @@ void Microapp::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::EVT_TICK: {
 			tick();
+			break;
+		}
+		case CS_TYPE::CMD_FACTORY_RESET: {
+			evt.result.returnCode = factoryReset();
+			break;
+		}
+		case CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND: {
+			auto packet = CS_TYPE_CAST(CMD_RESOLVE_ASYNC_CONTROL_COMMAND, evt.data);
+			onStorageEvent(*packet);
 			break;
 		}
 		default: {
