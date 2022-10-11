@@ -249,7 +249,7 @@ void CrownstoneCentral::setStep(uint8_t step) {
 
 bool CrownstoneCentral::finalizeStep(ConnectSteps step, cs_ret_code_t retCode) {
 	if (_currentOperation != Operation::CONNECT) {
-		LOGCsCentralInfo("Wrong operation: _currentOperation=%u", _currentOperation);
+		LOGCsCentralDebug("Wrong operation: _currentOperation=%u", _currentOperation);
 		finalizeOperation(Operation::CONNECT, ERR_WRONG_OPERATION);
 		return false;
 	}
@@ -550,25 +550,28 @@ void CrownstoneCentral::onReadDuringConnect(ble_central_read_result_t& result) {
 			setStep(ConnectSteps::SESSION_DATA);
 			return;
 		}
-		default: finalizeOperation(_currentOperation, ERR_WRONG_OPERATION); return;
+		default: {
+			finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
+			return;
+		}
 	}
 }
 
-void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
-	if (retCode != ERR_SUCCESS) {
-		finalizeOperation(_currentOperation, retCode);
+void CrownstoneCentral::onWrite(ble_central_write_result_t& result) {
+	if (result.retCode != ERR_SUCCESS) {
+		finalizeOperation(_currentOperation, result.retCode);
 		return;
 	}
 	switch (_currentOperation) {
 		case Operation::CONNECT: {
-			if (!finalizeStep(ConnectSteps::ENABLE_NOTIFICATIONS, retCode)) {
+			if (!finalizeStep(ConnectSteps::ENABLE_NOTIFICATIONS, result.retCode)) {
 				return;
 			}
 			readSessionData();
 			break;
 		}
 		case Operation::WRITE: {
-			if (!finalizeStep(WriteControlSteps::WRITE, retCode)) {
+			if (!finalizeStep(WriteControlSteps::WRITE, result.retCode)) {
 				return;
 			}
 			// Wait for notifications.
@@ -584,7 +587,7 @@ void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
 
 void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
 	if (result.handle != _resultHandle) {
-		LOGw("Unexpected handle=%u", result.handle);
+		LOGCsCentralDebug("Unexpected handle=%u", result.handle);
 		return;
 	}
 

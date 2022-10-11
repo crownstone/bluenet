@@ -18,7 +18,7 @@
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 
-#define LogMicroappDebug LOGvv
+#define LogMicroappControllerDebug LOGvv
 
 /**
  * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
@@ -224,7 +224,7 @@ uint16_t MicroappController::initMemory(uint8_t appIndex) {
  * boundaries. Then we call it from a coroutine context and expect it to yield.
  */
 void MicroappController::callApp(uint8_t appIndex) {
-	LOGi("Call microapp #%i", appIndex);
+	LOGi("Call microapp index=%u", appIndex);
 
 	initMemory(appIndex);
 
@@ -237,25 +237,25 @@ void MicroappController::callApp(uint8_t appIndex) {
 	}
 
 	// The entry function is this immediate address (no correction for thumb mode)
-	sharedState.entry = address;
+	_sharedState.entry = address;
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
 	LOGi("Setup coroutine and configure it");
-	startCoroutine(&_coroutine, goIntoMicroapp, &sharedState);
+	startCoroutine(&_coroutine, goIntoMicroapp, &_sharedState);
 }
 
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffers->microapp2bluenet.payload;
+	uint8_t* payload = _sharedState.io_buffers->microapp2bluenet.payload;
 	return payload;
 }
 
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffers->bluenet2microapp.payload;
+	uint8_t* payload = _sharedState.io_buffers->bluenet2microapp.payload;
 	return payload;
 }
 
 void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingState state) {
-	LogMicroappDebug("setOperatingState appIndex=%u state=%u", appIndex, state);
+	LogMicroappControllerDebug("setOperatingState appIndex=%u state=%u", appIndex, state);
 	if (appIndex > 0) {
 		LOGi("Multiple apps not supported yet");
 		return;
@@ -335,8 +335,8 @@ void MicroappController::callMicroapp() {
 	// just do it from current coroutine context
 	if (!start) {
 		start = true;
-		LOGi("Call address: %p", sharedState->entry);
-		jumpToAddress(sharedState->entry);
+		LOGi("Call address: %p", _sharedState->entry);
+		jumpToAddress(_sharedState->entry);
 		LOGi("Microapp might have run, but this statement is never reached (no coroutine used).");
 	}
 	return;
@@ -376,12 +376,24 @@ bool MicroappController::handleAck() {
 bool MicroappController::handleRequest() {
 	uint8_t* inputBuffer                  = getInputMicroappBuffer();
 	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
-	LogMicroappControllerDebug("Retrieve and handle request [type %u]", incomingHeader->messageType);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
+	LogMicroappControllerDebug("  ack=%u", incomingHeader->ack);
+
 	// TODO: put result in ack, instead of letting the handler(s) set the ack.
-	if (result != ERR_SUCCESS) {
-		LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+	switch (result) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE: {
+			break;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			LOGi("Handling request of type %u is in progress", incomingHeader->messageType);
+			break;
+		}
+		default: {
+			LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+			break;
+		}
 	}
 	bool callAgain = !stopAfterMicroappRequest(incomingHeader);
 	if (!callAgain) {
@@ -580,4 +592,15 @@ void MicroappController::incrementEmptySoftInterruptSlots() {
 		return;
 	}
 	_emptySoftInterruptSlots++;
+}
+
+void MicroappController::clear(uint8_t appIndex) {
+	LOGi("Clear appIndex=%u", appIndex);
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		_softInterruptRegistrations[i] = {};
+	}
+	_emptySoftInterruptSlots = 1;
+
+	microappData.isScanning = false;
+
 }

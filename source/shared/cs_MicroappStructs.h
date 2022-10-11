@@ -14,6 +14,7 @@
 
 #include <ipc/cs_IpcRamData.h>
 
+#include <cstddef>
 #include <cstdint>
 
 /**
@@ -31,6 +32,7 @@ const uint8_t MAC_ADDRESS_LENGTH                            = 6;
 // Defined by the BLE SIG
 const uint8_t MAX_BLE_ADV_DATA_LENGTH                       = 31;
 // Defined by the mesh protocol
+// TODO: single target mesh messages may be longer.
 const uint8_t MAX_MICROAPP_MESH_PAYLOAD_SIZE                = 7;
 // Defined by the service data packet service_data_encrypted_microapp_t
 const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = 8;
@@ -41,6 +43,8 @@ const uint8_t MICROAPP_SDK_MAX_SERVICE_DATA_LENGTH          = 8;
 // Maximum total payload (somewhat arbitrary, should be able to contain most-used data structures e.g. BLE
 // advertisements)
 const uint8_t MICROAPP_SDK_MAX_PAYLOAD                      = 48;
+
+// TODO: use sizeof() and offsetof() instead. See MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE
 // messageType [1] + ack [1]
 const uint8_t MICROAPP_SDK_HEADER_SIZE                      = 2;
 // header + type [1] + flags [1] + size [1]
@@ -110,6 +114,12 @@ enum MicroappSdkAck {
 	CS_MICROAPP_SDK_ACK_ERR_EMPTY           = 0x0C,
 	//! Request or its parameters are too large
 	CS_MICROAPP_SDK_ACK_ERR_TOO_LARGE       = 0x0D,
+	//! Request cannot be fulfilled again
+	CS_MICROAPP_SDK_ACK_ERR_ALREADY_EXISTS  = 0x0E,
+	//! Request parameters are wrong
+	CS_MICROAPP_SDK_ACK_ERR_WRONG_PARAM     = 0x0F,
+	//! Request timed out
+	CS_MICROAPP_SDK_ACK_ERR_TIMEOUT         = 0x10,
 };
 
 typedef MicroappSdkAck microapp_sdk_result_t;
@@ -255,6 +265,11 @@ enum MicroappSdkPinValue {
 	CS_MICROAPP_SDK_PIN_ON  = 0x01,
 };
 
+enum MicroappSdkSwitchType {
+	CS_MICROAPP_SDK_SWITCH_REQUEST_SET = 1,
+	CS_MICROAPP_SDK_SWITCH_REQUEST_GET = 2,
+};
+
 /**
  * Switch value according to same protocol as switch command value over BLE and UART
  * Values between 0 and 100 can be used for dimming
@@ -385,7 +400,7 @@ struct __attribute__((packed)) microapp_sdk_header_t {
 	 * Used for requesting and receiving acks. Can be used for identifying requests and interrupts.
 	 * See MicroappSdkAck.
 	 */
-	int8_t ack;
+	uint8_t ack;
 };
 
 static_assert(sizeof(microapp_sdk_header_t) == MICROAPP_SDK_HEADER_SIZE);
@@ -502,14 +517,27 @@ struct __attribute__((packed)) microapp_sdk_pin_t {
 
 static_assert(sizeof(microapp_sdk_pin_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
+struct __attribute__((packed)) microapp_sdk_switch_state_t {
+	uint8_t dimmer : 7;
+	bool relay : 1;
+};
+
 /**
  * Struct for switching and dimming the crownstone. Conforms to the general control command protocol
  */
 struct __attribute__((packed)) microapp_sdk_switch_t {
 	microapp_sdk_header_t header;
 
-	//!  Specifies what action to take. See MicroappSdkSwitchValue.
-	uint8_t value;
+	//! The type of switch command, see MicroappSdkSwitchType.
+	uint8_t type;
+
+	union {
+		//! See MicroappSdkSwitchValue.
+		uint8_t set;
+
+		//! Switch state set by bluenet.
+		microapp_sdk_switch_state_t get;
+	};
 };
 
 static_assert(sizeof(microapp_sdk_switch_t) <= MICROAPP_SDK_MAX_PAYLOAD);
@@ -590,10 +618,10 @@ struct __attribute__((packed)) microapp_sdk_ble_scan_event_t {
 };
 
 enum MicroappSdkBleScanType {
-	CS_MICROAPP_SDK_BLE_SCAN_START              = 1,
-	CS_MICROAPP_SDK_BLE_SCAN_STOP               = 2,
-	CS_MICROAPP_SDK_BLE_SCAN_REGISTER_INTERRUPT = 3,
-	CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN         = 4,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_REGISTER_INTERRUPT = 1,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_START              = 2,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_STOP               = 3,
+	CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN                 = 4,
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_scan_t {
@@ -626,12 +654,40 @@ struct __attribute__((packed)) microapp_sdk_ble_uuid_t {
 	uint16_t uuid;
 };
 
+struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
+	//! Whether the characteristic is readable.
+	bool read;
+
+	//! Whether the characteristic can be written to without response.
+	bool writeNoResponse;
+
+	//! Whether the characteristic can be written to with response.
+	bool write;
+
+	//! Whether the characteristic supports notifications.
+	bool notify;
+
+	//! Whether the characteristic supports indications.
+	bool indicate;
+
+	/**
+	 * Whether the characteristic should automatically notify the value when you updated the value.
+	 * This currently only sends the first 20 bytes of the value.
+	 * Peripheral only option.
+	 */
+	bool autoNotify;
+};
+
 struct __attribute__((packed)) microapp_sdk_ble_request_uuid_register_t {
 	//! The custom service UUID to register.
 	uint8_t customUuid[16];
 
 	//! UUID set by bluenet, to be used later.
 	microapp_sdk_ble_uuid_t uuid;
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_request_mac_t {
+	microapp_sdk_ble_address_t address;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_request_connect_t {
@@ -652,9 +708,16 @@ struct __attribute__((packed)) microapp_sdk_ble_central_request_discover_t {
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_t {
+	//! UUID of the service.
+	microapp_sdk_ble_uuid_t serviceUuid;
+	//! UUID of the service or characteristic.
 	microapp_sdk_ble_uuid_t uuid;
+	//! Handle for the value, 0 for none.
 	uint16_t valueHandle;
+	//! Handle for the CCCD, 0 for none.
 	uint16_t cccdHandle;
+	//! Supported options.
+	microapp_sdk_ble_characteristic_options_t options;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_done_t {
@@ -662,13 +725,15 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_discover_done_t {
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_request_write_t {
-	uint16_t valueHandle;
+	//! Value or CCCD handle.
+	uint16_t handle;
 	uint16_t size;
 	uint8_t* buffer;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_event_write_t {
-	uint16_t valueHandle;
+	//! Value or CCCD handle.
+	uint16_t handle;
 	uint8_t result;
 };
 
@@ -680,33 +745,38 @@ struct __attribute__((packed)) microapp_sdk_ble_central_event_read_t {
 	uint16_t valueHandle;
 	uint8_t result;
 	uint16_t size;
+
+	//! The read data. Maximum size is MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE.
+	uint8_t data[0];
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_central_event_notification_t {
+	uint16_t valueHandle;
+	uint16_t size;
+
+	//! The notification data. Maximum size is MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE
 	uint8_t data[0];
 };
 
 enum MicroappSdkBleCentralType {
-	CS_MICROAPP_SDK_BLE_CENTRAL_REGISTER_INTERRUPT  = 1,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_REGISTER_INTERRUPT = 1,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT     = 2,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT       = 3,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_CONNECT            = 2,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_CONNECT              = 3,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT  = 4,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT    = 5,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCONNECT         = 4,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT           = 5,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCOVER    = 6,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER      = 7,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE = 8,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_DISCOVER           = 6,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER             = 7,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCOVER_DONE        = 8,
 
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_WRITE       = 9,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE         = 10,
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ        = 11,
-	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ          = 12,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_WRITE              = 9,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_WRITE                = 10,
+	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_READ               = 11,
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_READ                 = 12,
 
-	//! Subscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_SUBSCRIBE   = 12,
-
-	//! Unsubscribe for notifications. Wait for write event with the same handle.
-	CS_MICROAPP_SDK_BLE_CENTRAL_REQUEST_UNSUBSCRIBE = 13,
-
+	CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION         = 15,
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_central_t {
@@ -727,29 +797,13 @@ struct __attribute__((packed)) microapp_sdk_ble_central_t {
 		microapp_sdk_ble_central_event_write_t eventWrite;
 		microapp_sdk_ble_central_request_read_t requestRead;
 		microapp_sdk_ble_central_event_read_t eventRead;
+		microapp_sdk_ble_central_event_notification_t eventNotification;
 	};
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_service_add_t {
 	//! The UUID of the service.
 	microapp_sdk_ble_uuid_t uuid;
-};
-
-struct __attribute__((packed)) microapp_sdk_ble_characteristic_options_t {
-	//! Whether the characteristic is readable.
-	bool read : 1;
-
-	//! Whether the characteristic can be written to without response.
-	bool writeNoResponse : 1;
-
-	//! Whether the characteristic can be written to with response.
-	bool write : 1;
-
-	//! Whether the characteristic supports notifications.
-	bool notify : 1;
-
-	//! Whether the characteristic supports indications.
-	bool indicate : 1;
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_peripheral_request_characteristic_add_t {
@@ -815,8 +869,13 @@ enum MicroappSdkBlePeripheralType {
 	//! Notify data. Payload is notify.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_NOTIFY             = 12,
 
-	//! Indicate data. Payload is indicate.
-	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_INDICATE           = 13,
+	/**
+	 * Keep the connection open for some more time.
+	 * By default, bluenet may disconnect after some time being connected.
+	 * See CONNECTION_WATCHDOG_TIMEOUT.
+	 * Send this request regularly to keep the connection alive.
+	 */
+	CS_MICROAPP_SDK_BLE_PERIPHERAL_REQUEST_CONNECTION_ALIVE   = 13,
 
 	//! Client connected.
 	CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_CONNECT              = 20,
@@ -877,6 +936,7 @@ enum MicroappSdkBleType {
 	CS_MICROAPP_SDK_BLE_SCAN          = 0x02,
 	CS_MICROAPP_SDK_BLE_CENTRAL       = 0x03,
 	CS_MICROAPP_SDK_BLE_PERIPHERAL    = 0x04,
+	CS_MICROAPP_SDK_BLE_MAC           = 0x05,
 };
 
 /**
@@ -893,10 +953,18 @@ struct __attribute__((packed)) microapp_sdk_ble_t {
 		microapp_sdk_ble_scan_t scan;
 		microapp_sdk_ble_central_t central;
 		microapp_sdk_ble_peripheral_t peripheral;
+		microapp_sdk_ble_request_mac_t requestMac;
 	};
 };
 
+// The ble struct includes the microapp sdk header, so we can check the size.
 static_assert(sizeof(microapp_sdk_ble_t) <= MICROAPP_SDK_MAX_PAYLOAD);
+
+// Calculate max payload sizes.
+const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventRead.data);
+const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventNotification.data);
 
 /**
  * Struct for mesh message from microapp.

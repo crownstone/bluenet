@@ -29,8 +29,6 @@ extern uint32_t g_RAM_R1_BASE;
 
 extern uint32_t g_RAM_APPLICATION_AMOUNT;
 
-extern uint8_t g_MICROAPP_COUNT;
-
 extern int8_t g_MAX_CHIP_TEMPERATURE;
 
 extern uint16_t g_BOOT_DELAY;
@@ -41,7 +39,7 @@ extern uint16_t g_SCAN_BREAK_DURATION;
 
 extern const int8_t g_TX_POWER;
 
-extern const uint32_t g_CONNECTION_ALIVE_TIMEOUT;
+extern const uint32_t g_CONNECTION_WATCHDOG_TIMEOUT;
 
 extern const uint16_t g_MASTER_BUFFER_SIZE;
 
@@ -84,6 +82,9 @@ extern const uint8_t g_TWI_SCL_INDEX;
 extern const uint8_t g_TWI_SDA_INDEX;
 
 extern const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT;
+
+//! Amount of ram each microapp can use.
+extern const uint16_t g_RAM_MICROAPP_AMOUNT;
 
 extern const int8_t g_GPIO_PIN1_INDEX;
 extern const int8_t g_GPIO_PIN2_INDEX;

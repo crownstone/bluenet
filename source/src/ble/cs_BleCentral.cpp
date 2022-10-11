@@ -247,17 +247,31 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 
 			// Send an event for the service
 			ble_central_discovery_t packet = {
+					.serviceUuid = UUID(event.params.discovered_db.srv_uuid),
 					.uuid        = UUID(event.params.discovered_db.srv_uuid),
 					.valueHandle = BLE_GATT_HANDLE_INVALID,
-					.cccdHandle  = BLE_GATT_HANDLE_INVALID};
+					.cccdHandle  = BLE_GATT_HANDLE_INVALID,
+					.flags       = {}};
 			event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 			eventOut.dispatch();
 
 			// Send an event for each characteristic
 			for (uint8_t i = 0; i < event.params.discovered_db.char_count; ++i) {
+				packet.serviceUuid = UUID(event.params.discovered_db.srv_uuid);
 				packet.uuid        = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
 				packet.valueHandle = event.params.discovered_db.charateristics[i].characteristic.handle_value;
 				packet.cccdHandle  = event.params.discovered_db.charateristics[i].cccd_handle;
+				packet.flags.broadcast =
+						event.params.discovered_db.charateristics[i].characteristic.char_props.broadcast;
+				packet.flags.read = event.params.discovered_db.charateristics[i].characteristic.char_props.read;
+				packet.flags.write_no_ack =
+						event.params.discovered_db.charateristics[i].characteristic.char_props.write_wo_resp;
+				packet.flags.write_with_ack =
+						event.params.discovered_db.charateristics[i].characteristic.char_props.write;
+				packet.flags.notify   = event.params.discovered_db.charateristics[i].characteristic.char_props.notify;
+				packet.flags.indicate = event.params.discovered_db.charateristics[i].characteristic.char_props.indicate;
+				packet.flags.write_signed =
+						event.params.discovered_db.charateristics[i].characteristic.char_props.auth_signed_wr;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 				eventOut.dispatch();
 			}
@@ -385,6 +399,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 	}
 
 	_currentOperation = Operation::WRITE;
+	_currentHandle    = handle;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -424,6 +439,7 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 		}
 	}
 	_currentOperation = Operation::WRITE;
+	_currentHandle    = handle;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -452,6 +468,7 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 	}
 
 	_currentOperation = Operation::READ;
+	_currentHandle    = handle;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -466,14 +483,24 @@ void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 		case Operation::CONNECT_CLEARANCE:
 		case Operation::CONNECT:
 		case Operation::DISCONNECT:
-		case Operation::DISCOVERY:
-		case Operation::WRITE: {
+		case Operation::DISCOVERY: {
 			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&retCode), sizeof(retCode));
 			break;
 		}
-		case Operation::READ: {
-			ble_central_read_result_t result = {
+		case Operation::WRITE: {
+			TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT)
+			result = {
 					.retCode = retCode,
+					.handle  = _currentHandle,
+			};
+			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+			break;
+		}
+		case Operation::READ: {
+			TYPIFY(EVT_BLE_CENTRAL_READ_RESULT)
+			result = {
+					.retCode = retCode,
+					.handle  = _currentHandle,
 					.data    = cs_data_t(),
 			};
 			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
@@ -522,7 +549,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 			}
 			case Operation::READ: {
 				// Ignore data, finalize with error instead.
-				TYPIFY(EVT_BLE_CENTRAL_READ_RESULT) result = {.retCode = ERR_WRONG_STATE, .data = cs_data_t()};
+				TYPIFY(EVT_BLE_CENTRAL_READ_RESULT)
+				result = {.retCode = ERR_WRONG_STATE, .handle = _currentHandle, .data = cs_data_t()};
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
@@ -530,7 +558,7 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 			}
 			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
-				TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = ERR_WRONG_STATE;
+				TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = {.retCode = ERR_WRONG_STATE, .handle = _currentHandle};
 				event_t errEvent(
 						CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
@@ -586,6 +614,7 @@ void BleCentral::sendOperationResult(event_t& event) {
 	LOGBleCentralDebug("sendOperationResult type=%u size=%u", event.type, event.size);
 	// Set current operation before dispatching the event, so that a new command can be issued on event.
 	_currentOperation = Operation::NONE;
+	_currentHandle    = BLE_GATT_HANDLE_INVALID;
 
 	if (event.type != CS_TYPE::CONFIG_DO_NOT_USE) {
 		event.dispatch();
@@ -661,15 +690,28 @@ void BleCentral::onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp
 }
 
 void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& event) {
-	_log(LogLevelBleCentralDebug, false, "Read offset=%u len=%u data=", event.offset, event.len);
+	_log(LogLevelBleCentralDebug,
+		 false,
+		 "Read handle=%u offset=%u len=%u data=",
+		 event.handle,
+		 event.offset,
+		 event.len);
 	_logArray(LogLevelBleCentralDebug, true, event.data, event.len);
+
+	if (event.handle != _currentHandle) {
+		LOGw("Unexpected handle: %u expected: %u", event.handle, _currentHandle);
+	}
+
+	// Because a read can happen in multiple parts, the offset + len is the current summed length.
+	// However, we only finalize when the lenght is invalid or 0, so we can just use offset as data length.
+	TYPIFY(EVT_BLE_CENTRAL_READ_RESULT)
+	result = {.retCode = ERR_SUCCESS, .handle = event.handle, .data = cs_data_t(_buf.data, event.offset)};
 
 	// According to
 	// https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.1.1/group___b_l_e___g_a_t_t_c___v_a_l_u_e___r_e_a_d___m_s_c.html
 	// we should continue reading, until we get a gatt status of invalid offset.
 	// But it seems like the last read we get is with a length of 0.
 	if (gattStatus == BLE_GATT_STATUS_ATTERR_INVALID_OFFSET) {
-		ble_central_read_result_t result = {.retCode = ERR_SUCCESS, .data = cs_data_t(_buf.data, event.offset)};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
@@ -681,7 +723,6 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 	}
 
 	if (event.len == 0) {
-		ble_central_read_result_t result = {.retCode = ERR_SUCCESS, .data = cs_data_t(_buf.data, event.offset)};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
@@ -703,24 +744,34 @@ void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& eve
 }
 
 void BleCentral::onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& event) {
-	LOGBleCentralDebug("onWrite write_op=%u offset=%u len=%u", event.write_op, event.offset, event.len);
+	LOGBleCentralDebug(
+			"onWrite handle=%u write_op=%u offset=%u len=%u", event.handle, event.write_op, event.offset, event.len);
+
+	if (event.handle != _currentHandle) {
+		LOGw("Unexpected handle: %u expected: %u", event.handle, _currentHandle);
+	}
+
+	TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result;
+	result.handle = event.handle;
 
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
 		LOGw("gattStatus=%u", gattStatus);
-		finalizeOperation(Operation::WRITE, ERR_GATT_ERROR);
+		result.retCode = ERR_GATT_ERROR;
+		finalizeOperation(Operation::WRITE, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 		return;
 	}
 
 	switch (event.write_op) {
 		case BLE_GATT_OP_WRITE_REQ:
 		case BLE_GATT_OP_EXEC_WRITE_REQ: {
-			finalizeOperation(Operation::WRITE, ERR_SUCCESS);
+			result.retCode = ERR_SUCCESS;
+			finalizeOperation(Operation::WRITE, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 			break;
 		}
 		case BLE_GATT_OP_PREP_WRITE_REQ: {
-			cs_ret_code_t retCode = nextWrite(event.handle, event.offset + event.len);
-			if (retCode != ERR_WAIT_FOR_SUCCESS) {
-				finalizeOperation(Operation::WRITE, retCode);
+			result.retCode = nextWrite(event.handle, event.offset + event.len);
+			if (result.retCode != ERR_WAIT_FOR_SUCCESS) {
+				finalizeOperation(Operation::WRITE, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 			}
 			break;
 		}

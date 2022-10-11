@@ -62,20 +62,27 @@ private:
 	//! Return whether pin exists on board
 	bool pinExists(uint8_t pin_index);
 
-	//! Return physical pin from virtual pin index
+	/**
+	 * Return physical pin from virtual pin index.
+	 * Returns PIN_NONE when it does not exist (for the configured board).
+	 */
 	pin_t getPin(uint8_t pin_index);
 
 	//! Return whether pin is a LED
 	bool isLedPin(uint8_t pin_index);
 
 	//! Configure pin
-	void configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity);
+	cs_ret_code_t configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity);
 
 	//! Write to pin
-	void write(uint8_t pin_index, uint8_t* buf, uint8_t& length);
+	/**
+	 * Write to pin.
+	 * Assumes pin has been configured as output.
+	 */
+	cs_ret_code_t write(uint8_t pin_index, uint8_t* buf, uint8_t& length);
 
 	//! Read from pin
-	void read(uint8_t pin_index, uint8_t* buf, uint8_t& length);
+	cs_ret_code_t read(uint8_t pin_index, uint8_t* buf, uint8_t& length);
 
 	//! Initialized flag
 	bool _initialized;

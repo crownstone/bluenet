@@ -23,6 +23,7 @@ Service::Service() {}
  *
  */
 void Service::init(Stack* stack) {
+	LOGd("Init uuid=%u", _uuid.getUuid().uuid);
 	if (isInitialized(C_SERVICE_INITIALIZED)) {
 		return;
 	}
@@ -53,6 +54,7 @@ void Service::init(Stack* stack) {
 			// Crash
 			APP_ERROR_HANDLER(nrfCode);
 	}
+	_log(LogLevelServiceDebug, true, "  handle=%u", _handle);
 
 	for (CharacteristicBase* characteristic : _characteristics) {
 		characteristic->init(this);

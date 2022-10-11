@@ -62,8 +62,9 @@ private:
 
 	void onBleCentralDiscovery(ble_central_discovery_t& event);
 	void onBleCentralDiscoveryResult(cs_ret_code_t& retCode);
-	void onBleCentralWriteResult(cs_ret_code_t& retCode);
+	void onBleCentralWriteResult(ble_central_write_result_t& event);
 	void onBleCentralReadResult(ble_central_read_result_t& event);
+	void onBleCentralNotification(ble_central_notification_t& event);
 	void onBlePeripheralConnect(ble_connected_t& event);
 	void onBlePeripheralDisconnect(uint16_t connectionHandle);
 

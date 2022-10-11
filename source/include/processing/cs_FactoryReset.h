@@ -15,6 +15,9 @@
 // All the classes that are expected to factory reset.
 enum FactoryResetClassBit {
 	FACTORY_RESET_BIT_STATE = 0,
+#if BUILD_MICROAPP_SUPPORT == 1
+	FACTORY_RESET_BIT_MICROAPP,
+#endif
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 	FACTORY_RESET_BIT_MESH,
 #endif
@@ -39,7 +42,7 @@ public:
 	bool factoryReset(uint32_t resetCode);
 
 	/* Function to actually wipe the memory */
-	bool finishFactoryReset(uint8_t deviceType);
+	void finishFactoryReset(uint8_t deviceType);
 
 	/* Enable/disable ability to recover */
 	void enableRecovery(bool enable);
@@ -69,7 +72,7 @@ private:
 	uint32_t _rtcStartTime;
 
 	// Used to check if all classes are factory reset.
-	uint32_t _successfullyFactoryResetBitmask = 0;
+	uint8_t _successfullyFactoryResetBitmask = 0;
 
 	app_timer_t _recoveryDisableTimerData;
 	app_timer_id_t _recoveryDisableTimerId;

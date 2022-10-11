@@ -213,9 +213,14 @@ struct state_external_stone_t {
 
 struct ble_connected_t {
 	uint16_t connectionHandle;
-	uint8_t advertisementHandle;    // Advertisement handle that stopped advertising.
-	cs_data_t advertisementBuffer;  // Buffer that's no longer in use.
-	cs_data_t scanResponseBuffer;   // Buffer that's no longer in use.
+	//! Advertisement handle that stopped advertising.
+	uint8_t advertisementHandle;
+	//! Buffer that's no longer in use because advertising stopped.
+	cs_data_t advertisementBuffer;
+	//! Buffer that's no longer in use because advertising stopped.
+	cs_data_t scanResponseBuffer;
+	//! Address of the connected device.
+	device_address_t address;
 };
 
 /**

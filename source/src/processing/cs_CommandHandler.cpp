@@ -95,7 +95,9 @@ void CommandHandler::resolveAsyncCommand(cs_async_result_t* result) {
 		 result->resultCode,
 		 result->resultData.len);
 	if (result->commandType != _awaitingCommandResult.type) {
-		LOGw("Resolving different type: resolving=%u, awaiting=%u", result->commandType, _awaitingCommandResult.type);
+		LOGw("Awaiting different type to resolve: resolving=%u, awaiting=%u",
+			 result->commandType,
+			 _awaitingCommandResult.type);
 		return;
 	}
 	switch (_awaitingCommandResult.source.source.type) {
@@ -253,7 +255,7 @@ void CommandHandler::_handleCommand(
 
 void CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	// A no operation command to keep the connection alive.
-	// No need to do anything here, the connection keep alive is handled in the stack.
+	// No need to do anything here, the connection watchdog is handled in the stack.
 	result.returnCode = ERR_SUCCESS;
 }
 
