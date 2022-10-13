@@ -68,6 +68,7 @@ public:
 	cs_ret_code_t init();
 
 	inline bool isInitialized() { return _initialized; }
+	bool isBusy();
 
 	/**
 	 * Set the callback for errors.
@@ -400,7 +401,7 @@ private:
 	void setBusy(uint16_t recordKey);
 	void clearBusy(uint16_t recordKey);
 	bool isBusy(uint16_t recordKey);
-	bool isBusy();
+
 
 	cs_ret_code_t getErrorCode(ret_code_t code);
 

@@ -24,12 +24,9 @@
 // fds_register
 
 std::vector<cs_state_data_t> _storage;
-#define NOT_FOUND std::end(_storage)
 
 
-void logStateDataEntry(const cs_state_data_t& dat, std::string prefix = "") {
-	LOGd("%s{id: %u, type:%u, size:%u, value:%u}", prefix.c_str(), dat.id, dat.type, dat.size, dat.value);
-}
+// --- utils
 
 // --- comparison operations
 
@@ -51,18 +48,88 @@ auto equalTo(cs_state_data_t target) {
 	return matchIdType(target.id, target.type);
 }
 
-// --- std algorithms
-
 /**
- * Factor out all the cruft from std::find_if and use begin/end as sane defaults.
+ *  End is used as indicator value for 'not found'.
+ *  Use this function rather than std::end directly.
  */
-template<class C, class Pred>
-int findIf(C& container, const Pred& pred) {
-	return std::find_if(std::begin(container), std::end(container), pred);
+auto NOT_FOUND() {
+	return std::end(_storage);
 }
 
 /**
- * Deleting elements in vectors is not pretty until C++20. See std::erase_if
+ *  To emulate findNext, we keep track of the last find result.
+ *  It is reset by findFirst and read by findNext.
+ */
+auto lastFound = NOT_FOUND();
+
+/**
+ * Finds given type starting from given iterator. Sets lastFound iterator.
+ */
+template<class I>
+cs_ret_code_t findFrom(CS_TYPE type, cs_state_id_t& id, I startIter) {
+	auto it = findIf(_storage, matchType(type), startIter);
+	if (it != _storage.end()) {
+		id        = it->id;
+		lastFound = it;
+		return ERR_SUCCESS;
+	}
+	else {
+		lastFound = NOT_FOUND();
+		return ERR_NOT_FOUND;
+	}
+}
+
+/**
+ * Implements removal for the different matching options.
+ */
+template<class P>
+cs_ret_code_t _remove(Storage& s, P predicate){
+	if (!s.isInitialized()) {
+		return ERR_NOT_INITIALIZED;
+	}
+	if (s.isBusy()){
+		return ERR_BUSY;
+	}
+
+	int eraseCount = eraseIf(_storage, predicate);
+
+	if(eraseCount == 0) {
+		return ERR_NOT_FOUND;
+	}
+
+	return ERR_SUCCESS;
+}
+
+/**
+ * print cs_state_Data_t object (with prefix).
+ */
+void logStateDataEntry(const cs_state_data_t& dat, std::string prefix = "") {
+	LOGd("%s{id: %u, type:%u, size:%u, value:%u}", prefix.c_str(), dat.id, dat.type, dat.size, dat.value);
+}
+
+
+// --- std algorithm wrappers
+
+/**
+ * Factor out all the cruft from std::find_if and use begin/end as sane defaults.
+ *
+ * @return: first element matching
+ */
+template<class C, class Pred>
+auto findIf(C& container, const Pred& pred) {
+	return std::find_if(std::begin(container), std::end(container), pred);
+}
+
+template<class C, class Pred, class I>
+auto findIf(C& container, const Pred& pred, I startIter) {
+	return std::find_if(startIter, std::end(container), pred);
+}
+
+/**
+ * Deleting elements in vectors is not pretty until C++20. See std::erase_if.
+ * This wrapper makes it somewhat easier.
+ *
+ * @return: number of erased elements.
  */
 template<class C, class Pred>
 int eraseIf(C& container, const Pred& pred) {
@@ -72,27 +139,17 @@ int eraseIf(C& container, const Pred& pred) {
 	container.erase(newEndIt, oldEndIt);
 	return removedCount;
 }
-//
-///**
-// * returns iterator to object in _storage with id and type equal to target. else std::end(_storage).
-// */
-//auto find(cs_state_data_t target) {
-//	return find_if(_storage, equalTo(target));
-//}
-//
-///**
-// * returns iterator to object in _storage with id and type equal to target. else std::end(_storage).
-// */
-//auto find(cs_state_id_t targetId, CS_TYPE targetType) {
-//	return find_if(_storage, matchIdType(targetId, targetType));
-//}
 
 // ------------- implemented -------------
 
 cs_ret_code_t Storage::init() {
-	LOGd("Storage::init()");
+	LOGi("Storage::init()");
 	_initialized = true;
 	return ERR_SUCCESS;
+}
+
+bool Storage::isBusy() {
+	return false;
 }
 
 cs_ret_code_t Storage::write(const cs_state_data_t& data) {
@@ -103,14 +160,10 @@ cs_ret_code_t Storage::write(const cs_state_data_t& data) {
 
 	int removeCount = eraseIf(_storage, equalTo(data));
 	if(removeCount) {
-		LOGd("removed old entries: %u", removeCount);
+		LOGd("removed %u old entrie(s)", removeCount);
 	}
 
 	_storage.push_back(data);
-
-	for(auto d : _storage) {
-		logStateDataEntry(d, " * ");
-	}
 
 	return ERR_SUCCESS;
 }
@@ -124,13 +177,37 @@ uint8_t* Storage::allocate(size16_t& size) {
 	return new uint8_t[size];
 }
 
-
 cs_ret_code_t Storage::factoryReset() {
 	eraseAllPages();
 	return ERR_SUCCESS;
 }
 
+cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t& id) {
+	return findFrom(type, id, std::begin(_storage));
+}
 
+cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t& id) {
+	if(lastFound == NOT_FOUND()) {
+		return ERR_NOT_FOUND;
+	}
+	// Resumes search from lastFound. Call findFirst to restart.
+
+	auto searchFrom = lastFound;
+	searchFrom++;
+	return findFrom(type, id, searchFrom);
+}
+
+cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
+	return _remove(*this, matchIdType(id, type));
+}
+
+cs_ret_code_t Storage::remove(CS_TYPE type) {
+	return _remove(*this, matchType(type));
+}
+
+cs_ret_code_t Storage::remove(cs_state_id_t id) {
+	return _remove(*this, matchId(id));
+}
 
 // ------------- mock doesn't do anything -------------
 
@@ -145,20 +222,7 @@ cs_ret_code_t Storage::erasePages(const CS_TYPE doneEvent, void* startAddress, v
 	return ERR_SUCCESS;
 }
 
-
-
 // ------------ not implemented ------------
-void Storage::handleFileStorageEvent(fds_evt_t const* p_fds_evt) {}
-void Storage::handleFlashOperationSuccess() {}
-void Storage::handleFlashOperationError() {}
-
-cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t& id) {
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t& id) {
-	return ERR_SUCCESS;
-}
 
 cs_ret_code_t Storage::read(cs_state_data_t& data) {
 	return ERR_SUCCESS;
@@ -169,6 +233,7 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t& data) {
 }
 
 cs_ret_code_t Storage::readFirst(cs_state_data_t& data) {
+
 	return ERR_SUCCESS;
 }
 
@@ -177,15 +242,8 @@ cs_ret_code_t Storage::readNext(cs_state_data_t& data) {
 }
 
 
-cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
-	return ERR_SUCCESS;
-}
 
-cs_ret_code_t Storage::remove(CS_TYPE type) {
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t Storage::remove(cs_state_id_t id) {
-	return ERR_SUCCESS;
-}
+void Storage::handleFileStorageEvent(fds_evt_t const* p_fds_evt) {}
+void Storage::handleFlashOperationSuccess() {}
+void Storage::handleFlashOperationError() {}
 
