@@ -23,27 +23,26 @@ void startCoroutine(coroutine_function_t coroutineFunction, void* argument, cons
 	_stackParams->coroutineArguments = argument;
 
 	// As soon as setStackPointer is called, only fields in stackParams can be used.
-	// Between setStackPointer and setjmp local variables should not be used (for example for logging).
+	// Between getStackPointer and setjmp, local variables should not be used (for example for logging).
 	CLOGi("setStackPointer %p", _stackParams);
 
-	// Store current stack pointer in oldStackPointer.
+	// Store current bluenet stack pointer in oldStackPointer.
 	getStackPointer(_stackParams->oldStackPointer);
 
-	// Initialize the stack pointer for the coroutine before the stack params.
+	// Initialize the coroutine stack pointer for the coroutine before the stack params.
 	setStackPointer(_stackParams);
 
-
 	// Save current context (registers) for the coroutine.
-	int ret = setjmp(_stackParams->coroutine.coroutineContext);
-	if (ret == 0) {
-		// We have saved the context for the coroutine, but set the stack pointer back.
-		// We first continue with bluenet as usual.
+	if (setjmp(_stackParams->coroutine.coroutineContext) == 0) {
+		// The call to setjmp always returns 0.
+		// We have saved the context for the coroutine.
+		// We first continue with bluenet as usual, so set the stack pointer back.
 		setStackPointer(_stackParams->oldStackPointer);
 		CLOGi("setStackPointer %p", _stackParams->oldStackPointer);
 		return;
 	}
 
-	// We now come here from the first call to nextCoroutine.
+	// We now come here from the first call to nextCoroutine, by a longjmp.
 	// The stack pointer is now again at stackParams (at the end of the coroutine stack).
 
 	// Call the very first instruction of this coroutine.
@@ -64,7 +63,9 @@ int nextCoroutine() {
 	// Save current context (registers) for bluenet.
 	int ret = setjmp(_stackParams->coroutine.bluenetContext);
 	if (ret == 0) {
-		// The bluenet registers are saved, fine now to jump to the coroutine.
+		// The first call to setjmp always returns 0.
+		// The bluenet registers are saved.
+		// Jump to the coroutine, we end up at the last setjmp with coroutine context, returning non 0.
 		longjmp(_stackParams->coroutine.coroutineContext, WORKING);
 	}
 	else {
@@ -80,9 +81,11 @@ int nextCoroutine() {
  */
 void yieldCoroutine() {
 	// Save current context (registers) for the coroutine.
-	int ret                = setjmp(_stackParams->coroutine.coroutineContext);
+	int ret = setjmp(_stackParams->coroutine.coroutineContext);
 	if (ret == 0) {
-		// Context (registers) have been saved. Jump to bluenet.
+		// The call to setjmp always return 0.
+		// Context (registers) have been saved.
+		// Jump to bluenet, we end up at the setjmp with bluenet context, returning non 0.
 		longjmp(_stackParams->coroutine.bluenetContext, YIELDING_COROUTINE);
 	}
 	// Continue with coroutine code.

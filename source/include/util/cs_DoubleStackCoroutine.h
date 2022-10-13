@@ -27,14 +27,10 @@ typedef struct {
 
 typedef void (*coroutine_function_t)(void*);
 
-/*
+/**
  * Struct with all the state we need for a coroutine.
  */
 typedef struct {
-	/**
-	 * When implementing memory protection, the coroutine context data should not be in bluenet memory,
-	 * as it is read out while in coroutine context.
-	 */
 	coroutine_t coroutine;
 	coroutine_function_t coroutineFunction;
 	void* coroutineArguments;
@@ -46,7 +42,7 @@ typedef struct {
  *
  * @param[in] coroutineFunction   The first function of the coroutine to be executed.
  * @param[in] argument            The argument for the coroutine function.
- * @param[in] ramEnd              Pointer to the end of the ram for this coroutine.
+ * @param[in] ramEnd              Pointer to the end of the ram reserved for this coroutine.
  */
 void startCoroutine(coroutine_function_t coroutineFunction, void* argument, const uintptr_t ramEnd);
 
@@ -57,6 +53,8 @@ void yieldCoroutine();
 
 /**
  * Resume the coroutine.
+ *
+ * @return 0       When the coroutine finished.
  */
 int nextCoroutine();
 
