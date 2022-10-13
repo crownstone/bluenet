@@ -63,24 +63,7 @@ auto NOT_FOUND() {
 auto lastFound = NOT_FOUND();
 
 /**
- * Finds given type starting from given iterator. Sets lastFound iterator.
- */
-template<class I>
-cs_ret_code_t findFrom(CS_TYPE type, cs_state_id_t& id, I startIter) {
-	auto it = findIf(_storage, matchType(type), startIter);
-	if (it != _storage.end()) {
-		id        = it->id;
-		lastFound = it;
-		return ERR_SUCCESS;
-	}
-	else {
-		lastFound = NOT_FOUND();
-		return ERR_NOT_FOUND;
-	}
-}
-
-/**
- * Implements removal for the different matching options.
+ * Implements removal for the different matching predicates.
  */
 template<class P>
 cs_ret_code_t _remove(Storage& s, P predicate){
@@ -97,6 +80,63 @@ cs_ret_code_t _remove(Storage& s, P predicate){
 		return ERR_NOT_FOUND;
 	}
 
+	return ERR_SUCCESS;
+}
+
+/**
+ * Implements reading of data and corresponding return values
+ * foundIter: iterator where target should have been found.
+ */
+template<class I>
+cs_ret_code_t _read(Storage& s, cs_state_data_t& data, I foundIter) {
+	if(s.isBusy()) {
+		return ERR_BUSY;
+	}
+
+	if (foundIter == NOT_FOUND()) {
+		return ERR_NOT_FOUND;
+	}
+
+	if(foundIter->size != data.size) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	data.value = foundIter->value;
+	return ERR_SUCCESS;
+}
+
+/**
+ * Finds given type starting from given iterator using `equalTo`.
+ * If found, fills in `data.id`.
+ *
+ * Sets lastFound iterator.
+ */
+template<class I>
+cs_ret_code_t _readFrom(Storage& s, cs_state_data_t& data, I startIter) {
+	lastFound = findIf(_storage, equalTo(data), startIter);
+
+	if (lastFound == NOT_FOUND()) {
+		return ERR_NOT_FOUND;
+	}
+
+	return _read(s, data, lastFound);
+}
+
+/**
+ * Finds given type starting from given iterator using `matchType`.
+ * If found, fills in `data.id`.
+ *
+ * Sets lastFound iterator.
+ */
+template <class I>
+cs_ret_code_t _findFrom(CS_TYPE type, cs_state_id_t& id, I startIter) {
+	lastFound = findIf(_storage, matchType(type), startIter);
+
+	if (lastFound == NOT_FOUND()) {
+		return ERR_NOT_FOUND;
+	}
+
+	id = lastFound->id;
 	return ERR_SUCCESS;
 }
 
@@ -183,7 +223,7 @@ cs_ret_code_t Storage::factoryReset() {
 }
 
 cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t& id) {
-	return findFrom(type, id, std::begin(_storage));
+	return _findFrom(type, id, std::begin(_storage));
 }
 
 cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t& id) {
@@ -194,7 +234,7 @@ cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t& id) {
 
 	auto searchFrom = lastFound;
 	searchFrom++;
-	return findFrom(type, id, searchFrom);
+	return _findFrom(type, id, searchFrom);
 }
 
 cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
@@ -207,6 +247,41 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 
 cs_ret_code_t Storage::remove(cs_state_id_t id) {
 	return _remove(*this, matchId(id));
+}
+
+cs_ret_code_t Storage::read(cs_state_data_t& data) {
+	// start reading from the beginning
+	cs_ret_code_t prevRetCode = readFirst(data);
+
+	// continue, as long as it is successful
+	for(cs_ret_code_t currentRetCode = prevRetCode;
+			currentRetCode == ERR_SUCCESS;
+			currentRetCode = readNext(data)){
+		prevRetCode=currentRetCode;
+	}
+
+	// returns result of readFirst if it isn't ERR_SUCCESS, else ERR_SUCCESS,
+	// since there was a successful read at some point.
+	return prevRetCode;
+}
+
+cs_ret_code_t Storage::readFirst(cs_state_data_t& data) {
+	return _readFrom(*this, data, std::begin(_storage));
+}
+
+cs_ret_code_t Storage::readNext(cs_state_data_t& data) {
+	if(lastFound == NOT_FOUND()) {
+		return ERR_NOT_FOUND;
+	}
+	// Resumes search from lastFound. Call findFirst to restart.
+
+	auto searchFrom = lastFound;
+	searchFrom++;
+	return _readFrom(*this, data, std::begin(_storage));
+}
+
+cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t& data) {
+	return ERR_NOT_FOUND;
 }
 
 // ------------- mock doesn't do anything -------------
@@ -223,25 +298,6 @@ cs_ret_code_t Storage::erasePages(const CS_TYPE doneEvent, void* startAddress, v
 }
 
 // ------------ not implemented ------------
-
-cs_ret_code_t Storage::read(cs_state_data_t& data) {
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t& data) {
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t Storage::readFirst(cs_state_data_t& data) {
-
-	return ERR_SUCCESS;
-}
-
-cs_ret_code_t Storage::readNext(cs_state_data_t& data) {
-	return ERR_SUCCESS;
-}
-
-
 
 void Storage::handleFileStorageEvent(fds_evt_t const* p_fds_evt) {}
 void Storage::handleFlashOperationSuccess() {}
