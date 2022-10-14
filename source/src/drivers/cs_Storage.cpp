@@ -882,10 +882,11 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const* p_fds_evt) {
 				event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE);
 				EventDispatcher::getInstance().dispatch(resetEvent);
 				return;
+			} else {
+				event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
+				EventDispatcher::getInstance().dispatch(event);
+				return;
 			}
-			event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
-			EventDispatcher::getInstance().dispatch(event);
-			break;
 		}
 		case FDS_ERR_OPERATION_TIMEOUT: {
 			LOGw("Garbage collection timeout");

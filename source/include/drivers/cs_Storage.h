@@ -11,7 +11,7 @@
 #include <components/libraries/fds/fds.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_Utils.h>
-
+#include <test/cs_TestAccess.h>
 
 #include <vector>
 
@@ -55,6 +55,7 @@ typedef void (*cs_storage_error_callback_t)(cs_storage_operation_t operation, CS
  * that writes to flash (like Flash Manager).
  */
 class Storage {
+	friend class TestAccess<Storage>;
 public:
 	/** Returns the singleton instance of this class
 	 *

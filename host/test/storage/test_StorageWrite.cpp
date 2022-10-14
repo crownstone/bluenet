@@ -14,13 +14,13 @@ int main() {
 	cs_state_id_t out;
 	cs_state_data_t dat;
 
-	auto& s = Storage::getInstance();
+	Storage& storage = Storage::getInstance();
 
-	s.write(dat); // ignored
+	storage.write(dat); // ignored
 
-	s.init();
+	storage.init();
 
-	if(s.findFirst(dat.type, out) != ERR_NOT_FOUND) {
+	if(storage.findFirst(dat.type, out) != ERR_NOT_FOUND) {
 		LOGw("writing before init should have been skipped");
 		testFailed |= true;
 	}
@@ -29,7 +29,7 @@ int main() {
 	std::vector<cs_state_id_t> ids = {0,1,1,2,3,4,7,9};
 	for (auto id : ids) {
 		dat.id = id;
-		s.write(dat);
+		storage.write(dat);
 	}
 
 	std::vector<cs_state_id_t> idsUnique;
@@ -41,8 +41,8 @@ int main() {
 
 	// storage should contain the unique entries in that order.
 	int expectedValueIndex = 0;
-	for (cs_ret_code_t retcode = s.findFirst(dat.type, out); retcode == ERR_SUCCESS;
-		 retcode               = s.findNext(dat.type, out)) {
+	for (cs_ret_code_t retcode = storage.findFirst(dat.type, out); retcode == ERR_SUCCESS;
+		 retcode               = storage.findNext(dat.type, out)) {
 		if (out != idsUnique[expectedValueIndex]){
 			LOGw("found entry: %u, expected %u", out, idsUnique[expectedValueIndex]);
 			testFailed |= true;
@@ -52,20 +52,20 @@ int main() {
 	}
 
 	for (int i = 0; i < 5; i++) {
-		if(s.findNext(dat.type, out) == ERR_SUCCESS) {
+		if(storage.findNext(dat.type, out) == ERR_SUCCESS) {
 			LOGw("a findFirst, findNext, ... sequence should not automatically restart");
 			testFailed |= true;
 		}
 	}
 
-	if(s.findFirst(dat.type, out) != ERR_SUCCESS) {
+	if(storage.findFirst(dat.type, out) != ERR_SUCCESS) {
 		LOGw("findFirst should return ERR_SUCCESS, since an object of given type is written to storage.");
 		testFailed |= true;
 	}
 
-	s.eraseAllPages();
+	storage.eraseAllPages();
 
-	if(s.findFirst(dat.type, out) != ERR_NOT_FOUND) {
+	if(storage.findFirst(dat.type, out) != ERR_NOT_FOUND) {
 		LOGw("findFirst should return ERR_NOT_FOUND, since an storage was cleared.");
 		testFailed |= true;
 	}
