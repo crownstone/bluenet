@@ -23,7 +23,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_GpRegRet.cpp")
 
 
 
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
+
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Watchdog.cpp")
 
