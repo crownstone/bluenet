@@ -19,6 +19,8 @@
 #include <testaccess/cs_SwitchBehaviour.h>
 #include <testaccess/cs_SwitchAggregator.h>
 #include <testaccess/cs_Crownstone.h>
+#include <testaccess/cs_SystemTime.h>
+
 
 #include <utils/cs_iostream.h>
 #include <utils/cs_PresenceBuilder.h>

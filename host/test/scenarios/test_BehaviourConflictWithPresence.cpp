@@ -8,6 +8,7 @@
 #include <utils/cs_checks.h>
 #include <testaccess/cs_PresenceDescription.h>
 #include <testaccess/cs_SwitchBehaviour.h>
+#include <testaccess/cs_Behaviour.h>
 #include <testaccess/cs_SystemTime.h>
 
 #include <behaviour/cs_BehaviourStore.h>
