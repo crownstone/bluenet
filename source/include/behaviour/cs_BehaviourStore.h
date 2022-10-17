@@ -122,9 +122,9 @@ private:
 	 */
 	void storeMasterHash();
 
-	void handleSaveBehaviour(event_t& evt);
-	void handleReplaceBehaviour(event_t& evt);
-	void handleRemoveBehaviour(event_t& evt);
+	BehaviourMutation handleSaveBehaviour(event_t& evt);
+	BehaviourMutation handleReplaceBehaviour(event_t& evt);
+	BehaviourMutation handleRemoveBehaviour(event_t& evt);
 	void handleGetBehaviour(event_t& evt);
 	void handleGetBehaviourIndices(event_t& evt);
 
@@ -165,7 +165,7 @@ private:
 	 */
 	size_t getBehaviourSize(SwitchBehaviour::Type type);
 
-	void dispatchBehaviourMutationEvent();
+	void dispatchBehaviourMutationEvent(BehaviourMutation mutation);
 
 	// checks intermediate state of handleReplaceBehaviour for consistency.
 	ErrorCodesGeneral replaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);

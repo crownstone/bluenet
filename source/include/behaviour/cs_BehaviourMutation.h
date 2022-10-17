@@ -13,11 +13,12 @@
  */
 class BehaviourMutation {
 public:
-	enum Mutation { NONE, REMOVE, ADD, UPDATE };
+	enum Mutation { NONE, REMOVE, ADD, UPDATE, CLEAR_ALL };
 
 	uint8_t _index;
 	Mutation _mutation;
 
-	BehaviourMutation() : _index(0xFF), _mutation(Mutation::NONE) {}
 	BehaviourMutation(uint8_t index, Mutation mutation) : _index(index), _mutation(mutation) {}
+	BehaviourMutation(Mutation mutation) : BehaviourMutation(0xFF, mutation) {}
+	BehaviourMutation() : BehaviourMutation(0xFF, Mutation::NONE) {}
 };

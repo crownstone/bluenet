@@ -34,7 +34,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(Behaviour* behaviour) {
 ErrorCodesGeneral BehaviourStore::replaceBehaviour(uint8_t index, Behaviour* behaviour) {
 	// This also checks the index.
 	auto retVal = removeBehaviour(index);
-	if (retVal == ERR_SUCCESS) {
+	if (retVal == ERR_SUCCESS || retVal == ERR_SUCCESS_NO_CHANGE) {
 		assignBehaviour(index, behaviour);
 		storeUpdate(index, behaviour);
 	}
@@ -48,18 +48,18 @@ Behaviour* BehaviourStore::getBehaviour(uint8_t index) {
 void BehaviourStore::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::CMD_ADD_BEHAVIOUR: {
-			handleSaveBehaviour(evt);
-			dispatchBehaviourMutationEvent();
+			BehaviourMutation mutation = handleSaveBehaviour(evt);
+			dispatchBehaviourMutationEvent(mutation);
 			break;
 		}
 		case CS_TYPE::CMD_REPLACE_BEHAVIOUR: {
-			handleReplaceBehaviour(evt);
-			dispatchBehaviourMutationEvent();
+			BehaviourMutation mutation = handleReplaceBehaviour(evt);
+			dispatchBehaviourMutationEvent(mutation);
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_BEHAVIOUR: {
-			handleRemoveBehaviour(evt);
-			dispatchBehaviourMutationEvent();
+			BehaviourMutation mutation = handleRemoveBehaviour(evt);
+			dispatchBehaviourMutationEvent(mutation);
 			break;
 		}
 		case CS_TYPE::CMD_GET_BEHAVIOUR: {
@@ -72,6 +72,8 @@ void BehaviourStore::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::CMD_CLEAR_ALL_BEHAVIOUR: {
 			clearActiveBehavioursArray();
+			BehaviourMutation mutation(BehaviourMutation::Mutation::CLEAR_ALL);
+			dispatchBehaviourMutationEvent(mutation);
 			break;
 		}
 		default: {
@@ -82,9 +84,10 @@ void BehaviourStore::handleEvent(event_t& evt) {
 
 // ==================== handler functions ====================
 
-void BehaviourStore::handleSaveBehaviour(event_t& evt) {
+BehaviourMutation BehaviourStore::handleSaveBehaviour(event_t& evt) {
 	evt.result.returnCode = ERR_UNSPECIFIED;
 	uint8_t result_index  = 0xFF;
+	BehaviourMutation resultingMutation;
 
 	// Check if the behaviour is already there.
 	for (uint8_t index = 0; index < MaxBehaviours; ++index) {
@@ -93,11 +96,16 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 			LOGBehaviourStoreInfo("Behaviour already exists at ind=%u", index);
 			result_index          = index;
 			evt.result.returnCode = ERR_SUCCESS;
+			resultingMutation = BehaviourMutation(index, BehaviourMutation::Mutation::NONE);
 			break;
 		}
 	}
 	if (evt.result.returnCode != ERR_SUCCESS) {
 		evt.result.returnCode = addBehaviour(evt.getData(), evt.size, result_index);
+		if (evt.result.returnCode == ERR_SUCCESS) {
+			// result_index is passed by reference
+			resultingMutation = BehaviourMutation(result_index, BehaviourMutation::Mutation::ADD);
+		}
 	}
 
 	// Fill return buffer if it's large enough.
@@ -106,6 +114,8 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 		*reinterpret_cast<uint32_t*>(evt.result.buf.data + 1) = calculateMasterHash();
 		evt.result.dataSize                                   = sizeof(uint8_t) + sizeof(uint32_t);
 	}
+
+	return resultingMutation;
 }
 
 void BehaviourStore::storeUpdate(uint8_t index, Behaviour* behaviour) {
@@ -237,14 +247,15 @@ ErrorCodesGeneral BehaviourStore::replaceParameterValidation(event_t& evt, uint8
 	return ERR_SUCCESS;
 }
 
-void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
+BehaviourMutation BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	const uint8_t indexSize = sizeof(uint8_t);
 	const uint8_t typeSize  = sizeof(uint8_t);
+	BehaviourMutation resultingMutation;
 
 	if (evt.size < indexSize + typeSize) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, evt.size, (indexSize + typeSize));
 		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return;
+		return resultingMutation;
 	}
 
 	uint8_t* dat         = static_cast<uint8_t*>(evt.data);
@@ -259,6 +270,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 		removeBehaviour(index);
 		assignBehaviour(index, behaviour);
 		storeUpdate(index, type, dat + indexSize, evt.size - indexSize);
+		resultingMutation = BehaviourMutation(index, BehaviourMutation::Mutation::UPDATE);
 	}
 	evt.result.returnCode = retCode;
 
@@ -268,13 +280,22 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 		*reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = calculateMasterHash();
 		evt.result.dataSize                                                 = sizeof(uint8_t) + sizeof(uint32_t);
 	}
+
+	return resultingMutation;
 }
 
-void BehaviourStore::handleRemoveBehaviour(event_t& evt) {
+BehaviourMutation BehaviourStore::handleRemoveBehaviour(event_t& evt) {
 	uint8_t index = *reinterpret_cast<TYPIFY(CMD_REMOVE_BEHAVIOUR)*>(evt.data);
+	BehaviourMutation resultingMutation(index, BehaviourMutation::Mutation::REMOVE);
 	LOGBehaviourStoreInfo("Remove behaviour %u", index);
 
 	evt.result.returnCode = removeBehaviour(index);
+
+	if(evt.result.returnCode == ERR_SUCCESS_NO_CHANGE) {
+		resultingMutation = BehaviourMutation(index, BehaviourMutation::Mutation::NONE);
+		// stick to the protocol.
+		evt.result.returnCode = ERR_SUCCESS;
+	}
 
 	// Fill return buffer if it's large enough.
 	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
@@ -282,6 +303,8 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt) {
 		*reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = calculateMasterHash();
 		evt.result.dataSize                                                 = sizeof(uint8_t) + sizeof(uint32_t);
 	}
+
+	return resultingMutation;
 }
 
 void BehaviourStore::handleGetBehaviour(event_t& evt) {
@@ -355,8 +378,8 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt) {
 	evt.result.returnCode = ERR_SUCCESS;
 }
 
-void BehaviourStore::dispatchBehaviourMutationEvent() {
-	event_t evt(CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION, nullptr, 0);
+void BehaviourStore::dispatchBehaviourMutationEvent(BehaviourMutation mutation) {
+	event_t evt(CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION, &mutation, sizeof(mutation));
 	evt.dispatch();
 }
 
@@ -368,7 +391,7 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 	}
 	if (activeBehaviours[index] == nullptr) {
 		LOGBehaviourStoreDebug("Already removed");
-		return ERR_SUCCESS;
+		return ERR_SUCCESS_NO_CHANGE;
 	}
 	auto type = activeBehaviours[index]->getType();
 
