@@ -15,6 +15,13 @@ template <>
 class TestAccess<BehaviourStore> {
 public:
 	static void clearActiveBehavioursArray(BehaviourStore& store) { store.clearActiveBehavioursArray(); }
+
+	// TODO: implement
+	static void replaceBehaviour(uint8_t index, SwitchBehaviour s ) {
+		auto eventdata = std::make_tuple<uint8_t, SwitchBehaviour> {};
+	}
+
+
 	// prints list of valid behaviours
 	static std::ostream& toStream(
 			std::ostream& out, BehaviourStore& store, Time currentTime, PresenceStateDescription currentPresence) {
