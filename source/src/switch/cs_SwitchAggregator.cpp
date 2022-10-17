@@ -29,6 +29,7 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	_smartSwitch.init(board);
 
 	_smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
+		LOGSwitchAggregatorEvent("onUnexpectedStateChange lambda called");
 		handleSwitchStateChange(newState);
 	});
 

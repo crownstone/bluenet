@@ -24,14 +24,10 @@
 #error "TICK_INTERVAL_MS must not be larger than STATE_RETRY_STORE_DELAY_MS"
 #endif
 
-// Define to get debug logs.
-//#define CS_STATE_DEBUG_LOGS
+// Define to get more debug logs.
+#undef CS_STATE_DEBUG_LOGS
 
-#ifdef CS_STATE_DEBUG_LOGS
 #define LOGStateDebug LOGd
-#else
-#define LOGStateDebug LOGnone
-#endif
 
 void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
 	State::getInstance().handleStorageError(operation, type, id);

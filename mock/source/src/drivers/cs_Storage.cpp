@@ -11,6 +11,9 @@
 #include <logging/cs_Logger.h>
 #include <cfg/cs_Strings.h>
 
+
+#define LOGStorageMockDebug LOGd
+
 // this contains the data of the static storage instance.
 std::vector<cs_state_data_t> _storage;
 
@@ -172,7 +175,7 @@ int eraseIf(C& container, const Pred& pred) {
 // ------------- implemented -------------
 
 cs_ret_code_t Storage::init() {
-	LOGi("Storage::init()");
+	LOGi("Mock Storage::init()");
 	_initialized = true;
 	return ERR_SUCCESS;
 }
@@ -192,6 +195,7 @@ cs_ret_code_t Storage::write(const cs_state_data_t& data) {
 		LOGd("removed %u old entrie(s)", removeCount);
 	}
 
+	LOGStorageMockDebug("Storage::write pushing back data.");
 	_storage.push_back(data);
 
 	return ERR_SUCCESS;
