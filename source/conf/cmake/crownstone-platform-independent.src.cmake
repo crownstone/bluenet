@@ -35,6 +35,9 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/presence/cs_PresencePredicate.cpp")
 
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_UartProtocol.cpp")
 
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_StateData.cpp")
+
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SafeSwitch.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SmartSwitch.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/switch/cs_SwitchAggregator.cpp")
