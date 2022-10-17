@@ -8,10 +8,8 @@
 #include <utils/cs_checks.h>
 #include <testaccess/cs_PresenceDescription.h>
 #include <testaccess/cs_SwitchBehaviour.h>
-#include <testaccess/cs_Behaviour.h>
 #include <testaccess/cs_SystemTime.h>
-
-#include <behaviour/cs_BehaviourStore.h>
+#include <testaccess/cs_BehaviourStore.h>
 #include <presence/cs_PresenceHandler.h>
 #include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventDispatcher.h>
