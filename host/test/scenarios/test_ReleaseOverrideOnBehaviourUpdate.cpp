@@ -33,12 +33,9 @@
 #include <storage/cs_State.h>
 
 
-/**
- * Set or clear override and tick to ensure all internals of the aggregator are updated.
- */
-void setOverride(TestAccess<SwitchAggregator>& testSwitchAggregator, std::optional<uint8_t> val) {
-	testSwitchAggregator.setOverrideState(val);
-	TestAccess<SystemTime>::fastForwardS(1);
+void fastForwardS(int timeS) {
+	// (SystemTime::tick and Crownstone::tick are not the same.)
+	TestAccess<SystemTime>::fastForwardS(timeS);
 	TestAccess<Crownstone>::tick();
 }
 
@@ -130,14 +127,22 @@ int main() {
 	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
 	if(!checkCase(_behaviourHandler, _behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
-	setOverride(testSwitchAggregator, 50);
-	std::cout << "overridestate:" << testSwitchAggregator.getOverrideState() << std::endl;
+	// set override and presence
+	_presenceHandler.registerPresence(PresenceHandler::ProfileLocation{.profile = 0, .location = 0});
+	testSwitchAggregator.setOverrideState({50});
+	fastForwardS(1);
 
     // add behaviour which requires absence
+	_behaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
+	if(!checkCase(_behaviourHandler, _behaviourStore, requiresNooneInSphere._index, absent(), __LINE__)) return 1;
+	if(!checkCase(_behaviourHandler, _behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
+
+	if(testSwitchAggregator.getOverrideState() != std::nullopt) {
+		LOGw("uploading an immediately active behaviour should clear the override state.");
+		return 1;
+	}
 
     // add behaviour which requires presence (shouldn't release override?)
 
-	std::cout << "end of test" << std::endl;
-	return 1;
     return 0;
 }

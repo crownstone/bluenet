@@ -48,7 +48,7 @@ public:
 	std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 
 	/**
-	 * Validates and administrate a presence update.
+	 * Validates and administrate a presence update. May include sending a EVT_PRESENCE_CHANGE
 	 */
 	void registerPresence(ProfileLocation profileLocation);
 

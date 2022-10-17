@@ -39,7 +39,13 @@ std::ostream& operator<<(std::ostream& out, Time t);
 template<class T>
 std::ostream & operator<< (std::ostream &out, std::optional<T> p_opt) {
     if (p_opt) {
-    	return out << "{" << (std::is_unsigned<T>::value ? +p_opt.value() : p_opt.value()) << "}";
+    	out << "{" ;
+    	if constexpr( std::is_unsigned<T>::value) {
+    		out << +p_opt.value();
+    	} else {
+    		out << p_opt.value();
+    	}
+    	return out << "}";
     } else {
     	return out << "std::nullopt";
     }
