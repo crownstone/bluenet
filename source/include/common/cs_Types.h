@@ -9,6 +9,7 @@
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
+#include <behaviour/cs_BehaviourMutation.h>
 #include <localisation/cs_TrackableEvent.h>
 #include <mesh/cs_MeshMsgEvent.h>
 #include <protocol/cs_AssetFilterPackets.h>
@@ -647,7 +648,7 @@ typedef uint8_t TYPIFY(CMD_REMOVE_BEHAVIOUR);  // index
 typedef uint8_t TYPIFY(CMD_GET_BEHAVIOUR);     // index
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
-typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
+typedef BehaviourMutation TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
 
 // Localisation
