@@ -379,6 +379,7 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt) {
 }
 
 void BehaviourStore::dispatchBehaviourMutationEvent(BehaviourMutation mutation) {
+	LOGd("BehaviourStore::dispatchBehaviourMutationEvent");
 	event_t evt(CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION, &mutation, sizeof(mutation));
 	evt.dispatch();
 }

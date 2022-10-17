@@ -156,10 +156,27 @@ void SwitchAggregator::handleEvent(event_t& event) {
 		return;
 	}
 
-	handleStateIntentionEvents(event);
+	if(handleStateIntentionEvents(event)) {
+		return;
+	}
 
-	if (event.type == CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG) {
-		handleGetBehaviourDebug(event);
+	if(handleBehaviourEvents(event)) {
+		return;
+	}
+}
+
+bool SwitchAggregator::handleBehaviourEvents(event_t& event) {
+
+	switch(event.type ){
+		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
+			handleGetBehaviourDebug(event);
+			return true;
+		}
+		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION: {
+			LOGd("SwitchAggregator::handleBehaviourEvents EVT_BEHAVIOURSTORE_MUTATION");
+			return true;
+		}
+		default: return false;
 	}
 }
 

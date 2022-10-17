@@ -170,6 +170,12 @@ private:
 	 */
 	bool handleSwitchAggregatorCommand(event_t& evt);
 
+	/**
+	 * CMD_GET_BEHAVIOUR_DEBUG
+	 * EVT_BEHAVIOURSTORE_MUTATION
+	 */
+	bool handleBehaviourEvents(event_t& evt);
+
 	void handleSwitchStateChange(uint8_t newIntensity);
 
 	// ================================== Misc ==================================
