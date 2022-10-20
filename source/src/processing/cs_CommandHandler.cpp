@@ -231,6 +231,8 @@ void CommandHandler::_handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_ENABLE, commandData, source, result);
 		case CTRL_CMD_MICROAPP_DISABLE:
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_DISABLE, commandData, source, result);
+		case CTRL_CMD_MICROAPP_MESSAGE:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_MESSAGE, commandData, source, result);
 		case CTRL_CMD_CLEAN_FLASH:
 			return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
 		case CTRL_CMD_FILTER_UPLOAD:
@@ -1125,6 +1127,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_MICROAPP_REMOVE:
 		case CTRL_CMD_MICROAPP_ENABLE:
 		case CTRL_CMD_MICROAPP_DISABLE:
+		case CTRL_CMD_MICROAPP_MESSAGE:
 		case CTRL_CMD_CLEAN_FLASH:
 		case CTRL_CMD_FILTER_UPLOAD:
 		case CTRL_CMD_FILTER_REMOVE:

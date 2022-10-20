@@ -92,18 +92,45 @@ void MicroappInterruptHandler::handleEvent(event_t& event) {
 			break;
 		}
 	}
+	onBluenetEvent(event);
 }
 
-uint8_t* MicroappInterruptHandler::getOutputBuffer(MicroappSdkMessageType type, uint8_t id) {
-	if (!MicroappController::getInstance().allowSoftInterrupts()) {
+uint8_t* MicroappInterruptHandler::getOutputBuffer(MicroappSdkType type, uint8_t id) {
+	if (!MicroappController::getInstance().allowSoftInterrupts(type, id)) {
 		LogMicroappInterrupDebug("New interrupts blocked, ignore event");
 		return nullptr;
 	}
-	if (!MicroappController::getInstance().isSoftInterruptRegistered(type, id)) {
-		LogMicroappInterrupDebug("No interrupt registered");
-		return nullptr;
-	}
 	return MicroappController::getInstance().getOutputMicroappBuffer();
+}
+
+cs_ret_code_t MicroappInterruptHandler::onControlCommandMessage(uint8_t appIndex, const cs_data_t& message, cs_data_t& resultBuffer, uint16_t& resultSize) {
+	if (message.len == 0) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	if (message.len > MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+
+	if (!MicroappController::getInstance().getRegisteredInterrupt(CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG)) {
+		return ERR_NOT_STARTED;
+	}
+	if (!MicroappController::getInstance().allowSoftInterrupts(CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG)) {
+		return ERR_BUSY;
+	}
+
+	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG);
+	if (outputBuffer == nullptr) {
+		return ERR_UNSPECIFIED;
+	}
+
+	auto packet = reinterpret_cast<microapp_sdk_message_t*>(outputBuffer);
+	packet->header.messageType = CS_MICROAPP_SDK_TYPE_MESSAGE;
+	packet->type = CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG;
+	packet->receivedMessage.size = message.len;
+	memcpy(packet->receivedMessage.data, message.data, packet->receivedMessage.size);
+
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG);
+	return ERR_SUCCESS;
 }
 
 /*
@@ -125,7 +152,7 @@ void MicroappInterruptHandler::onGpioUpdate(cs_gpio_update_t& event) {
 	pin->pin                = interruptPin;
 
 	LogMicroappInterrupDebug("Incoming GPIO interrupt for microapp on virtual pin %i", interruptPin);
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_PIN, interruptPin);
 }
 
 /*
@@ -137,12 +164,78 @@ void MicroappInterruptHandler::onDeviceScanned(scanned_device_t& dev) {
 		return;
 	}
 
-#ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
-	// Throttle by rssi by default to limit number of scanned devices forwarded
-	if (dev.rssi < -50) {
-		return;
+	auto filter = MicroappController::getInstance().getScanFilter();
+	switch (filter.type) {
+		case CS_MICROAPP_SDK_BLE_SCAN_FILTER_RSSI: {
+			if (dev.rssi < filter.rssi) {
+				return;
+			}
+			break;
+		}
+		case CS_MICROAPP_SDK_BLE_SCAN_FILTER_MAC: {
+			if (memcmp(filter.mac, dev.address, MAC_ADDRESS_LEN) != 0) {
+				return;
+			}
+			break;
+		}
+		case CS_MICROAPP_SDK_BLE_SCAN_FILTER_NAME: {
+			bool passedFilter = false;
+			cs_data_t advData;
+			cs_ret_code_t retCode;
+
+			retCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_SHORT_LOCAL_NAME, dev.data, dev.dataSize, &advData);
+			if (retCode == ERR_SUCCESS && filter.name.size == advData.len) {
+				passedFilter = (memcmp(filter.name.name, advData.data, advData.len) == 0);
+			}
+
+			retCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_COMPLETE_LOCAL_NAME, dev.data, dev.dataSize, &advData);
+			if (retCode == ERR_SUCCESS && filter.name.size == advData.len) {
+				passedFilter = (memcmp(filter.name.name, advData.data, advData.len) == 0);
+			}
+
+			if (!passedFilter) {
+				return;
+			}
+			break;
+		}
+		case CS_MICROAPP_SDK_BLE_SCAN_FILTER_SERVICE_16_BIT: {
+			bool passedFilter = false;
+			cs_data_t advData;
+			cs_ret_code_t retCode;
+			uint16_t* services;
+
+			retCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, dev.data, dev.dataSize, &advData);
+			services = reinterpret_cast<uint16_t*>(advData.data);
+			if (retCode == ERR_SUCCESS) {
+				for (uint8_t i = 0; i < advData.len / sizeof(services[0]); ++i) {
+					if (services[i] == filter.service16bit) {
+						passedFilter = true;
+						break;
+					}
+				}
+			}
+
+			retCode = CsUtils::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE, dev.data, dev.dataSize, &advData);
+			services = reinterpret_cast<uint16_t*>(advData.data);
+			if (retCode == ERR_SUCCESS) {
+				for (uint8_t i = 0; i < advData.len / sizeof(services[0]); ++i) {
+					if (services[i] == filter.service16bit) {
+						passedFilter = true;
+						break;
+					}
+				}
+			}
+
+			if (!passedFilter) {
+				return;
+			}
+			break;
+		}
+		default: {
+			break;
+		}
 	}
-#endif
+
 	LogMicroappInterrupDebug("onDeviceScanned");
 
 	// Write bluetooth device to buffer
@@ -167,7 +260,7 @@ void MicroappInterruptHandler::onDeviceScanned(scanned_device_t& dev) {
 	memcpy(ble->scan.eventScan.data, dev.data, dev.dataSize);
 
 	LogMicroappInterrupDebug("Incoming BLE scanned device for microapp");
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_SCAN);
 }
 
 /*
@@ -205,7 +298,7 @@ void MicroappInterruptHandler::onReceivedMeshMessage(MeshMsgEvent& event) {
 	memcpy(meshMsg->data, event.msg.data, event.msg.len);
 
 	LogMicroappInterrupDebug("Incoming mesh message for microapp");
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESH, CS_MICROAPP_SDK_MESH_READ);
 }
 
 void MicroappInterruptHandler::onBleCentralConnectResult(cs_ret_code_t& retCode) {
@@ -222,7 +315,7 @@ void MicroappInterruptHandler::onBleCentralConnectResult(cs_ret_code_t& retCode)
 	ble->central.connectionHandle    = Stack::getInstance().getConnectionHandle();
 	ble->central.eventConnect.result = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBleCentralDisconnected() {
@@ -238,7 +331,7 @@ void MicroappInterruptHandler::onBleCentralDisconnected() {
 	ble->central.type             = CS_MICROAPP_SDK_BLE_CENTRAL_EVENT_DISCONNECT;
 	ble->central.connectionHandle = Stack::getInstance().getConnectionHandle();
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBleCentralDiscovery(ble_central_discovery_t& event) {
@@ -263,7 +356,7 @@ void MicroappInterruptHandler::onBleCentralDiscovery(ble_central_discovery_t& ev
 	ble->central.eventDiscover.options.notify          = event.flags.notify;
 	ble->central.eventDiscover.options.indicate        = event.flags.indicate;
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBleCentralDiscoveryResult(cs_ret_code_t& retCode) {
@@ -280,7 +373,7 @@ void MicroappInterruptHandler::onBleCentralDiscoveryResult(cs_ret_code_t& retCod
 	ble->central.connectionHandle         = Stack::getInstance().getConnectionHandle();
 	ble->central.eventDiscoverDone.result = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBleCentralWriteResult(ble_central_write_result_t& event) {
@@ -298,7 +391,7 @@ void MicroappInterruptHandler::onBleCentralWriteResult(ble_central_write_result_
 	ble->central.eventWrite.handle      = event.handle;
 	ble->central.eventWrite.result      = MicroappSdkUtil::bluenetResultToMicroapp(event.retCode);
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBleCentralReadResult(ble_central_read_result_t& event) {
@@ -319,7 +412,7 @@ void MicroappInterruptHandler::onBleCentralReadResult(ble_central_read_result_t&
 	ble->central.eventRead.size        = std::min(event.data.len, MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE);
 	memcpy(ble->central.eventRead.data, event.data.data, ble->central.eventRead.size);
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBleCentralNotification(ble_central_notification_t& event) {
@@ -340,7 +433,7 @@ void MicroappInterruptHandler::onBleCentralNotification(ble_central_notification
 			std::min(event.data.len, MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE);
 	memcpy(ble->central.eventNotification.data, event.data.data, ble->central.eventNotification.size);
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_CENTRAL);
 }
 
 void MicroappInterruptHandler::onBlePeripheralConnect(ble_connected_t& event) {
@@ -359,7 +452,7 @@ void MicroappInterruptHandler::onBlePeripheralConnect(ble_connected_t& event) {
 	ble->peripheral.eventConnect.address.type = event.address.addressType;
 	memcpy(ble->peripheral.eventConnect.address.address, event.address.address, sizeof(ble->peripheral.eventConnect.address.address));
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 }
 
 void MicroappInterruptHandler::onBlePeripheralDisconnect(uint16_t connectionHandle) {
@@ -375,7 +468,7 @@ void MicroappInterruptHandler::onBlePeripheralDisconnect(uint16_t connectionHand
 	ble->peripheral.type             = CS_MICROAPP_SDK_BLE_PERIPHERAL_EVENT_DISCONNECT;
 	ble->peripheral.connectionHandle = connectionHandle;
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 }
 
 void MicroappInterruptHandler::onBlePeripheralWrite(
@@ -394,7 +487,7 @@ void MicroappInterruptHandler::onBlePeripheralWrite(
 	ble->peripheral.handle           = characteristicHandle;
 	ble->peripheral.eventWrite.size  = value.len;
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 }
 
 void MicroappInterruptHandler::onBlePeripheralSubscription(
@@ -417,7 +510,7 @@ void MicroappInterruptHandler::onBlePeripheralSubscription(
 	ble->peripheral.connectionHandle = connectionHandle;
 	ble->peripheral.handle           = characteristicHandle;
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
 }
 
 void MicroappInterruptHandler::onBlePeripheralNotififyDone(uint16_t connectionHandle, uint16_t characteristicHandle) {
@@ -435,5 +528,25 @@ void MicroappInterruptHandler::onBlePeripheralNotififyDone(uint16_t connectionHa
 	ble->peripheral.connectionHandle = connectionHandle;
 	ble->peripheral.handle           = characteristicHandle;
 
-	MicroappController::getInstance().generateSoftInterrupt();
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
+}
+
+void MicroappInterruptHandler::onBluenetEvent(event_t& event) {
+	if (!MicroappController::getInstance().isEventInterruptRegistered(event.type)) {
+		return;
+	}
+
+	LogMicroappInterrupDebug("onBluenetEvent type=%u", event.type);
+	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_BLUENET_EVENT, 0);
+	if (outputBuffer == nullptr) {
+		return;
+	}
+
+	auto packet                = reinterpret_cast<microapp_sdk_bluenet_event_t*>(outputBuffer);
+	packet->header.messageType = CS_MICROAPP_SDK_TYPE_BLUENET_EVENT;
+	packet->type               = CS_MICROAPP_SDK_BLUENET_EVENT_EVENT;
+	packet->eventType          = static_cast<uint16_t>(event.type);
+	packet->event.size         = std::min(event.size, MICROAPP_SDK_BLUENET_EVENT_EVENT_MAX_SIZE);
+	memcpy(packet->event.data, event.data, packet->event.size);
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLUENET_EVENT, 0);
 }

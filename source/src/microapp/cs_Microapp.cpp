@@ -418,6 +418,20 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 	return storeState(index);
 }
 
+cs_ret_code_t Microapp::handleMessage(microapp_ctrl_message_t* packet, size16_t size, cs_result_t& result) {
+	LOGMicroappInfo("handleMessage appIndex=%u", packet->header.index);
+	cs_ret_code_t retCode = checkHeader(&packet->header);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	return MicroappInterruptHandler::getInstance().onControlCommandMessage(
+			packet->header.index,
+			cs_data_t(packet->payload, size - offsetof(microapp_ctrl_message_t, payload)),
+			result.buf,
+			result.dataSize);
+}
+
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
 	LOGMicroappDebug("checkHeader %u", packet->index);
 	if (packet->protocol != MICROAPP_CONTROL_COMMAND_PROTOCOL) {
@@ -524,6 +538,11 @@ void Microapp::handleEvent(event_t& evt) {
 		case CS_TYPE::CMD_MICROAPP_DISABLE: {
 			auto packet           = CS_TYPE_CAST(CMD_MICROAPP_DISABLE, evt.data);
 			evt.result.returnCode = handleDisable(packet);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_MESSAGE: {
+			auto data = CS_TYPE_CAST(CMD_MICROAPP_MESSAGE, evt.data);
+			evt.result.returnCode = handleMessage(data, evt.size, evt.result);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

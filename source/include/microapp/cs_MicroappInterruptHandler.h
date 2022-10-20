@@ -37,7 +37,7 @@ private:
 	 * @return nullptr       When no interrupt can be sent.
 	 * @return buffer        The buffer to fill for the interrupt.
 	 */
-	uint8_t* getOutputBuffer(MicroappSdkMessageType type, uint8_t id);
+	uint8_t* getOutputBuffer(MicroappSdkType type, uint8_t id);
 
 	/**
 	 * Handle a GPIO event
@@ -68,10 +68,17 @@ private:
 	void onBlePeripheralConnect(ble_connected_t& event);
 	void onBlePeripheralDisconnect(uint16_t connectionHandle);
 
+	void onBluenetEvent(event_t& event);
+
 public:
 	void onBlePeripheralWrite(uint16_t connectionHandle, uint16_t characteristicHandle, cs_data_t value);
 	void onBlePeripheralSubscription(uint16_t connectionHandle, uint16_t characteristicHandle, bool subscribed);
 	void onBlePeripheralNotififyDone(uint16_t connectionHandle, uint16_t characteristicHandle);
+
+	/**
+	 * Handle a control command message.
+	 */
+	cs_ret_code_t onControlCommandMessage(uint8_t appIndex, const cs_data_t& message, cs_data_t& resultBuffer, uint16_t& resultSize);
 
 	/**
 	 * Handle events

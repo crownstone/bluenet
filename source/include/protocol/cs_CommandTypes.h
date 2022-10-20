@@ -70,6 +70,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_MICROAPP_REMOVE          = 93,
 	CTRL_CMD_MICROAPP_ENABLE          = 94,
 	CTRL_CMD_MICROAPP_DISABLE         = 95,
+	CTRL_CMD_MICROAPP_MESSAGE         = 96,
 
 	CTRL_CMD_CLEAN_FLASH              = 100,
 

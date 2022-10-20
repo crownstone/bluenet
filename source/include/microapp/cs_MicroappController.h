@@ -38,17 +38,15 @@ struct microapp_coroutine_args_t {
 };
 
 /**
- * @struct microapp_soft_interrupt_registration_t
- * Struct for keeping track of registered interrupts from the microapp
- *
- * @var microapp_soft_interrupt_registration_t::registered indicates whether a registration slot is filled.
- * @var microapp_soft_interrupt_registration_t::type       indicates the message type for the interrupt
- * @var microapp_soft_interrupt_registration_t::id         unique identifier for interrupt registrations
+ * Struct for keeping track of registered interrupts from the microapp.
  */
 struct microapp_soft_interrupt_registration_t {
-	bool registered             = false;
-	MicroappSdkMessageType type = CS_MICROAPP_SDK_TYPE_NONE;
-	uint8_t id                  = 0;
+	//! Main type of registered interrupt. Set to CS_MICROAPP_SDK_TYPE_NONE when this slot is not filled.
+	MicroappSdkType type = CS_MICROAPP_SDK_TYPE_NONE;
+	//! Sub type of the registered interrupt.
+	uint8_t id           = 0;
+	//! Counter that keeps up how often an interrupt of this type has been called within a tick.
+	int8_t counter       = 0;
 };
 
 /**
@@ -84,7 +82,7 @@ private:
 	void operator=(MicroappController const&);
 
 	/**
-	 * Limit the number of interrupts in a tick. (if -1 there is no limit)
+	 * Limit the number of interrupts in a tick.
 	 */
 	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK = 10;
 
@@ -99,24 +97,27 @@ private:
 	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS = 10;
 
 	/**
+	 * The maximum number of registered bluenet event interrupts.
+	 */
+	static const uint8_t MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS = 10;
+
+	/**
 	 * Buffer for keeping track of registered interrupts
 	 */
 	microapp_soft_interrupt_registration_t _softInterruptRegistrations[MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS];
 
-	/*
-	 * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can
-	 * later be used to get information back and forth between microapp and bluenet.
+	/**
+	 * Keep up registered bluenet event interrupt registrations.
 	 */
+	CS_TYPE _eventInterruptRegistrations[MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS];
+
+	//! Keep up the current scan filter.
+	microapp_sdk_ble_scan_filter_t _scanFilter = { .type = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE, .rssi = 0 };
 
 	/**
 	 * To throttle the ticks themselves
 	 */
 	uint8_t _tickCounter                    = 0;
-
-	/**
-	 * Counter for interrupts within a tick. Limited to MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK
-	 */
-	int8_t _softInterruptCounter            = 0;
 
 	/**
 	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
@@ -222,17 +223,41 @@ public:
 	/**
 	 * Register interrupts that allow generation of interrupts to the microapp
 	 */
-	cs_ret_code_t registerSoftInterrupt(MicroappSdkMessageType type, uint8_t id);
+	cs_ret_code_t registerSoftInterrupt(MicroappSdkType type, uint8_t id);
 
 	/**
-	 * Checks whether an interrupt registration already exists
+	 * Get the registered soft interrupt of given type.
+	 *
+	 * @return    Null pointer when the given type is not registered.
+	 * @return    The registered interrupt of the given type.
 	 */
-	bool isSoftInterruptRegistered(MicroappSdkMessageType type, uint8_t id);
+	microapp_soft_interrupt_registration_t* getRegisteredInterrupt(MicroappSdkType type, uint8_t id);
 
 	/**
 	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
 	 */
-	bool allowSoftInterrupts();
+	bool allowSoftInterrupts(MicroappSdkType type, uint8_t id);
+
+	/**
+	 * Register interrupts for bluenet events.
+	 */
+	cs_ret_code_t registerBluenetEventInterrupt(CS_TYPE eventType);
+
+	/**
+	 * Returns true when given bluenet event type is registered as interrupt.
+	 */
+	bool isEventInterruptRegistered(CS_TYPE type);
+
+	/**
+	 * Set a scan filter.
+	 * Validity of the filter is not checked.
+	 */
+	cs_ret_code_t setScanFilter(microapp_sdk_ble_scan_filter_t& filter);
+
+	/**
+	 * Get the current scan filter.
+	 */
+	microapp_sdk_ble_scan_filter_t& getScanFilter();
 
 	/**
 	 * Set the number of empty interrupt slots
@@ -249,7 +274,7 @@ public:
 	/**
 	 * Call the microapp in an interrupt context
 	 */
-	void generateSoftInterrupt();
+	void generateSoftInterrupt(MicroappSdkType type, uint8_t id);
 
 	/**
 	 * Get operating state from IPC ram.
