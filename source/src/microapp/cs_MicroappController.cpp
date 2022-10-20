@@ -22,42 +22,13 @@
 #define LogMicroappControllerDebug LOGd
 #define LogMicroappControllerVerbose LOGvv
 
-/**
- * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
- * microapp can be started from the very first address after the header. The ResetHandler is written to that position.
- * This is done in linker scripts. If something goes off in the microapp in the startup code it might be convenient to
- * immediately call a particular function in the microapp. This address can be also the very first address but it can
- * just as well be in the middle of the microapp binary. Default is 0.
- */
-#define DEVELOPER_OPTION_USE_FUNCTION_CALL 0
-
-/*
- * Overwrite the address that is read from the microapp header (the offset field) by the following hardcoded address.
- * The default behaviour has this macro undefined.
- */
-#define DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS 0x69014
-#undef DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS
-
-/*
- * Use a dummy callback in bluenet itself (no microapp is required in that case) by setting this to 1. Default is 0.
- */
-#define DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET 0
-
-/*
- * Disable coroutines and use direct calls by setting this macro to 1. Default is 0.
- */
-#define DEVELOPER_OPTION_DISABLE_COROUTINE 0
-
 extern "C" {
 
 void updateIoBuffers(uint8_t appIndex, bluenet_io_buffers_t* ioBuffers) {
-	// TODO: This runs in microapp context, can we do logs here?
-	LogMicroappControllerVerbose("updateIoBuffers index=%u", appIndex);
-	microapp_coroutine_args_t* args = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArguments());
+	// This runs in microapp context, so no logs and no variables on stack.
 	switch (appIndex) {
 		case 0: {
-			args->ioBuffers = ioBuffers;
-			LogMicroappControllerVerbose("ioBuffers=[%p %p]", ioBuffers->microapp2bluenet.payload, ioBuffers->bluenet2microapp.payload);
+			reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers = ioBuffers;
 			break;
 		}
 		// potentially more microapps here
@@ -77,64 +48,23 @@ microapp_sdk_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* ioB
 	switch (opcode) {
 		case CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER: {
 			updateIoBuffers(0, ioBuffers);
-			[[fallthrough]];
+			break;
 		}
 		case CS_MICROAPP_CALLBACK_SIGNAL: {
-#if DEVELOPER_OPTION_DISABLE_COROUTINE == 1
-			LOGi("Do not yield");
-#else
-			yieldCoroutine();
-#endif
 			break;
 		}
 		default: {
-			// TODO: shouldn't we yield here as well?
 			LOGe("Unknown opcode %u", opcode);
 		}
 	}
-	// TODO: this result code is always success, not used and not checked, shall we remove it?
+	yieldCoroutine();
 	return CS_MICROAPP_SDK_ACK_SUCCESS;
 }
 
-#ifdef DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET
-/*
- * Helper function that does not go back and forth to the microapp and can be used to test if the coroutines and
- * callbacks are working properly without a microapp present.
- */
-void microappCallbackDummy() {
-	while (1) {
-		// just some random data array
-		bluenet_io_buffers_t io_buffers;
-		// fake setup or loop yields
-		io_buffers.microapp2bluenet.payload[0] = CS_MICROAPP_SDK_TYPE_YIELD;
-		// Get the ram data of ourselves.
-		bluenet2microapp_ipcdata_t ipc_data;
-		uint8_t dataSize;
-		getRamData(IPC_INDEX_BLUENET_TO_MICROAPP, (uint8_t*)&ipc_data, &dataSize, sizeof(bluenet2microapp_ipcdata_t));
-
-		// Perform the actual callback. Should call microappCallback and yield.
-		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffers);
-	}
-}
-#endif
-
 void jumpToAddress(uintptr_t address) {
-#ifdef DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS
-	address = DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS;
-#endif
-#if DEVELOPER_OPTION_USE_FUNCTION_CALL == 1
-	// You have to know which function you jump to, here we assume a function returning void and no arguments.
-	// We also have to add a 1 for thumb mode
-	void (*func)() = (void (*)())(address + 1);
-	LOGi("Call function at address: 0x%p", func);
-	(*func)();
-#else
-	// TODO: runs in microapp context, can we do logs here?
-	void* ptr = (void*)address;
-	LogMicroappControllerDebug("Jump to address: %p", ptr);
-	goto* ptr;
+	// This runs in microapp context, so no logs and no variables on stack.
+	goto *(void*)address;
 	LOGe("Shouldn't end up here");
-#endif
 }
 
 /*
@@ -148,17 +78,9 @@ void jumpToAddress(uintptr_t address) {
  * @param[in] void *args    Arguments provided when starting the coroutine.
  */
 void goIntoMicroapp(void* args) {
+	// This runs in microapp context, so no logs and no variables on stack.
+	jumpToAddress(reinterpret_cast<microapp_coroutine_args_t*>(args)->entry);
 
-#if DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET == 1
-	LOGi("Call main: %p", &microappCallbackDummy);
-	microappCallbackDummy();
-#else
-	// TODO: this is microapp context, but this reads data from bluenet stack (args == &_sharedState).
-	// Also, can we log before the jump?
-	microapp_coroutine_args_t* coargs = (microapp_coroutine_args_t*)args;
-	LogMicroappControllerDebug("Within coroutine, call main: %p", coargs->entry);
-	jumpToAddress(coargs->entry);
-#endif
 	// The coroutine should never return. Incorrectly written microapp!
 	LOGe("Coroutine should never return. We should not come here!");
 }
@@ -170,7 +92,7 @@ void goIntoMicroapp(void* args) {
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
 MicroappController::MicroappController() {
-	LogMicroappControllerDebug("Microapp end is at %p", microappRamSection._end);
+	LogMicroappControllerDebug("Microapp ram start=%p end=%p", microappRamSection._start, microappRamSection._end);
 }
 
 /*
@@ -248,20 +170,26 @@ void MicroappController::startMicroapp(uint8_t appIndex) {
 	}
 
 	// The entry function is this immediate address (no correction for thumb mode)
-	_sharedState.entry = address;
+	microapp_coroutine_args_t coroutineArg = {
+			.entry = address,
+			.ioBuffers = nullptr,
+	};
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
-	LogMicroappControllerInfo("Start coroutine");
-	startCoroutine(goIntoMicroapp, &_sharedState, microappRamSection._end);
+	LogMicroappControllerInfo("Init coroutine");
+	int result = initCoroutine(goIntoMicroapp, &coroutineArg, sizeof(coroutineArg), microappRamSection._end);
+	if (result != 0) {
+		LOGe("Failed to init coroutine");
+	}
 }
 
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = _sharedState.ioBuffers->microapp2bluenet.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers->microapp2bluenet.payload;
 	return payload;
 }
 
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = _sharedState.ioBuffers->bluenet2microapp.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers->bluenet2microapp.payload;
 	return payload;
 }
 
@@ -334,24 +262,13 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 }
 
 void MicroappController::callMicroapp() {
-#if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
 	const uint8_t appIndex = 0;
 	setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_RUNNING);
-	if (nextCoroutine()) {
+	if (resumeCoroutine()) {
 		setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_NOT_RUNNING);
 		return;
 	}
-#else
-	static bool start = false;
-	// just do it from current coroutine context
-	if (!start) {
-		start = true;
-		LOGi("Call address: %p", _sharedState->entry);
-		jumpToAddress(_sharedState->entry);
-		LOGi("Microapp might have run, but this statement is never reached (no coroutine used).");
-	}
-	return;
-#endif
+
 	// Should only happen if microapp actually ends (and does not yield anymore).
 	LOGe("End of coroutine. Should not happen.")
 }

@@ -107,7 +107,6 @@ private:
 	 * Shared state to both the microapp and the bluenet code. This is used as an argument to the coroutine. It can
 	 * later be used to get information back and forth between microapp and bluenet.
 	 */
-	microapp_coroutine_args_t _sharedState;
 
 	/**
 	 * To throttle the ticks themselves

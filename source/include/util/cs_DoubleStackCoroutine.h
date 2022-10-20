@@ -17,6 +17,9 @@
  * - Uses setjmp and longjmp to jump back and forth.
  */
 
+//! Max buffer size for coroutine arguments.
+#define DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE 8
+
 /**
  * Struct with the context to jump between bluenet and coroutine.
  */
@@ -33,18 +36,23 @@ typedef void (*coroutine_function_t)(void*);
 typedef struct {
 	coroutine_t coroutine;
 	coroutine_function_t coroutineFunction;
-	void* coroutineArguments;
+	uint8_t coroutineArgumentBuffer[DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE];
 	void* oldStackPointer;
 } stack_params_t;
 
 /**
- * Start the coroutine.
+ * Initialize the coroutine.
+ *
+ * Make sure to first set the coroutine arguments.
  *
  * @param[in] coroutineFunction   The first function of the coroutine to be executed.
- * @param[in] argument            The argument for the coroutine function.
+ * @param[in] argument            The argument for the coroutine function, this will be copied,
+ *                                and can be retrieved again with getCoroutineArgumentBuffer().
+ * @param[in] argumentSize        Size of the argument.
  * @param[in] ramEnd              Pointer to the end of the ram reserved for this coroutine.
+ * @return                        0 on success.
  */
-void startCoroutine(coroutine_function_t coroutineFunction, void* argument, const uintptr_t ramEnd);
+int initCoroutine(coroutine_function_t coroutineFunction, void* argument, uint8_t argumentSize, const uintptr_t ramEnd);
 
 /**
  * Yield the coroutine: resume in bluenet.
@@ -56,9 +64,9 @@ void yieldCoroutine();
  *
  * @return 0       When the coroutine finished.
  */
-int nextCoroutine();
+int resumeCoroutine();
 
 /**
- * Get the coroutine arguments.
+ * Get the coroutine argument buffer.
  */
-void* getCoroutineArguments();
+uint8_t* getCoroutineArgumentBuffer();
