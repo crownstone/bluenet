@@ -260,7 +260,8 @@ public:
 	microapp_sdk_ble_scan_filter_t& getScanFilter();
 
 	/**
-	 * Set the number of empty interrupt slots
+	 * Set the number of empty interrupt slots.
+	 * Should be called on microapp yield requests, which contain an emptyInterruptSlots field.
 	 *
 	 * @param emptySlots The new value
 	 */

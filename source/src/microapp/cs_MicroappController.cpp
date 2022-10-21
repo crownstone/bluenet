@@ -144,10 +144,7 @@ cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr
  */
 uint16_t MicroappController::initMemory(uint8_t appIndex) {
 	LOGi("Init memory: clear 0x%p to 0x%p", microappRamSection._start, microappRamSection._end);
-	for (uint32_t i = 0; i < microappRamSection._size; ++i) {
-		uint32_t* const val = (uint32_t*)(uintptr_t)(microappRamSection._start + i);
-		*val                = 0;
-	}
+	memset(reinterpret_cast<uint8_t*>(microappRamSection._start), 0, microappRamSection._size);
 	return ERR_SUCCESS;
 }
 
@@ -376,6 +373,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 		return;
 	}
 	_tickCounter                           = 0;
+
 	// Reset interrupt counter every microapp tick
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
 		_softInterruptRegistrations[i].counter = 0;
@@ -520,9 +518,6 @@ microapp_sdk_ble_scan_filter_t& MicroappController::getScanFilter() {
 	return _scanFilter;
 }
 
-/*
- * Check whether new interrupts can be generated
- */
 bool MicroappController::allowSoftInterrupts(MicroappSdkType type, uint8_t id) {
 	// if the microapp dropped the last one and hasn't finished an interrupt,
 	// we won't try to call it with a new interrupt
@@ -550,10 +545,6 @@ bool MicroappController::allowSoftInterrupts(MicroappSdkType type, uint8_t id) {
 	return true;
 }
 
-/*
- * Set the number of empty interrupt slots.
- * This function can be used upon microapp yield requests, which contain an emptyInterruptSlots field
- */
 void MicroappController::setEmptySoftInterruptSlots(uint8_t emptySlots) {
 	_emptySoftInterruptSlots = emptySlots;
 }

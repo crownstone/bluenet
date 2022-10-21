@@ -1004,14 +1004,14 @@ const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE =
 struct __attribute__((packed)) microapp_sdk_message_event_received_msg_t {
 	uint16_t size;
 
-	//! The message data. Maximum size is MICROAPP_SDK_MESSAGE_SEND_MSG_MAX_SIZE.
+	//! The message data. Maximum size is MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE.
 	uint8_t data[0];
 };
 
 struct __attribute__((packed)) microapp_sdk_message_request_send_msg_t {
 	uint16_t size;
 
-	//! The message data. Maximum size is MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE.
+	//! The message data. Maximum size is MICROAPP_SDK_MESSAGE_SEND_MSG_MAX_SIZE.
 	uint8_t data[0];
 };
 
