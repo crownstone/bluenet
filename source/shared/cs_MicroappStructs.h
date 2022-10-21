@@ -58,8 +58,8 @@ const uint8_t MICROAPP_SDK_MAX_ARRAY_SIZE                   = MICROAPP_SDK_MAX_P
 // max total - (header + protocol [1] + type [2] + size [2])
 const uint8_t MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 5);
 
-// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
-#define MICROAPP_LOOP_FREQUENCY 10
+// Call loop every N ticks. The ticks are every 100 ms.
+#define MICROAPP_LOOP_FREQUENCY 1
 
 #ifndef TICK_INTERVAL_MS
 #define TICK_INTERVAL_MS 100

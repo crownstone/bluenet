@@ -82,14 +82,22 @@ private:
 	void operator=(MicroappController const&);
 
 	/**
-	 * Limit the number of interrupts in a tick.
+	 * The max number of interrupt calls per type per microapp tick.
+	 *
+	 * Any interrupt passed this, will be dropped.
+	 * We can use a low value, because service discovery is not limited.
+	 *
+	 * Suggestion: allow for bursts by setting a higher threshold, but decrease the counter only by N every tick.
 	 */
-	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK = 10;
+	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK = 3;
 
 	/**
-	 * The maximum number of consecutive calls to a microapp
+	 * The maximum number of calls to the main thread of a microapp, per microapp tick.
+	 *
+	 * Any call passed this, will be executed later.
+	 * We want at least 3, so you can set the RGB values of a led together.
 	 */
-	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS     = 8;
+	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS     = 3;
 
 	/**
 	 * The maximum number of registered interrupts

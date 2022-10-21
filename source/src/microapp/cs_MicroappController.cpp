@@ -538,6 +538,11 @@ bool MicroappController::allowSoftInterrupts(MicroappSdkType type, uint8_t id) {
 		registration->counter++;
 	}
 
+	if (type == CS_MICROAPP_SDK_TYPE_BLE && id == CS_MICROAPP_SDK_BLE_CENTRAL) {
+		// We allow this to allow for service discovery (a soft interrupts per discovered service and characteristic).
+		return true;
+	}
+
 	// Check if we already exceeded the max number of interrupts in this tick
 	if (registration->counter >= MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK) {
 		return false;
