@@ -1087,6 +1087,12 @@ struct __attribute__((packed)) microapp_sdk_mesh_t {
 	//! Indicates the stone id to send to/read from or own stone ID. Use ID 0 for a broadcast.
 	uint8_t stoneId;
 
+	struct __attribute__((packed)) {
+		//! When set to true, the mesh message will not be relayed, and thus only received by neighbouring nodes.
+		bool doNotRelay : 1;
+		uint8_t reserved : 7;
+	} options;
+
 	//! Size of the payload.
 	uint8_t size;
 

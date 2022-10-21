@@ -855,7 +855,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMesh(microapp_sdk_mesh_t* mes
 			eventData.flags.flags.broadcast   = broadcast;
 			eventData.flags.flags.acked       = !broadcast;
 			eventData.flags.flags.useKnownIds = false;
-			eventData.flags.flags.doNotRelay  = false;
+			eventData.flags.flags.doNotRelay  = mesh->options.doNotRelay;
 			eventData.type                    = CS_MESH_MODEL_TYPE_MICROAPP;
 			eventData.payload                 = mesh->data;
 			eventData.size                    = mesh->size;
