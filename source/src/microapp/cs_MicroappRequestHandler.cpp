@@ -17,11 +17,11 @@
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappInterruptHandler.h>
-#include <protocol/cs_MicroappPackets.h>
 #include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappSdkUtil.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_MicroappPackets.h>
 #include <protocol/cs_Packets.h>
 #include <storage/cs_State.h>
 #include <uart/cs_UartHandler.h>
@@ -384,7 +384,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestSwitch(microapp_sdk_switch_t*
 		case CS_MICROAPP_SDK_SWITCH_REQUEST_GET: {
 			TYPIFY(STATE_SWITCH_STATE) switchState;
 			State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
-			packet->get.relay = (switchState.state.relay != 0);
+			packet->get.relay  = (switchState.state.relay != 0);
 			packet->get.dimmer = switchState.state.dimmer;
 			packet->header.ack = CS_MICROAPP_SDK_ACK_SUCCESS;
 			return ERR_SUCCESS;
@@ -556,7 +556,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleScan(microapp_sdk_ble_t* b
 				}
 			}
 			cs_ret_code_t retCode = MicroappController::getInstance().setScanFilter(ble->scan.filter);
-			ble->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
+			ble->header.ack       = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 			return retCode;
 		}
 		default: {
@@ -607,11 +607,13 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 
 			UUID uuids[sizeof(ble->central.requestDiscover.uuids) / sizeof(ble->central.requestDiscover.uuids[0])];
 			for (uint8_t i = 0; i < count; ++i) {
-				uuids[i] = UUID(ble_uuid_t({.uuid = ble->central.requestDiscover.uuids[i].uuid, .type = ble->central.requestDiscover.uuids[i].type}));
+				uuids[i] = UUID(ble_uuid_t(
+						{.uuid = ble->central.requestDiscover.uuids[i].uuid,
+						 .type = ble->central.requestDiscover.uuids[i].type}));
 			}
 
 			TYPIFY(CMD_BLE_CENTRAL_DISCOVER) discoverCommand;
-			discoverCommand.uuids = uuids;
+			discoverCommand.uuids     = uuids;
 			discoverCommand.uuidCount = count;
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_DISCOVER, &discoverCommand, sizeof(discoverCommand));
 			event.dispatch();
@@ -624,8 +626,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBleCentral(microapp_sdk_ble_t
 			// Later we should check the connection handle.
 
 			TYPIFY(CMD_BLE_CENTRAL_WRITE) writeCommand;
-			writeCommand.handle = ble->central.requestWrite.handle;
-			writeCommand.data.len = ble->central.requestWrite.size;
+			writeCommand.handle    = ble->central.requestWrite.handle;
+			writeCommand.data.len  = ble->central.requestWrite.size;
 			writeCommand.data.data = ble->central.requestWrite.buffer;
 			event_t event(CS_TYPE::CMD_BLE_CENTRAL_WRITE, &writeCommand, sizeof(writeCommand));
 			event.dispatch();
@@ -957,7 +959,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMessage(microapp_sdk_message_
 	switch (packet->type) {
 		case CS_MICROAPP_SDK_MSG_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			retCode = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG);
+			retCode                        = controller.registerSoftInterrupt(
+                    CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG);
 			break;
 		}
 		case CS_MICROAPP_SDK_MSG_REQUEST_SEND_MSG: {
@@ -972,7 +975,8 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMessage(microapp_sdk_message_
 			};
 
 			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MICROAPP_DATA, size + sizeof(header));
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MICROAPP_DATA, reinterpret_cast<uint8_t*>(&header), sizeof(header));
+			UartHandler::getInstance().writeMsgPart(
+					UART_OPCODE_TX_MICROAPP_DATA, reinterpret_cast<uint8_t*>(&header), sizeof(header));
 			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MICROAPP_DATA, packet->sendMessage.data, size);
 			UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_MICROAPP_DATA);
 			retCode = ERR_SUCCESS;
@@ -992,7 +996,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBluenetEvent(microapp_sdk_blu
 	switch (packet->type) {
 		case CS_MICROAPP_SDK_BLUENET_EVENT_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
-			retCode = controller.registerBluenetEventInterrupt(toCsType(packet->eventType));
+			retCode                        = controller.registerBluenetEventInterrupt(toCsType(packet->eventType));
 			break;
 		}
 		default: {

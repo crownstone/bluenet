@@ -75,10 +75,7 @@ cs_ret_code_t MicroappStorage::init() {
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			// * @retval  NRF_SUCCESS         If initialization was successful.
-			LOGMicroappInfo(
-					"Successfully initialized from 0x%08X to 0x%08X",
-					fStorage.start_addr,
-					fStorage.end_addr);
+			LOGMicroappInfo("Successfully initialized from 0x%08X to 0x%08X", fStorage.start_addr, fStorage.end_addr);
 			break;
 		case NRF_ERROR_NULL:
 			// * @retval  NRF_ERROR_NULL      If @p p_fs or @p p_api field in @p p_fs is NULL.

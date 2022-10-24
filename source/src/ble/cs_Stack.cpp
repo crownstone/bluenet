@@ -27,8 +27,8 @@
 #define LogLevelStackDebug SERIAL_VERY_VERBOSE
 
 Stack::Stack() {
-	_connectionWatchdogTimerData       = {{0}};
-	_connectionWatchdogTimerId         = &_connectionWatchdogTimerData;
+	_connectionWatchdogTimerData        = {{0}};
+	_connectionWatchdogTimerId          = &_connectionWatchdogTimerData;
 
 	_connectionParams.min_conn_interval = MIN_CONNECTION_INTERVAL;
 	_connectionParams.max_conn_interval = MAX_CONNECTION_INTERVAL;

@@ -64,7 +64,7 @@ microapp_sdk_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* ioB
 
 void jumpToAddress(uintptr_t address) {
 	// This runs in microapp context, so no logs and no variables on stack.
-	goto *(void*)address;
+	goto*(void*)address;
 	LOGe("Shouldn't end up here");
 }
 
@@ -168,7 +168,7 @@ void MicroappController::startMicroapp(uint8_t appIndex) {
 
 	// The entry function is this immediate address (no correction for thumb mode)
 	microapp_coroutine_args_t coroutineArg = {
-			.entry = address,
+			.entry     = address,
 			.ioBuffers = nullptr,
 	};
 
@@ -181,12 +181,14 @@ void MicroappController::startMicroapp(uint8_t appIndex) {
 }
 
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers->microapp2bluenet.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())
+							   ->ioBuffers->microapp2bluenet.payload;
 	return payload;
 }
 
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers->bluenet2microapp.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())
+							   ->ioBuffers->bluenet2microapp.payload;
 	return payload;
 }
 
@@ -268,8 +270,8 @@ bool MicroappController::handleAck() {
 }
 
 bool MicroappController::handleRequest() {
-	uint8_t* inputBuffer                  = getInputMicroappBuffer();
-	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
+	uint8_t* inputBuffer                           = getInputMicroappBuffer();
+	microapp_sdk_header_t* incomingHeader          = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
 	LogMicroappControllerVerbose("  ack=%u", incomingHeader->ack);
@@ -285,7 +287,8 @@ bool MicroappController::handleRequest() {
 			break;
 		}
 		default: {
-			LogMicroappControllerInfo("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+			LogMicroappControllerInfo(
+					"Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
 			break;
 		}
 	}
@@ -342,7 +345,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	if (_tickCounter < MICROAPP_LOOP_FREQUENCY) {
 		return;
 	}
-	_tickCounter                           = 0;
+	_tickCounter = 0;
 
 	// Reset interrupt counter every microapp tick
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
@@ -434,9 +437,9 @@ cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkType type, ui
 		return ERR_NO_SPACE;
 	}
 	// Register the interrupt
-	_softInterruptRegistrations[emptySlotIndex].type       = type;
-	_softInterruptRegistrations[emptySlotIndex].id         = id;
-	_softInterruptRegistrations[emptySlotIndex].counter    = 0;
+	_softInterruptRegistrations[emptySlotIndex].type    = type;
+	_softInterruptRegistrations[emptySlotIndex].id      = id;
+	_softInterruptRegistrations[emptySlotIndex].counter = 0;
 
 	LogMicroappControllerDebug("Registered interrupt of type %i, id %u", type, id);
 
@@ -540,7 +543,7 @@ void MicroappController::incrementEmptySoftInterruptSlots() {
 void MicroappController::clear(uint8_t appIndex) {
 	LOGi("Clear appIndex=%u", appIndex);
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
-		_softInterruptRegistrations[i].type = CS_MICROAPP_SDK_TYPE_NONE;
+		_softInterruptRegistrations[i].type    = CS_MICROAPP_SDK_TYPE_NONE;
 		_softInterruptRegistrations[i].counter = 0;
 	}
 
@@ -548,10 +551,9 @@ void MicroappController::clear(uint8_t appIndex) {
 		_eventInterruptRegistrations[i] = CS_TYPE::CONFIG_DO_NOT_USE;
 	}
 
-	_scanFilter.type = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE;
+	_scanFilter.type         = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE;
 
 	_emptySoftInterruptSlots = 1;
 
-	microappData.isScanning = false;
-
+	microappData.isScanning  = false;
 }

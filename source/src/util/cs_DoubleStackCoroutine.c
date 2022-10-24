@@ -1,8 +1,8 @@
+#include <logging/cs_CLogger.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <util/cs_DoubleStackCoroutine.h>
-#include <logging/cs_CLogger.h>
 #include <string.h>
+#include <util/cs_DoubleStackCoroutine.h>
 
 enum { WORKING = 1, YIELDING_COROUTINE = 2, DONE };
 
@@ -17,10 +17,11 @@ stack_params_t* _stackParams = NULL;
 /*
  * Starts a new coroutine. We store the parameters that we need when we switch back again to the current stack.
  */
-int initCoroutine(coroutine_function_t coroutineFunction, void* argument, uint8_t argumentSize, const uintptr_t ramEnd) {
+int initCoroutine(
+		coroutine_function_t coroutineFunction, void* argument, uint8_t argumentSize, const uintptr_t ramEnd) {
 	// Place the stack params at the end of the coroutine ram.
-	_stackParams = ((stack_params_t*)ramEnd) - 1;
-	_stackParams->coroutineFunction  = coroutineFunction;
+	_stackParams                    = ((stack_params_t*)ramEnd) - 1;
+	_stackParams->coroutineFunction = coroutineFunction;
 
 	if (argumentSize > sizeof(_stackParams->coroutineArgumentBuffer)) {
 		return -1;
@@ -29,7 +30,10 @@ int initCoroutine(coroutine_function_t coroutineFunction, void* argument, uint8_
 
 	// As soon as setStackPointer is called, only fields in stackParams can be used.
 	// Between getStackPointer and setjmp, local variables should not be used (for example for logging).
-	CLOGi("setStackPointer %p sizeof(stack_params_t)=%u sizeof(coroutine_t)=%u", _stackParams, sizeof(stack_params_t), sizeof(coroutine_t));
+	CLOGi("setStackPointer %p sizeof(stack_params_t)=%u sizeof(coroutine_t)=%u",
+		  _stackParams,
+		  sizeof(stack_params_t),
+		  sizeof(coroutine_t));
 
 	// Store current bluenet stack pointer in oldStackPointer.
 	getStackPointer(_stackParams->oldStackPointer);

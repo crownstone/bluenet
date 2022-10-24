@@ -89,7 +89,7 @@ private:
 	 *
 	 * Suggestion: allow for bursts by setting a higher threshold, but decrease the counter only by N every tick.
 	 */
-	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK = 3;
+	static const int8_t MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK          = 3;
 
 	/**
 	 * The maximum number of calls to the main thread of a microapp, per microapp tick.
@@ -97,12 +97,12 @@ private:
 	 * Any call passed this, will be executed later.
 	 * We want at least 3, so you can set the RGB values of a led together.
 	 */
-	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS     = 3;
+	static const uint8_t MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS              = 3;
 
 	/**
 	 * The maximum number of registered interrupts
 	 */
-	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS = 10;
+	static const uint8_t MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS          = 10;
 
 	/**
 	 * The maximum number of registered bluenet event interrupts.
@@ -120,23 +120,23 @@ private:
 	CS_TYPE _eventInterruptRegistrations[MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS];
 
 	//! Keep up the current scan filter.
-	microapp_sdk_ble_scan_filter_t _scanFilter = { .type = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE, .rssi = 0 };
+	microapp_sdk_ble_scan_filter_t _scanFilter = {.type = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE, .rssi = 0};
 
 	/**
 	 * To throttle the ticks themselves
 	 */
-	uint8_t _tickCounter                    = 0;
+	uint8_t _tickCounter                       = 0;
 
 	/**
 	 * Counter for consecutive microapp calls. Limited to MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS
 	 */
-	uint8_t _consecutiveMicroappCallCounter = 0;
+	uint8_t _consecutiveMicroappCallCounter    = 0;
 
 	/**
 	 * Keeps track of how many empty interrupt slots are available on the microapp side.
 	 * Start with 1, but will be set to the correct value in the request handler.
 	 */
-	uint8_t _emptySoftInterruptSlots        = 1;
+	uint8_t _emptySoftInterruptSlots           = 1;
 
 	/**
 	 * Set operating state in IPC ram. This can be used after (an accidental) boot to decide if a microapp has been

@@ -14,17 +14,17 @@
 #include "common/cs_Types.h"
 #include "drivers/cs_RTC.h"
 #include "events/cs_EventDispatcher.h"
+#include "ipc/cs_IpcRamDataContents.h"
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_Packets.h"
 #include "protocol/cs_UartMsgTypes.h"
+#include "storage/cs_IpcRamBluenet.h"
 #include "storage/cs_State.h"
 #include "structs/buffer/cs_AdcBuffer.h"
 #include "third/SortMedian.h"
 #include "third/optmed.h"
 #include "time/cs_SystemTime.h"
 #include "uart/cs_UartHandler.h"
-#include "ipc/cs_IpcRamDataContents.h"
-#include "storage/cs_IpcRamBluenet.h"
 
 #define LOGPowerSamplingWarn LOGw
 #define LOGPowerSamplingDebug LOGnone

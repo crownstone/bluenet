@@ -53,8 +53,8 @@
 #include <logging/cs_Logger.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
-#include <storage/cs_State.h>
 #include <storage/cs_IpcRamBluenet.h>
+#include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <structs/buffer/cs_EncryptedBuffer.h>

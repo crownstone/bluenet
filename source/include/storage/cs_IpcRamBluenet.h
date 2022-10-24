@@ -42,7 +42,6 @@ public:
 	//! Update a microapp field.
 	void updateMicroappData(uint8_t appIndex, const microapp_reboot_data_t& data);
 
-
 private:
 	//! Constructor, singleton, thus made private
 	IpcRamBluenet();
@@ -66,5 +65,3 @@ private:
 
 	void printData();
 };
-
-
