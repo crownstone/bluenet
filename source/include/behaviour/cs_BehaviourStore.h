@@ -122,7 +122,20 @@ private:
 	 */
 	void storeMasterHash();
 
+	/**
+	 * Deserializes the behaviour from event data, and allocate new instance of correct
+	 * type on the heap.
+	 *
+	 * Checks if an identical behaviour already exists. (I.e. serialized equality.)
+	 */
 	BehaviourMutation handleSaveBehaviour(event_t& evt);
+
+	/**
+	 * Deserializes the behaviour from event data, and allocate new instance of correct
+	 * type on the heap.
+	 *
+	 * Does not check for prior existence.
+	 */
 	BehaviourMutation handleReplaceBehaviour(event_t& evt);
 	BehaviourMutation handleRemoveBehaviour(event_t& evt);
 	void handleGetBehaviour(event_t& evt);
