@@ -51,6 +51,8 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	pushTestDataToHost();
 
 	initChildren();
+
+	_behaviourStore = getComponent<BehaviourStore>();
 }
 
 void SwitchAggregator::switchPowered() {
@@ -141,6 +143,18 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 	return retCode;
 }
 
+void SwitchAggregator::update() {
+	bool behaviourValueChanged = updateBehaviourHandlers();
+	uint8_t behaviourRuleIndex = 255;  // TODO: set correct value.
+	cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
+	updateState(behaviourValueChanged, source);
+	if (behaviourValueChanged) {
+		uint32_t timestamp = SystemTime::posix();
+		addToSwitchHistory(cs_switch_history_item_t(
+				timestamp, *_aggregatedState, _smartSwitch.getActualState(), source.source));
+	}
+}
+
 // ========================= Event handling =========================
 
 void SwitchAggregator::handleEvent(event_t& event) {
@@ -174,9 +188,61 @@ bool SwitchAggregator::handleBehaviourEvents(event_t& event) {
 		}
 		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION: {
 			LOGd("SwitchAggregator::handleBehaviourEvents EVT_BEHAVIOURSTORE_MUTATION");
+			BehaviourMutation* mutation = static_cast<TYPIFY(EVT_BEHAVIOURSTORE_MUTATION)*>(event.data);
+
+			if(_behaviourStore == nullptr) {
+				LOGd("behaviourstore wasn't found by switchaggregator");
+				if(mutation->_mutation != BehaviourMutation::NONE) {
+					update();
+				}
+
+				return true;
+			}
+
+			switch(mutation->_mutation) {
+				case BehaviourMutation::REMOVE: {
+					LOGd("index: %u: remove", mutation->_index);
+					// TODO: shouldn't remove event be sent before actual removal so that
+					// we can check if the behaviour was active or something?
+//					update();
+					break;
+				}
+				case BehaviourMutation::CLEAR_ALL: {
+					LOGd("index: %u: clear all", mutation->_index);
+//					update();
+					break;
+				}
+				case BehaviourMutation::ADD: {
+					LOGd("index: %u: add", mutation->_index);
+					auto behaviour = _behaviourStore->getBehaviour(mutation->_index);
+					if(auto switchBehaviour = dynamic_cast<SwitchBehaviour*>(behaviour)) {
+						LOGd("it's derrived from switch! %x", switchBehaviour);
+					} else {
+						LOGd("it's not a switchbehaviour!");
+					}
+					break;
+				}
+				case BehaviourMutation::UPDATE: {
+					LOGd("index: %u: update", mutation->_index);
+					auto behaviour = _behaviourStore->getBehaviour(mutation->_index);
+					if(auto switchBehaviour = dynamic_cast<SwitchBehaviour*>(behaviour)) {
+						LOGd("it's derrived from switch! %x", switchBehaviour);
+					} else {
+						LOGd("it's not a switchbehaviour!");
+					}
+					break;
+				}
+				case BehaviourMutation::NONE: {
+					LOGd("index: %u: none", mutation->_index);
+					break;
+				}
+			}
+
 			return true;
 		}
-		default: return false;
+		default: {
+			return false;
+		}
 	}
 }
 
@@ -211,7 +277,6 @@ bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& event) {
 bool SwitchAggregator::handleTimingEvents(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_TICK: {
-			LOGd("tick!");
 			printStates(__LINE__);
 			// decrement until 0
 			if (_ownerTimeoutCountdown) {
@@ -229,17 +294,9 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 				break;
 			}
 			_lastTimestamp             = timestamp;
-			LOGd("tock!");
 
 			// Update switch value.
-			bool behaviourValueChanged = updateBehaviourHandlers();
-			uint8_t behaviourRuleIndex = 255;  // TODO: set correct value.
-			cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
-			updateState(behaviourValueChanged, source);
-			if (behaviourValueChanged) {
-				addToSwitchHistory(cs_switch_history_item_t(
-						timestamp, *_aggregatedState, _smartSwitch.getActualState(), source.source));
-			}
+			update();
 			break;
 		}
 		default: {

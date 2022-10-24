@@ -32,7 +32,6 @@ void PresenceHandler::registerPresence(ProfileLocation profileLocation) {
 }
 
 void PresenceHandler::handleEvent(event_t& event) {
-
 	switch (event.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			auto parsedAdvEventData = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(event.data);
