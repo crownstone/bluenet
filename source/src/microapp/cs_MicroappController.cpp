@@ -311,11 +311,11 @@ bool MicroappController::handleRequest() {
 			break;
 		}
 		case ERR_WAIT_FOR_SUCCESS: {
-			LOGi("Handling request of type %u is in progress", incomingHeader->messageType);
+			LogMicroappControllerDebug("Handling request of type %u is in progress", incomingHeader->messageType);
 			break;
 		}
 		default: {
-			LOGi("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+			LogMicroappControllerInfo("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
 			break;
 		}
 	}
@@ -328,7 +328,7 @@ bool MicroappController::handleRequest() {
 	// Also check if the max number of consecutive nonyielding calls is reached
 	if (_consecutiveMicroappCallCounter >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
 		_consecutiveMicroappCallCounter = 0;
-		LOGi("Stop because we've reached a max # of consecutive calls");
+		LogMicroappControllerVerbose("Stop because we've reached a max number of consecutive calls");
 		return false;
 	}
 	_consecutiveMicroappCallCounter++;
