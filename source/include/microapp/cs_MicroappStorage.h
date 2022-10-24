@@ -100,6 +100,13 @@ private:
 	void operator=(MicroappStorage const&)  = delete;
 
 	/**
+	 * Keep up whether or not we are currently writing to (or erasing) flash.
+	 * We tried using nrf_fstorage_is_busy() instead, but that seems to return busy
+	 * when State is writing (because State uses FDS, which uses fstorage).
+	 */
+	bool _writing                           = false;
+
+	/**
 	 * The buffer is required to perform writes to flash, as the data has to
 	 * be aligned, and stay in memory until the write is done.
 	 */

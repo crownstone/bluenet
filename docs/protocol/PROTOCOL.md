@@ -348,6 +348,7 @@ Type nr | Type name | Payload type | Result payload | Description | A     | M   
 93 | Remove microapp | [Microapp header packet](#microapp-header-packet) | - | Removes a microapp. When result is ERR_WAIT_FOR_SUCCESS, you have to wait for ERR_SUCCESS. In case the microapp is already removed, you will get ERR_SUCCESS_NO_CHANGE. | x
 94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
 95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
+96 | Message microapp | [Microapp message packet](#microapp-message-packet) | [Microapp message packet](#microapp-message-packet) | Send a data message to a microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 110 | Upload filter | [Upload filter packet](ASSET_FILTERING.md#upload-filter-packet) | - | Upload (a part of) an asset filter. | x
 111 | Remove filter | [Remove filter packet](ASSET_FILTERING.md#remove-filter-packet) | - | Delete an asset filter. | x
@@ -840,7 +841,16 @@ Bit  | Name     | Description
 6    | memory   | 0=ok, 1=excessive
 7-15 | reserved | Reserved, must be 0 for now.
 
+#### Microapp message packet
 
+![Microapp message packet](../diagrams/microapp_message_packet.png)
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Microapp header](#microapp-header-packet) | Header | 2 |
+uint8[] | Payload | N | Data message for the microapp.
+
+The microapp determines the format of the payload.
 
 
 ## Result packet
