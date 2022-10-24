@@ -74,7 +74,7 @@ public:
 				out << (firstByte ? "" : ", ") << +byte;
 				firstByte = false;
 			}
-			out << "}";
+			out << "}" << std::dec << std::noshowbase;
 		}
 
 		return out;

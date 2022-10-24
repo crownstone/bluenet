@@ -17,6 +17,7 @@
 #include <testaccess/cs_PresenceDescription.h>
 #include <testaccess/cs_BehaviourHandler.h>
 #include <testaccess/cs_SwitchBehaviour.h>
+#include <testaccess/cs_BehaviourStore.h>
 #include <testaccess/cs_SwitchAggregator.h>
 #include <testaccess/cs_Crownstone.h>
 #include <testaccess/cs_SystemTime.h>
@@ -54,6 +55,7 @@ int main() {
 	TestAccess<Storage> testStorage(storage);
 	TestAccess<SwitchBehaviour> switchBehaviourFactory;
 	TestAccess<SwitchAggregator> testSwitchAggregator(_switchAggregator);
+	TestAccess<BehaviourStore> testBehaviourStore;
 
 	// initialization
     boards_config_t board;
@@ -92,6 +94,9 @@ int main() {
 	_switchAggregator.init(board);
 	_switchAggregator.switchPowered();
 
+	_behaviourStore.init();
+	_behaviourStore.listen();
+
 	// construct switch behaviours for the test
 
 	// to keep track of used indices.
@@ -112,18 +117,22 @@ int main() {
 	switchBehaviourFactory.presencecondition.predicate._presence._bitmask = 0b01; // only in room 0.
 	auto requiresAnyoneInRoom = switchBehaviourFactory.getItem(indexer++);
 
+	TestAccess<SwitchBehaviour>::_printStyle = TestAccess<SwitchBehaviour>::AsBytes;
+	std::cout << "requiresAnyoneInSphere: " << *requiresAnyoneInSphere._behaviour << std::endl;
+	std::cout << "requiresNooneInSphere: " << *requiresNooneInSphere._behaviour << std::endl;
+	std::cout << "requiresAnyoneInRoom: " << *requiresAnyoneInRoom._behaviour << std::endl;
 	// tests
 
     // add behaviour that doesn't have presence requirement,
 	// check expected resolution by behaviourhandler.
-	_behaviourStore.replaceBehaviour(noPresenceRequired._index, noPresenceRequired._behaviour);
+	testBehaviourStore.replaceBehaviour(noPresenceRequired._index, noPresenceRequired._behaviour);
 
 	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
 	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, present(), __LINE__)) return 1;
 
     // add behaviour which requires presence,
 	// check expected resolution by behaviourhandler.
-	_behaviourStore.replaceBehaviour(requiresAnyoneInSphere._index, requiresAnyoneInSphere._behaviour);
+	testBehaviourStore.replaceBehaviour(requiresAnyoneInSphere._index, requiresAnyoneInSphere._behaviour);
 	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
 	if(!checkCase(_behaviourHandler, _behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
@@ -133,12 +142,12 @@ int main() {
 	fastForwardS(1);
 
     // add behaviour which requires absence
-	_behaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
+	testBehaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
 	if(!checkCase(_behaviourHandler, _behaviourStore, requiresNooneInSphere._index, absent(), __LINE__)) return 1;
 	if(!checkCase(_behaviourHandler, _behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
 	if(testSwitchAggregator.getOverrideState() != std::nullopt) {
-		LOGw("uploading an immediately active behaviour should clear the override state.");
+		LOGw("FAILED: uploading an immediately active behaviour should clear the override state.");
 		return 1;
 	}
 

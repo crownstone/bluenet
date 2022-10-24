@@ -16,8 +16,8 @@ class TestAccess<BehaviourStore> {
 public:
 	static void clearActiveBehavioursArray(BehaviourStore& store) { store.clearActiveBehavioursArray(); }
 
-	static void replaceBehaviour(uint8_t index, SwitchBehaviour s ) {
-		auto eventdata = s.serialized();
+	static void replaceBehaviour(uint8_t index, SwitchBehaviour* s ) {
+		auto eventdata = s->serialized();
 		eventdata.insert(std::begin(eventdata), index);
 
 		event_t evt(CS_TYPE::CMD_REPLACE_BEHAVIOUR, eventdata.data(), eventdata.size());
