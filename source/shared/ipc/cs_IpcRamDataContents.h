@@ -82,12 +82,17 @@ typedef struct {
  * Data struct that can be used to communicate from bluenet to bluenet across reboots.
  */
 typedef struct {
-	// Major version of the data in this struct
+	//! Major version of the data in this struct
 	uint8_t ipcDataMajor;
-	// Minor version of the data in this struct
+	//! Minor version of the data in this struct
 	uint8_t ipcDataMinor;
-	// Currently only 1 app is supported, expand with more bits for more apps
+
+	//! Energy used since last cold boot, in mJ.
+	int64_t energyUsedMicroJoule;
+
+	//! Currently only 1 app is supported, expand with more bits for more apps
 	microapp_reboot_data_t microapp[1];
+
 } __attribute__((packed)) bluenet_ipc_bluenet_data_t;
 
 /**

@@ -23,6 +23,8 @@
 #include "third/optmed.h"
 #include "time/cs_SystemTime.h"
 #include "uart/cs_UartHandler.h"
+#include "ipc/cs_IpcRamDataContents.h"
+#include "storage/cs_IpcRamBluenet.h"
 
 #define LOGPowerSamplingWarn LOGw
 #define LOGPowerSamplingDebug LOGnone
@@ -207,11 +209,26 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 	//	_lastSoftfuse.offset = 0;
 	//	_lastSoftfuse.multiplier = _currentMultiplier;
 
+	initEnergyUsed();
+
 	EventDispatcher::getInstance().addListener(this);
 
 	PS_TEST_PIN_INIT
 
 	_isInitialized = true;
+}
+
+void PowerSampling::initEnergyUsed() {
+	if (!IpcRamBluenet::getInstance().isValidOnBoot()) {
+		_energyUsedmicroJoule = 0;
+		return;
+	}
+	_energyUsedmicroJoule = IpcRamBluenet::getInstance().getData().energyUsedMicroJoule;
+	LOGi("Restored energy used from IPC ram");
+}
+
+void PowerSampling::storeEnergyUsed() {
+	IpcRamBluenet::getInstance().updateEnergyUsed(_energyUsedmicroJoule);
 }
 
 void PowerSampling::startSampling() {
@@ -427,6 +444,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	//		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 	int32_t slowAvgPowerMilliWatt = _slowAvgPowerMilliWatt;
 	State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &slowAvgPowerMilliWatt, sizeof(slowAvgPowerMilliWatt));
+	storeEnergyUsed();
 	State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	//	}
 

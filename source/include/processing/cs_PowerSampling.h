@@ -207,6 +207,16 @@ private:
 	cs_adc_restarts_t _adcRestarts;
 	cs_adc_channel_swaps_t _adcChannelSwaps;
 
+	/**
+	 * Load energy used from IPC ram.
+	 */
+	void initEnergyUsed();
+
+	/**
+	 * Store energy used to IPC ram.
+	 */
+	void storeEnergyUsed();
+
 	/** Initialize the moving averages
 	 */
 	void initAverages();

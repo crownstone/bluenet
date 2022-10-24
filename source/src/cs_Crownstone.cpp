@@ -54,6 +54,7 @@
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
+#include <storage/cs_IpcRamBluenet.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <structs/buffer/cs_EncryptedBuffer.h>
@@ -291,6 +292,7 @@ void Crownstone::initDrivers0() {
 	_stack->init();
 	_timer->init();
 	_stack->initSoftdevice();
+	IpcRamBluenet::getInstance().init();
 
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 	// Check if flash pages of mesh are valid, else erase them.

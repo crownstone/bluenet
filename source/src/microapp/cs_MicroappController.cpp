@@ -11,12 +11,13 @@
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
-#include <ipc/cs_IpcRamData.h>
+#include <ipc/cs_IpcRamDataContents.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <storage/cs_IpcRamBluenet.h>
 
 #define LogMicroappControllerInfo LOGi
 #define LogMicroappControllerDebug LOGd
@@ -195,20 +196,10 @@ void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingSt
 		LOGi("Multiple apps not supported yet");
 		return;
 	}
-	uint8_t runFlag = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
-	bluenet_ipc_data_payload_t ipcData;
-
-	// We can just overwrite all, as a newer IPC version will be written and read by bluenet only.
-	ipcData.bluenetRebootData.ipcDataMajor = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
-	ipcData.bluenetRebootData.ipcDataMinor = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
-
-	memset(ipcData.bluenetRebootData.microapp, 0, sizeof(ipcData.bluenetRebootData.microapp));
-	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
-
-	IpcRetCode ipcCode = setRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, sizeof(ipcData.bluenetRebootData));
-	if (ipcCode != IPC_RET_SUCCESS) {
-		LOGw("Failed to set IPC data: ipcCode=%i", ipcCode);
-	}
+	microapp_reboot_data_t microappData;
+	memset(&microappData, 0, sizeof(microappData));
+	microappData.running = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	IpcRamBluenet::getInstance().updateMicroappData(appIndex, microappData);
 }
 
 MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
@@ -218,34 +209,13 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 		LOGi("Multiple apps not supported yet");
 		return state;
 	}
-	bluenet_ipc_data_payload_t ipcData;
-	uint8_t dataSize   = 0;
 
-	// We might read the IPC data of a previous bluenet version.
-	IpcRetCode ipcCode = getRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
-	if (ipcCode != IPC_RET_SUCCESS) {
-		LOGi("Failed to get IPC data: ipcCode=%i", ipcCode);
-		return state;
-	}
-	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
-		LOGw("Incorrect major version: major=%u required=%u",
-			 ipcData.bluenetRebootData.ipcDataMajor,
-			 BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR);
+	IpcRamBluenet& ipcRam = IpcRamBluenet::getInstance();
+	if (!ipcRam.isValidOnBoot()) {
 		return state;
 	}
 
-	// We need to ignore this warning, it's triggered because the minimum minor is 0, making the statement always false.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtype-limits"
-	if (ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
-		LOGw("Minor version too low: minor=%u minimum=%u",
-			 ipcData.bluenetRebootData.ipcDataMinor,
-			 BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
-		return state;
-	}
-#pragma GCC diagnostic pop
-
-	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
+	switch (ipcRam.getData().microapp[appIndex].running) {
 		case 1: {
 			state = MicroappOperatingState::CS_MICROAPP_RUNNING;
 			break;
