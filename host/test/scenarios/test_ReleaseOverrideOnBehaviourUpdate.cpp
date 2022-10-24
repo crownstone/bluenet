@@ -34,6 +34,41 @@
 #include <storage/cs_State.h>
 
 
+#include <common/cs_Component.h>
+
+class MockCrownstone : public Component {
+public:
+	SwitchAggregator _switchAggregator;
+	BehaviourStore _behaviourStore;
+	BehaviourHandler _behaviourHandler;
+	PresenceHandler _presenceHandler;
+	SystemTime _systemTime;
+
+	EventDispatcher& _eventDispatcher = EventDispatcher::getInstance();
+	Storage& _storage                 = Storage::getInstance();
+	State& _state                     = State::getInstance();
+
+	virtual std::vector<Component*> getChildren() override {
+		return {&_switchAggregator, &_behaviourStore, &_behaviourHandler,  & _presenceHandler};
+	}
+
+	MockCrownstone() {
+		TestAccess<BehaviourHandler>::setup(_behaviourHandler, &_presenceHandler, &_behaviourStore);
+	}
+};
+
+class TestCrownstone {
+public:
+	TestAccess<Storage> _storage;
+	TestAccess<SwitchBehaviour> _switchBehaviour;
+	TestAccess<SwitchAggregator> _switchAggregator;
+	TestAccess<BehaviourStore> _behaviourStore;
+
+	TestCrownstone(MockCrownstone& mock)
+			: _storage(mock._storage), _switchBehaviour(), _switchAggregator(mock._switchAggregator), _behaviourStore() {
+	}
+};
+
 void fastForwardS(int timeS) {
 	// (SystemTime::tick and Crownstone::tick are not the same.)
 	TestAccess<SystemTime>::fastForwardS(timeS);
@@ -42,111 +77,98 @@ void fastForwardS(int timeS) {
 
 int main() {
 	// firmware components
-    SwitchAggregator _switchAggregator;
-    BehaviourStore _behaviourStore;
-    BehaviourHandler _behaviourHandler;
-    PresenceHandler _presenceHandler;
-    SystemTime _systemTime;
-    EventDispatcher &_eventDispatcher = EventDispatcher::getInstance();
-	Storage& storage = Storage::getInstance();
-	State& state = State::getInstance();
+	MockCrownstone crownstone;
+	crownstone.parentAllChildren();
 
     // test objects with private access
-	TestAccess<Storage> testStorage(storage);
-	TestAccess<SwitchBehaviour> switchBehaviourFactory;
-	TestAccess<SwitchAggregator> testSwitchAggregator(_switchAggregator);
-	TestAccess<BehaviourStore> testBehaviourStore;
+	TestCrownstone test(crownstone);
 
 	// initialization
     boards_config_t board;
     init(&board);
     asHostFullyFeatured(&board);
 
-    storage.init();
-    state.init(&board);
+    crownstone._storage.init();
+    crownstone._state.init(&board);
 
     uint8_t stateDimmingAllowed = 1;
-    state.set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &stateDimmingAllowed, sizeof(stateDimmingAllowed));
+    crownstone._state.set(CS_TYPE::CONFIG_DIMMING_ALLOWED, &stateDimmingAllowed, sizeof(stateDimmingAllowed));
 
 	uint8_t stateSwitchLocked = 0;
-	state.set(CS_TYPE::CONFIG_SWITCH_LOCKED, &stateSwitchLocked, sizeof(stateSwitchLocked));
+	crownstone._state.set(CS_TYPE::CONFIG_SWITCH_LOCKED, &stateSwitchLocked, sizeof(stateSwitchLocked));
 
 	uint8_t stateSwitchState = 0;
-	state.set(CS_TYPE::STATE_SWITCH_STATE, &stateSwitchState, sizeof(stateSwitchState));
+	crownstone._state.set(CS_TYPE::STATE_SWITCH_STATE, &stateSwitchState, sizeof(stateSwitchState));
 
 	TYPIFY(STATE_OPERATION_MODE) mode = static_cast<uint8_t>(OperationMode::OPERATION_MODE_NORMAL);
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	crownstone._state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
-	TestAccess<BehaviourHandler>::setup(_behaviourHandler, &_presenceHandler, &_behaviourStore);
 
-    _systemTime.init();
+    crownstone._systemTime.init();
     TestAccess<SystemTime>::fastForwardS(120);
     TestAccess<SystemTime>::setTime(Time(DayOfWeek::Tuesday, 12,30));
     SystemTime::setSunTimes(sun_time_t{});
 
-	switchBehaviourFactory.from = TimeOfDay(9,0,0);
-	switchBehaviourFactory.until = TimeOfDay(19,0,0);
-	switchBehaviourFactory.intensity = 90;
+	test._switchBehaviour.from = TimeOfDay(9,0,0);
+	test._switchBehaviour.until = TimeOfDay(19,0,0);
+	test._switchBehaviour.intensity = 90;
 
 	TYPIFY(STATE_OPERATION_MODE) modeStored;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &modeStored, sizeof(modeStored));
 
-	_switchAggregator.init(board);
-	_switchAggregator.switchPowered();
+	crownstone._switchAggregator.init(board);
+	crownstone._switchAggregator.switchPowered();
 
-	_behaviourStore.init();
-	_behaviourStore.listen();
+	crownstone._behaviourStore.init();
+	crownstone._behaviourStore.listen();
+
 
 	// construct switch behaviours for the test
 
 	// to keep track of used indices.
 	uint8_t indexer = 0;
 
-	switchBehaviourFactory.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
-	typename TestAccess<SwitchBehaviour>::BehaviourStoreItem noPresenceRequired = switchBehaviourFactory.getItem(indexer++);
+	test._switchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::VacuouslyTrue;
+	typename TestAccess<SwitchBehaviour>::BehaviourStoreItem noPresenceRequired = test._switchBehaviour.getItem(indexer++);
 
-	switchBehaviourFactory.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSphere;
-	switchBehaviourFactory.presencecondition.predicate._presence._bitmask = ~0b00; // all ones
-	auto requiresAnyoneInSphere = switchBehaviourFactory.getItem(indexer++);
+	test._switchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSphere;
+	test._switchBehaviour.presencecondition.predicate._presence._bitmask = ~0b00; // all ones
+	auto requiresAnyoneInSphere = test._switchBehaviour.getItem(indexer++);
 
-	switchBehaviourFactory.presencecondition.predicate._condition = PresencePredicate::Condition::NooneInSphere;
-	switchBehaviourFactory.presencecondition.predicate._presence._bitmask = ~0b00; // all ones
-	auto requiresNooneInSphere = switchBehaviourFactory.getItem(indexer++);
+	test._switchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::NooneInSphere;
+	test._switchBehaviour.presencecondition.predicate._presence._bitmask = ~0b00; // all ones
+	auto requiresNooneInSphere = test._switchBehaviour.getItem(indexer++);
 
-	switchBehaviourFactory.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
-	switchBehaviourFactory.presencecondition.predicate._presence._bitmask = 0b01; // only in room 0.
-	auto requiresAnyoneInRoom = switchBehaviourFactory.getItem(indexer++);
+	test._switchBehaviour.presencecondition.predicate._condition = PresencePredicate::Condition::AnyoneInSelectedRooms;
+	test._switchBehaviour.presencecondition.predicate._presence._bitmask = 0b01; // only in room 0.
+	auto requiresAnyoneInRoom = test._switchBehaviour.getItem(indexer++);
 
-	TestAccess<SwitchBehaviour>::_printStyle = TestAccess<SwitchBehaviour>::AsBytes;
-	std::cout << "requiresAnyoneInSphere: " << *requiresAnyoneInSphere._behaviour << std::endl;
-	std::cout << "requiresNooneInSphere: " << *requiresNooneInSphere._behaviour << std::endl;
-	std::cout << "requiresAnyoneInRoom: " << *requiresAnyoneInRoom._behaviour << std::endl;
 	// tests
 
     // add behaviour that doesn't have presence requirement,
 	// check expected resolution by behaviourhandler.
-	testBehaviourStore.replaceBehaviour(noPresenceRequired._index, noPresenceRequired._behaviour);
+	test._behaviourStore.replaceBehaviour(noPresenceRequired._index, noPresenceRequired._behaviour);
 
-	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
-	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, present(), __LINE__)) return 1;
+	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
+	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, noPresenceRequired._index, present(), __LINE__)) return 1;
 
     // add behaviour which requires presence,
 	// check expected resolution by behaviourhandler.
-	testBehaviourStore.replaceBehaviour(requiresAnyoneInSphere._index, requiresAnyoneInSphere._behaviour);
-	if(!checkCase(_behaviourHandler, _behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
-	if(!checkCase(_behaviourHandler, _behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
+	test._behaviourStore.replaceBehaviour(requiresAnyoneInSphere._index, requiresAnyoneInSphere._behaviour);
+	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, noPresenceRequired._index, absent(), __LINE__)) return 1;
+	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
 	// set override and presence
-	_presenceHandler.registerPresence(PresenceHandler::ProfileLocation{.profile = 0, .location = 0});
-	testSwitchAggregator.setOverrideState({50});
+	crownstone._presenceHandler.registerPresence(PresenceHandler::ProfileLocation{.profile = 0, .location = 0});
+	test._switchAggregator.setOverrideState({50});
 	fastForwardS(1);
 
     // add behaviour which requires absence
-	testBehaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
-	if(!checkCase(_behaviourHandler, _behaviourStore, requiresNooneInSphere._index, absent(), __LINE__)) return 1;
-	if(!checkCase(_behaviourHandler, _behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
+	test._behaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
+	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, requiresNooneInSphere._index, absent(), __LINE__)) return 1;
+	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
-	if(testSwitchAggregator.getOverrideState() != std::nullopt) {
+	if(test._switchAggregator.getOverrideState() != std::nullopt) {
 		LOGw("FAILED: uploading an immediately active behaviour should clear the override state.");
 		return 1;
 	}

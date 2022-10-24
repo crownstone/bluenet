@@ -46,6 +46,7 @@ protected:
 private:
 	TwilightHandler _twilightHandler;
 	BehaviourHandler _behaviourHandler;
+	BehaviourStore* _behaviourStore;
 
 	SmartSwitch _smartSwitch;
 
@@ -110,6 +111,11 @@ private:
 	 * Returns true when behaviour value changed since last time it was called.
 	 */
 	bool updateBehaviourHandlers();
+
+	/**
+	 * Calls updateBehaviourHandlers, updateState and possibly addToSwitchHistory.
+	 */
+	void update();
 
 	// ================================== Event handling ==================================
 

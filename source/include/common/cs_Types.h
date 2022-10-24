@@ -18,7 +18,6 @@
 #include <time/cs_TimeSyncMessage.h>
 
 #include <cstdint>
-#include <tuple>
 #include <type_traits>
 
 #include "cfg/cs_Config.h"
