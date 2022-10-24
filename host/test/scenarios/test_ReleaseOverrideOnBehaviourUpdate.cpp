@@ -71,8 +71,10 @@ public:
 
 void fastForwardS(int timeS) {
 	// (SystemTime::tick and Crownstone::tick are not the same.)
-	TestAccess<SystemTime>::fastForwardS(timeS);
-	TestAccess<Crownstone>::tick();
+	for (int i = 0 ; i < timeS; i++ ) {
+		TestAccess<SystemTime>::fastForwardS(1);
+		TestAccess<Crownstone>::tick();
+	}
 }
 
 int main() {
@@ -122,6 +124,8 @@ int main() {
 	crownstone._behaviourStore.init();
 	crownstone._behaviourStore.listen();
 
+//	crownstone._presenceHandler.init();
+
 
 	// construct switch behaviours for the test
 
@@ -159,9 +163,14 @@ int main() {
 	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
 	// set override and presence
+	std::cout << __LINE__ << " current presence: " << crownstone._presenceHandler.getCurrentPresenceDescription() << std::endl;
 	crownstone._presenceHandler.registerPresence(PresenceHandler::ProfileLocation{.profile = 0, .location = 0});
 	test._switchAggregator.setOverrideState({50});
-	fastForwardS(1);
+	crownstone._behaviourHandler.update();
+	fastForwardS(1000);
+	crownstone._behaviourHandler.update();
+
+	std::cout << __LINE__ << " current presence: " << crownstone._presenceHandler.getCurrentPresenceDescription() << std::endl;
 
     // add behaviour which requires absence
 	test._behaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);

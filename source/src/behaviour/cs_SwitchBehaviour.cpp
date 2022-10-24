@@ -12,7 +12,7 @@
 
 #include <algorithm>
 
-#define LOGBehaviour_V LOGvv
+#define LOGBehaviour_V LOGd
 #define LOGSwitchBehaviourDebug LOGvv
 
 SwitchBehaviour::SwitchBehaviour(
