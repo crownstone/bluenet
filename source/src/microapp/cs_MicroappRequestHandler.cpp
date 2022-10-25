@@ -84,6 +84,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_
 			auto packet = reinterpret_cast<microapp_sdk_message_t*>(header);
 			return handleRequestMessage(packet);
 		}
+		case CS_MICROAPP_SDK_TYPE_BLUENET_EVENT: {
+			auto packet = reinterpret_cast<microapp_sdk_bluenet_event_t*>(header);
+			return handleRequestBluenetEvent(packet);
+		}
 		case CS_MICROAPP_SDK_TYPE_YIELD: {
 			microapp_sdk_yield_t* yield = reinterpret_cast<microapp_sdk_yield_t*>(header);
 			return handleRequestYield(yield);
@@ -970,8 +974,9 @@ cs_ret_code_t MicroappRequestHandler::handleRequestMessage(microapp_sdk_message_
 				size = MICROAPP_SDK_MESSAGE_SEND_MSG_MAX_SIZE;
 			}
 
-			microapp_message_out_header_t header = {
-					.appIndex = 0,
+			microapp_ctrl_header_t header = {
+					.protocol = MICROAPP_CONTROL_COMMAND_PROTOCOL,
+					.index = 0,
 			};
 
 			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MICROAPP_DATA, size + sizeof(header));

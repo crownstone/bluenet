@@ -78,7 +78,7 @@ public:
 	/**
 	 * Handle a control command message.
 	 */
-	cs_ret_code_t onControlCommandMessage(
+	cs_ret_code_t onMessage(
 			uint8_t appIndex, const cs_data_t& message, cs_data_t& resultBuffer, uint16_t& resultSize);
 
 	/**

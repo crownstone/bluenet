@@ -282,7 +282,7 @@ Value | Name | Description
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
-uint8 | App index | 1 | The index of the microapp that sent the message.
+[Microapp header](PROTOCOL.md#microapp-header-packet) | Header | 2 | The header.
 uint8[] | Data | N | The data, protocol is microapp specific.
 
 ### Asset MAC report

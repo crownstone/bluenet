@@ -75,7 +75,7 @@ struct __attribute__((packed)) microapp_upload_t {
 	// Followed by a chunk of the microapp binary.
 };
 
-struct __attribute__((packed)) microapp_ctrl_message_t {
+struct __attribute__((packed)) microapp_message_t {
 	microapp_ctrl_header_t header;
 	uint8_t payload[0];
 };
@@ -151,11 +151,4 @@ struct __attribute__((packed)) microapp_info_t {
 	uint16_t maxRamUsage  = g_RAM_MICROAPP_AMOUNT;           // Maximum RAM usage of a microapp.
 	microapp_sdk_version_t sdkVersion;                       // SDK version the firmware supports.
 	microapp_status_t appsStatus[g_MICROAPP_COUNT];          // Status of each microapp.
-};
-
-/**
- * Header of a data message from the microapp.
- */
-struct __attribute__((packed)) microapp_message_out_header_t {
-	uint8_t appIndex;
 };

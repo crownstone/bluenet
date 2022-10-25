@@ -12,6 +12,7 @@
 #include <microapp/cs_MicroappInterruptHandler.h>
 #include <microapp/cs_MicroappSdkUtil.h>
 
+#define LogMicroappInterrupInfo LOGi
 #define LogMicroappInterrupDebug LOGvv
 
 /*
@@ -97,27 +98,31 @@ void MicroappInterruptHandler::handleEvent(event_t& event) {
 
 uint8_t* MicroappInterruptHandler::getOutputBuffer(MicroappSdkType type, uint8_t id) {
 	if (!MicroappController::getInstance().allowSoftInterrupts(type, id)) {
-		LogMicroappInterrupDebug("New interrupts blocked, ignore event");
+		LogMicroappInterrupDebug("New interrupts blocked for type=%i id=%u, ignore event", type, id);
 		return nullptr;
 	}
 	return MicroappController::getInstance().getOutputMicroappBuffer();
 }
 
-cs_ret_code_t MicroappInterruptHandler::onControlCommandMessage(
+cs_ret_code_t MicroappInterruptHandler::onMessage(
 		uint8_t appIndex, const cs_data_t& message, cs_data_t& resultBuffer, uint16_t& resultSize) {
+	LogMicroappInterrupDebug("onMessage index=%u messageLen=%u", appIndex, message.len);
 	if (message.len == 0) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	if (message.len > MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE) {
+		LogMicroappInterrupInfo("Message too large: len=%u max=%u", message.len, MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE);
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
 	if (!MicroappController::getInstance().getRegisteredInterrupt(
 				CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG)) {
+		LogMicroappInterrupInfo("No interrupt registered");
 		return ERR_NOT_STARTED;
 	}
 	if (!MicroappController::getInstance().allowSoftInterrupts(
 				CS_MICROAPP_SDK_TYPE_MESSAGE, CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG)) {
+		LogMicroappInterrupInfo("No interrupt allowed");
 		return ERR_BUSY;
 	}
 

@@ -187,6 +187,7 @@ void CommandHandler::_handleCommand(
 			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
 		case CTRL_CMD_GET_UPTIME: return handleCmdGetUptime(commandData, accessLevel, result);
 		case CTRL_CMD_MICROAPP_UPLOAD: return handleCmdMicroappUpload(commandData, accessLevel, result);
+		case CTRL_CMD_MICROAPP_MESSAGE: return handleCmdMicroappMessage(commandData, accessLevel, result);
 		// cases handled by dispatchEventForCommand:
 		case CTRL_CMD_SET_TIME: return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SAVE_BEHAVIOUR:
@@ -231,8 +232,6 @@ void CommandHandler::_handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_ENABLE, commandData, source, result);
 		case CTRL_CMD_MICROAPP_DISABLE:
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_DISABLE, commandData, source, result);
-		case CTRL_CMD_MICROAPP_MESSAGE:
-			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_MESSAGE, commandData, source, result);
 		case CTRL_CMD_CLEAN_FLASH:
 			return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
 		case CTRL_CMD_FILTER_UPLOAD:
@@ -1055,6 +1054,27 @@ void CommandHandler::handleCmdMicroappUpload(
 	evtData.data.len  = commandData.len - sizeof(evtData.header);
 	evtData.data.data = commandData.data + sizeof(evtData.header);
 	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData), result);
+	event.dispatch();
+	result.returnCode = event.result.returnCode;
+	result.dataSize   = event.result.dataSize;
+	return;
+}
+
+void CommandHandler::handleCmdMicroappMessage(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
+	LOGi(STR_HANDLE_COMMAND "microapp upload");
+	size_t headerSize = offsetof(microapp_message_t, payload);
+	if (commandData.len < headerSize) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, headerSize);
+		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		return;
+	}
+
+	TYPIFY(CMD_MICROAPP_MESSAGE) evtData;
+	evtData.header       = reinterpret_cast<microapp_message_t*>(commandData.data)->header;
+	evtData.payload.len  = commandData.len - headerSize;
+	evtData.payload.data = commandData.data + headerSize;
+	event_t event(CS_TYPE::CMD_MICROAPP_MESSAGE, &evtData, sizeof(evtData), result);
 	event.dispatch();
 	result.returnCode = event.result.returnCode;
 	result.dataSize   = event.result.dataSize;
