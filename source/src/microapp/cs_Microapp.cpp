@@ -356,7 +356,7 @@ cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
-	uint8_t index            = packet->index;
+	uint8_t index          = packet->index;
 
 	// First, stop running the microapp.
 	_states[index].enabled = false;
@@ -541,7 +541,7 @@ void Microapp::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CMD_MICROAPP_MESSAGE: {
-			auto data = CS_TYPE_CAST(CMD_MICROAPP_MESSAGE, evt.data);
+			auto data             = CS_TYPE_CAST(CMD_MICROAPP_MESSAGE, evt.data);
 			evt.result.returnCode = handleMessage(data, evt.size, evt.result);
 			break;
 		}

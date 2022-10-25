@@ -998,9 +998,6 @@ const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE =
 const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE =
 		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventNotification.data);
 
-
-
-
 struct __attribute__((packed)) microapp_sdk_message_event_received_msg_t {
 	uint16_t size;
 
@@ -1039,9 +1036,6 @@ const uint16_t MICROAPP_SDK_MESSAGE_SEND_MSG_MAX_SIZE =
 const uint16_t MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE =
 		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_message_t, receivedMessage.data);
 
-
-
-
 struct __attribute__((packed)) microapp_sdk_bluenet_event_event_t {
 	//! Size of the data.
 	uint16_t size;
@@ -1072,8 +1066,6 @@ struct __attribute__((packed)) microapp_sdk_bluenet_event_t {
 // Calculate max payload sizes.
 const uint16_t MICROAPP_SDK_BLUENET_EVENT_EVENT_MAX_SIZE =
 		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_bluenet_event_t, event.data);
-
-
 
 /**
  * Struct for mesh message from microapp.

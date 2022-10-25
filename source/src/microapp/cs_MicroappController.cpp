@@ -11,12 +11,13 @@
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
-#include <ipc/cs_IpcRamData.h>
+#include <ipc/cs_IpcRamDataContents.h>
 #include <logging/cs_Logger.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <storage/cs_IpcRamBluenet.h>
 
 #define LogMicroappControllerInfo LOGi
 #define LogMicroappControllerDebug LOGd
@@ -63,7 +64,7 @@ microapp_sdk_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* ioB
 
 void jumpToAddress(uintptr_t address) {
 	// This runs in microapp context, so no logs and no variables on stack.
-	goto *(void*)address;
+	goto*(void*)address;
 	LOGe("Shouldn't end up here");
 }
 
@@ -167,7 +168,7 @@ void MicroappController::startMicroapp(uint8_t appIndex) {
 
 	// The entry function is this immediate address (no correction for thumb mode)
 	microapp_coroutine_args_t coroutineArg = {
-			.entry = address,
+			.entry     = address,
 			.ioBuffers = nullptr,
 	};
 
@@ -180,12 +181,14 @@ void MicroappController::startMicroapp(uint8_t appIndex) {
 }
 
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers->microapp2bluenet.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())
+							   ->ioBuffers->microapp2bluenet.payload;
 	return payload;
 }
 
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers->bluenet2microapp.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())
+							   ->ioBuffers->bluenet2microapp.payload;
 	return payload;
 }
 
@@ -195,20 +198,10 @@ void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingSt
 		LOGi("Multiple apps not supported yet");
 		return;
 	}
-	uint8_t runFlag = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
-	bluenet_ipc_data_payload_t ipcData;
-
-	// We can just overwrite all, as a newer IPC version will be written and read by bluenet only.
-	ipcData.bluenetRebootData.ipcDataMajor = BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR;
-	ipcData.bluenetRebootData.ipcDataMinor = BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR;
-
-	memset(ipcData.bluenetRebootData.microapp, 0, sizeof(ipcData.bluenetRebootData.microapp));
-	ipcData.bluenetRebootData.microapp[appIndex].running = runFlag;
-
-	IpcRetCode ipcCode = setRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, sizeof(ipcData.bluenetRebootData));
-	if (ipcCode != IPC_RET_SUCCESS) {
-		LOGw("Failed to set IPC data: ipcCode=%i", ipcCode);
-	}
+	microapp_reboot_data_t microappData;
+	memset(&microappData, 0, sizeof(microappData));
+	microappData.running = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	IpcRamBluenet::getInstance().updateMicroappData(appIndex, microappData);
 }
 
 MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
@@ -218,34 +211,13 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 		LOGi("Multiple apps not supported yet");
 		return state;
 	}
-	bluenet_ipc_data_payload_t ipcData;
-	uint8_t dataSize   = 0;
 
-	// We might read the IPC data of a previous bluenet version.
-	IpcRetCode ipcCode = getRamData(IPC_INDEX_BLUENET_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
-	if (ipcCode != IPC_RET_SUCCESS) {
-		LOGi("Failed to get IPC data: ipcCode=%i", ipcCode);
-		return state;
-	}
-	if (ipcData.bluenetRebootData.ipcDataMajor != BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR) {
-		LOGw("Incorrect major version: major=%u required=%u",
-			 ipcData.bluenetRebootData.ipcDataMajor,
-			 BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR);
+	IpcRamBluenet& ipcRam = IpcRamBluenet::getInstance();
+	if (!ipcRam.isValidOnBoot()) {
 		return state;
 	}
 
-	// We need to ignore this warning, it's triggered because the minimum minor is 0, making the statement always false.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtype-limits"
-	if (ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
-		LOGw("Minor version too low: minor=%u minimum=%u",
-			 ipcData.bluenetRebootData.ipcDataMinor,
-			 BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR);
-		return state;
-	}
-#pragma GCC diagnostic pop
-
-	switch (ipcData.bluenetRebootData.microapp[appIndex].running) {
+	switch (ipcRam.getData().microapp[appIndex].running) {
 		case 1: {
 			state = MicroappOperatingState::CS_MICROAPP_RUNNING;
 			break;
@@ -298,8 +270,8 @@ bool MicroappController::handleAck() {
 }
 
 bool MicroappController::handleRequest() {
-	uint8_t* inputBuffer                  = getInputMicroappBuffer();
-	microapp_sdk_header_t* incomingHeader = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
+	uint8_t* inputBuffer                           = getInputMicroappBuffer();
+	microapp_sdk_header_t* incomingHeader          = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
 	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
 	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
 	LogMicroappControllerVerbose("  ack=%u", incomingHeader->ack);
@@ -315,7 +287,8 @@ bool MicroappController::handleRequest() {
 			break;
 		}
 		default: {
-			LogMicroappControllerInfo("Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+			LogMicroappControllerInfo(
+					"Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
 			break;
 		}
 	}
@@ -372,7 +345,7 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 	if (_tickCounter < MICROAPP_LOOP_FREQUENCY) {
 		return;
 	}
-	_tickCounter                           = 0;
+	_tickCounter = 0;
 
 	// Reset interrupt counter every microapp tick
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
@@ -464,9 +437,9 @@ cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkType type, ui
 		return ERR_NO_SPACE;
 	}
 	// Register the interrupt
-	_softInterruptRegistrations[emptySlotIndex].type       = type;
-	_softInterruptRegistrations[emptySlotIndex].id         = id;
-	_softInterruptRegistrations[emptySlotIndex].counter    = 0;
+	_softInterruptRegistrations[emptySlotIndex].type    = type;
+	_softInterruptRegistrations[emptySlotIndex].id      = id;
+	_softInterruptRegistrations[emptySlotIndex].counter = 0;
 
 	LogMicroappControllerDebug("Registered interrupt of type %i, id %u", type, id);
 
@@ -570,7 +543,7 @@ void MicroappController::incrementEmptySoftInterruptSlots() {
 void MicroappController::clear(uint8_t appIndex) {
 	LOGi("Clear appIndex=%u", appIndex);
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
-		_softInterruptRegistrations[i].type = CS_MICROAPP_SDK_TYPE_NONE;
+		_softInterruptRegistrations[i].type    = CS_MICROAPP_SDK_TYPE_NONE;
 		_softInterruptRegistrations[i].counter = 0;
 	}
 
@@ -578,10 +551,9 @@ void MicroappController::clear(uint8_t appIndex) {
 		_eventInterruptRegistrations[i] = CS_TYPE::CONFIG_DO_NOT_USE;
 	}
 
-	_scanFilter.type = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE;
+	_scanFilter.type         = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE;
 
 	_emptySoftInterruptSlots = 1;
 
-	microappData.isScanning = false;
-
+	microappData.isScanning  = false;
 }
