@@ -11,6 +11,8 @@
 
 /**
  * Class to operate on bluenet to bluenet IPC ram.
+ *
+ * An alternative to this class would be to add a method to the IpcRamData class to update a single field.
  */
 class IpcRamBluenet {
 public:
@@ -21,11 +23,14 @@ public:
 
 	/**
 	 * Reads the IPC ram.
+	 *
+	 * If it's not valid, the data will be cleared.
+	 * After init, the data is valid.
 	 */
 	void init();
 
 	/**
-	 * Whether the IPC ram data was valid on boot.
+	 * Whether the IPC ram data was valid before init.
 	 */
 	bool isValidOnBoot();
 
@@ -36,10 +41,18 @@ public:
 	 */
 	const bluenet_ipc_bluenet_data_t& getData();
 
-	//! Update the energy field.
+	/**
+	 * Update the energy field.
+	 *
+	 * Will write the data to IPC ram.
+	 */
 	void updateEnergyUsed(const int64_t& energyUsed);
 
-	//! Update a microapp field.
+	/**
+	 * Update a microapp field.
+	 *
+	 * Will write the data to IPC ram.
+	 */
 	void updateMicroappData(uint8_t appIndex, const microapp_reboot_data_t& data);
 
 private:

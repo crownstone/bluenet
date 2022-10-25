@@ -41,9 +41,6 @@ void IpcRamBluenet::init() {
 		return;
 	}
 
-	// We need to ignore this warning, it's triggered because the minimum minor is 0, making the statement always false.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wtype-limits"
 	if (_ipcData.bluenetRebootData.ipcDataMinor < BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR) {
 		LogIpcRamBluenetInfo(
 				"Minor version too low: minor=%u minimum=%u",
@@ -52,7 +49,6 @@ void IpcRamBluenet::init() {
 		clearData();
 		return;
 	}
-#pragma GCC diagnostic pop
 
 	LogIpcRamBluenetInfo("Loaded bluenet IPC ram: size=%u", ipcDataSize);
 	printData();
@@ -92,7 +88,7 @@ void IpcRamBluenet::updateEnergyUsed(const int64_t& energyUsed) {
 }
 
 void IpcRamBluenet::updateMicroappData(uint8_t appIndex, const microapp_reboot_data_t& data) {
-	if (appIndex > sizeof(_ipcData.bluenetRebootData.microapp) / sizeof(_ipcData.bluenetRebootData.microapp[0])) {
+	if (appIndex > BLUENET_IPC_MICROAPP_COUNT) {
 		LOGw("Invalid appIndex=%u", appIndex);
 		return;
 	}
@@ -107,14 +103,12 @@ void IpcRamBluenet::printData() {
 		 true,
 		 "  energy=%i J",
 		 static_cast<int>(_ipcData.bluenetRebootData.energyUsedMicroJoule / 1000 / 1000));
-	for (unsigned int i = 0;
-		 i < sizeof(_ipcData.bluenetRebootData.microapp) / sizeof(_ipcData.bluenetRebootData.microapp[0]);
-		 ++i) {
+	for (unsigned int i = 0; i < BLUENET_IPC_MICROAPP_COUNT; ++i) {
 		_log(LogLevelIpcRamBluenetVerbose,
 			 true,
 			 "  microapp %u: running=%u",
 			 i,
-			 _ipcData.bluenetRebootData.microapp[0].running);
+			 _ipcData.bluenetRebootData.microapp[i].running);
 	}
 	_logArray(LogLevelIpcRamBluenetVerbose, true, _ipcData.raw, sizeof(_ipcData.raw));
 }
