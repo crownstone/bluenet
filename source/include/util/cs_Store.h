@@ -7,20 +7,19 @@
 
 #pragma once
 
-#include <logging/cs_Logger.h>
-
 #include <type_traits>
 
 /**
- * A storage utility for objects of type Rec.
+ * A variable size storage utility for objects of type Rec with absolute maximum Size.
+ * Can be stack allocated.
  *
  * Rec should implement:
  *   - IdType id();
  *   - bool isValid();
- *   - void invalidate();    // TODO:
+ *   - void invalidate();
  *
- * furthermore it must be default constructible.
- *
+ * Where IdType is freely dependent on Rec.
+ * Furthermore it must be default constructible.
  */
 template <class Rec, unsigned int Size>
 class Store {
@@ -53,7 +52,6 @@ public:
 	 */
 	void clear() {
 		_currentSize = 0;
-		// TODO: @Bart practically we don't need to invalidate anything if size is shrunk to 0.
 		for (auto& rec : *this) {
 			rec.invalidate();
 		}
@@ -188,6 +186,7 @@ public:
 		}
 		return s;
 	}
+
 	/**
 	 * returns number of valid elements.
 	 */
