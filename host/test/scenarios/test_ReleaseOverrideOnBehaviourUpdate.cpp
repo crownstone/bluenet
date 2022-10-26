@@ -170,21 +170,18 @@ int main() {
 	std::cout << __LINE__ << " current presence: " << crownstone._presenceHandler.getCurrentPresenceDescription() << std::endl;
 	crownstone._presenceHandler.registerPresence(PresenceHandler::ProfileLocation{.profile = 0, .location = 0});
 	test._switchAggregator.setOverrideState({50});
-	crownstone._behaviourHandler.update();
+
+	// ensure grace periods of presence based behaviours time out
 	fastForwardS(1000);
 	crownstone._behaviourHandler.update();
 
-	std::cout << __LINE__ << " current presence: " << crownstone._presenceHandler.getCurrentPresenceDescription() << std::endl;
-
-	// NOTE: gracePeriodForPresenceIsActive is making trouble here
-
-    // add behaviour which requires absence
+    // add behaviour which requires absence and is immediately active
 	test._behaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
 	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, requiresNooneInSphere._index, absent(), __LINE__)) return 1;
 	if(!checkCase(crownstone._behaviourHandler, crownstone._behaviourStore, requiresAnyoneInSphere._index, present(), __LINE__)) return 1;
 
 	if(test._switchAggregator.getOverrideState() != std::nullopt) {
-		LOGw("FAILED: uploading an immediately active behaviour should clear the override state.");
+		LOGw("FAILED: uploading an immediately active behaviour should have cleared the override state.");
 		return 1;
 	}
 
