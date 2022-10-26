@@ -55,6 +55,8 @@ public:
 	MockCrownstone() {
 		TestAccess<BehaviourHandler>::setup(_behaviourHandler, &_presenceHandler, &_behaviourStore);
 	}
+
+	virtual ~MockCrownstone() { LOGi("MockCrownstone::~MockCrownstone()");}
 };
 
 class TestCrownstone {
@@ -67,6 +69,8 @@ public:
 	TestCrownstone(MockCrownstone& mock)
 			: _storage(mock._storage), _switchBehaviour(), _switchAggregator(mock._switchAggregator), _behaviourStore() {
 	}
+
+	~TestCrownstone() {LOGi("TestCrownstone::~TestCrownstone()"); }
 };
 
 void fastForwardS(int timeS) {
@@ -124,7 +128,7 @@ int main() {
 	crownstone._behaviourStore.init();
 	crownstone._behaviourStore.listen();
 
-//	crownstone._presenceHandler.init();
+	crownstone._presenceHandler.init();
 
 
 	// construct switch behaviours for the test
@@ -171,6 +175,8 @@ int main() {
 	crownstone._behaviourHandler.update();
 
 	std::cout << __LINE__ << " current presence: " << crownstone._presenceHandler.getCurrentPresenceDescription() << std::endl;
+
+	// NOTE: gracePeriodForPresenceIsActive is making trouble here
 
     // add behaviour which requires absence
 	test._behaviourStore.replaceBehaviour(requiresNooneInSphere._index, requiresNooneInSphere._behaviour);
