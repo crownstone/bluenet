@@ -58,8 +58,8 @@ const uint8_t MICROAPP_SDK_MAX_ARRAY_SIZE                   = MICROAPP_SDK_MAX_P
 // max total - (header + protocol [1] + type [2] + size [2])
 const uint8_t MICROAPP_SDK_MAX_CONTROL_COMMAND_PAYLOAD_SIZE = MICROAPP_SDK_MAX_PAYLOAD - (MICROAPP_SDK_HEADER_SIZE + 5);
 
-// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
-#define MICROAPP_LOOP_FREQUENCY 10
+// Call loop every N ticks. The ticks are every 100 ms.
+#define MICROAPP_LOOP_FREQUENCY 1
 
 #ifndef TICK_INTERVAL_MS
 #define TICK_INTERVAL_MS 100
@@ -127,7 +127,7 @@ typedef MicroappSdkAck microapp_sdk_result_t;
 /**
  * The main opcodes for microapp commands.
  */
-enum MicroappSdkMessageType {
+enum MicroappSdkType {
 	//! No meaning, should not be used
 	CS_MICROAPP_SDK_TYPE_NONE            = 0x00,
 	//! Microapp logs
@@ -154,6 +154,10 @@ enum MicroappSdkMessageType {
 	CS_MICROAPP_SDK_TYPE_YIELD           = 0x0B,
 	//! Bluenet calling the microapp on a tick or subsequent call
 	CS_MICROAPP_SDK_TYPE_CONTINUE        = 0x0C,
+	//! Generic data message. Received from a control command, or outgoing to for example UART.
+	CS_MICROAPP_SDK_TYPE_MESSAGE         = 0x0D,
+	//! Internal bluenet events.
+	CS_MICROAPP_SDK_TYPE_BLUENET_EVENT   = 0x0E,
 };
 
 /**
@@ -392,7 +396,7 @@ typedef union {
 struct __attribute__((packed)) microapp_sdk_header_t {
 	/**
 	 * Specifies the type of message, and how to interpret the rest of the payload.
-	 * See MicroappSdkMessageType.
+	 * See MicroappSdkType.
 	 */
 	uint8_t messageType;
 
@@ -617,18 +621,46 @@ struct __attribute__((packed)) microapp_sdk_ble_scan_event_t {
 	uint8_t data[MAX_BLE_ADV_DATA_LENGTH];
 };
 
+enum MicroappSdkBleScanFilterType {
+	CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE           = 0,
+	CS_MICROAPP_SDK_BLE_SCAN_FILTER_RSSI           = 1,
+	CS_MICROAPP_SDK_BLE_SCAN_FILTER_MAC            = 2,
+	CS_MICROAPP_SDK_BLE_SCAN_FILTER_NAME           = 3,
+	CS_MICROAPP_SDK_BLE_SCAN_FILTER_SERVICE_16_BIT = 4,
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_scan_filter_name_t {
+	uint8_t size;
+	uint8_t name[MAX_BLE_ADV_DATA_LENGTH];
+};
+
+struct __attribute__((packed)) microapp_sdk_ble_scan_filter_t {
+	//! Type of filter, see MicroappSdkBleScanFilterType.
+	uint8_t type;
+
+	union {
+		int8_t rssi;
+		microapp_sdk_ble_scan_filter_name_t name;
+		uint8_t mac[MAC_ADDRESS_LENGTH];
+		uint16_t service16bit;
+	};
+};
+
 enum MicroappSdkBleScanType {
 	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_REGISTER_INTERRUPT = 1,
 	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_START              = 2,
 	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_STOP               = 3,
 	CS_MICROAPP_SDK_BLE_SCAN_EVENT_SCAN                 = 4,
+	CS_MICROAPP_SDK_BLE_SCAN_REQUEST_FILTER             = 5,
 };
 
 struct __attribute__((packed)) microapp_sdk_ble_scan_t {
+	//! Type, see MicroappSdkBleScanType.
 	uint8_t type;
 
 	union {
 		microapp_sdk_ble_scan_event_t eventScan;
+		microapp_sdk_ble_scan_filter_t filter;
 	};
 };
 
@@ -966,6 +998,75 @@ const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_READ_DATA_MAX_SIZE =
 const uint16_t MICROAPP_SDK_BLE_CENTRAL_EVENT_NOTIFICATION_DATA_MAX_SIZE =
 		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_ble_t, central.eventNotification.data);
 
+struct __attribute__((packed)) microapp_sdk_message_event_received_msg_t {
+	uint16_t size;
+
+	//! The message data. Maximum size is MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE.
+	uint8_t data[0];
+};
+
+struct __attribute__((packed)) microapp_sdk_message_request_send_msg_t {
+	uint16_t size;
+
+	//! The message data. Maximum size is MICROAPP_SDK_MESSAGE_SEND_MSG_MAX_SIZE.
+	uint8_t data[0];
+};
+
+enum MicroappSdkMsgType {
+	CS_MICROAPP_SDK_MSG_REGISTER_INTERRUPT = 0x01,
+	CS_MICROAPP_SDK_MSG_REQUEST_SEND_MSG   = 0x02,
+	CS_MICROAPP_SDK_MSG_EVENT_RECEIVED_MSG = 0x03,
+};
+
+struct __attribute__((packed)) microapp_sdk_message_t {
+	microapp_sdk_header_t header;
+
+	//! See MicroappSdkMsgType.
+	uint8_t type;
+
+	union {
+		microapp_sdk_message_event_received_msg_t receivedMessage;
+		microapp_sdk_message_request_send_msg_t sendMessage;
+	};
+};
+
+// Calculate max payload sizes.
+const uint16_t MICROAPP_SDK_MESSAGE_SEND_MSG_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_message_t, sendMessage.data);
+const uint16_t MICROAPP_SDK_MESSAGE_RECEIVED_MSG_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_message_t, receivedMessage.data);
+
+struct __attribute__((packed)) microapp_sdk_bluenet_event_event_t {
+	//! Size of the data.
+	uint16_t size;
+
+	//! The event data. Maximum size is MICROAPP_SDK_BLUENET_EVENT_EVENT_MAX_SIZE.
+	uint8_t data[0];
+};
+
+enum MicroappSdkBluenetEventType {
+	CS_MICROAPP_SDK_BLUENET_EVENT_REGISTER_INTERRUPT = 0x01,
+	CS_MICROAPP_SDK_BLUENET_EVENT_EVENT              = 0x02,
+};
+
+struct __attribute__((packed)) microapp_sdk_bluenet_event_t {
+	microapp_sdk_header_t header;
+
+	//! See MicroappSdkBluenetEventType.
+	uint8_t type;
+
+	//! Type of event, see CS_TYPE
+	uint16_t eventType;
+
+	union {
+		microapp_sdk_bluenet_event_event_t event;
+	};
+};
+
+// Calculate max payload sizes.
+const uint16_t MICROAPP_SDK_BLUENET_EVENT_EVENT_MAX_SIZE =
+		MICROAPP_SDK_MAX_PAYLOAD - offsetof(microapp_sdk_bluenet_event_t, event.data);
+
 /**
  * Struct for mesh message from microapp.
  */
@@ -977,6 +1078,12 @@ struct __attribute__((packed)) microapp_sdk_mesh_t {
 
 	//! Indicates the stone id to send to/read from or own stone ID. Use ID 0 for a broadcast.
 	uint8_t stoneId;
+
+	struct __attribute__((packed)) {
+		//! When set to true, the mesh message will not be relayed, and thus only received by neighbouring nodes.
+		bool doNotRelay : 1;
+		uint8_t reserved : 7;
+	} options;
 
 	//! Size of the payload.
 	uint8_t size;

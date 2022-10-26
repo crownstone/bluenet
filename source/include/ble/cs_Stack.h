@@ -68,7 +68,7 @@ protected:
 
 	app_timer_t _connectionWatchdogTimerData;
 	app_timer_id_t _connectionWatchdogTimerId = NULL;
-	bool _connectionWatchdogRunning = false;
+	bool _connectionWatchdogRunning           = false;
 
 	uint8_t _scanBuffer[31];  // Same size as buffer in cs_stack_scan_t.
 	ble_data_t _scanBufferStruct = {_scanBuffer, sizeof(_scanBuffer)};

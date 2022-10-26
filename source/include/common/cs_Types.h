@@ -371,6 +371,7 @@ enum class CS_TYPE : uint16_t {
 	CMD_MICROAPP_REMOVE,     // Microapp control command.
 	CMD_MICROAPP_ENABLE,     // Microapp control command.
 	CMD_MICROAPP_DISABLE,    // Microapp control command.
+	CMD_MICROAPP_MESSAGE,    // Microapp control command.
 	CMD_MICROAPP_ADVERTISE,  // A microapp wants to advertise something.
 	EVT_MICROAPP_FACTORY_RESET_DONE,  // All microapps have been erased.
 
@@ -695,6 +696,7 @@ typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_VALIDATE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
+typedef microapp_message_internal_t TYPIFY(CMD_MICROAPP_MESSAGE);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef void TYPIFY(EVT_MICROAPP_FACTORY_RESET_DONE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);

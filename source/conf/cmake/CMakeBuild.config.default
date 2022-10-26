@@ -522,7 +522,7 @@ FLASH_MICROAPP_PAGES=4
 MICROAPP_COUNT=1
 
 # The amount of RAM a single microapp is allowed to use (before IPC ram, and grows down).
-RAM_MICROAPP_AMOUNT=0x800
+RAM_MICROAPP_AMOUNT=0x1000
 
 # Default location of file with keys to setup Crownstone
 KEYS_JSON_FILE=~/.keys/crownstone.json

@@ -124,6 +124,7 @@ private:
 	cs_ret_code_t handleRemove(microapp_ctrl_header_t* packet);
 	cs_ret_code_t handleEnable(microapp_ctrl_header_t* packet);
 	cs_ret_code_t handleDisable(microapp_ctrl_header_t* packet);
+	cs_ret_code_t handleMessage(microapp_message_internal_t* packet, cs_result_t& result);
 
 	/**
 	 * Checks if control command header is ok.

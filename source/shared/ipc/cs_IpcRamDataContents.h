@@ -18,7 +18,7 @@ extern "C" {
 
 // Update when struct bluenet_ipc_bluenet_data_t changes
 #define BLUENET_IPC_BLUENET_REBOOT_DATA_MAJOR 1
-#define BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR 0
+#define BLUENET_IPC_BLUENET_REBOOT_DATA_MINOR 1
 
 enum BuildType {
 	BUILD_TYPE_RESERVED       = 0,
@@ -78,16 +78,23 @@ typedef struct {
 	uint8_t running : 1;
 } __attribute__((packed)) microapp_reboot_data_t;
 
+#define BLUENET_IPC_MICROAPP_COUNT 1
+
 /**
  * Data struct that can be used to communicate from bluenet to bluenet across reboots.
  */
 typedef struct {
-	// Major version of the data in this struct
+	//! Major version of the data in this struct
 	uint8_t ipcDataMajor;
-	// Minor version of the data in this struct
+	//! Minor version of the data in this struct
 	uint8_t ipcDataMinor;
-	// Currently only 1 app is supported, expand with more bits for more apps
-	microapp_reboot_data_t microapp[1];
+
+	//! Energy used since last cold boot, in mJ.
+	int64_t energyUsedMicroJoule;
+
+	//! Currently only 1 app is supported, expand with more bits for more apps
+	microapp_reboot_data_t microapp[BLUENET_IPC_MICROAPP_COUNT];
+
 } __attribute__((packed)) bluenet_ipc_bluenet_data_t;
 
 /**

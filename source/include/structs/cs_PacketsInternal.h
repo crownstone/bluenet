@@ -381,6 +381,11 @@ struct microapp_upload_internal_t {
 	cs_data_t data;
 };
 
+struct microapp_message_internal_t {
+	microapp_ctrl_header_t header;
+	cs_data_t payload;
+};
+
 struct mesh_topo_mac_result_t {
 	uint8_t stoneId;
 	uint8_t macAddress[MAC_ADDRESS_LEN];

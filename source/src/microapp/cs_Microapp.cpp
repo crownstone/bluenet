@@ -201,7 +201,7 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
-	MicroappController::getInstance().callApp(index);
+	MicroappController::getInstance().startMicroapp(index);
 	return ERR_SUCCESS;
 }
 
@@ -356,7 +356,7 @@ cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
-	uint8_t index            = packet->index;
+	uint8_t index          = packet->index;
 
 	// First, stop running the microapp.
 	_states[index].enabled = false;
@@ -416,6 +416,20 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 	uint8_t index          = packet->index;
 	_states[index].enabled = false;
 	return storeState(index);
+}
+
+cs_ret_code_t Microapp::handleMessage(microapp_message_internal_t* packet, cs_result_t& result) {
+	LOGMicroappInfo("handleMessage appIndex=%u", packet->header.index);
+	cs_ret_code_t retCode = checkHeader(&packet->header);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	return MicroappInterruptHandler::getInstance().onMessage(
+			packet->header.index,
+			packet->payload,
+			result.buf,
+			result.dataSize);
 }
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
@@ -524,6 +538,11 @@ void Microapp::handleEvent(event_t& evt) {
 		case CS_TYPE::CMD_MICROAPP_DISABLE: {
 			auto packet           = CS_TYPE_CAST(CMD_MICROAPP_DISABLE, evt.data);
 			evt.result.returnCode = handleDisable(packet);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_MESSAGE: {
+			auto data             = CS_TYPE_CAST(CMD_MICROAPP_MESSAGE, evt.data);
+			evt.result.returnCode = handleMessage(data, evt.result);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

@@ -140,6 +140,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
 10007 | Hub data                      | Optional  | uint8 [] | As requested via control command `Hub data`. Make sure you reply with the `Hub data reply` uart command.
+10008 | Microapp data                 | Yes       | [Microapp message](#microapp-message) | As requested by the microapp.
 10102 | Mesh state msg                | Yes       | [Service data without device type](SERVICE_DATA.md#encrypted-data) | State of other Crownstones in the mesh (unencrypted).
 10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh-state-part-0) | Part of the state of other Crownstones in the mesh.
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh-state-part-1) | Part of the state of other Crownstones in the mesh.
@@ -277,6 +278,12 @@ Value | Name | Description
 4 | Profile location enter | The first user of given profile entered the given location.
 5 | Profile location exit  | The first user of given profile left the given location.
 
+### Microapp message
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Microapp header](PROTOCOL.md#microapp-header-packet) | Header | 2 | The header.
+uint8[] | Data | N | The data, protocol is microapp specific.
 
 ### Asset MAC report
 

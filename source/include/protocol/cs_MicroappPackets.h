@@ -37,7 +37,7 @@ constexpr uint8_t MICROAPP_SDK_MAJOR                = 1;
 constexpr uint8_t MICROAPP_SDK_MINOR                = 0;
 
 //! Max flash size of a microapp, must be a multiple of flash page size.
-constexpr uint16_t MICROAPP_MAX_SIZE = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
+constexpr uint16_t MICROAPP_MAX_SIZE                = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
 
 /**
  * Header of a microapp binary.
@@ -73,6 +73,11 @@ struct __attribute__((packed)) microapp_upload_t {
 	// Offset in bytes of this chunk of data. Must be a multiple of 4.
 	uint16_t offset;
 	// Followed by a chunk of the microapp binary.
+};
+
+struct __attribute__((packed)) microapp_message_t {
+	microapp_ctrl_header_t header;
+	uint8_t payload[0];
 };
 
 /**
