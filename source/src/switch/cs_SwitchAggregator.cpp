@@ -181,17 +181,17 @@ void SwitchAggregator::handleEvent(event_t& event) {
 
 bool SwitchAggregator::handleBehaviourEvents(event_t& event) {
 
-	switch(event.type ){
+	switch(event.type){
 		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
 			handleGetBehaviourDebug(event);
 			return true;
 		}
+
 		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION: {
-			LOGd("SwitchAggregator::handleBehaviourEvents EVT_BEHAVIOURSTORE_MUTATION");
 			BehaviourMutation* mutation = static_cast<TYPIFY(EVT_BEHAVIOURSTORE_MUTATION)*>(event.data);
 
 			if(_behaviourStore == nullptr) {
-				LOGd("behaviourstore wasn't found by switchaggregator");
+				LOGw("_behaviourStore is null in switchaggregator");
 				if(mutation->_mutation != BehaviourMutation::NONE) {
 					update();
 				}
@@ -201,45 +201,46 @@ bool SwitchAggregator::handleBehaviourEvents(event_t& event) {
 
 			switch(mutation->_mutation) {
 				case BehaviourMutation::REMOVE: {
-					LOGd("index: %u: remove", mutation->_index);
-					// TODO: shouldn't remove event be sent before actual removal so that
-					// we can check if the behaviour was active or something?
-//					update();
+					update();
 					break;
 				}
 				case BehaviourMutation::CLEAR_ALL: {
-					LOGd("index: %u: clear all", mutation->_index);
-//					update();
+					update();
 					break;
 				}
 				case BehaviourMutation::ADD: {
-					LOGd("index: %u: add", mutation->_index);
-					auto behaviour = _behaviourStore->getBehaviour(mutation->_index);
-					if(auto switchBehaviour = dynamic_cast<SwitchBehaviour*>(behaviour)) {
-						LOGd("it's derrived from switch! %x", switchBehaviour);
-					} else {
-						LOGd("it's not a switchbehaviour!");
+					auto behaviourPtr = _behaviourStore->getBehaviour(mutation->_index);
+
+					if(_behaviourHandler.validateBehaviour(behaviourPtr)){
+						LOGSwitchAggregatorDebug(
+								"Event Mutation::ADD received for valid behaviour. Clearing override and updating.");
+						_overrideState.reset();
+						update();
 					}
+
 					break;
 				}
 				case BehaviourMutation::UPDATE: {
-					LOGd("index: %u: update", mutation->_index);
-					auto behaviour = _behaviourStore->getBehaviour(mutation->_index);
-					if(auto switchBehaviour = dynamic_cast<SwitchBehaviour*>(behaviour)) {
-						LOGd("it's derrived from switch! %x", switchBehaviour);
-					} else {
-						LOGd("it's not a switchbehaviour!");
+					auto behaviourPtr = _behaviourStore->getBehaviour(mutation->_index);
+
+					if(_behaviourHandler.validateBehaviour(behaviourPtr)){
+						LOGSwitchAggregatorDebug(
+								"Event Mutation::UPDATE received for valid behaviour. Clearing override and updating.");
+						_overrideState.reset();
+						update();
 					}
+
 					break;
 				}
 				case BehaviourMutation::NONE: {
-					LOGd("index: %u: none", mutation->_index);
+					// nothing happened.
 					break;
 				}
-			}
+			} // switch(mutation->_mutation)
 
 			return true;
-		}
+		} // CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION
+
 		default: {
 			return false;
 		}

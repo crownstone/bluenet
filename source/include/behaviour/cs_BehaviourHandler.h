@@ -63,6 +63,12 @@ public:
 	 */
 	bool requiresAbsence(Time t);
 
+	/**
+	 * Checks if the given behaviour is valid. Queries the presence handler and SystemTime for
+	 * the current state, and resolves the behaviour type to call isValid.
+	 */
+	bool validateBehaviour(Behaviour* behaviour) const;
+
 private:
 	/**
 	 * Cached reference to the presence handler. (obtained at init)
@@ -133,12 +139,20 @@ private:
 	void handleGetBehaviourDebug(event_t& evt);
 
 	/**
-	 * Returns b, casted as switch behaviour if that cast is valid and
+	 * Returns `behaviour`, casted as switch behaviour if that cast is valid and
 	 * isValid(*) returns true.
 	 * Else, returns nullptr.
 	 */
-	SwitchBehaviour* ValidateSwitchBehaviour(
-			Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const;
+	SwitchBehaviour* validateSwitchBehaviour(
+			Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const;
+
+	/**
+	 * Returns `behaviour`, casted as twilight behaviour if that cast is valid and
+	 * isValid(*) returns true.
+	 * Else, returns nullptr.
+	 */
+	TwilightBehaviour* validateTwilightBehaviour(
+			Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const;
 
 	// -----------------------------------------------------------------------
 	// --------------------------- synchronization ---------------------------
