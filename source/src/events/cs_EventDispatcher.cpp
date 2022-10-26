@@ -10,6 +10,7 @@
 #include <logging/cs_Logger.h>
 #include <util/cs_BleError.h>
 
+#define LOGEventDispatherDebug LOGvv
 #define LOGEventdispatcherInfo LOGi
 #define LOGEventdispatcherWarning LOGw
 
@@ -41,7 +42,9 @@ void EventDispatcher::dispatch(event_t& event) {
 	}
 
 	for (int i = 0; i < _listenerCount; i++) {
-		_listeners[i]->handleEvent(event);
+		if (auto listener = _listeners[i]) {
+			listener->handleEvent(event);
+		}
 	}
 }
 
@@ -64,4 +67,12 @@ bool EventDispatcher::addListener(EventListener* listener) {
 
 	_listeners[_listenerCount++] = listener;
 	return true;
+}
+
+void EventDispatcher::removeListener(EventListener* listener) {
+	for (auto& l : _listeners) {
+		if (listener == l) {
+			l = nullptr;
+		}
+	}
 }
