@@ -20,6 +20,7 @@ class AssetFilter : FilterInterface {
 public:
 	uint8_t* _data;  // byte representation of this object.
 	AssetFilter(uint8_t* data) : _data(data) {}
+	~AssetFilter() { LOGi("AssetFilter::~AssetFilter()"); }
 
 	// ================
 	// Accessor methods

@@ -30,6 +30,8 @@ public:
 
 	virtual size_t serializedSize() const;
 
+	virtual ~PresenceCondition() { LOGi("PresenceCondition::~PresenceCondition()");};
+
 	/**
 	 * Returns true if this condition is satisfied given the presence state.
 	 */

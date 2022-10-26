@@ -56,6 +56,7 @@ public:
 	void init();
 
 	virtual void handleEvent(event_t& event);
+	virtual ~SystemTime() { LOGi("SystemTime::~SystemTime()"); }
 
 	// ======================== Utility functions ========================
 

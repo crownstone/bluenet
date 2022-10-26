@@ -27,7 +27,7 @@
 // Define to get more debug logs.
 #undef CS_STATE_DEBUG_LOGS
 
-#define LOGStateDebug LOGd
+#define LOGStateDebug LOGvv
 
 void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
 	State::getInstance().handleStorageError(operation, type, id);
@@ -36,6 +36,8 @@ void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_sta
 State::State() : _storage(NULL), _boardsConfig(NULL) {}
 
 State::~State() {
+	LOGi("State::~State");
+
 	for (auto it = _ram_data_register.begin(); it < _ram_data_register.end(); it++) {
 		cs_state_data_t* ram_data = &(*it);
 		free(ram_data->value);
@@ -203,7 +205,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
-	LOGStateDebug("Set value: $typeName(%u)", data.type);
+	LOGStateDebug("setInternal: $typeName(%u) mode(%u)", data.type, static_cast<uint32_t>(mode));
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type           = data.type;
 	cs_state_id_t id       = data.id;
@@ -223,8 +225,11 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 		LOGw("Type size is different (%u rather than %u).", data.size, typeSize);
 		return ERR_BUFFER_TOO_SMALL;
 	}
+
 	switch (mode) {
-		case PersistenceMode::NEITHER_RAM_NOR_FLASH: return ERR_NOT_AVAILABLE;
+		case PersistenceMode::NEITHER_RAM_NOR_FLASH: {
+			return ERR_NOT_AVAILABLE;
+		}
 		case PersistenceMode::RAM: {
 			ret_code = storeInRam(data);
 			switch (ret_code) {
@@ -233,7 +238,6 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 				default: LOGw("Failed to store in RAM");
 			}
 			return ret_code;
-			break;
 		}
 		case PersistenceMode::FLASH: {
 			// By the time the data is written to flash, the data pointer might be invalid.
@@ -244,7 +248,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
 			switch (DefaultLocation(data.type)) {
-				case PersistenceMode::RAM:
+				case PersistenceMode::RAM: {
 					ret_code = storeInRam(data);
 					switch (ret_code) {
 						case ERR_SUCCESS:
@@ -252,12 +256,16 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 						default: LOGw("Failed to store in RAM");
 					}
 					return ret_code;
+				}
+				case PersistenceMode::FLASH: {
 					break;
-				case PersistenceMode::FLASH:
-					// fall-through
-					break;
-				default: LOGe("Persistence mode not implemented"); return ERR_NOT_IMPLEMENTED;
+				}
+				default: {
+					LOGe("Persistence mode not implemented");
+					return ERR_NOT_IMPLEMENTED;
+				}
 			}
+
 			// we first store the data in RAM
 			size16_t index = 0;
 			ret_code       = storeInRam(data, index);
@@ -274,7 +282,8 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
-			if (ret_code == ERR_BUSY) {  // TODO(AREND): this check is too narrow
+			if (ret_code == ERR_BUSY) {  // TODO(AREND): check other return values too
+				LOGStateDebug("Storage busy, adding to queue");
 				return addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
 			}
 			break;
@@ -285,16 +294,19 @@ cs_ret_code_t State::setInternal(const cs_state_data_t& data, const PersistenceM
 			break;
 		}
 	}
+
 	return ret_code;
 }
 
 cs_ret_code_t State::removeInternal(const CS_TYPE& type, cs_state_id_t id, const PersistenceMode mode) {
-	LOGStateDebug("Remove value: $typeName(%u)", type);
+	LOGStateDebug("removeInternal: $typeName(%u) mode(%u)", type, static_cast<uint32_t>(mode));
+
 	if (!isInitialized()) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
+
 	switch (mode) {
 		case PersistenceMode::NEITHER_RAM_NOR_FLASH: return ERR_NOT_AVAILABLE;
 		case PersistenceMode::RAM: {
@@ -306,12 +318,20 @@ cs_ret_code_t State::removeInternal(const CS_TYPE& type, cs_state_id_t id, const
 		}
 		case PersistenceMode::STRATEGY1: {
 			switch (DefaultLocation(type)) {
-				case PersistenceMode::RAM: return removeFromRam(type, id);
-				case PersistenceMode::FLASH:
+				case PersistenceMode::RAM: {
+					return removeFromRam(type, id);
+				}
+				case PersistenceMode::FLASH: {
 					// continue after this switch
 					break;
-				default: LOGe("PM not implemented"); return ERR_NOT_IMPLEMENTED;
+				}
+				default: {
+					LOGe("PersistenceMode for DefaultLocation %u not implemented",
+						 static_cast<uint32_t>(DefaultLocation(type)));
+					return ERR_NOT_IMPLEMENTED;
+				}
 			}
+
 			// First remove from ram, this should always succeed.
 			ret_code = removeFromRam(type, id);
 			if (ret_code != ERR_SUCCESS) {
@@ -321,6 +341,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE& type, cs_state_id_t id, const
 			// Then remove from flash asynchronously.
 			ret_code = removeFromFlash(type, id);
 			if (ret_code == ERR_BUSY) {
+				LOGStateDebug("Storage busy, adding to queue");
 				return addToQueue(
 						CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE,
 						type,
@@ -328,7 +349,8 @@ cs_ret_code_t State::removeInternal(const CS_TYPE& type, cs_state_id_t id, const
 						STATE_RETRY_STORE_DELAY_MS,
 						StateQueueMode::DELAY);
 			}
-			break;
+
+			break; // STRATEGY1
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
 			LOGe("Default cannot be removed");
@@ -336,6 +358,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE& type, cs_state_id_t id, const
 			break;
 		}
 	}
+	LOGStateDebug("Remove done");
 	return ret_code;
 }
 
@@ -370,7 +393,7 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t& data, size16_t& index_in_
 	LOGStateDebug("storeInRam type=%u id=%u size=%u", to_underlying_type(data.type), data.id, data.size);
 	cs_ret_code_t ret_code = findInRam(data.type, data.id, index_in_ram);
 	if (ret_code == ERR_SUCCESS) {
-		LOGStateDebug("Update in RAM");
+		LOGStateDebug("found previous value in RAM, updating it.");
 		cs_state_data_t& ram_data = _ram_data_register[index_in_ram];
 		if (ram_data.size != data.size) {
 			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
@@ -392,6 +415,7 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t& data, size16_t& index_in_
 		memcpy(ram_data.value, data.value, data.size);
 		index_in_ram = _ram_data_register.size() - 1;
 	}
+
 	return ERR_SUCCESS;
 }
 
@@ -415,6 +439,7 @@ cs_ret_code_t State::removeFromRam(const CS_TYPE& type, cs_state_id_t id) {
 		_ram_data_register.erase(_ram_data_register.begin() + index_in_ram);
 	}
 	remId(type, id);
+
 	return ERR_SUCCESS;
 }
 
@@ -468,10 +493,13 @@ cs_ret_code_t State::storeInFlash(size16_t& index_in_ram) {
 }
 
 cs_ret_code_t State::removeFromFlash(const CS_TYPE& type, const cs_state_id_t id) {
+	LOGStateDebug("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
 	if (!_startedWritingToFlash) {
+		LOGStateDebug("removeFromFlash: ERR_BUSY");
 		return ERR_BUSY;
 	}
 	if (_performingFactoryReset) {
+		LOGStateDebug("removeFromFlash: ERR_WRONG_STATE");
 		return ERR_WRONG_STATE;
 	}
 	LOGd("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
@@ -629,7 +657,7 @@ cs_ret_code_t State::addId(const CS_TYPE& type, cs_state_id_t id) {
 					return ERR_SUCCESS;
 				}
 			}
-			LOGd("Added id=%u to type=%u", id, to_underlying_type(type));
+			LOGStateDebug("Added id=%u to type=%u", id, to_underlying_type(type));
 			typeIter->ids->push_back(id);
 			break;
 		}
@@ -643,7 +671,7 @@ cs_ret_code_t State::remId(const CS_TYPE& type, cs_state_id_t id) {
 			auto ids = typeIter->ids;
 			for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
 				if (*idIter == id) {
-					LOGd("Removed id=%u to type=%u", id, to_underlying_type(type));
+					LOGStateDebug("Removed id=%u to type=%u", id, to_underlying_type(type));
 					ids->erase(idIter);
 					return ERR_SUCCESS;
 				}

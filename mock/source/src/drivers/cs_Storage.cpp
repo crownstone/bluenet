@@ -12,7 +12,7 @@
 #include <cfg/cs_Strings.h>
 
 
-#define LOGStorageMockDebug LOGd
+#define LOGStorageMockDebug LOGvv
 
 // this contains the data of the static storage instance.
 std::vector<cs_state_data_t> _storage;

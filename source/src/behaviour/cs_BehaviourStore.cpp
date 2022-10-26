@@ -396,18 +396,29 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 	}
 	auto type = activeBehaviours[index]->getType();
 
-	LOGBehaviourStoreInfo("deleting behaviour #%u", index);
+	LOGBehaviourStoreInfo("deleting behaviour #%u, type: %u", index, static_cast<uint32_t>(type));
 	delete activeBehaviours[index];
 	activeBehaviours[index] = nullptr;
 
 	switch (type) {
-		case Behaviour::Type::Switch: State::getInstance().remove(CS_TYPE::STATE_BEHAVIOUR_RULE, index); break;
-		case Behaviour::Type::Twilight: State::getInstance().remove(CS_TYPE::STATE_TWILIGHT_RULE, index); break;
-		case Behaviour::Type::Extended:
+		case Behaviour::Type::Switch: {
+			State::getInstance().remove(CS_TYPE::STATE_BEHAVIOUR_RULE, index);
+			break;
+		}
+		case Behaviour::Type::Twilight: {
+			State::getInstance().remove(CS_TYPE::STATE_TWILIGHT_RULE, index);
+			break;
+		}
+		case Behaviour::Type::Extended: {
 			State::getInstance().remove(CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, index);
 			break;
-		default: LOGw("Unknown type: %u", type);
+		}
+		default: {
+			LOGw("Unknown type: %u", type);
+			break;
+		}
 	}
+
 	storeMasterHash();
 	return ERR_SUCCESS;
 }
@@ -458,7 +469,6 @@ void BehaviourStore::LoadBehavioursFromMemory(CS_TYPE BehaviourCsType) {
 				activeBehaviours[iter] =
 						new BehaviourType(WireFormat::deserialize<BehaviourType>(data_array, data_size));
 				LOGBehaviourStoreInfo("Loaded behaviour at ind=%u:", iter);
-				//				activeBehaviours[iter]->print();
 			}
 		}
 		storeMasterHash();
@@ -482,7 +492,6 @@ void BehaviourStore::clearActiveBehavioursArray() {
 }
 
 BehaviourStore::~BehaviourStore() {
-	LOGBehaviourStoreInfo("destroying BehaviourStore");
+	LOGBehaviourStoreDebug("BehaviourStore::~BehaviourStore()");
 	clearActiveBehavioursArray();
-	LOGBehaviourStoreInfo("destroying BehaviourStore -- done");
 }
