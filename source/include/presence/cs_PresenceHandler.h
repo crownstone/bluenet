@@ -34,6 +34,7 @@ public:
 	};
 
 	PresenceHandler();
+	virtual ~PresenceHandler();
 
 	/**
 	 * calls listen();
