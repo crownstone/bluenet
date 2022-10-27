@@ -38,8 +38,9 @@ STATIC_ASSERT(BOOTLOADER_SETTINGS_ADDRESS == ${CS_BOOTLOADER_SETTINGS_ADDRESS}, 
 
 STATIC_ASSERT(NRF_MBR_PARAMS_PAGE_ADDRESS == ${CS_MBR_PARAMS_PAGE_ADDRESS}, "MBR param page address mismatch");
 
+// There should be one page between application and microapp: the p2p dfu page.
 STATIC_ASSERT(
-		${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} == ${FLASH_MICROAPP_BASE},
+		${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} + CODE_PAGE_SIZE == ${FLASH_MICROAPP_BASE},
 		"Incorrect application max length");
 
 /**
@@ -75,29 +76,30 @@ const struct MemorySection microappFlashSection = {
 };
 
 /**
- * A single page after the microapp pages for DFU update procedures from one Crownstone to the next.
+ * A single page after the application for DFU update procedures from one Crownstone to the next.
  */
 const struct MemorySection p2pDfuFlashSection = {
-		._start = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_COUNT},
-		._end  = ${FLASH_MICROAPP_BASE} + ${FLASH_MICROAPP_PAGES} * CODE_PAGE_SIZE * ${MICROAPP_COUNT} + CODE_PAGE_SIZE,
+		._start = ${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH},
+		._end  = ${APPLICATION_START_ADDRESS} + ${APPLICATION_MAX_LENGTH} + CODE_PAGE_SIZE,
 		._size = CODE_PAGE_SIZE,
 		._type = MT_Flash,
 };
 
 /**
- * For possible FDS expansion. Nordic's FDS_VIRTUAL_PAGES_RESERVED is called CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER to
+ * For possible FDS expansion before current FDS.
+ * Note that VIRTUAL_PAGE_SIZE is in units of 4 bytes.
+ * Nordic's FDS_VIRTUAL_PAGES_RESERVED is called CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER to
  * indicate it's the pages after FDS and before the bootloader that is reserved by that. This is usually 0.
  * The CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE reserves pages before FDS for possible expansion.
  */
 const struct MemorySection fdsExpansionFlashSection = {
 		._start = ${BOOTLOADER_START_ADDRESS}
-				  - ${CS_FDS_VIRTUAL_PAGES}
-							* -(${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}
-								+ ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE}),
+				  - (${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE} + ${CS_FDS_VIRTUAL_PAGES}
+								+ ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}) * 4 * ${CS_FDS_VIRTUAL_PAGE_SIZE},
 		._end = ${BOOTLOADER_START_ADDRESS}
-				- (${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE})
-						  * ${CS_FDS_VIRTUAL_PAGE_SIZE},
-		._size = ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE} * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+				- (${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER})
+						  * 4 * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._size = ${CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE} * 4 * ${CS_FDS_VIRTUAL_PAGE_SIZE},
 		._type = MT_Flash,
 };
 
@@ -107,9 +109,9 @@ const struct MemorySection fdsExpansionFlashSection = {
 const struct MemorySection fdsFlashSection = {
 		// Values should match the ones in components/libraries/fds/fds.c
 		._start = ${BOOTLOADER_START_ADDRESS}
-				  - (${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}) * ${CS_FDS_VIRTUAL_PAGE_SIZE},
-		._end  = ${BOOTLOADER_START_ADDRESS} - (${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER} * ${CS_FDS_VIRTUAL_PAGE_SIZE}),
-		._size = ${CS_FDS_VIRTUAL_PAGES} * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+				  - (${CS_FDS_VIRTUAL_PAGES} + ${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}) * 4 * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._end  = ${BOOTLOADER_START_ADDRESS} - (${CS_FDS_VIRTUAL_PAGES_RESERVED_AFTER}) * 4 * ${CS_FDS_VIRTUAL_PAGE_SIZE},
+		._size = ${CS_FDS_VIRTUAL_PAGES} * 4 * ${CS_FDS_VIRTUAL_PAGE_SIZE},
 		._type = MT_Flash,
 };
 
@@ -121,17 +123,6 @@ const struct MemorySection bootloaderFlashSection = {
 		._start = ${BOOTLOADER_START_ADDRESS},
 		._end   = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
 		._size  = ${BOOTLOADER_LENGTH},
-		._type  = MT_Flash,
-};
-
-/**
- * The bootloader can be expanded for 1 page without the need to change its start address. Very important for easy
- * upgradeability. For now just hardcoded to this 1 page.
- */
-const struct MemorySection bootloaderExpansionFlashSection = {
-		._start = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH},
-		._end   = ${BOOTLOADER_START_ADDRESS} + ${BOOTLOADER_LENGTH} + CODE_PAGE_SIZE,
-		._size  = CODE_PAGE_SIZE,
 		._type  = MT_Flash,
 };
 
@@ -165,14 +156,15 @@ const struct MemorySection bootloaderSettingsFlashSection = {
  * The amount of memory required for the SoftDevice. The application memory starts immediately after this.
  */
 const struct MemorySection softdeviceRamSection = {
-		._start = 0x00,
+		._start = 0x20000000,
 		._end   = ${RAM_R1_BASE},
-		._size  = ${RAM_R1_BASE},
-		._type  = MT_Flash,
+		._size  = ${RAM_R1_BASE} - 0x20000000,
+		._type  = MT_Ram,
 };
 
 /**
  * The amount of memory available to bluenet (at the end there's memory set aside for the microapps and IPC).
+ * Values should match those in include/third/nrf/generic_gcc_nrf52.ld
  */
 const struct MemorySection bluenetRamSection = {
 		._start = ${RAM_R1_BASE},
