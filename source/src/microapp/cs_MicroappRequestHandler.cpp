@@ -88,6 +88,10 @@ cs_ret_code_t MicroappRequestHandler::handleMicroappRequest(microapp_sdk_header_
 			auto packet = reinterpret_cast<microapp_sdk_bluenet_event_t*>(header);
 			return handleRequestBluenetEvent(packet);
 		}
+		case CS_MICROAPP_SDK_TYPE_ASSETS: {
+			auto packet = reinterpret_cast<microapp_sdk_asset_t*>(header);
+			return handleRequestAsset(packet);
+		}
 		case CS_MICROAPP_SDK_TYPE_YIELD: {
 			microapp_sdk_yield_t* yield = reinterpret_cast<microapp_sdk_yield_t*>(header);
 			return handleRequestYield(yield);
@@ -1002,6 +1006,24 @@ cs_ret_code_t MicroappRequestHandler::handleRequestBluenetEvent(microapp_sdk_blu
 		case CS_MICROAPP_SDK_BLUENET_EVENT_REGISTER_INTERRUPT: {
 			MicroappController& controller = MicroappController::getInstance();
 			retCode                        = controller.registerBluenetEventInterrupt(toCsType(packet->eventType));
+			break;
+		}
+		default: {
+			retCode = ERR_NOT_FOUND;
+			break;
+		}
+	}
+	packet->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
+	return retCode;
+}
+
+cs_ret_code_t MicroappRequestHandler::handleRequestAsset(microapp_sdk_asset_t* asset) {
+	LogMicroappRequestHandlerDebug("handleRequestAsset");
+	cs_ret_code_t retCode;
+	switch (asset->type) {
+		case CS_MICROAPP_SDK_ASSET_REGISTER_INTERRUPT: {
+			MicroappController& controller = MicroappController::getInstance();
+			retCode                        = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, 0);
 			break;
 		}
 		default: {

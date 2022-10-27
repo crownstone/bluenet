@@ -158,6 +158,8 @@ enum MicroappSdkType {
 	CS_MICROAPP_SDK_TYPE_MESSAGE         = 0x0D,
 	//! Internal bluenet events.
 	CS_MICROAPP_SDK_TYPE_BLUENET_EVENT   = 0x0E,
+	//! Asset accepted events.
+	CS_MICROAPP_SDK_TYPE_ASSETS          = 0x0F,
 };
 
 /**
@@ -1123,6 +1125,27 @@ struct __attribute__((packed)) microapp_sdk_presence_t {
 };
 
 static_assert(sizeof(microapp_sdk_presence_t) <= MICROAPP_SDK_MAX_PAYLOAD);
+
+
+enum MicroappSdkAssetType {
+	CS_MICROAPP_SDK_ASSET_REGISTER_INTERRUPT = 0x01,
+	CS_MICROAPP_SDK_ASSET_EVENT              = 0x02,
+};
+/**
+ * Struct for microapp asset requests and events
+ */
+struct __attribute__((packed)) microapp_sdk_asset_t {
+	microapp_sdk_header_t header;
+
+	//! See MicroappSdkAssetType
+	uint8_t type;
+	//! Specifies the assetId of the asset
+	uint8_t assetId[3];
+	//! Rssi of the scanned asset
+	int8_t rssi;
+	//! BLE advertising channel of the scanned asset
+	uint8_t channel;
+};
 
 /**
  * Struct with payload conforming to control command protocol for direct handling by command handler

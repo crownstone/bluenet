@@ -89,6 +89,11 @@ void MicroappInterruptHandler::handleEvent(event_t& event) {
 			onBlePeripheralDisconnect(*data);
 			break;
 		}
+		case CS_TYPE::EVT_ASSET_ACCEPTED: {
+			auto data = CS_TYPE_CAST(EVT_ASSET_ACCEPTED, event.data);
+			onAssetAccepted(*data);
+			break;
+		}
 		default: {
 			break;
 		}
@@ -542,6 +547,23 @@ void MicroappInterruptHandler::onBlePeripheralNotififyDone(uint16_t connectionHa
 	ble->peripheral.handle           = characteristicHandle;
 
 	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLE, CS_MICROAPP_SDK_BLE_PERIPHERAL);
+}
+
+void MicroappInterruptHandler::onAssetAccepted(AssetAcceptedEvent& event) {
+	LogMicroappInterrupDebug("onAssetAccepted");
+	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_ASSETS, 0);
+	if (outputBuffer == nullptr) {
+		return;
+	}
+	asset_id_t assetId = event._primaryFilter.getAssetId(event._asset);
+	microapp_sdk_ble_t* asset = reinterpret_cast<microapp_sdk_asset_t*>(outputBuffer);
+	asset->header.messageType = CS_MICROAPP_SDK_TYPE_ASSETS;
+	asset->type               = CS_MICROAPP_SDK_ASSET_EVENT;
+	memcpy(asset->assetId, assetId.data, sizeof(asset_id_t));
+	asset->rssi               = event._asset.rssi;
+	asset->channel            = event._asset.channel;
+
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, 0);
 }
 
 void MicroappInterruptHandler::onBluenetEvent(event_t& event) {
