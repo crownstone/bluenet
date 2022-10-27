@@ -556,7 +556,7 @@ void MicroappInterruptHandler::onAssetAccepted(AssetAcceptedEvent& event) {
 		return;
 	}
 	asset_id_t assetId = event._primaryFilter.getAssetId(event._asset);
-	microapp_sdk_ble_t* asset = reinterpret_cast<microapp_sdk_asset_t*>(outputBuffer);
+	microapp_sdk_asset_t* asset = reinterpret_cast<microapp_sdk_asset_t*>(outputBuffer);
 	asset->header.messageType = CS_MICROAPP_SDK_TYPE_ASSETS;
 	asset->type               = CS_MICROAPP_SDK_ASSET_EVENT;
 	memcpy(asset->assetId, assetId.data, sizeof(asset_id_t));

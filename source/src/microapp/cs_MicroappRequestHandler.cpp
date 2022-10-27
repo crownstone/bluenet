@@ -1031,7 +1031,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestAsset(microapp_sdk_asset_t* a
 			break;
 		}
 	}
-	packet->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
+	asset->header.ack = MicroappSdkUtil::bluenetResultToMicroapp(retCode);
 	return retCode;
 }
 
