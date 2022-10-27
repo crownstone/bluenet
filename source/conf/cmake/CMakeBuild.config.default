@@ -379,8 +379,8 @@ APPLICATION_START_ADDRESS=0x00026000
 
 # The application max length can be seen from <https://github.com/crownstone/bluenet/blob/master/docs/MEMORY.md>
 # The start is the above start address.
-# The end is calculated from bootloader start: minus fds (8 pages), p2p dfu (1 page), and microapp (4 pages).
-# The size is the end minus the start. For the nRF52832 this is: 0x76000-(8+4+1)*0x1000-0x26000 = 0x43000
+# The end is calculated from micrapp start, minus p2p dfu (1 page).
+# The size is the end minus the start. For the nRF52832 this is: 0x6C000 - (1) * 0x1000 - 0x26000 = 0x45000
 APPLICATION_MAX_LENGTH=0x45000
 
 # Start of RAM for the application
