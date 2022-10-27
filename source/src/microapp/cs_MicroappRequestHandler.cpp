@@ -1022,8 +1022,7 @@ cs_ret_code_t MicroappRequestHandler::handleRequestAsset(microapp_sdk_asset_t* a
 	cs_ret_code_t retCode;
 	switch (asset->type) {
 		case CS_MICROAPP_SDK_ASSET_REGISTER_INTERRUPT: {
-			MicroappController& controller = MicroappController::getInstance();
-			retCode                        = controller.registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, CS_MICROAPP_SDK_ASSET_EVENT);
+			retCode = MicroappController::getInstance().registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, CS_MICROAPP_SDK_ASSET_EVENT);
 			break;
 		}
 		default: {

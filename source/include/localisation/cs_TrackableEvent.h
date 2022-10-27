@@ -11,8 +11,9 @@
 
 class AssetAcceptedEvent {
 public:
+	uint8_t _filterIndex;
 	AssetFilter _primaryFilter;
 	const scanned_device_t& _asset;
 
-	AssetAcceptedEvent(AssetFilter filter, const scanned_device_t& asset) : _primaryFilter(filter), _asset(asset) {}
+	AssetAcceptedEvent(uint8_t filterIndex, AssetFilter filter, const scanned_device_t& asset) : _filterIndex(filterIndex), _primaryFilter(filter), _asset(asset) {}
 };

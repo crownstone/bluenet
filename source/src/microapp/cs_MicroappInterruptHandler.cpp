@@ -559,9 +559,13 @@ void MicroappInterruptHandler::onAssetAccepted(AssetAcceptedEvent& event) {
 	microapp_sdk_asset_t* asset = reinterpret_cast<microapp_sdk_asset_t*>(outputBuffer);
 	asset->header.messageType = CS_MICROAPP_SDK_TYPE_ASSETS;
 	asset->type               = CS_MICROAPP_SDK_ASSET_EVENT;
-	memcpy(asset->assetId, assetId.data, sizeof(asset_id_t));
-	asset->rssi               = event._asset.rssi;
-	asset->channel            = event._asset.channel;
+	memcpy(asset->event.assetId, assetId.data, sizeof(asset_id_t));
+	asset->event.rssi         = event._asset.rssi;
+	asset->event.channel      = event._asset.channel;
+	asset->event.profileId    = *(event._primaryFilter.filterdata().metadata().profileId());
+	asset->event.filterId     = event._filterIndex;
+	asset->event.address.type = event._asset.addressType;
+	memcpy(asset->event.address.address, event._asset.address, MAC_ADDRESS_LEN);
 
 	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, CS_MICROAPP_SDK_ASSET_EVENT);
 }

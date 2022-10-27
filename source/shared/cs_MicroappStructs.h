@@ -1131,6 +1131,22 @@ enum MicroappSdkAssetType {
 	CS_MICROAPP_SDK_ASSET_REGISTER_INTERRUPT = 0x01,
 	CS_MICROAPP_SDK_ASSET_EVENT              = 0x02,
 };
+
+struct __attribute__((packed)) microapp_sdk_asset_event_t {
+	//! Specifies the assetId of the asset
+	uint8_t assetId[3];
+	//! Rssi of the scanned asset
+	int8_t rssi;
+	//! BLE advertising channel of the scanned asset
+	uint8_t channel;
+	//! profileId of the filter that passed the asset
+	uint8_t profileId;
+	//! filterId of the filter that passed the asset
+	uint8_t filterId;
+	//! MAC address of asset
+	microapp_sdk_ble_address_t address;
+};
+
 /**
  * Struct for microapp asset requests and events
  */
@@ -1139,13 +1155,14 @@ struct __attribute__((packed)) microapp_sdk_asset_t {
 
 	//! See MicroappSdkAssetType
 	uint8_t type;
-	//! Specifies the assetId of the asset
-	uint8_t assetId[3];
-	//! Rssi of the scanned asset
-	int8_t rssi;
-	//! BLE advertising channel of the scanned asset
-	uint8_t channel;
+
+	union {
+		microapp_sdk_asset_event_t event;
+	};
+
 };
+
+static_assert(sizeof(microapp_sdk_asset_t) <= MICROAPP_SDK_MAX_PAYLOAD);
 
 /**
  * Struct with payload conforming to control command protocol for direct handling by command handler
