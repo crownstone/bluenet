@@ -77,7 +77,7 @@ public:
 
 	// ================== Con-/destructors ==================
 
-	virtual ~Component() { LOGi("Component::~Component()"); };
+	virtual ~Component() = default;
 
 protected:
 	// ================== Getters ==================

@@ -24,7 +24,7 @@ public:
 	 */
 	virtual cs_ret_code_t init() override;
 
-	virtual ~BehaviourHandler() { LOGi("BehaviourHandler::~BehaviourHandler()"); }
+	virtual ~BehaviourHandler() = default;
 	/**
 	 * Computes the intended behaviour state of this crownstone based on
 	 * the stored behaviours, and then dispatches an event for that.
