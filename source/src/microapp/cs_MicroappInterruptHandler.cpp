@@ -551,7 +551,7 @@ void MicroappInterruptHandler::onBlePeripheralNotififyDone(uint16_t connectionHa
 
 void MicroappInterruptHandler::onAssetAccepted(AssetAcceptedEvent& event) {
 	LogMicroappInterrupDebug("onAssetAccepted");
-	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_ASSETS, 0);
+	uint8_t* outputBuffer = getOutputBuffer(CS_MICROAPP_SDK_TYPE_ASSETS, CS_MICROAPP_SDK_ASSET_EVENT);
 	if (outputBuffer == nullptr) {
 		return;
 	}
@@ -563,7 +563,7 @@ void MicroappInterruptHandler::onAssetAccepted(AssetAcceptedEvent& event) {
 	asset->rssi               = event._asset.rssi;
 	asset->channel            = event._asset.channel;
 
-	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, 0);
+	MicroappController::getInstance().generateSoftInterrupt(CS_MICROAPP_SDK_TYPE_ASSETS, CS_MICROAPP_SDK_ASSET_EVENT);
 }
 
 void MicroappInterruptHandler::onBluenetEvent(event_t& event) {
