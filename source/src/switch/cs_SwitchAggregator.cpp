@@ -16,8 +16,8 @@
 
 #include <optional>
 
-#define LOGSwitchAggregatorDebug LOGd
-#define LOGSwitchAggregatorEvent LOGd
+#define LOGSwitchAggregatorDebug LOGvv
+#define LOGSwitchAggregatorEvent LOGvv
 #define LOGSwitchHistory LOGvv
 
 // ========================= Public ========================

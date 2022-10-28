@@ -113,7 +113,9 @@ private:
 	bool updateBehaviourHandlers();
 
 	/**
-	 * Calls updateBehaviourHandlers, updateState and possibly addToSwitchHistory.
+	 * Updates internal state and adjusts the switch values based on the new state.
+	 *
+	 * Also keeps switchHistory up to date.
 	 */
 	void update();
 
@@ -177,8 +179,12 @@ private:
 	bool handleSwitchAggregatorCommand(event_t& evt);
 
 	/**
-	 * CMD_GET_BEHAVIOUR_DEBUG
-	 * EVT_BEHAVIOURSTORE_MUTATION
+	 * Handles the following events:
+	 *  - CMD_GET_BEHAVIOUR_DEBUG:
+	 *     Fills in the current state of the SwitchAggregator as response to a query from host.
+	 *  - EVT_BEHAVIOURSTORE_MUTATION:
+	 *     If mutation is of type Add or Update, checks if the changed behaviour. If it was
+	 *     active, the override will be reset in order to show a user the effect of its change.
 	 */
 	bool handleBehaviourEvents(event_t& evt);
 

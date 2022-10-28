@@ -139,17 +139,15 @@ private:
 	void handleGetBehaviourDebug(event_t& evt);
 
 	/**
-	 * Returns `behaviour`, casted as switch behaviour if that cast is valid and
-	 * isValid(*) returns true.
-	 * Else, returns nullptr.
+	 * @return      Switch behaviour if the behaviour is a valid switch behaviour, and active at this time/presence.
+	 * @return      nullptr otherwise.
 	 */
 	SwitchBehaviour* validateSwitchBehaviour(
 			Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const;
 
 	/**
-	 * Returns `behaviour`, casted as twilight behaviour if that cast is valid and
-	 * isValid(*) returns true.
-	 * Else, returns nullptr.
+	 * @return      Twilight behaviour if the behaviour is a valid twilight behaviour, and active at this time/presence.
+	 * @return      nullptr otherwise.
 	 */
 	TwilightBehaviour* validateTwilightBehaviour(
 			Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const;

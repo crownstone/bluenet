@@ -42,9 +42,7 @@ void EventDispatcher::dispatch(event_t& event) {
 	}
 
 	for (int i = 0; i < _listenerCount; i++) {
-		if (auto listener = _listeners[i]) {
-			listener->handleEvent(event);
-		}
+			_listeners[i]->handleEvent(event);
 	}
 }
 
@@ -70,9 +68,15 @@ bool EventDispatcher::addListener(EventListener* listener) {
 }
 
 void EventDispatcher::removeListener(EventListener* listener) {
-	for (auto& l : _listeners) {
-		if (listener == l) {
-			l = nullptr;
+	for (int i = 1; i < _listenerCount; i++) {
+		if (_listeners[i] == listener) {
+			// found match, shifting tail down one index
+			for( int j = i+1; j < _listenerCount; j++) {
+				_listeners[j-1] = _listeners[j];
+			}
+			// toss out duplicate
+			_listeners[_listenerCount -1] = nullptr;
+			_listenerCount--;
 		}
 	}
 }
