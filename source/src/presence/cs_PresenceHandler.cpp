@@ -12,7 +12,7 @@
 #include <time/cs_TimeOfDay.h>
 #include <util/cs_Math.h>
 
-#define LOGPresenceHandlerDebug LOGd
+#define LOGPresenceHandlerDebug LOGvv
 
 //#define PRESENCE_HANDLER_TESTING_CODE
 
@@ -25,7 +25,7 @@ PresenceHandler::~PresenceHandler() {
 }
 
 cs_ret_code_t PresenceHandler::init() {
-	LOGi("PresenceHandler::init");
+	LOGi("init");
 
 	listen();
 	return ERR_SUCCESS;
@@ -36,7 +36,6 @@ void PresenceHandler::registerPresence(ProfileLocation profileLocation) {
 }
 
 void PresenceHandler::handleEvent(event_t& event) {
-	LOGPresenceHandlerDebug("PresenceHandler::handleEvent type: %u", event.type);
 	switch (event.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			auto parsedAdvEventData = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(event.data);

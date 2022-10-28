@@ -29,7 +29,6 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	_smartSwitch.init(board);
 
 	_smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
-		LOGSwitchAggregatorEvent("onUnexpectedStateChange lambda called");
 		handleSwitchStateChange(newState);
 	});
 
@@ -132,7 +131,6 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 		}
 	}
 	printStates(__LINE__);
-	LOGSwitchAggregatorDebug("tonk!");
 
 	TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = _overrideState.has_value();
 	event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
@@ -200,46 +198,33 @@ bool SwitchAggregator::handleBehaviourEvents(event_t& event) {
 			}
 
 			switch(mutation->_mutation) {
-				case BehaviourMutation::REMOVE: {
-					update();
-					break;
-				}
+				case BehaviourMutation::REMOVE:
 				case BehaviourMutation::CLEAR_ALL: {
 					update();
 					break;
 				}
-				case BehaviourMutation::ADD: {
-					auto behaviourPtr = _behaviourStore->getBehaviour(mutation->_index);
 
-					if(_behaviourHandler.validateBehaviour(behaviourPtr)){
-						LOGSwitchAggregatorDebug(
-								"Event Mutation::ADD received for valid behaviour. Clearing override and updating.");
-						_overrideState.reset();
-						update();
-					}
-
-					break;
-				}
+				case BehaviourMutation::ADD:
 				case BehaviourMutation::UPDATE: {
 					auto behaviourPtr = _behaviourStore->getBehaviour(mutation->_index);
 
 					if(_behaviourHandler.validateBehaviour(behaviourPtr)){
 						LOGSwitchAggregatorDebug(
-								"Event Mutation::UPDATE received for valid behaviour. Clearing override and updating.");
+								"Event Mutation::ADD/UPDATE received for valid behaviour. Clearing override and updating.");
 						_overrideState.reset();
 						update();
 					}
 
 					break;
 				}
+
 				case BehaviourMutation::NONE: {
-					// nothing happened.
 					break;
 				}
-			} // switch(mutation->_mutation)
+			}
 
 			return true;
-		} // CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION
+		}
 
 		default: {
 			return false;
@@ -343,7 +328,6 @@ bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 
 bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 	switch (event.type) {
-		// ============== overrideState Events ==============
 		case CS_TYPE::CMD_SWITCH_ON: {
 			LOGSwitchAggregatorEvent("CMD_SWITCH_ON");
 
@@ -459,8 +443,9 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
-		case ERR_NOT_POWERED:
+		case ERR_NOT_POWERED:{
 			break;
+		}
 		default: {
 			// Only when the dimmer isn't powered yet, we want to keep the given overrideState,
 			// because it should be set once the dimmer is powered.
@@ -472,7 +457,6 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 	}
 
 	printStates(__LINE__);
-	LOGSwitchAggregatorDebug("executeStateIntentionUpdate end");
 
 	addToSwitchHistory(
 			cs_switch_history_item_t(SystemTime::posix(), value, _smartSwitch.getActualState(), source.source));

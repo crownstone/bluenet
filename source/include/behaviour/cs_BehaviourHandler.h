@@ -64,8 +64,11 @@ public:
 	bool requiresAbsence(Time t);
 
 	/**
-	 * Checks if the given behaviour is valid. Queries the presence handler and SystemTime for
-	 * the current state, and resolves the behaviour type to call isValid.
+	 * Checks if the given behaviour is valid. I.e. its presence clause and time constraints are met.
+	 *
+	 * Presence and time are obtained from PresenceHandler and SystemTime for this check.
+	 *
+	 * @see Behaviour::isValid.
 	 */
 	bool validateBehaviour(Behaviour* behaviour) const;
 

@@ -10,7 +10,7 @@
 #include <switch/cs_SafeSwitch.h>
 #include <test/cs_Test.h>
 
-#define LOGSafeSwitch LOGd
+#define LOGSafeSwitch LOGvv
 
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);

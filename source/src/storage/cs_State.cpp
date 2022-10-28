@@ -25,7 +25,9 @@
 #endif
 
 // Define to get more debug logs.
-#undef CS_STATE_DEBUG_LOGS
+#if !defined(CS_STATE_DEBUG_LOGS)
+#define CS_STATE_DEBUG_LOGS 0
+#endif
 
 #define LOGStateDebug LOGvv
 
@@ -36,8 +38,6 @@ void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_sta
 State::State() : _storage(NULL), _boardsConfig(NULL) {}
 
 State::~State() {
-	LOGi("State::~State");
-
 	for (auto it = _ram_data_register.begin(); it < _ram_data_register.end(); it++) {
 		cs_state_data_t* ram_data = &(*it);
 		free(ram_data->value);
@@ -635,7 +635,7 @@ cs_ret_code_t State::getIdsFromFlash(const CS_TYPE& type, std::vector<cs_state_i
 	_idsCache.push_back(idList);
 	retIds = ids;
 	LOGStateDebug("Got ids from flash type=%u", to_underlying_type(type));
-#ifdef CS_STATE_DEBUG_LOGS
+#if CS_STATE_DEBUG_LOGS == 1
 	for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
 		LOGStateDebug("id=%u", *idIter);
 	}
