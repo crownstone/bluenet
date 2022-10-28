@@ -11,3 +11,7 @@
 void EventListener::listen() {
 	EventDispatcher::getInstance().addListener(this);
 }
+
+EventListener::~EventListener() {
+	EventDispatcher::getInstance().removeListener(this);
+}

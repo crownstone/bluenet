@@ -69,6 +69,12 @@ public:
 	 */
 	virtual cs_ret_code_t init() { return ERR_SUCCESS; }
 
+	/**
+	 * utility that loops over all elements of getChildren() and setParent on
+	 * the non-nullptr ones.
+	 */
+	void parentAllChildren();
+
 	// ================== Con-/destructors ==================
 
 	virtual ~Component() = default;
@@ -102,11 +108,6 @@ protected:
 	 */
 	void setParent(Component* p);
 
-	/**
-	 * utility that loops over all elements of getChildren() and setParent on
-	 * the non-nullptr ones.
-	 */
-	void parentAllChildren();
 
 private:
 	Component* _parent = nullptr;

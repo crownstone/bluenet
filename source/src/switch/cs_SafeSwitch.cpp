@@ -260,7 +260,7 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 // ======================== Error state checks ===========================
 
 state_errors_t SafeSwitch::getErrorState() {
-	TYPIFY(STATE_ERRORS) stateErrors;
+	TYPIFY(STATE_ERRORS) stateErrors = {};
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 	return stateErrors;
 }

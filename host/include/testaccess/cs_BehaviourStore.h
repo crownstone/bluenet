@@ -15,6 +15,16 @@ template <>
 class TestAccess<BehaviourStore> {
 public:
 	static void clearActiveBehavioursArray(BehaviourStore& store) { store.clearActiveBehavioursArray(); }
+
+	static void replaceBehaviour(uint8_t index, SwitchBehaviour* s ) {
+		auto eventdata = s->serialized();
+		eventdata.insert(std::begin(eventdata), index);
+
+		event_t evt(CS_TYPE::CMD_REPLACE_BEHAVIOUR, eventdata.data(), eventdata.size());
+		evt.dispatch();
+	}
+
+
 	// prints list of valid behaviours
 	static std::ostream& toStream(
 			std::ostream& out, BehaviourStore& store, Time currentTime, PresenceStateDescription currentPresence) {

@@ -14,6 +14,7 @@
 #include <bitset>
 #include <iomanip>
 #include <iostream>
+#include <ios>
 
 template <>
 class TestAccess<SwitchBehaviour> {
@@ -24,6 +25,12 @@ public:
 	TimeOfDay from;
 	TimeOfDay until;
 	TestAccess<PresenceCondition> presencecondition;
+
+	enum PrintStyle {
+		Verbose,
+		AsBytes,
+	};
+	static PrintStyle _printStyle;
 
 	TestAccess() : from(TimeOfDay::Sunrise()), until(TimeOfDay::Sunset()) { reset(); }
 
@@ -38,17 +45,43 @@ public:
 
 	SwitchBehaviour get() { return {intensity, profileId, activedaysofweek, from, until, presencecondition.get()}; }
 
+	// same as get, but allocate object on the heap.
+	SwitchBehaviour* getNew() { return new auto(get()); }
+
+	struct BehaviourStoreItem {
+		uint8_t _index;
+		SwitchBehaviour* _behaviour;
+	};
+
+	BehaviourStoreItem getItem(uint8_t index) { return BehaviourStoreItem{._index = index, ._behaviour = getNew()}; }
+
 	static std::ostream& toStream(std::ostream& out, SwitchBehaviour& s) {
-		return out << "{"
-				   << "from: " << s.from() << ", "
-				   << "until: " << s.until() << ", "
-				   << "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
-				   << "profileId:" << +s.profileId << ", "
-				   << "activeDays: " << std::bitset<8>(s.activeDays) << ", "
-				   << "presenceCondition: " << s.presenceCondition << "}"
-				   << "[gracePeriodForPresenceIsActive(): " << s.gracePeriodForPresenceIsActive() << "]";
+		if (_printStyle == Verbose) {
+			out << "{"
+				<< "from: " << s.from() << ", "
+				<< "until: " << s.until() << ", "
+				<< "value: " << std::setw(3) << std::setfill(' ') << +s.value() << ", "
+				<< "profileId:" << +s.profileId << ", "
+				<< "activeDays: " << std::bitset<8>(s.activeDays) << ", "
+				<< "presenceCondition: " << s.presenceCondition << "}"
+				<< "[gracePeriodForPresenceIsActive(): " << s.gracePeriodForPresenceIsActive() << "]";
+		}
+
+		if (_printStyle == AsBytes) {
+			out << "{" << std::showbase << std::hex;
+			bool firstByte = true;
+			for (auto byte : s.serialized()) {
+				out << (firstByte ? "" : ", ") << +byte;
+				firstByte = false;
+			}
+			out << "}" << std::dec << std::noshowbase;
+		}
+
+		return out;
 	}
 };
+
+TestAccess<SwitchBehaviour>::PrintStyle TestAccess<SwitchBehaviour>::_printStyle = Verbose;
 
 /**
  * Allows streaming SwitchBehaviour objects to std::cout and other streams.

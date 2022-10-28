@@ -7,53 +7,51 @@
 
 #pragma once
 
-#include <logging/cs_Logger.h>
-
 #include <type_traits>
 
 /**
- * A storage utility for objects of type Rec.
+ * A variable size storage utility for objects of type RecordType with absolute maximum MaxItemCount.
+ * Can be stack allocated.
  *
- * Rec should implement:
+ * RecordType should implement:
  *   - IdType id();
  *   - bool isValid();
- *   - void invalidate();    // TODO:
+ *   - void invalidate();
  *
- * furthermore it must be default constructible.
- *
+ * Where IdType is freely dependent on RecordType.
+ * Furthermore it must be default constructible.
  */
-template <class Rec, unsigned int Size>
+template <class RecordType, unsigned int MaxItemCount>
 class Store {
 private:
 	/**
 	 * Current maximal number of valid records.
-	 * if _currentSize is less than Size, range based for loops
+	 * if _currentSize is less than MaxItemCount, range based for loops
 	 * will loop over at most _currentSize items.
 	 */
 	uint16_t _currentSize = 0;
 
 public:
-	Rec _records[Size] = {};
+	RecordType _records[MaxItemCount] = {};
 
-	Rec* begin() { return _records; }
+	RecordType* begin() { return _records; }
 
-	Rec* end() { return _records + _currentSize; }
+	RecordType* end() { return _records + _currentSize; }
 
 	/**
-	 * Identifies and simplifies the type returned by the id() method of Rec.
+	 * Identifies and simplifies the type returned by the id() method of RecordType.
 	 *
 	 * Notes:
 	 *  - remove_reference to avoid complications
 	 *  - decltype doesn't dereference the nullptr
 	 */
-	typedef typename std::remove_reference<decltype(((Rec*)nullptr)->id())>::type IdType;
+	typedef typename std::remove_reference<decltype(((RecordType*)nullptr)->id())>::type IdType;
 
 	/**
 	 * invalidate all records.
 	 */
 	void clear() {
 		_currentSize = 0;
-		// TODO: @Bart practically we don't need to invalidate anything if size is shrunk to 0.
 		for (auto& rec : *this) {
 			rec.invalidate();
 		}
@@ -64,7 +62,7 @@ public:
 	 *
 	 * Returns nullptr if no such element exists.
 	 */
-	constexpr Rec* get(const IdType& id) {
+	constexpr RecordType* get(const IdType& id) {
 		for (auto& rec : *this) {
 			if (rec.isValid() && rec.id() == id) {
 				return &rec;
@@ -81,7 +79,7 @@ public:
 	 * first invalid item for example!
 	 */
 	template <class UnaryPredicate>
-	constexpr Rec* get(UnaryPredicate p) {
+	constexpr RecordType* get(UnaryPredicate p) {
 		for (auto& obj : *this) {
 			if (p(obj)) {
 				return &obj;
@@ -97,18 +95,18 @@ public:
 	 * Only considers records with `isValid() == true`.
 	 *
 	 * ValueFunction is a function (or function like object) that
-	 * takes an object of type `Rec` as argument and returns the value
+	 * takes an object of type `RecordType` as argument and returns the value
 	 * that should be minimized.
 	 */
 	template <class ValueFunction>
-	constexpr Rec* getMin(ValueFunction getValue) {
-		Rec* smallest = get([](auto rec) { return rec.isValid(); });
+	constexpr RecordType* getMin(ValueFunction getValue) {
+		RecordType* smallest = get([](auto rec) { return rec.isValid(); });
 
 		if (smallest == nullptr) {
 			return nullptr;
 		}
 
-		for (Rec* obj = smallest + 1; obj != end(); obj++) {
+		for (RecordType* obj = smallest + 1; obj != end(); obj++) {
 			if (!obj->isValid()) {
 				continue;
 			}
@@ -127,8 +125,8 @@ public:
 	 *
 	 * Returns nullptr if full();
 	 */
-	Rec* getOrAdd(IdType id) {
-		Rec* retval = nullptr;
+	RecordType* getOrAdd(IdType id) {
+		RecordType* retval = nullptr;
 		for (auto& rec : *this) {
 			if (!rec.isValid()) {
 				retval = &rec;
@@ -151,7 +149,7 @@ public:
 	 *
 	 * Returns nullptr if such element doesn't exist.
 	 */
-	constexpr Rec* add() {
+	constexpr RecordType* add() {
 		for (auto& rec : *this) {
 			if (!rec.isValid()) {
 				return &rec;
@@ -164,10 +162,10 @@ public:
 	 * increases size of the store if possible and returns
 	 * the entry at the end(), after invalidating.
 	 */
-	constexpr Rec* addAtEnd() {
-		if (_currentSize < Size) {
+	constexpr RecordType* addAtEnd() {
+		if (_currentSize < MaxItemCount) {
 			// still have space, increment size and return ref to last index.
-			Rec* retval = &_records[_currentSize++];  // must postcrement
+			RecordType* retval = &_records[_currentSize++];  // must postcrement
 			retval->invalidate();
 			return retval;
 		}
@@ -188,6 +186,7 @@ public:
 		}
 		return s;
 	}
+
 	/**
 	 * returns number of valid elements.
 	 */
@@ -198,5 +197,5 @@ public:
 	/**
 	 * returns true if all elements are occupied and valid.
 	 */
-	constexpr bool full() { return count() == Size; }
+	constexpr bool full() { return count() == MaxItemCount; }
 };

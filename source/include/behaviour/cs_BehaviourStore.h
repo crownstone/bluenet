@@ -32,6 +32,12 @@ private:
 	std::array<Behaviour*, MaxBehaviours> activeBehaviours = {};
 
 public:
+	// delete copy and move constructor to prevent double deletions etc.
+	BehaviourStore(BehaviourStore& other) = delete;
+	BehaviourStore(BehaviourStore&& other) = delete;
+	// default is not implicitly generated when copy constructors are deleted.
+	BehaviourStore() = default;
+
 	/**
 	 * handles events concerning updates of the active behaviours on this crownstone.
 	 */
@@ -116,9 +122,22 @@ private:
 	 */
 	void storeMasterHash();
 
-	void handleSaveBehaviour(event_t& evt);
-	void handleReplaceBehaviour(event_t& evt);
-	void handleRemoveBehaviour(event_t& evt);
+	/**
+	 * Deserializes the behaviour from event data, and allocate new instance of correct
+	 * type on the heap.
+	 *
+	 * Checks if an identical behaviour already exists. (I.e. serialized equality.)
+	 */
+	BehaviourMutation handleSaveBehaviour(event_t& evt);
+
+	/**
+	 * Deserializes the behaviour from event data, and allocate new instance of correct
+	 * type on the heap.
+	 *
+	 * Does not check for prior existence.
+	 */
+	BehaviourMutation handleReplaceBehaviour(event_t& evt);
+	BehaviourMutation handleRemoveBehaviour(event_t& evt);
 	void handleGetBehaviour(event_t& evt);
 	void handleGetBehaviourIndices(event_t& evt);
 
@@ -159,7 +178,7 @@ private:
 	 */
 	size_t getBehaviourSize(SwitchBehaviour::Type type);
 
-	void dispatchBehaviourMutationEvent();
+	void dispatchBehaviourMutationEvent(BehaviourMutation mutation);
 
 	// checks intermediate state of handleReplaceBehaviour for consistency.
 	ErrorCodesGeneral replaceParameterValidation(event_t& evt, uint8_t index, SwitchBehaviour::Type type);

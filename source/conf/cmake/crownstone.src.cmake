@@ -62,8 +62,6 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/buffer/cs_CharacteristicBuffer.
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_StateData.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_IpcRamBluenet.cpp")
 
-
-
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/optmed.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_error_weak.c")

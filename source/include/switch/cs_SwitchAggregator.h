@@ -13,7 +13,7 @@
 #include <events/cs_EventListener.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <switch/cs_SmartSwitch.h>
-
+#include <test/cs_TestAccess.h>
 #include <optional>
 
 /**
@@ -22,6 +22,7 @@
  * this object decides what state to set the SmartSwitch to.
  */
 class SwitchAggregator : public EventListener, public Component {
+	friend class TestAccess<SwitchAggregator>;
 public:
 	SwitchAggregator();
 
@@ -45,6 +46,7 @@ protected:
 private:
 	TwilightHandler _twilightHandler;
 	BehaviourHandler _behaviourHandler;
+	BehaviourStore* _behaviourStore;
 
 	SmartSwitch _smartSwitch;
 
@@ -110,6 +112,13 @@ private:
 	 */
 	bool updateBehaviourHandlers();
 
+	/**
+	 * Updates internal state and adjusts the switch values based on the new state.
+	 *
+	 * Also keeps switchHistory up to date.
+	 */
+	void update();
+
 	// ================================== Event handling ==================================
 
 	/**
@@ -169,6 +178,16 @@ private:
 	 */
 	bool handleSwitchAggregatorCommand(event_t& evt);
 
+	/**
+	 * Handles the following events:
+	 *  - CMD_GET_BEHAVIOUR_DEBUG:
+	 *     Fills in the current state of the SwitchAggregator as response to a query from host.
+	 *  - EVT_BEHAVIOURSTORE_MUTATION:
+	 *     If mutation is of type Add or Update, checks if the changed behaviour. If it was
+	 *     active, the override will be reset in order to show a user the effect of its change.
+	 */
+	bool handleBehaviourEvents(event_t& evt);
+
 	void handleSwitchStateChange(uint8_t newIntensity);
 
 	// ================================== Misc ==================================
@@ -202,6 +221,8 @@ private:
 
 	void addToSwitchHistory(const cs_switch_history_item_t& cmd);
 	void printSwitchHistory();
+
+	void printStates(uint32_t lineNumber);
 
 	void pushTestDataToHost();
 };

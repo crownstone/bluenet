@@ -82,7 +82,7 @@ class ble_exception : public std::exception {
 public:
 	char* _message;
 	ble_exception(char* message, char* file = "<unknown>", int line = 0) : _message(message) {}
-	~ble_exception() throw() {}
+	virtual ~ble_exception() throw() {}
 
 	virtual char const* what() const throw() { return _message; }
 };
