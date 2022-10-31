@@ -168,7 +168,7 @@ bool AssetFiltering::checkIfFilterAccepts(uint8_t filterIndex, const scanned_dev
 	if (filter.filterAcceptsScannedDevice(device)) {
 		handleAcceptedAsset(filterIndex, filter, device);
 
-		AssetAcceptedEvent evtData(filterIndex, filter, device);
+		AssetAcceptedEvent evtData(filter, device);
 		event_t assetEvent(CS_TYPE::EVT_ASSET_ACCEPTED, &evtData, sizeof(evtData));
 		assetEvent.dispatch();
 
