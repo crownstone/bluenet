@@ -562,7 +562,7 @@ void MicroappInterruptHandler::onAssetAccepted(AssetAcceptedEvent& event) {
 	memcpy(asset->event.assetId, assetId.data, sizeof(asset_id_t));
 	asset->event.rssi         = event._asset.rssi;
 	asset->event.channel      = event._asset.channel;
-	asset->event.profileId    = *(event._primaryFilter.filterdata().metadata().profileId());
+	asset->event.profileId    = event._primaryFilter.runtimedata()->filterId;
 	asset->event.filterId     = event._filterIndex;
 	asset->event.address.type = event._asset.addressType;
 	memcpy(asset->event.address.address, event._asset.address, MAC_ADDRESS_LEN);
