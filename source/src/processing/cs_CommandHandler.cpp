@@ -1062,7 +1062,7 @@ void CommandHandler::handleCmdMicroappUpload(
 
 void CommandHandler::handleCmdMicroappMessage(
 		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
-	LOGi(STR_HANDLE_COMMAND "microapp upload");
+	LOGi(STR_HANDLE_COMMAND "microapp message");
 	size_t headerSize = offsetof(microapp_message_t, payload);
 	if (commandData.len < headerSize) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, headerSize);

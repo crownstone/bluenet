@@ -22,11 +22,6 @@ void MemUsageTest::onTick() {
 		return;
 	}
 
-	if (setNextBehaviour() == false) {
-		printRamStats();
-		return;
-	}
-
 	if (setNextStateType() == false) {
 		printRamStats();
 		return;
@@ -43,6 +38,11 @@ void MemUsageTest::onTick() {
 	}
 
 	if (setNextTrackedDevice() == false) {
+		printRamStats();
+		return;
+	}
+
+	if (setNextBehaviour() == false) {
 		printRamStats();
 		return;
 	}
