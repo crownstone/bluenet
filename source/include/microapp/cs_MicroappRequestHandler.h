@@ -39,6 +39,7 @@ protected:
 	cs_ret_code_t handleRequestControlCommand(microapp_sdk_control_command_t* controlCommand);
 	cs_ret_code_t handleRequestMessage(microapp_sdk_message_t* packet);
 	cs_ret_code_t handleRequestBluenetEvent(microapp_sdk_bluenet_event_t* packet);
+	cs_ret_code_t handleRequestAsset(microapp_sdk_asset_t* asset);
 	cs_ret_code_t handleRequestYield(microapp_sdk_yield_t* yield);
 
 	CharacteristicBase* getCharacteristic(uint16_t handle);

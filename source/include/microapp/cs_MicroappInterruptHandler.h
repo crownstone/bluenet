@@ -68,6 +68,8 @@ private:
 	void onBlePeripheralConnect(ble_connected_t& event);
 	void onBlePeripheralDisconnect(uint16_t connectionHandle);
 
+	void onAssetAccepted(AssetAcceptedEvent& event);
+
 	void onBluenetEvent(event_t& event);
 
 public:

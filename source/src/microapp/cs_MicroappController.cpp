@@ -321,7 +321,8 @@ bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomin
 		case CS_MICROAPP_SDK_TYPE_PRESENCE:
 		case CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND:
 		case CS_MICROAPP_SDK_TYPE_MESSAGE:
-		case CS_MICROAPP_SDK_TYPE_BLUENET_EVENT: {
+		case CS_MICROAPP_SDK_TYPE_BLUENET_EVENT:
+		case CS_MICROAPP_SDK_TYPE_ASSETS: {
 			return false;
 		}
 		case CS_MICROAPP_SDK_TYPE_NONE:
