@@ -56,7 +56,8 @@ void MemUsageTest::printRamStats() {
 
 bool MemUsageTest::setNextBehaviour() {
 	// Can't add all behaviours at once, as that prints too much and crashes the firmware.
-	if (_behaviourIndex >= (int)BehaviourStore::MaxBehaviours) {
+//	if (_behaviourIndex >= (int)BehaviourStore::MaxBehaviours) {
+	if (_behaviourIndex >= 10) {
 		return true;
 	}
 	cs_result_t result;
@@ -100,12 +101,12 @@ bool MemUsageTest::sendNextRssiData() {
 	TYPIFY(EVT_RECV_MESH_MSG) msg;
 	msg.type = CS_MESH_MODEL_TYPE_UNKNOWN;
 	msg.rssi = -50;
-	msg.hops = 0;
+	msg.isMaybeRelayed = false;
 
 	for (int id = _rssiDataStoneId; id < untilId; ++id) {
 		for (uint8_t channel = 37; channel < 40; ++channel) {
 			msg.channel    = channel;
-			msg.srcAddress = id;
+			msg.srcStoneId = id;
 			event_t event(CS_TYPE::EVT_RECV_MESH_MSG, reinterpret_cast<uint8_t*>(&msg), sizeof(msg));
 			event.dispatch();
 		}
@@ -117,13 +118,13 @@ bool MemUsageTest::sendNextRssiData() {
 }
 
 bool MemUsageTest::sendNextPresence() {
-	if (_presenceProfileId > PresenceHandler::MAX_PROFILE_ID) {
+	if (_presenceProfileId > PresenceHandler::ProfileLocation::MAX_PROFILE_ID) {
 		return true;
 	}
 	LOGi("sendNextPresence profile=%i location=%i", _presenceProfileId, _presenceLocationId);
 
 	int locationIdUntil    = _presenceLocationId + 8;
-	int locationIdMaxUntil = (int)PresenceHandler::MAX_LOCATION_ID + 1;
+	int locationIdMaxUntil = (int)PresenceHandler::ProfileLocation::MAX_LOCATION_ID + 1;
 	if (locationIdUntil > locationIdMaxUntil) {
 		locationIdUntil = locationIdMaxUntil;
 	}
