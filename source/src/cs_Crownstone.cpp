@@ -622,6 +622,64 @@ void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER "startup");
 
+	LOGd("softdeviceFlashSection start=%p end=%p size=%p",
+			softdeviceFlashSection._start,
+			softdeviceFlashSection._end,
+			softdeviceFlashSection._size);
+	LOGd("bluenetFlashSection start=%p end=%p size=%p",
+			bluenetFlashSection._start,
+			bluenetFlashSection._end,
+			bluenetFlashSection._size);
+	LOGd("microappFlashSection start=%p end=%p size=%p",
+			microappFlashSection._start,
+			microappFlashSection._end,
+			microappFlashSection._size);
+	LOGd("p2pDfuFlashSection start=%p end=%p size=%p",
+			p2pDfuFlashSection._start,
+			p2pDfuFlashSection._end,
+			p2pDfuFlashSection._size);
+	LOGd("fdsExpansionFlashSection start=%p end=%p size=%p",
+			fdsExpansionFlashSection._start,
+			fdsExpansionFlashSection._end,
+			fdsExpansionFlashSection._size);
+	LOGd("fdsFlashSection start=%p end=%p size=%p",
+			fdsFlashSection._start,
+			fdsFlashSection._end,
+			fdsFlashSection._size);
+	LOGd("bootloaderFlashSection start=%p end=%p size=%p",
+			bootloaderFlashSection._start,
+			bootloaderFlashSection._end,
+			bootloaderFlashSection._size);
+	LOGd("mbrSettingsFlashSection start=%p end=%p size=%p",
+			mbrSettingsFlashSection._start,
+			mbrSettingsFlashSection._end,
+			mbrSettingsFlashSection._size);
+	LOGd("bootloaderSettingsFlashSection start=%p end=%p size=%p",
+			bootloaderSettingsFlashSection._start,
+			bootloaderSettingsFlashSection._end,
+			bootloaderSettingsFlashSection._size);
+
+	LOGd("softdeviceRamSection start=%p end=%p size=%p",
+			softdeviceRamSection._start,
+			softdeviceRamSection._end,
+			softdeviceRamSection._size);
+	LOGd("bluenetRamSection start=%p end=%p size=%p",
+			bluenetRamSection._start,
+			bluenetRamSection._end,
+			bluenetRamSection._size);
+	LOGd("microappRamSection start=%p end=%p size=%p",
+			microappRamSection._start,
+			microappRamSection._end,
+			microappRamSection._size);
+	LOGd("ipcRamSection start=%p end=%p size=%p",
+			ipcRamSection._start,
+			ipcRamSection._end,
+			ipcRamSection._size);
+	LOGd("bootloaderRamSection start=%p end=%p size=%p",
+			bootloaderRamSection._start,
+			bootloaderRamSection._end,
+			bootloaderRamSection._size);
+
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
 	if (bootDelay) {
