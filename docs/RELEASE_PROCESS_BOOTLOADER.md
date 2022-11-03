@@ -60,6 +60,11 @@ git tag -a -m "Tagging bootloader version ${CS_BL_VERSION}" "bootloader-${CS_BL_
 git push --tags
 ```
 
+## Tests
+
+Make sure you can upload the bootloader over the air.
+Make sure you can still perform an OTA update. Both firmware, and a new bootloader should work.
+
 ## Release repository
 
 After the above, the release `.zip` files are generated, however, they are not yet made available to the public.
