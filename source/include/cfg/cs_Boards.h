@@ -68,6 +68,7 @@ extern "C" {
 
 // Prototype plug.
 #define ACR01B2A 1500
+
 // Prototype plug. Replace caps before and after LDO with electrolytic caps due to DC bias.
 #define ACR01B2B 1501
 
@@ -78,13 +79,16 @@ extern "C" {
 // Move thermal fuse to cover both power paths. Alter offset and gain of power measurement service. Add measurement
 // offset to ADC.
 #define ACR01B2E 1503
-// Schematic change. Change power measurement resistor values.
+
+// Production release plug. Schematic change. Change power measurement resistor values.
 #define ACR01B2G 1504
 
-// Crownstone Plug One (first prototype of second edition of the plug)
+// Prototype Crownstone Plug One (first prototype of second edition of the plug)
 #define ACR01B11A 1505
 
-// Outlets
+// CROWNSTONE OUTLETS
+
+// Prototype outlet
 #define CR01R02v4 1100
 
 #define PIN_NONE 0xFF
