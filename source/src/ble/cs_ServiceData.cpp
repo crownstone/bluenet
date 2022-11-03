@@ -366,10 +366,12 @@ bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
 	if (!_microappServiceDataSet) {
 		return false;
 	}
-	_serviceData.params.encrypted.type     = SERVICE_DATA_DATA_TYPE_MICROAPP;
-	_serviceData.params.encrypted.microapp = _microappServiceData;
 	// Stone ID and validation are set at init.
 	// Timestamp is set when microapp service data was received.
+	// We don't have to update it, as validation can be done with the other service data.
+	// But why wouldn't we update it?
+	_serviceData.params.encrypted.type     = SERVICE_DATA_DATA_TYPE_MICROAPP;
+	_serviceData.params.encrypted.microapp = _microappServiceData;
 	return true;
 }
 
