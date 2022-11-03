@@ -46,12 +46,34 @@ void MemUsageTest::onTick() {
 		printRamStats();
 		return;
 	}
+
+	if (setNextAssetFilter() == false) {
+		printRamStats();
+		return;
+	}
 }
 
 void MemUsageTest::printRamStats() {
 	Crownstone::updateHeapStats();
 	Crownstone::updateMinStackEnd();
 	Crownstone::printLoadStats();
+}
+
+bool MemUsageTest::setNextAssetFilter() {
+	LOGi("Asset filters not implemented yet");
+	return true;
+
+//	if (_assetFilterIndex >= 10) {
+//		return true;
+//	}
+//
+//	TYPIFY(CMD_UPLOAD_FILTER) upload;
+//	// Filter by list of MAC addresses, exact match, output MAC address and RSSI.
+//
+//	LOGd("Add asset filter: serializedSize=%u classSize=%u", sizeof(buf), sizeof(filter));
+//	event_t event(CS_TYPE::CMD_UPLOAD_FILTER, buf, sizeof(buf), result);
+//	event.dispatch();
+//	LOGd("result=%u", event.result.returnCode);
 }
 
 bool MemUsageTest::setNextBehaviour() {
