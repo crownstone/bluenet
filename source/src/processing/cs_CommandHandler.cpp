@@ -1171,7 +1171,13 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		case CTRL_CMD_RESET_MESH_TOPOLOGY:
 		case CTRL_CMD_LOCK_SWITCH:
-		case CTRL_CMD_ALLOW_DIMMING: return true;
+		case CTRL_CMD_ALLOW_DIMMING:
+		case CTRL_CMD_MICROAPP_VALIDATE:
+		case CTRL_CMD_MICROAPP_REMOVE:
+		case CTRL_CMD_MICROAPP_ENABLE:
+		case CTRL_CMD_MICROAPP_DISABLE: {
+			return true;
+		}
 		default: return false;
 	}
 	return false;
