@@ -83,6 +83,8 @@ void Microapp::loadApps() {
 	}
 
 	for (uint8_t index = 0; index < g_MICROAPP_COUNT; ++index) {
+		_started[index] = false;
+
 		loadState(index);
 		updateStateFromOperatingData(index);
 		retCode = validateApp(index);
@@ -93,6 +95,9 @@ void Microapp::loadApps() {
 		if (_states[index].didReboot) {
 			LOGMicroappInfo("Sorry, reboot while microapp running. App %u will not be started.", index);
 		}
+		if (_states[index].exceededCallDuration) {
+			LOGMicroappInfo("Sorry, call to microapp took too long to yield. App %u will not be started.", index);
+		}
 		storeState(index);
 		startApp(index);
 	}
@@ -102,6 +107,14 @@ void Microapp::updateStateFromOperatingData(uint8_t index) {
 	MicroappController& controller   = MicroappController::getInstance();
 	MicroappOperatingState prevState = controller.getOperatingState(index);
 	_states[index].didReboot         = (prevState == MicroappOperatingState::CS_MICROAPP_RUNNING);
+}
+
+void Microapp::onExcessiveCallDuration(uint8_t appIndex) {
+	if (appIndex < g_MICROAPP_COUNT && _states[appIndex].exceededCallDuration == false) {
+		LOGw("Disable microapp because the call took too long to yield");
+		_states[appIndex].exceededCallDuration = true;
+		storeState(appIndex);
+	}
 }
 
 void Microapp::loadState(uint8_t index) {
@@ -192,16 +205,22 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
 		LOGMicroappInfo(
-				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u didReboot=%u failedFunction=%u",
+				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u didReboot=%u exceededCallDuration=%u failedFunction=%u",
 				_states[index].enabled,
 				_states[index].checksumTest,
 				_states[index].memoryUsage,
 				_states[index].bootTest,
 				_states[index].didReboot,
+				_states[index].exceededCallDuration,
 				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
+	if (_started[index]) {
+		return ERR_SUCCESS;
+	}
+
 	MicroappController::getInstance().startMicroapp(index);
+	_started[index] = true;
 	return ERR_SUCCESS;
 }
 
@@ -212,12 +231,13 @@ void Microapp::resetState(uint8_t index) {
 }
 
 void Microapp::resetTestState(uint8_t index) {
-	_states[index].checksumTest    = MICROAPP_TEST_STATE_UNTESTED;
-	_states[index].memoryUsage     = MICROAPP_TEST_STATE_UNTESTED;
-	_states[index].tryingFunction  = MICROAPP_FUNCTION_NONE;
-	_states[index].failedFunction  = MICROAPP_FUNCTION_NONE;
-	_states[index].passedFunctions = 0;
-	_states[index].didReboot       = false;
+	_states[index].checksumTest         = MICROAPP_TEST_STATE_UNTESTED;
+	_states[index].memoryUsage          = MICROAPP_TEST_STATE_UNTESTED;
+	_states[index].tryingFunction       = MICROAPP_FUNCTION_NONE;
+	_states[index].failedFunction       = MICROAPP_FUNCTION_NONE;
+	_states[index].passedFunctions      = 0;
+	_states[index].didReboot            = false;
+	_states[index].exceededCallDuration = false;
 }
 
 cs_ret_code_t Microapp::storeState(uint8_t index) {
@@ -245,16 +265,18 @@ cs_ret_code_t Microapp::storeState(uint8_t index) {
  */
 bool Microapp::canRunApp(uint8_t index) {
 	LOGMicroappVerbose(
-			"enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
-			_states[index].enabled,
+			"checkSumTest=%u enabled=%u bootTest=%u memoryUsage=%u didReboot=%u exceededCallDuration=%u failedFunction=%u",
 			_states[index].checksumTest,
+			_states[index].enabled,
+			_states[index].bootTest,
 			_states[index].memoryUsage,
 			_states[index].didReboot,
-			_states[index].bootTest,
+			_states[index].exceededCallDuration,
 			_states[index].failedFunction);
 	return _states[index].enabled && _states[index].checksumTest == MICROAPP_TEST_STATE_PASSED
 		   && _states[index].memoryUsage != 1 && _states[index].bootTest != MICROAPP_TEST_STATE_FAILED
-		   && _states[index].didReboot != true && _states[index].failedFunction == MICROAPP_FUNCTION_NONE;
+		   && _states[index].didReboot != true && _states[index].exceededCallDuration != true
+		   && _states[index].failedFunction == MICROAPP_FUNCTION_NONE;
 }
 
 void Microapp::tick() {
@@ -375,6 +397,7 @@ cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
 
 	// Assume the erase will succeed. If not, the state will be corrected later.
 	//	_states[index].hasData = false;
+	_started[index] = false;
 	resetState(index);
 	storeState(index);
 	return retCode;

@@ -315,6 +315,11 @@ void PowerSampling::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
+			auto tickCount = CS_TYPE_CAST(EVT_TICK, event.data);
+			if (*tickCount % 10 == 0) {
+				// Reset every second.
+				_bufSkipCount = 0;
+			}
 			if (_calibratePowerZeroCountDown) {
 				--_calibratePowerZeroCountDown;
 			}
@@ -352,6 +357,10 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isConsecutiveBuf(seqNr, _lastBufSeqNr)) {
 		LOGw("buf skipped (prev=%u cur=%u)", _lastBufSeqNr, seqNr);
+
+		adc_buffer_seq_nr_t skips = seqNr - 1 - _lastBufSeqNr;
+		_bufSkipCount += skips;
+
 		// Clear buffer queue, as these are no longer consecutive.
 		_bufferQueue.clear();
 	}
@@ -359,6 +368,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(bufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		_bufSkipCount++;
 		// Clear buffer queue, as these are no longer valid.
 		_bufferQueue.clear();
 		return;
@@ -376,6 +386,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufSkipCount++;
 		// Clear buffer queue, as these are no longer valid.
 		_bufferQueue.clear();
 		return;
@@ -397,6 +408,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufSkipCount++;
 		_bufferQueue.clear();
 		return;
 	}
@@ -426,6 +438,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufSkipCount++;
 		return;
 	}
 
@@ -530,6 +543,10 @@ void PowerSampling::removeInvalidBufs() {
 			_bufferQueue.pop();
 		}
 	}
+}
+
+uint32_t PowerSampling::getSkippedBufCount() {
+	return _bufSkipCount;
 }
 
 /*

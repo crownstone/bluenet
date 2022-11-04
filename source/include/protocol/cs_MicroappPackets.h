@@ -120,8 +120,10 @@ struct __attribute__((packed)) microapp_state_t {
 	uint8_t memoryUsage : 1;
 	// Did reboot
 	uint8_t didReboot : 1;
+	// Whether a call to the microapp took too long to yield.
+	bool exceededCallDuration : 1;
 	// Reserved, must be 0 for now.
-	uint16_t reservedTest : 8;
+	uint16_t reservedTest : 7;
 	// Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
 	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;
 	// Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.

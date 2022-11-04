@@ -31,6 +31,16 @@ public:
 	 */
 	void init(OperationMode operationMode);
 
+	/**
+	 * Checks app state and returns true if this app is allowed to run.
+	 */
+	bool canRunApp(uint8_t index);
+
+	/**
+	 * To be called when a microapp took too long to yield.
+	 */
+	void onExcessiveCallDuration(uint8_t appIndex);
+
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
@@ -43,6 +53,11 @@ private:
 	 * The state of each microapp.
 	 */
 	microapp_state_t _states[g_MICROAPP_COUNT];
+
+	/**
+	 * Keep up whether the microapp has been started yet.
+	 */
+	bool _started[g_MICROAPP_COUNT];
 
 	/**
 	 * Local flag to indicate that ram section has been loaded.
@@ -103,11 +118,6 @@ private:
 	 * Store app state to flash.
 	 */
 	cs_ret_code_t storeState(uint8_t index);
-
-	/**
-	 * Checks app state and returns true if this app is allowed to run.
-	 */
-	bool canRunApp(uint8_t index);
 
 	/**
 	 * To be called every tick.

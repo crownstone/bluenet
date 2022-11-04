@@ -11,13 +11,16 @@
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
+#include <drivers/cs_RTC.h>
 #include <ipc/cs_IpcRamDataContents.h>
 #include <logging/cs_Logger.h>
+#include <microapp/cs_Microapp.h>
 #include <microapp/cs_MicroappController.h>
 #include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_IpcRamBluenet.h>
+#include <processing/cs_PowerSampling.h>
 
 #define LogMicroappControllerInfo LOGi
 #define LogMicroappControllerDebug LOGd
@@ -231,9 +234,20 @@ MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
 
 void MicroappController::callMicroapp() {
 	const uint8_t appIndex = 0;
+
+	if (!Microapp::getInstance().canRunApp(appIndex)) {
+		return;
+	}
+
 	setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_RUNNING);
+	uint32_t startTime = RTC::getCount();
 	if (resumeCoroutine()) {
+		uint32_t duration = RTC::msPassedSince(startTime);
 		setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_NOT_RUNNING);
+
+		if (duration > MICROAPP_MAX_CALL_DURATION_MS) {
+			Microapp::getInstance().onExcessiveCallDuration(appIndex);
+		}
 		return;
 	}
 
@@ -349,6 +363,11 @@ void MicroappController::tickMicroapp(uint8_t appIndex) {
 		return;
 	}
 	_tickCounter = 0;
+
+	if (isCpuBusy()) {
+		LOGw("Skip microapp tick: CPU is busy");
+		return;
+	}
 
 	// Reset interrupt counter every microapp tick
 	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
@@ -502,6 +521,11 @@ bool MicroappController::allowSoftInterrupts(MicroappSdkType type, uint8_t id) {
 		return false;
 	}
 
+	if (isCpuBusy()) {
+		LOGw("Skip interrupt: CPU is busy");
+		return false;
+	}
+
 	auto registration = getRegisteredInterrupt(type, id);
 	if (registration == nullptr) {
 		// Not registered.
@@ -524,6 +548,21 @@ bool MicroappController::allowSoftInterrupts(MicroappSdkType type, uint8_t id) {
 		return false;
 	}
 	return true;
+}
+
+bool MicroappController::isCpuBusy() {
+	uint16_t schedulerSpace = app_sched_queue_space_get();
+	if (schedulerSpace < SCHED_QUEUE_SIZE - SCHEDULER_QUEUE_ALMOST_FULL) {
+		LogMicroappControllerInfo("Scheduler almost full");
+		return true;
+	}
+
+	auto skips = PowerSampling::getInstance().getSkippedBufCount();
+	if (skips > 0) {
+		return true;
+	}
+
+	return false;
 }
 
 void MicroappController::setEmptySoftInterruptSlots(uint8_t emptySlots) {
