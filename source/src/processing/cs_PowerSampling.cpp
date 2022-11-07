@@ -315,8 +315,8 @@ void PowerSampling::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
-			auto tickCount = CS_TYPE_CAST(EVT_TICK, event.data);
-			if (*tickCount % 10 == 0) {
+			auto tickCount = *CS_TYPE_CAST(EVT_TICK, event.data);
+			if (tickCount % 10 == 0) {
 				// Reset every second.
 				_bufSkipCount = 0;
 			}
