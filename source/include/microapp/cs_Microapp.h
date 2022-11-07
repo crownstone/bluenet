@@ -67,9 +67,9 @@ private:
 	/**
 	 * Keep up which microapp is currently being operated on.
 	 * Used for factory reset.
-	 * Set to -1 when not operating on anything.
+	 * Set to MICROAPP_INDEX_NONE when not operating on anything.
 	 */
-	int16_t _currentMicroappIndex = -1;
+	uint8_t _currentMicroappIndex = MICROAPP_INDEX_NONE;
 
 	/**
 	 * Whether we are in factory reset mode.

@@ -286,7 +286,7 @@ void Microapp::tick() {
 			controller.tickMicroapp(i);
 		}
 	}
-	if (_factoryResetMode && _currentMicroappIndex >= 0) {
+	if (_factoryResetMode && _currentMicroappIndex != MICROAPP_INDEX_NONE) {
 		// We can just try to resume all the time, as it will just return BUSY otherwise.
 		resumeFactoryReset();
 	}
@@ -480,12 +480,12 @@ cs_ret_code_t Microapp::factoryReset() {
 
 cs_ret_code_t Microapp::resumeFactoryReset() {
 	LOGd("resumeFactoryReset index=%u", _currentMicroappIndex);
-	if (_currentMicroappIndex < 0) {
+	if (_currentMicroappIndex == MICROAPP_INDEX_NONE) {
 		return ERR_WRONG_STATE;
 	}
 	if (_currentMicroappIndex == g_MICROAPP_COUNT) {
 		// Done
-		_currentMicroappIndex = -1;
+		_currentMicroappIndex = MICROAPP_INDEX_NONE;
 		event_t event(CS_TYPE::EVT_MICROAPP_FACTORY_RESET_DONE);
 		event.dispatch();
 		return ERR_SUCCESS;
@@ -524,7 +524,7 @@ void Microapp::onStorageEvent(cs_async_result_t& event) {
 		return;
 	}
 
-	if (_currentMicroappIndex < 0) {
+	if (_currentMicroappIndex == MICROAPP_INDEX_NONE) {
 		return;
 	}
 

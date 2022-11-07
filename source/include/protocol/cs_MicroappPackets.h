@@ -39,6 +39,9 @@ constexpr uint8_t MICROAPP_SDK_MINOR                = 0;
 //! Max flash size of a microapp, must be a multiple of flash page size.
 constexpr uint16_t MICROAPP_MAX_SIZE                = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
 
+//! Invalid microapp index.
+constexpr uint8_t MICROAPP_INDEX_NONE               = 255;
+
 /**
  * Header of a microapp binary.
  *
