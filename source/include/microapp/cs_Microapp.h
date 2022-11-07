@@ -56,8 +56,9 @@ private:
 
 	/**
 	 * Keep up whether the microapp has been started yet.
+	 * Init to false (default bool constructor).
 	 */
-	bool _started[g_MICROAPP_COUNT];
+	bool _started[g_MICROAPP_COUNT] = {};
 
 	/**
 	 * Local flag to indicate that ram section has been loaded.

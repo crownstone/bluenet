@@ -83,8 +83,6 @@ void Microapp::loadApps() {
 	}
 
 	for (uint8_t index = 0; index < g_MICROAPP_COUNT; ++index) {
-		_started[index] = false;
-
 		loadState(index);
 		updateStateFromOperatingData(index);
 		retCode = validateApp(index);
