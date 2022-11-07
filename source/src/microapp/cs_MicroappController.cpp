@@ -252,6 +252,7 @@ void MicroappController::callMicroapp() {
 	}
 
 	// Should only happen if microapp actually ends (and does not yield anymore).
+	// TODO: handle this case, should disable the microapp.
 	LOGe("End of coroutine. Should not happen.")
 }
 

@@ -236,6 +236,9 @@ void Microapp::resetTestState(uint8_t index) {
 	_states[index].passedFunctions      = 0;
 	_states[index].didReboot            = false;
 	_states[index].exceededCallDuration = false;
+
+	// Not resetting _started[index], otherwise the app gets started again on enable.
+	// While the registered soft interrtups etc were not cleaned up on disable.
 }
 
 cs_ret_code_t Microapp::storeState(uint8_t index) {

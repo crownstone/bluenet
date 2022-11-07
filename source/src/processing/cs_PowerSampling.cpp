@@ -358,6 +358,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	if (!isConsecutiveBuf(seqNr, _lastBufSeqNr)) {
 		LOGw("buf skipped (prev=%u cur=%u)", _lastBufSeqNr, seqNr);
 
+		// Make sure to first store the result first in a temp variable, so roll-over calculation works.
 		adc_buffer_seq_nr_t skips = seqNr - 1 - _lastBufSeqNr;
 		_bufSkipCount += skips;
 
