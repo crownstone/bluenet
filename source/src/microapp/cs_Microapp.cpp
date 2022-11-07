@@ -202,7 +202,6 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 }
 
 cs_ret_code_t Microapp::startApp(uint8_t index) {
-	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
 		LOGMicroappInfo(
 				"Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u didReboot=%u exceededCallDuration=%u failedFunction=%u",
@@ -219,6 +218,7 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 		return ERR_SUCCESS;
 	}
 
+	LOGMicroappInfo("startApp %u", index);
 	MicroappController::getInstance().startMicroapp(index);
 	_started[index] = true;
 	return ERR_SUCCESS;
