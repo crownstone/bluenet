@@ -346,8 +346,8 @@ Type nr | Type name | Payload type | Result payload | Description | A     | M   
 91 | Upload microapp | [Microapp upload packet](#microapp-upload-packet) | - | Upload (a part of) a microapp. | x
 92 | Validate microapp | [Microapp header packet](#microapp-header-packet) | - | Validate a microapp. Should be done after upload: checks integrity of the uploaded data. | x
 93 | Remove microapp | [Microapp header packet](#microapp-header-packet) | - | Removes a microapp. When result is ERR_WAIT_FOR_SUCCESS, you have to wait for ERR_SUCCESS. In case the microapp is already removed, you will get ERR_SUCCESS_NO_CHANGE. | x
-94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
-95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
+94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. Also used to re-enable a disabled microapp. | x
+95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, pauses a running microapp. | x
 96 | Message microapp | [Microapp message packet](#microapp-message-packet) | - | Send a data message to a microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 110 | Upload filter | [Upload filter packet](ASSET_FILTERING.md#upload-filter-packet) | - | Upload (a part of) an asset filter. | x

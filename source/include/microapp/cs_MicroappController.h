@@ -110,6 +110,13 @@ private:
 	static const uint8_t MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS = 10;
 
 	/**
+	 * The maximum time in ms a call to a microapp can take.
+	 *
+	 * Take into account that real interrupts are included in this time.
+	 */
+	static const uint32_t MICROAPP_MAX_CALL_DURATION_MS                     = 20;
+
+	/**
 	 * Buffer for keeping track of registered interrupts
 	 */
 	microapp_soft_interrupt_registration_t _softInterruptRegistrations[MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS];
@@ -245,6 +252,14 @@ public:
 	 * Checks whether the microapp has empty interrupt slots to deal with a new softInterrupt
 	 */
 	bool allowSoftInterrupts(MicroappSdkType type, uint8_t id);
+
+	/**
+	 * Checks whether the CPU is busy.
+	 * This is done by checking if:
+	 * - The scheduler is almost full.
+	 * - ADC buffers have been skipped.
+	 */
+	bool isCpuBusy();
 
 	/**
 	 * Register interrupts for bluenet events.
