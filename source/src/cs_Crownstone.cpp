@@ -349,6 +349,13 @@ void Crownstone::initDrivers1() {
 	_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
 	_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
 
+	if (GpRegRet::getCounter() >= CS_GPREGRET_COUNTER_MAX - 2) {
+		LOGi("Almost going to DFU mode, try factory resetting first.");
+		// Do this by simply setting the operation mode, this is read out later.
+		TYPIFY(STATE_OPERATION_MODE) mode = static_cast<uint8_t>(OperationMode::OPERATION_MODE_FACTORY_RESET);
+		_state->set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	}
+
 	if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 		_setStateValuesAfterStorageRecover = true;
 		GpRegRet::clearFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
