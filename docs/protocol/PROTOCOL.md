@@ -225,8 +225,8 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Data type | Description | A     | M     | B     | U
 -------------- | ---- | --------- | ----------- | :---: | :---: | :---: | :---:
-Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB |
-Session nonce  | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |  | x
+Session data   | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB |
+Session data   | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |  | x
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x |
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x |
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |  |  |  | x
@@ -252,7 +252,7 @@ Characteristic | UUID | Data type | Description | S     | U
 MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone. | x |
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption. | x |
 Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. (encrypted). This characteristic is deprecated. | ECB |
-Session nonce  | 24f1000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  | x
+Session data   | 24f1000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  | x
 Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x |
 Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x |
 
