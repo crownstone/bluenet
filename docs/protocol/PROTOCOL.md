@@ -205,11 +205,13 @@ The broadcast protocol is documented in the [broadcast protocol](BROADCAST_PROTO
 
 When connected, the following services are available.
 
-The `A`, `M`, and `B` columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet.
+The `A`, `M`, `B`, `S`, and `U` columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet.
 
 - A: Admin
 - M: Member
 - B: Basic
+- S: Setup
+- U: Unencrypted
 
 The following services are available (depending on state and config):
 - [Crownstone service](#crownstone-service). Contains all you need: control, config and state.
@@ -221,13 +223,13 @@ The following services are available (depending on state and config):
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
 
-Characteristic | UUID | Data type | Description | A     | M     | B
--------------- | ---- | --------- | ----------- | :---: | :---: | :---:
-Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB
-Session nonce  | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |
-Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x
-Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x
-Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). | | |
+Characteristic | UUID | Data type | Description | A     | M     | B     | U
+-------------- | ---- | --------- | ----------- | :---: | :---: | :---: | :---:
+Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB |
+Session nonce  | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |  | x
+Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x |
+Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x |
+Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |  |  |  | x
 
 Every command written to the control characteristic returns a [result packet](#result-packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
@@ -245,13 +247,14 @@ The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only avai
  When encryption is enabled, the control and both config characteristics are encrypted with AES CTR. The key and session nonce for this are gotten from their
  characteristics.
 
-Characteristic | UUID | Data type | Description
--------------- | ---- | --------- | -----------
-MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone.
-Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption.
-Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data.
-Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone.
-Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone.
+Characteristic | UUID | Data type | Description | S     | U
+-------------- | ---- | --------- | ----------- | :---: | :---:
+MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone. | x |
+Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption. | x |
+Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. (encrypted). This characteristic is deprecated. | ECB |
+Session nonce  | 24f1000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  | x
+Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x |
+Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x |
 
 Every command written to the control characteristic returns a [result packet](#result-packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
