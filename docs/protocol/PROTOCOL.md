@@ -83,11 +83,20 @@ uint8[] | Session nonce | 5 | Session nonce, should be [read](#session-data) whe
 #### Session data
 
 After connecting, you should first read the session data from the [Crownstone service](#crownstone-service).
-The session data is [ECB encrypted](#aes-128-ecb-encryption) with the basic key, or when in setup mode: the session key.
-After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
 The session nonce and validation key will be different each time you connect.
 
 ![Session data](../diagrams/session-data.png)
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | Protocol | 1 | The protocol version to use for communication.
+uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
+uint8[] | Validation key | 4 | The validation key for this session. Used to verify decryption/encryption.
+
+When the session data is [ECB encrypted](#aes-128-ecb-encryption) it is done so with the basic key, or when in setup mode: the session key.
+After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
+
+![Session data encrypted](../diagrams/session-data-encrypted.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
