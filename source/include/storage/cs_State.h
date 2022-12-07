@@ -152,7 +152,7 @@ public:
 		return instance;
 	}
 
-	~State();
+	virtual ~State();
 
 	/**
 	 * Initialize the State object with the board configuration.

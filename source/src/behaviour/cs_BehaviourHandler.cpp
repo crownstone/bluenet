@@ -107,15 +107,42 @@ bool BehaviourHandler::update() {
 	return true;
 }
 
-SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(
-		Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const {
-	if (SwitchBehaviour* switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
-		if (switchbehave->isValid(currentTime, currentPresence)) {
-			return switchbehave;
+SwitchBehaviour* BehaviourHandler::validateSwitchBehaviour(
+		Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const {
+	if (SwitchBehaviour* switchBehaviour = dynamic_cast<SwitchBehaviour*>(behaviour)) {
+		if (switchBehaviour->isValid(currentTime, currentPresence)) {
+			return switchBehaviour;
 		}
 	}
 
 	return nullptr;
+}
+
+TwilightBehaviour* BehaviourHandler::validateTwilightBehaviour(
+		Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const {
+	if (TwilightBehaviour* twilightBehaviour = dynamic_cast<TwilightBehaviour*>(behaviour)) {
+		if (twilightBehaviour->isValid(currentTime)) {
+			return twilightBehaviour;
+		}
+	}
+
+	return nullptr;
+}
+
+bool BehaviourHandler::validateBehaviour(Behaviour* behaviour) const {
+	if (_presenceHandler == nullptr) {
+		return false;
+	}
+
+	Time time                                        = SystemTime::now();
+	std::optional<PresenceStateDescription> presence = _presenceHandler->getCurrentPresenceDescription();
+
+	if (!presence) {
+		return false;
+	}
+
+	return validateSwitchBehaviour(behaviour, time, presence.value()) != nullptr
+		   || validateTwilightBehaviour(behaviour, time, presence.value()) != nullptr;
 }
 
 SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
@@ -126,7 +153,7 @@ SwitchBehaviour* BehaviourHandler::resolveSwitchBehaviour(
 	SwitchBehaviour* currentBestSwitchBehaviour = nullptr;
 	for (auto candidateBehaviour : _behaviourStore->getActiveBehaviours()) {
 		SwitchBehaviour* candidateSwitchBehaviour =
-				ValidateSwitchBehaviour(candidateBehaviour, currentTime, currentPresence);
+				validateSwitchBehaviour(candidateBehaviour, currentTime, currentPresence);
 
 		// check for failed transformation from right to left. If either
 		// current or candidate is nullptr, we can continue to the next candidate.

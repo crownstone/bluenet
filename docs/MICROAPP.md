@@ -1,4 +1,4 @@
-# Microapps
+# Microapp protocol
 
 The protocol has to be designed yet. Currently, there are a few functions implemented with a hint of a protocol. At
 the microapp code side this will be completely hidden for the user, hence this protocol definition has to be seen as
@@ -38,9 +38,11 @@ int loop() {
 	// every 5 seconds
 	if (counter % 5 == 0) {
 		digitalWrite(LED1_PIN, 1);
-		delay(1000);
+		delay(100);
 		digitalWrite(LED1_PIN, 0);
 	}
+
+    delay(1000);
 }
 
 ```
@@ -293,9 +295,20 @@ The protocol to upload microapps can be found in the [protocol](protocol/PROTOCO
 
 ## Microapp binary format
 
-The binary format of a microapp.
+The binary of a microapp always starts with the following header:
 
-TBD.
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8_t  | sdkVersionMajor | 1 | The major SDK protocol version this microapp was compiled for.
+uint8_t  | sdkVersionMinor | 1 | The minor SDK protocol version this microapp was compiled for.
+uint16_t | size | 2 | Size of the binary, including this header.
+uint16_t | checksum | 2 | Checksum (CRC16-CCITT) of the binary, after this header.
+uint16_t | checksumHeader | 2 | Checksum (CRC16-CCITT) of this header, with this field set to 0.
+uint32_t | appBuildVersion | 4 | Build version of this microapp.
+uint16_t | startOffset | 2 | Offset in bytes of the first instruction to execute.
+uint16_t | reserved | 2 | Reserved for future use, must be 0 for now.
+uint32_t | reserved2 | 4 | Reserved for future use, must be 0 for now.
+
 
 ## Implementation
 

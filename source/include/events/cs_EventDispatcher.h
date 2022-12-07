@@ -20,7 +20,7 @@ private:
 	EventDispatcher();
 
 	//! Array of listeners
-	EventListener* _listeners[MAX_EVENT_LISTENERS];
+	EventListener* _listeners[MAX_EVENT_LISTENERS] = {};
 
 	//! Count of added listeners
 	uint16_t _listenerCount;
@@ -32,11 +32,14 @@ public:
 	}
 
 	EventDispatcher(EventDispatcher const&) = delete;
-	void operator=(EventDispatcher const&)  = delete;
+	void operator=(EventDispatcher const&) = delete;
 
 	//! Add a listener
 	bool addListener(EventListener* listener);
 
-	//! Dispatch an event with data
+	//! Nulls all elements in _listeners equal to listener.
+	void removeListener(EventListener* listener);
+
+	//! Dispatch an event to all registered (non-null) listeners.
 	void dispatch(event_t& event);
 };

@@ -37,7 +37,10 @@ constexpr uint8_t MICROAPP_SDK_MAJOR                = 1;
 constexpr uint8_t MICROAPP_SDK_MINOR                = 0;
 
 //! Max flash size of a microapp, must be a multiple of flash page size.
-constexpr uint16_t MICROAPP_MAX_SIZE = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
+constexpr uint16_t MICROAPP_MAX_SIZE                = (g_FLASH_MICROAPP_PAGES * CS_FLASH_PAGE_SIZE);
+
+//! Invalid microapp index.
+constexpr uint8_t MICROAPP_INDEX_NONE               = 255;
 
 /**
  * Header of a microapp binary.
@@ -73,6 +76,11 @@ struct __attribute__((packed)) microapp_upload_t {
 	// Offset in bytes of this chunk of data. Must be a multiple of 4.
 	uint16_t offset;
 	// Followed by a chunk of the microapp binary.
+};
+
+struct __attribute__((packed)) microapp_message_t {
+	microapp_ctrl_header_t header;
+	uint8_t payload[0];
 };
 
 /**
@@ -115,8 +123,10 @@ struct __attribute__((packed)) microapp_state_t {
 	uint8_t memoryUsage : 1;
 	// Did reboot
 	uint8_t didReboot : 1;
+	// Whether a call to the microapp took too long to yield.
+	bool exceededCallDuration : 1;
 	// Reserved, must be 0 for now.
-	uint16_t reservedTest : 8;
+	uint16_t reservedTest : 7;
 	// Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
 	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;
 	// Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.

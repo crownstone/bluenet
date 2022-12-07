@@ -43,6 +43,12 @@ void GpRegRet::clearCounter() {
 	printRegRet();
 }
 
+uint32_t GpRegRet::getCounter() {
+	uint32_t value;
+	sd_power_gpregret_get(GpRegRetId::GPREGRET, &value);
+	return value & CS_GPREGRET_COUNTER_MASK;
+}
+
 void GpRegRet::setCounter(uint32_t value) {
 	LOGGpRegRetDebug("setCounter %u", value);
 	if (value > CS_GPREGRET_COUNTER_MAX) {

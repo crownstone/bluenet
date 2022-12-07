@@ -9,6 +9,7 @@
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
+#include <behaviour/cs_BehaviourMutation.h>
 #include <localisation/cs_TrackableEvent.h>
 #include <mesh/cs_MeshMsgEvent.h>
 #include <protocol/cs_AssetFilterPackets.h>
@@ -17,7 +18,6 @@
 #include <time/cs_TimeSyncMessage.h>
 
 #include <cstdint>
-#include <tuple>
 #include <type_traits>
 
 #include "cfg/cs_Config.h"
@@ -371,6 +371,7 @@ enum class CS_TYPE : uint16_t {
 	CMD_MICROAPP_REMOVE,     // Microapp control command.
 	CMD_MICROAPP_ENABLE,     // Microapp control command.
 	CMD_MICROAPP_DISABLE,    // Microapp control command.
+	CMD_MICROAPP_MESSAGE,    // Microapp control command.
 	CMD_MICROAPP_ADVERTISE,  // A microapp wants to advertise something.
 	EVT_MICROAPP_FACTORY_RESET_DONE,  // All microapps have been erased.
 
@@ -641,13 +642,13 @@ typedef uint32_t TYPIFY(EVT_TIME_SET);
 typedef void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 
 // Behaviour
-typedef SwitchBehaviour TYPIFY(CMD_ADD_BEHAVIOUR);
-typedef std::tuple<uint8_t, SwitchBehaviour> TYPIFY(CMD_REPLACE_BEHAVIOUR);
+typedef SwitchBehaviour::SerializedDataType TYPIFY(CMD_ADD_BEHAVIOUR);
+typedef std::array<uint8_t, sizeof(uint8_t) + WireFormat::size<SwitchBehaviour>()> TYPIFY(CMD_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(CMD_REMOVE_BEHAVIOUR);  // index
 typedef uint8_t TYPIFY(CMD_GET_BEHAVIOUR);     // index
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
-typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
+typedef BehaviourMutation TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
 
 // Localisation
@@ -695,6 +696,7 @@ typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_VALIDATE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
+typedef microapp_message_internal_t TYPIFY(CMD_MICROAPP_MESSAGE);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef void TYPIFY(EVT_MICROAPP_FACTORY_RESET_DONE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);

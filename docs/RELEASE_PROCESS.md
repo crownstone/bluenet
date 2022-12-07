@@ -72,6 +72,11 @@ git tag -a -m "Tagging version ${CS_FW_VERSION}" "v${CS_FW_VERSION}"
 git push --tags
 ```
 
+## Tests
+
+Make sure you can upload the firmware over the air.
+After releasing, make sure to run the [safety tests](https://github.com/crownstone/firmware-tests).
+
 ## Release repository
 
 After the above, the release `.zip` files are generated, however, they are not yet made available to the public.

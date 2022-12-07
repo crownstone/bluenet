@@ -53,6 +53,7 @@
 #include <logging/cs_Logger.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
+#include <storage/cs_IpcRamBluenet.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
@@ -291,6 +292,7 @@ void Crownstone::initDrivers0() {
 	_stack->init();
 	_timer->init();
 	_stack->initSoftdevice();
+	IpcRamBluenet::getInstance().init();
 
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 	// Check if flash pages of mesh are valid, else erase them.
@@ -346,6 +348,13 @@ void Crownstone::initDrivers1() {
 	// Store gpregret.
 	_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
 	_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
+
+	if (GpRegRet::getCounter() >= CS_GPREGRET_COUNTER_MAX - 2) {
+		LOGi("Almost going to DFU mode, try factory resetting first.");
+		// Do this by simply setting the operation mode, this is read out later.
+		TYPIFY(STATE_OPERATION_MODE) mode = static_cast<uint8_t>(OperationMode::OPERATION_MODE_FACTORY_RESET);
+		_state->set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	}
 
 	if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 		_setStateValuesAfterStorageRecover = true;
@@ -619,6 +628,64 @@ void Crownstone::startOperationMode(const OperationMode& mode) {
 void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER "startup");
+
+	LOGd("softdeviceFlashSection start=%p end=%p size=%p",
+			softdeviceFlashSection._start,
+			softdeviceFlashSection._end,
+			softdeviceFlashSection._size);
+	LOGd("bluenetFlashSection start=%p end=%p size=%p",
+			bluenetFlashSection._start,
+			bluenetFlashSection._end,
+			bluenetFlashSection._size);
+	LOGd("microappFlashSection start=%p end=%p size=%p",
+			microappFlashSection._start,
+			microappFlashSection._end,
+			microappFlashSection._size);
+	LOGd("p2pDfuFlashSection start=%p end=%p size=%p",
+			p2pDfuFlashSection._start,
+			p2pDfuFlashSection._end,
+			p2pDfuFlashSection._size);
+	LOGd("fdsExpansionFlashSection start=%p end=%p size=%p",
+			fdsExpansionFlashSection._start,
+			fdsExpansionFlashSection._end,
+			fdsExpansionFlashSection._size);
+	LOGd("fdsFlashSection start=%p end=%p size=%p",
+			fdsFlashSection._start,
+			fdsFlashSection._end,
+			fdsFlashSection._size);
+	LOGd("bootloaderFlashSection start=%p end=%p size=%p",
+			bootloaderFlashSection._start,
+			bootloaderFlashSection._end,
+			bootloaderFlashSection._size);
+	LOGd("mbrSettingsFlashSection start=%p end=%p size=%p",
+			mbrSettingsFlashSection._start,
+			mbrSettingsFlashSection._end,
+			mbrSettingsFlashSection._size);
+	LOGd("bootloaderSettingsFlashSection start=%p end=%p size=%p",
+			bootloaderSettingsFlashSection._start,
+			bootloaderSettingsFlashSection._end,
+			bootloaderSettingsFlashSection._size);
+
+	LOGd("softdeviceRamSection start=%p end=%p size=%p",
+			softdeviceRamSection._start,
+			softdeviceRamSection._end,
+			softdeviceRamSection._size);
+	LOGd("bluenetRamSection start=%p end=%p size=%p",
+			bluenetRamSection._start,
+			bluenetRamSection._end,
+			bluenetRamSection._size);
+	LOGd("microappRamSection start=%p end=%p size=%p",
+			microappRamSection._start,
+			microappRamSection._end,
+			microappRamSection._size);
+	LOGd("ipcRamSection start=%p end=%p size=%p",
+			ipcRamSection._start,
+			ipcRamSection._end,
+			ipcRamSection._size);
+	LOGd("bootloaderRamSection start=%p end=%p size=%p",
+			bootloaderRamSection._start,
+			bootloaderRamSection._end,
+			bootloaderRamSection._size);
 
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));

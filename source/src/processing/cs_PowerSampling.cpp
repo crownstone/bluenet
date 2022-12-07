@@ -14,9 +14,11 @@
 #include "common/cs_Types.h"
 #include "drivers/cs_RTC.h"
 #include "events/cs_EventDispatcher.h"
+#include "ipc/cs_IpcRamDataContents.h"
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_Packets.h"
 #include "protocol/cs_UartMsgTypes.h"
+#include "storage/cs_IpcRamBluenet.h"
 #include "storage/cs_State.h"
 #include "structs/buffer/cs_AdcBuffer.h"
 #include "third/SortMedian.h"
@@ -207,11 +209,26 @@ void PowerSampling::init(const boards_config_t* boardConfig) {
 	//	_lastSoftfuse.offset = 0;
 	//	_lastSoftfuse.multiplier = _currentMultiplier;
 
+	initEnergyUsed();
+
 	EventDispatcher::getInstance().addListener(this);
 
 	PS_TEST_PIN_INIT
 
 	_isInitialized = true;
+}
+
+void PowerSampling::initEnergyUsed() {
+	if (!IpcRamBluenet::getInstance().isValidOnBoot()) {
+		_energyUsedmicroJoule = 0;
+		return;
+	}
+	_energyUsedmicroJoule = IpcRamBluenet::getInstance().getData().energyUsedMicroJoule;
+	LOGi("Restored energy used from IPC ram");
+}
+
+void PowerSampling::storeEnergyUsed() {
+	IpcRamBluenet::getInstance().updateEnergyUsed(_energyUsedmicroJoule);
 }
 
 void PowerSampling::startSampling() {
@@ -298,6 +315,11 @@ void PowerSampling::handleEvent(event_t& event) {
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
+			auto tickCount = *CS_TYPE_CAST(EVT_TICK, event.data);
+			if (tickCount % 10 == 0) {
+				// Reset every second.
+				_bufSkipCount = 0;
+			}
 			if (_calibratePowerZeroCountDown) {
 				--_calibratePowerZeroCountDown;
 			}
@@ -335,6 +357,11 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isConsecutiveBuf(seqNr, _lastBufSeqNr)) {
 		LOGw("buf skipped (prev=%u cur=%u)", _lastBufSeqNr, seqNr);
+
+		// Make sure to first store the result first in a temp variable, so roll-over calculation works.
+		adc_buffer_seq_nr_t skips = seqNr - 1 - _lastBufSeqNr;
+		_bufSkipCount += skips;
+
 		// Clear buffer queue, as these are no longer consecutive.
 		_bufferQueue.clear();
 	}
@@ -342,6 +369,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(bufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		_bufSkipCount++;
 		// Clear buffer queue, as these are no longer valid.
 		_bufferQueue.clear();
 		return;
@@ -359,6 +387,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufSkipCount++;
 		// Clear buffer queue, as these are no longer valid.
 		_bufferQueue.clear();
 		return;
@@ -380,6 +409,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufSkipCount++;
 		_bufferQueue.clear();
 		return;
 	}
@@ -409,6 +439,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufSkipCount++;
 		return;
 	}
 
@@ -427,6 +458,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	//		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 	int32_t slowAvgPowerMilliWatt = _slowAvgPowerMilliWatt;
 	State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &slowAvgPowerMilliWatt, sizeof(slowAvgPowerMilliWatt));
+	storeEnergyUsed();
 	State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	//	}
 
@@ -512,6 +544,10 @@ void PowerSampling::removeInvalidBufs() {
 			_bufferQueue.pop();
 		}
 	}
+}
+
+uint32_t PowerSampling::getSkippedBufCount() {
+	return _bufSkipCount;
 }
 
 /*

@@ -75,10 +75,7 @@ cs_ret_code_t MicroappStorage::init() {
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			// * @retval  NRF_SUCCESS         If initialization was successful.
-			LOGMicroappInfo(
-					"Successfully initialized from 0x%08X to 0x%08X",
-					fStorage.start_addr,
-					fStorage.end_addr);
+			LOGMicroappInfo("Successfully initialized from 0x%08X to 0x%08X", fStorage.start_addr, fStorage.end_addr);
 			break;
 		case NRF_ERROR_NULL:
 			// * @retval  NRF_ERROR_NULL      If @p p_fs or @p p_api field in @p p_fs is NULL.
@@ -92,7 +89,7 @@ cs_ret_code_t MicroappStorage::init() {
 }
 
 cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
-	if (nrf_fstorage_is_busy(&fStorage)) {
+	if (_writing) {
 		return ERR_BUSY;
 	}
 
@@ -115,6 +112,7 @@ cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
 			return ERR_UNSPECIFIED;
 		}
 	}
+	_writing = true;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -175,7 +173,7 @@ cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data,
 	LOGMicroappDebug("write %u bytes from 0x%X to 0x%08X", size, data, flashAddress);
 	_logArray(LOGMicroappVerboseLevel, true, data, size);
 	// Only allow 1 write to flash at a time.
-	if (nrf_fstorage_is_busy(&fStorage)) {
+	if (_writing) {
 		LOGw("Busy writing");
 		return ERR_BUSY;
 	}
@@ -183,13 +181,27 @@ cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data,
 	// Write will only work if the flashAddress, and data pointer are word aligned, and when size is word sized.
 	uint32_t nrfCode = nrf_fstorage_write(&fStorage, flashAddress, data, size, nullptr);
 	switch (nrfCode) {
-		case NRF_SUCCESS:
+		case NRF_SUCCESS: {
 			LOGMicroappDebug("Success");
+			_writing = true;
 			return ERR_SUCCESS;
-		case NRF_ERROR_NO_MEM: LOGw("Write queue is full"); return ERR_BUSY;
-		case NRF_ERROR_INVALID_LENGTH: LOGw("Invalid length: size=%u", size); return ERR_WRONG_PAYLOAD_LENGTH;
-		case NRF_ERROR_INVALID_ADDR: LOGw("Invalid address: flashAddress=0x%08X data=0x%08X"); return ERR_NOT_ALIGNED;
-		default: LOGw("Error %u", nrfCode); return ERR_UNSPECIFIED;
+		}
+		case NRF_ERROR_NO_MEM: {
+			LOGw("Write queue is full");
+			return ERR_BUSY;
+		}
+		case NRF_ERROR_INVALID_LENGTH: {
+			LOGw("Invalid length: size=%u", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		case NRF_ERROR_INVALID_ADDR: {
+			LOGw("Invalid address: flashAddress=0x%08X data=0x%08X");
+			return ERR_NOT_ALIGNED;
+		}
+		default: {
+			LOGw("Error %u", nrfCode);
+			return ERR_UNSPECIFIED;
+		}
 	}
 }
 
@@ -381,11 +393,13 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t* evt) {
 		case NRF_FSTORAGE_EVT_WRITE_RESULT: {
 			LOGMicroappDebug("Write result addr=0x%08X len=%u src=0x%X", evt->addr, evt->len, evt->p_src);
 			_logArray(LOGMicroappVerboseLevel, true, (const uint8_t*)(evt->p_src), evt->len);
+			_writing = false;
 			onFlashWritten(retCode);
 			break;
 		}
 		case NRF_FSTORAGE_EVT_ERASE_RESULT: {
 			LOGMicroappInfo("Flash erase result=%u addr=0x%08X len=%u", evt->result, evt->addr, evt->len);
+			_writing = false;
 			TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND) result(CTRL_CMD_MICROAPP_REMOVE, retCode);
 			event_t eventResult(CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND, &result, sizeof(result));
 			eventResult.dispatch();

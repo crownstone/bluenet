@@ -22,8 +22,6 @@
 #define LOGStorageDebug LOGvv
 #define LOGStorageVerbose LOGvv
 
-Storage::Storage() {}
-
 cs_ret_code_t Storage::init() {
 	LOGStorageInit("Init storage");
 	ret_code_t fds_ret_code;
@@ -334,6 +332,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t& stateData) {
 		LOGStorageVerbose("Write key=%u file=%u ptr=%p", record.key, record.file_id, record.data.p_data);
 		fdsRetCode = fds_record_write(&recordDesc, &record);
 	}
+
 	switch (fdsRetCode) {
 		case NRF_SUCCESS:
 			setBusy(recordKey);
@@ -355,6 +354,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t& stateData) {
 		case FDS_ERR_BUSY: break;
 		default: LOGw("Unhandled write error: %u", fdsRetCode);
 	}
+
 	return fdsRetCode;
 }
 
@@ -652,12 +652,9 @@ size16_t Storage::getPaddedSize(size16_t size) {
 	return flashSize;
 }
 
-/*
- * Default id = 0
- * Old configs were all at file id FILE_CONFIGURATION.
- * So for id 0, we want to get FILE_CONFIGURATION.
- */
 uint16_t Storage::getFileId(cs_state_id_t valueId) {
+	// Old configs were all at file id FILE_CONFIGURATION.
+	// So for id 0, we want to get FILE_CONFIGURATION.
 	return valueId + FILE_CONFIGURATION;
 }
 
@@ -885,10 +882,11 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const* p_fds_evt) {
 				event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE);
 				EventDispatcher::getInstance().dispatch(resetEvent);
 				return;
+			} else {
+				event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
+				EventDispatcher::getInstance().dispatch(event);
+				return;
 			}
-			event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
-			EventDispatcher::getInstance().dispatch(event);
-			break;
 		}
 		case FDS_ERR_OPERATION_TIMEOUT: {
 			LOGw("Garbage collection timeout");

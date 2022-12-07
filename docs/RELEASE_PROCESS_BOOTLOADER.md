@@ -7,12 +7,20 @@ Mostly copied from firmware release process. So before releasing a bootloader ch
 The release process starts with updating version information. The bootloader version has to be bumped. This is an integer that is checked by the bootloader to make sure that the
 bootloader version is actually newer than the previous release.
 
-* Update the `VERSION` file in `source/bootloader/VERSION`.
+Update the `VERSION` file in `source/bootloader/VERSION`:
+```
+2.1.0
+9
+RC0
+```
+The first line is the version string in the form `<major>.<minor>.<patch>`.
+The second line is the integer version (used for the DFU process), and should be increased by 1 each time.
+The third line is empty for a release, and `RC<int>` for a release candidate.
 
 For further instructions, we set the version in a variable:
 
 ```
-CS_BL_VERSION="2.0.1-RC0"
+CS_BL_VERSION="2.1.0-RC0"
 ```
 
 Then to create a release:
@@ -22,7 +30,7 @@ cd build
 make create_git_release_bootloader
 ```
 
-This will create a `release/` directory with the version information in a subdirectory, e.g. `release/bootloader_2.0.1-RC0`.
+This will create a `release/` directory with the version information in a subdirectory, e.g. `release/bootloader_2.1.0-RC0`.
 Double check if the CMakeBuild.config is correct. Eventually add a CMakeBuild.config.overwrite file for your own
 passkey file.
 Now using this information, we will build everything for this release.
@@ -42,7 +50,7 @@ make generate_dfu_package_bootloader
 make install
 ```
 
-After make install you will find the `.zip` files in (subdirectories of) `bin/bootloader_2.0.1-RC0`.
+After make install you will find the `.zip` files in (subdirectories of) `bin/bootloader_2.1.0-RC0`.
 
 Don't forget to commit the release config:
 
@@ -59,6 +67,11 @@ And create a git tag:
 git tag -a -m "Tagging bootloader version ${CS_BL_VERSION}" "bootloader-${CS_BL_VERSION}"
 git push --tags
 ```
+
+## Tests
+
+Make sure you can upload the bootloader over the air.
+Make sure you can still perform an OTA update. Both firmware, and a new bootloader should work.
 
 ## Release repository
 

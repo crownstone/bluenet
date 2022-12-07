@@ -8,56 +8,65 @@
 
 #include <setjmp.h>
 
-enum { COROUTINE_BLUENET = 0, COROUTINE_MICROAPP0 = 1 };
-
 /**
- * We introduce here the DoubleStackCoroutine because the term Coroutine already has been taken in cs_Coroutine.h.
+ * This class implements a coroutine with its own stack.
+ *
  * The coroutine implementation:
- *   - is used to switch back and forth from microapp code and bluenet code
- *   - is especially used because a delay(..) function from microapp code should not be blocking
- *   - uses a separate stack for the coroutine
- *   - is in plain C
- *   - uses setjmp and longjmp to jump back and forth
+ * - Makes it possible to stop the coroutine half way a function, and resume from there later.
+ * - Is used by the microapp, so that blocking calls can be used in the microapp code, without blocking bluenet.
+ * - Uses setjmp and longjmp to jump back and forth.
  */
 
+//! Max buffer size for coroutine arguments.
+#define DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE 8
+
 /**
- * We have a buffer to store our stack pointer and registers to if we go back and forth. There are only two coroutines
- * envisioned.
+ * Struct with the context to jump between bluenet and coroutine.
  */
 typedef struct {
-	jmp_buf microapp0Context;
+	jmp_buf coroutineContext;
 	jmp_buf bluenetContext;
 } coroutine_t;
 
-typedef void (*coroutineFunc)(void*);
+typedef void (*coroutine_function_t)(void*);
 
-/*
- * The struct stack_params_t is stored "beyond the stack" of the microapp so it can be used by the microapp to jump
- * back to bluenet.
+/**
+ * Struct with all the state we need for a coroutine.
  */
 typedef struct {
-	coroutine_t* coroutine;
-	coroutineFunc coroutineFunction;
-	void* arg;
+	coroutine_t coroutine;
+	coroutine_function_t coroutineFunction;
+	uint8_t coroutineArgumentBuffer[DOUBLE_STACK_COROUTINE_ARGUMENTS_BUFFER_SIZE];
 	void* oldStackPointer;
 } stack_params_t;
 
 /**
- * Start the coroutine.
+ * Initialize the coroutine.
+ *
+ * Make sure to first set the coroutine arguments.
+ *
+ * @param[in] coroutineFunction   The first function of the coroutine to be executed.
+ * @param[in] argument            The argument for the coroutine function, this will be copied,
+ *                                and can be retrieved again with getCoroutineArgumentBuffer().
+ * @param[in] argumentSize        Size of the argument.
+ * @param[in] ramEnd              Pointer to the end of the ram reserved for this coroutine.
+ * @return                        0 on success.
  */
-void startCoroutine(coroutine_t* coroutine, coroutineFunc coroutineFunction, void* arg);
+int initCoroutine(coroutine_function_t coroutineFunction, void* argument, uint8_t argumentSize, const uintptr_t ramEnd);
 
 /**
- * Yield the coroutine.
+ * Yield the coroutine: resume in bluenet.
  */
 void yieldCoroutine();
 
 /**
  * Resume the coroutine.
+ *
+ * @return 0       When the coroutine finished.
  */
-int nextCoroutine();
+int resumeCoroutine();
 
 /**
- * Get stack parameters (be very careful)
+ * Get the coroutine argument buffer.
  */
-stack_params_t* getStackParams();
+uint8_t* getCoroutineArgumentBuffer();

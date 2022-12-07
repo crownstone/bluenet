@@ -83,6 +83,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_FACTORY_RESET   = 10005,  // Sent when a factory reset is going to be performed.
 	UART_OPCODE_TX_BOOTED          = 10006,  // Sent when this crownstone just booted.
 	UART_OPCODE_TX_HUB_DATA        = 10007,  // Sent by command (CTRL_CMD_HUB_DATA), payload: buffer.
+	UART_OPCODE_TX_MICROAPP_DATA   = 10008,  // Sent by microapp, payload: TODO
 
 	UART_OPCODE_TX_MESH_STATE      = 10102,  // Received state of external stone, payload: service_data_encrypted_t
 	UART_OPCODE_TX_MESH_STATE_PART_0 =

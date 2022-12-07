@@ -4,7 +4,6 @@ To test how much memory the firmware currently uses, you should build the firmwa
 
 ```
 CS_SERIAL_ENABLED=SERIAL_ENABLE_RX_AND_TX
-BUILD_MICROAPP_SUPPORT=1
 ```
 
 With this build flag enabled, the firmware will:

@@ -17,7 +17,7 @@
 #include <optional>
 
 #define LOGSwitchAggregatorDebug LOGvv
-#define LOGSwitchAggregatorEvent LOGd
+#define LOGSwitchAggregatorEvent LOGvv
 #define LOGSwitchHistory LOGvv
 
 // ========================= Public ========================
@@ -26,8 +26,11 @@ SwitchAggregator::SwitchAggregator() : _switchHistory(_maxSwitchHistoryItems) {}
 
 void SwitchAggregator::init(const boards_config_t& board) {
 	LOGi("init");
-	_smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void { handleSwitchStateChange(newState); });
 	_smartSwitch.init(board);
+
+	_smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
+		handleSwitchStateChange(newState);
+	});
 
 	// Allocate buffer.
 	_switchHistory.init();
@@ -39,9 +42,16 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	_behaviourHandler.init();
 
 	_overrideState = _smartSwitch.getIntendedState();
+	if(_overrideState) {
+		LOGSwitchAggregatorDebug("loading override state from smartswitch value for init: %u", _overrideState.value());
+	} else {
+		LOGSwitchAggregatorDebug("loading override state from smartswitch value for init: none");
+	}
 	pushTestDataToHost();
 
 	initChildren();
+
+	_behaviourStore = getComponent<BehaviourStore>();
 }
 
 void SwitchAggregator::switchPowered() {
@@ -85,7 +95,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 		bool behaviourWantsToChangeState = (behaviourStateIsOn != aggregatedStateIsOn);
 
 		if (overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset) {
-			LOGd("Resetting override state overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u",
+			LOGSwitchAggregatorDebug("Resetting override state overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u",
 				 overrideStateIsOn,
 				 aggregatedStateIsOn,
 				 behaviourStateIsOn);
@@ -94,6 +104,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 	}
 
 	if (_overrideState && !shouldResetOverrideState) {
+		LOGSwitchAggregatorDebug("_overrideState set and not shouldResetOverrideState: %u", _overrideState.value());
 		_aggregatedState = resolveOverrideState(*_overrideState);
 	}
 	else if (_behaviourState) {
@@ -102,12 +113,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 	}
 	// If override and behaviour don't have an opinion, keep previous value.
 
-	LOGSwitchAggregatorDebug(
-			"overrideState=%u, behaviourState=%u, twilightState=%u, aggregatedState=%u",
-			_overrideState ? _overrideState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
-			_behaviourState ? _behaviourState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
-			_twilightState ? _twilightState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
-			_aggregatedState ? _aggregatedState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE));
+	printStates(__LINE__);
 
 	// attempt to update smartSwitch value
 	cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
@@ -124,14 +130,27 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 			}
 		}
 	}
+	printStates(__LINE__);
 
 	TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = _overrideState.has_value();
 	event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
 	overrideEvent.dispatch();
 
 	pushTestDataToHost();
-
+	printStates(__LINE__);
 	return retCode;
+}
+
+void SwitchAggregator::update() {
+	bool behaviourValueChanged = updateBehaviourHandlers();
+	uint8_t behaviourRuleIndex = 255;  // TODO: set correct value.
+	cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
+	updateState(behaviourValueChanged, source);
+	if (behaviourValueChanged) {
+		uint32_t timestamp = SystemTime::posix();
+		addToSwitchHistory(cs_switch_history_item_t(
+				timestamp, *_aggregatedState, _smartSwitch.getActualState(), source.source));
+	}
 }
 
 // ========================= Event handling =========================
@@ -149,10 +168,67 @@ void SwitchAggregator::handleEvent(event_t& event) {
 		return;
 	}
 
-	handleStateIntentionEvents(event);
+	if(handleStateIntentionEvents(event)) {
+		return;
+	}
 
-	if (event.type == CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG) {
-		handleGetBehaviourDebug(event);
+	if(handleBehaviourEvents(event)) {
+		return;
+	}
+}
+
+bool SwitchAggregator::handleBehaviourEvents(event_t& event) {
+
+	switch(event.type){
+		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
+			handleGetBehaviourDebug(event);
+			return true;
+		}
+
+		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION: {
+			BehaviourMutation* mutation = static_cast<TYPIFY(EVT_BEHAVIOURSTORE_MUTATION)*>(event.data);
+
+			if(_behaviourStore == nullptr) {
+				LOGw("_behaviourStore is null in switchaggregator");
+				if(mutation->_mutation != BehaviourMutation::NONE) {
+					update();
+				}
+
+				return true;
+			}
+
+			switch(mutation->_mutation) {
+				case BehaviourMutation::REMOVE:
+				case BehaviourMutation::CLEAR_ALL: {
+					update();
+					break;
+				}
+
+				case BehaviourMutation::ADD:
+				case BehaviourMutation::UPDATE: {
+					auto behaviourPtr = _behaviourStore->getBehaviour(mutation->_index);
+
+					if(_behaviourHandler.validateBehaviour(behaviourPtr)){
+						LOGSwitchAggregatorDebug(
+								"Event Mutation::ADD/UPDATE received for valid behaviour. Clearing override and updating.");
+						_overrideState.reset();
+						update();
+					}
+
+					break;
+				}
+
+				case BehaviourMutation::NONE: {
+					break;
+				}
+			}
+
+			return true;
+		}
+
+		default: {
+			return false;
+		}
 	}
 }
 
@@ -187,6 +263,7 @@ bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& event) {
 bool SwitchAggregator::handleTimingEvents(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_TICK: {
+			printStates(__LINE__);
 			// decrement until 0
 			if (_ownerTimeoutCountdown) {
 				_ownerTimeoutCountdown--;
@@ -205,14 +282,7 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 			_lastTimestamp             = timestamp;
 
 			// Update switch value.
-			bool behaviourValueChanged = updateBehaviourHandlers();
-			uint8_t behaviourRuleIndex = 255;  // TODO: set correct value.
-			cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
-			updateState(behaviourValueChanged, source);
-			if (behaviourValueChanged) {
-				addToSwitchHistory(cs_switch_history_item_t(
-						timestamp, *_aggregatedState, _smartSwitch.getActualState(), source.source));
-			}
+			update();
 			break;
 		}
 		default: {
@@ -258,7 +328,6 @@ bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 
 bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 	switch (event.type) {
-		// ============== overrideState Events ==============
 		case CS_TYPE::CMD_SWITCH_ON: {
 			LOGSwitchAggregatorEvent("CMD_SWITCH_ON");
 
@@ -272,7 +341,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH: {
-			//			LOGSwitchAggregatorEvent("CMD_SWITCH");
+			LOGSwitchAggregatorEvent("CMD_SWITCH");
 
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*)event.data;
 			if (!checkAndSetOwner(event.source)) {
@@ -312,24 +381,26 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			_behaviourState.reset();
 			_twilightState.reset();
 			_aggregatedState = 0;
-			LOGd("Reset all");
+			LOGSwitchAggregatorDebug("Reset all");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG:
 			_aggregatedState.reset();
-			LOGd("Reset aggregatedState");
+			LOGSwitchAggregatorDebug("Reset aggregatedState");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE:
 			_overrideState.reset();
-			LOGd("Reset overrideState");
+			LOGSwitchAggregatorDebug("Reset overrideState");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE:
 			_overrideState.reset();
 			_aggregatedState.reset();
-			LOGd("Reset overrideState and aggregatedState");
+			LOGSwitchAggregatorDebug("Reset overrideState and aggregatedState");
 			break;
 	}
 #endif
 
+	LOGSwitchAggregatorDebug("executeStateIntentionUpdate start");
+	printStates(__LINE__);
 	switch (value) {
 		case CS_SWITCH_CMD_VAL_TOGGLE: {
 			// Toggle between 0 and on.
@@ -361,18 +432,18 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			break;
 		}
 	}
+	printStates(__LINE__);
 
 	// Don't allow override reset in updateState, it has just been requested to be set to `value`
 	cs_ret_code_t retCode = updateState(false, source);
+	LOGSwitchAggregatorDebug("updateState retcode: %u", retCode);
+
+	printStates(__LINE__);
 
 	switch (retCode) {
-		case ERR_SUCCESS: {
-			[[fallthrough]];
-		}
-		case ERR_SUCCESS_NO_CHANGE: {
-			[[fallthrough]];
-		}
-		case ERR_NOT_POWERED: {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+		case ERR_NOT_POWERED:{
 			break;
 		}
 		default: {
@@ -384,6 +455,8 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			_overrideState = _smartSwitch.getCurrentIntensity();
 		}
 	}
+
+	printStates(__LINE__);
 
 	addToSwitchHistory(
 			cs_switch_history_item_t(SystemTime::posix(), value, _smartSwitch.getActualState(), source.source));
@@ -606,6 +679,16 @@ void SwitchAggregator::printSwitchHistory() {
 				iter.source.type,
 				iter.source.id);
 	}
+}
+
+void SwitchAggregator::printStates(uint32_t lineNumber) {
+	LOGSwitchAggregatorDebug(
+		"[line #%u] overrideState=%u, behaviourState=%u, twilightState=%u, aggregatedState=%u",
+		lineNumber,
+		_overrideState ? _overrideState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
+		_behaviourState ? _behaviourState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
+		_twilightState ? _twilightState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE),
+		_aggregatedState ? _aggregatedState.value() : static_cast<uint8_t>(CS_SWITCH_CMD_VAL_NONE));
 }
 
 void SwitchAggregator::pushTestDataToHost() {

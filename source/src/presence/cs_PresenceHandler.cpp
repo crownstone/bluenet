@@ -20,6 +20,10 @@ PresenceHandler::PresenceHandler() {
 	_store.clear();
 }
 
+PresenceHandler::~PresenceHandler() {
+	LOGi("PresenceHandler::~PresenceHandler");
+}
+
 cs_ret_code_t PresenceHandler::init() {
 	LOGi("init");
 
@@ -32,7 +36,6 @@ void PresenceHandler::registerPresence(ProfileLocation profileLocation) {
 }
 
 void PresenceHandler::handleEvent(event_t& event) {
-
 	switch (event.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			auto parsedAdvEventData = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(event.data);

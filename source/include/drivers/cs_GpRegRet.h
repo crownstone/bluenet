@@ -46,6 +46,11 @@ public:
 	static void clearCounter();
 
 	/**
+	 * Get the current counter value.
+	 */
+	static uint32_t getCounter();
+
+	/**
 	 * Set counter to a given value.
 	 */
 	static void setCounter(uint32_t value);

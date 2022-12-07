@@ -18,7 +18,10 @@ class EventListener {
 public:
 	EventListener() {}
 
-	virtual ~EventListener(){};
+	/**
+	 * unregisters the listener.
+	 */
+	virtual ~EventListener();
 
 	/** Handle events
 	 *

@@ -31,6 +31,16 @@ public:
 	 */
 	void init(OperationMode operationMode);
 
+	/**
+	 * Checks app state and returns true if this app is allowed to run.
+	 */
+	bool canRunApp(uint8_t index);
+
+	/**
+	 * To be called when a microapp took too long to yield.
+	 */
+	void onExcessiveCallDuration(uint8_t appIndex);
+
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
@@ -45,6 +55,12 @@ private:
 	microapp_state_t _states[g_MICROAPP_COUNT];
 
 	/**
+	 * Keep up whether the microapp has been started yet.
+	 * Init to false (default bool constructor).
+	 */
+	bool _started[g_MICROAPP_COUNT] = {};
+
+	/**
 	 * Local flag to indicate that ram section has been loaded.
 	 */
 	bool _loaded                  = false;
@@ -52,9 +68,9 @@ private:
 	/**
 	 * Keep up which microapp is currently being operated on.
 	 * Used for factory reset.
-	 * Set to -1 when not operating on anything.
+	 * Set to MICROAPP_INDEX_NONE when not operating on anything.
 	 */
-	int16_t _currentMicroappIndex = -1;
+	uint8_t _currentMicroappIndex = MICROAPP_INDEX_NONE;
 
 	/**
 	 * Whether we are in factory reset mode.
@@ -105,11 +121,6 @@ private:
 	cs_ret_code_t storeState(uint8_t index);
 
 	/**
-	 * Checks app state and returns true if this app is allowed to run.
-	 */
-	bool canRunApp(uint8_t index);
-
-	/**
 	 * To be called every tick.
 	 * Calls all microapps.
 	 */
@@ -124,6 +135,7 @@ private:
 	cs_ret_code_t handleRemove(microapp_ctrl_header_t* packet);
 	cs_ret_code_t handleEnable(microapp_ctrl_header_t* packet);
 	cs_ret_code_t handleDisable(microapp_ctrl_header_t* packet);
+	cs_ret_code_t handleMessage(microapp_message_internal_t* packet, cs_result_t& result);
 
 	/**
 	 * Checks if control command header is ok.

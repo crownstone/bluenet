@@ -24,6 +24,7 @@ public:
 	 */
 	virtual cs_ret_code_t init() override;
 
+	virtual ~BehaviourHandler() = default;
 	/**
 	 * Computes the intended behaviour state of this crownstone based on
 	 * the stored behaviours, and then dispatches an event for that.
@@ -61,6 +62,15 @@ public:
 	 * Returns true if a behaviour at given time requires absence
 	 */
 	bool requiresAbsence(Time t);
+
+	/**
+	 * Checks if the given behaviour is valid. I.e. its presence clause and time constraints are met.
+	 *
+	 * Presence and time are obtained from PresenceHandler and SystemTime for this check.
+	 *
+	 * @see Behaviour::isValid.
+	 */
+	bool validateBehaviour(Behaviour* behaviour) const;
 
 private:
 	/**
@@ -132,12 +142,18 @@ private:
 	void handleGetBehaviourDebug(event_t& evt);
 
 	/**
-	 * Returns b, casted as switch behaviour if that cast is valid and
-	 * isValid(*) returns true.
-	 * Else, returns nullptr.
+	 * @return      Switch behaviour if the behaviour is a valid switch behaviour, and active at this time/presence.
+	 * @return      nullptr otherwise.
 	 */
-	SwitchBehaviour* ValidateSwitchBehaviour(
-			Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) const;
+	SwitchBehaviour* validateSwitchBehaviour(
+			Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const;
+
+	/**
+	 * @return      Twilight behaviour if the behaviour is a valid twilight behaviour, and active at this time/presence.
+	 * @return      nullptr otherwise.
+	 */
+	TwilightBehaviour* validateTwilightBehaviour(
+			Behaviour* behaviour, Time currentTime, PresenceStateDescription currentPresence) const;
 
 	// -----------------------------------------------------------------------
 	// --------------------------- synchronization ---------------------------

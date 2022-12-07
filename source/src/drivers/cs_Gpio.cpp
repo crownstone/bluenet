@@ -114,12 +114,13 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 	if (pin == PIN_NONE) {
 		return ERR_NOT_FOUND;
 	}
-	LogGpioInfo("Configure pinIndex=%u pin=%u direction=%i pullResistor=%i polarity=%i",
-		 pinIndex,
-		 pin,
-		 direction,
-		 pull,
-		 polarity);
+	LogGpioInfo(
+			"Configure pinIndex=%u pin=%u direction=%i pullResistor=%i polarity=%i",
+			pinIndex,
+			pin,
+			direction,
+			pull,
+			polarity);
 
 	nrf_gpio_pin_pull_t nrfPull;
 	switch (pull) {
@@ -153,7 +154,7 @@ cs_ret_code_t Gpio::configure(uint8_t pinIndex, GpioDirection direction, GpioPul
 	}
 
 	_pins[pinIndex].direction = 0;
-	_pins[pinIndex].event = false;
+	_pins[pinIndex].event     = false;
 
 	switch (direction) {
 		case GpioDirection::INPUT: {

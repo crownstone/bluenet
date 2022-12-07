@@ -83,11 +83,20 @@ uint8[] | Session nonce | 5 | Session nonce, should be [read](#session-data) whe
 #### Session data
 
 After connecting, you should first read the session data from the [Crownstone service](#crownstone-service).
-The session data is [ECB encrypted](#aes-128-ecb-encryption) with the basic key, or when in setup mode: the session key.
-After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
 The session nonce and validation key will be different each time you connect.
 
 ![Session data](../diagrams/session-data.png)
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8 | Protocol | 1 | The protocol version to use for communication.
+uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
+uint8[] | Validation key | 4 | The validation key for this session. Used to verify decryption/encryption.
+
+When the session data is [ECB encrypted](#aes-128-ecb-encryption) it is done so with the basic key, or when in setup mode: the session key.
+After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
+
+![Session data encrypted](../diagrams/session-data-encrypted.png)
 
 Type | Name | Length | Description
 ---- | ---- | ------ | -----------
@@ -205,11 +214,13 @@ The broadcast protocol is documented in the [broadcast protocol](BROADCAST_PROTO
 
 When connected, the following services are available.
 
-The `A`, `M`, and `B` columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet.
+The `A`, `M`, `B`, `S`, and `U` columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet.
 
 - A: Admin
 - M: Member
 - B: Basic
+- S: Setup
+- U: Unencrypted
 
 The following services are available (depending on state and config):
 - [Crownstone service](#crownstone-service). Contains all you need: control, config and state.
@@ -221,13 +232,13 @@ The following services are available (depending on state and config):
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
 
-Characteristic | UUID | Data type | Description | A     | M     | B
--------------- | ---- | --------- | ----------- | :---: | :---: | :---:
-Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB
-Session nonce  | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |
-Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x
-Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x
-Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). | | |
+Characteristic | UUID | Data type | Description | A     | M     | B     | U
+-------------- | ---- | --------- | ----------- | :---: | :---: | :---: | :---:
+Session data   | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data (encrypted). This characteristic is deprecated. |  |  | ECB |
+Session data   | 24f0000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  |  | x
+Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x |
+Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x |
+Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |  |  |  | x
 
 Every command written to the control characteristic returns a [result packet](#result-packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
@@ -245,13 +256,14 @@ The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only avai
  When encryption is enabled, the control and both config characteristics are encrypted with AES CTR. The key and session nonce for this are gotten from their
  characteristics.
 
-Characteristic | UUID | Data type | Description
--------------- | ---- | --------- | -----------
-MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone.
-Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption.
-Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data.
-Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone.
-Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone.
+Characteristic | UUID | Data type | Description | S     | U
+-------------- | ---- | --------- | ----------- | :---: | :---:
+MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone. | x |
+Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption. | x |
+Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. (encrypted). This characteristic is deprecated. | ECB |
+Session data   | 24f1000f-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  | x
+Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x |
+Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x |
 
 Every command written to the control characteristic returns a [result packet](#result-packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
@@ -346,8 +358,9 @@ Type nr | Type name | Payload type | Result payload | Description | A     | M   
 91 | Upload microapp | [Microapp upload packet](#microapp-upload-packet) | - | Upload (a part of) a microapp. | x
 92 | Validate microapp | [Microapp header packet](#microapp-header-packet) | - | Validate a microapp. Should be done after upload: checks integrity of the uploaded data. | x
 93 | Remove microapp | [Microapp header packet](#microapp-header-packet) | - | Removes a microapp. When result is ERR_WAIT_FOR_SUCCESS, you have to wait for ERR_SUCCESS. In case the microapp is already removed, you will get ERR_SUCCESS_NO_CHANGE. | x
-94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
-95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
+94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. Also used to re-enable a disabled microapp. | x
+95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, pauses a running microapp. | x
+96 | Message microapp | [Microapp message packet](#microapp-message-packet) | - | Send a data message to a microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 110 | Upload filter | [Upload filter packet](ASSET_FILTERING.md#upload-filter-packet) | - | Upload (a part of) an asset filter. | x
 111 | Remove filter | [Remove filter packet](ASSET_FILTERING.md#remove-filter-packet) | - | Delete an asset filter. | x
@@ -840,7 +853,16 @@ Bit  | Name     | Description
 6    | memory   | 0=ok, 1=excessive
 7-15 | reserved | Reserved, must be 0 for now.
 
+#### Microapp message packet
 
+![Microapp message packet](../diagrams/microapp_message_packet.png)
+
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+[Microapp header](#microapp-header-packet) | Header | 2 | The header.
+uint8[] | Payload | N | Data message for the microapp.
+
+The microapp determines the format of the payload.
 
 
 ## Result packet

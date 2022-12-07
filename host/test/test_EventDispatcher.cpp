@@ -19,6 +19,8 @@ public:
 	}
 
 	bool receivedEvent() { return _receivedEvent; }
+
+	virtual ~TestListener() { LOGi("TestListener::~TestListener()"); }
 };
 
 int main() {

@@ -10,6 +10,7 @@ This script depends on the crownstone python library: https://github.com/crownst
 """
 
 import argparse
+import asyncio
 import logging
 import os
 import time
@@ -32,13 +33,12 @@ from bluenet_logs import BluenetLogs
 defaultSourceFilesDir = os.path.abspath(f"{os.path.dirname(os.path.abspath(__file__))}/../source")
 
 argParser = argparse.ArgumentParser(description="Client to show binary logs")
-argParser.add_argument('--sourceFilesDir',
-                       '-s',
-                       dest='sourceFilesDir',
+argParser.add_argument('--logStringsFile', '-l',
+                       dest='logStringsFileName',
                        metavar='path',
                        type=str,
-                       default=f"{defaultSourceFilesDir}",
-                       help='The path with the bluenet source code files on your system.')
+                       default=None,
+                       help='The path of the file with the extracted firmware logs on your system.')
 argParser.add_argument('--device',
                        '-d',
                        dest='device',
@@ -48,12 +48,14 @@ argParser.add_argument('--device',
                        help='The UART device to use, for example: /dev/ttyACM0')
 args = argParser.parse_args()
 
-sourceFilesDir = args.sourceFilesDir
+logStringsFile = "extracted_logs.json"
+if args.logStringsFileName is not None:
+	logStringsFile = args.logStringsFileName
 
 bluenetLogs = BluenetLogs()
-bluenetLogs.setSourceFilesDir(sourceFilesDir)
+bluenetLogs.setLogStringsFile(logStringsFile)
 
-logFile = sourceFilesDir + "/../mem-usage-test.log"
+logFile = "mem-usage-test.log"
 logging.basicConfig(
 	format='%(asctime)s %(levelname)-7s: %(message)s',
 	level=logging.INFO,
@@ -82,8 +84,8 @@ UartEventBus.subscribe(UartTopics.hello, handleHello)
 
 
 # Start up the USB bridge.
-uart = CrownstoneUart()
-uart.initialize_usb_sync(port=args.device, writeChunkMaxSize=64)
+core = CrownstoneUart()
+core.initialize_usb_sync(port=args.device, writeChunkMaxSize=64)
 
 # Sphere specific settings:
 adminKey = "adminKeyForCrown"
@@ -102,63 +104,87 @@ meshDeviceKey = "aStoneKeyForMesh"
 ibeaconMajor = 123
 ibeaconMinor = 456
 
+keysDict = {
+	"admin": adminKey,
+	"member": memberKey,
+	"basic": basicKey,
+	"serviceDataKey": serviceDataKey,
+	"localizationKey": localizationKey,
+	"meshApplicationKey":meshAppKey,
+	"meshNetworkKey": meshNetworkKey,
+}
+
 stats = {
 	"minStackEnd": [],
 	"maxHeapEnd": [],
 	"minFree": [],
 }
 
-def factoryReset() -> bool:
+async def factoryReset() -> bool:
 	logging.log(logging.INFO, "Factory reset")
 	try:
-		controlPacket = ControlPacketsGenerator.getCommandFactoryResetPacket()
-		uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
-		uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
-		result = UartWriter(uartPacket).write_with_result_sync([ResultValue.SUCCESS, ResultValue.WAIT_FOR_SUCCESS])
-		if result.resultCode is ResultValue.SUCCESS:
-			# This always returns SUCCESS, while we should actually wait.
-			time.sleep(10.0)
-			return True
-		if result.resultCode is ResultValue.WAIT_FOR_SUCCESS:
-			# Actually we should wait for the next result code..
-			time.sleep(10.0)
-			return True
-		logging.log(logging.WARN, f"Factory reset failed, result={result}")
-		return False
+		await core.control.factoryReset()
+		# Wait for the reboots.
+		await asyncio.sleep(5.0)
+		return True
+		# controlPacket = ControlPacketsGenerator.getCommandFactoryResetPacket()
+		# uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
+		# uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
+		# result = UartWriter(uartPacket).write_with_result_sync([ResultValue.SUCCESS, ResultValue.WAIT_FOR_SUCCESS])
+		# if result.resultCode is ResultValue.SUCCESS:
+		# 	# This always returns SUCCESS, while we should actually wait.
+		# 	time.sleep(10.0)
+		# 	return True
+		# if result.resultCode is ResultValue.WAIT_FOR_SUCCESS:
+		# 	# Actually we should wait for the next result code..
+		# 	time.sleep(10.0)
+		# 	return True
+		# logging.log(logging.WARN, f"Factory reset failed, result={result}")
+		# return False
 
 	except CrownstoneException as e:
 		logging.log(logging.WARN, f"Failed to factory reset: {e}")
 		return False
 
-def setup() -> bool:
+async def setup() -> bool:
 	logging.log(logging.INFO, "Perform setup")
 	try:
-		controlPacket = ControlPacketsGenerator.getSetupPacket(
-			crownstoneId=crownstoneId,
-			sphereId=sphereId,
-			adminKey=Conversion.ascii_or_hex_string_to_16_byte_array(adminKey),
-			memberKey=Conversion.ascii_or_hex_string_to_16_byte_array(memberKey),
-			basicKey=Conversion.ascii_or_hex_string_to_16_byte_array(basicKey),
-			serviceDataKey=Conversion.ascii_or_hex_string_to_16_byte_array(serviceDataKey),
-			localizationKey=Conversion.ascii_or_hex_string_to_16_byte_array(localizationKey),
-			meshDeviceKey=Conversion.ascii_or_hex_string_to_16_byte_array(meshDeviceKey),
-			meshAppKey=Conversion.ascii_or_hex_string_to_16_byte_array(meshAppKey),
-			meshNetworkKey=Conversion.ascii_or_hex_string_to_16_byte_array(meshNetworkKey),
-			ibeaconUUID=ibeaconUUID,
-			ibeaconMajor=ibeaconMajor,
-			ibeaconMinor=ibeaconMinor
+		await core.setup.setup(
+			sphereId,
+			crownstoneId,
+			meshDeviceKey,
+			ibeaconUUID,
+			ibeaconMajor,
+			ibeaconMinor,
+			keysDict
 		)
-		uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
-		uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
-		result = UartWriter(uartPacket).write_with_result_sync([ResultValue.SUCCESS, ResultValue.WAIT_FOR_SUCCESS])
-		if result.resultCode is ResultValue.SUCCESS:
-			return True
-		if result.resultCode is ResultValue.WAIT_FOR_SUCCESS:
-			# Actually we should wait for the next result code..
-			time.sleep(3.0)
-			return True
-		logging.log(logging.WARN, f"Setup failed, result={result}")
-		return False
+		return True
+		# controlPacket = ControlPacketsGenerator.getSetupPacket(
+		# 	crownstoneId=crownstoneId,
+		# 	sphereId=sphereId,
+		# 	adminKey=Conversion.ascii_or_hex_string_to_16_byte_array(adminKey),
+		# 	memberKey=Conversion.ascii_or_hex_string_to_16_byte_array(memberKey),
+		# 	basicKey=Conversion.ascii_or_hex_string_to_16_byte_array(basicKey),
+		# 	serviceDataKey=Conversion.ascii_or_hex_string_to_16_byte_array(serviceDataKey),
+		# 	localizationKey=Conversion.ascii_or_hex_string_to_16_byte_array(localizationKey),
+		# 	meshDeviceKey=Conversion.ascii_or_hex_string_to_16_byte_array(meshDeviceKey),
+		# 	meshAppKey=Conversion.ascii_or_hex_string_to_16_byte_array(meshAppKey),
+		# 	meshNetworkKey=Conversion.ascii_or_hex_string_to_16_byte_array(meshNetworkKey),
+		# 	ibeaconUUID=ibeaconUUID,
+		# 	ibeaconMajor=ibeaconMajor,
+		# 	ibeaconMinor=ibeaconMinor
+		# )
+		# uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
+		# uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
+		# result = UartWriter(uartPacket).write_with_result_sync([ResultValue.SUCCESS, ResultValue.WAIT_FOR_SUCCESS])
+		# if result.resultCode is ResultValue.SUCCESS:
+		# 	return True
+		# if result.resultCode is ResultValue.WAIT_FOR_SUCCESS:
+		# 	# Actually we should wait for the next result code..
+		# 	time.sleep(3.0)
+		# 	return True
+		# logging.log(logging.WARN, f"Setup failed, result={result}")
+		# return False
 
 	except CrownstoneException as e:
 		logging.log(logging.WARN, f"Failed to setup: {e}")
@@ -167,21 +193,28 @@ def setup() -> bool:
 def isSetupMode() -> bool:
 	return stoneHasBeenSetUp is False
 
-def getRamStats():
-	controlPacket = ControlPacket(ControlType.GET_RAM_STATS).getPacket()
-	uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
-	uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
+async def getRamStats():
 	try:
-		result = UartWriter(uartPacket).write_with_result_sync()
-		if result.resultCode is ResultValue.SUCCESS:
-			return RamStatsPacket(result.payload)
-		logging.log(logging.WARN, f"Get ram stats failed, result={result}")
+		controlPacket = ControlPacket(ControlType.GET_RAM_STATS).serialize()
+		resultPacket = await core.control._writeControlAndGetResult(controlPacket)
+		return RamStatsPacket(resultPacket.payload)
 	except CrownstoneException as e:
 		logging.log(logging.WARN, f"Get ram stats failed: {e}")
 	return None
 
+	# uartMessage = UartMessagePacket(UartTxType.CONTROL, controlPacket).getPacket()
+	# uartPacket = UartWrapperPacket(UartMessageType.UART_MESSAGE, uartMessage).getPacket()
+	# try:
+	# 	result = UartWriter(uartPacket).write_with_result_sync()
+	# 	if result.resultCode is ResultValue.SUCCESS:
+	# 		return RamStatsPacket(result.payload)
+	# 	logging.log(logging.WARN, f"Get ram stats failed, result={result}")
+	# except CrownstoneException as e:
+	# 	logging.log(logging.WARN, f"Get ram stats failed: {e}")
+	# return None
+
 def stop(errStr=None):
-	uart.stop()
+	core.stop()
 	if (errStr is None):
 		printStats()
 		logging.log(logging.INFO, "DONE!")
@@ -190,7 +223,7 @@ def stop(errStr=None):
 		logging.log(logging.WARN, f"Failed: {errStr}")
 		exit(1)
 
-def testRun():
+async def testRun():
 	minStackEnd = 0xFFFFFFFF
 	maxHeapEnd = 0x00000000
 	minFree = minStackEnd - maxHeapEnd
@@ -198,8 +231,8 @@ def testRun():
 	similarStats = 0
 
 	while True:
-		time.sleep(1)
-		ramStats = getRamStats()
+		await asyncio.sleep(1.0)
+		ramStats = await getRamStats()
 		if ramStats is not None:
 			logging.log(logging.INFO, ramStats)
 
@@ -230,29 +263,37 @@ def printStats():
 	arr = stats["minFree"]
 	logging.log(logging.INFO, f"minFree:     min={min(arr):10} avg={int(sum(arr) / len(arr)):10} max={max(arr):10}")
 
-def main():
+async def main():
+	core.uartManager.writeHello()
 	for i in range(0, 5):
 		time.sleep(1)
 		if not isSetupMode():
 			stop("Not in setup mode")
 			return
 
-		success = setup()
+		success = await setup()
 		if not success:
 			stop("Failed to setup")
 		logging.log(logging.INFO, "Setup completed")
 
-		testRun()
+		await testRun()
 
-		success = factoryReset()
+		success = await factoryReset()
 		if not success:
 			stop("Failed to factory reset")
 		logging.log(logging.INFO, "Factory reset completed")
 
 # Main
 try:
-	main()
+	# asyncio.run does not work here.
+	loop = asyncio.get_event_loop()
+	loop.run_until_complete(main())
 except KeyboardInterrupt:
-	pass
+	print("Stopping")
+
+# try:
+# 	main()
+# except KeyboardInterrupt:
+# 	pass
 
 stop()

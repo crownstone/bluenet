@@ -30,6 +30,8 @@ public:
 
 	virtual size_t serializedSize() const;
 
+	virtual ~PresenceCondition() = default;
+
 	/**
 	 * Returns true if this condition is satisfied given the presence state.
 	 */

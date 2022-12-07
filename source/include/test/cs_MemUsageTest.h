@@ -24,6 +24,7 @@ private:
 	boards_config_t _boardConfig;
 	bool _started           = false;
 
+	int _assetFilterIndex   = 0;
 	int _behaviourIndex     = 0;
 
 	int _rssiDataStoneId    = 1;
@@ -34,6 +35,9 @@ private:
 	int _trackedDeviceId    = 0;
 
 	int _stateType          = 0;
+
+	// Returns true when done with all.
+	bool setNextAssetFilter();
 
 	// Returns true when done with all.
 	bool setNextBehaviour();

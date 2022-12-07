@@ -11,8 +11,8 @@
 #include <components/libraries/fds/fds.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_Utils.h>
+#include <test/cs_TestAccess.h>
 
-#include <string>
 #include <vector>
 
 enum cs_storage_operation_t {
@@ -55,6 +55,7 @@ typedef void (*cs_storage_error_callback_t)(cs_storage_operation_t operation, CS
  * that writes to flash (like Flash Manager).
  */
 class Storage {
+	friend class TestAccess<Storage>;
 public:
 	/** Returns the singleton instance of this class
 	 *
@@ -68,6 +69,7 @@ public:
 	cs_ret_code_t init();
 
 	inline bool isInitialized() { return _initialized; }
+	bool isBusy();
 
 	/**
 	 * Set the callback for errors.
@@ -288,9 +290,9 @@ public:
 	void handleFlashOperationError();
 
 private:
-	Storage();
-	Storage(Storage const&);
-	void operator=(Storage const&);
+	Storage() = default;
+	Storage(Storage const&) = delete;
+	void operator=(Storage const&) = delete;
 
 	bool _initialized                          = false;
 	bool _registeredFds                        = false;
@@ -400,7 +402,7 @@ private:
 	void setBusy(uint16_t recordKey);
 	void clearBusy(uint16_t recordKey);
 	bool isBusy(uint16_t recordKey);
-	bool isBusy();
+
 
 	cs_ret_code_t getErrorCode(ret_code_t code);
 
@@ -408,6 +410,4 @@ private:
 	void handleRemoveRecordEvent(fds_evt_t const* p_fds_evt);
 	void handleRemoveFileEvent(fds_evt_t const* p_fds_evt);
 	void handleGarbageCollectionEvent(fds_evt_t const* p_fds_evt);
-
-	//	inline void print(const std::string & prefix, CS_TYPE type);
 };

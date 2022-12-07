@@ -60,6 +60,13 @@ public:
 	 */
 	void enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback);
 
+	/**
+	 * Get the number of bufs that have been recently skipped.
+	 *
+	 * Is reset every second.
+	 */
+	uint32_t getSkippedBufCount();
+
 	/** handle (crownstone) events
 	 */
 	void handleEvent(event_t& event);
@@ -206,6 +213,19 @@ private:
 
 	cs_adc_restarts_t _adcRestarts;
 	cs_adc_channel_swaps_t _adcChannelSwaps;
+
+	//! Count number of buffers that have been skipped for processing.
+	uint32_t _bufSkipCount = 0;
+
+	/**
+	 * Load energy used from IPC ram.
+	 */
+	void initEnergyUsed();
+
+	/**
+	 * Store energy used to IPC ram.
+	 */
+	void storeEnergyUsed();
 
 	/** Initialize the moving averages
 	 */
