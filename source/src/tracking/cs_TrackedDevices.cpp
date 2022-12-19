@@ -298,7 +298,8 @@ void TrackedDevices::tickMinute() {
 			device.data.data.locationId = 0;
 		}
 
-		if (*CsMath::DecreaseByPointer(&device.data.data.timeToLiveMinutes) == 0) {
+		
+		if (CsMath::DecreaseMember(device.data.data, &register_tracked_device_packet_t::timeToLiveMinutes) == 0) {
 			// Always check if device is timed out, as it might be that the TTL was never set.
 			LOGTrackedDevicesDebug("Timed out id=%u", device.data.data.deviceId);
 			device.invalidate();
