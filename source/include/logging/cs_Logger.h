@@ -21,11 +21,11 @@
 #if HOST_TARGET
 #include <logging/impl/cs_LogStdPrintf.h>
 
-#elif SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
-#include <logging/impl/cs_LogBinaryProtocol.h>
-
 #elif CS_UART_BINARY_PROTOCOL_ENABLED == 0
 #include <logging/impl/cs_LogPlainText.h>
+
+#elif SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
+#include <logging/impl/cs_LogBinaryProtocol.h>
 
 #else
 #include <logging/impl/cs_LogNone.h>

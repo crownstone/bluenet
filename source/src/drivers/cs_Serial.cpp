@@ -197,7 +197,7 @@ bool serial_tx_ready() {
 }
 
 /*
- * This fucntion does not check _initializedTx. That's supposed to have been done by functions that call this function.
+ * This function does not check _initializedTx. That's supposed to have been done by functions that call this function.
  */
 inline void _serial_write(uint8_t val) {
 #if SERIAL_VERBOSITY > SERIAL_READ_ONLY
