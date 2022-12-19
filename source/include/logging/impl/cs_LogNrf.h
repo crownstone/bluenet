@@ -20,6 +20,8 @@
 extern "C" {
 #endif
 
+#include "nrf_log.h"
+
 #define _log(level, addNewLine, fmt, ...)  \
 	if (level <= SERIAL_VERBOSITY) {       \
 		NRF_LOG_DEBUG(fmt, ##__VA_ARGS__); \
