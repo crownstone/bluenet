@@ -93,3 +93,8 @@ make create_bootloader_release_in_repository
 ```
 
 This will copy all `.zip`, `.elf`, `.bin`, files, as well as configuration files.
+
+
+## Release to cloud
+
+Now release the firmware to the cloud, so app users actually use the new bootloader. This is similar to the [application release](RELEASE_PROCESS.md#release-to-cloud).
