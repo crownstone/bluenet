@@ -629,7 +629,7 @@ add_custom_target(write_config
 #if(NOT CONFIG_DIR STREQUAL "release")
 set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
-message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
+message(STATUS "Get version for hardware board \"${HARDWARE_BOARD}\"")
 load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
 message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
 include(${DEFAULT_MODULES_PATH}/hex.cmake)
