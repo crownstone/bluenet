@@ -3,18 +3,25 @@ on: [push, pull_request, release]
 jobs:
   Build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/crownstone/bluenet:latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
       - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: Install dependencies
+      - name: Prepare dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake gcc g++ wget
+          echo "🖥️ Prepare dependencies by symlinking to /bluenet/tools and add some to $PATH"
+          ln -s /bluenet/tools tools
+          echo "/bluenet/tools/gcc_arm_none_eabi/bin" >> $GITHUB_PATH
+          echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: Show versions
+        shell: bash
+        run: |
+          echo "🖥️ Show some versions of dependencies."
+          arm-none-eabi-gcc --version
           cmake --version
       - name: Create build dir
         run: |
@@ -22,7 +29,7 @@ jobs:
       - name: Run cmake
         working-directory: ./build
         run: |
-          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
+          cmake .. -DREQUIRE_NRFJPROG=OFF -DREQUIRE_JLINK=OFF -DCOMPILE_FOR_HOST=ON
       - name: Run make
         working-directory: ./build
         run: |
@@ -35,29 +42,29 @@ jobs:
         run: |
           echo "🍏 This job's status is ${{ job.status }}."
   Test:
+    if: ${{ github.repository_owner == 'crownstone' }}
     runs-on: [self-hosted, Linux, X64]
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Crownstone!"
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: Check out repository code
         uses: actions/checkout@v2
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: Install dependencies
+      - name: Prepare dependencies
         run: |
-          sudo DEBIAN_FRONTEND=noninteractive apt-get update -y --fix-missing
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -f -y
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cmake gcc g++ git make python3 python3-pip wget unzip apt
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y libusb-1.0-0 libsm6
-          cmake --version
+          echo "🖥️ Prepare dependencies by symlinking to /bluenet/tools and add some to $PATH"
+          ln -s /bluenet/tools tools
+          echo "/bluenet/tools/gcc_arm_none_eabi/bin" >> $GITHUB_PATH
+          echo "🖥️ The workflow is now ready to test your code on the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Create build dir
         run: |
           mkdir build
       - name: Run cmake
         working-directory: ./build
         run: |
-          cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DCOMPILE_FOR_HOST=ON
+          cmake .. -DREQUIRE_NRFJPROG=OFF -DREQUIRE_JLINK=OFF -DCOMPILE_FOR_HOST=ON
       - name: Run make
         working-directory: ./build
         run: |

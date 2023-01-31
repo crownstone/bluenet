@@ -11,8 +11,8 @@
 #include <ble/cs_UUID.h>
 #include <common/cs_Types.h>
 #include <events/cs_Event.h>
-#include <structs/cs_PacketsInternal.h>
 #include <events/cs_EventListener.h>
+#include <structs/cs_PacketsInternal.h>
 
 /**
  * Class that enables you to connect to a device, and perform write or read operations.
@@ -24,7 +24,7 @@
  *
  * TODO: introduce a timeout, so that a connection cannot remain open.
  */
-class BleCentral: EventListener {
+class BleCentral : EventListener {
 public:
 	static BleCentral& getInstance() {
 		static BleCentral instance;
@@ -61,7 +61,8 @@ public:
 	/**
 	 * Discover services.
 	 *
-	 * Unfortunately you cannot simply discover all services, you will need to tell in advance which services you are looking for.
+	 * Unfortunately you cannot simply discover all services, you will need to tell in advance which services you are
+	 * looking for.
 	 *
 	 * For each discovered service and characteristic, EVT_BLE_CENTRAL_DISCOVERY is dispatched.
 	 * Use these events to figure out which handles to use for reading and writing.
@@ -100,7 +101,8 @@ public:
 	/**
 	 * Performs a write() with the value to enable or disable notifications.
 	 *
-	 * @param[in] cccdHandle           The characteristic CCCD handle to write to. The handle was received during discovery.
+	 * @param[in] cccdHandle           The characteristic CCCD handle to write to. The handle was received during
+	 * discovery.
 	 * @param[in] enableNotifications  True to enable notifications.
 	 *
 	 * @return                         See write().
@@ -108,7 +110,8 @@ public:
 	cs_ret_code_t writeNotificationConfig(uint16_t cccdHandle, bool enableNotifications);
 
 	/**
-	 * Request the write buffer. You can then put your data in this buffer and use it as data in the write() command, so no copy has to take place.
+	 * Request the write buffer. You can then put your data in this buffer and use it as data in the write() command, so
+	 * no copy has to take place.
 	 *
 	 * @return     When busy:          A null pointer.
 	 * @return     On success:         A pointer to the write buffer, and the length of the buffer.
@@ -126,9 +129,9 @@ public:
 	bool isBusy();
 
 private:
-	enum class Operation: uint8_t {
+	enum class Operation : uint8_t {
 		NONE,
-		CONNECT_CLEARANCE, // Waiting for clearance to connect.
+		CONNECT_CLEARANCE,  // Waiting for clearance to connect.
 		CONNECT,
 		DISCONNECT,
 		DISCOVERY,
@@ -138,7 +141,7 @@ private:
 
 	BleCentral();
 	BleCentral(BleCentral const&);
-	void operator=(BleCentral const &);
+	void operator=(BleCentral const&);
 
 	device_address_t _address;
 
@@ -152,22 +155,25 @@ private:
 	/**
 	 * How much data is actually in the buffer.
 	 */
-	uint16_t _bufDataSize = 0;
+	uint16_t _bufDataSize      = 0;
 
 	uint16_t _connectionHandle = BLE_CONN_HANDLE_INVALID;
+
+	//! Keep up the handle of the current write or read operation.
+	uint16_t _currentHandle    = BLE_GATT_HANDLE_INVALID;
 
 	ble_db_discovery_t _discoveryModule;
 
 #if NORDIC_SDK_VERSION > 15
 	ble_db_discovery_init_t _discoveryInit;
 
-	nrf_ble_gq_t *_queue;
+	nrf_ble_gq_t* _queue;
 #endif
 
 	/**
 	 * Current MTU.
 	 */
-	uint16_t _mtu = BLE_GATT_ATT_MTU_DEFAULT;
+	uint16_t _mtu               = BLE_GATT_ATT_MTU_DEFAULT;
 
 	/**
 	 * Operation in progress.
@@ -215,7 +221,6 @@ private:
 	void onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& event);
 	void onNotification(uint16_t gattStatus, const ble_gattc_evt_hvx_t& event);
 
-
 public:
 	/**
 	 * Internal usage: to be called on BLE events.
@@ -232,5 +237,3 @@ public:
 	 */
 	void handleEvent(event_t& event);
 };
-
-

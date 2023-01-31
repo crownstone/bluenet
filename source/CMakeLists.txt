@@ -41,6 +41,8 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_M
 
 message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
+set(COMPILE_FOR_HOST FALSE)
+
 # Get compilation day, this will be used in the binary itself
 string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 
@@ -49,6 +51,8 @@ include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 message(STATUS "Git branch ${GIT_REFSPEC} at hash ${GIT_SHA1}")
+
+include(cs_list_utils)
 
 #######################################################################################################################
 
@@ -108,11 +112,6 @@ if(VERBOSITY GREATER 4)
 	message(STATUS "Linked libraries: ${LIBS}")
 endif()
 
-# Source directory
-set(SOURCE_DIR "src")
-
-# Get all includes from nordic
-include(nordic.src)
 
 set(BOOTLOADER "_bootloader_.hex")
 
@@ -120,17 +119,27 @@ set(BOOTLOADER "_bootloader_.hex")
 # Include source files
 #######################################################################################################################
 
-include(crownstone.src)
-include(crownstone-application.src)
-include(crownstone-platform.src)
+# Source directory
+set(SOURCE_DIR "src")
+
+# Get all includes from nordic
+set(INCLUDE_BASE_DIR ${NRF5_DIR})
+message(STATUS "INCLUDE_BASE_DIR: ${INCLUDE_BASE_DIR}")
+
+include(nrf5-sdk-includes.src)
+include(mesh-sdk-includes.src)
+
+####################################################
+# Include crownstone source files for platform nrf52
+####################################################
+
+include(crownstone.src)                # deprecated: choose appropriate file from crownstone-platform-{independent,nrf52,host}
+include(crownstone-platform-independent.src)
+include(crownstone-platform-nrf52.src)
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/${MAIN_FILE}")
 
-if(VERBOSITY GREATER 4)
-	foreach(crownstone_file ${FOLDER_SOURCE})
-		message(STATUS "Include Crownstone file: " ${crownstone_file})
-	endforeach()
-endif()
+LogListV("Include Crownstone file: " FOLDER_SOURCE)
 
 # Be more strict about our own files (then about Nordic's files)
 set(CROWNSTONE_ONLY_FLAGS "-W -Wno-unused-parameter")
@@ -138,8 +147,37 @@ set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS}
 )
 
-# This will add the required nRF5 code files to ${NORDIC_SOURCE}
+###################################################
+# Include nrf5 sdk source files for platform host
+###################################################
+
+# get source file lists
 include(nrf5.src)
+include(nrf5sdk-platform-independent.src)
+include(nrf5sdk-platform-nrf52.src)
+
+# convert relative to absolute paths
+foreach(FILE_REL IN LISTS NORDIC_SOURCE_NRF5_REL)
+	list(APPEND 
+		NORDIC_SOURCE 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_INDEPENDENT_SOURCE_REL)
+	list(APPEND 
+		BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+foreach(FILE_REL IN LISTS NRF5SDK_PLATFORM_NRF52_SOURCE_REL)
+	list(APPEND 
+		BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS 
+		${NRF5_DIR}/${FILE_REL})
+endforeach()
+
+###################################################
+# Include mesh
+###################################################
 
 if(BUILD_MESHING)
 	# This will add the required mesh code files to ${NORDIC_SOURCE}
@@ -148,22 +186,38 @@ else()
 	message(STATUS "Mesh SDK files not being compiled (BUILD_MESHING=OFF)")
 endif()
 
-if(VERBOSITY GREATER 4)
-	foreach(nordic_file ${NORDIC_SOURCE})
-		message(STATUS "Include Nordic file: " ${nordic_file})
-	endforeach()
-endif()
+###################################################
+# Combine all sources into single list
+###################################################
 
-# We now have a variable FOLDER_SOURCE with all source files
-list(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
+# add to folder sources
+list(APPEND FOLDER_SOURCE 
+	${NORDIC_SOURCE} 
+	${BLUENET_SOURCE_NRF5SDK_PLATFORM_INDEPENDENT_ABS} 
+	${BLUENET_SOURCE_NRF5SDK_PLATFORM_NRF52_ABS})
 
-# For Visual Studio and perhaps other IDEs group the files
-source_group("Source files" FILES ${FOLDER_SOURCE})
-source_group("Header files" FILES ${FOLDER_HEADER})
+LogListV("NORDIC_SOURCE: " NORDIC_SOURCE)
+
+###################################################
+# Include softdevice
+###################################################
 
 if(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_API)
 	include_directories(SYSTEM "${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_API}")
 endif()
+
+if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
+	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
+	set(${SOFTDEVICE_DIR_HEX}, "hex")
+endif()
+
+###################################################
+# status messages & IDE config
+###################################################
+
+# For Visual Studio and perhaps other IDEs group the files
+source_group("Source files" FILES ${FOLDER_SOURCE})
+source_group("Header files" FILES ${FOLDER_HEADER})
 
 # Show which directories are actually included to the user
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY include_directories)
@@ -171,11 +225,6 @@ if(VERBOSITY GREATER 4)
 	foreach(dir ${dirs})
 		message(STATUS "Add to the include directories: '${dir}'")
 	endforeach()
-endif()
-
-if(NOT(DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
-	set(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
-	set(${SOFTDEVICE_DIR_HEX}, "hex")
 endif()
 
 if(FOLDER_SOURCE STREQUAL "")
@@ -231,18 +280,25 @@ if(NOT EXISTS "${TARGET_CONFIG_FILE}")
 	message(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
 endif()
 
-set_source_files_properties(${NORDIC_SOURCE}
-	PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
-)
-
 set_source_files_properties(${FOLDER_SOURCE}
 	PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_FILE}
 )
+
 if(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 	set_source_files_properties(${FOLDER_SOURCE}
 		PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE}
 	)
+	message(STATUS "TARGET_CONFIG_OVERWRITE_FILE: " ${TARGET_CONFIG_OVERWRITE_FILE})
+else()
+	message(STATUS "TARGET_CONFIG_OVERWRITE_FILE: not found")
 endif()
+
+message(STATUS "TARGET_CONFIG_OVERWRITE_FILE" ${TARGET_CONFIG_OVERWRITE_FILE})
+message(STATUS "ARENDS_TEST_VARIABLE" ${ARENDS_TEST_VARIABLE})
+
+set_source_files_properties(${NORDIC_SOURCE}
+	PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
+)
 
 # calculate some values that are to be used in the auto-generated files below
 
@@ -267,6 +323,10 @@ message(STATUS "Configure cs_AutoConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 
+message(STATUS "Configure cs_SharedConfig.c file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/shared/cs_SharedConfig.c")
+
 # auto-generate linker files
 
 message(STATUS "Configure nrf_symbols.ld file")
@@ -284,7 +344,15 @@ configure_file(${TEMPLATE_DIR}/build-status.txt.in ${CMAKE_BINARY_DIR}/build-sta
 
 message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
-add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
+LOGd("The bluenet add_executable command: ")
+LogListD("PROJECT_NAME: " PROJECT_NAME)
+LogListD("FOLDER_SOURCE: " FOLDER_SOURCE )
+LogListD("GENERATED_SOURCES: " GENERATED_SOURCES )
+LogListD("FOLDER_HEADER: " FOLDER_HEADER )
+LogListD("OBJECT_FILES: " OBJECT_FILES )
+LogListD("TARGET_CONFIG_FILE: " TARGET_CONFIG_FILE)
+
+add_executable(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${TARGET_CONFIG_FILE})
 
 # Add path with files like sdk_config.h to include directories
 # The include/third/nrf file dir is required for files in the sdk (e.g. link "sdk_config.h" without path prefix)
@@ -293,7 +361,7 @@ set(THIRD_PARTY_NRF_INCLUDE_PATH "include/third/nrf")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_INCLUDE_PATH}")
 set(THIRD_PARTY_NRF_SDK_INCLUDE_PATH "include/third/nrf/sdk${NORDIC_SDK_VERSION_FULL}")
 message(STATUS "Include path: ${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}")
-target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include""${CMAKE_CURRENT_BINARY_DIR}/shared")
+target_include_directories(${PROJECT_NAME} PRIVATE "${THIRD_PARTY_NRF_INCLUDE_PATH}" "${THIRD_PARTY_NRF_SDK_INCLUDE_PATH}" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/shared")
 
 # Save intermediate files, these are used for binary logging.
 target_compile_options(${PROJECT_NAME} PRIVATE -save-temps=obj)
@@ -318,27 +386,32 @@ set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}
 set(INCLUDE_ONLY_SECTIONS "")
 
 # https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
-add_custom_command(OUTPUT ${PROJECT_NAME}.bin
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME}.elf ${PROJECT_NAME}.bin
 	COMMAND stat -t ${PROJECT_NAME}.bin | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
-	DEPENDS
-		display_build_status
-		${PROJECT_NAME}
-	COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
+	COMMENT "Object copy ${PROJECT_NAME}.elf to ${PROJECT_NAME}.bin")
 
-add_custom_command(OUTPUT ${PROJECT_NAME}.hex
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
-	DEPENDS
-		${PROJECT_NAME}
-	COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.hex")
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+	COMMENT "Object copy ${PROJECT_NAME}.elf to ${PROJECT_NAME}.hex")
 
-add_custom_command(OUTPUT ${PROJECT_NAME}.elf
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
 	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DCMAKE_SIZE=${CMAKE_SIZE} -DBINARY=${PROJECT_NAME}.elf -DOFFSET=${APPLICATION_START_ADDRESS} -DMAX_SIZE=${FLASH_MICROAPP_BASE} -P ${DEFAULT_MODULES_PATH}/check_sizes.cmake
-	DEPENDS
-		${PROJECT_NAME}
-	COMMENT "Copy ${PROJECT_NAME} to ${PROJECT_NAME}.elf")
+	COMMENT "Show size and check them")
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
+	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	DEPENDS display_build_status
+	COMMENT "Display build status"
+)
+
+add_custom_target(display_build_status
+	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
+	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
+	COMMENT "Display build status"
+)
 
 add_custom_target(generate_dat
 	COMMAND echo
@@ -357,7 +430,7 @@ add_custom_target(merge_all
 	COMMAND echo
 	COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.hex -intel bootloader-settings.hex -intel -exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant 0x0007E000 4 -o combined.hex -intel"
 	COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.hex -intel bootloader-settings.hex -intel -exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant 0x0007E000 4 -o combined.hex -intel
-	DEPENDS ${PROJECT_NAME}.bin
+	DEPENDS ${PROJECT_NAME}
 	COMMENT "Merge all but board version into one hex"
 	)
 
@@ -372,15 +445,9 @@ add_custom_target(analyze
 	COMMAND echo
 	COMMAND echo "** Show size of sections"
 	COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
-	DEPENDS ${PROJECT_NAME}.elf
+	DEPENDS ${PROJECT_NAME}
 	COMMENT "Read headers ${PROJECT_NAME}.elf"
 	)
-
-add_custom_target(display_build_status
-	COMMAND ${CMAKE_COMMAND} -E echo "** Display build status"
-	COMMAND cat ${CMAKE_BINARY_DIR}/build-status.txt
-	COMMENT "Display build status"
-)
 
 # The reason to - again - write all those parameters is that at runtime they are not available. If we want
 # them to be available we will have to send them as arguments like this.
@@ -411,8 +478,6 @@ add_custom_target(write_runtime_config
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writescripts.cmake
 	COMMENT "Write runtime config"
 )
-
-
 
 add_custom_target(debug_server
 	COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
@@ -564,7 +629,7 @@ add_custom_target(write_config
 #if(NOT CONFIG_DIR STREQUAL "release")
 set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
-message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
+message(STATUS "Get version for hardware board \"${HARDWARE_BOARD}\"")
 load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
 message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
 include(${DEFAULT_MODULES_PATH}/hex.cmake)
@@ -587,11 +652,19 @@ add_custom_target(increment_application_version
 set(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
 set(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
+if(NRF_DEVICE STREQUAL "NRF52832_XXAA")
+	set(NRFUTIL_FAMILY "NRF52")
+elseif(NRF_DEVICE STREQUAL "NRF52840_XXAA")
+	set(NRFUTIL_FAMILY "NRF52840")
+else()
+	message(FATAL "Do not know what family this is for the nrfutil utility")
+endif()
+
 add_custom_target(build_bootloader_settings
 	COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 	COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 	COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-	COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
+	COMMAND nrfutil settings generate --family ${NRFUTIL_FAMILY} --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}"
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
 	COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 	COMMENT "Create bootloader settings"
@@ -770,14 +843,15 @@ set(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
 set(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
 set(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 set(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 target_link_libraries(${PROJECT_NAME} ${LIBS})
 
 # We actually do not need the file without extension
-#install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
 
 # TARGETS are not accepted from other directoreis
 install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
-install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
 install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
 install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
 install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
@@ -785,8 +859,8 @@ if(EXISTS "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
 	install(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
 endif()
 install(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
-install(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
-	
+install(DIRECTORY "${CMAKE_BINARY_DIR}/dfu" DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
+
 set(FILE_LIST_VARIABLES "${CMAKE_BINARY_DIR}/list_variables.txt")
 file(WRITE ${FILE_LIST_VARIABLES} "")
 message(STATUS "Write variables to ${FILE_LIST_VARIABLES}")

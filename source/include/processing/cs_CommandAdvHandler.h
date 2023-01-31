@@ -11,7 +11,7 @@
 #include "events/cs_EventListener.h"
 #include "util/cs_Utils.h"
 
-#define CMD_ADV_NUM_SERVICES_16BIT 4 // There are 4 16 bit service UUIDs in a command advertisement.
+#define CMD_ADV_NUM_SERVICES_16BIT 4  // There are 4 16 bit service UUIDs in a command advertisement.
 
 /**
  * Time that advertisements of other devices are ignored once a valid command advertisement has been received.
@@ -38,21 +38,21 @@ struct __attribute__((__packed__)) command_adv_claim_t {
 };
 
 struct __attribute__((__packed__)) command_adv_header_t {
-//	uint8_t sequence0 : 2;
+	//	uint8_t sequence0 : 2;
 	uint16_t protocol : 3;
 	uint16_t sphereId : 8;
 	uint16_t accessLevel : 3;
 
-//	uint8_t sequence1 : 2;
-//	uint8_t reserved : 2;
+	//	uint8_t sequence1 : 2;
+	//	uint8_t reserved : 2;
 	uint16_t deviceToken : 8;
-//	uint16_t payload1 : 4;
+	//	uint16_t payload1 : 4;
 
-//	uint8_t sequence2 : 2;
-//	uint16_t payload2 : 14;
+	//	uint8_t sequence2 : 2;
+	//	uint16_t payload2 : 14;
 
-//	uint8_t sequence3 : 2;
-//	uint16_t payload3 : 14;
+	//	uint8_t sequence3 : 2;
+	//	uint16_t payload3 : 14;
 };
 
 class CommandAdvHandler : public EventListener {
@@ -62,8 +62,7 @@ public:
 		return staticInstance;
 	}
 	void init();
-	void handleEvent(event_t & event);
-
+	void handleEvent(event_t& event);
 
 private:
 	CommandAdvHandler();
@@ -73,11 +72,18 @@ private:
 	void parseAdvertisement(scanned_device_t* scannedDevice);
 
 	// Return true when command payload is validated, and RC5 payload is decrypted.
-	bool handleEncryptedCommandPayload(scanned_device_t* scannedDevice, const command_adv_header_t& header, const cs_data_t& nonce, cs_data_t& encryptedPayload, uint16_t encryptedPayloadRC5[2], uint16_t decryptedPayloadRC5[2]);
+	bool handleEncryptedCommandPayload(
+			scanned_device_t* scannedDevice,
+			const command_adv_header_t& header,
+			const cs_data_t& nonce,
+			cs_data_t& encryptedPayload,
+			uint16_t encryptedPayloadRC5[2],
+			uint16_t decryptedPayloadRC5[2]);
 
 	bool decryptRC5Payload(uint16_t encryptedPayload[2], uint16_t decryptedPayload[2]);
 
-	void handleDecryptedRC5Payload(scanned_device_t* scannedDevice, const command_adv_header_t& header, uint16_t decryptedPayload[2]);
+	void handleDecryptedRC5Payload(
+			scanned_device_t* scannedDevice, const command_adv_header_t& header, uint16_t decryptedPayload[2]);
 
 	EncryptionAccessLevel getRequiredAccessLevel(const AdvCommandTypes type);
 
@@ -89,10 +95,16 @@ private:
 	 * Returns -1 when the device token was not found.
 	 * Returns -2 when the device token was found, but the previous encryptedData is similar.
 	 */
-	int checkSimilarCommand(uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t& decryptedRC5);
+	int checkSimilarCommand(
+			uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t& decryptedRC5);
 
 	// Return true when device claimed successfully: when there's a claim spot.
-	bool claim(uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t decryptedRC5, int indexOfDevice);
+	bool claim(
+			uint8_t deviceToken,
+			cs_data_t& encryptedData,
+			uint16_t encryptedRC5,
+			uint16_t decryptedRC5,
+			int indexOfDevice);
 
 	void tickClaims();
 };

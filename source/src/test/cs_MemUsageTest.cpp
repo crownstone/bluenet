@@ -11,10 +11,7 @@
 #include <test/cs_MemUsageTest.h>
 #include <tracking/cs_TrackedDevices.h>
 
-MemUsageTest::MemUsageTest(const boards_config_t& boardsConfig):
-	_boardConfig(boardsConfig) {
-
-}
+MemUsageTest::MemUsageTest(const boards_config_t& boardsConfig) : _boardConfig(boardsConfig) {}
 
 void MemUsageTest::start() {
 	_started = true;
@@ -22,11 +19,6 @@ void MemUsageTest::start() {
 
 void MemUsageTest::onTick() {
 	if (!_started) {
-		return;
-	}
-
-	if (setNextBehaviour() == false) {
-		printRamStats();
 		return;
 	}
 
@@ -49,6 +41,16 @@ void MemUsageTest::onTick() {
 		printRamStats();
 		return;
 	}
+
+	if (setNextBehaviour() == false) {
+		printRamStats();
+		return;
+	}
+
+	if (setNextAssetFilter() == false) {
+		printRamStats();
+		return;
+	}
 }
 
 void MemUsageTest::printRamStats() {
@@ -57,9 +59,27 @@ void MemUsageTest::printRamStats() {
 	Crownstone::printLoadStats();
 }
 
+bool MemUsageTest::setNextAssetFilter() {
+	LOGi("Asset filters not implemented yet");
+	return true;
+
+//	if (_assetFilterIndex >= 10) {
+//		return true;
+//	}
+//
+//	TYPIFY(CMD_UPLOAD_FILTER) upload;
+//	// Filter by list of MAC addresses, exact match, output MAC address and RSSI.
+//
+//	LOGd("Add asset filter: serializedSize=%u classSize=%u", sizeof(buf), sizeof(filter));
+//	event_t event(CS_TYPE::CMD_UPLOAD_FILTER, buf, sizeof(buf), result);
+//	event.dispatch();
+//	LOGd("result=%u", event.result.returnCode);
+}
+
 bool MemUsageTest::setNextBehaviour() {
 	// Can't add all behaviours at once, as that prints too much and crashes the firmware.
-	if (_behaviourIndex >= (int)BehaviourStore::MaxBehaviours) {
+//	if (_behaviourIndex >= (int)BehaviourStore::MaxBehaviours) {
+	if (_behaviourIndex >= 10) {
 		return true;
 	}
 	cs_result_t result;
@@ -67,21 +87,16 @@ bool MemUsageTest::setNextBehaviour() {
 	// ExtenedSwitchBehaviour is the largest behaviour type.
 	ExtendedSwitchBehaviour behaviour(
 			SwitchBehaviour(
-						100,
-						0,
-						0xFF,
-						TimeOfDay(2 * _behaviourIndex),
-						TimeOfDay(2 * _behaviourIndex + 1),
-						PresenceCondition(
-								PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription()),
-								0
-						)
-				),
-				PresenceCondition(
-						PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription()),
-						0
-				)
-	);
+					100,
+					0,
+					0xFF,
+					TimeOfDay(2 * _behaviourIndex),
+					TimeOfDay(2 * _behaviourIndex + 1),
+					PresenceCondition(
+							PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription()),
+							0)),
+			PresenceCondition(
+					PresencePredicate(PresencePredicate::Condition::VacuouslyTrue, PresenceStateDescription()), 0));
 	uint8_t buf[behaviour.serializedSize()];
 	behaviour.serialize(buf, sizeof(buf));
 
@@ -108,42 +123,45 @@ bool MemUsageTest::sendNextRssiData() {
 	TYPIFY(EVT_RECV_MESH_MSG) msg;
 	msg.type = CS_MESH_MODEL_TYPE_UNKNOWN;
 	msg.rssi = -50;
-	msg.hops = 0;
+	msg.isMaybeRelayed = false;
 
 	for (int id = _rssiDataStoneId; id < untilId; ++id) {
 		for (uint8_t channel = 37; channel < 40; ++channel) {
-			msg.channel = channel;
-			msg.srcAddress = id;
+			msg.channel    = channel;
+			msg.srcStoneId = id;
 			event_t event(CS_TYPE::EVT_RECV_MESH_MSG, reinterpret_cast<uint8_t*>(&msg), sizeof(msg));
 			event.dispatch();
 		}
 	}
 
 	_rssiDataStoneId = untilId;
-//	++_rssiDataStoneId;
+	//	++_rssiDataStoneId;
 	return false;
 }
 
 bool MemUsageTest::sendNextPresence() {
-	if (_presenceProfileId > PresenceHandler::MAX_PROFILE_ID) {
+	if (_presenceProfileId > PresenceHandler::ProfileLocation::MAX_PROFILE_ID) {
 		return true;
 	}
 	LOGi("sendNextPresence profile=%i location=%i", _presenceProfileId, _presenceLocationId);
 
-	int locationIdUntil = _presenceLocationId + 8;
-	int locationIdMaxUntil = (int)PresenceHandler::MAX_LOCATION_ID + 1;
+	int locationIdUntil    = _presenceLocationId + 8;
+	int locationIdMaxUntil = (int)PresenceHandler::ProfileLocation::MAX_LOCATION_ID + 1;
 	if (locationIdUntil > locationIdMaxUntil) {
 		locationIdUntil = locationIdMaxUntil;
 	}
 
 	TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) profileLocation;
-	profileLocation.fromMesh = true;
+	profileLocation.fromMesh  = true;
 	profileLocation.simulated = false;
 	profileLocation.profileId = _presenceProfileId;
 
 	for (int locationId = _presenceLocationId; locationId < locationIdUntil; ++locationId) {
 		profileLocation.locationId = locationId;
-		event_t event(CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION, reinterpret_cast<uint8_t*>(&profileLocation), sizeof(profileLocation));
+		event_t event(
+				CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION,
+				reinterpret_cast<uint8_t*>(&profileLocation),
+				sizeof(profileLocation));
 		event.dispatch();
 	}
 
@@ -165,16 +183,17 @@ bool MemUsageTest::setNextTrackedDevice() {
 	LOGi("setNextTrackedDevice trackedDeviceId=%i", _trackedDeviceId);
 
 	TYPIFY(CMD_REGISTER_TRACKED_DEVICE) trackedDevice;
-	trackedDevice.accessLevel = ADMIN;
-	trackedDevice.data.deviceId = _trackedDeviceId;
-	trackedDevice.data.deviceToken[0] = _trackedDeviceId;
+	trackedDevice.accessLevel                         = ADMIN;
+	trackedDevice.data.deviceId                       = _trackedDeviceId;
+	trackedDevice.data.deviceToken[0]                 = _trackedDeviceId;
 	trackedDevice.data.flags.flags.ignoreForBehaviour = false;
-	trackedDevice.data.flags.flags.tapToToggle = false;
-	trackedDevice.data.locationId = 0;
-	trackedDevice.data.profileId = 0;
-	trackedDevice.data.rssiOffset = 0;
-	trackedDevice.data.timeToLiveMinutes = 10;
-	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, reinterpret_cast<uint8_t*>(&trackedDevice), sizeof(trackedDevice));
+	trackedDevice.data.flags.flags.tapToToggle        = false;
+	trackedDevice.data.locationId                     = 0;
+	trackedDevice.data.profileId                      = 0;
+	trackedDevice.data.rssiOffset                     = 0;
+	trackedDevice.data.timeToLiveMinutes              = 10;
+	event_t event(
+			CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, reinterpret_cast<uint8_t*>(&trackedDevice), sizeof(trackedDevice));
 	event.dispatch();
 
 	++_trackedDeviceId;
@@ -182,7 +201,7 @@ bool MemUsageTest::setNextTrackedDevice() {
 }
 
 bool MemUsageTest::setNextStateType() {
-//	if (_stateType >= 0xFFFF) {
+	//	if (_stateType >= 0xFFFF) {
 	if (_stateType >= InternalBaseBluetooth) {
 		return true;
 	}
@@ -193,9 +212,8 @@ bool MemUsageTest::setNextStateType() {
 		setNextStateType(stateType);
 	}
 
-
 	_stateType = stateTypeUntil;
-//	++_stateType;
+	//	++_stateType;
 	return false;
 }
 
@@ -240,10 +258,8 @@ bool MemUsageTest::setNextStateType(int intType) {
 		case CS_TYPE::STATE_BEHAVIOUR_RULE:
 		case CS_TYPE::STATE_TWILIGHT_RULE:
 		case CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE:
-		case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
-			return false;
-		default:
-			break;
+		case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH: return false;
+		default: break;
 	}
 
 	LOGd("Set type %u", stateType);
@@ -253,8 +269,7 @@ bool MemUsageTest::setNextStateType(int intType) {
 	cs_ret_code_t retCode = State::getInstance().set(stateData);
 	switch (retCode) {
 		case ERR_SUCCESS:
-		case ERR_SUCCESS_NO_CHANGE:
-			return true;
+		case ERR_SUCCESS_NO_CHANGE: return true;
 	}
 	return false;
 }

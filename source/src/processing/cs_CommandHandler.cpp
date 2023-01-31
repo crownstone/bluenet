@@ -11,9 +11,10 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_GpRegRet.h>
-#include <logging/cs_Logger.h>
+#include <drivers/cs_Uicr.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <ipc/cs_IpcRamData.h>
+#include <logging/cs_Logger.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <processing/cs_Scanner.h>
@@ -29,7 +30,7 @@
 
 void reset(void* p_context) {
 
-	uint8_t cmd = *(uint8_t*) p_context;
+	uint8_t cmd = *(uint8_t*)p_context;
 
 	switch (cmd) {
 		case CS_RESET_CODE_SOFT_RESET: {
@@ -42,34 +43,28 @@ void reset(void* p_context) {
 			GpRegRet::setFlag(GpRegRet::FLAG_DFU);
 			break;
 		}
-		default:
-			LOGw("Unknown reset code: %u", cmd);
-			return;
+		default: LOGw("Unknown reset code: %u", cmd); return;
 	}
 	sd_nvic_SystemReset();
 }
 
-
-CommandHandler::CommandHandler() :
-		_resetTimerId(nullptr),
-		_boardConfig(nullptr)
-{
-		_resetTimerData = { {0} };
-		_resetTimerId = &_resetTimerData;
+CommandHandler::CommandHandler() : _resetTimerId(nullptr), _boardConfig(nullptr) {
+	_resetTimerData = {{0}};
+	_resetTimerId   = &_resetTimerData;
 }
 
 void CommandHandler::init(const boards_config_t* board) {
 	_boardConfig = board;
 	EventDispatcher::getInstance().addListener(this);
-	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
+	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t)reset);
 }
 
 void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 	LOGi("Reset in %u ms, code=%u", delayMs, opCode);
 	static uint8_t resetOpCode = opCode;
 	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(delayMs), &resetOpCode);
-//	// Loop until reset trigger
-//	while (true) {}; // This doesn't seem to work
+	//	// Loop until reset trigger
+	//	while (true) {}; // This doesn't seem to work
 }
 
 void CommandHandler::handleCommand(
@@ -78,8 +73,7 @@ void CommandHandler::handleCommand(
 		cs_data_t commandData,
 		const cmd_source_with_counter_t source,
 		const EncryptionAccessLevel accessLevel,
-		cs_result_t & result
-		) {
+		cs_result_t& result) {
 
 	if (_awaitingCommandResult.type != CommandHandlerTypes::CTRL_CMD_NONE) {
 		LOGw("Received command while awaiting result of type %u. Return ERR_BUSY.", _awaitingCommandResult.type);
@@ -89,38 +83,47 @@ void CommandHandler::handleCommand(
 
 	_handleCommand(protocolVersion, type, commandData, source, accessLevel, result);
 	if (result.returnCode == ERR_WAIT_FOR_SUCCESS) {
-		_awaitingCommandResult.type = type;
-		_awaitingCommandResult.source = source;
+		_awaitingCommandResult.type             = type;
+		_awaitingCommandResult.source           = source;
 		_awaitingCommandResult.timeoutCountdown = ASYNC_COMMAND_TIMEOUT_MS / TICK_INTERVAL_MS;
 	}
 }
 
 void CommandHandler::resolveAsyncCommand(cs_async_result_t* result) {
-	LOGd("Resolving async command: type=%u result=%u size=%u", result->commandType, result->resultCode, result->resultData.len);
+	LOGd("Resolving async command: type=%u result=%u size=%u",
+		 result->commandType,
+		 result->resultCode,
+		 result->resultData.len);
 	if (result->commandType != _awaitingCommandResult.type) {
-		LOGw("Resolving different type: resolving=%u, awaiting=%u", result->commandType, _awaitingCommandResult.type);
+		LOGw("Awaiting different type to resolve: resolving=%u, awaiting=%u",
+			 result->commandType,
+			 _awaitingCommandResult.type);
 		return;
 	}
 	switch (_awaitingCommandResult.source.source.type) {
 		case CS_CMD_SOURCE_TYPE_UART: {
 			LOGd("Send to UART");
 			result_packet_header_t resultHeader(result->commandType, result->resultCode, result->resultData.len);
-			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_CONTROL_RESULT, sizeof(resultHeader) + result->resultData.len);
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, result->resultData.data, result->resultData.len);
+			UartHandler::getInstance().writeMsgStart(
+					UART_OPCODE_TX_CONTROL_RESULT, sizeof(resultHeader) + result->resultData.len);
+			UartHandler::getInstance().writeMsgPart(
+					UART_OPCODE_TX_CONTROL_RESULT, reinterpret_cast<uint8_t*>(&resultHeader), sizeof(resultHeader));
+			UartHandler::getInstance().writeMsgPart(
+					UART_OPCODE_TX_CONTROL_RESULT, result->resultData.data, result->resultData.len);
 			UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
 			break;
 		}
 		default: {
 			LOGd("Send to BLE");
 			TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE)* eventOutData = result;
-			event_t eventOut(CS_TYPE::CMD_SEND_ASYNC_RESULT_TO_BLE, eventOutData, sizeof(TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE)));
+			event_t eventOut(
+					CS_TYPE::CMD_SEND_ASYNC_RESULT_TO_BLE, eventOutData, sizeof(TYPIFY(CMD_SEND_ASYNC_RESULT_TO_BLE)));
 			eventOut.dispatch();
 			break;
 		}
 	}
 	// Reset the await.
-	_awaitingCommandResult.type = CTRL_CMD_NONE;
+	_awaitingCommandResult.type             = CTRL_CMD_NONE;
 	_awaitingCommandResult.timeoutCountdown = 0;
 }
 
@@ -130,8 +133,7 @@ void CommandHandler::_handleCommand(
 		cs_data_t commandData,
 		const cmd_source_with_counter_t source,
 		const EncryptionAccessLevel accessLevel,
-		cs_result_t & result
-		) {
+		cs_result_t& result) {
 	if (protocolVersion != CS_CONNECTION_PROTOCOL_VERSION) {
 		LOGw("Wrong protocol: %u", protocolVersion);
 		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
@@ -153,69 +155,41 @@ void CommandHandler::_handleCommand(
 
 	switch (type) {
 		// cases handled by specific handlers
-		case CTRL_CMD_NOP:
-			return handleCmdNop(commandData, accessLevel, result);
-		case CTRL_CMD_GOTO_DFU:
-			return handleCmdGotoDfu(commandData, accessLevel, result);
-		case CTRL_CMD_GET_BOOTLOADER_VERSION:
-			return handleCmdGetBootloaderVersion(commandData, accessLevel, result);
-		case CTRL_CMD_GET_UICR_DATA:
-			return handleCmdGetUicrData(commandData, accessLevel, result);
-		case CTRL_CMD_RESET:
-			return handleCmdReset(commandData, accessLevel, result);
-		case CTRL_CMD_FACTORY_RESET:
-			return handleCmdFactoryReset(commandData, accessLevel, result);
-		case CTRL_CMD_GET_MAC_ADDRESS:
-			return handleCmdGetMacAddress(commandData, accessLevel, result);
-		case CTRL_CMD_GET_HARDWARE_VERSION:
-			return handleCmdGetHardwareVersion(commandData, accessLevel, result);
-		case CTRL_CMD_GET_FIRMWARE_VERSION:
-			return handleCmdGetFirmwareVersion(commandData, accessLevel, result);
-		case CTRL_CMD_SET_SUN_TIME:
-			return handleCmdSetSunTime(commandData, accessLevel, result);
-		case CTRL_CMD_GET_TIME:
-			return handleCmdGetTime(commandData, accessLevel, result);
-		case CTRL_CMD_INCREASE_TX:
-			return handleCmdIncreaseTx(commandData, accessLevel, result);
-		case CTRL_CMD_DISCONNECT:
-			return handleCmdDisconnect(commandData, accessLevel, result);
-		case CTRL_CMD_RESET_ERRORS:
-			return handleCmdResetErrors(commandData, accessLevel, result);
-		case CTRL_CMD_PWM:
-			return handleCmdPwm(commandData, source, accessLevel, result);
-		case CTRL_CMD_SWITCH:
-			return handleCmdSwitch(commandData, source, accessLevel, result);
-		case CTRL_CMD_RELAY:
-			return handleCmdRelay(commandData, source, accessLevel, result);
-		case CTRL_CMD_MULTI_SWITCH:
-			return handleCmdMultiSwitch(commandData, source, accessLevel, result);
+		case CTRL_CMD_NOP: return handleCmdNop(commandData, accessLevel, result);
+		case CTRL_CMD_GOTO_DFU: return handleCmdGotoDfu(commandData, accessLevel, result);
+		case CTRL_CMD_GET_BOOTLOADER_VERSION: return handleCmdGetBootloaderVersion(commandData, accessLevel, result);
+		case CTRL_CMD_GET_UICR_DATA: return handleCmdGetUicrData(commandData, accessLevel, result);
+		case CTRL_CMD_RESET: return handleCmdReset(commandData, accessLevel, result);
+		case CTRL_CMD_FACTORY_RESET: return handleCmdFactoryReset(commandData, accessLevel, result);
+		case CTRL_CMD_GET_MAC_ADDRESS: return handleCmdGetMacAddress(commandData, accessLevel, result);
+		case CTRL_CMD_GET_HARDWARE_VERSION: return handleCmdGetHardwareVersion(commandData, accessLevel, result);
+		case CTRL_CMD_GET_FIRMWARE_VERSION: return handleCmdGetFirmwareVersion(commandData, accessLevel, result);
+		case CTRL_CMD_SET_SUN_TIME: return handleCmdSetSunTime(commandData, accessLevel, result);
+		case CTRL_CMD_GET_TIME: return handleCmdGetTime(commandData, accessLevel, result);
+		case CTRL_CMD_INCREASE_TX: return handleCmdIncreaseTx(commandData, accessLevel, result);
+		case CTRL_CMD_DISCONNECT: return handleCmdDisconnect(commandData, accessLevel, result);
+		case CTRL_CMD_RESET_ERRORS: return handleCmdResetErrors(commandData, accessLevel, result);
+		case CTRL_CMD_PWM: return handleCmdPwm(commandData, source, accessLevel, result);
+		case CTRL_CMD_SWITCH: return handleCmdSwitch(commandData, source, accessLevel, result);
+		case CTRL_CMD_RELAY: return handleCmdRelay(commandData, source, accessLevel, result);
+		case CTRL_CMD_MULTI_SWITCH: return handleCmdMultiSwitch(commandData, source, accessLevel, result);
 		case CTRL_CMD_MESH_COMMAND:
 			return handleCmdMeshCommand(protocolVersion, commandData, source, accessLevel, result);
-		case CTRL_CMD_ALLOW_DIMMING:
-			return handleCmdAllowDimming(commandData, accessLevel, result);
-		case CTRL_CMD_LOCK_SWITCH:
-			return handleCmdLockSwitch(commandData, accessLevel, result);
-		case CTRL_CMD_SETUP:
-			return handleCmdSetup(commandData, accessLevel, result);
-		case CTRL_CMD_UART_MSG:
-			return handleCmdUartMsg(commandData, accessLevel, result);
-		case CTRL_CMD_HUB_DATA:
-			return handleCmdHubData(commandData, accessLevel, result);
-		case CTRL_CMD_STATE_GET:
-			return handleCmdStateGet(commandData, accessLevel, result);
-		case CTRL_CMD_STATE_SET:
-			return handleCmdStateSet(commandData, accessLevel, result);
-		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-			return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
+		case CTRL_CMD_ALLOW_DIMMING: return handleCmdAllowDimming(commandData, accessLevel, result);
+		case CTRL_CMD_LOCK_SWITCH: return handleCmdLockSwitch(commandData, accessLevel, result);
+		case CTRL_CMD_SETUP: return handleCmdSetup(commandData, accessLevel, result);
+		case CTRL_CMD_UART_MSG: return handleCmdUartMsg(commandData, accessLevel, result);
+		case CTRL_CMD_HUB_DATA: return handleCmdHubData(commandData, accessLevel, result);
+		case CTRL_CMD_STATE_GET: return handleCmdStateGet(commandData, accessLevel, result);
+		case CTRL_CMD_STATE_SET: return handleCmdStateSet(commandData, accessLevel, result);
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE: return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
 		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
 			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
-		case CTRL_CMD_GET_UPTIME:
-			return handleCmdGetUptime(commandData, accessLevel, result);
-		case CTRL_CMD_MICROAPP_UPLOAD:
-			return handleCmdMicroappUpload(commandData, accessLevel, result);
+		case CTRL_CMD_GET_UPTIME: return handleCmdGetUptime(commandData, accessLevel, result);
+		case CTRL_CMD_MICROAPP_UPLOAD: return handleCmdMicroappUpload(commandData, accessLevel, result);
+		case CTRL_CMD_MICROAPP_MESSAGE: return handleCmdMicroappMessage(commandData, accessLevel, result);
 		// cases handled by dispatchEventForCommand:
-		case CTRL_CMD_SET_TIME:
-			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
+		case CTRL_CMD_SET_TIME: return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SAVE_BEHAVIOUR:
 			return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, source, result);
 		case CTRL_CMD_REPLACE_BEHAVIOUR:
@@ -271,11 +245,8 @@ void CommandHandler::_handleCommand(
 		case CTRL_CMD_RESET_MESH_TOPOLOGY:
 			return dispatchEventForCommand(CS_TYPE::CMD_MESH_TOPO_RESET, commandData, source, result);
 
-		case CTRL_CMD_NONE:
-			[[fallthrough]];
-		case CTRL_CMD_UNKNOWN:
-			result.returnCode = ERR_UNKNOWN_TYPE;
-			return;
+		case CTRL_CMD_NONE: [[fallthrough]];
+		case CTRL_CMD_UNKNOWN: result.returnCode = ERR_UNKNOWN_TYPE; return;
 	}
 
 	LOGe("Unknown type: %u", type);
@@ -283,13 +254,14 @@ void CommandHandler::_handleCommand(
 	return;
 }
 
-void CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	// A no operation command to keep the connection alive.
-	// No need to do anything here, the connection keep alive is handled in the stack.
+	// No need to do anything here, the connection watchdog is handled in the stack.
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGotoDfu(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "goto dfu");
 	event_t event(CS_TYPE::EVT_GOING_TO_DFU);
 	event.dispatch();
@@ -297,22 +269,59 @@ void CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAcc
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetBootloaderVersion(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get bootloader version");
 
+	cs_bootloader_info_t* bootloaderInfo = reinterpret_cast<cs_bootloader_info_t*>(result.buf.data);
+	if (result.buf.len < sizeof(cs_bootloader_info_t)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+	}
+
+	// Get the bootloader info from IPC.
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, result.buf.data, result.buf.len, &dataSize);
-	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("No IPC data found, error = %i", retCode);
+	bluenet_ipc_bootloader_data_t ipcData;
+	IpcRetCode ipcCode = getRamData(
+			IPC_INDEX_BOOTLOADER_TO_BLUENET, reinterpret_cast<uint8_t*>(&ipcData), &dataSize, sizeof(ipcData));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGw("IPC error = %i", ipcCode);
 		result.returnCode = ERR_NOT_FOUND;
 		return;
 	}
-	result.dataSize = dataSize;
-	result.returnCode = ERR_SUCCESS;
+
+	if (ipcData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGi("Major version unsupported: major=%u required=%u",
+			 ipcData.ipcDataMajor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
+		result.returnCode = ERR_MISMATCH;
+		return;
+	}
+
+	// This check could later use a different minimum. Because at version 1.0 we already have all the info we need.
+	if (ipcData.ipcDataMinor < g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGi("Minor version too low: minor=%u minimum=%u",
+			 ipcData.ipcDataMinor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
+		result.returnCode = ERR_MISMATCH;
+		return;
+	}
+
+	// Copy the info we need from IPC to the result packet.
+	bootloaderInfo->protocol             = 1;
+	bootloaderInfo->dfuVersion           = ipcData.dfuVersion;
+	bootloaderInfo->bootloaderMajor      = ipcData.bootloaderMajor;
+	bootloaderInfo->bootloaderMinor      = ipcData.bootloaderMinor;
+	bootloaderInfo->bootloaderPatch      = ipcData.bootloaderPatch;
+	bootloaderInfo->bootloaderPrerelease = ipcData.bootloaderPrerelease;
+	bootloaderInfo->bootloaderBuildType  = ipcData.bootloaderBuildType;
+
+	result.dataSize                      = sizeof(cs_bootloader_info_t);
+	result.returnCode                    = ERR_SUCCESS;
 	return;
 }
 
-void CommandHandler::handleCmdGetHardwareVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetHardwareVersion(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get hardware version");
 
 	// TODO: use UICR to determine hardware version, use struct instead of string.
@@ -320,38 +329,37 @@ void CommandHandler::handleCmdGetHardwareVersion(cs_data_t commandData, const En
 	return;
 }
 
-void CommandHandler::handleCmdGetFirmwareVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetFirmwareVersion(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get firmware version");
 
-//	// Let std string handle the null termination.
-//	std::string firmwareVersion;
-//	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
-//		firmwareVersion = g_FIRMWARE_VERSION;
-//	}
-//	else {
-//		firmwareVersion = g_GIT_SHA1;
-//	}
-//	uint16_t dataSize = firmwareVersion.size();
-//
-//	LOGd("Firmware version: %s", firmwareVersion.c_str());
-//	if (result.buf.len < dataSize) {
-//		result.returnCode = ERR_BUFFER_TOO_SMALL;
-//		return;
-//	}
-//
-//	memcpy(result.buf.data, firmwareVersion.c_str(), dataSize);
-//	result.dataSize = dataSize;
-//	result.returnCode = ERR_SUCCESS;
+	//	// Let std string handle the null termination.
+	//	std::string firmwareVersion;
+	//	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
+	//		firmwareVersion = g_FIRMWARE_VERSION;
+	//	}
+	//	else {
+	//		firmwareVersion = g_GIT_SHA1;
+	//	}
+	//	uint16_t dataSize = firmwareVersion.size();
+	//
+	//	LOGd("Firmware version: %s", firmwareVersion.c_str());
+	//	if (result.buf.len < dataSize) {
+	//		result.returnCode = ERR_BUFFER_TOO_SMALL;
+	//		return;
+	//	}
+	//
+	//	memcpy(result.buf.data, firmwareVersion.c_str(), dataSize);
+	//	result.dataSize = dataSize;
+	//	result.returnCode = ERR_SUCCESS;
 
 	// TODO: use struct instead of string?
 	result.returnCode = ERR_NOT_IMPLEMENTED;
 	return;
 }
 
-
-
-
-void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetUicrData(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get UICR data");
 
 	if (result.buf.len < sizeof(cs_uicr_data_t)) {
@@ -360,39 +368,37 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 	}
 
 	cs_uicr_data_t* uicrData = (cs_uicr_data_t*)result.buf.data;
-	uint8_t uicrIndex = UICR_BOARD_INDEX;
-	uicrData->board = NRF_UICR->CUSTOMER[uicrIndex++];
-	uicrData->productRegionFamily.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
-	uicrData->majorMinorPatch.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
-	uicrData->productionDateHousing.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
+	cs_ret_code_t returnCode = getUicr(uicrData);
 	LOGd("board=%u", uicrData->board);
 	LOGd("productType=%u region=%u productFamily=%u int=0x%X",
-			uicrData->productRegionFamily.fields.productType,
-			uicrData->productRegionFamily.fields.region,
-			uicrData->productRegionFamily.fields.productFamily,
-			uicrData->productRegionFamily.asInt);
+		 uicrData->productRegionFamily.fields.productType,
+		 uicrData->productRegionFamily.fields.region,
+		 uicrData->productRegionFamily.fields.productFamily,
+		 uicrData->productRegionFamily.asInt);
 	LOGd("major=%u minor=%u patch=%u int=0x%X",
-			uicrData->majorMinorPatch.fields.major,
-			uicrData->majorMinorPatch.fields.minor,
-			uicrData->majorMinorPatch.fields.patch,
-			uicrData->majorMinorPatch.asInt);
+		 uicrData->majorMinorPatch.fields.major,
+		 uicrData->majorMinorPatch.fields.minor,
+		 uicrData->majorMinorPatch.fields.patch,
+		 uicrData->majorMinorPatch.asInt);
 	LOGd("year=%u week=%u housing=%u int=0x%X",
-			uicrData->productionDateHousing.fields.year,
-			uicrData->productionDateHousing.fields.week,
-			uicrData->productionDateHousing.fields.housing,
-			uicrData->productionDateHousing.asInt);
+		 uicrData->productionDateHousing.fields.year,
+		 uicrData->productionDateHousing.fields.week,
+		 uicrData->productionDateHousing.fields.housing,
+		 uicrData->productionDateHousing.asInt);
 
-	result.dataSize = sizeof(*uicrData);
-	result.returnCode = ERR_SUCCESS;
+	result.dataSize   = sizeof(*uicrData);
+	result.returnCode = returnCode;
 }
 
-void CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdReset(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "reset");
 	resetDelayed(CS_RESET_CODE_SOFT_RESET);
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdFactoryReset(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "factory reset");
 
 	if (commandData.len != sizeof(FACTORY_RESET_CODE)) {
@@ -401,8 +407,8 @@ void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const Encrypti
 		return;
 	}
 
-	factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*) commandData.data;
-	uint32_t resetCode = payload->resetCode;
+	factory_reset_message_payload_t* payload = (factory_reset_message_payload_t*)commandData.data;
+	uint32_t resetCode                       = payload->resetCode;
 
 	if (!FactoryReset::getInstance().factoryReset(resetCode)) {
 		result.returnCode = ERR_WRONG_PARAMETER;
@@ -411,7 +417,8 @@ void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const Encrypti
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdGetMacAddress(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetMacAddress(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get MAC");
 
 	if (result.buf.len < MAC_ADDRESS_LEN) {
@@ -425,11 +432,12 @@ void CommandHandler::handleCmdGetMacAddress(cs_data_t commandData, const Encrypt
 		return;
 	}
 	memcpy(result.buf.data, address.addr, MAC_ADDRESS_LEN);
-	result.dataSize = MAC_ADDRESS_LEN;
+	result.dataSize   = MAC_ADDRESS_LEN;
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdStateGet(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "state get");
 
 	// Check if command data is large enough for header.
@@ -440,9 +448,12 @@ void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAc
 	}
 
 	// Read out header.
-	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
-	LOGi("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
-	CS_TYPE stateType = toCsType(stateHeader->stateType);
+	state_packet_header_t* stateHeader = (state_packet_header_t*)commandData.data;
+	LOGi("State type=%u id=%u persistenceMode=%u",
+		 stateHeader->stateType,
+		 stateHeader->stateId,
+		 stateHeader->persistenceMode);
+	CS_TYPE stateType     = toCsType(stateHeader->stateType);
 	cs_state_id_t stateId = stateHeader->stateId;
 
 	// Check access.
@@ -458,35 +469,29 @@ void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAc
 	}
 
 	// Fill the result buffer with a header.
-	cs_data_t stateDataBuf(result.buf.data + sizeof(state_packet_header_t) , result.buf.len - sizeof(state_packet_header_t));
-	state_packet_header_t* resultHeader = (state_packet_header_t*) result.buf.data;
-	resultHeader->stateType = stateHeader->stateType;
-	resultHeader->stateId = stateHeader->stateId;
-	resultHeader->persistenceMode = stateHeader->persistenceMode;
+	cs_data_t stateDataBuf(
+			result.buf.data + sizeof(state_packet_header_t), result.buf.len - sizeof(state_packet_header_t));
+	state_packet_header_t* resultHeader = (state_packet_header_t*)result.buf.data;
+	resultHeader->stateType             = stateHeader->stateType;
+	resultHeader->stateId               = stateHeader->stateId;
+	resultHeader->persistenceMode       = stateHeader->persistenceMode;
 
 	// Check if there's enough space in result buffer the state data.
 	cs_state_data_t stateData(stateType, stateId, stateDataBuf.data, stateDataBuf.len);
 	result.returnCode = State::getInstance().verifySizeForGet(stateData);
-	result.dataSize = sizeof(state_packet_header_t);
+	result.dataSize   = sizeof(state_packet_header_t);
 	if (FAILURE(result.returnCode)) {
 		return;
 	}
 
 	// Determine persistence mode.
-	PersistenceMode persistenceMode = PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	PersistenceMode persistenceMode       = PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	PersistenceModeGet persistenceModeGet = toPersistenceModeGet(stateHeader->persistenceMode);
 	switch (persistenceModeGet) {
-		case PersistenceModeGet::CURRENT:
-			persistenceMode = PersistenceMode::STRATEGY1;
-			break;
-		case PersistenceModeGet::STORED:
-			persistenceMode = PersistenceMode::FLASH;
-			break;
-		case PersistenceModeGet::FIRMWARE_DEFAULT:
-			persistenceMode = PersistenceMode::FIRMWARE_DEFAULT;
-			break;
-		case PersistenceModeGet::UNKNOWN:
-			break;
+		case PersistenceModeGet::CURRENT: persistenceMode = PersistenceMode::STRATEGY1; break;
+		case PersistenceModeGet::STORED: persistenceMode = PersistenceMode::FLASH; break;
+		case PersistenceModeGet::FIRMWARE_DEFAULT: persistenceMode = PersistenceMode::FIRMWARE_DEFAULT; break;
+		case PersistenceModeGet::UNKNOWN: break;
 	}
 
 	// Get the state value.
@@ -500,7 +505,8 @@ void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAc
 	result.dataSize = sizeof(state_packet_header_t) + stateData.size;
 }
 
-void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdStateSet(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "state set");
 
 	// Check if command data is large enough for header.
@@ -511,9 +517,12 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 	}
 
 	// Read out header.
-	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
-	LOGi("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
-	CS_TYPE stateType = toCsType(stateHeader->stateType);
+	state_packet_header_t* stateHeader = (state_packet_header_t*)commandData.data;
+	LOGi("State type=%u id=%u persistenceMode=%u",
+		 stateHeader->stateType,
+		 stateHeader->stateId,
+		 stateHeader->persistenceMode);
+	CS_TYPE stateType     = toCsType(stateHeader->stateType);
 	cs_state_id_t stateId = stateHeader->stateId;
 
 	// Check access.
@@ -530,12 +539,12 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 
 	// If there's enough space in result buffer, fill it up.
 	if (result.buf.len >= sizeof(state_packet_header_t)) {
-		state_packet_header_t* resultHeader = (state_packet_header_t*) result.buf.data;
-		resultHeader->stateType = stateHeader->stateType;
-		resultHeader->stateId = stateHeader->stateId;
-		resultHeader->persistenceMode = stateHeader->persistenceMode;
+		state_packet_header_t* resultHeader = (state_packet_header_t*)result.buf.data;
+		resultHeader->stateType             = stateHeader->stateType;
+		resultHeader->stateId               = stateHeader->stateId;
+		resultHeader->persistenceMode       = stateHeader->persistenceMode;
 
-		result.dataSize = sizeof(state_packet_header_t);
+		result.dataSize                     = sizeof(state_packet_header_t);
 	}
 
 	if (FAILURE(result.returnCode)) {
@@ -543,32 +552,25 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 	}
 
 	// Determine persistence mode.
-	PersistenceMode persistenceMode = PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	PersistenceMode persistenceMode       = PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	PersistenceModeSet persistenceModeSet = toPersistenceModeSet(stateHeader->persistenceMode);
 	switch (persistenceModeSet) {
-		case PersistenceModeSet::TEMPORARY:
-			persistenceMode = PersistenceMode::RAM;
-			break;
-		case PersistenceModeSet::STORED:
-			persistenceMode = PersistenceMode::STRATEGY1;
-			break;
-		case PersistenceModeSet::UNKNOWN:
-			break;
+		case PersistenceModeSet::TEMPORARY: persistenceMode = PersistenceMode::RAM; break;
+		case PersistenceModeSet::STORED: persistenceMode = PersistenceMode::STRATEGY1; break;
+		case PersistenceModeSet::UNKNOWN: break;
 	}
 
 	// Finally: set the state value.
 	cs_ret_code_t retCode = State::getInstance().set(stateData, persistenceMode);
 	switch (retCode) {
 		case ERR_SUCCESS:
-		case ERR_SUCCESS_NO_CHANGE:
-			result.returnCode = ERR_SUCCESS;
-			break;
-		default:
-			result.returnCode = retCode;
+		case ERR_SUCCESS_NO_CHANGE: result.returnCode = ERR_SUCCESS; break;
+		default: result.returnCode = retCode;
 	}
 }
 
-void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdSetSunTime(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGCommandHandlerDebug(STR_HANDLE_COMMAND "set sun time");
 	if (commandData.len != sizeof(sun_time_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(sun_time_t));
@@ -576,10 +578,11 @@ void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const Encryption
 		return;
 	}
 	sun_time_t* payload = reinterpret_cast<sun_time_t*>(commandData.data);
-	result.returnCode = SystemTime::setSunTimes(*payload);
+	result.returnCode   = SystemTime::setSunTimes(*payload);
 }
 
-void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetTime(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get time");
 
 	if (result.buf.len < sizeof(uint32_t)) {
@@ -588,37 +591,41 @@ void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAcc
 	}
 
 	uint32_t* timestamp = (uint32_t*)result.buf.data;
-	*timestamp = SystemTime::posix();
-	result.dataSize = sizeof(*timestamp);
-	result.returnCode = ERR_SUCCESS;
+	*timestamp          = SystemTime::posix();
+	result.dataSize     = sizeof(*timestamp);
+	result.returnCode   = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdIncreaseTx(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "increase TX");
 	Advertiser::getInstance().setNormalTxPower();
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdSetup(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdSetup(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "setup");
 	cs_ret_code_t errCode = Setup::getInstance().handleCommand(commandData);
-	result.returnCode = errCode;
+	result.returnCode     = errCode;
 }
 
-void CommandHandler::handleCmdDisconnect(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdDisconnect(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "disconnect");
 	Stack::getInstance().disconnect();
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdResetErrors(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdResetErrors(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "reset errors");
 	if (commandData.len != sizeof(state_errors_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(state_errors_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
-	state_errors_t* payload = (state_errors_t*) commandData.data;
+	state_errors_t* payload = (state_errors_t*)commandData.data;
 	TYPIFY(STATE_ERRORS) stateErrors;
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 	LOGd("old errors %u - reset %u", stateErrors.asInt, payload->asInt);
@@ -628,7 +635,11 @@ void CommandHandler::handleCmdResetErrors(cs_data_t commandData, const Encryptio
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdPwm(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdPwm(
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t& result) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -643,8 +654,8 @@ void CommandHandler::handleCmdPwm(cs_data_t commandData, const cmd_source_with_c
 		return;
 	}
 
-	switch_message_payload_t* payload = (switch_message_payload_t*) commandData.data;
-	
+	switch_message_payload_t* payload = (switch_message_payload_t*)commandData.data;
+
 	TYPIFY(CMD_SET_DIMMER) switchCmd;
 	switchCmd = payload->switchState;
 
@@ -654,7 +665,11 @@ void CommandHandler::handleCmdPwm(cs_data_t commandData, const cmd_source_with_c
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdSwitch(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdSwitch(
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t& result) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -669,7 +684,7 @@ void CommandHandler::handleCmdSwitch(cs_data_t commandData, const cmd_source_wit
 		return;
 	}
 
-	switch_message_payload_t* payload = (switch_message_payload_t*) commandData.data;
+	switch_message_payload_t* payload = (switch_message_payload_t*)commandData.data;
 
 	TYPIFY(CMD_SWITCH) switch_cmd;
 	switch_cmd.switchCmd = payload->switchState;
@@ -679,7 +694,11 @@ void CommandHandler::handleCmdSwitch(cs_data_t commandData, const cmd_source_wit
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdRelay(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdRelay(
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t& result) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -694,16 +713,20 @@ void CommandHandler::handleCmdRelay(cs_data_t commandData, const cmd_source_with
 		return;
 	}
 
-	switch_message_payload_t* payload = (switch_message_payload_t*) commandData.data;
+	switch_message_payload_t* payload = (switch_message_payload_t*)commandData.data;
 	TYPIFY(CMD_SET_RELAY) relay_switch_state;
 	relay_switch_state = payload->switchState != 0;
 	event_t evt(CS_TYPE::CMD_SET_RELAY, &relay_switch_state, sizeof(relay_switch_state), source);
 	EventDispatcher::getInstance().dispatch(evt);
-	
+
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdMultiSwitch(
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "multi switch");
 	multi_switch_t* multiSwitchPacket = (multi_switch_t*)commandData.data;
 	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, commandData.len)) {
@@ -711,9 +734,9 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 		result.returnCode = ERR_INVALID_MESSAGE;
 		return;
 	}
-	for (int i=0; i<multiSwitchPacket->count; ++i) {
+	for (int i = 0; i < multiSwitchPacket->count; ++i) {
 		TYPIFY(CMD_MULTI_SWITCH) item;
-		item.id = multiSwitchPacket->items[i].id;
+		item.id            = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
 
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
@@ -727,14 +750,19 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	uint16_t size = commandData.len;
+void CommandHandler::handleCmdMeshCommand(
+		uint8_t protocol,
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t& result) {
+	uint16_t size       = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
 	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND "mesh command: ");
 	_logArray(SERIAL_INFO, true, buffer, size);
 
 	// Keep up the required size, and where in the buffer we are.
-	uint16_t bufIndex = 0;
+	uint16_t bufIndex     = 0;
 	size16_t requiredSize = 0;
 	TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND) meshCtrlCmd;
 
@@ -785,13 +813,13 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
-	meshCtrlCmd.controlCommand.type = (CommandHandlerTypes) controlPacketHeader.commandType;
-	meshCtrlCmd.controlCommand.data = &(buffer[bufIndex]);
-	meshCtrlCmd.controlCommand.size = controlPacketHeader.payloadSize;
+	meshCtrlCmd.controlCommand.type        = (CommandHandlerTypes)controlPacketHeader.commandType;
+	meshCtrlCmd.controlCommand.data        = &(buffer[bufIndex]);
+	meshCtrlCmd.controlCommand.size        = controlPacketHeader.payloadSize;
 	meshCtrlCmd.controlCommand.accessLevel = accessLevel;
 
 	// Check permissions
-	CommandHandlerTypes controlCmdType = meshCtrlCmd.controlCommand.type;
+	CommandHandlerTypes controlCmdType     = meshCtrlCmd.controlCommand.type;
 	if (!allowedAsMeshCommand(controlCmdType)) {
 		LOGw("Command %u is not allowed via mesh", controlCmdType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -804,12 +832,12 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 	}
 
 	// Handle command if the command is for this stone.
-	bool forSelf = (meshCtrlCmd.header.idCount == 0);
-	bool forOthers = (meshCtrlCmd.header.idCount == 0);
+	bool forSelf                       = (meshCtrlCmd.header.idCount == 0);
+	bool forOthers                     = (meshCtrlCmd.header.idCount == 0);
 	TYPIFY(CONFIG_CROWNSTONE_ID) ownId = 0;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &ownId, sizeof(ownId));
 	for (uint8_t i = 0; i < meshCtrlCmd.header.idCount; ++i) {
-		forSelf = forSelf || (meshCtrlCmd.targetIds[i] == ownId);
+		forSelf   = forSelf || (meshCtrlCmd.targetIds[i] == ownId);
 		forOthers = forOthers || (meshCtrlCmd.targetIds[i] != ownId);
 	}
 	if (forSelf) {
@@ -818,18 +846,24 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 
 		// Send out result to UART.
 		uart_msg_mesh_result_packet_header_t resultHeader;
-		resultHeader.stoneId = ownId;
+		resultHeader.stoneId                  = ownId;
 		resultHeader.resultHeader.commandType = meshCtrlCmd.controlCommand.type;
-		resultHeader.resultHeader.returnCode = result.returnCode;
+		resultHeader.resultHeader.returnCode  = result.returnCode;
 		resultHeader.resultHeader.payloadSize = result.dataSize;
-		_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+		_log(SERIAL_INFO,
+			 false,
+			 "Result: id=%u cmdType=%u retCode=%u data: ",
+			 resultHeader.stoneId,
+			 resultHeader.resultHeader.commandType,
+			 resultHeader.resultHeader.returnCode);
 		_logArray(SERIAL_INFO, true, result.buf.data, result.dataSize);
 
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
-		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+		UartHandler::getInstance().writeMsgPart(
+				UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, result.buf.data, result.dataSize);
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
-//		LOGd("success id=%u", resultHeader.stoneId);
+		//		LOGd("success id=%u", resultHeader.stoneId);
 
 		if (!forOthers) {
 			return;
@@ -850,14 +884,17 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 				return;
 			}
-			state_packet_header_t* stateHeader = (state_packet_header_t*) meshCtrlCmd.controlCommand.data;
-			LOGd("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
-			CS_TYPE stateType = toCsType(stateHeader->stateType);
-			requiredAccessLevel = (controlCmdType == CTRL_CMD_STATE_SET) ? getUserAccessLevelSet(stateType) : getUserAccessLevelGet(stateType);
+			state_packet_header_t* stateHeader = (state_packet_header_t*)meshCtrlCmd.controlCommand.data;
+			LOGd("State type=%u id=%u persistenceMode=%u",
+				 stateHeader->stateType,
+				 stateHeader->stateId,
+				 stateHeader->persistenceMode);
+			CS_TYPE stateType   = toCsType(stateHeader->stateType);
+			requiredAccessLevel = (controlCmdType == CTRL_CMD_STATE_SET) ? getUserAccessLevelSet(stateType)
+																		 : getUserAccessLevelGet(stateType);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 	if (!KeysAndAccess::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
 		LOGw("No access for command payload. Required=%u", requiredAccessLevel);
@@ -871,7 +908,8 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 	dispatchEventForCommand(CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND, eventData, source, result);
 }
 
-void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdAllowDimming(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "allow dimming");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
@@ -880,16 +918,17 @@ void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const Encrypti
 		return;
 	}
 
-	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
+	enable_message_payload_t* payload    = (enable_message_payload_t*)commandData.data;
 	TYPIFY(CONFIG_DIMMING_ALLOWED) allow = payload->enable;
 
 	event_t evt(CS_TYPE::CMD_DIMMING_ALLOWED, &allow, sizeof(allow));
 	EventDispatcher::getInstance().dispatch(evt);
-	
+
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdLockSwitch(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "lock switch");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
@@ -898,8 +937,8 @@ void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const Encryption
 		return;
 	}
 
-	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CMD_LOCK_SWITCH) lock = payload->enable;
+	enable_message_payload_t* payload = (enable_message_payload_t*)commandData.data;
+	TYPIFY(CMD_LOCK_SWITCH) lock      = payload->enable;
 
 	event_t evt(CS_TYPE::CMD_LOCK_SWITCH, &lock, sizeof(lock));
 	EventDispatcher::getInstance().dispatch(evt);
@@ -907,7 +946,8 @@ void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const Encryption
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdUartMsg(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGd(STR_HANDLE_COMMAND "UART msg");
 
 	if (!commandData.len) {
@@ -919,8 +959,8 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
 }
 
-
-void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdHubData(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGd(STR_HANDLE_COMMAND "hub data");
 
 	if (commandData.len < sizeof(hub_data_header_t)) {
@@ -929,9 +969,9 @@ void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAcc
 		return;
 	}
 
-	hub_data_header_t* header = reinterpret_cast<hub_data_header_t*>(commandData.data);
-	buffer_ptr_t hubDataPtr =      commandData.data + sizeof(*header);
-	cs_buffer_size_t hubDataSize = commandData.len  - sizeof(*header);
+	hub_data_header_t* header     = reinterpret_cast<hub_data_header_t*>(commandData.data);
+	buffer_ptr_t hubDataPtr       = commandData.data + sizeof(*header);
+	cs_buffer_size_t hubDataSize  = commandData.len - sizeof(*header);
 	UartProtocol::Encrypt encrypt = static_cast<UartProtocol::Encrypt>(header->encrypt);
 
 	if (header->reserved != 0) {
@@ -945,8 +985,8 @@ void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAcc
 	}
 }
 
-
-void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdRegisterTrackedDevice(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "register tracked device");
 	if (commandData.len != sizeof(register_tracked_device_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(register_tracked_device_packet_t));
@@ -955,19 +995,20 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 	}
 
 	TYPIFY(CMD_REGISTER_TRACKED_DEVICE) evtData;
-	evtData.data = *((register_tracked_device_packet_t*)commandData.data);
+	evtData.data        = *((register_tracked_device_packet_t*)commandData.data);
 	evtData.accessLevel = accessLevel;
 	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, &evtData, sizeof(evtData), result);
 	event.dispatch();
 	result.returnCode = event.result.returnCode;
-	result.dataSize = event.result.dataSize;
+	result.dataSize   = event.result.dataSize;
 	return;
 }
 
-void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdTrackedDeviceHeartbeat(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "tracked device heartbeat");
-//	result.returnCode = ERR_NOT_IMPLEMENTED;
-//	return;
+	//	result.returnCode = ERR_NOT_IMPLEMENTED;
+	//	return;
 
 	if (commandData.len != sizeof(tracked_device_heartbeat_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(tracked_device_heartbeat_packet_t));
@@ -976,29 +1017,31 @@ void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, cons
 	}
 
 	TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT) evtData;
-	evtData.data = *((tracked_device_heartbeat_packet_t*)commandData.data);
+	evtData.data        = *((tracked_device_heartbeat_packet_t*)commandData.data);
 	evtData.accessLevel = accessLevel;
 	event_t event(CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT, &evtData, sizeof(evtData), result);
 	event.dispatch();
 	result.returnCode = event.result.returnCode;
-	result.dataSize = event.result.dataSize;
+	result.dataSize   = event.result.dataSize;
 	return;
 }
 
-void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdGetUptime(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "get uptime");
 	if (result.buf.len < sizeof(uint32_t)) {
 		result.returnCode = ERR_BUFFER_TOO_SMALL;
 		return;
 	}
-	uint32_t* uptime = (uint32_t*) result.buf.data;
-	*uptime = SystemTime::up();
-	result.dataSize = sizeof(uint32_t);
+	uint32_t* uptime  = (uint32_t*)result.buf.data;
+	*uptime           = SystemTime::up();
+	result.dataSize   = sizeof(uint32_t);
 	result.returnCode = ERR_SUCCESS;
 	return;
 }
 
-void CommandHandler::handleCmdMicroappUpload(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdMicroappUpload(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
 	LOGi(STR_HANDLE_COMMAND "microapp upload");
 	if (commandData.len < sizeof(microapp_upload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_t));
@@ -1007,21 +1050,43 @@ void CommandHandler::handleCmdMicroappUpload(cs_data_t commandData, const Encryp
 	}
 
 	TYPIFY(CMD_MICROAPP_UPLOAD) evtData;
-	evtData.header = *reinterpret_cast<microapp_upload_t*>(commandData.data);
-	evtData.data.len = commandData.len - sizeof(evtData.header);
+	evtData.header    = *reinterpret_cast<microapp_upload_t*>(commandData.data);
+	evtData.data.len  = commandData.len - sizeof(evtData.header);
 	evtData.data.data = commandData.data + sizeof(evtData.header);
 	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData), result);
 	event.dispatch();
 	result.returnCode = event.result.returnCode;
-	result.dataSize = event.result.dataSize;
+	result.dataSize   = event.result.dataSize;
 	return;
 }
 
-void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t & result) {
+void CommandHandler::handleCmdMicroappMessage(
+		cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t& result) {
+	LOGi(STR_HANDLE_COMMAND "microapp message");
+	size_t headerSize = offsetof(microapp_message_t, payload);
+	if (commandData.len < headerSize) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, headerSize);
+		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		return;
+	}
+
+	TYPIFY(CMD_MICROAPP_MESSAGE) evtData;
+	evtData.header       = reinterpret_cast<microapp_message_t*>(commandData.data)->header;
+	evtData.payload.len  = commandData.len - headerSize;
+	evtData.payload.data = commandData.data + headerSize;
+	event_t event(CS_TYPE::CMD_MICROAPP_MESSAGE, &evtData, sizeof(evtData), result);
+	event.dispatch();
+	result.returnCode = event.result.returnCode;
+	result.dataSize   = event.result.dataSize;
+	return;
+}
+
+void CommandHandler::dispatchEventForCommand(
+		CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t& result) {
 	event_t event(type, commandData.data, commandData.len, source, result);
 	event.dispatch();
 	result.returnCode = event.result.returnCode;
-	result.dataSize = event.result.dataSize;
+	result.dataSize   = event.result.dataSize;
 }
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
@@ -1030,12 +1095,10 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_GET_UICR_DATA:
 		case CTRL_CMD_GET_MAC_ADDRESS:
 		case CTRL_CMD_GET_HARDWARE_VERSION:
-		case CTRL_CMD_GET_FIRMWARE_VERSION:
-			return ENCRYPTION_DISABLED;
+		case CTRL_CMD_GET_FIRMWARE_VERSION: return ENCRYPTION_DISABLED;
 
 		case CTRL_CMD_INCREASE_TX:
-		case CTRL_CMD_SETUP:
-			return BASIC; // These commands are only available in setup mode.
+		case CTRL_CMD_SETUP: return BASIC;  // These commands are only available in setup mode.
 
 		case CTRL_CMD_SWITCH:
 		case CTRL_CMD_PWM:
@@ -1048,8 +1111,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_STATE_SET:
 		case CTRL_CMD_GET_TIME:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
-			return BASIC;
+		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT: return BASIC;
 
 		case CTRL_CMD_SET_TIME:
 		case CTRL_CMD_SET_SUN_TIME:
@@ -1057,8 +1119,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_REPLACE_BEHAVIOUR:
 		case CTRL_CMD_REMOVE_BEHAVIOUR:
 		case CTRL_CMD_GET_BEHAVIOUR:
-		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-			return MEMBER;
+		case CTRL_CMD_GET_BEHAVIOUR_INDICES: return MEMBER;
 
 		case CTRL_CMD_GOTO_DFU:
 		case CTRL_CMD_RESET:
@@ -1086,16 +1147,15 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_MICROAPP_REMOVE:
 		case CTRL_CMD_MICROAPP_ENABLE:
 		case CTRL_CMD_MICROAPP_DISABLE:
+		case CTRL_CMD_MICROAPP_MESSAGE:
 		case CTRL_CMD_CLEAN_FLASH:
 		case CTRL_CMD_FILTER_UPLOAD:
 		case CTRL_CMD_FILTER_REMOVE:
 		case CTRL_CMD_FILTER_COMMIT:
 		case CTRL_CMD_FILTER_GET_SUMMARIES:
-		case CTRL_CMD_RESET_MESH_TOPOLOGY:
-			return ADMIN;
+		case CTRL_CMD_RESET_MESH_TOPOLOGY: return ADMIN;
 		case CTRL_CMD_NONE:
-		case CTRL_CMD_UNKNOWN:
-			return NOT_SET;
+		case CTRL_CMD_UNKNOWN: return NOT_SET;
 	}
 	return NOT_SET;
 }
@@ -1112,14 +1172,18 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 		case CTRL_CMD_RESET_MESH_TOPOLOGY:
 		case CTRL_CMD_LOCK_SWITCH:
 		case CTRL_CMD_ALLOW_DIMMING:
+		case CTRL_CMD_MICROAPP_VALIDATE:
+		case CTRL_CMD_MICROAPP_REMOVE:
+		case CTRL_CMD_MICROAPP_ENABLE:
+		case CTRL_CMD_MICROAPP_DISABLE: {
 			return true;
-		default:
-			return false;
+		}
+		default: return false;
 	}
 	return false;
 }
 
-void CommandHandler::handleEvent(event_t & event) {
+void CommandHandler::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_RESET_DELAYED: {
 			auto payload = reinterpret_cast<TYPIFY(CMD_RESET_DELAYED)*>(event.data);
@@ -1129,16 +1193,15 @@ void CommandHandler::handleEvent(event_t & event) {
 		case CS_TYPE::CMD_CONTROL_CMD: {
 			auto cmd = reinterpret_cast<TYPIFY(CMD_CONTROL_CMD)*>(event.data);
 			handleCommand(
-				cmd->protocolVersion,
-				cmd->type,
-				cs_data_t(cmd->data, cmd->size),
-				event.source,
-				cmd->accessLevel,
-				event.result
-			);
+					cmd->protocolVersion,
+					cmd->type,
+					cs_data_t(cmd->data, cmd->size),
+					event.source,
+					cmd->accessLevel,
+					event.result);
 			break;
 		}
-		case CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND:{
+		case CS_TYPE::CMD_RESOLVE_ASYNC_CONTROL_COMMAND: {
 			auto result = reinterpret_cast<TYPIFY(CMD_RESOLVE_ASYNC_CONTROL_COMMAND)*>(event.data);
 			resolveAsyncCommand(result);
 			break;
@@ -1152,6 +1215,7 @@ void CommandHandler::handleEvent(event_t & event) {
 			}
 			break;
 		}
-		default: {}
+		default: {
+		}
 	}
 }

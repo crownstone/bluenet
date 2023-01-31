@@ -38,6 +38,7 @@ void cs_log_printf(const char* str, ...) {
 
 #endif  // CS_UART_BINARY_PROTOCOL_ENABLED == 0
 
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 template <>
 void cs_log_add_arg_size(size_t& size, uint8_t& numArgs, char* str) {
 	size += sizeof(uart_msg_log_arg_header_t) + strlen(str);
@@ -104,5 +105,6 @@ void cs_log_array_no_fmt(
 	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG_ARRAY, ptr, size);
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG_ARRAY);
 }
+#endif  // SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 
 #endif  // CS_SERIAL_NRF_LOG_ENABLED == 0

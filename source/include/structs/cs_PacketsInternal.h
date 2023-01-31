@@ -73,8 +73,10 @@ struct cs_async_result_t {
 	cs_ret_code_t resultCode;
 	cs_data_t resultData;
 
-	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode) : commandType(type), resultCode(resultCode), resultData() {}
-	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode, cs_data_t data) : commandType(type), resultCode(resultCode), resultData(data) {}
+	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode)
+			: commandType(type), resultCode(resultCode), resultData() {}
+	cs_async_result_t(CommandHandlerTypes type, cs_ret_code_t resultCode, cs_data_t data)
+			: commandType(type), resultCode(resultCode), resultData(data) {}
 };
 
 /**
@@ -211,9 +213,14 @@ struct state_external_stone_t {
 
 struct ble_connected_t {
 	uint16_t connectionHandle;
-	uint8_t advertisementHandle;    // Advertisement handle that stopped advertising.
-	cs_data_t advertisementBuffer;  // Buffer that's no longer in use.
-	cs_data_t scanResponseBuffer;   // Buffer that's no longer in use.
+	//! Advertisement handle that stopped advertising.
+	uint8_t advertisementHandle;
+	//! Buffer that's no longer in use because advertising stopped.
+	cs_data_t advertisementBuffer;
+	//! Buffer that's no longer in use because advertising stopped.
+	cs_data_t scanResponseBuffer;
+	//! Address of the connected device.
+	device_address_t address;
 };
 
 /**
@@ -303,17 +310,25 @@ struct __attribute__((packed)) adc_config_t {
 };
 
 /**
+ * @struct adc_channel_config_result_t
  * Result struct after configuring an ADC channel. Has all the info to put the sample values in context.
  *
  * Usage: Vpin = sampleVal / maxSampleValue * maxValueMilliVolt * 1000 + Vpinref
  *
- * pin:                 The AIN pin of this channel.
- * referencePin:        The AIN pin that was subtracted from the measured voltage on <pin>.
- * samplingIntervalUs:  The sampling interval in μs.
- * minValueMilliVolt:   Minimum of the measured voltage (Vpin - Vpinref) range, in mV.
- * maxValueMilliVolt:   Maximum of the measured voltage (Vpin - Vpinref) range, in mV.
- * minSampleValue:      Minimum of the sample value range.
- * maxSampleValue:      Maximum of the sample value range.
+ * @var adc_channel_config_result_t::pin
+ *   The AIN pin of this channel.
+ * @var adc_channel_config_result_t::referencePin
+ *   The AIN pin of which its voltage will be subtracted from the voltage measured on adc_channel_config_result_t::pin.
+ * @var adc_channel_config_result_t::samplingIntervalUs
+ *   The sampling interval in μs.
+ * @var adc_channel_config_result_t::minValueMilliVolt
+ *   Minimum of the measured voltage (Vpin - Vpinref) range, in mV.
+ * @var adc_channel_config_result_t::maxValueMilliVolt
+ *   Maximum of the measured voltage (Vpin - Vpinref) range, in mV.
+ * @var adc_channel_config_result_t::minSampleValue
+ *   Minimum of the sample value range.
+ * @var adc_channel_config_result_t::maxSampleValue
+ *   Maximum of the sample value range.
  */
 struct __attribute__((packed)) adc_channel_config_result_t {
 	adc_pin_id_t pin;
@@ -334,7 +349,7 @@ struct adc_buffer_t {
 	 *
 	 * This may change at any moment, so make sure to check it after calculations and be ready to revert.
 	 */
-	bool valid = false;
+	bool valid                = false;
 
 	/**
 	 * Sequence number.
@@ -366,7 +381,58 @@ struct microapp_upload_internal_t {
 	cs_data_t data;
 };
 
+struct microapp_message_internal_t {
+	microapp_ctrl_header_t header;
+	cs_data_t payload;
+};
+
 struct mesh_topo_mac_result_t {
 	uint8_t stoneId;
 	uint8_t macAddress[MAC_ADDRESS_LEN];
+};
+
+struct __attribute__((packed)) cs_twi_init_t {
+	uint8_t scl;
+	uint8_t sda;
+	uint8_t freq;
+};
+
+struct __attribute__((packed)) cs_twi_write_t {
+	uint8_t address;
+	uint8_t length;
+	uint8_t* buf;
+	bool stop;
+};
+
+struct __attribute__((packed)) cs_twi_read_t {
+	uint8_t address;
+	uint8_t length;
+	uint8_t* buf;
+	bool stop;
+};
+
+struct __attribute__((packed)) cs_gpio_init_t {
+	uint8_t pinIndex;
+	uint8_t direction;
+	uint8_t pull;
+	uint8_t polarity;
+	uintptr_t callback;
+};
+
+struct __attribute__((packed)) cs_gpio_write_t {
+	uint8_t pinIndex;
+	uint8_t length;
+	uint8_t* buf;
+};
+
+struct __attribute__((packed)) cs_gpio_read_t {
+	uint8_t pinIndex;
+	uint8_t length;
+	uint8_t* buf;
+};
+
+struct __attribute__((packed)) cs_gpio_update_t {
+	uint8_t pinIndex;
+	uint8_t length;
+	uint8_t* buf;
 };

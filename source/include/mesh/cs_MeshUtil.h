@@ -8,8 +8,9 @@
 #pragma once
 
 extern "C" {
-#include "nrf_mesh.h"
 #include <access.h>
+
+#include "nrf_mesh.h"
 }
 
 /**
@@ -25,14 +26,13 @@ int8_t getRssi(const nrf_mesh_rx_metadata_t* metaData);
 uint8_t getChannel(const nrf_mesh_rx_metadata_t* metaData);
 
 /**
- * (Factory method because a constructor for cs_mesh_received_msg_t
- * woudl pollute the packed struct.)
+ * Factory method because a constructor would pollute the struct.
  */
-cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg);
+MeshMsgEvent fromAccessMessageRX(const access_message_rx_t& accessMsg);
 
 /**
  * Print a mesh address.
  */
 void printMeshAddress(const char* prefix, const nrf_mesh_address_t* addr);
 
-} // namespace MeshUtil
+}  // namespace MeshUtil

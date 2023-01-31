@@ -7,13 +7,11 @@
 
 #pragma once
 
-#include <vector>
-
+#include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_Typedefs.h>
 
-#include <logging/cs_Logger.h>
-
+#include <vector>
 
 /**
  * Helper class to manage decoupling of components.
@@ -71,6 +69,12 @@ public:
 	 */
 	virtual cs_ret_code_t init() { return ERR_SUCCESS; }
 
+	/**
+	 * utility that loops over all elements of getChildren() and setParent on
+	 * the non-nullptr ones.
+	 */
+	void parentAllChildren();
+
 	// ================== Con-/destructors ==================
 
 	virtual ~Component() = default;
@@ -83,9 +87,7 @@ protected:
 	 * them. This is used by getComponent<> to search for available
 	 * components.
 	 */
-	virtual std::vector<Component*> getChildren() {
-		return {};
-	}
+	virtual std::vector<Component*> getChildren() { return {}; }
 
 	// ============== parenting ==============
 
@@ -100,17 +102,12 @@ protected:
 	 */
 	cs_ret_code_t initChildren();
 
- 	/**
- 	 * Children that are instantiated later can also be added
- 	 * individually.
- 	 */
+	/**
+	 * Children that are instantiated later can also be added
+	 * individually.
+	 */
 	void setParent(Component* p);
 
-	/**
-	 * utility that loops over all elements of getChildren() and setParent on
-	 * the non-nullptr ones.
-	 */
-	void parentAllChildren();
 
 private:
 	Component* _parent = nullptr;

@@ -22,18 +22,22 @@ public:
 
 private:
 	boards_config_t _boardConfig;
-	bool _started = false;
+	bool _started           = false;
 
-	int _behaviourIndex = 0;
+	int _assetFilterIndex   = 0;
+	int _behaviourIndex     = 0;
 
-	int _rssiDataStoneId = 1;
+	int _rssiDataStoneId    = 1;
 
-	int _presenceProfileId = 0;
+	int _presenceProfileId  = 0;
 	int _presenceLocationId = 0;
 
-	int _trackedDeviceId = 0;
+	int _trackedDeviceId    = 0;
 
-	int _stateType = 0;
+	int _stateType          = 0;
+
+	// Returns true when done with all.
+	bool setNextAssetFilter();
 
 	// Returns true when done with all.
 	bool setNextBehaviour();
@@ -55,5 +59,3 @@ private:
 
 	void printRamStats();
 };
-
-

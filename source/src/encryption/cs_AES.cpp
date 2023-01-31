@@ -5,29 +5,29 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <logging/cs_Logger.h>
 #include <encryption/cs_AES.h>
+#include <logging/cs_Logger.h>
+#include <nrf_sdm.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#include <algorithm> // for std::min
+#include <algorithm>  // for std::min
 
 #if ENCRYPTION_KEY_LENGTH != SOC_ECB_KEY_LENGTH
-	#error "AES key size mismatch"
+#error "AES key size mismatch"
 #endif
 
 #if AES_BLOCK_SIZE != SOC_ECB_CLEARTEXT_LENGTH || AES_BLOCK_SIZE != SOC_ECB_CIPHERTEXT_LENGTH
-	#error "AES block size mismatch"
+#error "AES block size mismatch"
 #endif
 
 #define LOGAesDebug LOGnone
 #define LOGAesVerbose LOGnone
 
-AES::AES() {
+AES::AES() {}
 
-}
-
-cs_ret_code_t AES::encryptEcb(cs_data_t key, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize) {
+cs_ret_code_t AES::encryptEcb(
+		cs_data_t key, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize) {
 	uint32_t errCode;
 	uint8_t softdeviceEnabled;
 	errCode = sd_softdevice_is_enabled(&softdeviceEnabled);
@@ -42,9 +42,9 @@ cs_ret_code_t AES::encryptEcb(cs_data_t key, cs_data_t prefix, cs_data_t input, 
 	}
 
 	uint32_t totalInputSize = prefix.len + input.len;
-	uint32_t outputSize = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(totalInputSize, AES_BLOCK_SIZE);
-	uint16_t numBlocks = outputSize / AES_BLOCK_SIZE;
-	writtenSize = 0;
+	uint32_t outputSize     = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(totalInputSize, AES_BLOCK_SIZE);
+	uint16_t numBlocks      = outputSize / AES_BLOCK_SIZE;
+	writtenSize             = 0;
 
 	if (totalInputSize == 0) {
 		LOGw("nothing to encrypt");
@@ -69,24 +69,32 @@ cs_ret_code_t AES::encryptEcb(cs_data_t key, cs_data_t prefix, cs_data_t input, 
 	cs_buffer_size_t prefixReadSize = 0;
 
 	// how much has been read from input buffer.
-	cs_buffer_size_t inputReadSize = 0;
+	cs_buffer_size_t inputReadSize  = 0;
 
 	for (int i = 0; i < numBlocks; ++i) {
 		blockWrittenSize = 0;
 
 		// Prefix data.
-		writeSize = std::min(prefix.len - prefixReadSize, AES_BLOCK_SIZE - blockWrittenSize);
+		writeSize        = std::min(prefix.len - prefixReadSize, AES_BLOCK_SIZE - blockWrittenSize);
 		memcpy(_block.cleartext + blockWrittenSize, prefix.data + prefixReadSize, writeSize);
 		prefixReadSize += writeSize;
 		blockWrittenSize += writeSize;
-		LOGAesVerbose("write prefix from=%u to=%u size=%u", prefix.data + prefixReadSize, _block.cleartext + blockWrittenSize, writeSize);
+		LOGAesVerbose(
+				"write prefix from=%u to=%u size=%u",
+				prefix.data + prefixReadSize,
+				_block.cleartext + blockWrittenSize,
+				writeSize);
 
 		// Input data.
 		writeSize = std::min(input.len - inputReadSize, AES_BLOCK_SIZE - blockWrittenSize);
 		memcpy(_block.cleartext + blockWrittenSize, input.data + inputReadSize, writeSize);
 		inputReadSize += writeSize;
 		blockWrittenSize += writeSize;
-		LOGAesVerbose("write input from=%u to=%u size=%u", input.data + inputReadSize, _block.cleartext + blockWrittenSize, writeSize);
+		LOGAesVerbose(
+				"write input from=%u to=%u size=%u",
+				input.data + inputReadSize,
+				_block.cleartext + blockWrittenSize,
+				writeSize);
 
 		// Zero padding.
 		writeSize = AES_BLOCK_SIZE - blockWrittenSize;
@@ -105,11 +113,25 @@ cs_ret_code_t AES::encryptEcb(cs_data_t key, cs_data_t prefix, cs_data_t input, 
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t AES::encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr) {
+cs_ret_code_t AES::encryptCtr(
+		cs_data_t key,
+		cs_data_t nonce,
+		cs_data_t prefix,
+		cs_data_t input,
+		cs_data_t output,
+		cs_buffer_size_t& writtenSize,
+		uint8_t blockCtr) {
 	return ctr(key, nonce, prefix, input, cs_data_t(), output, writtenSize, blockCtr);
 }
 
-cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr) {
+cs_ret_code_t AES::decryptCtr(
+		cs_data_t key,
+		cs_data_t nonce,
+		cs_data_t input,
+		cs_data_t prefix,
+		cs_data_t output,
+		cs_buffer_size_t& writtenSize,
+		uint8_t blockCtr) {
 	if (input.len % AES_BLOCK_SIZE) {
 		LOGw(STR_ERR_MULTIPLE_OF_16);
 		return ERR_WRONG_PAYLOAD_LENGTH;
@@ -118,16 +140,24 @@ cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, c
 	return ctr(key, nonce, cs_data_t(), input, prefix, output, writtenSize);
 }
 
-cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs_data_t input, cs_data_t outputPrefix, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr) {
-	LOGAesVerbose("CTR key=%u nonce=%u inputPrefix=%u input=%u outputPrefix=%u output=%u ctr=%u",
+cs_ret_code_t AES::ctr(
+		cs_data_t key,
+		cs_data_t nonce,
+		cs_data_t inputPrefix,
+		cs_data_t input,
+		cs_data_t outputPrefix,
+		cs_data_t output,
+		cs_buffer_size_t& writtenSize,
+		uint8_t blockCtr) {
+	LOGAesVerbose(
+			"CTR key=%u nonce=%u inputPrefix=%u input=%u outputPrefix=%u output=%u ctr=%u",
 			key.data,
 			nonce.data,
 			inputPrefix.data,
 			input.data,
 			outputPrefix.data,
 			output.data,
-			blockCtr
-			);
+			blockCtr);
 
 	uint32_t errCode;
 	uint8_t softdeviceEnabled;
@@ -143,9 +173,9 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 	}
 
 	uint32_t totalInputSize = inputPrefix.len + input.len;
-	uint32_t outputSize = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(totalInputSize, AES_BLOCK_SIZE);
-	uint16_t numBlocks = outputSize / AES_BLOCK_SIZE;
-	writtenSize = 0;
+	uint32_t outputSize     = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(totalInputSize, AES_BLOCK_SIZE);
+	uint16_t numBlocks      = outputSize / AES_BLOCK_SIZE;
+	writtenSize             = 0;
 
 	if (numBlocks > 255) {
 		LOGw("Too many blocks.");
@@ -176,10 +206,10 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 	cs_buffer_size_t writeSize;
 
 	// how much has been read from input prefix buffer.
-	cs_buffer_size_t prefixReadSize = 0;
+	cs_buffer_size_t prefixReadSize    = 0;
 
 	// how much has been read from input buffer.
-	cs_buffer_size_t inputReadSize = 0;
+	cs_buffer_size_t inputReadSize     = 0;
 
 	// how much has been written to output prefix buffer.
 	cs_buffer_size_t prefixWrittenSize = 0;
@@ -190,14 +220,14 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 		_block.cleartext[AES_BLOCK_SIZE - 1] = i + blockCtr;
 
 		// Encrypts the cleartext and puts it in ciphertext.
-//		_log(SERIAL_DEBUG, false, "key: ");
-//		CsUtils::printArray(_block.key, sizeof(_block.key), SERIAL_DEBUG);
-//		_log(SERIAL_DEBUG, false, "cleartext: ");
-//		CsUtils::printArray(_block.cleartext, sizeof(_block.cleartext), SERIAL_DEBUG);
-		errCode = sd_ecb_block_encrypt(&_block);
+		//		_log(SERIAL_DEBUG, false, "key: ");
+		//		CsUtils::printArray(_block.key, sizeof(_block.key), SERIAL_DEBUG);
+		//		_log(SERIAL_DEBUG, false, "cleartext: ");
+		//		CsUtils::printArray(_block.cleartext, sizeof(_block.cleartext), SERIAL_DEBUG);
+		errCode                              = sd_ecb_block_encrypt(&_block);
 		APP_ERROR_CHECK(errCode);
-//		_log(SERIAL_DEBUG, false, "cipher: ");
-//		CsUtils::printArray(_block.ciphertext, sizeof(_block.ciphertext), SERIAL_DEBUG);
+		//		_log(SERIAL_DEBUG, false, "cipher: ");
+		//		CsUtils::printArray(_block.ciphertext, sizeof(_block.ciphertext), SERIAL_DEBUG);
 
 		///////////////////////////////////////////////////////////////////
 		// XOR the ciphertext with the data to finish encrypting the block.
@@ -205,8 +235,12 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 		blockWrittenSize = 0;
 
 		// Prefix data.
-		writeSize = std::min(inputPrefix.len - prefixReadSize, AES_BLOCK_SIZE - blockWrittenSize);
-		LOGAesVerbose("write prefix from=%u to=%u size=%u", inputPrefix.data + prefixReadSize, _block.cleartext + blockWrittenSize, writeSize);
+		writeSize        = std::min(inputPrefix.len - prefixReadSize, AES_BLOCK_SIZE - blockWrittenSize);
+		LOGAesVerbose(
+				"write prefix from=%u to=%u size=%u",
+				inputPrefix.data + prefixReadSize,
+				_block.cleartext + blockWrittenSize,
+				writeSize);
 		for (uint8_t j = 0; j < writeSize; j++) {
 			_block.ciphertext[blockWrittenSize] ^= inputPrefix.data[prefixReadSize];
 			++prefixReadSize;
@@ -215,7 +249,11 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 
 		// Input data.
 		writeSize = std::min(input.len - inputReadSize, AES_BLOCK_SIZE - blockWrittenSize);
-		LOGAesVerbose("write input from=%u to=%u size=%u", input.data + inputReadSize, _block.cleartext + blockWrittenSize, writeSize);
+		LOGAesVerbose(
+				"write input from=%u to=%u size=%u",
+				input.data + inputReadSize,
+				_block.cleartext + blockWrittenSize,
+				writeSize);
 		for (uint8_t j = 0; j < writeSize; j++) {
 			_block.ciphertext[blockWrittenSize] ^= input.data[inputReadSize];
 			++inputReadSize;
@@ -235,18 +273,25 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 		//////////////////
 		blockWrittenSize = 0;
 
-		writeSize = std::min(outputPrefix.len - prefixWrittenSize, AES_BLOCK_SIZE - blockWrittenSize);
-		LOGAesVerbose("write output prefix from=%u to=%u size=%u", _block.ciphertext + blockWrittenSize, outputPrefix.data + prefixWrittenSize, writeSize);
+		writeSize        = std::min(outputPrefix.len - prefixWrittenSize, AES_BLOCK_SIZE - blockWrittenSize);
+		LOGAesVerbose(
+				"write output prefix from=%u to=%u size=%u",
+				_block.ciphertext + blockWrittenSize,
+				outputPrefix.data + prefixWrittenSize,
+				writeSize);
 		memcpy(outputPrefix.data + prefixWrittenSize, _block.ciphertext + blockWrittenSize, writeSize);
 		prefixWrittenSize += writeSize;
 		blockWrittenSize += writeSize;
 
 		writeSize = AES_BLOCK_SIZE - blockWrittenSize;
-		LOGAesVerbose("write output from=%u to=%u size=%u", _block.ciphertext + blockWrittenSize, output.data + writtenSize, writeSize);
+		LOGAesVerbose(
+				"write output from=%u to=%u size=%u",
+				_block.ciphertext + blockWrittenSize,
+				output.data + writtenSize,
+				writeSize);
 		memcpy(output.data + writtenSize, _block.ciphertext + blockWrittenSize, writeSize);
 		blockWrittenSize += writeSize;
 		writtenSize += writeSize;
 	}
 	return ERR_SUCCESS;
-
 }

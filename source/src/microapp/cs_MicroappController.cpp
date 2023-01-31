@@ -8,70 +8,37 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
-#include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <cs_MemoryLayout.h>
-#include <cs_MicroappStructs.h>
-#include <drivers/cs_Gpio.h>
-#include <drivers/cs_Storage.h>
-#include <events/cs_EventDispatcher.h>
-#include <ipc/cs_IpcRamData.h>
+#include <drivers/cs_RTC.h>
+#include <ipc/cs_IpcRamDataContents.h>
 #include <logging/cs_Logger.h>
-#include <microapp/cs_MicroappCommandHandler.h>
+#include <microapp/cs_Microapp.h>
 #include <microapp/cs_MicroappController.h>
+#include <microapp/cs_MicroappRequestHandler.h>
 #include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <storage/cs_State.h>
-#include <storage/cs_StateData.h>
-#include <util/cs_BleError.h>
-#include <util/cs_Error.h>
-#include <util/cs_Hash.h>
-#include <util/cs_Utils.h>
+#include <storage/cs_IpcRamBluenet.h>
+#include <processing/cs_PowerSampling.h>
 
-#include <algorithm>
-
-#include "nrf_fstorage_sd.h"
-
-/**
- * A developer option that calls the microapp through a function call (rather than a jump). A properly compiled
- * microapp can be started from the very first address after the header. The ResetHandler is written to that position.
- * This is done in linker scripts. If something goes off in the microapp in the startup code it might be convenient to
- * immediately call a particular function in the microapp. This address can be also the very first address but it can
- * just as well be in the middle of the microapp binary. Default is 0.
- */
-#define DEVELOPER_OPTION_USE_FUNCTION_CALL 0
-
-/*
- * Overwrite the address that is read from the microapp header (the offset field) by the following hardcoded address.
- * The default behaviour has this macro undefined.
- */
-#define DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS 0x69014
-#undef DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS
-
-/*
- * Use a dummy callback in bluenet itself (no microapp is required in that case) by setting this to 1. Default is 0.
- */
-#define DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET 0
-
-/*
- * Disable coroutines and use direct calls by setting this macro to 1. Default is 0.
- */
-#define DEVELOPER_OPTION_DISABLE_COROUTINE 0
+#define LogMicroappControllerInfo LOGi
+#define LogMicroappControllerDebug LOGd
+#define LogMicroappControllerVerbose LOGvv
 
 extern "C" {
 
-/*
- * Set arguments for coroutine.
- */
-void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer) {
-	stack_params_t* stackParams = getStackParams();
-	coroutine_args_t* args      = (coroutine_args_t*)stackParams->arg;
-	switch (coroutineIndex) {
-		case COROUTINE_MICROAPP0: args->io_buffer = io_buffer; break;
+void updateIoBuffers(uint8_t appIndex, bluenet_io_buffers_t* ioBuffers) {
+	// This runs in microapp context, so no logs and no variables on stack.
+	switch (appIndex) {
+		case 0: {
+			reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())->ioBuffers = ioBuffers;
+			break;
+		}
 		// potentially more microapps here
-		default: break;
+		default: {
+			break;
+		}
 	}
 }
 
@@ -79,76 +46,29 @@ void setCoroutineContext(uint8_t coroutineIndex, bluenet_io_buffer_t* io_buffer)
  * This function is the only function called by the microapp. It is called from the coroutine context and just yields.
  * The argument is placed outside of the stack so it can be obtained by bluenet after the coroutine context switch.
  *
- * @param[in] payload                            pointer to buffer with command for bluenet
+ * @param[in] ioBuffers     Pointer to buffers provided by the microapp for communication between bluenet and microapp.
  */
-cs_ret_code_t microappCallback(uint8_t opcode, bluenet_io_buffer_t* io_buffer) {
-	cs_ret_code_t retCode = ERR_SUCCESS;
+microapp_sdk_result_t microappCallback(uint8_t opcode, bluenet_io_buffers_t* ioBuffers) {
 	switch (opcode) {
 		case CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER: {
-			setCoroutineContext(COROUTINE_MICROAPP0, io_buffer);
-			[[fallthrough]];
+			updateIoBuffers(0, ioBuffers);
+			break;
 		}
 		case CS_MICROAPP_CALLBACK_SIGNAL: {
-#if DEVELOPER_OPTION_DISABLE_COROUTINE == 1
-			LOGi("Do not yield");
-#else
-			yieldCoroutine();
-#endif
 			break;
 		}
 		default: {
-			LOGi("Unknown opcode");
+			LOGe("Unknown opcode %u", opcode);
 		}
 	}
-	return retCode;
+	yieldCoroutine();
+	return CS_MICROAPP_SDK_ACK_SUCCESS;
 }
-
-#ifdef DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET
-/*
- * Helper function that does not go back and forth to the microapp and can be used to test if the coroutines and
- * callbacks are working properly without a microapp present.
- */
-void microappCallbackDummy() {
-	static int first_time = true;
-	while (1) {
-		// just some random data array
-		bluenet_io_buffer_t io_buffer;
-		// fake setup and loop commands
-		if (first_time) {
-			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_COMMAND_SETUP_END;
-			first_time                            = false;
-		}
-		else {
-			io_buffer.microapp2bluenet.payload[0] = CS_MICROAPP_COMMAND_LOOP_END;
-			// data[0] = CS_MICROAPP_COMMAND_LOOP_END;
-		}
-		// Get the ram data of ourselves (IPC_INDEX_CROWNSTONE_APP).
-		uint8_t rd_size = 0;
-		bluenet2microapp_ipcdata_t ipc_data;
-		getRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&ipc_data, sizeof(bluenet2microapp_ipcdata_t), &rd_size);
-
-		// Perform the actual callback. Should call microappCallback and yield.
-		ipc_data.microappCallback(CS_MICROAPP_CALLBACK_UPDATE_IO_BUFFER, &io_buffer);
-	}
-}
-#endif
 
 void jumpToAddress(uintptr_t address) {
-#ifdef DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS
-	address = DEVELOPER_OPTION_OVERWRITE_FUNCTION_CALL_ADDRESS;
-#endif
-#if DEVELOPER_OPTION_USE_FUNCTION_CALL == 1
-	// You have to know which function you jump to, here we assume a function returning void and no arguments.
-	// We also have to add a 1 for thumb mode
-	void (*func)() = (void (*)())(address + 1);
-	LOGi("Call function at address: 0x%p", func);
-	(*func)();
-#else
-	void* ptr = (void*)address;
-	LOGi("Jump to address: %p", ptr);
-	goto* ptr;
-	LOGi("Shouldn't end up here");
-#endif
+	// This runs in microapp context, so no logs and no variables on stack.
+	goto*(void*)address;
+	LOGe("Shouldn't end up here");
 }
 
 /*
@@ -159,18 +79,12 @@ void jumpToAddress(uintptr_t address) {
  * microapp forever. Alternatively, if the function never yields, it will trip the watchdog. If the watchdog is
  * triggered, we might presume that a microapp was the reason for it and disable it.
  *
- * @param[in] void *p                            pointer to a coroutine_args_t struct
+ * @param[in] void *args    Arguments provided when starting the coroutine.
  */
-void goIntoMicroapp(void* p) {
+void goIntoMicroapp(void* args) {
+	// This runs in microapp context, so no logs and no variables on stack.
+	jumpToAddress(reinterpret_cast<microapp_coroutine_args_t*>(args)->entry);
 
-#if DEVELOPER_OPTION_USE_DUMMY_CALLBACK_IN_BLUENET == 1
-	LOGi("Call main: %p", &microappCallbackDummy);
-	microappCallbackDummy();
-#else
-	coroutine_args_t* coargs = (coroutine_args_t*)p;
-	LOGi("Within coroutine, call main: %p", coargs->entry);
-	jumpToAddress(coargs->entry);
-#endif
 	// The coroutine should never return. Incorrectly written microapp!
 	LOGe("Coroutine should never return. We should not come here!");
 }
@@ -181,43 +95,30 @@ void goIntoMicroapp(void* p) {
  * MicroappController constructor zero-initializes most fields and makes sure the instance can receive messages through
  * deriving from EventListener and adding itself to the EventDispatcher as listener.
  */
-MicroappController::MicroappController() : EventListener(), _callCounter(0), _microappIsScanning(false) {
-
-	EventDispatcher::getInstance().addListener(this);
-
-	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
-		_pinIsr[i].pin = 0;
-	}
-	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
-		_bleIsr[i].id = 0;
-	}
-
-	LOGi("Microapp end is at %p", microappRamSection._end);
-}
-
-/*
- * Get from digital pin to interrupt. See also interruptToDigitalPin.
- */
-int MicroappController::digitalPinToInterrupt(int pin) {
-	return pin;
+MicroappController::MicroappController() {
+	LogMicroappControllerDebug("Microapp ram start=%p end=%p", microappRamSection._start, microappRamSection._end);
 }
 
 /*
  * Set the microappCallback in the IPC ram data bank. At a later time it can be used by the microapp to find the
  * address of microappCallback to call back into the bluenet code.
+ *
+ * The bluenet2microapp object can be stored on the stack because setRamData copies the data.
  */
 void MicroappController::setIpcRam() {
-	LOGi("Set IPC info for microapp");
-	bluenet2microapp_ipcdata_t bluenet2microapp;
-	bluenet2microapp.protocol         = 1;
-	bluenet2microapp.length           = sizeof(bluenet2microapp_ipcdata_t);
-	bluenet2microapp.microappCallback = microappCallback;
+	LogMicroappControllerDebug("Set IPC from bluenet for microapp");
+	bluenet_ipc_data_cpp_t ipcData;
+	ipcData.bluenet2microappData.dataProtocol     = MICROAPP_IPC_DATA_PROTOCOL;
+	ipcData.bluenet2microappData.microappCallback = microappCallback;
 
-	LOGi("Set callback to %p", bluenet2microapp.microappCallback);
+	LogMicroappControllerDebug("Set callback to %p", ipcData.bluenet2microappData.microappCallback);
 
-	[[maybe_unused]] uint32_t retCode =
-			setRamData(IPC_INDEX_CROWNSTONE_APP, (uint8_t*)&bluenet2microapp, bluenet2microapp.length);
-	LOGi("Set ram data for microapp, retCode=%u", retCode);
+	uint32_t retCode = setRamData(IPC_INDEX_BLUENET_TO_MICROAPP, ipcData.raw, sizeof(bluenet2microapp_ipcdata_t));
+	if (retCode != ERR_SUCCESS) {
+		LOGw("Microapp IPC RAM data error, retCode=%u", retCode);
+		return;
+	}
+	LogMicroappControllerDebug("Set ram data for microapp");
 }
 
 /*
@@ -244,30 +145,24 @@ cs_ret_code_t MicroappController::checkFlashBoundaries(uint8_t appIndex, uintptr
  * Clear memory. Should be done in ResetHandler, but we don't want to rely on it.
  *
  * TODO: If this is actually necessary, also check if .data is actually properly copied.
- * TODO: This should be initialized per microapp.
  */
 uint16_t MicroappController::initMemory(uint8_t appIndex) {
 	LOGi("Init memory: clear 0x%p to 0x%p", microappRamSection._start, microappRamSection._end);
-	for (uint32_t i = 0; i < microappRamSection._size; ++i) {
-		uint32_t* const val = (uint32_t*)(uintptr_t)(microappRamSection._start + i);
-		*val                = 0;
-	}
+	memset(reinterpret_cast<uint8_t*>(microappRamSection._start), 0, microappRamSection._size);
 	return ERR_SUCCESS;
 }
 
 /*
  * Gets the first instruction for the microapp (this is written in its header). We correct for thumb and check its
  * boundaries. Then we call it from a coroutine context and expect it to yield.
- *
- * @param[in]                                    appIndex (currently ignored)
  */
-void MicroappController::callApp(uint8_t appIndex) {
-	LOGi("Call microapp #%i", appIndex);
+void MicroappController::startMicroapp(uint8_t appIndex) {
+	LogMicroappControllerInfo("startMicroapp index=%u", appIndex);
 
 	initMemory(appIndex);
 
 	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
-	LOGi("Microapp: start at %p", address);
+	LogMicroappControllerDebug("Microapp: start at %p", address);
 
 	if (checkFlashBoundaries(appIndex, address) != ERR_SUCCESS) {
 		LOGe("Address not within microapp flash boundaries");
@@ -275,27 +170,186 @@ void MicroappController::callApp(uint8_t appIndex) {
 	}
 
 	// The entry function is this immediate address (no correction for thumb mode)
-	sharedState.entry = address;
+	microapp_coroutine_args_t coroutineArg = {
+			.entry     = address,
+			.ioBuffers = nullptr,
+	};
 
 	// Write coroutine as argument in the struct so we can yield from it in the context of the microapp stack
-	LOGi("Setup coroutine and configure it");
-	startCoroutine(&_coroutine, goIntoMicroapp, &sharedState);
+	LogMicroappControllerInfo("Init coroutine");
+	int result = initCoroutine(goIntoMicroapp, &coroutineArg, sizeof(coroutineArg), microappRamSection._end);
+	if (result != 0) {
+		LOGe("Failed to init coroutine");
+	}
 }
 
-/*
- * Get incoming microapp buffer (from coroutine_args).
- */
 uint8_t* MicroappController::getInputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffer->microapp2bluenet.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())
+							   ->ioBuffers->microapp2bluenet.payload;
 	return payload;
 }
 
-/*
- * Get outgoing microapp buffer (from coroutine_args).
- */
 uint8_t* MicroappController::getOutputMicroappBuffer() {
-	uint8_t* payload = sharedState.io_buffer->bluenet2microapp.payload;
+	uint8_t* payload = reinterpret_cast<microapp_coroutine_args_t*>(getCoroutineArgumentBuffer())
+							   ->ioBuffers->bluenet2microapp.payload;
 	return payload;
+}
+
+void MicroappController::setOperatingState(uint8_t appIndex, MicroappOperatingState state) {
+	LogMicroappControllerVerbose("setOperatingState appIndex=%u state=%u", appIndex, state);
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return;
+	}
+	microapp_reboot_data_t microappData;
+	memset(&microappData, 0, sizeof(microappData));
+	microappData.running = (state == MicroappOperatingState::CS_MICROAPP_RUNNING) ? 1 : 0;
+	IpcRamBluenet::getInstance().updateMicroappData(appIndex, microappData);
+}
+
+MicroappOperatingState MicroappController::getOperatingState(uint8_t appIndex) {
+	LOGd("getOperatingState appIndex=%u", appIndex);
+	MicroappOperatingState state = MicroappOperatingState::CS_MICROAPP_NOT_RUNNING;
+	if (appIndex > 0) {
+		LOGi("Multiple apps not supported yet");
+		return state;
+	}
+
+	IpcRamBluenet& ipcRam = IpcRamBluenet::getInstance();
+	if (!ipcRam.isValidOnBoot()) {
+		return state;
+	}
+
+	switch (ipcRam.getData().microapp[appIndex].running) {
+		case 1: {
+			state = MicroappOperatingState::CS_MICROAPP_RUNNING;
+			break;
+		}
+		default: {
+			// non-running state as default
+		}
+	}
+	return state;
+}
+
+void MicroappController::callMicroapp() {
+	const uint8_t appIndex = 0;
+
+	if (!Microapp::getInstance().canRunApp(appIndex)) {
+		return;
+	}
+
+	setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_RUNNING);
+	uint32_t startTime = RTC::getCount();
+	if (resumeCoroutine()) {
+		uint32_t duration = RTC::msPassedSince(startTime);
+		setOperatingState(appIndex, MicroappOperatingState::CS_MICROAPP_NOT_RUNNING);
+
+		if (duration > MICROAPP_MAX_CALL_DURATION_MS) {
+			Microapp::getInstance().onExcessiveCallDuration(appIndex);
+		}
+		return;
+	}
+
+	// Should only happen if microapp actually ends (and does not yield anymore).
+	// TODO: handle this case, should disable the microapp.
+	LOGe("End of coroutine. Should not happen.")
+}
+
+bool MicroappController::handleAck() {
+	uint8_t* outputBuffer                 = getOutputMicroappBuffer();
+	microapp_sdk_header_t* outgoingHeader = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
+	LogMicroappControllerVerbose("handleAck: [ack %u]", outgoingHeader->ack);
+	bool inInterruptContext = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_NO_REQUEST);
+	if (!inInterruptContext) {
+		return true;
+	}
+	bool interruptDone = (outgoingHeader->ack != CS_MICROAPP_SDK_ACK_IN_PROGRESS);
+	if (!interruptDone) {
+		return true;
+	}
+	bool interruptDropped = (outgoingHeader->ack == CS_MICROAPP_SDK_ACK_ERR_BUSY);
+	if (interruptDropped) {
+		LogMicroappControllerVerbose("Microapp is busy, drop interrupt");
+		// Also prevent new interrupts since apparently the microapp has no more space
+		setEmptySoftInterruptSlots(0);
+	}
+	else {
+		LogMicroappControllerVerbose("Finished interrupt with return code %u", outgoingHeader->ack);
+		// Increment number of empty interrupt slots since we just finished one
+		incrementEmptySoftInterruptSlots();
+	}
+	// If interrupt finished, we do not call again and we also don't handle the microapp request
+	_consecutiveMicroappCallCounter = 0;
+	return false;
+}
+
+bool MicroappController::handleRequest() {
+	uint8_t* inputBuffer                           = getInputMicroappBuffer();
+	microapp_sdk_header_t* incomingHeader          = reinterpret_cast<microapp_sdk_header_t*>(inputBuffer);
+	MicroappRequestHandler& microappRequestHandler = MicroappRequestHandler::getInstance();
+	cs_ret_code_t result                           = microappRequestHandler.handleMicroappRequest(incomingHeader);
+	LogMicroappControllerVerbose("  ack=%u", incomingHeader->ack);
+
+	// TODO: put result in ack, instead of letting the handler(s) set the ack.
+	switch (result) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE: {
+			break;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			LogMicroappControllerDebug("Handling request of type %u is in progress", incomingHeader->messageType);
+			break;
+		}
+		default: {
+			LogMicroappControllerInfo(
+					"Handling request of type %u failed with return code %u", incomingHeader->messageType, result);
+			break;
+		}
+	}
+	bool callAgain = !stopAfterMicroappRequest(incomingHeader);
+	if (!callAgain) {
+		LogMicroappControllerVerbose("Do not call again");
+		_consecutiveMicroappCallCounter = 0;
+		return false;
+	}
+	// Also check if the max number of consecutive nonyielding calls is reached
+	if (_consecutiveMicroappCallCounter >= MICROAPP_MAX_NUMBER_CONSECUTIVE_CALLS) {
+		_consecutiveMicroappCallCounter = 0;
+		LogMicroappControllerVerbose("Stop because we've reached a max number of consecutive calls");
+		return false;
+	}
+	_consecutiveMicroappCallCounter++;
+	return true;
+}
+
+bool MicroappController::stopAfterMicroappRequest(microapp_sdk_header_t* incomingHeader) {
+	switch (incomingHeader->messageType) {
+		case CS_MICROAPP_SDK_TYPE_LOG:
+		case CS_MICROAPP_SDK_TYPE_PIN:
+		case CS_MICROAPP_SDK_TYPE_SWITCH:
+		case CS_MICROAPP_SDK_TYPE_SERVICE_DATA:
+		case CS_MICROAPP_SDK_TYPE_TWI:
+		case CS_MICROAPP_SDK_TYPE_BLE:
+		case CS_MICROAPP_SDK_TYPE_MESH:
+		case CS_MICROAPP_SDK_TYPE_POWER_USAGE:
+		case CS_MICROAPP_SDK_TYPE_PRESENCE:
+		case CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND:
+		case CS_MICROAPP_SDK_TYPE_MESSAGE:
+		case CS_MICROAPP_SDK_TYPE_BLUENET_EVENT:
+		case CS_MICROAPP_SDK_TYPE_ASSETS: {
+			return false;
+		}
+		case CS_MICROAPP_SDK_TYPE_NONE:
+		case CS_MICROAPP_SDK_TYPE_YIELD:
+		case CS_MICROAPP_SDK_TYPE_CONTINUE: {
+			return true;
+		}
+		default: {
+			LOGi("Unknown request type: %u", incomingHeader->messageType);
+			return true;
+		}
+	}
 }
 
 /*
@@ -305,323 +359,244 @@ uint8_t* MicroappController::getOutputMicroappBuffer() {
  * There's no load failure detection. When the call fails bluenet hangs and should reboot.
  */
 void MicroappController::tickMicroapp(uint8_t appIndex) {
-	bool callAgain = false;
 	_tickCounter++;
-	if (_tickCounter % MICROAPP_LOOP_FREQUENCY != 0) {
+	if (_tickCounter < MICROAPP_LOOP_FREQUENCY) {
 		return;
 	}
 	_tickCounter = 0;
-	LOGv("Tick microapp");
-	_softInterruptCounter = 0;
+
+	if (isCpuBusy()) {
+		LOGw("Skip microapp tick: CPU is busy");
+		return;
+	}
+
+	// Reset interrupt counter every microapp tick
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		_softInterruptRegistrations[i].counter = 0;
+	}
+
+	// Indicate to the microapp that this is a tick entry by writing in outgoing message header
+	uint8_t* outputBuffer                  = getOutputMicroappBuffer();
+	microapp_sdk_header_t* outgoingMessage = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
+
+	outgoingMessage->messageType           = CS_MICROAPP_SDK_TYPE_CONTINUE;
+	outgoingMessage->ack                   = CS_MICROAPP_SDK_ACK_NO_REQUEST;
+	bool callAgain                         = false;
+	bool ignoreRequest                     = false;
+	int8_t repeatCounter                   = 0;
 	do {
+		LogMicroappControllerVerbose("tickMicroapp [call %i]", repeatCounter);
 		callMicroapp();
-		callAgain = retrieveCommand();
-	} while (callAgain);
-}
-
-/*
- * Retrieve command from the microapp. This is within the crownstone coroutine context. It gets the payload from the
- * global `sharedState` variable and calls `handleMicroappCommand` afterwards. The `sharedState.microapp2bluenet buffer`
- * only stores a single command. This is fine because after each command the microapp should transfer control to
- * bluenet. For each command is decided in `stopAfterMicroappCommand` if the microapp should be called again. For
- * example, for the end of setup, loop, or delay, it is **not** immediately called again but normal bluenet execution
- * continues. In that case the microapp is called again on the next tick.
- */
-bool MicroappController::retrieveCommand() {
-	uint8_t* inputBuffer            = getInputMicroappBuffer();
-	microapp_cmd_t* incomingMessage = reinterpret_cast<microapp_cmd_t*>(inputBuffer);
-
-	[[maybe_unused]] static int retrieveCounter = 0;
-	if (incomingMessage->cmd != CS_MICROAPP_COMMAND_LOOP_END) {
-		LOGv("Retrieve and handle [%i] command %i (callback %i)",
-			 ++retrieveCounter,
-			 incomingMessage->cmd,
-			 incomingMessage->interruptCmd);
-	}
-	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
-	microappCommandHandler.handleMicroappCommand(incomingMessage);
-	bool callAgain = !stopAfterMicroappCommand(incomingMessage);
-	if (!callAgain) {
-		LOGv("Command %i, do not call again", incomingMessage->cmd);
-	}
-	return callAgain;
-}
-
-/*
- * A GPIO callback towards the microapp.
- */
-void MicroappController::softInterruptGpio(uint8_t pin) {
-	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
-	if (microappCommandHandler.softInterruptInProgress()) {
-		LOGi("Interrupt in progress, ignore pin %i event", digitalPinToInterrupt(pin));
-		return;
-	}
-	// Write pin command into the buffer.
-	uint8_t* outputBuffer    = getOutputMicroappBuffer();
-	microapp_pin_cmd_t* cmd  = reinterpret_cast<microapp_pin_cmd_t*>(outputBuffer);
-	cmd->header.interruptCmd = CS_MICROAPP_COMMAND_PIN;
-	cmd->header.ack          = false;
-	cmd->header.id           = digitalPinToInterrupt(pin);
-	cmd->pin                 = digitalPinToInterrupt(pin);
-	// Resume microapp so it can pick up this command.
-	LOGi("GPIO interrupt on virtual pin %i", cmd->pin);
-	softInterrupt();
-}
-
-/*
- * Communicate mesh message towards microapp.
- */
-void MicroappController::softInterruptBle(scanned_device_t* bluenetBleDevice) {
-
-#ifdef DEVELOPER_OPTION_THROTTLE_BY_RSSI
-	if (bluenetBleDevice->rssi < -50) {
-		return;
-	}
-#endif
-
-	MicroappCommandHandler& microappCommandHandler = MicroappCommandHandler::getInstance();
-	if (microappCommandHandler.softInterruptInProgress()) {
-		LOGv("Callback in progress, ignore scanned device event");
-		return;
-	}
-
-	// Write bluetooth device to buffer
-	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
-	microapp_ble_device_t* microappBleDevice = reinterpret_cast<microapp_ble_device_t*>(outputBuffer);
-
-	bool found                     = false;
-	uint8_t id                     = 0;
-	enum MicroappBleEventType type = BleEventDeviceScanned;
-	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
-		if (_bleIsr[i].type == type) {
-			id    = _bleIsr[i].id;
-			found = true;
+		ignoreRequest = !handleAck();
+		if (ignoreRequest) {
 			break;
 		}
-	}
-	if (!found) {
-		LOGw("No callback registered");
-		return;
-	}
-
-	if (bluenetBleDevice->dataSize > sizeof(microappBleDevice->data)) {
-		LOGw("BLE advertisement data too large");
-		return;
-	}
-
-	microappBleDevice->header.interruptCmd = CS_MICROAPP_COMMAND_BLE_DEVICE;
-
-	// Allow microapp to map to handler with given id
-	microappBleDevice->header.id = id;
-	microappBleDevice->type      = type;
-
-	// Copy address and at the same time convert from little endian to big endian
-	std::reverse_copy(
-			bluenetBleDevice->address, bluenetBleDevice->address + MAC_ADDRESS_LENGTH, microappBleDevice->addr);
-	microappBleDevice->rssi = bluenetBleDevice->rssi;
-
-	// Copy the data itself
-	microappBleDevice->dlen = bluenetBleDevice->dataSize;
-	memcpy(microappBleDevice->data, bluenetBleDevice->data, bluenetBleDevice->dataSize);
-
-	LOGv("Incoming advertisement written to %p", microappBleDevice);
-	softInterrupt();
-}
-
-/*
- * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the soft interrupt.
- * Hence, we call retrieveCommand after this. Then a number of calls are executed until we reach the end of the loop
- * or until we have reached a maximum of consecutive calls (within retrieveCommand).
- *
- * Note that although we do throttle the number of consecutive calls, this does not throttle the callbacks themselves.
- *
- */
-void MicroappController::softInterrupt() {
-	uint8_t* outputBuffer           = getOutputMicroappBuffer();
-	microapp_cmd_t* outgoingCommand = reinterpret_cast<microapp_cmd_t*>(outputBuffer);
-
-	if (_softInterruptCounter == MAX_CALLBACKS_WITHIN_A_TICK - 1) {
-		LOGv("Last callback (next one in next tick)");
-	}
-
-	if (_softInterruptCounter == MAX_CALLBACKS_WITHIN_A_TICK) {
-		LOGv("Not doing another callback");
-		return;
-	}
-	_softInterruptCounter++;
-
-	outgoingCommand->ack                = CS_ACK_BLUENET_MICROAPP_REQUEST;
-	bool callAgain                      = false;
-	int8_t repeatCounter                = 0;
-	static int32_t softInterruptCounter = 0;
-	do {
-		LOGv("Call [%i,%i,%i], within interrupt %i",
-			 softInterruptCounter,
-			 repeatCounter,
-			 outgoingCommand->counter,
-			 outgoingCommand->interruptCmd);
-		callMicroapp();
-		bool acked = (outgoingCommand->ack == CS_ACK_BLUENET_MICROAPP_REQ_ACK);
-		if (acked) {
-			LOGv("Acked interrupt");
-		}
-		callAgain = retrieveCommand();
-		if (!acked) {
-			LOGv("Not acked... Next tick again");
-			callAgain = false;
-		}
+		callAgain = handleRequest();
 		repeatCounter++;
 	} while (callAgain);
-	softInterruptCounter++;
+	LogMicroappControllerVerbose("tickMicroapp end");
 }
 
 /*
- * We resume the previously started coroutine.
+ * Write the callback to the microapp and have it execute it. We can have calls to bluenet within the interrupt.
+ * Hence, we call handleRequest after this if the interrupt is not finished.
+ * Note that although we do throttle the number of consecutive calls, this does not throttle the callbacks themselves.
  */
-void MicroappController::callMicroapp() {
-#if DEVELOPER_OPTION_DISABLE_COROUTINE == 0
-	if (nextCoroutine()) {
-		return;
-	}
-#else
-	static bool start = false;
-	// just do it from current coroutine context
-	if (!start) {
-		start = true;
-		LOGi("Call address: %p", sharedState->entry);
-		jumpToAddress(sharedState->entry);
-		LOGi("Microapp might have run, but this statement is never reached (no coroutine used).");
-	}
-	return;
-#endif
-	// Should only happen if microapp actually ends (and does not yield anymore).
-	LOGi("End of coroutine. Should not happen.")
-}
-
-/*
- * Called upon receiving scanned BLE device, generates a soft interrupt if a slot has been registered before.
- */
-void MicroappController::onDeviceScanned(scanned_device_t* dev) {
-	if (!_microappIsScanning) {
-		LOGv("Microapp not scanning, so not forwarding scanned device");
+void MicroappController::generateSoftInterrupt(MicroappSdkType type, uint8_t id) {
+	// This is probably already checked before this function call, but let's do it anyway to be sure
+	if (!allowSoftInterrupts(type, id)) {
 		return;
 	}
 
-	softInterruptBle(dev);
-}
+	auto registration = getRegisteredInterrupt(type, id);
+	if (registration == nullptr) {
+		return;
+	}
+	// Increase the counter. It won't overflow, as the check above already checks if the counter is above threshold.
+	registration->counter++;
 
-bool MicroappController::stopAfterMicroappCommand(microapp_cmd_t* cmd) {
-	uint8_t command = cmd->cmd;
-	bool stop       = true;
-	switch (command) {
-		case CS_MICROAPP_COMMAND_PIN:
-		case CS_MICROAPP_COMMAND_SWITCH_DIMMER:
-		case CS_MICROAPP_COMMAND_LOG:
-		case CS_MICROAPP_COMMAND_SERVICE_DATA:
-		case CS_MICROAPP_COMMAND_TWI:
-		case CS_MICROAPP_COMMAND_BLE:
-		case CS_MICROAPP_COMMAND_POWER_USAGE:
-		case CS_MICROAPP_COMMAND_PRESENCE:
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_RECEIVED:
-		case CS_MICROAPP_COMMAND_MESH: {
-			stop = false;
+	uint8_t* outputBuffer                    = getOutputMicroappBuffer();
+	microapp_sdk_header_t* outgoingInterrupt = reinterpret_cast<microapp_sdk_header_t*>(outputBuffer);
+
+	// Request an acknowledgement by the microapp indicating status of interrupt
+	outgoingInterrupt->ack                   = CS_MICROAPP_SDK_ACK_REQUEST;
+	bool callAgain                           = false;
+	bool ignoreRequest                       = false;
+	int8_t repeatCounter                     = 0;
+	do {
+		LogMicroappControllerVerbose("generateSoftInterrupt [call %i]", repeatCounter);
+		callMicroapp();
+		ignoreRequest = !handleAck();
+		if (ignoreRequest) {
 			break;
 		}
-		case CS_MICROAPP_COMMAND_DELAY:
-		case CS_MICROAPP_COMMAND_SETUP_END:
-		case CS_MICROAPP_COMMAND_LOOP_END:
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_END:
-		case CS_MICROAPP_COMMAND_SOFT_INTERRUPT_ERROR:
-		case CS_MICROAPP_COMMAND_NONE: {
-			stop = true;
-			break;
-		}
-		default: {
-			LOGi("Unknown command: %i", command);
-			stop = true;
-			break;
-		}
-	}
-	if (stop) {
-		_callCounter = 0;
-	}
-	else {
-		if (++_callCounter % MICROAPP_MAX_NUMBER_CONSECUTIVE_MESSAGES == 0) {
-			_callCounter = 0;
-			LOGv("Stop because we've reached a max # of calls");
-			return true;
-		}
-	}
-	return stop;
+		callAgain = handleRequest();
+		repeatCounter++;
+	} while (callAgain);
+	LogMicroappControllerVerbose("generateSoftInterrupt end");
 }
 
 /*
- * Register a slot for a GPIO pin interrupt.
+ * Attempt registration of an interrupt. An interrupt registration is uniquely identified
+ * by a type (=messageType, see enum MicroappSdkType) and an id which identifies the interrupt
+ * registration within the scope of the type.
  */
-bool MicroappController::registerSoftInterruptSlotGpio(uint8_t pin) {
-	// We register the pin at the first empty slot
-	for (int i = 0; i < MICROAPP_MAX_PIN_ISR_COUNT; ++i) {
-		if (!_pinIsr[i].registered) {
-			_pinIsr[i].registered = true;
-			_pinIsr[i].pin        = pin;
-			LOGi("Register interrupt slot for microapp pin %i", pin);
+cs_ret_code_t MicroappController::registerSoftInterrupt(MicroappSdkType type, uint8_t id) {
+	// Check if interrupt registration already exists
+	if (getRegisteredInterrupt(type, id) != nullptr) {
+		LogMicroappControllerDebug("Interrupt type=%i id=%u already registered", type, id);
+		return ERR_ALREADY_EXISTS;
+	}
+	// Look for first empty slot, if it exists
+	int emptySlotIndex = -1;
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		if (_softInterruptRegistrations[i].type == CS_MICROAPP_SDK_TYPE_NONE) {
+			emptySlotIndex = i;
+			break;
+		}
+	}
+	if (emptySlotIndex < 0) {
+		LOGw("No empty interrupt registration slots left");
+		return ERR_NO_SPACE;
+	}
+	// Register the interrupt
+	_softInterruptRegistrations[emptySlotIndex].type    = type;
+	_softInterruptRegistrations[emptySlotIndex].id      = id;
+	_softInterruptRegistrations[emptySlotIndex].counter = 0;
+
+	LogMicroappControllerDebug("Registered interrupt of type %i, id %u", type, id);
+
+	return ERR_SUCCESS;
+}
+
+microapp_soft_interrupt_registration_t* MicroappController::getRegisteredInterrupt(MicroappSdkType type, uint8_t id) {
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		if (_softInterruptRegistrations[i].type == type && _softInterruptRegistrations[i].id == id) {
+			return &_softInterruptRegistrations[i];
+		}
+	}
+	return nullptr;
+}
+
+cs_ret_code_t MicroappController::registerBluenetEventInterrupt(CS_TYPE eventType) {
+	cs_ret_code_t retCode = registerSoftInterrupt(CS_MICROAPP_SDK_TYPE_BLUENET_EVENT, 0);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	if (isEventInterruptRegistered(eventType)) {
+		return ERR_SUCCESS;
+	}
+	for (int i = 0; i < MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS; ++i) {
+		if (_eventInterruptRegistrations[i] == CS_TYPE::CONFIG_DO_NOT_USE) {
+			_eventInterruptRegistrations[i] = eventType;
+			return ERR_SUCCESS;
+		}
+	}
+	return ERR_NO_SPACE;
+}
+
+bool MicroappController::isEventInterruptRegistered(CS_TYPE type) {
+	for (int i = 0; i < MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS; ++i) {
+		if (_eventInterruptRegistrations[i] == type) {
 			return true;
 		}
 	}
-	LOGw("Could not register interrupt slot for microapp pin %i", pin);
 	return false;
+}
+
+cs_ret_code_t MicroappController::setScanFilter(microapp_sdk_ble_scan_filter_t& filter) {
+	_scanFilter = filter;
+	return ERR_SUCCESS;
+}
+
+microapp_sdk_ble_scan_filter_t& MicroappController::getScanFilter() {
+	return _scanFilter;
+}
+
+bool MicroappController::allowSoftInterrupts(MicroappSdkType type, uint8_t id) {
+	// if the microapp dropped the last one and hasn't finished an interrupt,
+	// we won't try to call it with a new interrupt
+	if (_emptySoftInterruptSlots == 0) {
+		LogMicroappControllerDebug("No empty interrupt slots");
+		return false;
+	}
+
+	if (isCpuBusy()) {
+		LOGw("Skip interrupt: CPU is busy");
+		return false;
+	}
+
+	auto registration = getRegisteredInterrupt(type, id);
+	if (registration == nullptr) {
+		// Not registered.
+		return false;
+	}
+
+	// Only print first time we hit the threshold.
+	if (registration->counter == MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK) {
+		LogMicroappControllerDebug("Too many soft interrupts for type=%u id=%u", type, id);
+		registration->counter++;
+	}
+
+	if (type == CS_MICROAPP_SDK_TYPE_BLE && id == CS_MICROAPP_SDK_BLE_CENTRAL) {
+		// We allow this to allow for service discovery (a soft interrupts per discovered service and characteristic).
+		return true;
+	}
+
+	// Check if we already exceeded the max number of interrupts in this tick
+	if (registration->counter >= MICROAPP_MAX_SOFT_INTERRUPTS_WITHIN_A_TICK) {
+		return false;
+	}
+	return true;
+}
+
+bool MicroappController::isCpuBusy() {
+	uint16_t schedulerSpace = app_sched_queue_space_get();
+	if (schedulerSpace < SCHED_QUEUE_SIZE - SCHEDULER_QUEUE_ALMOST_FULL) {
+		LogMicroappControllerInfo("Scheduler almost full");
+		return true;
+	}
+
+	auto skips = PowerSampling::getInstance().getSkippedBufCount();
+	if (skips > 0) {
+		return true;
+	}
+
+	return false;
+}
+
+void MicroappController::setEmptySoftInterruptSlots(uint8_t emptySlots) {
+	_emptySoftInterruptSlots = emptySlots;
 }
 
 /*
- * Register a slot for a BLE soft interrupt.
+ * Increment the number of empty interrupt slots.
+ * This function can be used when the microapp finishes handling an interrupt.
+ * That means a slot will have been freed at the microapp side.
  */
-bool MicroappController::registerSoftInterruptSlotBle(uint8_t id) {
-	for (int i = 0; i < MICROAPP_MAX_BLE_ISR_COUNT; ++i) {
-		if (!_bleIsr[i].registered) {
-			_bleIsr[i].registered = true;
-			_bleIsr[i].type       = BleEventDeviceScanned;
-			_bleIsr[i].id         = id;
-			LOGi("Registered slot %i for BLE events towards the microapp", id);
-			return true;
-		}
+void MicroappController::incrementEmptySoftInterruptSlots() {
+	// Make sure we don't overflow to zero in extreme cases
+	if (_emptySoftInterruptSlots == 0xFF) {
+		return;
 	}
-	// no empty slot available
-	LOGw("Could not register slot for BLE events for the microapp %i", id);
-	return false;
+	_emptySoftInterruptSlots++;
 }
 
-void MicroappController::setScanning(bool scanning) {
-	_microappIsScanning = scanning;
-}
-
-/**
- * Listen to events from the microapp with respect to initialization (registering soft interrupt service routines) and
- * get the interrupts for those routines and forward them.
- */
-void MicroappController::handleEvent(event_t& event) {
-	switch (event.type) {
-		case CS_TYPE::EVT_GPIO_INIT: {
-			auto gpio = CS_TYPE_CAST(EVT_GPIO_INIT, event.data);
-			if (gpio->direction == INPUT || gpio->direction == SENSE) {
-				registerSoftInterruptSlotGpio(gpio->pin_index);
-			}
-			break;
-		}
-		case CS_TYPE::EVT_GPIO_UPDATE: {
-			auto gpio = CS_TYPE_CAST(EVT_GPIO_UPDATE, event.data);
-			softInterruptGpio(gpio->pin_index);
-			break;
-		}
-		case CS_TYPE::EVT_DEVICE_SCANNED: {
-			auto dev = CS_TYPE_CAST(EVT_DEVICE_SCANNED, event.data);
-			onDeviceScanned(dev);
-			break;
-		}
-		case CS_TYPE::EVT_MICROAPP_BLE_FILTER_INIT: {
-			auto ble = CS_TYPE_CAST(EVT_MICROAPP_BLE_FILTER_INIT, event.data);
-			registerSoftInterruptSlotBle(ble->index);
-			break;
-		}
-		default: break;
+void MicroappController::clear(uint8_t appIndex) {
+	LOGi("Clear appIndex=%u", appIndex);
+	for (int i = 0; i < MICROAPP_MAX_SOFT_INTERRUPT_REGISTRATIONS; ++i) {
+		_softInterruptRegistrations[i].type    = CS_MICROAPP_SDK_TYPE_NONE;
+		_softInterruptRegistrations[i].counter = 0;
 	}
+
+	for (int i = 0; i < MICROAPP_MAX_BLUENET_EVENT_INTERRUPT_REGISTRATIONS; ++i) {
+		_eventInterruptRegistrations[i] = CS_TYPE::CONFIG_DO_NOT_USE;
+	}
+
+	_scanFilter.type         = CS_MICROAPP_SDK_BLE_SCAN_FILTER_NONE;
+
+	_emptySoftInterruptSlots = 1;
+
+	microappData.isScanning  = false;
 }

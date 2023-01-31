@@ -10,13 +10,13 @@
 #include <drivers/cs_ADC.h>
 #include <events/cs_EventListener.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_CircularBuffer.h>
 #include <structs/buffer/cs_AdcBuffer.h>
+#include <structs/buffer/cs_CircularBuffer.h>
 #include <third/Median.h>
+
 #include <cstdint>
 
-typedef void (*ps_zero_crossing_cb_t) ();
-
+typedef void (*ps_zero_crossing_cb_t)();
 
 class PowerSampling : EventListener {
 public:
@@ -55,13 +55,21 @@ public:
 
 	/** Enable zero crossing detection on given channel, generating interrupts.
 	 *
-	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
+	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at
+	 * interrupt level!
 	 */
 	void enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback);
 
+	/**
+	 * Get the number of bufs that have been recently skipped.
+	 *
+	 * Is reset every second.
+	 */
+	uint32_t getSkippedBufCount();
+
 	/** handle (crownstone) events
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 	/**
 	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
@@ -76,7 +84,6 @@ public:
 		uint32_t acPeriodUs;
 	} power_t;
 
-
 private:
 	PowerSampling();
 
@@ -85,13 +92,13 @@ private:
 	const static uint8_t numFilteredBuffersForProcessing = 4;
 
 	// Currently hard coded at 1.
-	const static uint8_t numUnfilteredBuffers = 1;
+	const static uint8_t numUnfilteredBuffers            = 1;
 
 	// Number of switch states to keep up.
-	const static uint8_t switchHistSize = 3;
+	const static uint8_t switchHistSize                  = 3;
 
 	//! Variable to keep up whether power sampling is initialized.
-	bool _isInitialized = false;
+	bool _isInitialized                                  = false;
 
 	//! Reference to the ADC instance
 	ADC* _adc;
@@ -119,14 +126,14 @@ private:
 	CircularBuffer<switch_state_t> _switchHist;
 	cs_power_samples_header_t _lastSwitchSamplesHeader;
 
-	const static uint8_t numSwitchSamplesBuffers = 6; // 3 voltage and 3 current buffers.
+	const static uint8_t numSwitchSamplesBuffers = 6;  // 3 voltage and 3 current buffers.
 	adc_sample_value_t _lastSwitchSamples[numSwitchSamplesBuffers * AdcBuffer::getChannelLength()] = {0};
 
-	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
-	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.
-	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) _voltageZero; //! Voltage zero from settings.
-	TYPIFY(CONFIG_CURRENT_ADC_ZERO) _currentZero; //! Current zero from settings.
-	TYPIFY(CONFIG_POWER_ZERO) _powerZero; //! Power zero from settings.
+	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier;  //! Voltage multiplier from settings.
+	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier;  //! Current multiplier from settings.
+	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) _voltageZero;          //! Voltage zero from settings.
+	TYPIFY(CONFIG_CURRENT_ADC_ZERO) _currentZero;          //! Current zero from settings.
+	TYPIFY(CONFIG_POWER_ZERO) _powerZero;                  //! Power zero from settings.
 
 	uint16_t _avgZeroCurrentDiscount;
 	uint16_t _avgZeroVoltageDiscount;
@@ -135,49 +142,48 @@ private:
 	// Slow averaging of power
 	float _slowAvgPowerDiscount;
 	float _slowAvgPowerMilliWatt = 0.0f;
-	uint16_t _slowAvgPowerCount; // Number of values that have been used for slow averaging.
+	uint16_t _slowAvgPowerCount;  // Number of values that have been used for slow averaging.
 	const uint16_t slowAvgPowerConvergedCount = 1000;
 	float _powerDiffThresholdPart;  // When difference is 10% larger or smaller, consider it a significant change.
-	float _powerDiffThresholdMinMilliWatt; // But the difference must also be at least so many Watts.
-	float _negativePowerThresholdMilliWatt; // Only if power is below threshold, it may be negative.
+	float _powerDiffThresholdMinMilliWatt;   // But the difference must also be at least so many Watts.
+	float _negativePowerThresholdMilliWatt;  // Only if power is below threshold, it may be negative.
 
+	int32_t _boardPowerZero;       //! Measured power when there is no load for this board (mW).
+	int32_t _avgZeroVoltage;       //! Used for storing and calculating the average zero voltage value (times 1024).
+	int32_t _avgZeroCurrent;       //! Used for storing and calculating the average zero current value (times 1024).
+	bool _recalibrateZeroVoltage;  //! Whether or not the zero voltage value should be recalculated.
+	bool _recalibrateZeroCurrent;  //! Whether or not the zero current value should be recalculated.
 
-	int32_t _boardPowerZero; //! Measured power when there is no load for this board (mW).
-	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1024).
-	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1024).
-	bool _recalibrateZeroVoltage; //! Whether or not the zero voltage value should be recalculated.
-	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
-//	bool _zeroVoltageInitialized; //! True when zero of voltage has been initialized.
-//	bool _zeroCurrentInitialized; //! True when zero of current has been initialized.
-	uint16_t _zeroVoltageCount; //! Number of times the zero voltage has been calculated.
-	uint16_t _zeroCurrentCount; //! Number of times the zero current has been calculated.
+	uint16_t _zeroVoltageCount;  //! Number of times the zero voltage has been calculated.
+	uint16_t _zeroCurrentCount;  //! Number of times the zero current has been calculated.
 
-	int32_t _avgPowerMilliWatt; //! Used to send out the average power (in mW).
-	int32_t _avgCurrentRmsMilliAmp; //! Used for storing the average rms current (in mA).
-	int32_t _avgVoltageRmsMilliVolt; //! Used for storing the average rms voltage (in mV).
+	int32_t _avgPowerMilliWatt;       //! Used to send out the average power (in mW).
+	int32_t _avgCurrentRmsMilliAmp;   //! Used for storing the average rms current (in mA).
+	int32_t _avgVoltageRmsMilliVolt;  //! Used for storing the average rms voltage (in mV).
 
-	PowerVector* _inputSamples;  //! Used for storing the samples to be filtered.
-	PowerVector* _outputSamples; //! Used for storing the filtered samples.
+	PowerVector* _inputSamples;   //! Used for storing the samples to be filtered.
+	PowerVector* _outputSamples;  //! Used for storing the filtered samples.
 	MedianFilter* _filterParams;  //! Stores the parameters for the moving median filter.
 
-	CircularBuffer<int32_t>* _powerMilliWattHist;      //! Used to store a history of the power
-	CircularBuffer<int32_t>* _currentRmsMilliAmpHist;  //! Used to store a history of the current_rms
-	CircularBuffer<int32_t>* _filteredCurrentRmsHistMA; //! Used to store a history of the filtered current_rms
-	CircularBuffer<int32_t>* _voltageRmsMilliVoltHist; //! Used to store a history of the voltage_rms
-	int32_t _histCopy[POWER_SAMPLING_RMS_WINDOW_SIZE]; //! Used to copy a history to (so it can be used to calculate the median)
+	CircularBuffer<int32_t>* _powerMilliWattHist;        //! Used to store a history of the power
+	CircularBuffer<int32_t>* _currentRmsMilliAmpHist;    //! Used to store a history of the current_rms
+	CircularBuffer<int32_t>* _filteredCurrentRmsHistMA;  //! Used to store a history of the filtered current_rms
+	CircularBuffer<int32_t>* _voltageRmsMilliVoltHist;   //! Used to store a history of the voltage_rms
+	int32_t _histCopy[POWER_SAMPLING_RMS_WINDOW_SIZE];   //! Used to copy a history to (so it can be used to calculate
+														 //! the median)
 	uint16_t _consecutiveDimmerOvercurrent = 0;
-	uint16_t _consecutiveOvercurrent = 0;
+	uint16_t _consecutiveOvercurrent       = 0;
 
+	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD) _currentMilliAmpThreshold;  //! Current threshold from settings.
+	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER)
+	_currentMilliAmpThresholdDimmer;  //! Current threshold when using dimmer from settings.
 
-	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD) _currentMilliAmpThreshold;    //! Current threshold from settings.
-	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER) _currentMilliAmpThresholdDimmer; //! Current threshold when using dimmer from settings.
+	int64_t _energyUsedmicroJoule = 0;  //! Energy used in micro joule
 
-	int64_t _energyUsedmicroJoule = 0; //! Energy used in micro joule
-
-	switch_state_t _lastSwitchState; //! Stores the last seen switch state.
-	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
-	bool _lastSwitchOffTicksValid = false;   //! Keep up whether the last switch off time is valid.
-	bool _dimmerFailureDetectionStarted = false; //! Keep up whether the IGBT failure detection has started yet.
+	switch_state_t _lastSwitchState;                //! Stores the last seen switch state.
+	uint32_t _lastSwitchOffTicks;                   //! RTC ticks when the switch was last turned off.
+	bool _lastSwitchOffTicksValid         = false;  //! Keep up whether the last switch off time is valid.
+	bool _dimmerFailureDetectionStarted   = false;  //! Keep up whether the IGBT failure detection has started yet.
 	uint32_t _calibratePowerZeroCountDown = 4000 / TICK_INTERVAL_MS;
 
 	// Store the adc config, so that the actual adc config can be changed.
@@ -201,13 +207,25 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
-	adc_buffer_seq_nr_t _lastBufSeqNr = 0;
-	adc_buffer_id_t _lastBufIndex = 0;
+	adc_buffer_seq_nr_t _lastBufSeqNr     = 0;
+	adc_buffer_id_t _lastBufIndex         = 0;
 	adc_buffer_id_t _lastFilteredBufIndex = 0;
 
 	cs_adc_restarts_t _adcRestarts;
 	cs_adc_channel_swaps_t _adcChannelSwaps;
 
+	//! Count number of buffers that have been skipped for processing.
+	uint32_t _bufSkipCount = 0;
+
+	/**
+	 * Load energy used from IPC ram.
+	 */
+	void initEnergyUsed();
+
+	/**
+	 * Store energy used to IPC ram.
+	 */
+	void storeEnergyUsed();
 
 	/** Initialize the moving averages
 	 */
@@ -288,7 +306,11 @@ private:
 	 * @param[in] voltageRmsMilliVolt            RMS voltage in mV of the last AC period.
 	 * @param[in] power                          Struct that holds the buffers.
 	 */
-	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, adc_buffer_id_t bufIndex);
+	void checkSoftfuse(
+			int32_t currentRmsMilliAmp,
+			int32_t currentRmsMilliAmpFiltered,
+			int32_t voltageRmsMilliVolt,
+			adc_buffer_id_t bufIndex);
 
 	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 
@@ -306,4 +328,3 @@ private:
 
 	void printBuf(adc_buffer_id_t bufIndex);
 };
-

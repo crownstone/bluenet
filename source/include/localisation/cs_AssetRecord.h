@@ -78,7 +78,6 @@ struct __attribute__((__packed__)) asset_record_t {
 #endif
 	}
 
-
 	bool isThrottled() {
 		return throttlingCountdown != 0;
 	}
@@ -86,7 +85,8 @@ struct __attribute__((__packed__)) asset_record_t {
 	void setThrottlingCountdown(uint8_t ticks) {
 		if (ticks >= 0xff) {
 			throttlingCountdown = 0xff - 1;
-		} else {
+		}
+		else {
 			throttlingCountdown = ticks;
 		}
 	}

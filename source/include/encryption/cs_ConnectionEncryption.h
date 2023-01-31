@@ -11,12 +11,9 @@
 #include <protocol/cs_Packets.h>
 #include <structs/cs_PacketsInternal.h>
 
-#define DEFAULT_VALIDATION_KEY  0xCAFEBABE
+#define DEFAULT_VALIDATION_KEY 0xCAFEBABE
 
-enum class ConnectionEncryptionType {
-	CTR,
-	ECB
-};
+enum class ConnectionEncryptionType { CTR, ECB };
 
 class ConnectionEncryption : EventListener {
 public:
@@ -40,7 +37,11 @@ public:
 	 * @param[in]  encryptionType      Type of encryption to use.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t encrypt(cs_data_t input, cs_data_t output, EncryptionAccessLevel accessLevel, ConnectionEncryptionType encryptionType);
+	cs_ret_code_t encrypt(
+			cs_data_t input,
+			cs_data_t output,
+			EncryptionAccessLevel accessLevel,
+			ConnectionEncryptionType encryptionType);
 
 	/**
 	 * Parses headers, decrypts data, and validates decrypted data.
@@ -51,16 +52,22 @@ public:
 	 * @param[in]  encryptionType      Type of encryption to use.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t decrypt(cs_data_t input, cs_data_t output, EncryptionAccessLevel& accessLevel, ConnectionEncryptionType encryptionType);
+	cs_ret_code_t decrypt(
+			cs_data_t input,
+			cs_data_t output,
+			EncryptionAccessLevel& accessLevel,
+			ConnectionEncryptionType encryptionType);
 
 	/**
 	 * Get the required output buffer size when encrypting plaintext.
 	 *
 	 * @param[in]  plaintextBufferSize      Size of the buffer with the payload that will be encrypted.
 	 * @param[in]  encryptionType           Type of encryption to use.
-	 * @return                              Required size of the buffer that will hold the encryption headers and encrypted payload.
+	 * @return                              Required size of the buffer that will hold the encryption headers and
+	 * encrypted payload.
 	 */
-	static cs_buffer_size_t getEncryptedBufferSize(cs_buffer_size_t plaintextBufferSize, ConnectionEncryptionType encryptionType);
+	static cs_buffer_size_t getEncryptedBufferSize(
+			cs_buffer_size_t plaintextBufferSize, ConnectionEncryptionType encryptionType);
 
 	/**
 	 * Get the required output buffer size when decrypting encrypted data.
@@ -69,7 +76,8 @@ public:
 	 * @param[in]  encryptionType           Type of encryption to use.
 	 * @return                              Required size of the buffer that will hold the decrypted payload.
 	 */
-	static cs_buffer_size_t getPlaintextBufferSize(cs_buffer_size_t encryptedBufferSize, ConnectionEncryptionType encryptionType);
+	static cs_buffer_size_t getPlaintextBufferSize(
+			cs_buffer_size_t encryptedBufferSize, ConnectionEncryptionType encryptionType);
 
 	/**
 	 * Set session data. To be used when connecting to another crownstone.
@@ -80,13 +88,6 @@ public:
 	 * @return ERR_SUCCESS                  When the session data is set.
 	 */
 	cs_ret_code_t setSessionData(session_data_t& sessionData);
-
-	/**
-	 * Whether a it's allowed to write to a characteristic.
-	 *
-	 * TODO: remove and let stack handle this.
-	 */
-	bool allowedToWrite();
 
 	/**
 	 * Close connection due to insufficient access.
@@ -106,7 +107,7 @@ private:
 	ConnectionEncryption(ConnectionEncryption const&);
 
 	// This class is singleton, deny implementation
-	void operator=(ConnectionEncryption const &);
+	void operator=(ConnectionEncryption const&);
 
 	/**
 	 * Session data: data that's valid for a whole session (connection).
@@ -127,4 +128,3 @@ private:
 	 */
 	void generateSessionData();
 };
-

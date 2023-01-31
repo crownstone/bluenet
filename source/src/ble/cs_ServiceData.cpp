@@ -9,10 +9,10 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
-#include <logging/cs_Logger.h>
 #include <drivers/cs_Temperature.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
+#include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
@@ -24,7 +24,7 @@
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
 ServiceData::ServiceData() {
-//	_stateErrors.asInt = 0;
+	//	_stateErrors.asInt = 0;
 	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 	assert(sizeof(service_data_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_encrypted_t must be 1 block.");
@@ -39,13 +39,13 @@ void ServiceData::init(uint8_t deviceType) {
 	_externalStates.init();
 
 	// Init flags
-	_flags.asInt = 0;
+	_flags.asInt                = 0;
 	_flags.flags.markedDimmable = State::getInstance().isTrue(CS_TYPE::CONFIG_DIMMING_ALLOWED);
-	_flags.flags.switchLocked = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED);
-	_flags.flags.switchcraft = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
-	_flags.flags.tapToToggle = State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED);
+	_flags.flags.switchLocked   = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED);
+	_flags.flags.switchcraft    = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
+	_flags.flags.tapToToggle    = State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED);
 
-	_extraFlags.asInt = 0;
+	_extraFlags.asInt           = 0;
 
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS) behaviourSettings;
 	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, &behaviourSettings, sizeof(behaviourSettings));
@@ -79,14 +79,14 @@ void ServiceData::init(uint8_t deviceType) {
 		updateCrownstoneId(crownstoneId);
 
 		// Init microapp service data.
-		_microappServiceData.id = crownstoneId;
-		_microappServiceData.validation = SERVICE_DATA_VALIDATION;
+		_microappServiceData.id          = crownstoneId;
+		_microappServiceData.validation  = SERVICE_DATA_VALIDATION;
 		_microappServiceData.flags.asInt = 0;
 	}
 
 	// Init the timer: we want to update the advertisement packet on a fixed interval.
-	_updateTimerData = { {0} };
-	_updateTimerId = &_updateTimerData;
+	_updateTimerData = {{0}};
+	_updateTimerId   = &_updateTimerData;
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
 	// Set the initial advertisement (timer has to be initialized before).
@@ -100,13 +100,13 @@ void ServiceData::init(uint8_t deviceType) {
 }
 
 void ServiceData::setDeviceType(uint8_t deviceType) {
-//	_deviceType = deviceType;
+	//	_deviceType = deviceType;
 	_serviceData.params.deviceType = deviceType;
 }
 
 void ServiceData::updatePowerUsage(int32_t powerUsage) {
 	_powerUsageReal = powerUsage;
-	_powerFactor = 127;
+	_powerFactor    = 127;
 }
 
 void ServiceData::updateAccumulatedEnergy(int32_t energy) {
@@ -134,8 +134,6 @@ uint16_t ServiceData::getArraySize() {
 	return sizeof(service_data_t);
 }
 
-
-
 void ServiceData::updateServiceData(bool initial) {
 	Timer::getInstance().stop(_updateTimerId);
 
@@ -148,7 +146,7 @@ void ServiceData::updateServiceData(bool initial) {
 
 	// Update flags.
 	_flags.flags.timeSet = (timestamp != 0);
-	_flags.flags.error = _stateErrors.asInt != 0;
+	_flags.flags.error   = _stateErrors.asInt != 0;
 
 	// Set timestamp of first error.
 	if (_stateErrors.asInt == 0) {
@@ -161,9 +159,20 @@ void ServiceData::updateServiceData(bool initial) {
 	bool encrypt = fillServiceData(timestamp);
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
-	_log(SERIAL_DEBUG, false, "servideData: ");
-	_logArray(SERIAL_DEBUG, true, _serviceData.array, sizeof(service_data_t));
-//		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
+	_log(SERIAL_DEBUG,
+		 false,
+		 "serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i",
+		 serviceData->params.type,
+		 serviceData->params.crownstoneId,
+		 serviceData->params.switchState,
+		 serviceData->params.flagBitmask,
+		 serviceData->params.temperature,
+		 serviceData->params.powerUsageReal);
+	_log(SERIAL_DEBUG,
+		 true,
+		 "E=%i time=%u",
+		 serviceData->params.accumulatedEnergy,
+		 serviceData->params.partialTimestamp);
 #endif
 
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(_serviceData.array));
@@ -185,8 +194,6 @@ void ServiceData::updateServiceData(bool initial) {
 		Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
 	}
 }
-
-
 
 bool ServiceData::fillServiceData(uint32_t timestamp) {
 	bool serviceDataSet = false;
@@ -233,8 +240,6 @@ bool ServiceData::fillServiceData(uint32_t timestamp) {
 	return true;
 }
 
-
-
 void ServiceData::encryptServiceData() {
 	// encrypt the array using the guest key ECB if encryption is enabled.
 	uint8_t key[ENCRYPTION_KEY_LENGTH];
@@ -249,46 +254,44 @@ void ServiceData::encryptServiceData() {
 	}
 }
 
-
-
 void ServiceData::fillWithSetupState(uint32_t timestamp) {
-	_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
-	_serviceData.params.setup.type = SERVICE_DATA_DATA_TYPE_STATE;
-	_serviceData.params.setup.state.switchState = _switchState;
-	_serviceData.params.setup.state.flags = _flags;
-	_serviceData.params.setup.state.temperature = _temperature;
-	_serviceData.params.setup.state.powerFactor = _powerFactor;
+	_serviceData.params.type                       = SERVICE_DATA_TYPE_SETUP;
+	_serviceData.params.setup.type                 = SERVICE_DATA_DATA_TYPE_STATE;
+	_serviceData.params.setup.state.switchState    = _switchState;
+	_serviceData.params.setup.state.flags          = _flags;
+	_serviceData.params.setup.state.temperature    = _temperature;
+	_serviceData.params.setup.state.powerFactor    = _powerFactor;
 	_serviceData.params.setup.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-	_serviceData.params.setup.state.errors = _stateErrors.asInt;
-	_serviceData.params.setup.state.counter = _updateCount;
+	_serviceData.params.setup.state.errors         = _stateErrors.asInt;
+	_serviceData.params.setup.state.counter        = _updateCount;
 	memset(_serviceData.params.setup.state.reserved, 0, sizeof(_serviceData.params.setup.state.reserved));
 }
 
 void ServiceData::fillWithState(uint32_t timestamp) {
-	_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_STATE;
-	_serviceData.params.encrypted.state.id = _crownstoneId;
-	_serviceData.params.encrypted.state.switchState = _switchState;
-	_serviceData.params.encrypted.state.flags = _flags;
-	_serviceData.params.encrypted.state.temperature = _temperature;
-	_serviceData.params.encrypted.state.powerFactor = _powerFactor;
-	_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-	_serviceData.params.encrypted.state.energyUsed = _energyUsed;
+	_serviceData.params.type                             = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type                   = SERVICE_DATA_DATA_TYPE_STATE;
+	_serviceData.params.encrypted.state.id               = _crownstoneId;
+	_serviceData.params.encrypted.state.switchState      = _switchState;
+	_serviceData.params.encrypted.state.flags            = _flags;
+	_serviceData.params.encrypted.state.temperature      = _temperature;
+	_serviceData.params.encrypted.state.powerFactor      = _powerFactor;
+	_serviceData.params.encrypted.state.powerUsageReal   = compressPowerUsageMilliWatt(_powerUsageReal);
+	_serviceData.params.encrypted.state.energyUsed       = _energyUsed;
 	_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-	_serviceData.params.encrypted.state.extraFlags = _extraFlags;
-	_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
+	_serviceData.params.encrypted.state.extraFlags       = _extraFlags;
+	_serviceData.params.encrypted.state.validation       = SERVICE_DATA_VALIDATION;
 }
 
 void ServiceData::fillWithError(uint32_t timestamp) {
-	_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ERROR;
-	_serviceData.params.encrypted.error.id = _crownstoneId;
-	_serviceData.params.encrypted.error.errors = _stateErrors.asInt;
-	_serviceData.params.encrypted.error.timestamp = _firstErrorTimestamp;
-	_serviceData.params.encrypted.error.flags = _flags;
-	_serviceData.params.encrypted.error.temperature = _temperature;
+	_serviceData.params.type                             = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type                   = SERVICE_DATA_DATA_TYPE_ERROR;
+	_serviceData.params.encrypted.error.id               = _crownstoneId;
+	_serviceData.params.encrypted.error.errors           = _stateErrors.asInt;
+	_serviceData.params.encrypted.error.timestamp        = _firstErrorTimestamp;
+	_serviceData.params.encrypted.error.flags            = _flags;
+	_serviceData.params.encrypted.error.temperature      = _temperature;
 	_serviceData.params.encrypted.error.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-	_serviceData.params.encrypted.error.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+	_serviceData.params.encrypted.error.powerUsageReal   = compressPowerUsageMilliWatt(_powerUsageReal);
 }
 
 bool ServiceData::fillWithExternalState() {
@@ -303,51 +306,51 @@ bool ServiceData::fillWithExternalState() {
 void ServiceData::fillWithAlternativeState(uint32_t timestamp) {
 	TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) behaviourHash;
 	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &behaviourHash, sizeof(behaviourHash));
-	_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE;
-	_serviceData.params.encrypted.altState.id = _crownstoneId;
-	_serviceData.params.encrypted.altState.switchState = _switchState;
-	_serviceData.params.encrypted.altState.flags = _flags;
+	_serviceData.params.type                                   = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type                         = SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE;
+	_serviceData.params.encrypted.altState.id                  = _crownstoneId;
+	_serviceData.params.encrypted.altState.switchState         = _switchState;
+	_serviceData.params.encrypted.altState.flags               = _flags;
 	_serviceData.params.encrypted.altState.behaviourMasterHash = getPartialBehaviourHash(behaviourHash);
 
 	TYPIFY(STATE_ASSET_FILTERS_VERSION) filtersVersion;
 	State::getInstance().get(CS_TYPE::STATE_ASSET_FILTERS_VERSION, &filtersVersion, sizeof(filtersVersion));
 	_serviceData.params.encrypted.altState.assetFiltersVersion = filtersVersion.masterVersion;
-	_serviceData.params.encrypted.altState.assetFiltersCrc = filtersVersion.masterCrc;
+	_serviceData.params.encrypted.altState.assetFiltersCrc     = filtersVersion.masterCrc;
 
-//	_serviceData.params.encrypted.altState.reserved = {0};
-	_serviceData.params.encrypted.altState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-	_serviceData.params.encrypted.altState.reserved2 = 0;
-	_serviceData.params.encrypted.altState.validation = SERVICE_DATA_VALIDATION;
+	//	_serviceData.params.encrypted.altState.reserved = {0};
+	_serviceData.params.encrypted.altState.partialTimestamp    = getPartialTimestampOrCounter(timestamp, _updateCount);
+	_serviceData.params.encrypted.altState.reserved2           = 0;
+	_serviceData.params.encrypted.altState.validation          = SERVICE_DATA_VALIDATION;
 }
 
 void ServiceData::fillWithHubState(uint32_t timestamp) {
 	service_data_hub_state_t* serviceDataHubState = nullptr;
 	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-		_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
+		_serviceData.params.type       = SERVICE_DATA_TYPE_SETUP;
 		_serviceData.params.setup.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
-		serviceDataHubState = &(_serviceData.params.setup.hubState);
+		serviceDataHubState            = &(_serviceData.params.setup.hubState);
 	}
 	else {
-		_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+		_serviceData.params.type           = SERVICE_DATA_TYPE_ENCRYPTED;
 		_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
-		serviceDataHubState = &(_serviceData.params.encrypted.hubState);
+		serviceDataHubState                = &(_serviceData.params.encrypted.hubState);
 	}
 
-	serviceDataHubState->id = _crownstoneId;
-	auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
-	auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
+	serviceDataHubState->id                             = _crownstoneId;
+	auto selfFlags                                      = UartConnection::getInstance().getSelfStatus().flags.flags;
+	auto hubFlags                                       = UartConnection::getInstance().getUserStatus().flags.flags;
 
-	serviceDataHubState->flags.asInt = 0;
-	serviceDataHubState->flags.flags.uartAlive = UartConnection::getInstance().isAlive();
+	serviceDataHubState->flags.asInt                    = 0;
+	serviceDataHubState->flags.flags.uartAlive          = UartConnection::getInstance().isAlive();
 	serviceDataHubState->flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
 	serviceDataHubState->flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
-	serviceDataHubState->flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
-	serviceDataHubState->flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
-	serviceDataHubState->flags.flags.hasInternet = hubFlags.hasInternet;
-	serviceDataHubState->flags.flags.hasError = hubFlags.hasError;
+	serviceDataHubState->flags.flags.uartEncryptionRequiredByHub   = hubFlags.encryptionRequired;
+	serviceDataHubState->flags.flags.hasBeenSetUp                  = hubFlags.hasBeenSetUp;
+	serviceDataHubState->flags.flags.hasInternet                   = hubFlags.hasInternet;
+	serviceDataHubState->flags.flags.hasError                      = hubFlags.hasError;
 
-	auto hubData = UartConnection::getInstance().getUserStatus();
+	auto hubData                                                   = UartConnection::getInstance().getUserStatus();
 	if (hubData.type == UART_HUB_DATA_TYPE_CROWNSTONE_HUB) {
 		memcpy(serviceDataHubState->hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
 	}
@@ -355,27 +358,29 @@ void ServiceData::fillWithHubState(uint32_t timestamp) {
 		memset(serviceDataHubState->hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
 	}
 	serviceDataHubState->partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-	serviceDataHubState->reserved = 0;
-	serviceDataHubState->validation = SERVICE_DATA_VALIDATION;
+	serviceDataHubState->reserved         = 0;
+	serviceDataHubState->validation       = SERVICE_DATA_VALIDATION;
 }
 
 bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
 	if (!_microappServiceDataSet) {
 		return false;
 	}
-	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_MICROAPP;
-	_serviceData.params.encrypted.microapp = _microappServiceData;
 	// Stone ID and validation are set at init.
 	// Timestamp is set when microapp service data was received.
+	// We don't have to update it, as validation can be done with the other service data.
+	// But why wouldn't we update it?
+	_serviceData.params.encrypted.type     = SERVICE_DATA_DATA_TYPE_MICROAPP;
+	_serviceData.params.encrypted.microapp = _microappServiceData;
 	return true;
 }
 
-void ServiceData::handleEvent(event_t & event) {
+void ServiceData::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::STATE_ERRORS: {
 			LOGd("Event: $typeName(%u)", event.type);
-			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
-			_flags.flags.error = stateErrors->asInt;
+			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*)event.data;
+			_flags.flags.error          = stateErrors->asInt;
 			break;
 		}
 		case CS_TYPE::CONFIG_CROWNSTONE_ID: {
@@ -385,7 +390,7 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_SWITCH_STATE: {
 			switch_state_t* state = (TYPIFY(STATE_SWITCH_STATE)*)event.data;
 			updateSwitchState(state->asInt);
-//			sendMeshState(true);
+			//			sendMeshState(true);
 			// Abuse the state update timeout.
 			_sendStateCountdown = 300 / TICK_INTERVAL_MS;
 			break;
@@ -406,7 +411,7 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
-			auto behaviourSettings = CS_TYPE_CAST(STATE_BEHAVIOUR_SETTINGS, event.data);
+			auto behaviourSettings             = CS_TYPE_CAST(STATE_BEHAVIOUR_SETTINGS, event.data);
 			_extraFlags.flags.behaviourEnabled = behaviourSettings->flags.enabled;
 			break;
 		}
@@ -442,7 +447,8 @@ void ServiceData::handleEvent(event_t & event) {
 			TYPIFY(EVT_TICK) tickCount = *(TYPIFY(EVT_TICK)*)event.data;
 			_externalStates.tick(tickCount);
 			if (_sendStateCountdown-- == 0) {
-				uint32_t randMs = MESH_SEND_STATE_INTERVAL_MS + RNG::getInstance().getRandom8() * MESH_SEND_STATE_INTERVAL_MS_VARIATION / 255;
+				uint32_t randMs = MESH_SEND_STATE_INTERVAL_MS
+								  + RNG::getInstance().getRandom8() * MESH_SEND_STATE_INTERVAL_MS_VARIATION / 255;
 				_sendStateCountdown = randMs / TICK_INTERVAL_MS;
 				sendMeshState(false);
 			}
@@ -475,37 +481,38 @@ void ServiceData::handleEvent(event_t & event) {
 			_microappServiceData.appUuid = advertise->appUuid;
 
 			memset(_microappServiceData.data, 0, sizeof(_microappServiceData.data));
-			cs_buffer_size_t dataSize = std::min(advertise->data.len, static_cast<uint16_t>(sizeof(_microappServiceData.data)));
+			cs_buffer_size_t dataSize =
+					std::min(advertise->data.len, static_cast<uint16_t>(sizeof(_microappServiceData.data)));
 			memcpy(_microappServiceData.data, advertise->data.data, dataSize);
 
-
-			uint32_t timestamp = SystemTime::posix();
-			_microappServiceData.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+			uint32_t timestamp                       = SystemTime::posix();
+			_microappServiceData.partialTimestamp    = getPartialTimestampOrCounter(timestamp, _updateCount);
 			_microappServiceData.flags.flags.timeSet = _flags.flags.timeSet;
 
-			LOGd("Updated microapp data: uuid=%u timestamp=%u", _microappServiceData.appUuid, _microappServiceData.partialTimestamp);
+			LOGd("Updated microapp data: uuid=%u timestamp=%u",
+				 _microappServiceData.appUuid,
+				 _microappServiceData.partialTimestamp);
 			_microappServiceDataSet = true;
 			break;
 		}
-		default:
-			return;
+		default: return;
 	}
 }
 
 int16_t ServiceData::compressPowerUsageMilliWatt(int32_t powerUsageMW) {
 	// units of 1/8 W
-	int16_t retVal = powerUsageMW / 125; // similar to *8/1000, but then without chance to overflow
+	int16_t retVal = powerUsageMW / 125;  // similar to *8/1000, but then without chance to overflow
 	return retVal;
 }
 
 int32_t ServiceData::decompressPowerUsage(int16_t compressedPowerUsage) {
-	int32_t retVal = compressedPowerUsage * 125; // similar to /8*1000, but then without losing precision.
+	int32_t retVal = compressedPowerUsage * 125;  // similar to /8*1000, but then without losing precision.
 	return retVal;
 }
 
 uint16_t ServiceData::timestampToPartialTimestamp(uint32_t timestamp) {
-//	uint16_t retVal = timestamp & 0x0000FFFF;
-	uint16_t retVal = timestamp % (UINT16_MAX+1); // Safer
+	//	uint16_t retVal = timestamp & 0x0000FFFF;
+	uint16_t retVal = timestamp % (UINT16_MAX + 1);  // Safer
 	return retVal;
 }
 
@@ -522,46 +529,46 @@ uint16_t ServiceData::getPartialBehaviourHash(uint32_t behaviourHash) {
 }
 
 void ServiceData::sendMeshState(bool event) {
-//#ifdef BUILD_MESHING
+	//#ifdef BUILD_MESHING
 	LOGi("sendMeshState");
 	uint32_t timestamp = SystemTime::posix();
 
 	cs_mesh_msg_t meshMsg;
 	if (event) {
 		meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-		meshMsg.urgency = CS_MESH_URGENCY_HIGH;
+		meshMsg.urgency     = CS_MESH_URGENCY_HIGH;
 	}
 	else {
 		meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
-		meshMsg.urgency = CS_MESH_URGENCY_LOW;
+		meshMsg.urgency     = CS_MESH_URGENCY_LOW;
 	}
 	{
 		cs_mesh_model_msg_state_1_t packet;
-		packet.temperature = _temperature;
-		packet.energyUsed = _energyUsed;
+		packet.temperature      = _temperature;
+		packet.energyUsed       = _energyUsed;
 		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 
-		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_1;
-		meshMsg.payload = (uint8_t*)&packet;
-		meshMsg.size = sizeof(packet);
+		meshMsg.type            = CS_MESH_MODEL_TYPE_STATE_1;
+		meshMsg.payload         = (uint8_t*)&packet;
+		meshMsg.size            = sizeof(packet);
 
 		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		EventDispatcher::getInstance().dispatch(cmd);
 	}
 	{
 		cs_mesh_model_msg_state_0_t packet;
-		packet.switchState = _switchState;
-		packet.flags = _flags.asInt;
-		packet.powerFactor = _powerFactor;
-		packet.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+		packet.switchState      = _switchState;
+		packet.flags            = _flags.asInt;
+		packet.powerFactor      = _powerFactor;
+		packet.powerUsageReal   = compressPowerUsageMilliWatt(_powerUsageReal);
 		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 
-		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_0;
-		meshMsg.payload = (uint8_t*)&packet;
-		meshMsg.size = sizeof(packet);
+		meshMsg.type            = CS_MESH_MODEL_TYPE_STATE_0;
+		meshMsg.payload         = (uint8_t*)&packet;
+		meshMsg.size            = sizeof(packet);
 
 		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		EventDispatcher::getInstance().dispatch(cmd);
 	}
-//#endif
+	//#endif
 }

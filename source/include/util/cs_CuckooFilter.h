@@ -109,7 +109,6 @@ public:
 		return remove(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-
 	/**
 	 * Reduces a key (element) to a compressed fingerprint, consisting of
 	 * the fingerprint of the key and its associated primary position in the fingerprint array.
@@ -178,7 +177,6 @@ public:
 	constexpr size_t bucketCount() { return 1 << _data->bucketCountLog2; }
 
 	constexpr size_t bufferSize() { return bufferSize(bucketCount(), _data->nestsPerBucket); }
-
 
 private:
 	// -------------------------------------------------------------

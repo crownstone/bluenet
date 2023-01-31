@@ -6,9 +6,10 @@
  */
 #pragma once
 
-#include <cstdint>
 #include <protocol/cs_AssetFilterPackets.h>
 #include <protocol/cs_CuckooFilterStructs.h>
+
+#include <cstdint>
 
 /**
  * Runtime meta data associated to an asset filter that is not persisted to flash.

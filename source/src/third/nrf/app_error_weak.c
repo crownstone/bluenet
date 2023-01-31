@@ -38,10 +38,9 @@
  *
  */
 #include "app_error.h"
-
+#include "app_util_platform.h"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
-#include "app_util_platform.h"
 #include "nrf_strerror.h"
 
 #if defined(SOFTDEVICE_PRESENT) && SOFTDEVICE_PRESENT
@@ -53,66 +52,59 @@
  * Function is implemented as weak so that it can be overwritten by custom application error handler
  * when needed.
  */
-__WEAK void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
-{
-    __disable_irq();
-    NRF_LOG_FINAL_FLUSH();
+__WEAK void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info) {
+	__disable_irq();
+	NRF_LOG_FINAL_FLUSH();
 
 #ifndef DEBUG
-    NRF_LOG_ERROR("Fatal error");
+	NRF_LOG_ERROR("Fatal error");
 #else
-    switch (id)
-    {
+	switch (id) {
 #if defined(SOFTDEVICE_PRESENT) && SOFTDEVICE_PRESENT
-        case NRF_FAULT_ID_SD_ASSERT:
-        	/**< SoftDevice assertion. The info parameter is reserved for future used. */
-            NRF_LOG_ERROR("SOFTDEVICE: ASSERTION FAILED");
-            break;
-        case NRF_FAULT_ID_APP_MEMACC:
-            /**< Application invalid memory access. The info parameter will contain 0x00000000,
-            in case of SoftDevice RAM access violation. In case of SoftDevice peripheral
-            register violation the info parameter will contain the sub-region number of
-            PREGION[0], on whose address range the disallowed write access caused the
-            memory access fault. */
-            NRF_LOG_ERROR("SOFTDEVICE: INVALID MEMORY ACCESS");
-            break;
+		case NRF_FAULT_ID_SD_ASSERT:
+			/**< SoftDevice assertion. The info parameter is reserved for future used. */
+			NRF_LOG_ERROR("SOFTDEVICE: ASSERTION FAILED");
+			break;
+		case NRF_FAULT_ID_APP_MEMACC:
+			/**< Application invalid memory access. The info parameter will contain 0x00000000,
+			in case of SoftDevice RAM access violation. In case of SoftDevice peripheral
+			register violation the info parameter will contain the sub-region number of
+			PREGION[0], on whose address range the disallowed write access caused the
+			memory access fault. */
+			NRF_LOG_ERROR("SOFTDEVICE: INVALID MEMORY ACCESS");
+			break;
 #endif
-        case NRF_FAULT_ID_SDK_ASSERT:
-        {
-            assert_info_t * p_info = (assert_info_t *)info;
-            NRF_LOG_ERROR("ASSERTION FAILED at %s:%u",
-                          p_info->p_file_name,
-                          p_info->line_num);
-            break;
-        }
-        case NRF_FAULT_ID_SDK_ERROR:
-        {
-            error_info_t * p_info = (error_info_t *)info;
-            NRF_LOG_ERROR("ERROR %u [%s] at %s:%u\r\nPC at: 0x%08x",
-                          p_info->err_code,
-                          nrf_strerror_get(p_info->err_code),
-                          p_info->p_file_name,
-                          p_info->line_num,
-                          pc);
-             NRF_LOG_ERROR("End of error report");
-            break;
-        }
-        default:
-            NRF_LOG_ERROR("UNKNOWN FAULT at 0x%08X", pc);
-            break;
-    }
+		case NRF_FAULT_ID_SDK_ASSERT: {
+			assert_info_t* p_info = (assert_info_t*)info;
+			NRF_LOG_ERROR("ASSERTION FAILED at %s:%u", p_info->p_file_name, p_info->line_num);
+			break;
+		}
+		case NRF_FAULT_ID_SDK_ERROR: {
+			error_info_t* p_info = (error_info_t*)info;
+			NRF_LOG_ERROR(
+					"ERROR %u [%s] at %s:%u\r\nPC at: 0x%08x",
+					p_info->err_code,
+					nrf_strerror_get(p_info->err_code),
+					p_info->p_file_name,
+					p_info->line_num,
+					pc);
+			NRF_LOG_ERROR("End of error report");
+			break;
+		}
+		default: NRF_LOG_ERROR("UNKNOWN FAULT at 0x%08X", pc); break;
+	}
 #endif
 
 #ifdef DEBUG
-    NRF_BREAKPOINT_COND;
+	NRF_BREAKPOINT_COND;
 #endif
 
-    // On assert, the system can only recover with a reset.
+	// On assert, the system can only recover with a reset.
 #ifndef DEBUG
-    NRF_LOG_WARNING("System reset");
-    NVIC_SystemReset();
+	NRF_LOG_WARNING("System reset");
+	NVIC_SystemReset();
 #else
-    app_error_save_and_stop(id, pc, info);
-#endif // DEBUG
+	app_error_save_and_stop(id, pc, info);
+#endif  // DEBUG
 }
 /*lint -restore */

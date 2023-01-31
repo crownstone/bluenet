@@ -23,6 +23,7 @@ extern "C" {
 #endif
 
 #include <protocol/cs_Typedefs.h>
+#include <protocol/cs_UicrPacket.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -32,99 +33,103 @@ extern "C" {
  * type at runtime from the UICR and assigns the
  */
 
-
 // Nordic dev board, but with some hardware bugs.
-#define PCA10036             40
+#define PCA10036 40
 // Nordic dev board in active use.
-#define PCA10040             41
+#define PCA10040 41
 // Nordic dev board for the nRF52833
-#define PCA10100             42
+#define PCA10100 42
 // Nordic dev board for the nRF52840
-#define PCA10056             43
+#define PCA10056 43
 
 // Rectangular beacons from China.
-#define GUIDESTONE           100
-
+#define GUIDESTONE 100
 
 // Crownstone USB dongle
-#define CS_USB_DONGLE        200
+#define CS_USB_DONGLE 200
 
 // CROWNSTONE BUILTINS
 
 // Prototype builtin. Not in production.
-#define ACR01B1A             1000
+#define ACR01B1A 1000
 // Prototype builtin. Not in production.
-#define ACR01B1B             1001
+#define ACR01B1B 1001
 // Prototype builtin. Not in production.
-#define ACR01B1C             1002
-#define ACR01B1D             1003 // released
-#define ACR01B1E             1004 // same as ACR01B1D, but with patch
-#define ACR01B10B            1007 // Builtin One v20
-#define ACR01B10D            1008 // Builtin One v25
+#define ACR01B1C 1002
+#define ACR01B1D 1003   // released
+#define ACR01B1E 1004   // same as ACR01B1D, but with patch
+#define ACR01B10B 1007  // Builtin One v20
+#define ACR01B10D 1008  // Builtin One v25
 
-#define ACR01B13B            1009 // Builtin Two development version
-#define ACR01B15A            1010 // Builtin Two (V3-ACR01B15A-rev7)
+#define ACR01B13B 1009  // Builtin Two development version
+#define ACR01B15A 1010  // Builtin Two (V3-ACR01B15A-rev7)
 
 // CROWNSTONE PLUGS
 
 // Prototype plug.
-#define ACR01B2A             1500
+#define ACR01B2A 1500
+
 // Prototype plug. Replace caps before and after LDO with electrolytic caps due to DC bias.
-#define ACR01B2B             1501
+#define ACR01B2B 1501
 
 // Production release plug. Replace primary supply registor with MELF type and increase value to 100 Ohm.
-#define ACR01B2C             1502
+#define ACR01B2C 1502
 
 // Prototype plug. Remove MELF. Add compensation cap. Remove C7. Add pull-down resistor to LGBT driver input.
 // Move thermal fuse to cover both power paths. Alter offset and gain of power measurement service. Add measurement
 // offset to ADC.
-#define ACR01B2E             1503
-// Schematic change. Change power measurement resistor values.
-#define ACR01B2G             1504
+#define ACR01B2E 1503
 
-// Crownstone Plug One (first prototype of second edition of the plug)
-#define ACR01B11A            1505
+// Production release plug. Schematic change. Change power measurement resistor values.
+#define ACR01B2G 1504
 
+// Prototype Crownstone Plug One (first prototype of second edition of the plug)
+#define ACR01B11A 1505
+
+// CROWNSTONE OUTLETS
+
+// Prototype outlet
+#define CR01R02v4 1100
 
 #define PIN_NONE 0xFF
 
 enum GainIndex {
-	GAIN_LOW = 0,
+	GAIN_LOW    = 0,
 	GAIN_MIDDLE = 1,
-	GAIN_HIGH = 2,
-	GAIN_COUNT = 3,
-	GAIN_SINGLE = 0, // If there is only a single gain, use the low gain.
+	GAIN_HIGH   = 2,
+	GAIN_COUNT  = 3,
+	GAIN_SINGLE = 0,  // If there is only a single gain, use the low gain.
 };
 
 enum ButtonIndex {
-	BUTTON0 = 0,
-	BUTTON1 = 1,
-	BUTTON2 = 2,
-	BUTTON3 = 3,
+	BUTTON0      = 0,
+	BUTTON1      = 1,
+	BUTTON2      = 2,
+	BUTTON3      = 3,
 	BUTTON_COUNT = 4,
 };
 
 enum GpioIndex {
-	GPIO_INDEX0 = 0,
-	GPIO_INDEX1 = 1,
-	GPIO_INDEX2 = 2,
-	GPIO_INDEX3 = 3,
-	GPIO_INDEX4 = 4,
-	GPIO_INDEX5 = 5,
-	GPIO_INDEX6 = 6,
-	GPIO_INDEX7 = 7,
-	GPIO_INDEX8 = 8,
-	GPIO_INDEX9 = 9,
+	GPIO_INDEX0      = 0,
+	GPIO_INDEX1      = 1,
+	GPIO_INDEX2      = 2,
+	GPIO_INDEX3      = 3,
+	GPIO_INDEX4      = 4,
+	GPIO_INDEX5      = 5,
+	GPIO_INDEX6      = 6,
+	GPIO_INDEX7      = 7,
+	GPIO_INDEX8      = 8,
+	GPIO_INDEX9      = 9,
 	GPIO_INDEX_COUNT = 10,
 };
 
 enum LedIndex {
-	LED0 = 0,
-	LED1 = 1,
-	LED2 = 2,
-	LED3 = 3,
+	LED0      = 0,
+	LED1      = 1,
+	LED2      = 2,
+	LED3      = 3,
 	LED_COUNT = 4,
-	LED_RED = 0,
+	LED_RED   = 0,
 	LED_GREEN = 1,
 };
 
@@ -138,7 +143,8 @@ enum Chipset {
  * Maps GPIO pins to AIN pins.
  *
  * nRF52832
- *  - https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fpin.html&anchor=pin_assign
+ *  -
+ * https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fpin.html&anchor=pin_assign
  *  - same pin layout for the QFN48 and WLCSP package (in the respect of this mapping)
  * nRF52833
  *  - https://infocenter.nordicsemi.com/topic/ps_nrf52833/pin.html?cp=4_1_0_6_0
@@ -160,7 +166,7 @@ uint8_t GetGpioPin(uint8_t major, uint8_t minor);
  *
  * Configure pins for control relays, IGBTs, LEDs, UART, current sensing, etc.
  */
-typedef struct  {
+typedef struct {
 	// The hardware board type (number).
 	uint32_t hardwareBoard;
 
@@ -169,6 +175,9 @@ typedef struct  {
 
 	// GPIO pin to enable the IGBT circuit.
 	uint8_t pinEnableDimmer;
+
+	// GPIO to debug the relay: turns on when relay is turned on, and vice versa. Inverted when LEDs are inverted.
+	uint8_t pinRelayDebug;
 
 	// GPIO pin to switch the relay on.
 	uint8_t pinRelayOn;
@@ -191,9 +200,12 @@ typedef struct  {
 	// Analog input pin to read the dimmer temperature.
 	uint8_t pinAinDimmerTemp;
 
+	// Analog input pin to measure EARTH
+	uint8_t pinAinEarth;
+
 	// GPIO pin to get zero-crossing information for current.
 	uint8_t pinCurrentZeroCrossing;
-	
+
 	// GPIO pin to get zero-crossing information for voltage.
 	uint8_t pinVoltageZeroCrossing;
 
@@ -202,7 +214,7 @@ typedef struct  {
 
 	// GPIO pin to send UART.
 	uint8_t pinTx;
-	
+
 	// GPIO pins that can be used as GPIO by the user, for example microapps.
 	uint8_t pinGpio[GPIO_INDEX_COUNT];
 
@@ -212,36 +224,45 @@ typedef struct  {
 	// GPIO pins of LEDs.
 	uint8_t pinLed[LED_COUNT];
 
+	struct __attribute__((__packed__)) {
+		uint8_t cs;
+		uint8_t clk;
+		uint8_t dio[4];
+	} pinFlash;
+
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {
 		//! True if the dimmer is inverted (setting gpio high turns dimmer off).
-		bool dimmerInverted: 1;
+		bool dimmerInverted : 1;
 
 		// True if the board should have UART enabled by default.
-		bool enableUart: 1;
+		bool enableUart : 1;
 
 		// True if the board has LEDs that should be enabled by default.
 		// Some boards do have LEDs, but cannot deliver enough power when also listening (scanning / meshing).
 		bool enableLeds : 1;
 
 		//! True if LED is off when GPIO is set high.
-		bool ledInverted: 1;
+		bool ledInverted : 1;
 
 		//! True if the temperature sensor of the dimmer is inverted (NTC).
-		bool dimmerTempInverted: 1;
+		bool dimmerTempInverted : 1;
 
 		// True if the NFC pins (p0.09 and p0.10) are used as GPIO.
-		bool usesNfcPins: 1;
+		bool usesNfcPins : 1;
+
+		// True if the Crownstone has a more accurate power measurement.
+		bool hasAccuratePowerMeasurement : 1;
 
 		// True if the Crownstone can try dimming at boot, because it has an accurate enough power measurement,
 		// and a lower startup time of the dimmer circuit.
-		bool canTryDimmingOnBoot: 1;
+		bool canTryDimmingOnBoot : 1;
 
 		// True if the Crownstone can dim immediately after a warm boot.
-		bool canDimOnWarmBoot: 1;
+		bool canDimOnWarmBoot : 1;
 
 		// True if the dimmer can be on when the pins are floating (during boot).
-		bool dimmerOnWhenPinsFloat: 1;
+		bool dimmerOnWhenPinsFloat : 1;
 	} flags;
 
 	/** Device type, e.g. crownstone plug, crownstone builtin, guidestone.
@@ -312,8 +333,8 @@ typedef struct  {
 	 * Since this setting is also used when connecting, it influences the time it takes to make an outgoing connection.
 	 * For some reason, if the scan interval is 2s, it takes at least 2s before a connection is made.
 	 *
-	 * It's also best to make this interval not a multiple of the advertising interval, because in that case, it can happen
-	 * that the advertisements are outside the scan window every time.
+	 * It's also best to make this interval not a multiple of the advertising interval, because in that case, it can
+	 * happen that the advertisements are outside the scan window every time.
 	 *
 	 * Must not be larger than (1000 * BEARER_SCAN_INT_MAX_MS).
 	 */
@@ -334,6 +355,11 @@ typedef struct  {
 
 } boards_config_t;
 
+/**
+ * initializes a board config to default values.
+ */
+void init(boards_config_t* config);
+
 /** Configure board.
  *
  * This function reads a board type id from UICR. This is a dedicated part in memory that is preserved across firmware
@@ -345,6 +371,9 @@ typedef struct  {
  * @return                                       error value (NRF_SUCCESS or NRF_ERROR_INVALID_PARAM)
  */
 cs_ret_code_t configure_board(boards_config_t* p_config);
+
+cs_ret_code_t configure_board_from_hardware_board(uint32_t hardwareBoard, boards_config_t* config);
+cs_ret_code_t configure_board_from_uicr(const cs_uicr_data_t* uicrData, boards_config_t* config);
 
 #ifdef __cplusplus
 }

@@ -5,15 +5,12 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
-#include <util/cs_AssetFilter.h>
-
 #include <logging/cs_Logger.h>
+#include <util/cs_AssetFilter.h>
 #include <util/cs_Utils.h>
 
 #define LOGAssetFilterWarn LOGvv
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
-
 
 asset_filter_runtime_data_t* AssetFilter::runtimedata() {
 	return reinterpret_cast<asset_filter_runtime_data_t*>(_data + 0);
@@ -45,7 +42,7 @@ bool AssetFilter::isValid() {
 	return false;
 }
 
-bool AssetFilter::contains(const void* key, size_t keyLengthInBytes)  {
+bool AssetFilter::contains(const void* key, size_t keyLengthInBytes) {
 	// switch on filter type in metadata and call contain.
 
 	switch (*filterdata().metadata().filterType()) {
@@ -63,10 +60,7 @@ bool AssetFilter::contains(const void* key, size_t keyLengthInBytes)  {
 	return false;
 }
 
-
-
 // ---------------------------- Extracting data from the filter  ----------------------------
-
 
 template <class ReturnType, class ExpressionType>
 ReturnType AssetFilter::prepareFilterInputAndCallDelegate(
@@ -165,9 +159,7 @@ bool AssetFilter::filterAcceptsScannedDevice(const scanned_device_t& asset) {
 	return prepareFilterInputAndCallDelegate(
 			asset,
 			filterdata().metadata().inputType(),
-			[](FilterInterface* filter, const uint8_t* data, size_t len) {
-				return filter->contains(data, len);
-			},
+			[](FilterInterface* filter, const uint8_t* data, size_t len) { return filter->contains(data, len); },
 			false);
 }
 
@@ -184,13 +176,10 @@ asset_id_t AssetFilter::getAssetId(const scanned_device_t& asset) {
 		return assetId(asset.address, MAC_ADDRESS_LEN);
 	}
 
-
 	return prepareFilterInputAndCallDelegate(
 			asset,
 			filterdata().metadata().outputType().inFormat(),
-			[this](FilterInterface* filter, const uint8_t* data, size_t len) {
-				return assetId(data, len);
-			},
+			[this](FilterInterface* filter, const uint8_t* data, size_t len) { return assetId(data, len); },
 			asset_id_t{});
 }
 
@@ -203,5 +192,3 @@ asset_id_t AssetFilter::assetId(const void* key, size_t keyLengthInBytes, uint32
 
 	return id;
 }
-
-

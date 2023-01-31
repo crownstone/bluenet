@@ -9,11 +9,12 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_TwilightHandler.h>
+#include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-#include <optional>
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <switch/cs_SmartSwitch.h>
-#include <common/cs_Component.h>
+#include <test/cs_TestAccess.h>
+#include <optional>
 
 /**
  * Handler that aggregates events related to switching such as SwitchCraft,
@@ -21,6 +22,7 @@
  * this object decides what state to set the SmartSwitch to.
  */
 class SwitchAggregator : public EventListener, public Component {
+	friend class TestAccess<SwitchAggregator>;
 public:
 	SwitchAggregator();
 
@@ -42,21 +44,29 @@ protected:
 	std::vector<Component*> getChildren() override;
 
 private:
-	TwilightHandler twilightHandler;
-	BehaviourHandler behaviourHandler;
+	TwilightHandler _twilightHandler;
+	BehaviourHandler _behaviourHandler;
+	BehaviourStore* _behaviourStore;
 
-	SmartSwitch smartSwitch;
+	SmartSwitch _smartSwitch;
 
 	// the latest states requested by other parts of the system.
-	std::optional<uint8_t> overrideState = {};
-	std::optional<uint8_t> behaviourState = {};
-	std::optional<uint8_t> twilightState = {};
+	std::optional<uint8_t> _overrideState       = {};
+	std::optional<uint8_t> _behaviourState      = {};
+	std::optional<uint8_t> _twilightState       = {};
 
 	// the last state that was aggregated and passed on towards the SoftwareSwitch.
-	std::optional<uint8_t> aggregatedState = {};
+	std::optional<uint8_t> _aggregatedState     = {};
 
 	// Cache of previous time update.
-	uint32_t _lastTimestamp = 0;
+	uint32_t _lastTimestamp                     = 0;
+
+	//! Set on switchcraft event, then decremented each tick event until 0.
+	uint16_t _switchcraftDoubleTapCountdown     = 0;
+
+	//! Keeps up the switch value (1-100 from smart switch) of the last time it was on, before being turned off by
+	//! switchcraft.
+	uint8_t _lastSwitchcraftOnValue             = 0;
 
 	/**
 	 * Which source claimed the switch.
@@ -64,8 +74,8 @@ private:
 	 * Until timeout, nothing with a different source can set the switch.
 	 * Unless that source overrules the current source.
 	 */
-	cmd_source_with_counter_t _source = cmd_source_with_counter_t(CS_CMD_SOURCE_NONE);
-	uint32_t _ownerTimeoutCountdown = 0;
+	cmd_source_with_counter_t _source           = cmd_source_with_counter_t(CS_CMD_SOURCE_NONE);
+	uint32_t _ownerTimeoutCountdown             = 0;
 
 	// Max number of switch commands to store in history.
 	const static uint8_t _maxSwitchHistoryItems = 10;
@@ -102,13 +112,20 @@ private:
 	 */
 	bool updateBehaviourHandlers();
 
+	/**
+	 * Updates internal state and adjusts the switch values based on the new state.
+	 *
+	 * Also keeps switchHistory up to date.
+	 */
+	void update();
+
 	// ================================== Event handling ==================================
 
 	/**
 	 * Triggers an updateState() call on all handled events and adjusts
 	 * at least one of behaviourState or overrideState.
 	 */
-	bool handleStateIntentionEvents(event_t & evt);
+	bool handleStateIntentionEvents(event_t& evt);
 
 	/**
 	 * Tries to update [overrideState] to [value] and then calls updateState(false).
@@ -118,13 +135,34 @@ private:
 	void executeStateIntentionUpdate(uint8_t value, cmd_source_with_counter_t& source);
 
 	/**
+	 * Registers a switchcraft event and checks if it's a double tap action.
+	 *
+	 * Sets _lastSwitchcraftOnValue and _switchcraftDoubleTapCountdown.
+	 *
+	 * @param[in] currentValue    The current switch value.
+	 *
+	 * @return    true            When this event is a double tap.
+	 */
+	bool registerSwitchcraftEvent(uint8_t currentValue);
+
+	/**
+	 * Get the state intention from a switchcraft event.
+	 *
+	 * @param[in] currentValue    The current switch state (0-100 from smart switch).
+	 * @param[in] doubleTap       Whether the switchcraft event was a double tap.
+	 *
+	 * @return                    The switch value to be set.
+	 */
+	uint8_t getStateIntentionSwitchcraft(uint8_t currentValue, bool doubleTap);
+
+	/**
 	 * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
 	 * a new aggregated state. This handling function takes care of that.
 	 *
 	 * returns true when the event should be considered 'consumed'.
 	 * (which is when evt is of one of these types.)
 	 */
-	bool handleTimingEvents(event_t & evt);
+	bool handleTimingEvents(event_t& evt);
 
 	/**
 	 * EVT_PRESENCE_MUTATION
@@ -139,6 +177,16 @@ private:
 	 * Debug or power user features.
 	 */
 	bool handleSwitchAggregatorCommand(event_t& evt);
+
+	/**
+	 * Handles the following events:
+	 *  - CMD_GET_BEHAVIOUR_DEBUG:
+	 *     Fills in the current state of the SwitchAggregator as response to a query from host.
+	 *  - EVT_BEHAVIOURSTORE_MUTATION:
+	 *     If mutation is of type Add or Update, checks if the changed behaviour. If it was
+	 *     active, the override will be reset in order to show a user the effect of its change.
+	 */
+	bool handleBehaviourEvents(event_t& evt);
 
 	void handleSwitchStateChange(uint8_t newIntensity);
 
@@ -155,15 +203,17 @@ private:
 	uint8_t aggregatedBehaviourIntensity();
 
 	/**
-	 * When override state is the special value 'smart on'
-	 * it should be interpreted according to the values of twilightHandler
-	 * and behaviourHandler. This getter centralizes that.
+	 * Returns the switch state that should be set according to the override state.
+	 *
+	 * When override state is the special value 'smart on' it should be interpreted according to the values of
+	 * twilightHandler and behaviourHandler. This getter centralizes that.
 	 */
-	uint8_t resolveOverrideState();
+	uint8_t resolveOverrideState(uint8_t overrideState);
 
 	/**
 	 * Tries to set source as owner of the switch.
-	 * Returns true on success, false if switch is already owned by a different source, and given source does not overrule it.
+	 * Returns true on success, false if switch is already owned by a different source, and given source does not
+	 * overrule it.
 	 */
 	bool checkAndSetOwner(const cmd_source_with_counter_t& source);
 
@@ -171,6 +221,8 @@ private:
 
 	void addToSwitchHistory(const cs_switch_history_item_t& cmd);
 	void printSwitchHistory();
+
+	void printStates(uint32_t lineNumber);
 
 	void pushTestDataToHost();
 };

@@ -5,7 +5,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #pragma once
 
 #include <util/cs_Math.h>
@@ -48,15 +47,11 @@ public:
 	float _rssi;       // signed rssi, usually negative. higher is closer.
 	uint8_t _channel;  // 37-39
 
-	rssi_and_channel_float_t(float rssi, uint8_t channel = 0) :_rssi(rssi),  _channel(channel) {}
+	rssi_and_channel_float_t(float rssi, uint8_t channel = 0) : _rssi(rssi), _channel(channel) {}
 
-	bool isCloserThan(const rssi_and_channel_float_t& other) {
-		return _rssi > other._rssi;
-	}
+	bool isCloserThan(const rssi_and_channel_float_t& other) { return _rssi > other._rssi; }
 
-	bool isCloserEqual(const rssi_and_channel_float_t & other) {
-		return isCloserThan(other) || _rssi == other._rssi;
-	}
+	bool isCloserEqual(const rssi_and_channel_float_t& other) { return isCloserThan(other) || _rssi == other._rssi; }
 
 	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) {
 		return rssi_and_channel_float_t(_rssi - rate_db_sec * dt_sec, _channel);
@@ -66,30 +61,21 @@ public:
 // ---------------------------------------------------------------------
 
 struct __attribute__((__packed__)) rssi_and_channel_t {
-	uint8_t channel : 2; // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
-	uint8_t rssiHalved : 6; // half of the absolute value of the original rssi.
+	uint8_t channel : 2;     // 0 = unknown, 1 = channel 37, 2 = channel 38, 3 = channel 39
+	uint8_t rssiHalved : 6;  // half of the absolute value of the original rssi.
 
 	rssi_and_channel_t() = default;
 
 	rssi_and_channel_t(int8_t rssi, uint8_t ch = 0) {
-		channel = compressChannel(ch);
+		channel    = compressChannel(ch);
 		rssiHalved = compressRssi(rssi);
 	}
 
-	uint8_t getChannel() const {
-		return decompressChannel(channel);
-	}
+	uint8_t getChannel() const { return decompressChannel(channel); }
 
-	int8_t getRssi() const {
-		return decompressRssi(rssiHalved);
-	}
+	int8_t getRssi() const { return decompressRssi(rssiHalved); }
 
-	rssi_and_channel_float_t toFloat() {
-		return rssi_and_channel_float_t (getRssi(), getChannel());
-	}
+	rssi_and_channel_float_t toFloat() { return rssi_and_channel_float_t(getRssi(), getChannel()); }
 
-	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) {
-		return toFloat().fallOff(rate_db_sec, dt_sec);
-	}
-
+	rssi_and_channel_float_t fallOff(float rate_db_sec, float dt_sec) { return toFloat().fallOff(rate_db_sec, dt_sec); }
 };

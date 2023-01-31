@@ -9,9 +9,9 @@
  */
 #pragma once
 
-#include <cstdint>
-
 #include <cfg/cs_DeviceTypes.h>
+
+#include <cstdint>
 
 /** CrownstoneManufacturer defines the different types of developed devices for within the advertisement packets.
  */
@@ -26,27 +26,17 @@ private:
 	};
 
 public:
-	CrownstoneManufacturer() {
-		_params.deviceType = DEVICE_UNDEF;
-	};
+	CrownstoneManufacturer() { _params.deviceType = DEVICE_UNDEF; };
 
-	CrownstoneManufacturer(uint8_t deviceType) {
-		_params.deviceType = deviceType;
-	};
+	CrownstoneManufacturer(uint8_t deviceType) { _params.deviceType = deviceType; };
 
-	virtual ~CrownstoneManufacturer() {};
+	virtual ~CrownstoneManufacturer(){};
 
-	uint8_t size() {
-		return 1;
-	}
+	uint8_t size() { return 1; }
 
-	uint8_t* getArray() {
-		return _buffer;
-	}
+	uint8_t* getArray() { return _buffer; }
 
-	uint8_t getDeviceType() {
-		return _params.deviceType;
-	}
+	uint8_t getDeviceType() { return _params.deviceType; }
 
 	/** Serializes the object to a byte array
 	 *
@@ -59,4 +49,3 @@ public:
 
 	void parse(uint8_t* array, uint16_t len);
 };
-

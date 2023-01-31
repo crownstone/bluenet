@@ -18,7 +18,7 @@
  * - Keeps up the state of microapps.
  * - Instantiates and uses classes MicroappStorage and MicroappProtocol.
  */
-class Microapp: public EventListener {
+class Microapp : public EventListener {
 public:
 	static Microapp& getInstance() {
 		static Microapp instance;
@@ -26,31 +26,67 @@ public:
 	}
 
 	/**
-	 * Initialize storage, and load microapps.
+	 * Initialize storage, and load microapps in normal mode.
+	 * Checks operation mode and only actually initializes for some modes.
 	 */
-	void init();
+	void init(OperationMode operationMode);
+
+	/**
+	 * Checks app state and returns true if this app is allowed to run.
+	 */
+	bool canRunApp(uint8_t index);
+
+	/**
+	 * To be called when a microapp took too long to yield.
+	 */
+	void onExcessiveCallDuration(uint8_t appIndex);
 
 private:
 	/**
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
 	Microapp();
-	Microapp(Microapp const&) = delete;
-	void operator=(Microapp const &) = delete;
+	Microapp(Microapp const&)       = delete;
+	void operator=(Microapp const&) = delete;
 
 	/**
 	 * The state of each microapp.
 	 */
-	microapp_state_t _states[MAX_MICROAPPS];
+	microapp_state_t _states[g_MICROAPP_COUNT];
+
+	/**
+	 * Keep up whether the microapp has been started yet.
+	 * Init to false (default bool constructor).
+	 */
+	bool _started[g_MICROAPP_COUNT] = {};
 
 	/**
 	 * Local flag to indicate that ram section has been loaded.
 	 */
-	bool _loaded = false;
+	bool _loaded                  = false;
+
+	/**
+	 * Keep up which microapp is currently being operated on.
+	 * Used for factory reset.
+	 * Set to MICROAPP_INDEX_NONE when not operating on anything.
+	 */
+	uint8_t _currentMicroappIndex = MICROAPP_INDEX_NONE;
+
+	/**
+	 * Whether we are in factory reset mode.
+	 */
+	bool _factoryResetMode        = false;
 
 	void loadApps();
 
 	void loadState(uint8_t index);
+
+	/**
+	 * Update state from operating data in IPC.
+	 *
+	 * For example, when a reboot has happened when a microapp was running, this updates the state accordingly.
+	 */
+	void updateStateFromOperatingData(uint8_t index);
 
 	/**
 	 * Validates app: compare checksum.
@@ -85,11 +121,6 @@ private:
 	cs_ret_code_t storeState(uint8_t index);
 
 	/**
-	 * Checks app state and returns true if this app is allowed to run.
-	 */
-	bool canRunApp(uint8_t index);
-
-	/**
 	 * To be called every tick.
 	 * Calls all microapps.
 	 */
@@ -104,6 +135,7 @@ private:
 	cs_ret_code_t handleRemove(microapp_ctrl_header_t* packet);
 	cs_ret_code_t handleEnable(microapp_ctrl_header_t* packet);
 	cs_ret_code_t handleDisable(microapp_ctrl_header_t* packet);
+	cs_ret_code_t handleMessage(microapp_message_internal_t* packet, cs_result_t& result);
 
 	/**
 	 * Checks if control command header is ok.
@@ -111,7 +143,25 @@ private:
 	cs_ret_code_t checkHeader(microapp_ctrl_header_t* packet);
 
 	/**
+	 * Removes all microapps and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.
+	 */
+	cs_ret_code_t factoryReset();
+
+	/**
+	 * Remove next microapp and sends an event when done: EVT_MICROAPP_FACTORY_RESET_DONE.
+	 */
+	cs_ret_code_t resumeFactoryReset();
+
+	/**
+	 * Handle microapp storage event.
+	 *
+	 * For now, this just handles CMD_RESOLVE_ASYNC_CONTROL_COMMAND.
+	 * We should register an event handler instead.
+	 */
+	void onStorageEvent(cs_async_result_t& event);
+
+	/**
 	 * Handle incoming events.
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 };

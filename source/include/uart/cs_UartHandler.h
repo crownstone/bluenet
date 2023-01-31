@@ -12,12 +12,10 @@
 #include <protocol/cs_UartProtocol.h>
 #include <uart/cs_UartCommandHandler.h>
 
-#define UART_RX_BUFFER_SIZE            192
-#define UART_TX_BUFFER_SIZE            300
+#define UART_RX_BUFFER_SIZE 192
+#define UART_TX_BUFFER_SIZE 300
 #define UART_TX_ENCRYPTION_BUFFER_SIZE AES_BLOCK_SIZE
 //#define UART_TX_MAX_PAYLOAD_SIZE       500
-
-
 
 /**
  * Class that implements the binary UART protocol.
@@ -52,7 +50,11 @@ public:
 	 * @param[in] size       Size of the msg.
 	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	ret_code_t writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
+	ret_code_t writeMsg(
+			UartOpcodeTx opCode,
+			uint8_t* data,
+			uint16_t size,
+			UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Convenience method to write a msg over UART without payload data.
@@ -67,7 +69,10 @@ public:
 	 * @param[in] size       Size of the msg.
 	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	ret_code_t writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
+	ret_code_t writeMsgStart(
+			UartOpcodeTx opCode,
+			uint16_t size,
+			UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Write a msg over UART in a streaming manner.
@@ -78,7 +83,11 @@ public:
 	 * @param[in] size       Size of this data part.
 	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	ret_code_t writeMsgPart(UartOpcodeTx opCode, const uint8_t* const data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
+	ret_code_t writeMsgPart(
+			UartOpcodeTx opCode,
+			const uint8_t* const data,
+			uint16_t size,
+			UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Write a msg over UART in a streaming manner.
@@ -87,7 +96,8 @@ public:
 	 * @param[in] opCode     OpCode of the msg.
 	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	ret_code_t writeMsgEnd(UartOpcodeTx opCode, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
+	ret_code_t writeMsgEnd(
+			UartOpcodeTx opCode, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * To be called when a byte was read. Can be called from interrupt.
@@ -106,55 +116,53 @@ public:
 
 private:
 	//! Constructor
-	UartHandler() = default;
+	UartHandler()                      = default;
 
 	//! This class is singleton, deny implementation
-	UartHandler(UartHandler const&) = delete;
+	UartHandler(UartHandler const&)    = delete;
 
 	//! This class is singleton, deny implementation
-	void operator=(UartHandler const &) = delete;
+	void operator=(UartHandler const&) = delete;
 
 	// Keep up the state
-	bool _initialized = false;
+	bool _initialized                  = false;
 
 	UartCommandHandler _commandHandler;
-
 
 	//////// RX variables ////////
 
 	//! Pointer to the read buffer
-	uint8_t* _readBuffer = nullptr;
+	uint8_t* _readBuffer             = nullptr;
 
 	//! Where to read the next byte into the read buffer
-	uint16_t _readBufferIdx = 0;
+	uint16_t _readBufferIdx          = 0;
 
 	//! Keeps up whether we started reading into the read buffer
-	bool _startedReading = false;
+	bool _startedReading             = false;
 
 	//! Keeps up whether to escape the next read byte
-	bool _escapeNextByte = false;
+	bool _escapeNextByte             = false;
 
 	/**
 	 * Size of the msg to read, including header and tail, excluding start byte.
 	 * Once set, the read buffer index is set to 0.
 	 */
-	uint16_t _sizeToRead = 0;
+	uint16_t _sizeToRead             = 0;
 
 	//! Whether reading is busy (if true, can't read anything, until the read buffer was processed)
-	bool _readBusy = false;
-
+	bool _readBusy                   = false;
 
 	//////// TX variables ////////
 
 	//! Write buffer. Currently only used as result buffer for control commands.
-	uint8_t* _writeBuffer = nullptr;
+	uint8_t* _writeBuffer            = nullptr;
 
 	/**
 	 * Encryption buffer. Used to encrypt outgoing msgs.
 	 *
 	 * Only has to be 1 block size large, as we can stream the writes.
 	 */
-	uint8_t* _encryptionBuffer = nullptr;
+	uint8_t* _encryptionBuffer       = nullptr;
 
 	//! Number of bytes written to the encryption buffer currently.
 	uint8_t _encryptionBufferWritten = 0;
@@ -170,7 +178,6 @@ private:
 
 	//! Stone ID, part of the msg header.
 	TYPIFY(CONFIG_CROWNSTONE_ID) _stoneId = 0;
-
 
 	/**
 	 * Write the start byte.
@@ -276,7 +283,5 @@ private:
 	/**
 	 * Handle events as EventListener.
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 };
-
-

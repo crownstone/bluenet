@@ -37,59 +37,58 @@
  * TODO: The values used now might be empirical. Replace by theoretic values or tell why the calcluation is incorrect.
  */
 void asACR01B2G(boards_config_t* config) {
-	config->pinDimmer                          = 8;
-	config->pinRelayOn                         = 6;
-	config->pinRelayOff                        = 7;
+	config->pinDimmer                       = 8;
+	config->pinRelayOn                      = 6;
+	config->pinRelayOff                     = 7;
 
-	config->pinAinVoltage[GAIN_SINGLE]         = GpioToAin(3);
-	config->pinAinCurrent[GAIN_SINGLE]         = GpioToAin(4);
+	config->pinAinVoltage[GAIN_SINGLE]      = GpioToAin(3);
+	config->pinAinCurrent[GAIN_SINGLE]      = GpioToAin(4);
 
-	config->pinAinZeroRef                      = GpioToAin(2);
-	config->pinAinDimmerTemp                   = GpioToAin(5);
+	config->pinAinZeroRef                   = GpioToAin(2);
+	config->pinAinDimmerTemp                = GpioToAin(5);
 
-	config->pinRx                              = 20;
-	config->pinTx                              = 19;
+	config->pinRx                           = 20;
+	config->pinTx                           = 19;
 
-	config->pinLed[LED_RED]                    = 9;
-	config->pinLed[LED_GREEN]                  = 10;
+	config->pinLed[LED_RED]                 = 9;
+	config->pinLed[LED_GREEN]               = 10;
 
-	config->flags.dimmerInverted               = false;
-	config->flags.enableUart                   = false;
-	config->flags.enableLeds                   = false;
-	config->flags.ledInverted                  = false;
-	config->flags.dimmerTempInverted           = true;
-	config->flags.usesNfcPins                  = false; // Set to true if you want to use the LEDs.
-	config->flags.canTryDimmingOnBoot          = false;
-	config->flags.canDimOnWarmBoot             = false;
-	config->flags.dimmerOnWhenPinsFloat        = true;
+	config->flags.dimmerInverted            = false;
+	config->flags.enableUart                = false;
+	config->flags.enableLeds                = false;
+	config->flags.ledInverted               = false;
+	config->flags.dimmerTempInverted        = true;
+	config->flags.usesNfcPins               = false;  // Set to true if you want to use the LEDs.
+	config->flags.canTryDimmingOnBoot       = false;
+	config->flags.canDimOnWarmBoot          = false;
+	config->flags.dimmerOnWhenPinsFloat     = true;
 
-	config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
+	config->deviceType                      = DEVICE_CROWNSTONE_PLUG;
 
 	// The following two values are empirically determined, through calibration over 10 production crownstones
-	config->voltageMultiplier[GAIN_SINGLE]     = 0.171f;
-	config->currentMultiplier[GAIN_SINGLE]     = 0.00385f;
+	config->voltageMultiplier[GAIN_SINGLE]  = 0.171f;
+	config->currentMultiplier[GAIN_SINGLE]  = 0.00385f;
 
 	// Calibrated by noisy data from 1 crownstone
 	// The following two values are empirically determined, through calibration over noisy data from 1 Crownstone.
-	config->voltageOffset[GAIN_SINGLE]         = -99;
-	config->currentOffset[GAIN_SINGLE]         = -270;
+	config->voltageOffset[GAIN_SINGLE]      = -99;
+	config->currentOffset[GAIN_SINGLE]      = -270;
 
 	// The following value is empirically determined, through calibration over 10 production crownstones
-	config->powerOffsetMilliWatt               = 9000;
+	config->powerOffsetMilliWatt            = 9000;
 
 	// ADC values [-2048, 2047] map to [REF - 1.2V, REF + 1.2V].
-	config->voltageAdcRangeMilliVolt           = 1200;
+	config->voltageAdcRangeMilliVolt        = 1200;
 
 	// ADC values [-2048, 2047] map to [REF - 0.6V, REF + 0.6V].
-	config->currentAdcRangeMilliVolt           = 600;
+	config->currentAdcRangeMilliVolt        = 600;
 
-	config->pwmTempVoltageThreshold            = 0.70;
-	config->pwmTempVoltageThresholdDown        = 0.25;
+	config->pwmTempVoltageThreshold         = 0.70;
+	config->pwmTempVoltageThresholdDown     = 0.25;
 
-	config->minTxPower                         = -20;
-
+	config->minTxPower                      = -20;
 
 	// This board cannot provide enough power for 100% scanning.
-	config->scanWindowUs                       = 3 * config->scanIntervalUs / 4;
-	config->tapToToggleDefaultRssiThreshold    = -35;
+	config->scanWindowUs                    = 3 * config->scanIntervalUs / 4;
+	config->tapToToggleDefaultRssiThreshold = -35;
 }

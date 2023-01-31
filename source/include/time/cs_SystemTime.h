@@ -9,16 +9,13 @@
 
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventListener.h>
-
 #include <protocol/cs_Typedefs.h>
-
+#include <stdint.h>
+#include <test/cs_TestAccess.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_TimeSyncMessage.h>
-
 #include <util/cs_Coroutine.h>
-
-#include <stdint.h>
 
 /**
  * This class keeps track of the real time in the current time zone.
@@ -50,6 +47,8 @@
  * Not sure if this is necessary.
  */
 class SystemTime : public EventListener {
+	friend class TestAccess<SystemTime>;
+
 public:
 	/**
 	 * Creates and starts the first tick timer.
@@ -57,6 +56,7 @@ public:
 	void init();
 
 	virtual void handleEvent(event_t& event);
+	virtual ~SystemTime() = default;
 
 	// ======================== Utility functions ========================
 
@@ -126,22 +126,26 @@ private:
 	static uint16_t throttleSetSunTimesCountdownTicks;
 
 	// settings
-	static constexpr auto TICK_TIME_MS = 500;
+	static constexpr auto TICK_TIME_MS                     = 500;
 
 	// Time stamp will be updated at a low rate, to maintain precision. Must be lower than RTC overflow time.
-	static constexpr uint16_t TIME_UPDATE_PERIOD_MS = (60 * 1000);
+	static constexpr uint16_t TIME_UPDATE_PERIOD_MS        = (60 * 1000);
 
 	// Time shouldn't differ more than 1 minute.
-	static constexpr uint16_t THROTTLE_SET_TIME_TICKS = (60 * 1000 / TICK_TIME_MS);
+	static constexpr uint16_t THROTTLE_SET_TIME_TICKS      = (60 * 1000 / TICK_TIME_MS);
 
 	// Sun time shouldn't differ more than 30 minutes.
 	static constexpr uint16_t THROTTLE_SET_SUN_TIMES_TICKS = (30 * 60 * 1000 / TICK_TIME_MS);
 
 	// timing features
-	static app_timer_t              appTimerData;
-	static app_timer_id_t           appTimerId;
+	static app_timer_t appTimerData;
+	static app_timer_id_t appTimerId;
 
 	static void scheduleNextTick();
+
+	/**
+	 * Must be called at least once per second to update upTimeSec.
+	 */
 	static void tick(void* unused);
 
 	// ===================== mesh posix time sync implementation =====================
@@ -177,7 +181,6 @@ private:
 	 * Lowest time version at which a valid posix time is set.
 	 */
 	static constexpr uint8_t timestamp_version_min_valid();
-
 
 	// -------------- runtime variables ----------------
 
@@ -263,7 +266,6 @@ private:
 	 */
 	static bool rebootTimedOut();
 
-
 	// ==========================================
 	// =========== Debug functions ==============
 	// ==========================================
@@ -281,4 +283,3 @@ private:
 	static void publishSyncMessageForTesting();
 	static void pushSyncMessageToTestSuite(time_sync_message_t& syncmessage);
 };
-

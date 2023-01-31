@@ -8,8 +8,9 @@
 #pragma once
 
 #include <ble/cs_UUID.h>
-#include <cstdint>
 #include <structs/cs_PacketsInternal.h>
+
+#include <cstdint>
 
 // Commands:
 
@@ -34,14 +35,41 @@ struct ble_central_write_t {
 
 // Events:
 
+/**
+ * Describes a service or characteristic that has been discovered.
+ */
 struct ble_central_discovery_t {
+	//! The service UUID.
+	UUID serviceUuid;
+
+	//! The characteristic UUID, or the service UUID for a service discovery.
 	UUID uuid;
-	uint16_t valueHandle;    // Set to BLE_GATT_HANDLE_INVALID when not existing.
-	uint16_t cccdHandle;     // Set to BLE_GATT_HANDLE_INVALID when not existing.
+
+	//! The value handle. 0 when it does not exist.
+	uint16_t valueHandle;
+
+	//! The CCCD handle. 0 when it does not exist.
+	uint16_t cccdHandle;
+
+	struct {
+		bool broadcast : 1;
+		bool read : 1;
+		bool write_no_ack : 1;
+		bool write_with_ack : 1;
+		bool notify : 1;
+		bool indicate : 1;
+		bool write_signed : 1;
+	} flags;
+};
+
+struct ble_central_write_result_t {
+	cs_ret_code_t retCode;
+	uint16_t handle;
 };
 
 struct ble_central_read_result_t {
 	cs_ret_code_t retCode;
+	uint16_t handle;
 	cs_data_t data;
 };
 
@@ -49,6 +77,3 @@ struct ble_central_notification_t {
 	uint16_t handle;
 	cs_const_data_t data;
 };
-
-
-

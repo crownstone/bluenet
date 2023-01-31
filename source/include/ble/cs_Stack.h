@@ -18,9 +18,10 @@
 #include <common/cs_Tuple.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Timer.h>
-#include <string>
 #include <third/std/function.h>
 #include <util/cs_BleError.h>
+
+#include <string>
 
 /////////////////////////////////////////////////
 
@@ -37,7 +38,7 @@ class Service;
  * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
-class Stack: public BaseClass<3> {
+class Stack : public BaseClass<3> {
 public:
 	static Stack& getInstance() {
 		static Stack instance;
@@ -49,31 +50,30 @@ public:
 	typedef fixed_tuple<Service*, MAX_SERVICE_COUNT> Services_t;
 
 	enum condition_t { C_STACK_INITIALIZED, C_RADIO_INITIALIZED, C_SERVICES_INITIALIZED };
-protected:
 
-	bool                                        _disconnectingInProgress = false;
+protected:
+	bool _disconnectingInProgress = false;
 
 	// might want to change this to a linked list or something that
 	// we can loop over but doesn't allocate more space than needed
-	Services_t                                  _services;
+	Services_t _services;
 
-	nrf_clock_lf_cfg_t                          _clockSource;
-	ble_gap_conn_params_t                       _connectionParams;
+	nrf_clock_lf_cfg_t _clockSource;
+	ble_gap_conn_params_t _connectionParams;
 
-	bool                                        _scanning = false;
+	bool _scanning             = false;
 
-	uint16_t                                    _connectionHandle = BLE_CONN_HANDLE_INVALID;
-	bool                                        _connectionIsOutgoing = false;
+	uint16_t _connectionHandle = BLE_CONN_HANDLE_INVALID;
+	bool _connectionIsOutgoing = false;
 
-	app_timer_t                                 _connectionKeepAliveTimerData;
-	app_timer_id_t                              _connectionKeepAliveTimerId = NULL;
+	app_timer_t _connectionWatchdogTimerData;
+	app_timer_id_t _connectionWatchdogTimerId = NULL;
+	bool _connectionWatchdogRunning           = false;
 
-	uint8_t _scanBuffer[31]; // Same size as buffer in cs_stack_scan_t.
-	ble_data_t _scanBufferStruct = { _scanBuffer, sizeof(_scanBuffer) };
-
+	uint8_t _scanBuffer[31];  // Same size as buffer in cs_stack_scan_t.
+	ble_data_t _scanBufferStruct = {_scanBuffer, sizeof(_scanBuffer)};
 
 public:
-
 	/** Initialization of the BLE stack
 	 *
 	 * Performs a series of tasks:
@@ -99,14 +99,6 @@ public:
 
 	void createCharacteristics();
 
-	/** Start the BLE stack
-	 *
-	 * Start can only be called once. It starts all services. If one of these services cannot be started, there is
-	 * currently no exception handling. The stack does not start the Softdevice. This needs to be done before in
-	 * init().
-	 */
-	void initServices();
-
 	/**
 	 * In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8
 	 */
@@ -116,20 +108,13 @@ public:
 
 	bool isConnectedPeripheral();
 
-	uint16_t getConnectionHandle() {
-		return _connectionHandle;
-	}
-
-	/** Shutdown the BLE stack
-	 *
-	 * The function shutdown() is the counterpart of start(). It does stop all services. It does not check if these
-	 * services have actually been started.
-	 *
-	 * It will also stop advertising. The SoftDevice will not be shut down.
-	 *
-	 * After a shutdown() the function start() can be called again.
+	/**
+	 * Bluenet will automatically disconnect after nothing has been written for some time.
+	 * This function will reset that timeout.
 	 */
-	void shutdown();
+	void resetConnectionWatchdog();
+
+	uint16_t getConnectionHandle() { return _connectionHandle; }
 
 	//! Set initial clock source, not applied unless done before radio init.
 	void setClockSource(nrf_clock_lf_cfg_t clockSource);
@@ -146,15 +131,22 @@ public:
 	/** Set and update the preferred connection supervision timeout in units of 10 ms. */
 	void updateConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms);
 
-	/** Add a service to the stack.
+	/**
+	 * Add a service to the stack.
+	 * This does not yet add it to the softdevice.
 	 */
-	Stack & addService(Service* svc);
+	void addService(Service* svc);
+
+	/**
+	 * Register the added services to the softdevice.
+	 */
+	void initServices();
 
 	/** Start scanning for devices
 	 *
-	 * Only call the following functions with a S120 or S130 device that can play a central role. The following functions
-	 * are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a smartphone
-	 * developer.
+	 * Only call the following functions with a S120 or S130 device that can play a central role. The following
+	 * functions are probably the ones your recognize from implementing BLE functionality on Android or iOS if you are a
+	 * smartphone developer.
 	 */
 	void startScanning();
 
@@ -170,13 +162,13 @@ public:
 	 *
 	 * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
 	 * an authorization request. Not all event structures are exactly the same over the different SoftDevices, so there
-	 * are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at all,
-	 * so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
+	 * are some defines for minor changes. And of course, e.g. the S110 softdevice cannot listen to advertisements at
+	 * all, so BLE_GAP_EVT_ADV_REPORT is entirely disabled.
 	 *
 	 * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
 	 * is faster to set up maps from handles to directly the right function.
 	 */
-	void onBleEvent(const ble_evt_t * p_ble_evt);
+	void onBleEvent(const ble_evt_t* p_ble_evt);
 
 	/**
 	 * Function that handles BLE events on interrupt level.
@@ -186,22 +178,19 @@ public:
 	 * @param[in] p_ble_evt            The BLE event.
 	 * @param[in] isInterrupt          Whether this function is actually called on interrupt level.
 	 */
-	void onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt);
+	void onBleEventInterrupt(const ble_evt_t* p_ble_evt, bool isInterrupt);
 
-	void secReqTimeoutHandler(void * p_context);
-	void setAesEncrypted(bool encrypted);
+	void secReqTimeoutHandler(void* p_context);
 	void disconnect();
 
 	bool checkCondition(condition_t condition, bool expectation);
 
 protected:
-
-
 	//! Update connection parameters, can be called when already initialized.
 	void updateConnParams();
 
-	void onConnect(const ble_evt_t * p_ble_evt);
-	void onDisconnect(const ble_evt_t * p_ble_evt);
+	void onConnect(const ble_evt_t* p_ble_evt);
+	void onDisconnect(const ble_evt_t* p_ble_evt);
 	void onGapTimeout(uint8_t src);
 
 	void onConnectionTimeout();
@@ -210,23 +199,22 @@ protected:
 	 *
 	 * On a connection request send it to all services.
 	 */
-	void onIncomingConnected(const ble_evt_t * p_ble_evt);
-	void onIncomingDisconnected(const ble_evt_t * p_ble_evt);
+	void onIncomingConnected(const ble_evt_t* p_ble_evt);
+	void onIncomingDisconnected(const ble_evt_t* p_ble_evt);
 
 	void onMemoryRequest(uint16_t connectionHandle);
 	void onMemoryRelease(uint16_t connectionHandle);
 
-	void onWrite(const ble_gatts_evt_write_t& writeEvt);
+	void onWrite(uint16_t connectionHandle, const ble_gatts_evt_write_t& writeEvt);
 
 	/** Transmission complete event
 	 *
 	 * Inform all services that transmission was completed in case they have notifications pending
 	 */
-	void onTxComplete(const ble_evt_t * p_ble_evt);
+	void onTxComplete(const ble_evt_t* p_ble_evt);
 
-	void startConnectionAliveTimer();
-	void stopConnectionAliveTimer();
-	void resetConnectionAliveTimer();
+	void startConnectionWatchdog();
+	void stopConnectionWatchdog();
 
 private:
 	/** Constructor of the BLE stack on the NRF5 series.
@@ -237,7 +225,7 @@ private:
 	 */
 	Stack();
 	Stack(Stack const&);
-	void operator=(Stack const &);
+	void operator=(Stack const&);
 
 	/**
 	 * The destructor shuts down the stack.
@@ -245,6 +233,4 @@ private:
 	 * TODO: The SoftDevice should be disabled as well.
 	 */
 	~Stack();
-
 };
-

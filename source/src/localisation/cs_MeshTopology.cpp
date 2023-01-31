@@ -7,13 +7,13 @@
 
 #include <ble/cs_Nordic.h>
 #include <localisation/cs_MeshTopology.h>
-#include <storage/cs_State.h>
 #include <protocol/cs_RssiAndChannel.h>
-#include <util/cs_Utils.h>
+#include <storage/cs_State.h>
 #include <uart/cs_UartHandler.h>
+#include <util/cs_Utils.h>
 
-#define LOGMeshTopologyInfo    LOGi
-#define LOGMeshTopologyDebug   LOGvv
+#define LOGMeshTopologyInfo LOGi
+#define LOGMeshTopologyDebug LOGvv
 #define LOGMeshTopologyVerbose LOGvv
 
 /**
@@ -46,11 +46,11 @@ void MeshTopology::reset() {
 	LOGMeshTopologyInfo("Reset");
 
 	// Remove stored neighbours.
-	_neighbourCount = 0;
+	_neighbourCount        = 0;
 
 	// Let everyone first send a noop, and then the first result.
-	_sendNoopCountdown = 1;
-	_sendCountdown = 2;
+	_sendNoopCountdown     = 1;
+	_sendCountdown         = 2;
 	_fastIntervalCountdown = FAST_INTERVAL_TIMEOUT_SECONDS;
 }
 
@@ -63,22 +63,22 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 	}
 
 	cs_mesh_model_msg_stone_mac_t request;
-	request.type = 0;
+	request.type               = 0;
 	request.connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
 	memset(request.reserved, 0, sizeof(request.reserved));
 
 	cs_mesh_msg_t meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_STONE_MAC;
-	meshMsg.flags.flags.broadcast = false;
-	meshMsg.flags.flags.reliable = true;
+	meshMsg.type                    = CS_MESH_MODEL_TYPE_STONE_MAC;
+	meshMsg.flags.flags.broadcast   = false;
+	meshMsg.flags.flags.acked       = true;
 	meshMsg.flags.flags.useKnownIds = false;
-	meshMsg.flags.flags.noHops = true;
-	meshMsg.reliability = 3; // Low timeout, we expect a result quickly.
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.idCount = 1;
-	meshMsg.targetIds = &stoneId;
-	meshMsg.payload = reinterpret_cast<uint8_t*>(&request);
-	meshMsg.size = sizeof(request);
+	meshMsg.flags.flags.doNotRelay  = true;
+	meshMsg.reliability             = 3;  // Low timeout, we expect a result quickly.
+	meshMsg.urgency                 = CS_MESH_URGENCY_LOW;
+	meshMsg.idCount                 = 1;
+	meshMsg.targetIds               = &stoneId;
+	meshMsg.payload                 = reinterpret_cast<uint8_t*>(&request);
+	meshMsg.size                    = sizeof(request);
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
@@ -88,7 +88,6 @@ cs_ret_code_t MeshTopology::getMacAddress(stone_id_t stoneId) {
 
 	return ERR_WAIT_FOR_SUCCESS;
 }
-
 
 void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 	if (id == 0 || id == _myId) {
@@ -117,15 +116,15 @@ void MeshTopology::updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t
 	node.id = id;
 	switch (channel) {
 		case 37: {
-			node.rssiChannel37  = rssi;
+			node.rssiChannel37 = rssi;
 			break;
 		}
 		case 38: {
-			node.rssiChannel38  = rssi;
+			node.rssiChannel38 = rssi;
 			break;
 		}
 		case 39: {
-			node.rssiChannel39  = rssi;
+			node.rssiChannel39 = rssi;
 			break;
 		}
 	}
@@ -174,19 +173,19 @@ void MeshTopology::getRssi(stone_id_t stoneId, cs_result_t& result) {
 	}
 	// Copy to result buf.
 	result.buf.data[0] = *reinterpret_cast<uint8_t*>(&rssi);
-	result.dataSize = sizeof(rssi);
-	result.returnCode = ERR_SUCCESS;
+	result.dataSize    = sizeof(rssi);
+	result.returnCode  = ERR_SUCCESS;
 }
 
 void MeshTopology::sendNoop() {
 	LOGMeshTopologyDebug("sendNoop");
 	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = true;
-	meshMsg.payload = nullptr;
-	meshMsg.size = 0;
+	meshMsg.type                   = CS_MESH_MODEL_TYPE_CMD_NOOP;
+	meshMsg.reliability            = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency                = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.doNotRelay = true;
+	meshMsg.payload                = nullptr;
+	meshMsg.size                   = 0;
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
@@ -204,9 +203,24 @@ void MeshTopology::sendNext() {
 	}
 
 	auto& node = _neighbours[_nextSendIndex];
-	LOGMeshTopologyDebug("sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u", _nextSendIndex, node.id, node.lastSeenSecondsAgo);
+	LOGMeshTopologyDebug(
+			"sendNextMeshMessage index=%u id=%u lastSeenSecondsAgo=%u",
+			_nextSendIndex,
+			node.id,
+			node.lastSeenSecondsAgo);
 
 	cs_mesh_model_msg_neighbour_rssi_t meshPayload = sendNeighbourMessageOverMesh(node);
+
+	TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
+	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
+	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	meshMsg.flags.flags.noHops = false;
+	meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
+	meshMsg.size = sizeof(meshPayload);
+
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	event.dispatch();
 
 	// Also send over UART.
 	sendRssiToUart(_myId, meshPayload);
@@ -244,16 +258,16 @@ cs_mesh_model_msg_neighbour_rssi_t MeshTopology::sendNeighbourMessageOverMesh(ne
 void MeshTopology::sendRssiToUart(stone_id_t receiverId, cs_mesh_model_msg_neighbour_rssi_t& packet) {
 	LOGMeshTopologyDebug("sendRssiToUart receiverId=%u senderId=%u", receiverId, packet.neighbourId);
 	mesh_topology_neighbour_rssi_uart_t uartMsg = {
-			.type = 0,
-			.receiverId = receiverId,
-			.senderId = packet.neighbourId,
-			.rssiChannel37 = packet.rssiChannel37,
-			.rssiChannel38 = packet.rssiChannel38,
-			.rssiChannel39 = packet.rssiChannel39,
+			.type               = 0,
+			.receiverId         = receiverId,
+			.senderId           = packet.neighbourId,
+			.rssiChannel37      = packet.rssiChannel37,
+			.rssiChannel38      = packet.rssiChannel38,
+			.rssiChannel39      = packet.rssiChannel39,
 			.lastSeenSecondsAgo = packet.lastSeenSecondsAgo,
-			.msgNumber = packet.counter
-	};
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
+			.msgNumber          = packet.counter};
+	UartHandler::getInstance().writeMsg(
+			UART_OPCODE_TX_NEIGHBOUR_RSSI, reinterpret_cast<uint8_t*>(&uartMsg), sizeof(uartMsg));
 }
 
 void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rssi_t& packet) {
@@ -263,6 +277,13 @@ void MeshTopology::onNeighbourRssi(stone_id_t id, cs_mesh_model_msg_neighbour_rs
 
 cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 	cs_mesh_model_msg_stone_mac_t packet = meshMsg.getPacket<CS_MESH_MODEL_TYPE_STONE_MAC>();
+	LOGMeshTopologyInfo(
+			"Receive MAC mesh msg: type=%u connectionProtocol=%u isReply=%u stoneId=%u, isRelayed=%u",
+			packet.type,
+			packet.connectionProtocol,
+			meshMsg.isReply,
+			meshMsg.srcStoneId,
+			meshMsg.isMaybeRelayed);
 	switch (packet.type) {
 		case 0: {
 			LOGMeshTopologyInfo("Reply to mac address request");
@@ -272,17 +293,18 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 			if (meshMsg.reply->buf.len < sizeof(cs_mesh_model_msg_stone_mac_t)) {
 				return ERR_BUFFER_TOO_SMALL;
 			}
-			cs_mesh_model_msg_stone_mac_t* replyPacket = reinterpret_cast<cs_mesh_model_msg_stone_mac_t*>(meshMsg.reply->buf.data);
-			replyPacket->type = 1;
+			cs_mesh_model_msg_stone_mac_t* replyPacket =
+					reinterpret_cast<cs_mesh_model_msg_stone_mac_t*>(meshMsg.reply->buf.data);
+			replyPacket->type               = 1;
 			replyPacket->connectionProtocol = CS_CONNECTION_PROTOCOL_VERSION;
 			memset(replyPacket->reserved, 0, sizeof(replyPacket->reserved));
 
-			meshMsg.reply->type = CS_MESH_MODEL_TYPE_STONE_MAC;
+			meshMsg.reply->type     = CS_MESH_MODEL_TYPE_STONE_MAC;
 			meshMsg.reply->dataSize = sizeof(cs_mesh_model_msg_stone_mac_t);
 			break;
 		}
 		case 1: {
-			LOGMeshTopologyInfo("Received mac address id=%u", meshMsg.srcAddress);
+			LOGMeshTopologyInfo("Received mac address id=%u", meshMsg.srcStoneId);
 			if (meshMsg.macAddressValid == false) {
 				LOGw("Missing MAC address");
 				break;
@@ -293,9 +315,12 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 				break;
 			}
 			TYPIFY(EVT_MESH_TOPO_MAC_RESULT) result;
-			result.stoneId = meshMsg.srcAddress;
+			result.stoneId = meshMsg.srcStoneId;
 			memcpy(result.macAddress, meshMsg.macAddress, sizeof(result.macAddress));
-			event_t event(CS_TYPE::EVT_MESH_TOPO_MAC_RESULT, &result, sizeof(result)); // TODO: add result code and connection protocol to event.
+			event_t event(
+					CS_TYPE::EVT_MESH_TOPO_MAC_RESULT,
+					&result,
+					sizeof(result));  // TODO: add result code and connection protocol to event.
 			event.dispatch();
 			break;
 		}
@@ -306,10 +331,10 @@ cs_ret_code_t MeshTopology::onStoneMacMsg(MeshMsgEvent& meshMsg) {
 void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 	if (packet.type == CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI) {
 		cs_mesh_model_msg_neighbour_rssi_t payload = packet.getPacket<CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI>();
-		onNeighbourRssi(packet.srcAddress, payload);
+		onNeighbourRssi(packet.srcStoneId, payload);
 	}
 
-	if (packet.hops != 0) {
+	if (packet.isMaybeRelayed) {
 		return;
 	}
 	if (packet.type == CS_MESH_MODEL_TYPE_STONE_MAC) {
@@ -334,7 +359,7 @@ void MeshTopology::onTickSecond() {
 	LOGMeshTopologyVerbose("onTickSecond nextSendIndex=%u", _nextSendIndex);
 	print();
 	[[maybe_unused]] bool change = false;
-	for (uint8_t i = 0; i < _neighbourCount; /**/ ) {
+	for (uint8_t i = 0; i < _neighbourCount; /**/) {
 		_neighbours[i].lastSeenSecondsAgo++;
 		if (_neighbours[i].lastSeenSecondsAgo == TIMEOUT_SECONDS) {
 			change = true;
@@ -388,7 +413,8 @@ void MeshTopology::onTickSecond() {
 
 void MeshTopology::print() {
 	for (uint8_t i = 0; i < _neighbourCount; ++i) {
-		LOGMeshTopologyVerbose("index=%u id=%u rssi=[%i, %i, %i] secondsAgo=%u",
+		LOGMeshTopologyVerbose(
+				"index=%u id=%u rssi=[%i, %i, %i] secondsAgo=%u",
 				i,
 				_neighbours[i].id,
 				_neighbours[i].rssiChannel37,
@@ -398,7 +424,7 @@ void MeshTopology::print() {
 	}
 }
 
-void MeshTopology::handleEvent(event_t &evt) {
+void MeshTopology::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
 			auto packet = CS_TYPE_CAST(EVT_RECV_MESH_MSG, evt.data);
@@ -419,7 +445,7 @@ void MeshTopology::handleEvent(event_t &evt) {
 			break;
 		}
 		case CS_TYPE::CMD_MESH_TOPO_GET_MAC: {
-			auto packet = CS_TYPE_CAST(CMD_MESH_TOPO_GET_MAC, evt.data);
+			auto packet           = CS_TYPE_CAST(CMD_MESH_TOPO_GET_MAC, evt.data);
 			evt.result.returnCode = getMacAddress(*packet);
 			break;
 		}
@@ -433,7 +459,6 @@ void MeshTopology::handleEvent(event_t &evt) {
 			getRssi(*packet, evt.result);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }

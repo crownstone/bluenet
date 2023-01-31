@@ -10,6 +10,7 @@
 #include <logging/cs_Logger.h>
 #include <util/cs_BleError.h>
 
+#define LOGEventDispatherDebug LOGvv
 #define LOGEventdispatcherInfo LOGi
 #define LOGEventdispatcherWarning LOGw
 
@@ -30,15 +31,18 @@ void EventDispatcher::dispatch(event_t& event) {
 			break;
 		default:
 			if (event.size != TypeSize(event.type)) {
-				LOGEventdispatcherWarning("Can't dispatch: wrong payload length (%u should be %u) for type %u",
-						event.size, TypeSize(event.type), event.type);
+				LOGEventdispatcherWarning(
+						"Can't dispatch: wrong payload length (%u should be %u) for type %u",
+						event.size,
+						TypeSize(event.type),
+						event.type);
 				event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 				return;
 			}
 	}
 
 	for (int i = 0; i < _listenerCount; i++) {
-		_listeners[i]->handleEvent(event);
+			_listeners[i]->handleEvent(event);
 	}
 }
 
@@ -54,11 +58,25 @@ bool EventDispatcher::addListener(EventListener* listener) {
 
 	// check for duplicate registration
 	for (uint8_t listenerIndex = 0; listenerIndex < _listenerCount; listenerIndex++) {
-		if(_listeners[listenerIndex] == listener) {
+		if (_listeners[listenerIndex] == listener) {
 			return true;
 		}
 	}
 
 	_listeners[_listenerCount++] = listener;
 	return true;
+}
+
+void EventDispatcher::removeListener(EventListener* listener) {
+	for (int i = 1; i < _listenerCount; i++) {
+		if (_listeners[i] == listener) {
+			// found match, shifting tail down one index
+			for( int j = i+1; j < _listenerCount; j++) {
+				_listeners[j-1] = _listeners[j];
+			}
+			// toss out duplicate
+			_listeners[_listenerCount -1] = nullptr;
+			_listenerCount--;
+		}
+	}
 }

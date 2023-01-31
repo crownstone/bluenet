@@ -7,13 +7,12 @@
 
 #include <drivers/cs_RNG.h>
 #include <encryption/cs_KeysAndAccess.h>
+#include <nrf_soc.h>
 #include <storage/cs_State.h>
 
 #define LOGKeysAndAccessDebug LOGnone
 
-KeysAndAccess::KeysAndAccess() {
-
-}
+KeysAndAccess::KeysAndAccess() {}
 
 void KeysAndAccess::init() {
 	_encryptionEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED);
@@ -43,7 +42,8 @@ bool KeysAndAccess::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessL
 		return true;
 	}
 
-	if (minimum == SETUP && (provided != SETUP || _operationMode != OperationMode::OPERATION_MODE_SETUP || !_setupKeyValid)) {
+	if (minimum == SETUP
+		&& (provided != SETUP || _operationMode != OperationMode::OPERATION_MODE_SETUP || !_setupKeyValid)) {
 		LOGw("Setup mode required");
 		return false;
 	}
@@ -66,21 +66,11 @@ bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBu
 
 	CS_TYPE keyConfigType;
 	switch (accessLevel) {
-		case ADMIN:
-			keyConfigType = CS_TYPE::CONFIG_KEY_ADMIN;
-			break;
-		case MEMBER:
-			keyConfigType = CS_TYPE::CONFIG_KEY_MEMBER;
-			break;
-		case BASIC:
-			keyConfigType = CS_TYPE::CONFIG_KEY_BASIC;
-			break;
-		case SERVICE_DATA:
-			keyConfigType = CS_TYPE::CONFIG_KEY_SERVICE_DATA;
-			break;
-		case LOCALIZATION:
-			keyConfigType = CS_TYPE::CONFIG_KEY_LOCALIZATION;
-			break;
+		case ADMIN: keyConfigType = CS_TYPE::CONFIG_KEY_ADMIN; break;
+		case MEMBER: keyConfigType = CS_TYPE::CONFIG_KEY_MEMBER; break;
+		case BASIC: keyConfigType = CS_TYPE::CONFIG_KEY_BASIC; break;
+		case SERVICE_DATA: keyConfigType = CS_TYPE::CONFIG_KEY_SERVICE_DATA; break;
+		case LOCALIZATION: keyConfigType = CS_TYPE::CONFIG_KEY_LOCALIZATION; break;
 		case SETUP: {
 			// Don't check if in setup mode: we want to use this for outgoing connections too.
 			// The check _setupKeyValid == true should be enough.
@@ -92,9 +82,7 @@ bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBu
 			LOGe("Can't use this setup key (yet)");
 			return false;
 		}
-		default:
-			LOGe("Invalid access level");
-			return false;
+		default: LOGe("Invalid access level"); return false;
 	}
 
 	State::getInstance().get(keyConfigType, outBuf, ENCRYPTION_KEY_LENGTH);
@@ -131,4 +119,3 @@ cs_ret_code_t KeysAndAccess::setSetupKey(cs_data_t data) {
 void KeysAndAccess::invalidateSetupKey() {
 	_setupKeyValid = false;
 }
-

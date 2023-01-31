@@ -44,6 +44,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <drivers/cs_Uicr.h>
 #include <drivers/cs_Watchdog.h>
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_RC5.h>
@@ -52,22 +53,25 @@
 #include <logging/cs_Logger.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
+#include <storage/cs_IpcRamBluenet.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_EncryptionBuffer.h>
+#include <structs/buffer/cs_CharacteristicReadBuffer.h>
+#include <structs/buffer/cs_CharacteristicWriteBuffer.h>
+#include <structs/buffer/cs_EncryptedBuffer.h>
 #include <time/cs_SystemTime.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
 extern "C" {
-#include <nrf_nvmc.h>
 #include <util/cs_Syscalls.h>
 }
 
+#define LOGCrownstoneDebug LOGd
 
-/****************************************************** Preamble *******************************************************/
+/****************************************************** Preamble
+ * *******************************************************/
 
 cs_ram_stats_t Crownstone::_ramStats;
-
 
 /****************************************** Global functions ******************************************/
 
@@ -79,6 +83,15 @@ cs_ram_stats_t Crownstone::_ramStats;
  */
 void startHFClock() {
 	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+#ifdef NRF_SDH_CLOCK_LF_SRC
+#if NRF_SDH_CLOCK_LF_SRC == 0
+	LOGd("LF clock driven by internal RC oscillator");
+#elif NRF_SDH_CLOCK_LF_SRC == 1
+	LOGd("LF clock driven by external crystal");
+#elif NRF_SDH_CLOCK_LF_SRC == 2
+	LOGd("LF clock to be synthesized from HF clock");
+#endif
+#endif
 
 	// Start the external high frequency crystal
 	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
@@ -104,6 +117,14 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
+
+	// Plain text log for when there are difficulties with the binary log parser.
+	// This means that when a device is returned to us (and binary logging is on) we can derive which firmware
+	// is present on it without having to parse the data coming from the device.
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 1
+	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
+	CLOGi("\r\nGit hash %s", g_GIT_SHA1);
+#endif
 
 	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
 	LOGi("Git hash %s", g_GIT_SHA1);
@@ -131,33 +152,15 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
  * the runtime always tries to overwrite it with the (let's hope) proper state.
  */
 void overwrite_hardware_version() {
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("Write board type into UICR");
-		nrf_nvmc_write_word(g_HARDWARE_BOARD_ADDRESS, g_DEFAULT_HARDWARE_BOARD);
-	}
-	LOGd("Board: %p", hardwareBoard);
-}
-
-/** Enable NFC pins to be used as GPIO.
- *
- * Warning: this is stored in UICR, so it's persistent.
- * Warning: NFC pins leak a bit of current when not at same voltage level.
- */
-void enableNfcPins() {
-	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+	cs_ret_code_t retCode = writeHardwareBoard();
+	LOGd("Board: %p", getHardwareBoard());
+	if (retCode != ERR_SUCCESS) {
+		LOGe("Failed to write hardware board: retCode=%u", retCode);
 	}
 }
 
 void printNfcPins() {
-	uint32_t val = NRF_UICR->NFCPINS;
-	if (val == 0) {
-		LOGd("NFC pins enabled (%p)", val);
-	}
-	else {
-		LOGd("NFC pins disabled (%p)", val);
-	}
+	LOGd("NFC pins used as gpio: %u", canUseNfcPinsAsGpio());
 }
 
 void on_exit(void) {
@@ -183,8 +186,6 @@ Crownstone::Crownstone(boards_config_t& board)
 	_mainTimerData = {{0}};
 	_mainTimerId   = &_mainTimerData;
 
-	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
-
 	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as
 	// well.
 	this->listen();
@@ -198,7 +199,7 @@ Crownstone::Crownstone(boards_config_t& board)
 	_commandHandler    = &CommandHandler::getInstance();
 	_factoryReset      = &FactoryReset::getInstance();
 
-	_scanner = &Scanner::getInstance();
+	_scanner           = &Scanner::getInstance();
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
@@ -224,10 +225,8 @@ Crownstone::Crownstone(boards_config_t& board)
 
 std::vector<Component*> Crownstone::getChildren() {
 	return {
-		&_switchAggregator,
-		&_presenceHandler,
-		&_behaviourStore,
-		// TODO: add others (when necessary for weak dependences)
+			&_switchAggregator, &_presenceHandler, &_behaviourStore,
+			// TODO: add others (when necessary for weak dependences)
 	};
 }
 
@@ -236,29 +235,32 @@ void Crownstone::init(uint16_t step) {
 	updateMinStackEnd();
 	printLoadStats();
 	switch (step) {
-	case 0: {
-		init0();
-		break;
-	}
-	case 1: {
-		init1();
-		break;
-	}
+		case 0: {
+			init0();
+			break;
+		}
+		case 1: {
+			init1();
+			break;
+		}
 	}
 }
 
 void Crownstone::init0() {
 	LOGi(FMT_HEADER "init");
-	initDrivers(0);
+	initDrivers0();
 }
 
 void Crownstone::init1() {
-	initDrivers(1);
+	initDrivers1();
 	LOG_FLUSH();
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	LOGCrownstoneDebug("Persisted operation mode is 0x%X", mode);
+
 	_operationMode = getOperationMode(mode);
+	LOGCrownstoneDebug("Resolved operation mode is 0x%X", _operationMode);
 
 	//! configure the crownstone
 	LOGi(FMT_HEADER "configure");
@@ -277,26 +279,10 @@ void Crownstone::init1() {
 	_stack->initServices();
 	LOG_FLUSH();
 
-	LOGi(FMT_HEADER "init central");
-	_bleCentral->init();
-	_crownstoneCentral->init();
-
-#if BUILD_MICROAPP_SUPPORT == 1
-	LOGi(FMT_HEADER "init microapp");
-	_microapp->init();
-#endif
-}
-
-void Crownstone::initDrivers(uint16_t step) {
-	switch (step) {
-	case 0: {
-		initDrivers0();
-		break;
-	}
-	case 1: {
-		initDrivers1();
-		break;
-	}
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		LOGi(FMT_HEADER "init central");
+		_bleCentral->init();
+		_crownstoneCentral->init();
 	}
 }
 
@@ -306,6 +292,7 @@ void Crownstone::initDrivers0() {
 	_stack->init();
 	_timer->init();
 	_stack->initSoftdevice();
+	IpcRamBluenet::getInstance().init();
 
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 	// Check if flash pages of mesh are valid, else erase them.
@@ -347,22 +334,27 @@ void Crownstone::initDrivers1() {
 		UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 	}
 
-	// Plain text log.
-	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
-
 	LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
 	// Store reset reason.
 	sd_power_reset_reason_get(&_resetReason);
-	LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", _resetReason,
-			(_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
-			(_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
-			(_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
-			(_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+	LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u",
+		 _resetReason,
+		 (_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+		 (_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+		 (_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+		 (_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
 
 	// Store gpregret.
 	_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
 	_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
+
+	if (GpRegRet::getCounter() >= CS_GPREGRET_COUNTER_MAX - 2) {
+		LOGi("Almost going to DFU mode, try factory resetting first.");
+		// Do this by simply setting the operation mode, this is read out later.
+		TYPIFY(STATE_OPERATION_MODE) mode = static_cast<uint8_t>(OperationMode::OPERATION_MODE_FACTORY_RESET);
+		_state->set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	}
 
 	if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 		_setStateValuesAfterStorageRecover = true;
@@ -435,7 +427,7 @@ void Crownstone::configure() {
 	_stack->initRadio();
 
 	// Don't do garbage collection now, it will block reading flash.
-//	_storage->garbageCollect();
+	//	_storage->garbageCollect();
 
 	increaseResetCounter();
 
@@ -475,37 +467,41 @@ void Crownstone::createService(const ServiceEvent event) {
 			_crownstoneService = new CrownstoneService();
 			_stack->addService(_crownstoneService);
 			break;
-		default:
-			LOGe("Unknown creation event");
+		default: LOGe("Unknown creation event");
 	}
 }
 
-void Crownstone::switchMode(const OperationMode & newMode) {
+void Crownstone::switchMode(const OperationMode& newMode) {
 
 	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
 	LOGd("Switch to mode: %s", operationModeName(newMode));
 
 	switch (_oldOperationMode) {
-		case OperationMode::OPERATION_MODE_UNINITIALIZED:
-			break;
+		case OperationMode::OPERATION_MODE_UNINITIALIZED: break;
 		case OperationMode::OPERATION_MODE_DFU:
 		case OperationMode::OPERATION_MODE_NORMAL:
 		case OperationMode::OPERATION_MODE_SETUP:
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGe("Only switching from UNINITIALIZED to another mode is supported");
 			break;
-		default:
-			LOGe("Unknown mode %i!", newMode);
-			return;
+		default: LOGe("Unknown mode %i!", newMode); return;
 	}
 
-//	_stack->halt();
+	//	_stack->halt();
 
 	// Remove services that belong to the current operation mode.
 	// This is not done... It is impossible to remove services in the SoftDevice.
 
 	// Start operation mode
 	startOperationMode(newMode);
+
+	// Init buffers, used by characteristics and central.
+	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	// The encrypted buffer needs some extra due to overhead: header and padding.
+	uint16_t encryptedSize = ConnectionEncryption::getInstance().getEncryptedBufferSize(
+			g_MASTER_BUFFER_SIZE, ConnectionEncryptionType::CTR);
+	EncryptedBuffer::getInstance().alloc(encryptedSize);
 
 	// Create services that belong to the new mode.
 	switch (newMode) {
@@ -522,19 +518,14 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			createService(CREATE_SETUP_SERVICE);
 			break;
 		default:
-			// nothing to do
-			;
+				// nothing to do
+				;
 	}
-
-	// Loop through all services added to the stack and create the characteristics.
-	_stack->createCharacteristics();
-
-//	_stack->resume();
 
 	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
 			LOGd("Configure setup mode");
-//			_advertiser->changeToLowTxPower();
+			//			_advertiser->changeToLowTxPower();
 			_advertiser->setNormalTxPower();
 			break;
 		}
@@ -545,7 +536,6 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			_mesh->init(_boardsConfig);
 			_mesh->start();
 #endif
-			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 			_advertiser->setNormalTxPower();
 			break;
 		}
@@ -566,13 +556,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 		default: _advertiser->setNormalTxPower();
 	}
 
-	// Enable AES encryption.
-	if (_state->isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
-		LOGi(FMT_ENABLE "AES encryption");
-		_stack->setAesEncrypted(true);
-	}
-
-//	_operationMode = newMode;
+	//	_operationMode = newMode;
 }
 
 void Crownstone::setName() {
@@ -645,6 +629,64 @@ void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER "startup");
 
+	LOGd("softdeviceFlashSection start=%p end=%p size=%p",
+			softdeviceFlashSection._start,
+			softdeviceFlashSection._end,
+			softdeviceFlashSection._size);
+	LOGd("bluenetFlashSection start=%p end=%p size=%p",
+			bluenetFlashSection._start,
+			bluenetFlashSection._end,
+			bluenetFlashSection._size);
+	LOGd("microappFlashSection start=%p end=%p size=%p",
+			microappFlashSection._start,
+			microappFlashSection._end,
+			microappFlashSection._size);
+	LOGd("p2pDfuFlashSection start=%p end=%p size=%p",
+			p2pDfuFlashSection._start,
+			p2pDfuFlashSection._end,
+			p2pDfuFlashSection._size);
+	LOGd("fdsExpansionFlashSection start=%p end=%p size=%p",
+			fdsExpansionFlashSection._start,
+			fdsExpansionFlashSection._end,
+			fdsExpansionFlashSection._size);
+	LOGd("fdsFlashSection start=%p end=%p size=%p",
+			fdsFlashSection._start,
+			fdsFlashSection._end,
+			fdsFlashSection._size);
+	LOGd("bootloaderFlashSection start=%p end=%p size=%p",
+			bootloaderFlashSection._start,
+			bootloaderFlashSection._end,
+			bootloaderFlashSection._size);
+	LOGd("mbrSettingsFlashSection start=%p end=%p size=%p",
+			mbrSettingsFlashSection._start,
+			mbrSettingsFlashSection._end,
+			mbrSettingsFlashSection._size);
+	LOGd("bootloaderSettingsFlashSection start=%p end=%p size=%p",
+			bootloaderSettingsFlashSection._start,
+			bootloaderSettingsFlashSection._end,
+			bootloaderSettingsFlashSection._size);
+
+	LOGd("softdeviceRamSection start=%p end=%p size=%p",
+			softdeviceRamSection._start,
+			softdeviceRamSection._end,
+			softdeviceRamSection._size);
+	LOGd("bluenetRamSection start=%p end=%p size=%p",
+			bluenetRamSection._start,
+			bluenetRamSection._end,
+			bluenetRamSection._size);
+	LOGd("microappRamSection start=%p end=%p size=%p",
+			microappRamSection._start,
+			microappRamSection._end,
+			microappRamSection._size);
+	LOGd("ipcRamSection start=%p end=%p size=%p",
+			ipcRamSection._start,
+			ipcRamSection._end,
+			ipcRamSection._size);
+	LOGd("bootloaderRamSection start=%p end=%p size=%p",
+			bootloaderRamSection._start,
+			bootloaderRamSection._end,
+			bootloaderRamSection._size);
+
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
 	if (bootDelay) {
@@ -688,7 +730,7 @@ void Crownstone::startUp() {
 		_trackedDevices.init();
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
-			uint16_t delay = RNG::getInstance().getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+			uint16_t delay = RNG::getInstance().getRandom16() / 6;  // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 
@@ -706,6 +748,15 @@ void Crownstone::startUp() {
 		}
 
 		_behaviourStore.init();
+	}
+
+#if BUILD_MICROAPP_SUPPORT == 1
+	LOGi(FMT_HEADER "start microapp");
+	_microapp->init(_operationMode);
+#endif
+
+	if (_operationMode == OperationMode::OPERATION_MODE_FACTORY_RESET) {
+		FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 	}
 
 	uint32_t err_code;
@@ -812,15 +863,15 @@ void Crownstone::handleEvent(event_t& event) {
 			 * The following commented out code could be used once FDS has been fixed.
 			 * For now, we use GPREGRET to remember and do it next boot.
 			 */
-//			cs_ret_code_t retCode = _storage->init();
-//			if (retCode != ERR_SUCCESS) {
-//				LOGf("Storage init failed after page erase");
-//				// Only option left is to reboot and see if things work out next time.
-//				APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
-//			}
-//
-//			_setStateValuesAfterStorageRecover = true;
-//			// Wait for storage initialized event.
+			//			cs_ret_code_t retCode = _storage->init();
+			//			if (retCode != ERR_SUCCESS) {
+			//				LOGf("Storage init failed after page erase");
+			//				// Only option left is to reboot and see if things work out next time.
+			//				APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
+			//			}
+			//
+			//			_setStateValuesAfterStorageRecover = true;
+			//			// Wait for storage initialized event.
 			GpRegRet::setFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
 			sd_nvic_SystemReset();
 			break;
@@ -880,33 +931,32 @@ void Crownstone::handleEvent(event_t& event) {
 				break;
 			}
 			memcpy(event.result.buf.data, &_ramStats, sizeof(_ramStats));
-			event.result.dataSize = sizeof(_ramStats);
+			event.result.dataSize   = sizeof(_ramStats);
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		default:
-			LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
+		default: LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
 	}
 
 	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {
-	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
+	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled =
+	// *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
 	// 		// 12-sep-2019 TODO: implement
 	// 		LOGw("TODO ibeacon enabled=%i", enabled);
 	// 		break;
 	// 	}
-
 }
 
 void Crownstone::updateHeapStats() {
 	// Don't have to do much, _sbrk() is the best place to keep up the heap end.
-	_ramStats.maxHeapEnd = (uint32_t)getHeapEndMax();
-	_ramStats.minFree = _ramStats.minStackEnd - _ramStats.maxHeapEnd;
+	_ramStats.maxHeapEnd   = (uint32_t)getHeapEndMax();
+	_ramStats.minFree      = _ramStats.minStackEnd - _ramStats.maxHeapEnd;
 	_ramStats.numSbrkFails = getSbrkNumFails();
 }
 
 void Crownstone::updateMinStackEnd() {
 	void* stackPointer;
-	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	asm("mov %0, sp" : "=r"(stackPointer) : :);
 	if ((uint32_t)stackPointer < _ramStats.minStackEnd) {
 		_ramStats.minStackEnd = (uint32_t)stackPointer;
 	}
@@ -914,43 +964,95 @@ void Crownstone::updateMinStackEnd() {
 
 void Crownstone::printLoadStats() {
 	// Log ram usage.
-	uint8_t *heapPointer = (uint8_t*)malloc(1);
+	uint8_t* heapPointer = (uint8_t*)malloc(1);
 	void* stackPointer;
-	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	asm("mov %0, sp" : "=r"(stackPointer) : :);
 	LOGd("Memory heap=%p, stack=%p", heapPointer, (uint8_t*)stackPointer);
 	free(heapPointer);
 
-	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
+	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u",
+		 (uint32_t)getHeapEnd(),
+		 _ramStats.maxHeapEnd,
+		 _ramStats.minStackEnd,
+		 _ramStats.minFree,
+		 _ramStats.numSbrkFails);
 
 	// Log scheduler usage.
-	__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
+	__attribute__((unused)) uint16_t maxUsed     = app_sched_queue_utilization_get();
 	__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();
 	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
 
-void printBootloaderInfo() {
-	bluenet_ipc_bootloader_data_t bootloaderData;
-	uint8_t size = sizeof(bootloaderData);
+/*
+ * Handle bootloader information. If a firmware is just activated, IPC RAM for managing error conditions around
+ * reboots (esp. with respect to the microapps) will be cleared. If the IPC version is exactly the same between
+ * bootloader and firmware the justActivated flag is subsequently cleared.
+ *
+ * Caution is required if there's an updateError which is not cleared by the bootloader across reboots. This means
+ * that RAM data for the microapps will always be cleared. That subsequently means that misbehaving microapps can not
+ * be properly detected.
+ *
+ * To fix this, it should be possible by the user to clear IPC ram.
+ */
+void handleBootloaderInfo() {
+	bluenet_ipc_data_payload_t ipcData;
 	uint8_t dataSize;
-	uint8_t* buf = (uint8_t*)&bootloaderData;
-	int retCode  = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
-	if (retCode != IPC_RET_SUCCESS) {
-		LOGw("No IPC data found, error = %i", retCode);
+	LOGi("Get bootloader IPC data info");
+	IpcRetCode ipcCode = getRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, &dataSize, sizeof(ipcData.raw));
+	if (ipcCode != IPC_RET_SUCCESS) {
+		LOGw("Bootloader IPC data error: ipcCode=%i", ipcCode);
 		return;
 	}
-	if (size != dataSize) {
-		LOGw("IPC data struct incorrect size");
+
+	if (ipcData.bootloaderData.ipcDataMajor != g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR) {
+		LOGw("Different IPC bootloader major: major=%u required=%u",
+			 ipcData.bootloaderData.ipcDataMajor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MAJOR);
 		return;
 	}
-	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
-		 bootloaderData.protocol,
-		 bootloaderData.dfu_version,
-		 bootloaderData.build_type);
+
+	// We can change this later to a lower minimal minor version.
+	if (ipcData.bootloaderData.ipcDataMinor < g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR) {
+		LOGw("Too old IPC bootloader minor: minor=%u minimum=%u.",
+			 ipcData.bootloaderData.ipcDataMinor,
+			 g_BLUENET_COMPAT_BOOTLOADER_IPC_RAM_MINOR);
+		return;
+	}
+
+	bool setData = false;
+	if (ipcData.bootloaderData.flags.readError) {
+		LOGi("Bootloader had an IPC read error");
+		ipcData.bootloaderData.flags.readError = 0;
+		setData                                = true;
+	}
+
+	if (ipcData.bootloaderData.flags.versionError) {
+		LOGi("Bootloader had an IPC version error");
+		ipcData.bootloaderData.flags.versionError = 0;
+		setData                                   = true;
+	}
+
+	if (ipcData.bootloaderData.flags.justActivated) {
+		LOGi("This is the first time this version of bluenet runs.");
+		LOGd("Clear the just activated flag");
+		ipcData.bootloaderData.flags.justActivated = 0;
+		setData                                    = true;
+	}
+
+	if (setData) {
+		// Use the raw buffer, so we keep the possible newer data as well
+		// (in case of newer minor version set by the bootloader).
+		setRamData(IPC_INDEX_BOOTLOADER_TO_BLUENET, ipcData.raw, dataSize);
+	}
+
 	LOGi("Bootloader version: %u.%u.%u-RC%u",
-		 bootloaderData.major,
-		 bootloaderData.minor,
-		 bootloaderData.patch,
-		 bootloaderData.prerelease);
+		 ipcData.bootloaderData.bootloaderMajor,
+		 ipcData.bootloaderData.bootloaderMinor,
+		 ipcData.bootloaderData.bootloaderPatch,
+		 ipcData.bootloaderData.bootloaderPrerelease);
+	LOGd("Bootloader dfuVersion=%u buildType=%u",
+		 ipcData.bootloaderData.dfuVersion,
+		 ipcData.bootloaderData.bootloaderBuildType);
 }
 
 /**********************************************************************************************************************
@@ -983,10 +1085,13 @@ int main() {
 	// Init GPIO pins early in the process!
 
 	if (board.flags.usesNfcPins) {
-		enableNfcPins();
+		cs_ret_code_t retCode = enableNfcPinsAsGpio();
+		if (retCode != ERR_SUCCESS) {
+			// Not much we can do here.
+		}
 	}
 
-//	if (IS_CROWNSTONE(board.deviceType)) {
+	//	if (IS_CROWNSTONE(board.deviceType)) {
 	// Turn dimmer off.
 	if (board.pinDimmer != PIN_NONE) {
 		nrf_gpio_cfg_output(board.pinDimmer);
@@ -1012,7 +1117,7 @@ int main() {
 		nrf_gpio_cfg_output(board.pinRelayOn);
 		nrf_gpio_pin_clear(board.pinRelayOn);
 	}
-//	}
+	//	}
 
 	if (board.flags.enableUart) {
 		initUart(board.pinRx, board.pinTx);
@@ -1026,24 +1131,7 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-	printBootloaderInfo();
-
-
-//	// Make a "clicker"
-//	nrf_delay_ms(1000);
-//	nrf_gpio_pin_set(board.pinGpioRelayOn);
-//	nrf_delay_ms(RELAY_HIGH_DURATION);
-//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
-//	while (true) {
-//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
-//		nrf_gpio_pin_set(board.pinGpioRelayOff);
-//		nrf_delay_ms(RELAY_HIGH_DURATION);
-//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
-//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
-//		nrf_gpio_pin_set(board.pinGpioRelayOn);
-//		nrf_delay_ms(RELAY_HIGH_DURATION);
-//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
-//	}
+	handleBootloaderInfo();
 
 	Crownstone crownstone(board);
 

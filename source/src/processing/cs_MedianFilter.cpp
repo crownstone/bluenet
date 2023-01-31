@@ -5,11 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-//typename uint8_t median_filter_data_t;
+// typename uint8_t median_filter_data_t;
 
 typedef struct node {
 	value_id_t index;
-	struct node *next;
+	struct node* next;
 } node_t;
 
 MedianFilter::MedianFilter() {
@@ -17,25 +17,23 @@ MedianFilter::MedianFilter() {
 	_nodes = calloc(sizeof(node_t), SLIDING_WINDOW_SIZE);
 	// start with a sequential order
 	for (uint8_t i = 0; i < SLIDING_WINDOW_SIZE - 1; ++i) {
-		_nodes[i].next = _nodes[j];
+		_nodes[i].next  = _nodes[j];
 		_nodes[i].index = i;
 	}
 }
 
-MedianFilter::~MedianFilter() {
-}
+MedianFilter::~MedianFilter() {}
 
 void MedianFilter::init(uint8_t sliding_window_size) {
 	// create linked list
 	for (uint8_t i = 0; i < sliding_window_size - 1; ++i) {
-
 	}
 }
 
 /**
  * Use an insert operation that has some state information.
  */
-void MedianFilter::sorted_insert(value_id_t value_id, value_t value, bool & start) {
+void MedianFilter::sorted_insert(value_id_t value_id, value_t value, bool& start) {
 	value_t pvalue = _buffer.getValue(buffer_id, channel_id, _nodes[0].index);
 	if (value > pvalue) {
 		value_id_t pvalue_id = _nodes[0].index;
@@ -61,7 +59,6 @@ void MedianFilter::setPadding(value_id_t padding) {
 	_padding = padding;
 }
 
-
 void MedianFilter::run(buffer_id_t buffer_id, channel_id_t channel_id) {
 	_buffer.getBuffer(buffer_id);
 
@@ -76,4 +73,3 @@ void MedianFilter::run(buffer_id_t buffer_id, channel_id_t channel_id) {
 		_buffer.getValue(buffer_id, channel_id, i);
 	}
 }
-

@@ -5,24 +5,22 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <time/cs_SystemTime.h>
-
 #include <common/cs_Types.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
-#include <logging/cs_Logger.h>
 #include <events/cs_EventDispatcher.h>
+#include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
+#include <test/cs_Test.h>
+#include <time/cs_SystemTime.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_TimeSyncMessage.h>
-#include <test/cs_Test.h>
 #include <util/cs_Lollipop.h>
 
-#define LOGSystemTimeInfo   LOGd
-#define LOGSystemTimeDebug   LOGnone
+#define LOGSystemTimeInfo LOGd
+#define LOGSystemTimeDebug LOGnone
 #define LOGSystemTimeVerbose LOGnone
-
 
 /**
  *  Define this symbol for more mesh traffic to facilitate debugging.
@@ -32,35 +30,34 @@
 
 // Check for debug symbol consistency
 #ifdef DEBUG_SYSTEM_TIME
-	#ifndef DEBUG
-		#error "SystemTime Debug must be turned off in release"
-	#else
-		#pragma message("SystemTime Debug is turned on.")
-	#endif  // DEBUG
+#ifndef DEBUG
+#error "SystemTime Debug must be turned off in release"
+#else
+#pragma message("SystemTime Debug is turned on.")
+#endif  // DEBUG
 #endif  // DEBUG_SYSTEM_TIME
 
 // ============== Static member declarations ==============
 
 // runtime variables
-uint32_t SystemTime::rtcCountOfLastSecondIncrement = 0;
-uint32_t SystemTime::upTimeSec = 0;
+uint32_t SystemTime::rtcCountOfLastSecondIncrement     = 0;
+uint32_t SystemTime::upTimeSec                         = 0;
 
-uint16_t SystemTime::throttleSetTimeCountdownTicks = 0;
+uint16_t SystemTime::throttleSetTimeCountdownTicks     = 0;
 uint16_t SystemTime::throttleSetSunTimesCountdownTicks = 0;
 
 // sync
 high_resolution_time_stamp_t SystemTime::rootTime;
 uint32_t SystemTime::rtcCountOfLastRootTimeUpdate = 0;
-uint32_t SystemTime::uptimeOfLastTimeSyncMessage = 0;
-stone_id_t SystemTime::rootClockId = stone_id_init();
-stone_id_t SystemTime::myId = stone_id_init();
+uint32_t SystemTime::uptimeOfLastTimeSyncMessage  = 0;
+stone_id_t SystemTime::rootClockId                = stone_id_init();
+stone_id_t SystemTime::myId                       = stone_id_init();
 Coroutine SystemTime::syncTimeCoroutine;
 Coroutine SystemTime::debugSyncTimeCoroutine;
 
 // driver details
-app_timer_t SystemTime::appTimerData = {{0}};
+app_timer_t SystemTime::appTimerData  = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;
-
 
 // ====================== Constants ======================
 
@@ -74,7 +71,7 @@ constexpr uint32_t SystemTime::root_clock_update_period_ms() {
 #ifdef DEBUG_SYSTEM_TIME
 	return 5 * 1000;
 #else
-	return 20 * 60 * 1000; // 20 minutes
+	return 20 * 60 * 1000;  // 20 minutes
 #endif  // DEBUG_SYSTEM_TIME
 }
 
@@ -100,9 +97,8 @@ constexpr uint8_t SystemTime::timestamp_version_min_valid() {
 }
 
 constexpr uint32_t SystemTime::debugSyncTimeMessagePeriodMs() {
-	return 5*1000;
+	return 5 * 1000;
 }
-
 
 // ============ SystemTime implementation ===========
 
@@ -113,16 +109,14 @@ constexpr uint32_t SystemTime::debugSyncTimeMessagePeriodMs() {
 void SystemTime::init() {
 	initDebug();
 
-	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
+	syncTimeCoroutine.action = []() { return syncTimeCoroutineAction(); };
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 
-	Timer::getInstance().createSingleShot(
-			appTimerId,
-			static_cast<app_timer_timeout_handler_t>(&SystemTime::tick));
+	Timer::getInstance().createSingleShot(appTimerId, static_cast<app_timer_timeout_handler_t>(&SystemTime::tick));
 
 	// Start the root clock, but accept clock of other IDs.
-	uint32_t rtcCount = RTC::getCount();
+	uint32_t rtcCount             = RTC::getCount();
 	rtcCountOfLastSecondIncrement = rtcCount;
 	setRootTimeStamp(high_resolution_time_stamp_t(), stone_id_init(), rtcCount);
 
@@ -132,7 +126,7 @@ void SystemTime::init() {
 // ======================== Utility functions ========================
 
 uint32_t SystemTime::posix() {
-	if (rootTime.version  < timestamp_version_min_valid()) {
+	if (rootTime.version < timestamp_version_min_valid()) {
 		return 0;
 	}
 
@@ -155,10 +149,7 @@ uint32_t SystemTime::up() {
 // ======================== timing driver stuff ========================
 
 void SystemTime::scheduleNextTick() {
-	Timer::getInstance().start(
-			appTimerId,
-			MS_TO_TICKS(TICK_TIME_MS),
-			nullptr);
+	Timer::getInstance().start(appTimerId, MS_TO_TICKS(TICK_TIME_MS), nullptr);
 }
 
 void SystemTime::tick(void*) {
@@ -199,7 +190,7 @@ cs_ret_code_t SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh
 	}
 	throttleSetTimeCountdownTicks = THROTTLE_SET_TIME_TICKS;
 
-	uint32_t rtcCount = RTC::getCount();
+	uint32_t rtcCount             = RTC::getCount();
 
 	TimeOfDay t(time);
 	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
@@ -209,10 +200,10 @@ cs_ret_code_t SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh
 	uint32_t prevtime = posix();
 
 	high_resolution_time_stamp_t stamp;
-	stamp.posix_s = time;
+	stamp.posix_s  = time;
 	stamp.posix_ms = 0;
 	// TODO: set at least to timestamp_version_min_valid()
-	stamp.version = Lollipop::next(rootTime.version, timestamp_version_lollipop_max());
+	stamp.version  = Lollipop::next(rootTime.version, timestamp_version_lollipop_max());
 
 	// Setting root id to 0 is a brutal claim to be root.
 	// It results in no crownstone claiming to be root, until re-election timeout.
@@ -227,17 +218,14 @@ cs_ret_code_t SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh
 		sendTimeSyncMessage(getSynchronizedStamp(), 0, true);
 	}
 
-	event_t event(
-			CS_TYPE::EVT_TIME_SET,
-			&prevtime,
-			sizeof(prevtime));
+	event_t event(CS_TYPE::EVT_TIME_SET, &prevtime, sizeof(prevtime));
 
 	event.dispatch();
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled) {
-	if (sunTimes.sunrise > 24*60*60 || sunTimes.sunset > 24*60*60) {
+	if (sunTimes.sunrise > 24 * 60 * 60 || sunTimes.sunset > 24 * 60 * 60) {
 		LOGw("Invalid suntimes: rise=%u set=%u", sunTimes.sunrise, sunTimes.sunset);
 		return ERR_WRONG_PARAMETER;
 	}
@@ -251,29 +239,29 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 	LOGSystemTimeDebug("setSunTimes rise=%u set=%u", sunTimes.sunrise, sunTimes.sunset);
 
 	TYPIFY(STATE_SUN_TIME) stateSunTimes = sunTimes;
-	cs_state_data_t stateData = cs_state_data_t(CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&stateSunTimes), sizeof(stateSunTimes));
+	cs_state_data_t stateData =
+			cs_state_data_t(CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&stateSunTimes), sizeof(stateSunTimes));
 	cs_ret_code_t retCode = State::getInstance().setThrottled(stateData, SUN_TIME_THROTTLE_PERIOD_SECONDS);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_WAIT_FOR_SUCCESS:
-		case ERR_SUCCESS_NO_CHANGE:
-			return ERR_SUCCESS;
-		default:
-			return retCode;
+		case ERR_SUCCESS_NO_CHANGE: return ERR_SUCCESS;
+		default: return retCode;
 	}
 }
 
 // ======================== Events ========================
 
-void SystemTime::handleEvent(event_t & event) {
+void SystemTime::handleEvent(event_t& event) {
 	syncTimeCoroutine.handleEvent(event);
 	debugSyncTimeCoroutine.handleEvent(event);
 
 	switch (event.type) {
 		case CS_TYPE::CMD_SET_TIME: {
-			LOGSystemTimeInfo("set time from command source: type=%u id=%u", event.source.source.type, event.source.source.id);
-			uint32_t time = *((TYPIFY(CMD_SET_TIME)*)event.data);
-			bool sendToMesh = isOnlyReceiveByThisDevice(event.source);
+			LOGSystemTimeInfo(
+					"set time from command source: type=%u id=%u", event.source.source.type, event.source.source.id);
+			uint32_t time           = *((TYPIFY(CMD_SET_TIME)*)event.data);
+			bool sendToMesh         = isOnlyReceiveByThisDevice(event.source);
 			event.result.returnCode = setTime(time, true, sendToMesh);
 			break;
 		}
@@ -298,7 +286,7 @@ void SystemTime::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
 			// Keep requesting the time until a valid posix time is received.
 			if (timeStampVersion() < timestamp_version_min_valid()) {
-				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(event.data);
+				auto req       = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(event.data);
 				req->bits.time = true;
 			}
 			break;
@@ -321,7 +309,8 @@ void SystemTime::handleEvent(event_t & event) {
 			}
 			break;
 		}
-		default: {}
+		default: {
+		}
 	}
 }
 
@@ -332,19 +321,21 @@ uint8_t SystemTime::timeStampVersion() {
 }
 
 void SystemTime::setRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id, uint32_t rtcCount) {
-	LOGSystemTimeDebug("setRootTimeStamp, posix=%u ms=%u version=%u id=%u", stamp.posix_s, stamp.posix_ms, stamp.version, id);
+	LOGSystemTimeDebug(
+			"setRootTimeStamp, posix=%u ms=%u version=%u id=%u", stamp.posix_s, stamp.posix_ms, stamp.version, id);
 
-	rootClockId = id;
-	rootTime = stamp;
+	rootClockId                  = id;
+	rootTime                     = stamp;
 	rtcCountOfLastRootTimeUpdate = rtcCount;
 }
 
 void SystemTime::updateRootTimeStamp(uint32_t rtcCount) {
-	uint32_t msPassed = RTC::differenceMs(rtcCount, rtcCountOfLastRootTimeUpdate);
+	uint32_t msPassed         = RTC::differenceMs(rtcCount, rtcCountOfLastRootTimeUpdate);
 
 	// Clock should go msPassed forward, this can be multiple seconds.
 	uint32_t secondsIncrement = (rootTime.posix_ms + msPassed) / 1000;
-	rootTime.posix_ms =         (rootTime.posix_ms + msPassed) - 1000 * secondsIncrement; // Same as (rootTime.posix_ms + msPassed) % 1000.
+	rootTime.posix_ms =
+			(rootTime.posix_ms + msPassed) - 1000 * secondsIncrement;  // Same as (rootTime.posix_ms + msPassed) % 1000.
 	rootTime.posix_s += secondsIncrement;
 
 	LOGSystemTimeDebug("updateRootTimeStamp s=%u ms=%u", rootTime.posix_s, rootTime.posix_ms);
@@ -359,7 +350,8 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp() {
 	high_resolution_time_stamp_t stamp;
 
 	uint32_t secondsIncrement = (rootTime.posix_ms + msPassed) / 1000;
-	stamp.posix_ms =            (rootTime.posix_ms + msPassed) - 1000 * secondsIncrement; // Same as (rootTime.posix_ms + msPassed) % 1000.
+	stamp.posix_ms =
+			(rootTime.posix_ms + msPassed) - 1000 * secondsIncrement;  // Same as (rootTime.posix_ms + msPassed) % 1000.
 	stamp.posix_s = rootTime.posix_s + secondsIncrement;
 	stamp.version = rootTime.version;
 	LOGSystemTimeVerbose("getSynchronizedStamp s=%u ms=%u version=%u", stamp.posix_s, stamp.posix_ms, stamp.version);
@@ -374,24 +366,15 @@ uint32_t SystemTime::syncTimeCoroutineAction() {
 		rootClockId = myId;
 	}
 
-//	if (meIsRootClock()) {
-//		LOGSystemTimeDebug("meIsRootClock");
-		auto stamp = getSynchronizedStamp();
-		sendTimeSyncMessage(stamp, myId);
-		return Coroutine::delayMs(root_clock_update_period_ms());
-//	}
-
-//	LOGSystemTimeDebug("syncTimeCoroutineAction did nothing, waiting for reelection (myId=%u, rootId=%u, version=%u)",
-//			myId, rootClockId, rootTime.version);
-//
-//	// we need to check at least once in a while so that if there are
-//	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
-//	return Coroutine::delayMs(root_clock_reelection_timeout_ms());
+	auto stamp = getSynchronizedStamp();
+	sendTimeSyncMessage(stamp, myId);
+	return Coroutine::delayMs(root_clock_update_period_ms());
 }
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 	uint32_t rtcCount = RTC::getCount();
-	bool versionIsNewer = Lollipop::isNewer(rootTime.version, syncMessage.stamp.version, timestamp_version_lollipop_max());
+	bool versionIsNewer =
+			Lollipop::isNewer(rootTime.version, syncMessage.stamp.version, timestamp_version_lollipop_max());
 	bool versionIsEqual = rootTime.version == syncMessage.stamp.version;
 
 	if (versionIsNewer || (versionIsEqual && isRootClock(syncMessage.srcId))) {
@@ -416,7 +399,8 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 		LOGSystemTimeDebug("ignored");
 	}
 	// These prints should be done after setRootTimeStamp(), else they influence the synchronization.
-	LOGSystemTimeDebug("onTimeSyncMsg msg: {id=%u version=%u s=%u ms=%u} cur: {id=%u version=%u s=%u ms=%u}",
+	LOGSystemTimeDebug(
+			"onTimeSyncMsg msg: {id=%u version=%u s=%u ms=%u} cur: {id=%u version=%u s=%u ms=%u}",
 			syncMessage.srcId,
 			syncMessage.stamp.version,
 			syncMessage.stamp.posix_s,
@@ -424,25 +408,22 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 			rootClockId,
 			rootTime.version,
 			getSynchronizedStamp().posix_s,
-			getSynchronizedStamp().posix_ms
-	);
-	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d",
-			versionIsNewer,
-			versionIsEqual,
-			isRootClock(syncMessage.srcId)
-	);
+			getSynchronizedStamp().posix_ms);
+	LOGSystemTimeDebug(
+			"isNewer=%d isEqual=%d isRoot=%d", versionIsNewer, versionIsEqual, isRootClock(syncMessage.srcId));
 
 	pushSyncMessageToTestSuite(syncMessage);
 }
 
 void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id, bool reliable) {
 	cs_mesh_model_msg_time_sync_t timeSyncMsg;
-	timeSyncMsg.posix_s  = stamp.posix_s;
-	timeSyncMsg.posix_ms = stamp.posix_ms;
-	timeSyncMsg.version  = stamp.version;
+	timeSyncMsg.posix_s      = stamp.posix_s;
+	timeSyncMsg.posix_ms     = stamp.posix_ms;
+	timeSyncMsg.version      = stamp.version;
 	timeSyncMsg.overrideRoot = (id == 0);
 
-	LOGSystemTimeDebug("sendTimeSyncMessage s=%u ms=%u version=%u override=%d",
+	LOGSystemTimeDebug(
+			"sendTimeSyncMessage s=%u ms=%u version=%u override=%d",
 			timeSyncMsg.posix_s,
 			timeSyncMsg.posix_ms,
 			timeSyncMsg.version,
@@ -452,9 +433,9 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	// This means the timestamp that is sent doesn't have to be updated.
 	// But we will have to send a sync message more often.
 	cs_mesh_msg_t meshMsg;
-	meshMsg.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
+	meshMsg.type    = CS_MESH_MODEL_TYPE_TIME_SYNC;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&timeSyncMsg);
-	meshMsg.size  = sizeof(timeSyncMsg);
+	meshMsg.size    = sizeof(timeSyncMsg);
 	if (reliable) {
 		meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
 	}
@@ -477,8 +458,6 @@ bool SystemTime::meIsRootClock() {
 	return isRootClock(myId);
 }
 
-
-
 bool SystemTime::reelectionPeriodTimedOut() {
 	return root_clock_reelection_timeout_ms() / 1000 <= upTimeSec - uptimeOfLastTimeSyncMessage;
 }
@@ -489,7 +468,6 @@ bool SystemTime::rebootTimedOut() {
 	return (uptimeOfLastTimeSyncMessage != 0) || (reboot_sync_timeout_ms() / 1000 <= upTimeSec);
 }
 
-
 bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_source) {
 	auto src = counted_source.source;
 	if (src.flagExternal) {
@@ -497,12 +475,8 @@ bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_sou
 	}
 
 	return src.type == CS_CMD_SOURCE_TYPE_UART
-			|| (src.type == CS_CMD_SOURCE_TYPE_ENUM
-					&&  src.id == CS_CMD_SOURCE_CONNECTION);
+		   || (src.type == CS_CMD_SOURCE_TYPE_ENUM && src.id == CS_CMD_SOURCE_CONNECTION);
 }
-
-
-
 
 // ==========================================
 // =========== Debug functions ==============
@@ -510,7 +484,7 @@ bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_sou
 
 void SystemTime::initDebug() {
 #ifdef DEBUG_SYSTEM_TIME
-	debugSyncTimeCoroutine.action = [](){
+	debugSyncTimeCoroutine.action = []() {
 		LOGd("debug sync time");
 		publishSyncMessageForTesting();
 		return Coroutine::delayMs(debugSyncTimeMessagePeriodMs());
@@ -525,20 +499,22 @@ void SystemTime::publishSyncMessageForTesting() {
 	// However, if the implementation is bugged, this might cover up the bug.
 	// Message should be marked to be solely for testing.
 //	sendTimeSyncMessage(getSynchronizedStamp(), myId);
-#endif // DEBUG_SYSTEM_TIME
+#endif  // DEBUG_SYSTEM_TIME
 }
 
 void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage) {
 #ifdef DEBUG_SYSTEM_TIME
-	char valuestring [50];
+	char valuestring[50];
 
-	LOGSystemTimeDebug("push sync message to host: %d %d %d %d",
+	LOGSystemTimeDebug(
+			"push sync message to host: %d %d %d %d",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
 			syncmessage.srcId,
 			syncmessage.stamp.version);
 
-	sprintf(valuestring, "%lu,%u,%u,%u",
+	sprintf(valuestring,
+			"%lu,%u,%u,%u",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
 			syncmessage.srcId,
@@ -547,4 +523,3 @@ void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage) {
 	TEST_PUSH_STATIC_S("SystemTime", "timesyncmsg", valuestring);
 #endif  // DEBUG_SYSTEM_TIME
 }
-

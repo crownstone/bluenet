@@ -31,7 +31,7 @@ To manually run the tests for a particular target:
 
 ```
 mkdir build && cd build
-cmake .. -DBOARDTARGET=${YOUR_CONFIG}
+cmake .. -DBOARD_TARGET=${YOUR_CONFIG} -DCOMPILE_FOR_HOST=ON
 make -j
 cd ./host/${YOUR_CONFIG}
 ctest
@@ -46,7 +46,7 @@ and a failure otherwise.
 For example, this would already be sufficient:
 ```
 #include <util/cs_Error.h>
-int main() { 
+int main() {
 	bool isImplemented = false;
 	assert(isImplemented, "not implemented");
 	return 0;

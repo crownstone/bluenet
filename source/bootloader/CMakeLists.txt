@@ -124,6 +124,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dev_info_service.c")
 	#LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/cs_IpcRamData.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/shared/ipc/cs_IpcRamData.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/drivers/cs_Uicr.c")
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
@@ -338,6 +339,10 @@ message(STATUS "bootloader: Configure cs_BootloaderConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 
+message(STATUS "bootloader: Configure cs_SharedConfig.cpp file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/../shared/cs_SharedConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_SharedConfig.c")
+
 message(STATUS "bootloader: Configure cs_config.h file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_config.h")
 
@@ -357,7 +362,7 @@ MESSAGE(STATUS "bootloader: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, 
 
 SET(CS_LINKER_FLAGS "-Wl,--defsym=BOOTLOADER_START_ADDRESS=${BOOTLOADER_START_ADDRESS} -Wl,--defsym=BOOTLOADER_LENGTH=${BOOTLOADER_LENGTH}")
 
-SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CS_LINKER_FLAGS}")
+SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${CS_LINKER_FLAGS}")
 
 # Remove sections that are part of UICR (so objcopy does not generate very large files)
 MESSAGE(STATUS "Remove sections .uicr_bootloader_start_address and .uicr_mbr_params_page (or objcopy will generate huge files)")
@@ -368,13 +373,14 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}.elf"
 	COMMAND stat -t ${PROJECT_NAME}.elf | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
 	COMMAND ${CMAKE_COMMAND} -E echo ""
-	#COMMAND stat ${PROJECT_NAME}.elf | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes")
+	COMMENT "Display size info of elf file"
 	)
 
 # Add post-build target to generate the .hex file (to be used in nrfjprog or jlink)
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E echo "** bootloader: Remove UICR sections for start address and MBR parameters"
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+	COMMENT "Generate hex file from elf file"
 	)
 
 SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}\
@@ -416,6 +422,7 @@ SET_SOURCE_FILES_PROPERTIES(${BOOTLOADER_SOURCE_FILES}
 SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
 SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/bootloader/")
 SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
+SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${CMAKE_CURRENT_BINARY_DIR}")
 SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
 
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC ${BOOTLOADER_INCLUDE_DIRS} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")

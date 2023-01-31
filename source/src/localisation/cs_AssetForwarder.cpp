@@ -5,18 +5,15 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #include <localisation/cs_AssetForwarder.h>
-#include <mesh/cs_MeshMsgEvent.h>
-
-#include <protocol/cs_RssiAndChannel.h>
-#include <protocol/cs_Packets.h>
-#include <uart/cs_UartHandler.h>
 #include <logging/cs_Logger.h>
+#include <mesh/cs_MeshMsgEvent.h>
+#include <protocol/cs_Packets.h>
+#include <protocol/cs_RssiAndChannel.h>
 #include <storage/cs_State.h>
+#include <uart/cs_UartHandler.h>
 
 #define LOGAssetForwarderDebug LOGvv
-
 
 cs_ret_code_t AssetForwarder::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myStoneId, sizeof(_myStoneId));
@@ -73,8 +70,8 @@ bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 	LOGAssetForwarderDebug("Forward mac-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 
 	outbox_msg_t outMsg;
-	outMsg.record = record;
-	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_MAC;
+	outMsg.record          = record;
+	outMsg.msgType         = CS_MESH_MODEL_TYPE_ASSET_INFO_MAC;
 
 	outMsg.macMsg.rssiData = rssi_and_channel_t(asset.rssi, asset.channel);
 	outMsg.macMsg.mac.copyFrom(asset.address);
@@ -82,18 +79,18 @@ bool AssetForwarder::sendAssetMacToMesh(asset_record_t* record, const scanned_de
 	return addToOutbox(outMsg);
 }
 
-
-bool AssetForwarder::sendAssetIdToMesh(asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
+bool AssetForwarder::sendAssetIdToMesh(
+		asset_record_t* record, const scanned_device_t& asset, const asset_id_t& assetId, uint8_t filterBitmask) {
 	LOGAssetForwarderDebug("Forward asset-id-over-mesh ch%u, %d dB", asset.channel, asset.rssi);
 
 	outbox_msg_t outMsg;
-	outMsg.record = record;
-	outMsg.msgType = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
+	outMsg.record              = record;
+	outMsg.msgType             = CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
 
-	outMsg.idMsg.id = assetId;
-	outMsg.idMsg.rssi= asset.rssi;
-	outMsg.idMsg.channel = compressChannel(asset.channel);
-	outMsg.idMsg.reserved = 0;
+	outMsg.idMsg.id            = assetId;
+	outMsg.idMsg.rssi          = asset.rssi;
+	outMsg.idMsg.channel       = compressChannel(asset.channel);
+	outMsg.idMsg.reserved      = 0;
 	outMsg.idMsg.filterBitmask = filterBitmask;
 
 	return addToOutbox(outMsg);
@@ -124,7 +121,6 @@ bool AssetForwarder::addToOutbox(outbox_msg_t& outMsg) {
 	*outSlot = outMsg;
 	return true;
 }
-
 
 bool AssetForwarder::dispatchOutboxMessage(outbox_msg_t& outMsg) {
 	if (!outMsg.isValid()) {
@@ -168,14 +164,10 @@ bool AssetForwarder::dispatchOutboxMessage(outbox_msg_t& outMsg) {
 
 // ------------- outbox_msg_t -------------
 
-AssetForwarder::outbox_msg_t::outbox_msg_t() : record(nullptr), msgType(CS_MESH_MODEL_TYPE_UNKNOWN), rawMsg{}  {
-
-}
-
+AssetForwarder::outbox_msg_t::outbox_msg_t() : record(nullptr), msgType(CS_MESH_MODEL_TYPE_UNKNOWN), rawMsg{} {}
 
 bool AssetForwarder::outbox_msg_t::isValid() {
-	return msgType == CS_MESH_MODEL_TYPE_ASSET_INFO_MAC ||
-			msgType == CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
+	return msgType == CS_MESH_MODEL_TYPE_ASSET_INFO_MAC || msgType == CS_MESH_MODEL_TYPE_ASSET_INFO_ID;
 }
 
 bool AssetForwarder::outbox_msg_t::isSimilar(const outbox_msg_t& other) {
@@ -198,19 +190,19 @@ bool AssetForwarder::outbox_msg_t::isSimilar(const outbox_msg_t& other) {
 
 // ------------- private stuff -------------
 
-void AssetForwarder::handleEvent(event_t & event) {
+void AssetForwarder::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_RECV_MESH_MSG: {
 			auto meshMsg = CS_TYPE_CAST(EVT_RECV_MESH_MSG, event.data);
 
-			switch(meshMsg->type) {
+			switch (meshMsg->type) {
 				case CS_MESH_MODEL_TYPE_ASSET_INFO_MAC: {
-					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_MAC>(), meshMsg->srcAddress);
+					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_MAC>(), meshMsg->srcStoneId);
 					event.result.returnCode = ERR_SUCCESS;
 					break;
 				}
 				case CS_MESH_MODEL_TYPE_ASSET_INFO_ID: {
-					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_ID>(), meshMsg->srcAddress);
+					forwardAssetToUart(meshMsg->getPacket<CS_MESH_MODEL_TYPE_ASSET_INFO_ID>(), meshMsg->srcStoneId);
 					event.result.returnCode = ERR_SUCCESS;
 					break;
 				}
@@ -220,17 +212,18 @@ void AssetForwarder::handleEvent(event_t & event) {
 			}
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }
 
-void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId) {
-	LOGAssetForwarderDebug("forward asset report MAC to uart: ch%u @ %i dB",
-				assetMsg.rssiData.getChannel(),
-				assetMsg.rssiData.getRssi());
+void AssetForwarder::forwardAssetToUart(
+		const cs_mesh_model_msg_asset_report_mac_t& assetMsg, stone_id_t seenByStoneId) {
+	LOGAssetForwarderDebug(
+			"forward asset report MAC to uart: ch%u @ %i dB",
+			assetMsg.rssiData.getChannel(),
+			assetMsg.rssiData.getRssi());
 
-	auto uartAssetMsg = asset_report_uart_mac_t {
+	auto uartAssetMsg = asset_report_uart_mac_t{
 			.address = assetMsg.mac,
 			.stoneId = seenByStoneId,
 			.rssi    = assetMsg.rssiData.getRssi(),
@@ -244,16 +237,14 @@ void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_mac
 }
 
 void AssetForwarder::forwardAssetToUart(const cs_mesh_model_msg_asset_report_id_t& assetMsg, stone_id_t seenByStoneId) {
-	LOGAssetForwarderDebug("forward asset report ID to uart: ch%u @ %i dB",
-					assetMsg.channel,
-					assetMsg.rssi);
+	LOGAssetForwarderDebug("forward asset report ID to uart: ch%u @ %i dB", assetMsg.channel, assetMsg.rssi);
 
 	auto uartAssetMsg = asset_report_uart_id_t{
-			.assetId         = assetMsg.id,
-			.stoneId         = seenByStoneId,
-			.filterBitmask   = assetMsg.filterBitmask,
-			.rssi            = assetMsg.rssi,
-			.channel         = decompressChannel(assetMsg.channel),
+			.assetId       = assetMsg.id,
+			.stoneId       = seenByStoneId,
+			.filterBitmask = assetMsg.filterBitmask,
+			.rssi          = assetMsg.rssi,
+			.channel       = decompressChannel(assetMsg.channel),
 	};
 
 	UartHandler::getInstance().writeMsg(

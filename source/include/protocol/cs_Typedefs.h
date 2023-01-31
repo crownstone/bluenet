@@ -18,22 +18,21 @@ extern "C" {
 
 typedef uint8_t* buffer_ptr_t;
 typedef uint16_t cs_buffer_size_t;
-typedef uint16_t cs_ret_code_t; // see protocol/cs_ErrorCodes.h
+typedef uint16_t cs_ret_code_t;  // see protocol/cs_ErrorCodes.h
 typedef uint16_t cs_control_cmd_t;
-typedef uint8_t  stone_id_t; // Stone ID 0 is invalid.
+typedef uint8_t stone_id_t;  // Stone ID 0 is invalid.
 typedef uint16_t device_id_t;
 typedef uint16_t size16_t;
 //! Boolean with fixed size.
 typedef uint8_t BOOL;
 typedef uint8_t cs_state_id_t;
 
-
-typedef uint8_t  adc_buffer_id_t;
-typedef uint8_t  adc_channel_id_t;
-typedef uint8_t  adc_pin_id_t;
+typedef uint8_t adc_buffer_id_t;
+typedef uint8_t adc_channel_id_t;
+typedef uint8_t adc_pin_id_t;
 typedef uint16_t adc_sample_value_id_t;
-typedef int16_t  adc_sample_value_t;
-typedef uint8_t  adc_buffer_seq_nr_t;
+typedef int16_t adc_sample_value_t;
+typedef uint8_t adc_buffer_seq_nr_t;
 
 // Actually wanted something like: typedef uint24_t cs_tracked_device_token_t;
 #define TRACKED_DEVICE_TOKEN_SIZE 3
@@ -44,7 +43,7 @@ typedef uint8_t  adc_buffer_seq_nr_t;
 static const uint8_t MAC_ADDRESS_LEN = 6;
 
 typedef struct __attribute__((__packed__)) {
-  uint8_t uuid128[16];
+	uint8_t uuid128[16];
 } cs_uuid128_t;
 
 #ifdef __cplusplus

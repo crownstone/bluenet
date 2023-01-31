@@ -8,13 +8,13 @@
 #include <logging/cs_Logger.h>
 #include <util/cs_Error.h>
 #include <util/cs_ExactMatchFilter.h>
+
 #include <cstring>
-#include <type_traits> // for assert(std::is_same ...) in binary search.
+#include <type_traits>  // for assert(std::is_same ...) in binary search.
 
 #define LogExactMatchFilterWarn LOGw
 
-ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {
-}
+ExactMatchFilter::ExactMatchFilter(exact_match_filter_data_t* data) : _data(data) {}
 
 bool ExactMatchFilter::isValid() {
 	if (_data == nullptr) {
@@ -26,8 +26,7 @@ bool ExactMatchFilter::isValid() {
 		return false;
 	}
 	if (_data->itemSize == 0) {
-		LogExactMatchFilterWarn("itemSize can't be 0")
-		return false;
+		LogExactMatchFilterWarn("itemSize can't be 0") return false;
 	}
 
 	for (auto i = 0; i < _data->itemCount - 1; i++) {
@@ -35,7 +34,7 @@ bool ExactMatchFilter::isValid() {
 		if (cmp > 0) {
 			LogExactMatchFilterWarn("Exact match filter requires sorted itemArray (index %u)", i);
 			_logArray(SERIAL_DEBUG, true, getItem(i), _data->itemSize);
-			_logArray(SERIAL_DEBUG, true, getItem(i+1), _data->itemSize);
+			_logArray(SERIAL_DEBUG, true, getItem(i + 1), _data->itemSize);
 			return false;
 		}
 	}
@@ -51,12 +50,13 @@ int ExactMatchFilter::find(const void* item, size_t itemSize) {
 	int lowerIndex = 0;
 	int upperIndex = _data->itemCount - 1;
 
-	static_assert(std::is_same<decltype(lowerIndex), int>() && std::is_same<decltype(upperIndex), int>(),
+	static_assert(
+			std::is_same<decltype(lowerIndex), int>() && std::is_same<decltype(upperIndex), int>(),
 			"unsigned int will underflow when key is smaller than smallest element in filter");
 
 	while (lowerIndex <= upperIndex) {
 		int midpointIndex = (lowerIndex + upperIndex) / 2;
-		auto cmp             = memcmp(item, getItem(midpointIndex), itemSize);
+		auto cmp          = memcmp(item, getItem(midpointIndex), itemSize);
 
 		if (cmp == 0) {  // early return when found
 			return midpointIndex;
@@ -73,7 +73,7 @@ int ExactMatchFilter::find(const void* item, size_t itemSize) {
 }
 
 bool ExactMatchFilter::contains(const void* key, size_t keyLengthInBytes) {
-	return find(key,keyLengthInBytes) >= 0;
+	return find(key, keyLengthInBytes) >= 0;
 }
 
 uint8_t* ExactMatchFilter::getItem(size_t index) {

@@ -6,6 +6,18 @@
  */
 #pragma once
 
+#include <nrf_sdh_ble.h>
+#include <protocol/cs_Typedefs.h>
+
+/**
+ * TODO: For now formatting is turned off, but the actual configurations should be:
+ *   - loaded from one single file, CMakeBuild.config.default
+ *   - configured in files like include/cfg/cs_StaticConfig.h.in, shared/cs_MemoryLayout.h.in, etc.
+ * This would make the values easier accessible when required (configuration time, build time, bootloader, firmware).
+ */
+
+// clang-format off
+
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
 #define CS_CONNECTION_PROTOCOL_VERSION           5
@@ -14,7 +26,7 @@
 //#define GENERAL_BUFFER_SIZE                      300
 
 /** maximum length of strings used for characteristic values */
-#define DEFAULT_CHAR_VALUE_STRING_LENGTH         25
+#define DEFAULT_CHAR_VALUE_STRING_LENGTH         50
 
 /** define the maximum size for strings to be stored
  */
@@ -180,6 +192,12 @@
 
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
 
+//! If 2 switchcraft events happen within this time, it will be regarded as a double tap.
+static const uint32_t SWITCHCRAFT_DOUBLE_TAP_TIMEOUT_MS    = 1000;
+
+//! The default default dim value.
+static const uint8_t DEFAULT_DIM_VALUE           = 40;
+
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
 #define SWITCH_DELAYED_STORE_MS                  (10 * 1000) // Timeout before storing the pwm switch value is stored.
@@ -300,4 +318,4 @@
 #define STATE_HUB_MODE_DEFAULT 0
 #endif
 
-
+// clang-format on

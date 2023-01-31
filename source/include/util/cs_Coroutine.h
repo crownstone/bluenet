@@ -6,10 +6,10 @@
  */
 #pragma once
 
-#include <functional>
-
-#include <drivers/cs_Timer.h>
 #include <drivers/cs_RTC.h>
+#include <drivers/cs_Timer.h>
+
+#include <functional>
 
 // coroutines
 // note: coroutine is currently built upon the event buss tickrate
@@ -56,7 +56,7 @@ public:
 	void onTick(uint32_t currentTickCount) {
 		// TODO: not doing roll-over checks here yet..
 		if (currentTickCount >= nextCallTickcount && action) {
-			auto ticksToWait = action();
+			auto ticksToWait  = action();
 			nextCallTickcount = currentTickCount + ticksToWait;
 		}
 	}
@@ -74,15 +74,9 @@ public:
 		return false;
 	}
 
-	uint32_t getNextCallTickCount() const {
-		return nextCallTickcount;
-	}
+	uint32_t getNextCallTickCount() const { return nextCallTickcount; }
 
-	static uint32_t delayMs(uint32_t ms) {
-		return ms / TICK_INTERVAL_MS;
-	}
+	static uint32_t delayMs(uint32_t ms) { return ms / TICK_INTERVAL_MS; }
 
-	static uint32_t delayS(uint32_t s){
-		return delayMs(s * 1000);
-	}
+	static uint32_t delayS(uint32_t s) { return delayMs(s * 1000); }
 };

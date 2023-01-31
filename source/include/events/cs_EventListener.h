@@ -7,8 +7,9 @@
 
 #pragma once
 
-#include <cstdint>
 #include <events/cs_Event.h>
+
+#include <cstdint>
 
 /**
  * Event listener.
@@ -17,14 +18,17 @@ class EventListener {
 public:
 	EventListener() {}
 
-	virtual ~EventListener() {};
+	/**
+	 * unregisters the listener.
+	 */
+	virtual ~EventListener();
 
 	/** Handle events
 	 *
 	 * This method is overloaded by all classes that derive from EventListener. They can receive an event_t struct
 	 * and act upon it. These events are dispatched by the EventDispatcher.
 	 */
-	virtual void handleEvent(event_t & event) = 0;
+	virtual void handleEvent(event_t& event) = 0;
 
 	/**
 	 * Registers this with the EventDispatcher.

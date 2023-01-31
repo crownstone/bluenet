@@ -23,7 +23,7 @@
  * - The CharacteristicReadBuffer to decrypt read data to.
  * - The CharacteristicWriteBuffer to construct control packets.
  */
-class CrownstoneCentral: EventListener {
+class CrownstoneCentral : EventListener {
 public:
 	/**
 	 * Initializes the class:
@@ -69,7 +69,8 @@ public:
 	/**
 	 * Write a control command, and get the result.
 	 *
-	 * When the result code in the result data is ERR_WAIT_FOR_SUCCESS, you will get another EVT_CS_CENTRAL_WRITE_RESULT event.
+	 * When the result code in the result data is ERR_WAIT_FOR_SUCCESS, you will get another EVT_CS_CENTRAL_WRITE_RESULT
+	 * event.
 	 *
 	 * TODO: add timeout.
 	 *
@@ -83,7 +84,8 @@ public:
 	cs_ret_code_t write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size);
 
 	/**
-	 * Request the write buffer. You can then put your data in this buffer and use it as data in the write() command, so no copy has to take place.
+	 * Request the write buffer. You can then put your data in this buffer and use it as data in the write() command, so
+	 * no copy has to take place.
 	 *
 	 * @return     When busy:          A null pointer.
 	 * @return     On success:         A pointer to the write buffer, and the length of the buffer.
@@ -92,20 +94,16 @@ public:
 
 private:
 	enum ServiceIndex {
-		SERVICE_INDEX_CROWNSTONE = 0,
-		SERVICE_INDEX_SETUP = 1,
+		SERVICE_INDEX_CROWNSTONE  = 0,
+		SERVICE_INDEX_SETUP       = 1,
 		SERVICE_INDEX_DEVICE_INFO = 2,
-		SERVICE_INDEX_DFU = 3,
-		SERVICE_INDEX_COUNT = 4
+		SERVICE_INDEX_DFU         = 3,
+		SERVICE_INDEX_COUNT       = 4
 	};
 
-	enum class Operation: uint8_t {
-		NONE,
-		CONNECT,
-		WRITE
-	};
+	enum class Operation : uint8_t { NONE, CONNECT, WRITE };
 
-	enum class ConnectSteps: uint8_t {
+	enum class ConnectSteps : uint8_t {
 		NONE = 0,
 		GET_ADDRESS,
 		CONNECT,
@@ -116,12 +114,7 @@ private:
 		DONE
 	};
 
-	enum class WriteControlSteps: uint8_t {
-		NONE = 0,
-		WRITE,
-		RECEIVE_RESULT,
-		DONE
-	};
+	enum class WriteControlSteps : uint8_t { NONE = 0, WRITE, RECEIVE_RESULT, DONE };
 
 	/**
 	 * Service UUIDs we need for discovery.
@@ -140,7 +133,7 @@ private:
 	/**
 	 * Operation mode of the crownstone we are connected to.
 	 */
-	OperationMode _opMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
+	OperationMode _opMode       = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	/**
 	 * The operation we're currently executing.
@@ -155,7 +148,7 @@ private:
 	/**
 	 * The notification index that we expect to get next.
 	 */
-	uint8_t _notificationNextIndex = 0;
+	uint8_t _notificationNextIndex       = 0;
 
 	/**
 	 * The current size of the merged notification data.
@@ -166,7 +159,7 @@ private:
 	 * Keep up to which stone ID we're connected.
 	 * Not always set though.
 	 */
-	stone_id_t _stoneId = 0;
+	stone_id_t _stoneId                  = 0;
 
 	/**
 	 * Keep up which timeout we use.
@@ -244,7 +237,7 @@ private:
 	void onDiscoveryDone(cs_ret_code_t retCode);
 	void onRead(ble_central_read_result_t& result);
 	void onReadDuringConnect(ble_central_read_result_t& result);
-	void onWrite(cs_ret_code_t result);
+	void onWrite(ble_central_write_result_t& result);
 	void onNotification(ble_central_notification_t& result);
 
 public:
@@ -253,4 +246,3 @@ public:
 	 */
 	void handleEvent(event_t& event);
 };
-

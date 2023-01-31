@@ -20,7 +20,7 @@ public:
 	/**
 	 * Use this default constructor with care, _data is never checked in this class.
 	 */
-	ExactMatchFilter() : _data(nullptr){}
+	ExactMatchFilter() : _data(nullptr) {}
 
 	bool contains(const void* key, size_t keyLengthInBytes) override;
 
@@ -39,9 +39,7 @@ public:
 	/**
 	 * Size of the itemArray in bytes.
 	 */
-	static constexpr size_t bufferSize(uint8_t itemCount, uint8_t itemSize) {
-		return itemCount * itemSize;
-	}
+	static constexpr size_t bufferSize(uint8_t itemCount, uint8_t itemSize) { return itemCount * itemSize; }
 
 	/**
 	 * Total number of bytes that a filter with the given parameters would occupy.
@@ -50,17 +48,12 @@ public:
 		return sizeof(exact_match_filter_data_t) + bufferSize(itemCount, itemSize);
 	}
 
-	constexpr size_t bufferSize() {
-		return bufferSize(_data->itemCount, _data->itemSize);
-	}
+	constexpr size_t bufferSize() { return bufferSize(_data->itemCount, _data->itemSize); }
 
-	constexpr size_t size() {
-		return size(_data->itemCount, _data->itemSize);
-	}
+	constexpr size_t size() { return size(_data->itemCount, _data->itemSize); }
 
 private:
 	uint8_t* getItem(size_t index);
 
 	exact_match_filter_data_t* _data;
-
 };

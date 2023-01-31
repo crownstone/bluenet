@@ -11,6 +11,8 @@ include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
 #   cmake ... RESET [SERIAL_NUM]
 #   cmake ... ERASE [SERIAL_NUM]
 
+set(DRY_RUN 0)
+
 if(EXISTS "${DEFAULT_CONFIG_FILE}")
 	load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
 endif()
@@ -30,7 +32,15 @@ if(COUNT)
 	set(COUNT_SWITCH "--n")
 endif()
 
+if(DRY_RUN)
+	message(STATUS "Dry run")
+endif()
+
 if(INSTRUCTION STREQUAL "READ")
+	if(DRY_RUN)
+		message(STATUS "$> nrfjprog -f nrf52 --memrd ${ADDRESS} ${COUNT_SWITCH} ${COUNT} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
+		return()
+	endif()
 	execute_process(
 		COMMAND nrfjprog -f nrf52 --memrd ${ADDRESS} ${COUNT_SWITCH} ${COUNT} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 		RESULT_VARIABLE status
@@ -94,6 +104,8 @@ if(INSTRUCTION STREQUAL "READ")
 				message(STATUS "Variant: AAB0")
 			elseif ("${Value}" STREQUAL "41414530")
 				message(STATUS "Variant: AAE0")
+			elseif ("${Value}" STREQUAL "41414630")
+				message(STATUS "Variant: AAF0")
 			endif()
 		elseif ("${ADDRESS}" STREQUAL "0x10001014") # Bootloader address in UICR
 			string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+)" Tmp ${output})
@@ -145,6 +157,10 @@ if(INSTRUCTION STREQUAL "READ")
 
 elseif(INSTRUCTION STREQUAL "WRITE")
 	message(STATUS "Write value ${VALUE} to address ${ADDRESS}")
+	message(STATUS "$> nrfjprog -f ${NRF_DEVICE_FAMILY} --memwr ${ADDRESS} --val ${VALUE} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
+	if(DRY_RUN)
+		return()
+	endif()
 	execute_process(
 		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --memwr ${ADDRESS} --val ${VALUE} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 		RESULT_VARIABLE status
@@ -182,9 +198,12 @@ elseif(INSTRUCTION STREQUAL "WRITE_BINARY")
 	# chiperase includes UICR (but cannot be used in a sequence for bootloader, softdevice, and firmware)
 	#set(ERASE_OPTION "--chiperase") 
 	message(STATUS "Flashing ${BINARY} with erase option ${ERASE_OPTION}")
-	#message(STATUS "nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
+	message(STATUS "$> nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} --verify")
+	if(DRY_RUN)
+		return()
+	endif()
 	execute_process(
-		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --program ${BINARY} ${ERASE_OPTION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} --verify
 		RESULT_VARIABLE status
 		OUTPUT_VARIABLE output
 		ERROR_VARIABLE error
@@ -198,6 +217,10 @@ elseif(INSTRUCTION STREQUAL "WRITE_BINARY")
 	endif()
 
 elseif(INSTRUCTION STREQUAL "RESET")
+	message(STATUS "$> nrfjprog -f ${NRF_DEVICE_FAMILY} --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
+	if(DRY_RUN)
+		return()
+	endif()
 	execute_process(
 		COMMAND nrfjprog -f ${NRF_DEVICE_FAMILY} --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 		RESULT_VARIABLE status
@@ -210,6 +233,10 @@ elseif(INSTRUCTION STREQUAL "RESET")
 	endif()
 
 elseif(INSTRUCTION STREQUAL "ERASE")
+	message(STATUS "$> nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}")
+	if(DRY_RUN)
+		return()
+	endif()
 	execute_process(
 		COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 		RESULT_VARIABLE status

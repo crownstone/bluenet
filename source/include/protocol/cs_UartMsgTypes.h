@@ -32,14 +32,14 @@ union __attribute__((packed)) uart_msg_status_reply_flags_t {
 };
 
 enum UartHubDataType {
-	UART_HUB_DATA_TYPE_NONE              = 0,
-	UART_HUB_DATA_TYPE_CROWNSTONE_HUB    = 1,
+	UART_HUB_DATA_TYPE_NONE           = 0,
+	UART_HUB_DATA_TYPE_CROWNSTONE_HUB = 1,
 };
 
 struct __attribute__((__packed__)) uart_msg_status_user_t {
-	uint8_t type; // See UartHubDataType.
+	uint8_t type;  // See UartHubDataType.
 	uart_msg_status_user_flags_t flags;
-	uint8_t data[SERVICE_DATA_HUB_DATA_SIZE]; // Depends on type.
+	uint8_t data[SERVICE_DATA_HUB_DATA_SIZE];  // Depends on type.
 };
 
 struct __attribute__((__packed__)) uart_msg_status_reply_t {
@@ -76,11 +76,11 @@ struct __attribute__((__packed__)) uart_msg_mesh_result_packet_header_t {
 
 struct __attribute__((__packed__)) uart_msg_log_common_header_t {
 	uint32_t fileNameHash;
-	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
-	uint8_t logLevel; // SERIAL_VERBOSE, SERIAL_DEBUG, etc.
+	uint16_t lineNumber;  // Line number (starting at line 1) where the ; of this log is.
+	uint8_t logLevel;     // SERIAL_VERBOSE, SERIAL_DEBUG, etc.
 	struct __attribute__((packed)) {
-		bool newLine : 1; // Whether this log should end with a new line.
-		bool reverse : 1; // Whether to print in reverse (arrays only).
+		bool newLine : 1;  // Whether this log should end with a new line.
+		bool reverse : 1;  // Whether to print in reverse (arrays only).
 	} flags;
 };
 
@@ -95,44 +95,41 @@ struct __attribute__((__packed__)) uart_msg_log_arg_header_t {
 	// Followed by <argSize> bytes.
 };
 
-
 enum ElementType {
-	ELEMENT_TYPE_SIGNED_INTEGER = 0,
+	ELEMENT_TYPE_SIGNED_INTEGER   = 0,
 	ELEMENT_TYPE_UNSIGNED_INTEGER = 1,
-	ELEMENT_TYPE_FLOAT = 2,
-	ELEMENT_TYPE_FROM_FORMAT = 10,
+	ELEMENT_TYPE_FLOAT            = 2,
+	ELEMENT_TYPE_FROM_FORMAT      = 10,
 };
 
 struct __attribute__((__packed__)) uart_msg_log_array_header_t {
 	uart_msg_log_common_header_t header;
-	uint8_t elementType; // ElementType
+	uint8_t elementType;  // ElementType
 	uint8_t elementSize;
 	// Followed by all elements, each of size <elementSize>.
 };
 
-
-
 struct __attribute__((__packed__)) uart_msg_power_t {
 	uint32_t timestamp;
-	int32_t  currentRmsMA;
-	int32_t  currentRmsMedianMA;
-	int32_t  filteredCurrentRmsMA;
-	int32_t  filteredCurrentRmsMedianMA;
-	int32_t  avgZeroVoltage;
-	int32_t  avgZeroCurrent;
-	int32_t  powerMilliWattApparent;
-	int32_t  powerMilliWattReal;
-	int32_t  avgPowerMilliWattReal;
+	int32_t currentRmsMA;
+	int32_t currentRmsMedianMA;
+	int32_t filteredCurrentRmsMA;
+	int32_t filteredCurrentRmsMedianMA;
+	int32_t avgZeroVoltage;
+	int32_t avgZeroCurrent;
+	int32_t powerMilliWattApparent;
+	int32_t powerMilliWattReal;
+	int32_t avgPowerMilliWattReal;
 };
 
 struct __attribute__((__packed__)) uart_msg_current_t {
 	uint32_t timestamp;
-	int16_t  samples[CS_ADC_NUM_SAMPLES_PER_CHANNEL];
+	int16_t samples[CS_ADC_NUM_SAMPLES_PER_CHANNEL];
 };
 
 struct __attribute__((__packed__)) uart_msg_voltage_t {
 	uint32_t timestamp;
-	int16_t  samples[CS_ADC_NUM_SAMPLES_PER_CHANNEL];
+	int16_t samples[CS_ADC_NUM_SAMPLES_PER_CHANNEL];
 };
 
 struct __attribute__((__packed__)) uart_msg_adc_channel_config_t {

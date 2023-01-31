@@ -22,10 +22,9 @@
  * "15 14 13 12 - 11 10 - 09 08 - 07 06 - 05 04 03 02 01 00"
  * but then without spaces.
  *
- * The Softdevice functions only deal with 16b UUIDS, so they introduced 1 extra byte (the 'type' field) to indicate the base UUID.
- * This base UUID has to be registered first, but can then be used with different 16b fields.
- * A base UUID would look like XXXX0000-XXXX-XXXX-XXXX-XXXXXXXXXXXX.
- * The 0000 part is then replaced by the 16b UUID.
+ * The Softdevice functions only deal with 16b UUIDS, so they introduced 1 extra byte (the 'type' field) to indicate the
+ * base UUID. This base UUID has to be registered first, but can then be used with different 16b fields. A base UUID
+ * would look like XXXX0000-XXXX-XXXX-XXXX-XXXXXXXXXXXX. The 0000 part is then replaced by the 16b UUID.
  *
  * A typical example is a BLE service with multiple characteristics.
  * All of them will have the same base UUID, but different 16b UUIDs.
@@ -96,10 +95,7 @@ public:
 	bool operator==(const UUID& other);
 
 private:
-	ble_uuid_t _uuid = {
-			.uuid = 0,
-			.type = BLE_UUID_TYPE_UNKNOWN
-	};
+	ble_uuid_t _uuid = {.uuid = 0, .type = BLE_UUID_TYPE_UNKNOWN};
 
 	// Same as the public functions, but return an NRF code.
 	ret_code_t fromShortUuidInternal(uint16_t shortUuid);
@@ -123,9 +119,7 @@ private:
 	/**
 	 * Removes a 128b UUID from the soft device.
 	 *
-	 * Currently, can only remove the last added UUID.
-	 *
-	 * @return NRF return code.
+	 * @return CS return code.
 	 */
 	static ret_code_t rem(const ble_uuid_t& uuid);
 

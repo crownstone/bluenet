@@ -28,8 +28,7 @@ public:
 			cs_data_t commandData,
 			EncryptionAccessLevel accessLevel,
 			bool wasEncrypted,
-			cs_data_t resultBuffer
-			);
+			cs_data_t resultBuffer);
 
 private:
 	EncryptionAccessLevel getRequiredAccessLevel(const UartOpcodeRx opCode);
@@ -40,20 +39,25 @@ private:
 	 * @param[in] type            Event type.
 	 * @param[in] commandData     Command data, which will be used as event data.
 	 */
-	void dispatchEventForCommand(
-			CS_TYPE type,
-			cs_data_t commandData
-			);
+	void dispatchEventForCommand(CS_TYPE type, cs_data_t commandData);
 
-	void handleCommandHello            (cs_data_t commandData);
-	void handleCommandSessionNonce     (cs_data_t commandData);
-	void handleCommandHeartBeat        (cs_data_t commandData, bool wasEncrypted);
-	void handleCommandStatus           (cs_data_t commandData);
-	void handleCommandControl          (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer);
-	void handleCommandHubDataReply     (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer);
+	void handleCommandHello(cs_data_t commandData);
+	void handleCommandSessionNonce(cs_data_t commandData);
+	void handleCommandHeartBeat(cs_data_t commandData, bool wasEncrypted);
+	void handleCommandStatus(cs_data_t commandData);
+	void handleCommandControl(
+			cs_data_t commandData,
+			const cmd_source_with_counter_t source,
+			const EncryptionAccessLevel accessLevel,
+			cs_data_t resultBuffer);
+	void handleCommandHubDataReply(
+			cs_data_t commandData,
+			const cmd_source_with_counter_t source,
+			const EncryptionAccessLevel accessLevel,
+			cs_data_t resultBuffer);
 	void handleCommandEnableAdvertising(cs_data_t commandData);
-	void handleCommandEnableMesh       (cs_data_t commandData);
-	void handleCommandGetId            (cs_data_t commandData);
-	void handleCommandGetMacAddress    (cs_data_t commandData);
-	void handleCommandInjectEvent      (cs_data_t commandData);
+	void handleCommandEnableMesh(cs_data_t commandData);
+	void handleCommandGetId(cs_data_t commandData);
+	void handleCommandGetMacAddress(cs_data_t commandData);
+	void handleCommandInjectEvent(cs_data_t commandData);
 };

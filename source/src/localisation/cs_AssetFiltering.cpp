@@ -9,15 +9,15 @@
 #include <util/cs_Utils.h>
 
 #define LOGAssetFilteringWarn LOGw
-#define LOGAssetFilteringInfo LOGd
+#define LOGAssetFilteringInfo LOGi
 #define LOGAssetFilteringDebug LOGvv
 #define LOGAssetFilteringVerbose LOGvv
-#define LogLevelAssetFilteringDebug   SERIAL_VERY_VERBOSE
+#define LogLevelAssetFilteringDebug SERIAL_VERY_VERBOSE
 #define LogLevelAssetFilteringVerbose SERIAL_VERY_VERBOSE
 
-
 void LogAcceptedDevice(AssetFilter filter, const scanned_device_t& device, bool excluded) {
-	LOGAssetFilteringDebug("FilterId=%u passed device with mac: %02X:%02X:%02X:%02X:%02X:%02X exclude=%u",
+	LOGAssetFilteringDebug(
+			"FilterId=%u passed device with mac: %02X:%02X:%02X:%02X:%02X:%02X exclude=%u",
 			filter.runtimedata()->filterId,
 			device.address[5],
 			device.address[4],
@@ -44,7 +44,6 @@ cs_ret_code_t AssetFiltering::init() {
 			LOGe("Init was already called: state=%u", _initState);
 			return ERR_WRONG_STATE;
 		}
-
 	}
 
 	// Keep up init state.
@@ -97,8 +96,7 @@ cs_ret_code_t AssetFiltering::initInternal() {
 	// TODO: move these constants or tie the forwarder up with the store so that they
 	// can decide how fast to tick and trottle
 	_assetForwarder->setThrottleCountdownBumpTicks(
-			_assetStore->throttlingBumpMsToTicks(
-					_assetForwarder->MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS));
+			_assetStore->throttlingBumpMsToTicks(_assetForwarder->MIN_THROTTLED_ADVERTISEMENT_PERIOD_MS));
 
 	listen();
 	return ERR_SUCCESS;
@@ -106,16 +104,12 @@ cs_ret_code_t AssetFiltering::initInternal() {
 
 std::vector<Component*> AssetFiltering::getChildren() {
 	return {
-		_filterStore,
-		_filterSyncer,
-		_assetForwarder,
-		_assetStore,
+		_filterStore, _filterSyncer, _assetForwarder, _assetStore,
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-		_nearestCrownstoneTracker,
+				_nearestCrownstoneTracker,
 #endif
 	};
 }
-
 
 bool AssetFiltering::isInitialized() {
 	return _initState == AssetFilteringState::INIT_SUCCESS;
@@ -134,8 +128,7 @@ void AssetFiltering::handleEvent(event_t& evt) {
 			handleScannedDevice(*scannedDevice);
 			break;
 		}
-		default:
-			break;
+		default: break;
 	}
 }
 
@@ -144,14 +137,14 @@ void AssetFiltering::handleScannedDevice(const scanned_device_t& asset) {
 		return;
 	}
 
-	LOGAssetFilteringVerbose("Scanned device mac=%02X:%02X:%02X:%02X:%02X:%02X",
+	LOGAssetFilteringVerbose(
+			"Scanned device mac=%02X:%02X:%02X:%02X:%02X:%02X",
 			asset.address[5],
 			asset.address[4],
 			asset.address[3],
 			asset.address[2],
 			asset.address[1],
-			asset.address[0]
-	);
+			asset.address[0]);
 	_logArray(LogLevelAssetFilteringVerbose, true, asset.data, asset.dataSize);
 
 	if (isAssetRejected(asset)) {
@@ -180,7 +173,6 @@ bool AssetFiltering::checkIfFilterAccepts(uint8_t filterIndex, const scanned_dev
 		assetEvent.dispatch();
 
 		return true;
-
 	}
 
 	return false;
@@ -217,20 +209,20 @@ void AssetFiltering::handleAcceptedAsset(uint8_t filterIndex, AssetFilter filter
 
 // -------------------- filter handlers -----------------------
 
-void AssetFiltering::handleAcceptedAssetOutputMac(
-		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
+void AssetFiltering::handleAcceptedAssetOutputMac(uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 	// construct short asset id
-	asset_id_t assetId = filter.getAssetId(asset);
+	asset_id_t assetId          = filter.getAssetId(asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
-	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
+	bool throttle               = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		_assetForwarder->sendAssetMacToMesh(assetRecord, asset);
 	}
 	else {
-		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
+		LOGAssetFilteringVerbose(
+				"Throttled asset id=%02X:%02X:%02X counter=%u",
 				assetId.data[0],
 				assetId.data[1],
 				assetId.data[2],
@@ -241,11 +233,11 @@ void AssetFiltering::handleAcceptedAssetOutputMac(
 void AssetFiltering::handleAcceptedAssetOutputAssetId(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 
-	asset_id_t assetId = filter.getAssetId(asset);
+	asset_id_t assetId          = filter.getAssetId(asset);
 	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
-	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
+	bool throttle               = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		uint8_t filterBitmask = 0;
@@ -253,7 +245,8 @@ void AssetFiltering::handleAcceptedAssetOutputAssetId(
 		_assetForwarder->sendAssetIdToMesh(assetRecord, asset, assetId, filterBitmask);
 	}
 	else {
-		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
+		LOGAssetFilteringVerbose(
+				"Throttled asset id=%02X:%02X:%02X counter=%u",
 				assetId.data[0],
 				assetId.data[1],
 				assetId.data[2],
@@ -261,15 +254,14 @@ void AssetFiltering::handleAcceptedAssetOutputAssetId(
 	}
 }
 
-
 void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 		uint8_t filterId, AssetFilter filter, const scanned_device_t& asset) {
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
-	asset_id_t assetId = filter.getAssetId(asset);
-	asset_record_t* assetRecord   = _assetStore->handleAcceptedAsset(asset, assetId);
+	asset_id_t assetId          = filter.getAssetId(asset);
+	asset_record_t* assetRecord = _assetStore->handleAcceptedAsset(asset, assetId);
 
 	// throttle if the record currently exists and requires it.
-	bool throttle = (assetRecord != nullptr) && (assetRecord->isThrottled());
+	bool throttle               = (assetRecord != nullptr) && (assetRecord->isThrottled());
 
 	if (!throttle) {
 		uint8_t filterBitmask = 0;
@@ -282,7 +274,8 @@ void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 		}
 	}
 	else {
-		LOGAssetFilteringVerbose("Throttled asset id=%02X:%02X:%02X counter=%u",
+		LOGAssetFilteringVerbose(
+				"Throttled asset id=%02X:%02X:%02X counter=%u",
 				assetId.data[0],
 				assetId.data[1],
 				assetId.data[2],
@@ -292,7 +285,6 @@ void AssetFiltering::handleAcceptedAssetOutputAssetIdNearest(
 }
 
 // ---------------------------- utils ----------------------------
-
 
 bool AssetFiltering::isAssetRejected(const scanned_device_t& device) {
 	// Rejection check: looping over exclusion filters.

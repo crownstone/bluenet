@@ -6,8 +6,8 @@
  */
 #pragma once
 
-#include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
+#include <ble/cs_Service.h>
 
 /** The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions.
  */
@@ -32,7 +32,7 @@ protected:
 	void addSoftwareRevisionCharacteristic();
 
 private:
-	Characteristic<std::string>* _hardwareRevisionCharacteristic;
-	Characteristic<std::string>* _firmwareRevisionCharacteristic;
-	Characteristic<std::string>* _softwareRevisionCharacteristic;
+	Characteristic<const char*>* _hardwareRevisionCharacteristic = nullptr;
+	Characteristic<const char*>* _firmwareRevisionCharacteristic = nullptr;
+	Characteristic<const char*>* _softwareRevisionCharacteristic = nullptr;
 };

@@ -5,13 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-
 #pragma once
 
-
 #include <localisation/cs_AssetFilterPacketAccessors.h>
-#include <util/cs_FilterInterface.h>
 #include <structs/cs_PacketsInternal.h>
+#include <util/cs_FilterInterface.h>
 
 /**
  * Class that contains all data required for an asset filter:
@@ -22,10 +20,9 @@ class AssetFilter : FilterInterface {
 public:
 	uint8_t* _data;  // byte representation of this object.
 	AssetFilter(uint8_t* data) : _data(data) {}
+	~AssetFilter() = default;
 
-	// ================
 	// Accessor methods
-	// ================
 
 	/**
 	 * Get the runtime data.
@@ -37,9 +34,7 @@ public:
 	 */
 	AssetFilterData filterdata();
 
-	// ===============
 	// FilterInterface
-	// ===============
 
 	/**
 	 * Number of bytes of the data, according to the metadata contained in it.
@@ -50,10 +45,7 @@ public:
 
 	bool isValid() override;
 
-
-	// ================
 	// Scan based utils
-	// ================
 
 	/**
 	 * Returns true if the device passes the filter according to its
@@ -68,7 +60,6 @@ public:
 	 * filterInputResult will return false in that case.)
 	 */
 	asset_id_t getAssetId(const scanned_device_t& asset);
-
 
 private:
 	/**
@@ -87,7 +78,7 @@ private:
 	 * delegateExpression should be of the form (FilterInterface&, void*, size_t) -> ReturnType.
 	 *
 	 * The argument that is passed into `delegateExpression` is based on the AssetFilterInputType
-	 * of the `assetFilter`.Buffers are only allocated when strictly necessary.
+	 * of the `assetFilter`. Buffers are only allocated when strictly necessary.
 	 * (E.g. MacAddress is already available in the `device`, but for MaskedAdDataType a buffer
 	 * of 31 bytes needs to be allocated on the stack.)
 	 *

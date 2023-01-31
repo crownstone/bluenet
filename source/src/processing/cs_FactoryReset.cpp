@@ -16,28 +16,27 @@
 #include <storage/cs_State.h>
 #include <uart/cs_UartHandler.h>
 
+FactoryReset::FactoryReset()
+		: _recoveryEnabled(true), _rtcStartTime(0), _recoveryDisableTimerId(NULL), _recoveryProcessTimerId(NULL) {
+	_recoveryDisableTimerData = {{0}};
+	_recoveryDisableTimerId   = &_recoveryDisableTimerData;
 
-FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
-		_recoveryDisableTimerId(NULL),
-		_recoveryProcessTimerId(NULL)
-{
-	_recoveryDisableTimerData = { {0} };
-	_recoveryDisableTimerId = &_recoveryDisableTimerData;
-
-	_recoveryProcessTimerData = { {0} };
-	_recoveryProcessTimerId = &_recoveryProcessTimerData;
+	_recoveryProcessTimerData = {{0}};
+	_recoveryProcessTimerId   = &_recoveryProcessTimerData;
 }
 
 void FactoryReset::init() {
-	Timer::getInstance().createSingleShot(_recoveryDisableTimerId, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
-	Timer::getInstance().createSingleShot(_recoveryProcessTimerId, (app_timer_timeout_handler_t)FactoryReset::staticProcess);
+	Timer::getInstance().createSingleShot(
+			_recoveryDisableTimerId, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
+	Timer::getInstance().createSingleShot(
+			_recoveryProcessTimerId, (app_timer_timeout_handler_t)FactoryReset::staticProcess);
 	EventDispatcher::getInstance().addListener(this);
 	resetTimeout();
 }
 
 void FactoryReset::resetTimeout() {
 	_recoveryEnabled = true;
-	_rtcStartTime = RTC::getCount();
+	_rtcStartTime    = RTC::getCount();
 	// stop the currently running timer, this does not cause problems if the timer has not been set yet.
 	Timer::getInstance().stop(_recoveryDisableTimerId);
 	Timer::getInstance().start(_recoveryDisableTimerId, MS_TO_TICKS(FACTORY_RESET_TIMEOUT), this);
@@ -108,8 +107,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 		case FACTORY_RESET_STATE_RESET:
 			// What to do here?
 			break;
-		default:
-			break;
+		default: break;
 	}
 	return false;
 }
@@ -139,7 +137,7 @@ bool FactoryReset::performFactoryReset() {
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
 	TYPIFY(CMD_RESET_DELAYED) resetCmd;
 	resetCmd.resetCode = CS_RESET_CODE_SOFT_RESET;
-	resetCmd.delayMs = 2000;
+	resetCmd.delayMs   = 2000;
 	event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 	EventDispatcher::getInstance().dispatch(eventReset);
 
@@ -151,30 +149,36 @@ bool FactoryReset::performFactoryReset() {
 
 void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
 	CsUtils::setBit(_successfullyFactoryResetBitmask, bit);
-	LOGi("onClassFactoryResetDone bit=%u bitmask=%u", bit, _successfullyFactoryResetBitmask);
+	LOGi("onClassFactoryResetDone bit=%u bitmask: done=%08b all=%08b",
+		 bit,
+		 _successfullyFactoryResetBitmask,
+		 FACTORY_RESET_MASK_ALL);
 
 	if ((_successfullyFactoryResetBitmask & FACTORY_RESET_MASK_ALL) == FACTORY_RESET_MASK_ALL) {
 		LOGi("All classes factory reset, rebooting device");
 		TYPIFY(CMD_RESET_DELAYED) resetCmd;
 		resetCmd.resetCode = CS_RESET_CODE_SOFT_RESET;
-		resetCmd.delayMs = 100;
+		resetCmd.delayMs   = 100;
 		event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 		EventDispatcher::getInstance().dispatch(eventReset);
 	}
 }
 
 /**
- * The reset itself. This clears out the code and will again reboot the device so default configuration is applied
- * again.
+ * Simply send out the factory reset command event and wait for the result event(s).
+ *
+ * Suggestion:
+ * - Check result codes of the result events.
+ * - Add a timeout.
+ * - Make all the result events the same type, and add the bitmask, or bitpos as value.
  */
-bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
+void FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	_successfullyFactoryResetBitmask = 0;
 	event_t factoryReset(CS_TYPE::CMD_FACTORY_RESET);
 	EventDispatcher::getInstance().dispatch(factoryReset);
-	return true;
 }
 
-void FactoryReset::handleEvent(event_t & event) {
+void FactoryReset::handleEvent(event_t& event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE: {
 			onClassFactoryResetDone(FACTORY_RESET_BIT_STATE);
@@ -186,7 +190,12 @@ void FactoryReset::handleEvent(event_t & event) {
 #endif
 			break;
 		}
-		default:
+		case CS_TYPE::EVT_MICROAPP_FACTORY_RESET_DONE: {
+#if BUILD_MICROAPP_SUPPORT == 1
+			onClassFactoryResetDone(FACTORY_RESET_BIT_MICROAPP);
+#endif
 			break;
+		}
+		default: break;
 	}
 }

@@ -13,6 +13,7 @@
 #include <cfg/cs_UuidConfig.h>
 #include <logging/cs_Logger.h>
 #include <services/cs_DeviceInformationService.h>
+#include <structs/cs_CharacteristicStructs.h>
 #include <util/cs_Utils.h>
 
 #ifdef GIT_BRANCH
@@ -21,7 +22,7 @@
 
 union cs_variant_t {
 	uint32_t u32;
-	uint8_t  u8[4];
+	uint8_t u8[4];
 };
 
 inline std::string get_hardware_revision(void) {
@@ -30,10 +31,10 @@ inline std::string get_hardware_revision(void) {
 	std::string production_run = "0000";
 
 	// get Housing ID
-	std::string housing_id = "0000";
+	std::string housing_id     = "0000";
 
 	// reserved
-	std::string reserved = "00000000";
+	std::string reserved       = "00000000";
 
 	// AAB0 is stored as 0x41414230
 	cs_variant_t variant;
@@ -59,28 +60,26 @@ inline std::string get_hardware_revision(void) {
 			nordic_chip_version[0] = 'C';
 			nordic_chip_version[1] = 'K';
 			break;
-		default:
-			nordic_chip_version[0] = '?';
-			nordic_chip_version[1] = '?';
+		default: nordic_chip_version[0] = '?'; nordic_chip_version[1] = '?';
 	}
 
 	for (uint8_t i = 0; i < 4; ++i) {
-		nordic_chip_version[i+2] = variant.u8[i];
+		nordic_chip_version[i + 2] = variant.u8[i];
 	}
 
 	char hardware_revision[34];
-	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(),
-			housing_id.c_str(), reserved.c_str(), nordic_chip_version);
+	sprintf(hardware_revision,
+			"%11.11s%.4s%.4s%.8s%.6s",
+			get_hardware_version(),
+			production_run.c_str(),
+			housing_id.c_str(),
+			reserved.c_str(),
+			nordic_chip_version);
 	return std::string(hardware_revision, 34);
 }
 
-DeviceInformationService::DeviceInformationService():
-	_hardwareRevisionCharacteristic(NULL),
-	_firmwareRevisionCharacteristic(NULL),
-	_softwareRevisionCharacteristic(NULL)
-{
+DeviceInformationService::DeviceInformationService() {
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
-	setName(BLE_SERVICE_DEVICE_INFORMATION);
 }
 
 void DeviceInformationService::createCharacteristics() {
@@ -92,73 +91,80 @@ void DeviceInformationService::createCharacteristics() {
 #ifdef SOFTWARE_REVISION_CHARACTERISTIC
 	addSoftwareRevisionCharacteristic();
 #endif
-
-	updatedCharacteristics();
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
 	LOGi(FMT_CHAR_ADD STR_CHAR_HARDWARE_REVISION);
-	if (_hardwareRevisionCharacteristic != NULL) {
+	if (_hardwareRevisionCharacteristic != nullptr) {
 		LOGe(FMT_CHAR_EXISTS STR_CHAR_HARDWARE_REVISION);
 		return;
 	}
 
-	_hardwareRevisionCharacteristic = new Characteristic<std::string>();
+	characteristic_config_t config = {
+			.read      = true,
+			.write     = false,
+			.notify    = false,
+			.encrypted = false,
+	};
+
+	std::string hardware_revision   = get_hardware_revision();
+
+	_hardwareRevisionCharacteristic = new Characteristic<const char*>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
-
-	std::string hardware_revision = get_hardware_revision();
-
-	_hardwareRevisionCharacteristic->setUUID(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
 	_hardwareRevisionCharacteristic->setName(BLE_CHAR_HARDWARE_REVISION);
-	_hardwareRevisionCharacteristic->setDefaultValue(hardware_revision);
-	_hardwareRevisionCharacteristic->setWritable(false);
-	_hardwareRevisionCharacteristic->setMaxStringLength(hardware_revision.size());
-	_hardwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_hardwareRevisionCharacteristic->setValueLength(hardware_revision.size());
+	_hardwareRevisionCharacteristic->setUuid(BLE_UUID_HARDWARE_REVISION_STRING_CHAR);
+	_hardwareRevisionCharacteristic->setConfig(config);
+	_hardwareRevisionCharacteristic->setInitialValue(hardware_revision.c_str());
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	LOGi(FMT_CHAR_ADD STR_CHAR_FIRMWARE_REVISION);
-	if (_firmwareRevisionCharacteristic != NULL) {
+	if (_firmwareRevisionCharacteristic != nullptr) {
 		LOGe(FMT_CHAR_EXISTS STR_CHAR_FIRMWARE_REVISION);
 		return;
 	}
-	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
+
+	characteristic_config_t config = {
+			.read      = true,
+			.write     = false,
+			.notify    = false,
+			.encrypted = false,
+	};
+
+	_firmwareRevisionCharacteristic = new Characteristic<const char*>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
-
-	std::string firmware_version;
-	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
-		firmware_version = g_FIRMWARE_VERSION;
-	} else {
-		firmware_version = g_GIT_SHA1;
-	}
-	LOGd("Firmware version: %s", firmware_version.c_str());
-
-	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
 	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);
-	_firmwareRevisionCharacteristic->setWritable(false);
-	_firmwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_firmwareRevisionCharacteristic->setDefaultValue(firmware_version);
-	_firmwareRevisionCharacteristic->setMaxStringLength(firmware_version.size());
-	_firmwareRevisionCharacteristic->setValueLength(firmware_version.size());
+	_firmwareRevisionCharacteristic->setUuid(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
+	_firmwareRevisionCharacteristic->setConfig(config);
+
+	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
+		_firmwareRevisionCharacteristic->setInitialValue(g_FIRMWARE_VERSION);
+	}
+	else {
+		_firmwareRevisionCharacteristic->setInitialValue(g_GIT_SHA1);
+	}
+	LOGd("Firmware version: %s", _firmwareRevisionCharacteristic->getValue());
 }
 
 void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 	LOGi(FMT_CHAR_ADD STR_CHAR_SOFTWARE_REVISION);
-	if (_softwareRevisionCharacteristic != NULL) {
+	if (_softwareRevisionCharacteristic != nullptr) {
 		LOGe(FMT_CHAR_EXISTS STR_CHAR_SOFTWARE_REVISION);
 		return;
 	}
-	_softwareRevisionCharacteristic = new Characteristic<std::string>();
+
+	characteristic_config_t config = {
+			.read      = true,
+			.write     = false,
+			.notify    = false,
+			.encrypted = false,
+	};
+
+	_softwareRevisionCharacteristic = new Characteristic<const char*>();
 	addCharacteristic(_softwareRevisionCharacteristic);
-
-	std::string software_version = STRINGIFY(GIT_BRANCH);
-
-	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
 	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
-	_softwareRevisionCharacteristic->setWritable(false);
-	_softwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_softwareRevisionCharacteristic->setDefaultValue(software_version);
-	_softwareRevisionCharacteristic->setMaxStringLength(software_version.size());
-	_softwareRevisionCharacteristic->setValueLength(software_version.size());
+	_softwareRevisionCharacteristic->setUuid(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
+	_softwareRevisionCharacteristic->setConfig(config);
+
+	_softwareRevisionCharacteristic->setInitialValue(STRINGIFY(GIT_BRANCH));
 }

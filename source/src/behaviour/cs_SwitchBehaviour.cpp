@@ -6,14 +6,14 @@
  */
 
 #include <behaviour/cs_SwitchBehaviour.h>
-
 #include <logging/cs_Logger.h>
 #include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 
 #include <algorithm>
 
-#define LOGBehaviour_V LOGnone
+#define LOGBehaviour_V LOGvv
+#define LOGSwitchBehaviourDebug LOGvv
 
 SwitchBehaviour::SwitchBehaviour(
 		uint8_t intensity,
@@ -21,21 +21,21 @@ SwitchBehaviour::SwitchBehaviour(
 		DayOfWeekBitMask activeDaysOfWeek,
 		TimeOfDay from,
 		TimeOfDay until,
-		PresenceCondition presencecondition) :
-	Behaviour(Behaviour::Type::Switch, intensity, profileid, activeDaysOfWeek, from, until),
-	presenceCondition(presencecondition)
-{
-}
+		PresenceCondition presencecondition)
+		: Behaviour(Behaviour::Type::Switch, intensity, profileid, activeDaysOfWeek, from, until)
+		, presenceCondition(presencecondition) {}
 
-SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1+26> arr) : 
-	Behaviour(          WireFormat::deserialize<Behaviour>(         arr.data() +  0, 14)),
-	presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 14, 13)) {
-}
+SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1 + 26> arr)
+		: Behaviour(WireFormat::deserialize<Behaviour>(arr.data() + 0, 14))
+		, presenceCondition(WireFormat::deserialize<PresenceCondition>(arr.data() + 14, 13)) {}
 
 SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() {
 	SerializedDataType result;
-	std::copy_n(std::begin(Behaviour::serialize()),  WireFormat::size<Behaviour>(),            std::begin(result) + 0);
-	std::copy_n(std::begin(WireFormat::serialize(presenceCondition)), WireFormat::size<PresenceCondition>(),    std::begin(result) + 14);
+	std::copy_n(std::begin(Behaviour::serialize()), WireFormat::size<Behaviour>(), std::begin(result) + 0);
+	std::copy_n(
+			std::begin(WireFormat::serialize(presenceCondition)),
+			WireFormat::size<PresenceCondition>(),
+			std::begin(result) + 14);
 
 	return result;
 }
@@ -50,16 +50,19 @@ uint8_t* SwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size) {
 	return std::copy_n(std::begin(SwitchBehaviour::serialize()), size, outbuff);
 }
 
-
 size_t SwitchBehaviour::serializedSize() const {
 	return WireFormat::size<SwitchBehaviour>();
 }
 
-bool SwitchBehaviour::requiresPresence() { 
+bool SwitchBehaviour::requiresPresence() {
 	return presenceCondition.predicate.requiresPresence();
 }
 bool SwitchBehaviour::requiresAbsence() {
 	return presenceCondition.predicate.requiresAbsence();
+}
+
+PresencePredicate SwitchBehaviour::currentPresencePredicate() {
+	return presenceCondition.predicate;
 }
 
 bool SwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
@@ -68,15 +71,16 @@ bool SwitchBehaviour::isValid(Time currentTime, PresenceStateDescription current
 
 bool SwitchBehaviour::gracePeriodForPresenceIsActive() {
 	if (prevInRoomTimeStamp) {
-		return CsMath::Interval(
-				SystemTime::up(),
-				presenceCondition.timeOut,
-				true)
-		.ClosureContains(*prevInRoomTimeStamp);
+		return CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true)
+				.ClosureContains(*prevInRoomTimeStamp);
 	}
 	return false;
 }
 
+/**
+ * TODO: Factor out the prevInRoomTimeStamp into a function update(presence,uptime)
+ * and have the BehaviourStore periodically update it.
+ */
 bool SwitchBehaviour::isValid(PresenceStateDescription currentPresence) {
 	LOGBehaviour_V("isValid(presence) called");
 	if (!requiresPresence() && !requiresAbsence()) {
@@ -94,12 +98,20 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentPresence) {
 			//    		presenceCondition.timeOut = 20;
 			if (gracePeriodForPresenceIsActive()) {
 				// presence invalid but we're in the grace period.
-				LOGBehaviour_V("left room(s) within time out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+				LOGBehaviour_V(
+						"left room(s) within time out: %d in [%d %d]",
+						*prevInRoomTimeStamp,
+						SystemTime::up() - presenceCondition.timeOut,
+						SystemTime::up());
 				return true;
 			}
 			else {
 				// fell out of grace, lets delete prev val.
-				LOGBehaviour_V("left room(s) timed out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+				LOGBehaviour_V(
+						"left room(s) timed out: %d in [%d %d]",
+						*prevInRoomTimeStamp,
+						SystemTime::up() - presenceCondition.timeOut,
+						SystemTime::up());
 				prevInRoomTimeStamp.reset();
 				return false;
 			}
@@ -117,11 +129,19 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentPresence) {
 		if (prevInRoomTimeStamp) {
 			//    		presenceCondition.timeOut = 20;
 			if (gracePeriodForPresenceIsActive()) {
-				LOGBehaviour_V("left room(s) within time out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+				LOGBehaviour_V(
+						"left room(s) within time out: %d in [%d %d]",
+						*prevInRoomTimeStamp,
+						SystemTime::up() - presenceCondition.timeOut,
+						SystemTime::up());
 				return false;
 			}
 			else {
-				LOGBehaviour_V("left room(s) timed out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+				LOGBehaviour_V(
+						"left room(s) timed out: %d in [%d %d]",
+						*prevInRoomTimeStamp,
+						SystemTime::up() - presenceCondition.timeOut,
+						SystemTime::up());
 				prevInRoomTimeStamp.reset();
 				return true;
 			}
@@ -146,15 +166,20 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentPresence) {
 
 void SwitchBehaviour::print() {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
-	LOGd("SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) isValid(%u)",
-			from().h(), from().m(), from().s(),
-			until().h(), until().m(), until().s(),
+	LOGSwitchBehaviourDebug(
+			"SwitchBehaviour: %02u:%02u:%02u - %02u:%02u:%02u %3u%%, days(0x%X), presencetype(%d), timeout(%u) "
+			"isValid(%u)",
+			from().h(),
+			from().m(),
+			from().s(),
+			until().h(),
+			until().m(),
+			until().s(),
 			activeIntensity,
 			activeDays,
 			presenceCondition.predicate._condition,
 			presenceCondition.timeOut,
-			isValid(SystemTime::now())
-	);
+			isValid(SystemTime::now()));
 	presenceCondition.predicate._presence.print();
 #endif
 }

@@ -21,15 +21,12 @@
 class GpRegRet {
 public:
 	enum GpRegRetFlag {
-		FLAG_BROWNOUT = CS_GPREGRET_FLAG_BROWNOUT,
-		FLAG_DFU = CS_GPREGRET_FLAG_DFU_RESET,
+		FLAG_BROWNOUT          = CS_GPREGRET_FLAG_BROWNOUT,
+		FLAG_DFU               = CS_GPREGRET_FLAG_DFU_RESET,
 		FLAG_STORAGE_RECOVERED = CS_GPREGRET_FLAG_STORAGE_RECOVERED
 	};
 
-	enum GpRegRetId {
-		GPREGRET =  0,
-		GPREGRET2 = 1
-	};
+	enum GpRegRetId { GPREGRET = 0, GPREGRET2 = 1 };
 
 	/**
 	 * Get the GPREGRET value.
@@ -47,6 +44,11 @@ public:
 	 * Clear counter.
 	 */
 	static void clearCounter();
+
+	/**
+	 * Get the current counter value.
+	 */
+	static uint32_t getCounter();
 
 	/**
 	 * Set counter to a given value.

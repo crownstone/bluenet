@@ -26,6 +26,7 @@ class Lollipop {
 private:
 	uint16_t val;
 	uint16_t max;
+
 public:
 	Lollipop(uint16_t m) : val(0), max(m) {}
 	Lollipop(uint16_t v, uint16_t m) : val(v), max(m) {}
@@ -46,8 +47,8 @@ public:
 		bool reverse = val > max / 2;
 
 		// TODO: what is m and M ?
-		int m = val - (reverse? max / 2 : 0);
-		int M = val + (reverse? 0 : max / 2);
+		int m        = val - (reverse ? max / 2 : 0);
+		int M        = val + (reverse ? 0 : max / 2);
 
 		return (m < other.val && other.val <= M) ^ reverse;
 	}
@@ -67,7 +68,7 @@ public:
 	 * This is always false when currentValue is 0.
 	 * This is true when previousValue is 0.
 	 */
-	static bool isNewer(uint16_t previousValue, uint16_t currentValue, uint16_t maxValue){
+	static bool isNewer(uint16_t previousValue, uint16_t currentValue, uint16_t maxValue) {
 		return Lollipop(previousValue, maxValue) < Lollipop(currentValue, maxValue);
 	}
 

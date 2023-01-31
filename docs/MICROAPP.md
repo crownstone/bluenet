@@ -1,4 +1,4 @@
-# Microapps
+# Microapp protocol
 
 The protocol has to be designed yet. Currently, there are a few functions implemented with a hint of a protocol. At
 the microapp code side this will be completely hidden for the user, hence this protocol definition has to be seen as
@@ -18,8 +18,8 @@ and describes everything on a level that would allow someone to write their own 
 
 ## User-facing definitions
 
-An implementation of a microapp can be found [here](https://github.com/mrquincle/crownstone-bluenet-module). It has
-a so-called `.ino` file with Arduino-like syntax:
+Microapps are written with Arduino-like syntax, in
+a so-called `.ino` file:
 
 ```
 static int counter = 0;
@@ -28,6 +28,8 @@ void setup() {
 	Serial.begin();
 	Serial.write("Hello world!");
 	Serial.write(counter);
+
+	pinMode(LED1_PIN, OUTPUT);
 }
 
 int loop() {
@@ -35,53 +37,86 @@ int loop() {
 
 	// every 5 seconds
 	if (counter % 5 == 0) {
-		digitalWrite(1, 1);
-		delay(1000);
-		digitalWrite(1, 0);
+		digitalWrite(LED1_PIN, 1);
+		delay(100);
+		digitalWrite(LED1_PIN, 0);
 	}
+
+    delay(1000);
 }
 
 ```
 
-Here the relay is mapped to pin `1` and the value written with `digitalWrite` turns it on or off. The delay function
+Here the relay is mapped to pin `LED1_PIN` and the value written with `digitalWrite` turns it on or off. The delay function
 can be used to introduce a non-blocking delay. It is perfectly fine to write `delay(1000000)`, delay of 1000 seconds.
 The microapp code will then resume 1000 seconds later.
 
 ## Microapp SDK protocol
 
-The protocol itself is implemented on both sides, at the bluenet side in the `microapp_callback` function and at the
-microapp side in for example the `main.c` code. Here we are only concerned in the bluenet side.
+The protocol defines how microapp functions map to bluenet functionality, and how control is shared between the microapp and bluenet.
 
-The function has the following syntax and is called like this:
+All microapp libraries that wish to access bluenet functionality have to do this via a call to `sendMessage()`.
+This function writes a request (or command) at a shared address in RAM according to the protocol defined below, and then yields to bluenet with a coroutine switch.
+Bluenet will handle the request and either resume its own tasks or hand back control to the microapp based on the type of request.
 
-```
-int (*callback_func)(char*,uint16_t) = (int (*)(char*,uint16_t)) _callback;
-int result = callback_func((char*)msg->payload, msg->length);
-```
+Bluenet can also make requests to the microapp, for example in the case of interrupts.
+The microapp may ask to be notified upon certain events within bluenet.
+Whenever such an event occurs, bluenet will write relevant event information in the shared RAM, again according to the protocol below.
+Then, bluenet calls the microapp which can handle the event and yield back once it has done so.
 
-It evokes a callback in the bluenet code with as parameters a pointer to a char buffer and a length field. Here length
-is sent separately so we don't need to inspect `msg->payload[i]` for length information. On the bluenet side the
-length field is never respected beyond the maximum payload size (`MAX_PAYLOAD`).
+Shared protocol definitions are located in `/source/shared/cs_MicroappStructs.h`. The bluenet entry and exit points for the microapp are defined in `/source/src/microapp/cs_MicroappController.cpp` and handling the requests happens in `/source/src/microapp/cs_MicroappRequestHandler.cpp`.
 
-![Microapp command](../docs/diagrams/microapp_command.png)
+The remaining part of this section is dedicated to explaining the protocol for writing to the shared memory for the following functionalities that are supported as of now:
+* [Log](#log)
+* [Pin](#pin)
+* [Switch](#switch)
+* [Service data](#service-data)
+* [TWI](#twi)
+* [BLE](#ble)
+* [Mesh](#mesh)
+* [Power usage](#power-usage)
+* [Presence](#presence)
+* [Control commands](#control-commands)
+* [Yield](#yield)
+* [Continue](#continue)
 
-Type    | Name    | Length  | Description
+### Microapp SDK message packet
+![Microapp message](../docs/diagrams/microapp_message.png)
+
+Type | Name | Length | Description
 ---     | ---     | ---     | ---
-uint8   | Command | 1       | Command type
-uint8[] | Payload | 31      | Fields depending on command type
+uint8[] | Header  | 2       | Includes message type and ack field
+uint8[] | Payload | 46      | Fields depending on message type
 
-There are a few command types defined.
+This is the base structure of all microapp sdk messages. The header contains the same fields for all types of messages, while the payload is interpreted differently depending on message type.
+
+### Header
+![Microapp header](../docs/diagrams/microapp_header.png)
+
+Type | Name | Length | Description
+---     | ---          | ---     | ---
+uint8   | Message type | 1       | Type of message
+uint8   | Ack          | 1       | Message acknowledgement and results
+
+The following message types are defined:
 
 Command | Command name                       | Description
 ---     | ---                                | ---
-0x00    |                                    | Reserved
-0x01    | `CS_MICROAPP_COMMAND_LOG`          | Print to serial (a log line in bluenet)
-0x02    | `CS_MICROAPP_COMMAND_DELAY`        | Delay microapp by calling bluenet and later on jumping back
-0x03    | `CS_MICROAPP_COMMAND_PIN`          | Write/read to/from a virtual pin
-0x04    | `CS_MICROAPP_COMMAND_SERVICE_DATA` | Write service data (over the air)
-0x05    | `CS_MICROAPP_COMMAND_TWI`          | Read/write from twi/i2c device
+0x00    | `CS_MICROAPP_SDK_TYPE_NONE`        | Not used / reserved
+0x01    | `CS_MICROAPP_SDK_TYPE_LOG`         | Print to serial (a log line in bluenet)
+0x02    | `CS_MICROAPP_SDK_TYPE_PIN`         | Write/read to/from a virtual pin
+0x03    | `CS_MICROAPP_SDK_TYPE_SWITCH`      | Control the relay/dimmer
+0x04    | `CS_MICROAPP_SDK_TYPE_SERVICE_DATA` | Write service data (over the air)
+0x05    | `CS_MICROAPP_SDK_TYPE_TWI`         | Read/write from twi/i2c device
+0x06    | `CS_MICROAPP_SDK_TYPE_BLE`         | Bluetooth Low Energy related commands
+0x07    | `CS_MICROAPP_SDK_TYPE_MESH`        | Bluetooth mesh related commands
+0x08    | `CS_MICROAPP_SDK_TYPE_POWER_USAGE` | Read power usage measured by crownstone
+0x09    | `CS_MICROAPP_SDK_TYPE_PRESENCE`    | Read presence detected
+0x0A    | `CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND` | Control commands following the [control packet protocol](../docs/protocol/PROTOCOL.md#control-packet)
+0x0B    | `CS_MICROAPP_SDK_TYPE_YIELD`       | End of microapp setup or loop, or used for async calls
+0x0C    | `CS_MICROAPP_SDK_TYPE_CONTINUE`    | Empty message for bluenet handing control to the microapp in non-interrupt context
 
-For further details, see the next sections.
+The ack field is usually (over)written by the receiving party. The sender can set it to either `REQUEST` or `NO_REQUEST`. The receiver can react to this and overwrite it with a result (e.g. `SUCCESS` or a specific error code) or indicate that the message is being handled with `IN_PROGRESS`.
 
 ### Log
 
@@ -89,83 +124,62 @@ The logging function accepts a type such as char, int, string, an option and the
 
 ![Microapp log](../docs/diagrams/microapp_log.png)
 
-Type    | Name    | Length | Description
+Type | Name | Length | Description
 ---     | ---     | ---    | ---
-uint8   | Command | 1      | Log command (`CS_MICROAPP_COMMAND_LOG`)
+--      | Header  | 2      | Message type is `CS_MICROAPP_SDK_TYPE_LOG`
 uint8   | Type    | 1      | Type of value to be logged (char, int, string, array, float, double, uint, short)
-uint8   | Option  | 1      | Yes/no newline
-uint8[] | Data    | 28     | Maximum string / array size
+uint8   | Flags   | 1      | Bit 0: yes/no newline. Bit 1-7: reserved
+uint8   | Size    | 1      | Size of data
+uint8[] | Payload | 43     | Interpretation depending on log type
 
 In the case of a string the last byte is set to 0 on the bluenet side (null-terminated), just an additional precaution.
 Note that we never rely on null-termination anyway (we always send along length as well).
 
-The opcode is called `port` on the microapp side (for this command). The same objects and functions are
-called to write to the logs as to write the service data for example.
-
-### Delay
-
-The delay function accepts a delay in milliseconds. A delay less than one second will be
-ignored. This is a function that requires a pointer to the coroutine argument which is used in `yield`.
-
-![Microapp delay](../docs/diagrams/microapp_delay.png)
-
-Type    | Name    | Length | Description
----     | ---     | ---    | ---
-uint8   | Command | 1      | Sleep command (`CS_MICROAPP_COMMAND_DELAY`)
-uint16  | Period  | 2      | Period to sleep in milliseconds
-uintptr | Coargs  | 4      | Pointer to coroutine arguments
-
-The coroutine arguments with which `loop` is called are passed through, so we can `yield` and later on call `next` to jump back and forth before we finally `yield` at the end of `loop`.
-
 ### Pin
 
-The pin command is defined for virtual pins.
+The pin message is defined for virtual pins. Bluenet
+has to be compiled with `BUILD_GPIOTE=1` for this functionality to be available.
 
 ![Microapp pin](../docs/diagrams/microapp_pin.png)
 
-Type    | Name     | Length | Description
+Type | Name | Length | Description
 ---     | ---      | ---    | ---
-uint8   | Command  | 1      | Pin command (`CS_MICROAPP_COMMAND_PIN`)
+--      | Header   | 2      | Message type is `CS_MICROAPP_SDK_TYPE_PIN`
 uint8   | Pin      | 1      | Pin index (virtual)
-uint8   | Opcode1  | 1      | Set a pin mode or perform action (read/write)
-uint8   | Opcode2  | 1      | If opcode1 = mode (pullup setting), if action (read/write/action)
-uint8   | Value    | 1      | Value to write
-uint8   | Ack      | 1      | Acknowledgment
-uint32  | Callback | 4      | Address of callback (on receiving a GPIO interrupt)
+uint8   | Type     | 1      | Set a pin mode (`INIT`) or perform read/write (`ACTION`).
+uint8   | Direction| 1      | Defines input or output and pullup/pulldown configuration. Only used with pin type `INIT`.
+uint8   | Polarity | 1      | Defines when to generate pin event (`NONE`, `CHANGE`, `RISING` or `FALLING`). Only used with pin type `INIT`.
+uint8   | Action    | 1      | What action to take (`READ` or `WRITE`). Only used with pin type `ACTION`.
+uint8   | Value     | 1      | Value to write/read. Only used with pin type `ACTION`.
 
 The value to write is an on/off value for digitalWrites. It is an 8-bits analog value for analogWrites.
-For a pin mode command the value can be e.g. change, rising, or falling.
 
-The acknowledgment setting is not used yet.
+### Switch
+![Microapp switch](../docs/diagrams/microapp_switch.png)
 
-### Dimmer / Switch
-![Microapp dimmer switch](../docs/diagrams/microapp_dimmer_switch.png)
+The switch message is used to control the dimmer and relay.
 
-The dimmer / switch command is used to control the dimmer and switch.
-
-Type    | Name     | Length | Description
+Type | Name | Length | Description
 ---     | ---      | ---    | ---
-uint8   | Command  | 1      | Dimmer/Switch command (`CS_MICROAPP_COMMAND_SWITCH_DIMMER`)
-uint8   | Opcode   | 1      | `CS_MICROAPP_COMMAND_SWITCH` or `CS_MICROAPP_COMMAND_DIMMER` for controlling the switch or the dimmer respectively.
-uint8   | Value    | 1      | Value to write. Binary (0 = off, 1 = on) for the switch, or an 8-bit intensity value for the dimmer.
+--      | Header   | 2      | Message type is `CS_MICROAPP_SDK_TYPE_SWITCH`
+uint8   | Value    | 1      | Value to write, according to [this](../docs/protocol/PROTOCOL.md#switch-command-value).
 
 ### Service data
 
-The service data command can be used to write data to a service data struct.
+The service data message can be used to write data to a service data struct.
 
 ![Microapp service data](../docs/diagrams/microapp_service_data.png)
 
-Type    | Name    | Length | Description
+Type | Name | Length | Description
 ---     | ---     | ---    | ---
-uint8   | Command | 1      | Pin command (`CS_MICROAPP_COMMAND_SERVICE_DATA`)
-uint8   | Type    | 1      | Type of value to be logged (char, int, string, array, float, double, uint, short)
-uint8   | Option  | 1      | Yes/no newline
-uint8[] | Data    | 28     | Maximum string / array size
+--      | Header  | 2      | Message type is `CS_MICROAPP_SDK_TYPE_SERVICE_DATA`
+uint16  | appUuid | 2      | Unique identifier to be advertised along with the data
+uint8   | Size    | 1      | Size of the data
+uint8[] | Data    | 8      | The data to be advertised
 
-This uses exactly the same format as for writing logs under the hood. At the microapp side, the class
-`SerialServiceData` inherits from `SerialBase_` (just as `Serial` itself does).
+The maximum data size for microapp service data ads is set at `8` at the moment.
 
-### TWI / I2C
+### TWI
 
 The twi (two-wire interface) command can be used to control twi devices. This bus is also called an i2c bus. Bluenet
 has to be compiled with `BUILD_TWI=1` for this functionality to be available. The bluenet device is always the
@@ -174,17 +188,106 @@ in that case.
 
 ![Microapp twi](../docs/diagrams/microapp_twi.png)
 
-Type    | Name     | Length | Description
+Type | Name | Length | Description
 ---     | ---      | ---    | ---
-uint8   | Command  | 1      | Pin command (`CS_MICROAPP_COMMAND_TWI`)
-uint8   | Address  | 1      | Target address
-uint8   | Opcode   | 1      | TWI opcodes such as read, write, init, enable, and disable
-uint8   | Length   | 1      | Length of data to be received (or sent)
-uint8   | Ack      | 1      | Acknowledgment received
-uint8   | Stop     | 1      | Existence of a stop symbol
-uint8[] | Buffer   | 26     | Maximum twi payload (1 up to 26 bytes)
+--      | Header   | 2      | Message type is `CS_MICROAPP_SDK_TYPE_TWI`
+uint8   | Type     | 1      | Read, write or initialize
+uint8   | Address  | 1      | Slave address
+uint8   | Flags    | 1      | Bit 0: stop bit. Bit 1-7: reserved
+uint8   | Size     | 1      | Length of data to be sent or received
+uint8[] | Buf      | 42     | Data to be sent or received
 
 In the microapp code this is available through the `Wire` class.
+
+### BLE
+
+For Bluetooth Low Energy functionalities, for now there is support for scanning advertisements. Mesh functionalities are covered with the `CS_MICROAPP_SDK_TYPE_MESH` message type. The microapp can register a handler when a device is scanned. Note that bluenet throttles the number of scanned devices for which an interrupt is generated. Also, bluenet has to be compiled with `BUILD_MESHING=1` since scanning is implemented in the mesh classes on the bluenet side. In the future, support for connecting to BLE peripherals will be added.
+
+![Microapp ble](../docs/diagrams/microapp_ble.png)
+
+Type | Name | Length | Description
+---    | ---       | ---    | ---
+--     | Header    | 2      | Message type is `CS_MICROAPP_SDK_TYPE_BLE`
+uint8  | Type      | 1      | Ble opcodes such as `SCAN_START` or `SCANNED_DEVICE`.
+uint8  | Address type | 1   | Ble address type
+uint8[]| Address   | 6      | MAC address of a BLE device
+int8   | Rssi      | 1      | Received signal strength
+uint8  | Size      | 1      | Data length
+uint8[]| Data      | 31     | Advertisement payload
+
+Some fields may be unused depending on the type of ble message. For a `SCAN_START` message, for example, no other fields are required other than the header and ble type.
+
+### Mesh
+
+The supported mesh functionalities at the moment include both sending and receiving mesh messages of the specific microapp type (`CS_MESH_MODEL_TYPE_MICROAPP`). Both broadcast and directed mesh messages are supported.
+
+![Microapp mesh](../docs/diagrams/microapp_mesh.png)
+
+Type | Name | Length | Description
+---    | ---       | ---    | ---
+--     | Header    | 2      | Message type is `CS_MICROAPP_SDK_TYPE_MESH`
+uint8  | Type      | 1      | Type of mesh message (send, read, info)
+uint8  | StoneId   | 1      | Id of stone (to send to, read from, or own id)
+uint8  | Size      | 1      | Length of data field
+uint8[] | Data     | 7      | 1 to 7 bytes (max mesh message payload length)
+
+### Power usage
+
+The power usage command can be used to read the measured power usage of the device plugged into the outlet of this crownstone.
+
+![Microapp powerusage](../docs/diagrams/microapp_powerusage.png)
+
+Type | Name | Length | Description
+---    | ---        | ---    | ---
+--     | Header     | 2      | Message type is `CS_MICROAPP_SDK_TYPE_POWER_USAGE`
+uint8  | Type       | 1      | Specify power, current or voltage
+int32  | PowerUsage | 4      | Power usage
+
+As of writing, current or voltage data is not yet supported.
+
+### Presence
+
+The presence command can be used to request presence of profiles in the sphere.
+
+![Microapp presence](../docs/diagrams/microapp_presence.png)
+
+Type | Name | Length | Description
+---    | ---       | ---    | ---
+--     | Header    | 2      | Message type is `CS_MICROAPP_SDK_TYPE_PRESENCE`
+uint8  | ProfileId | 1      | Requested profile
+uint64 | PresenceBitMask | 8 | Bitmask of the requested profile in the locations within the sphere
+
+### Control commands
+
+Control commands are defined [here](../docs/protocol/PROTOCOL.md#control-packet). The microapp sdk packet follows the same structure.
+From the microapp, only commands with accesslevel `BASIC` are allowed.
+
+![Microapp control commands](../docs/diagrams/microapp_control_commands.png)
+
+Type | Name | Length | Description
+---    | ---       | ---    | ---
+--     | Header    | 2      | Message type is `CS_MICROAPP_SDK_TYPE_CONTROL_COMMAND`
+uint8  | Protocol  | 1      | Protocol version of the command
+uint16 | Type      | 2      | Command type
+uint16 | Size      | 2      | Size of the payload
+--     | Payload   | 41     | Control command payload
+
+### Yield
+
+There are three possible instances where a microapp 'yields' to bluenet with the yield message. The first two are at the end of `setup` and `loop`. The third is for asynchronous, nonblocking calls such as `delay`. The yield message contains a field for the remaining number of interrupts that the microapp can process. Bluenet will keep this in mind and stop sending interrupts if the microapp is busy.
+
+![Microapp yield](../docs/diagrams/microapp_yield.png)
+
+Type | Name | Length | Description
+---    | ---       | ---    | ---
+--     | Header    | 2      | Message type is `CS_MICROAPP_SDK_TYPE_YIELD`
+uint8  | Type      | 1      | Either `SETUP_END`, `LOOP_END`, or `ASYNC`
+uint8  | EmptySlots | 1     | Number of empty slots for interrupts
+
+
+### Continue
+
+The continue message has no message-type-specific payload. Only the header is used.
 
 ## Microapp upload protocol
 
@@ -192,9 +295,20 @@ The protocol to upload microapps can be found in the [protocol](protocol/PROTOCO
 
 ## Microapp binary format
 
-The binary format of a microapp.
+The binary of a microapp always starts with the following header:
 
-TBD.
+Type | Name | Length | Description
+---- | ---- | ------ | -----------
+uint8_t  | sdkVersionMajor | 1 | The major SDK protocol version this microapp was compiled for.
+uint8_t  | sdkVersionMinor | 1 | The minor SDK protocol version this microapp was compiled for.
+uint16_t | size | 2 | Size of the binary, including this header.
+uint16_t | checksum | 2 | Checksum (CRC16-CCITT) of the binary, after this header.
+uint16_t | checksumHeader | 2 | Checksum (CRC16-CCITT) of this header, with this field set to 0.
+uint32_t | appBuildVersion | 4 | Build version of this microapp.
+uint16_t | startOffset | 2 | Offset in bytes of the first instruction to execute.
+uint16_t | reserved | 2 | Reserved for future use, must be 0 for now.
+uint32_t | reserved2 | 4 | Reserved for future use, must be 0 for now.
+
 
 ## Implementation
 

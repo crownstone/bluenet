@@ -13,6 +13,7 @@
 #include <protocol/cs_MicroappPackets.h>
 #include <protocol/cs_ServiceDataPackets.h>
 #include <protocol/cs_Typedefs.h>
+#include <protocol/cs_UicrPacket.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
 #include <cstdint>
@@ -166,9 +167,9 @@ struct __attribute__((__packed__)) state_packet_header_t {
 union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 	struct __attribute__((packed)) {
 		bool broadcast : 1;
-		bool reliable : 1;
+		bool acked : 1;
 		bool useKnownIds : 1;
-		bool noHops : 1;
+		bool doNotRelay : 1;
 	} flags;
 	uint8_t asInt = 1;  // Broadcast to all by default.
 };
@@ -225,24 +226,23 @@ union __attribute__((__packed__)) switch_state_t {
 
 /**
  * Switch command values.
- *
- * We could also write this as struct with 7 bits value,
- * and 1 bit that determines whether the value is switch value (0-100), or a special value (enum).
  */
-enum SwitchCommandValue : uint8_t {
-	CS_SWITCH_CMD_VAL_OFF = 0,
-	// Dimmed from 1 - 99
-	CS_SWITCH_CMD_VAL_FULLY_ON                 = 100,
-	CS_SWITCH_CMD_VAL_NONE                     = 128,  // For printing: the value is set to nothing.
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_ALL          = 129,
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG          = 130,
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE     = 131,
-	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132,
+constexpr uint8_t CS_SWITCH_CMD_VAL_OFF                      = 0;
+constexpr uint8_t CS_SWITCH_CMD_VAL_FULLY_ON                 = 100;
+constexpr uint8_t CS_SWITCH_CMD_VAL_NONE                     = 128;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_ALL          = 129;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG          = 130;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE     = 131;
+constexpr uint8_t CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132;
 
-	CS_SWITCH_CMD_VAL_TOGGLE    = 253,  // Switch OFF when currently on, switch to SMART_ON when currently off.
-	CS_SWITCH_CMD_VAL_BEHAVIOUR = 254,  // Switch to the value according to behaviour rules.
-	CS_SWITCH_CMD_VAL_SMART_ON  = 255   // Switch on, the value will be determined by behaviour rules.
-};
+//! Switch OFF when currently on, switch to SMART_ON when currently off.
+constexpr uint8_t CS_SWITCH_CMD_VAL_TOGGLE                   = 253;
+
+//! Switch to the value according to behaviour rules.
+constexpr uint8_t CS_SWITCH_CMD_VAL_BEHAVIOUR                = 254;
+
+//! Switch on, the value will be determined by behaviour rules.
+constexpr uint8_t CS_SWITCH_CMD_VAL_SMART_ON                 = 255;
 
 /**
  * A single multi switch item.
@@ -442,37 +442,6 @@ struct __attribute__((packed)) cs_mesh_seq_number_v5_t {
 	uint8_t synchro_index;
 };
 
-struct __attribute__((packed)) cs_uicr_data_t {
-	uint32_t board;
-
-	union __attribute__((packed)) {
-		struct __attribute__((packed)) {
-			uint8_t productType;
-			uint8_t region;
-			uint8_t productFamily;
-		} fields;
-		uint32_t asInt;
-	} productRegionFamily;
-
-	union __attribute__((packed)) {
-		struct __attribute__((packed)) {
-			uint8_t patch;
-			uint8_t minor;
-			uint8_t major;
-		} fields;
-		uint32_t asInt;
-	} majorMinorPatch;
-
-	union __attribute__((packed)) {
-		struct __attribute__((packed)) {
-			uint8_t housing;
-			uint8_t week;  // week number
-			uint8_t year;  // last 2 digits of the year
-		} fields;
-		uint32_t asInt;
-	} productionDateHousing;
-};
-
 struct __attribute__((packed)) cs_adc_restarts_t {
 	uint32_t count         = 0;  // Number of ADC restarts since boot.
 	uint32_t lastTimestamp = 0;  // Timestamp of last ADC restart.
@@ -537,58 +506,16 @@ struct __attribute__((packed)) cs_ram_stats_t {
 	uint32_t numSbrkFails = 0;
 };
 
-struct __attribute__((packed)) cs_twi_init_t {
-	uint8_t scl;
-	uint8_t sda;
-	uint8_t freq;
-};
-
-struct __attribute__((packed)) cs_twi_write_t {
-	uint8_t address;
-	uint8_t length;
-	uint8_t* buf;
-	bool stop;
-};
-
-struct __attribute__((packed)) cs_twi_read_t {
-	uint8_t address;
-	uint8_t length;
-	uint8_t* buf;
-	bool stop;
-};
-
-struct __attribute__((packed)) cs_gpio_init_t {
-	uint8_t pin_index;
-	uint8_t direction;
-	uint8_t pull;
-	uint8_t polarity;
-	uintptr_t callback;
-};
-
-struct __attribute__((packed)) cs_gpio_write_t {
-	uint8_t pin_index;
-	uint8_t length;
-	uint8_t* buf;
-};
-
-struct __attribute__((packed)) cs_gpio_read_t {
-	uint8_t pin_index;
-	uint8_t length;
-	uint8_t* buf;
-};
-
-struct __attribute__((packed)) cs_gpio_update_t {
-	uint8_t pin_index;
-	uint8_t length;
-	uint8_t* buf;
-};
-
-/**
- * Stores information on a filter as being expected by the microapp. Currently, only an index of the interrupt handler
- * where the BLE messages have to be delivered to is part of this struct.
- */
-struct __attribute__((packed)) cs_microapp_filter_init_t {
-	uint8_t index;
+struct __attribute__((packed)) cs_bootloader_info_t {
+	// Version of this struct.
+	uint8_t protocol;
+	uint16_t dfuVersion;
+	uint8_t bootloaderMajor;
+	uint8_t bootloaderMinor;
+	uint8_t bootloaderPatch;
+	// A prerelease value. This is 255 for normal releases.
+	uint8_t bootloaderPrerelease;
+	uint8_t bootloaderBuildType;
 };
 
 const uint8_t CS_CHARACTERISTIC_NOTIFICATION_PART_LAST = 255;

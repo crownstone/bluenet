@@ -8,12 +8,11 @@
 
 #include <common/cs_Component.h>
 #include <events/cs_EventListener.h>
-
 #include <localisation/cs_AssetFilterPacketAccessors.h>
-
-#include <optional>
 #include <protocol/cs_AssetFilterPackets.h>
 #include <structs/cs_AssetFilterStructs.h>
+
+#include <optional>
 
 /**
  * Keeps up the asset filters.
@@ -73,14 +72,14 @@ public:
 	/**
 	 * Max number of filters.
 	 */
-	constexpr static uint8_t MAX_FILTER_IDS = 8;
+	constexpr static uint8_t MAX_FILTER_IDS                       = 8;
 
 	/**
 	 * Max total size that the filters take up in RAM.
 	 *
 	 * Set to: TypeSize(CS_TYPE::STATE_ASSET_FILTER_512) + sizeof(asset_filter_runtime_data_t)
 	 */
-	constexpr static size_t FILTER_BUFFER_SIZE = 520;
+	constexpr static size_t FILTER_BUFFER_SIZE                    = 520;
 
 	/**
 	 * Time after last edit command (upload, remove), until "modification in progress" times out.
@@ -91,7 +90,8 @@ private:
 	/**
 	 * List of pointers to the allocated buffers for the filters.
 	 * The filters in this array are always sorted by filterId.
-	 * Null pointers will always be at the back of the array, so you can stop iterating when you encounter a null pointer.
+	 * Null pointers will always be at the back of the array, so you can stop iterating when you encounter a null
+	 * pointer.
 	 *
 	 * To access a filter, construct an accessor object of type TrackingFilter for the given buffer.
 	 */
@@ -100,13 +100,13 @@ private:
 	/**
 	 * Number of allocated filters in the filters array.
 	 */
-	uint8_t _filtersCount = 0;
+	uint8_t _filtersCount             = 0;
 
 	/**
 	 * Keeps track of the version of the filters.
 	 * When this value is 0, the filters are invalid.
 	 */
-	uint16_t _masterVersion = 0;
+	uint16_t _masterVersion           = 0;
 
 	/**
 	 * CRC over all the filter IDs and CRCs.

@@ -8,9 +8,9 @@
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshUtil.h>
-#include <uart/cs_UartHandler.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
+#include <uart/cs_UartHandler.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
@@ -21,7 +21,7 @@ extern "C" {
 #include <log.h>
 }
 
-static void staticMshHandler(access_model_handle_t handle, const access_message_rx_t * p_message, void * p_args) {
+static void staticMshHandler(access_model_handle_t handle, const access_message_rx_t* p_message, void* p_args) {
 	MeshModelMulticastAcked* meshModel = (MeshModelMulticastAcked*)p_args;
 	meshModel->handleMsg(p_message);
 }
@@ -40,13 +40,13 @@ void MeshModelMulticastAcked::init(uint16_t modelId) {
 	uint32_t retVal;
 	access_model_add_params_t accessParams;
 	accessParams.model_id.company_id = CROWNSTONE_COMPANY_ID;
-	accessParams.model_id.model_id = modelId;
-	accessParams.element_index = 0;
-	accessParams.p_opcode_handlers = opcodeHandlers;
-	accessParams.opcode_count = (sizeof(opcodeHandlers) / sizeof((opcodeHandlers)[0]));
-	accessParams.p_args = this;
-	accessParams.publish_timeout_cb = NULL;
-	retVal = access_model_add(&accessParams, &_accessModelHandle);
+	accessParams.model_id.model_id   = modelId;
+	accessParams.element_index       = 0;
+	accessParams.p_opcode_handlers   = opcodeHandlers;
+	accessParams.opcode_count        = (sizeof(opcodeHandlers) / sizeof((opcodeHandlers)[0]));
+	accessParams.p_args              = this;
+	accessParams.publish_timeout_cb  = NULL;
+	retVal                           = access_model_add(&accessParams, &_accessModelHandle);
 	APP_ERROR_CHECK(retVal);
 	retVal = access_model_subscription_list_alloc(_accessModelHandle);
 	APP_ERROR_CHECK(retVal);
@@ -72,46 +72,44 @@ void MeshModelMulticastAcked::configureSelf(dsm_handle_t appkeyHandle) {
 	APP_ERROR_CHECK(retCode);
 }
 
-void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
+void MeshModelMulticastAcked::handleMsg(const access_message_rx_t* accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
-//	if (true) {
-		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i loopback=%u",
+		//	if (true) {
+		LOGMeshModelVerbose(
+				"Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i loopback=%u",
 				accessMsg->opcode.opcode,
 				accessMsg->meta_data.appkey_handle,
 				accessMsg->meta_data.subnet_handle,
 				accessMsg->meta_data.ttl,
 				MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata),
-				accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK
-		);
+				accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK);
 		MeshUtil::printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 		MeshUtil::printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
 //		LOGMeshModelVerbose("ownAddress=%u  Data:", _ownAddress);
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
-		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n",
-				accessMsg->opcode.opcode,
-				accessMsg->meta_data.appkey_handle,
-				accessMsg->meta_data.subnet_handle,
-				accessMsg->meta_data.ttl,
-				MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata)
-		);
+		__LOG(LOG_SRC_APP,
+			  LOG_LEVEL_INFO,
+			  "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n",
+			  accessMsg->opcode.opcode,
+			  accessMsg->meta_data.appkey_handle,
+			  accessMsg->meta_data.subnet_handle,
+			  accessMsg->meta_data.ttl,
+			  MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata));
 	}
 	else {
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");
 #endif
 	}
-//	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type == NRF_MESH_ADDRESS_TYPE_UNICAST);
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
 	if (ownMsg) {
 		return;
 	}
 
-	MeshUtil::cs_mesh_received_msg_t msg = MeshUtil::fromAccessMessageRX(*accessMsg);
+	auto msg = MeshUtil::fromAccessMessageRX(*accessMsg);
 
 	switch (msg.opCode) {
 		case CS_MESH_MODEL_OPCODE_MULTICAST_REPLY: {
-//			if (!ownMsg) {
-				handleReply(msg);
-//			}
+			handleReply(msg);
 			return;
 		}
 		case CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG: {
@@ -119,13 +117,13 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 
 			mesh_reply_t reply = {
-					.type = CS_MESH_MODEL_TYPE_UNKNOWN,
-					.buf = cs_data_t(replyMsg + MESH_HEADER_SIZE, sizeof(replyMsg) - MESH_HEADER_SIZE),
-					.dataSize = 0
-			};
+					.type     = CS_MESH_MODEL_TYPE_UNKNOWN,
+					.buf      = cs_data_t(replyMsg + MESH_HEADER_SIZE, sizeof(replyMsg) - MESH_HEADER_SIZE),
+					.dataSize = 0};
 
 			// Handle the message, get the reply msg.
-			_msgCallback(msg, &reply);
+			msg.reply = &reply;
+			_msgCallback(msg);
 
 			// Send the reply.
 			if (reply.dataSize > sizeof(replyMsg) - MESH_HEADER_SIZE) {
@@ -135,23 +133,22 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			sendReply(accessMsg, replyMsg, MESH_HEADER_SIZE + reply.dataSize);
 			break;
 		}
-		default:
-			return;
+		default: return;
 	}
 }
 
 cs_ret_code_t MeshModelMulticastAcked::sendMsg(const uint8_t* data, uint16_t len) {
 	access_message_tx_t accessMsg;
 	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG;
-	accessMsg.p_buffer = data;
-	accessMsg.length = len;
-	accessMsg.force_segmented = false;
-	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-	accessMsg.access_token = nrf_mesh_unique_token_get();
+	accessMsg.opcode.opcode     = CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG;
+	accessMsg.p_buffer          = data;
+	accessMsg.length            = len;
+	accessMsg.force_segmented   = false;
+	accessMsg.transmic_size     = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	accessMsg.access_token      = nrf_mesh_unique_token_get();
 
-	uint32_t status = NRF_SUCCESS;
-	status = access_model_publish(_accessModelHandle, &accessMsg);
+	uint32_t status             = NRF_SUCCESS;
+	status                      = access_model_publish(_accessModelHandle, &accessMsg);
 	if (status != NRF_SUCCESS) {
 		LOGw("sendMsg failed: %u", status);
 	}
@@ -161,16 +158,16 @@ cs_ret_code_t MeshModelMulticastAcked::sendMsg(const uint8_t* data, uint16_t len
 void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, const uint8_t* data, uint16_t len) {
 	access_message_tx_t accessReplyMsg;
 	accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MULTICAST_REPLY;
-	accessReplyMsg.p_buffer = data;
-	accessReplyMsg.length = len;
-	accessReplyMsg.force_segmented = false;
-	accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	accessReplyMsg.opcode.opcode     = CS_MESH_MODEL_OPCODE_MULTICAST_REPLY;
+	accessReplyMsg.p_buffer          = data;
+	accessReplyMsg.length            = len;
+	accessReplyMsg.force_segmented   = false;
+	accessReplyMsg.transmic_size     = NRF_MESH_TRANSMIC_SIZE_SMALL;
 
-	uint32_t status = NRF_SUCCESS;
+	uint32_t status                  = NRF_SUCCESS;
 	for (int i = 0; i < MESH_MODEL_ACK_TRANSMISSIONS; ++i) {
 		accessReplyMsg.access_token = nrf_mesh_unique_token_get();
-		status = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
+		status                      = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
 		if (status != NRF_SUCCESS) {
 			LOGw("sendReply failed: %u", status);
 			break;
@@ -179,35 +176,35 @@ void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, co
 	LOGMeshModelDebug("Sent reply to id=%u", accessMsg->meta_data.src.value);
 }
 
-void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg) {
-	if (_queueIndexInProgress == queue_index_none) {
+void MeshModelMulticastAcked::handleReply(MeshMsgEvent& msg) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
+		LOGw("No index in progress");
 		return;
 	}
 
-	stone_id_t srcId = msg.srcAddress;
-
 	// Find stone ID in list of stone IDs.
-	auto item = _queue[_queueIndexInProgress];
+	auto item           = _queue[_queueIndexInProgress];
 	uint16_t stoneIndex = 0xFFFF;
-	for (uint8_t i = 0; i < item.numIds; ++i) {
-		if (item.stoneIdsPtr[i] == srcId) {
+	for (uint8_t i = 0; i < item.numStoneIds; ++i) {
+		if (item.stoneIdsPtr[i] == msg.srcStoneId) {
 			stoneIndex = i;
 			break;
 		}
 	}
 	if (stoneIndex == 0xFFFF) {
-		LOGMeshModelInfo("Stone id %u not in list", srcId);
+		LOGMeshModelInfo("Stone id %u not in list", msg.srcStoneId);
 		return;
 	}
 
 	// Check if stone ID has already been marked as acked, and thus already been handled.
 	if (_ackedStonesBitmask.isSet(stoneIndex)) {
-		LOGMeshModelVerbose("Already received ack from id %u", srcId);
+		LOGMeshModelVerbose("Already received ack from id %u", msg.srcStoneId);
 		return;
 	}
 
 	// Handle reply message.
-	_msgCallback(msg, nullptr);
+	msg.controlCommand = item.controlCommand;
+	_msgCallback(msg);
 
 	// Mark id as acked.
 	LOGMeshModelDebug("Set acked bit %u", stoneIndex);
@@ -232,7 +229,7 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 	// Checks that should've been performed already.
 	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
 	assert(item.broadcast == true, "Multicast only");
-	assert(item.reliable == true, "Reliable only");
+	assert(item.acked == true, "Reliable only");
 
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then reverse iterate over the queue.
@@ -240,8 +237,8 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 	// We do the reverse iterate, so that the chance is higher that
 	// the old _queueIndexNext will be sent quickly after this newly added item.
 	uint8_t index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
-		index = i % queue_size;
+	for (int i = _queueIndexNext; i < _queueIndexNext + QUEUE_SIZE; ++i) {
+		index                               = i % QUEUE_SIZE;
 		cs_multicast_acked_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.transmissionsOrTimeout == 0) {
 
@@ -251,26 +248,32 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 			if (it->msgPtr == NULL) {
 				return ERR_NO_SPACE;
 			}
-			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.msgPayload.data, item.msgPayload.len, it->msgPtr, msgSize)) {
+			if (!MeshUtil::setMeshMessage(
+						(cs_mesh_model_msg_type_t)item.metaData.type,
+						item.msgPayload.data,
+						item.msgPayload.len,
+						it->msgPtr,
+						msgSize)) {
 				LOGMeshModelVerbose("msg free %p", it->msgPtr);
 				free(it->msgPtr);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 
 			// Allocate and copy stone ids.
-			it->stoneIdsPtr = (stone_id_t*)malloc(item.numIds * sizeof(stone_id_t));
-			LOGMeshModelVerbose("ids alloc %p size=%u", it->stoneIdsPtr, item.numIds * sizeof(stone_id_t));
+			it->stoneIdsPtr = (stone_id_t*)malloc(item.numStoneIds * sizeof(stone_id_t));
+			LOGMeshModelVerbose("ids alloc %p size=%u", it->stoneIdsPtr, item.numStoneIds * sizeof(stone_id_t));
 			if (it->stoneIdsPtr == NULL) {
 				LOGMeshModelVerbose("msg free %p", it->msgPtr);
 				free(it->msgPtr);
 				return ERR_NO_SPACE;
 			}
-			memcpy(it->stoneIdsPtr, item.stoneIdsPtr, item.numIds * sizeof(stone_id_t));
+			memcpy(it->stoneIdsPtr, item.stoneIdsPtr, item.numStoneIds * sizeof(stone_id_t));
 
 			// Copy meta data.
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
-			it->numIds = item.numIds;
-			it->msgSize = msgSize;
+			it->numStoneIds    = item.numStoneIds;
+			it->msgSize        = msgSize;
+			it->controlCommand = item.controlCommand;
 
 			LOGMeshModelVerbose("added to ind=%u", index);
 			_logArray(LogLevelMeshModelVerbose, true, it->msgPtr, it->msgSize);
@@ -286,8 +289,9 @@ cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t
 
 cs_ret_code_t MeshModelMulticastAcked::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
-	for (int i = 0; i < queue_size; ++i) {
-		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
+	for (int i = 0; i < QUEUE_SIZE; ++i) {
+		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type
+			&& _queue[i].metaData.transmissionsOrTimeout != 0) {
 			cancelQueueItem(i);
 			remQueueItem(i);
 			retCode = ERR_SUCCESS;
@@ -299,7 +303,7 @@ cs_ret_code_t MeshModelMulticastAcked::remFromQueue(cs_mesh_model_msg_type_t typ
 void MeshModelMulticastAcked::cancelQueueItem(uint8_t index) {
 	if (_queueIndexInProgress == index) {
 		LOGe("TODO: Cancel progress");
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 }
 
@@ -315,8 +319,8 @@ void MeshModelMulticastAcked::remQueueItem(uint8_t index) {
 
 int MeshModelMulticastAcked::getNextItemInQueue(bool priority) {
 	int index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; i++) {
-		index = i % queue_size;
+	for (int i = _queueIndexNext; i < _queueIndexNext + QUEUE_SIZE; i++) {
+		index = i % QUEUE_SIZE;
 		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
@@ -325,7 +329,7 @@ int MeshModelMulticastAcked::getNextItemInQueue(bool priority) {
 }
 
 bool MeshModelMulticastAcked::sendMsgFromQueue() {
-	if (_queueIndexInProgress != queue_index_none) {
+	if (_queueIndexInProgress != QUEUE_INDEX_NONE) {
 		return false;
 	}
 	int index = getNextItemInQueue(true);
@@ -346,22 +350,27 @@ bool MeshModelMulticastAcked::sendMsgFromQueue() {
 		return false;
 	}
 	_queueIndexInProgress = index;
-	LOGMeshModelInfo("sent ind=%u timeout=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
+	LOGMeshModelInfo(
+			"sent ind=%u timeout=%u type=%u id=%u",
+			index,
+			item->metaData.transmissionsOrTimeout,
+			item->metaData.type,
+			item->metaData.id);
 
 	// Next item will be sent next, so that items are sent interleaved.
-	_queueIndexNext = (index + 1) % queue_size;
+	_queueIndexNext = (index + 1) % QUEUE_SIZE;
 	return true;
 }
 
 bool MeshModelMulticastAcked::prepareForMsg(cs_multicast_acked_queue_item_t* item) {
 	_processCallsLeft = item->metaData.transmissionsOrTimeout * 1000 / MESH_MODEL_ACKED_RETRY_INTERVAL_MS;
-	if (!_ackedStonesBitmask.setNumBits(item->numIds)) {
+	if (!_ackedStonesBitmask.setNumBits(item->numStoneIds)) {
 		return false;
 	}
-//	_handledSelf = false;
+	//	_handledSelf = false;
 
 	// Mark own stone ID as acked.
-	for (uint8_t i=0; i < item->numIds; ++i) {
+	for (uint8_t i = 0; i < item->numStoneIds; ++i) {
 		if (item->stoneIdsPtr[i] == _ownStoneId) {
 			_ackedStonesBitmask.setBit(i);
 			break;
@@ -371,53 +380,68 @@ bool MeshModelMulticastAcked::prepareForMsg(cs_multicast_acked_queue_item_t* ite
 }
 
 void MeshModelMulticastAcked::checkDone() {
-	if (_queueIndexInProgress == queue_index_none) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 		return;
 	}
-	auto item = _queue[_queueIndexInProgress];
+	auto& item = _queue[_queueIndexInProgress];
 
 	// Check acks.
 	if (_ackedStonesBitmask.isAllBitsSet()) {
 		LOGi("Received ack from all stones.");
 		printMeshQueueItem(" ", item.metaData);
 
-		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
-		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
-
-		result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
-		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
-		LOGMeshModelDebug("all success");
+		CommandHandlerTypes cmdType = static_cast<CommandHandlerTypes>(item.controlCommand);
+		if (cmdType == CTRL_CMD_UNKNOWN) {
+			LOGMeshModelDebug("Control command is unknown: don't send ack result");
+		}
+		else {
+			result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
+			LOGMeshModelInfo(
+					"Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
+			UartHandler::getInstance().writeMsg(
+					UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		}
 
 		remQueueItem(_queueIndexInProgress);
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 
 	// Check for timeout.
 	if (_processCallsLeft == 0) {
-		LOGi("Timeout.");
+		LOGi("Timeout");
 		printMeshQueueItem(" ", item.metaData);
 
-		// TODO: get cmd type from payload in case of CS_MESH_MODEL_TYPE_CTRL_CMD
-		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
-
-		// Timeout all remaining stones.
-		uart_msg_mesh_result_packet_header_t resultHeader;
-		resultHeader.resultHeader.commandType = cmdType;
-		resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
-		for (uint8_t i = 0; i < item.numIds; ++i) {
-			if (!_ackedStonesBitmask.isSet(i)) {
-				resultHeader.stoneId = item.stoneIdsPtr[i];
-				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
-				LOGi("timeout id=%u", resultHeader.stoneId);
+		CommandHandlerTypes cmdType = static_cast<CommandHandlerTypes>(item.controlCommand);
+		if (cmdType == CTRL_CMD_UNKNOWN) {
+			LOGMeshModelDebug("Control command is unknown: don't send ack results");
+		}
+		else {
+			// Timeout all remaining stones.
+			uart_msg_mesh_result_packet_header_t resultHeader;
+			resultHeader.resultHeader.commandType = cmdType;
+			resultHeader.resultHeader.returnCode  = ERR_TIMEOUT;
+			for (uint8_t i = 0; i < item.numStoneIds; ++i) {
+				if (!_ackedStonesBitmask.isSet(i)) {
+					resultHeader.stoneId = item.stoneIdsPtr[i];
+					LOGMeshModelInfo(
+							"Ack result: id=%u commandType=%u returnCode=%u",
+							resultHeader.stoneId,
+							resultHeader.resultHeader.commandType,
+							resultHeader.resultHeader.returnCode);
+					UartHandler::getInstance().writeMsg(
+							UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+				}
 			}
+
+			result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
+			LOGMeshModelInfo(
+					"Ack all result: commandType=%u returnCode=%u", ackResult.commandType, ackResult.returnCode);
+			UartHandler::getInstance().writeMsg(
+					UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
 		}
 
-		result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
-		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
-		LOGMeshModelDebug("all timeout");
-
 		remQueueItem(_queueIndexInProgress);
-		_queueIndexInProgress = queue_index_none;
+		_queueIndexInProgress = QUEUE_INDEX_NONE;
 	}
 	else {
 		--_processCallsLeft;
@@ -425,7 +449,7 @@ void MeshModelMulticastAcked::checkDone() {
 }
 
 void MeshModelMulticastAcked::retryMsg() {
-	if (_queueIndexInProgress == queue_index_none) {
+	if (_queueIndexInProgress == QUEUE_INDEX_NONE) {
 		return;
 	}
 	auto item = _queue[_queueIndexInProgress];

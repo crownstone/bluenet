@@ -6,10 +6,10 @@
  */
 #pragma once
 
-
+#include <test/cs_TestAccess.h>
+#include <time/cs_DayOfWeek.h>
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
-#include <time/cs_DayOfWeek.h>
 
 #include <vector>
 
@@ -18,71 +18,69 @@
  * such as from and until times.
  */
 class Behaviour {
-    public:
-    enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2, Undefined = 0xff};
-    typedef std::array<uint8_t, 1+13> SerializedDataType;
-    
-    protected:
-    Type typ;
-    uint8_t activeIntensity = 0;
-    uint8_t profileId = 0;
-    DayOfWeekBitMask activeDays;
-    TimeOfDay behaviourAppliesFrom = TimeOfDay::Midnight();
-    TimeOfDay behaviourAppliesUntil = TimeOfDay::Midnight();
+public:
+	enum class Type : uint8_t { Switch = 0, Twilight = 1, Extended = 2, Undefined = 0xff };
+	typedef std::array<uint8_t, 1 + 13> SerializedDataType;
 
-    public:
-    
-    virtual ~Behaviour() = default; // (to prevent object slicing from leaking memory.)
+protected:
+	Type typ;
+	uint8_t activeIntensity = 0;
+	uint8_t profileId       = 0;
+	DayOfWeekBitMask activeDays;
+	TimeOfDay behaviourAppliesFrom  = TimeOfDay::Midnight();
+	TimeOfDay behaviourAppliesUntil = TimeOfDay::Midnight();
 
-    Behaviour(
-      Type typ,
-      uint8_t intensity,
-      uint8_t profileid,
-      DayOfWeekBitMask activedaysofweek,
-      TimeOfDay from, 
-      TimeOfDay until
-      );
+public:
+	virtual ~Behaviour() = default;  // (to prevent object slicing from leaking memory.)
 
-    Behaviour(SerializedDataType arr);
-    SerializedDataType serialize();
-    
-    // return value: pointer to next empty val in outbuff.
-    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size);
+	Behaviour(
+			Type typ,
+			uint8_t intensity,
+			uint8_t profileid,
+			DayOfWeekBitMask activedaysofweek,
+			TimeOfDay from,
+			TimeOfDay until);
 
-    virtual size_t serializedSize() const;
-    std::vector<uint8_t> serialized(); // calls the above virtual functions.
+	Behaviour(SerializedDataType arr);
+	SerializedDataType serialize();
 
-    virtual void print();
+	// return value: pointer to next empty val in outbuff.
+	virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size);
 
-    // implementations of behaviours have a class specific identifier
-    // which is defined by overriding this method.
-    virtual Type getType() const { return Type::Undefined; }
+	virtual size_t serializedSize() const;
+	std::vector<uint8_t> serialized();  // calls the above virtual functions.
 
-    /**
-     * Does the behaviour apply to the current situation?
-     * If from() == until() the behaviour isValid all day.
-     * 
-     * Also checks the day of week bitmask.
-     **/
-    bool isValid(Time currenttime);
-    
-    virtual bool requiresPresence() { return false; }
-    virtual bool requiresAbsence() { return false; }
+	virtual void print();
 
-    // =========== Getters ===========
+	// implementations of behaviours have a class specific identifier
+	// which is defined by overriding this method.
+	virtual Type getType() const { return Type::Undefined; }
 
-    /**
-     * Returns the intended state when this behaviour is valid.
-     */
-    uint8_t value() const;
+	/**
+	 * Does the behaviour apply to the current situation?
+	 * If from() == until() the behaviour isValid all day.
+	 *
+	 * Also checks the day of week bitmask.
+	 **/
+	bool isValid(Time currenttime);
 
-    /**
-     * Returns from (incl.) which time on this behaviour applies.
-     */
-    TimeOfDay from() const;
+	virtual bool requiresPresence() { return false; }
+	virtual bool requiresAbsence() { return false; }
 
-    /**
-     * Returns until (excl.) which time on this behaviour applies.
-     */
-    TimeOfDay until() const;
+	// =========== Getters ===========
+
+	/**
+	 * Returns the intended state when this behaviour is valid.
+	 */
+	uint8_t value() const;
+
+	/**
+	 * Returns from (incl.) which time on this behaviour applies.
+	 */
+	TimeOfDay from() const;
+
+	/**
+	 * Returns until (excl.) which time on this behaviour applies.
+	 */
+	TimeOfDay until() const;
 };

@@ -1,0 +1,60 @@
+﻿---
+BasedOnStyle: Chromium
+Language: Cpp
+
+###### Install clang-format-14
+#
+# Install clang
+#   python3 -m pip install clang-format
+#   sudo apt install clang-14 clang-tidy-14 clang-format-14
+#
+# Only available in clang-format-12 and later:
+#   AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
+
+###### Source file preamble and comments ######
+
+SortIncludes: true
+IncludeBlocks: Regroup
+AlignTrailingComments: true
+
+###### Brackets ######
+
+AlignAfterOpenBracket: AlwaysBreak
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeElse: true
+
+###### Parameter lists ######
+
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
+###### Operators ######
+
+AlignOperands: true
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+AlignConsecutiveAssignments: AcrossEmptyLinesAndComments
+
+###### Wrapping and general whitespace ######
+
+ColumnLimit: 120
+AllowShortIfStatementsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+KeepEmptyLinesAtTheStartOfBlocks: true
+
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+
+UseTab: ForContinuationAndIndentation
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 8
+AccessModifierOffset: -4
+ConstructorInitializerIndentWidth: 8
+
+...

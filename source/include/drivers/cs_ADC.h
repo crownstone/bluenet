@@ -9,51 +9,47 @@
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_Config.h>
 #include <events/cs_EventListener.h>
-#include <structs/buffer/cs_CircularBuffer.h>
 #include <structs/buffer/cs_AdcBuffer.h>
-
+#include <structs/buffer/cs_CircularBuffer.h>
 
 enum adc_gain_t {
-	CS_ADC_GAIN4   = NRF_SAADC_GAIN4,   // gain is 4/1, maps [0, 0.15] to [0, 0.6]
-	CS_ADC_GAIN2   = NRF_SAADC_GAIN2,   // gain is 2/1, maps [0, 0.3]  to [0, 0.6]
-	CS_ADC_GAIN1   = NRF_SAADC_GAIN1,   // gain is 1/1, maps [0, 0.6]  to [0, 0.6]
-	CS_ADC_GAIN1_2 = NRF_SAADC_GAIN1_2, // gain is 1/2, maps [0, 1.2]  to [0, 0.6]
-	CS_ADC_GAIN1_3 = NRF_SAADC_GAIN1_3, // gain is 1/3, maps [0, 1.8]  to [0, 0.6]
-	CS_ADC_GAIN1_4 = NRF_SAADC_GAIN1_4, // gain is 1/4, maps [0, 2.4]  to [0, 0.6]
-	CS_ADC_GAIN1_5 = NRF_SAADC_GAIN1_5, // gain is 1/5, maps [0, 3.0]  to [0, 0.6]
-	CS_ADC_GAIN1_6 = NRF_SAADC_GAIN1_6, // gain is 1/6, maps [0, 3.6]  to [0, 0.6]
+	CS_ADC_GAIN4   = NRF_SAADC_GAIN4,    // gain is 4/1, maps [0, 0.15] to [0, 0.6]
+	CS_ADC_GAIN2   = NRF_SAADC_GAIN2,    // gain is 2/1, maps [0, 0.3]  to [0, 0.6]
+	CS_ADC_GAIN1   = NRF_SAADC_GAIN1,    // gain is 1/1, maps [0, 0.6]  to [0, 0.6]
+	CS_ADC_GAIN1_2 = NRF_SAADC_GAIN1_2,  // gain is 1/2, maps [0, 1.2]  to [0, 0.6]
+	CS_ADC_GAIN1_3 = NRF_SAADC_GAIN1_3,  // gain is 1/3, maps [0, 1.8]  to [0, 0.6]
+	CS_ADC_GAIN1_4 = NRF_SAADC_GAIN1_4,  // gain is 1/4, maps [0, 2.4]  to [0, 0.6]
+	CS_ADC_GAIN1_5 = NRF_SAADC_GAIN1_5,  // gain is 1/5, maps [0, 3.0]  to [0, 0.6]
+	CS_ADC_GAIN1_6 = NRF_SAADC_GAIN1_6,  // gain is 1/6, maps [0, 3.6]  to [0, 0.6]
 };
-
-
-
 
 /**
  * The typedef adc_done_cb_t is a function pointer to a function with the buffer index as argument.
  * This function pointer can be set via ADC::setDoneCallback.
  * Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
  */
-typedef void (*adc_done_cb_t) (adc_buffer_id_t bufIndex);
+typedef void (*adc_done_cb_t)(adc_buffer_id_t bufIndex);
 
-typedef void (*adc_zero_crossing_cb_t) ();
+typedef void (*adc_zero_crossing_cb_t)();
 
 // State of this class
 enum adc_state_t {
 	ADC_STATE_IDLE,
 	ADC_STATE_BUSY,
-	ADC_STATE_WAITING_TO_START, // Wait for buffers to be released.
-	ADC_STATE_READY_TO_START    // This state is a dummy, to work around the state check in start(). It is set just before calling start() again.
+	ADC_STATE_WAITING_TO_START,  // Wait for buffers to be released.
+	ADC_STATE_READY_TO_START  // This state is a dummy, to work around the state check in start(). It is set just before
+							  // calling start() again.
 };
 
 // State of the SAADC
 enum adc_saadc_state_t {
-	ADC_SAADC_STATE_IDLE,    // When saadc is idle.
-	ADC_SAADC_STATE_BUSY,    // When saadc is busy sampling.
-	ADC_SAADC_STATE_STOPPING // When saadc is or will be commanded to stop.
+	ADC_SAADC_STATE_IDLE,     // When saadc is idle.
+	ADC_SAADC_STATE_BUSY,     // When saadc is busy sampling.
+	ADC_SAADC_STATE_STOPPING  // When saadc is or will be commanded to stop.
 };
 
 // Max number of buffers in the SAADC peripheral.
 #define CS_ADC_NUM_SAADC_BUFFERS 2
-
 
 /** Analog-Digital conversion.
  *
@@ -120,7 +116,8 @@ public:
 	 *
 	 * Currently only called when going from below to above the zero.
 	 *
-	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
+	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at
+	 * interrupt level!
 	 */
 	void setZeroCrossingCallback(adc_zero_crossing_cb_t callback);
 
@@ -143,7 +140,7 @@ public:
 	cs_ret_code_t changeChannel(adc_channel_id_t channel, adc_channel_config_t& config);
 
 	// Handle events as EventListener.
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 	/** Restart
 	 */
@@ -176,7 +173,7 @@ private:
 	ADC(ADC const&);
 
 	// This class is singleton, deny implementation
-	void operator=(ADC const &);
+	void operator=(ADC const&);
 
 	/**
 	 * Whether or not the config should be changed.
@@ -238,10 +235,10 @@ private:
 	CircularBuffer<adc_buffer_id_t> _saadcBufferQueue;
 
 	// True when next buffer is the first after start.
-	bool _firstBuffer = true;
+	bool _firstBuffer                      = true;
 
 	// State of this class.
-	adc_state_t _state = ADC_STATE_IDLE;
+	adc_state_t _state                     = ADC_STATE_IDLE;
 
 	/**
 	 * Sate of the SAADC peripheral.
@@ -251,11 +248,9 @@ private:
 	volatile adc_saadc_state_t _saadcState = ADC_SAADC_STATE_IDLE;
 
 	// Callback function
-	adc_done_cb_t _doneCallback = nullptr;
+	adc_done_cb_t _doneCallback            = nullptr;
 
-	inline bool dataCallbackRegistered() {
-		return (_doneCallback != nullptr);
-	}
+	inline bool dataCallbackRegistered() { return (_doneCallback != nullptr); }
 
 	/**
 	 * The zero crossing callback.
@@ -269,7 +264,7 @@ private:
 	 *
 	 * == Used in interrupt! ==
 	 */
-	adc_channel_id_t _zeroCrossingChannel = 0;
+	adc_channel_id_t _zeroCrossingChannel        = 0;
 
 	/**
 	 * Cache limit event.
@@ -290,7 +285,7 @@ private:
 	 *
 	 * == Used in interrupt! ==
 	 */
-	bool _zeroCrossingEnabled = false;
+	bool _zeroCrossingEnabled     = false;
 
 	/**
 	 * Store the RTC timestamp of the last upwards zero crossing.
@@ -304,12 +299,12 @@ private:
 	 *
 	 * == Used in interrupt! ==
 	 */
-	int32_t _zeroValue = 0;
+	int32_t _zeroValue            = 0;
 
 	/**
 	 * Keep up number of nested critical regions entered.
 	 */
-	int _criticalRegionEntered = 0;
+	int _criticalRegionEntered    = 0;
 
 	cs_ret_code_t initSaadc();
 

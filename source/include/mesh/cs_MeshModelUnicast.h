@@ -7,10 +7,10 @@
 
 #pragma once
 
+#include <cfg/cs_Config.h>
 #include <mesh/cs_MeshCommon.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <third/std/function.h>
-#include <cfg/cs_Config.h>
 
 extern "C" {
 #include <access_reliable.h>
@@ -26,7 +26,7 @@ extern "C" {
 class MeshModelUnicast {
 public:
 	/** Callback function definition. */
-	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, mesh_reply_t* reply)> callback_msg_t;
+	typedef function<void(MeshMsgEvent& msg)> callback_msg_t;
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
@@ -61,61 +61,62 @@ public:
 	void tick(uint32_t tickCount);
 
 	/** Internal usage */
-	void handleMsg(const access_message_rx_t * accessMsg);
+	void handleMsg(const access_message_rx_t* accessMsg);
 
 	/** Internal usage */
 	void handleReliableStatus(access_reliable_status_t status);
 
 private:
-	const static uint8_t queue_size = 5;
+	const static uint8_t QUEUE_SIZE       = 5;
 
-	const static uint8_t queue_index_none = 255;
+	const static uint8_t QUEUE_INDEX_NONE = 255;
 
 	struct __attribute__((__packed__)) cs_unicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
 		stone_id_t targetId;
+		cs_control_cmd_t controlCommand;
 		uint8_t msgSize;
 		uint8_t* msgPtr = nullptr;
 	};
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
-	dsm_handle_t _publishAddressHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _publishAddressHandle       = DSM_HANDLE_INVALID;
 
-	callback_msg_t _msgCallback = nullptr;
+	callback_msg_t _msgCallback              = nullptr;
 
 	access_reliable_t _accessReliableMsg;
 
 #if MESH_MODEL_TEST_MSG == 2
-	uint32_t _acked = 0;
+	uint32_t _acked    = 0;
 	uint32_t _timedout = 0;
 	uint32_t _canceled = 0;
 #endif
 
-	cs_unicast_queue_item_t _queue[queue_size];
+	cs_unicast_queue_item_t _queue[QUEUE_SIZE];
 
 	/**
 	 * Queue index of message currently being sent.
 	 */
-	uint8_t _queueIndexInProgress = queue_index_none;
+	uint8_t _queueIndexInProgress = QUEUE_INDEX_NONE;
 
 	/**
 	 * Next index in queue to send.
 	 */
-	uint8_t _queueIndexNext = 0;
+	uint8_t _queueIndexNext       = 0;
 
 	/**
 	 * Status of the reliable msg.
 	 * 255 for no status.
 	 */
-	uint8_t _reliableStatus = 255;
+	uint8_t _reliableStatus       = 255;
 
 	/**
 	 * Whether the reply message has been received.
 	 */
-	bool _replyReceived = false;
+	bool _replyReceived           = false;
 
-	uint8_t _ttl = CS_MESH_DEFAULT_TTL;
+	uint8_t _ttl                  = CS_MESH_DEFAULT_TTL;
 
 	/**
 	 * If item at index is in progress, cancel it.
@@ -180,5 +181,5 @@ private:
 	 */
 	cs_ret_code_t setTtl(uint8_t ttl, bool temp = false);
 
-	void sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode);
+	void sendFailedResultToUart(cs_unicast_queue_item_t& item, cs_ret_code_t retCode);
 };

@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <common/cs_Types.h>
 #include <ble/cs_iBeacon.h>
+#include <common/cs_Types.h>
 #include <events/cs_EventListener.h>
 
 extern "C" {
@@ -23,7 +23,7 @@ extern "C" {
  */
 #define MESH_ADVERTISER_BUF_SIZE (ADVERTISER_PACKET_BUFFER_PACKET_MAXLEN + 4)
 
-class MeshAdvertiser: public EventListener {
+class MeshAdvertiser : public EventListener {
 public:
 	void init();
 
@@ -58,14 +58,14 @@ public:
 	void advertiseIbeacon(uint8_t ibeaconIndex);
 
 	/** Internal usage */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 
 private:
 	static const uint8_t num_ibeacon_config_ids = 2;
-	advertiser_t* _advertiser = NULL;
-	uint8_t* _buffer = NULL;
-	adv_packet_t* _advPacket = NULL;
-	uint8_t _ibeaconConfigId = 0;
+	advertiser_t* _advertiser                   = NULL;
+	uint8_t* _buffer                            = NULL;
+	adv_packet_t* _advPacket                    = NULL;
+	uint8_t _ibeaconConfigId                    = 0;
 
 	// Cache of what's in flash.
 	ibeacon_config_id_packet_t _ibeaconInterval[num_ibeacon_config_ids];

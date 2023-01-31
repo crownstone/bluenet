@@ -19,10 +19,10 @@ The global layout of the flash memory is shown below for the nRF52832:
 | 0x00000000 | MBR | 1 | fixed
 | 0x00001000 | SD | 37 | location: fixed <br> size: implicit
 | 0x00026000 | App / Bluenet | 54 | APPLICATION_START_ADDRESS<br> implicit
-| 0x0005C000 | Free | 13 | implicit
-| 0x00069000 | Microapp | 4 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
-| 0x0006D000 | P2P DFU | 1 | location: implicit<br> size: fixed
-| 0x0006E000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
+| 0x0005C000 | Free | 15 | implicit
+| 0x0006B000 | P2P DFU | 1 | location: implicit<br> size: fixed
+| 0x0006C000 | Microapp | 4 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
+| 0x00070000 | Reserved for FDS expansion | 2 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
 | 0x00072000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
 | 0x00076000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
 | 0x0007D000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
@@ -31,12 +31,10 @@ The global layout of the flash memory is shown below for the nRF52832:
 | | **Total** | 128
 
 
-The maximum size of the app is available as `APPLICATION_MAX_LENGTH`.
-For 54 + 13 pages this amounts to `(54 + 13) * 0x1000 = 0x43000`.
-This is about 256 kB. For a dual bank bootloader the firmware should than be 132 kB max so the old firmware can exist
-temporarily alongside the new firmware. This has not been achievable for us since a while, so no dual bank setup is in
-use.
-The build will fail if the app binary will go beyond the address `FLASH_MICROAPP_BASE` (`0x69000`).
+The maximum size of the app is available as `APPLICATION_MAX_LENGTH`, and is the sum of app + free.
+For a dual bank bootloader, the application size should be smaller than the free space.
+
+The build will fail if the app binary will go beyond the P2P DFU start address.
 
 ### RAM
 
@@ -44,22 +42,22 @@ The layout for RAM memory is shown below for the nRF52832:
 
 | Start address | What | Size | Size | Size (kB)
 | ------------- |:----:| ----:| ----:| --------:|
-| 0x20000000 | SD | 0x2A00 | 10752 | 10.5
-| 0x20002A00 | App heap and stack | 0xCD00 | 52480 | 51.25
-| 0x2000F700 | Microapp | 0x800 | 2048 | 2
+| 0x20000000 | SD | 0x2A60 | 10848 | 10.6
+| 0x20002A60 | Application | 0xC4A0 | 50336 | 49.2
+| 0x2000EF00 | Microapp | 0x1000 | 4086 | 4
 | 0x2000FF00 | IPC | 0x100 | 256 | 0.25
 | | **Total** | 0x10000 | 65536 | 64
 
-The bluenet heap starts at `0x20002A00` and grows up to the bluenet stack.
-The stack starts at `0x2000F6FF` and grows down to the heap.
-The microapp stack grows down from `0x2000FEFF` to `0x2000F700`.
+The bluenet heap starts at the start of application ram and grows up to the bluenet stack.
+The stack starts at the end of application ram and grows down to the heap.
+The microapp stack grows down from the end of microapp ram.
 
 In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/crownstone/bluenet/blob/master/source/bootloader/secure_bootloader_gcc_nrf52.ld)):
 
 | Start address | What | Size | Size | Size (kB)
 | ------------- |:-------------:| -----:| -----:| -----:|
-| 0x20000000 | SD + offset | 0x3118 | 12568 | 12.273
-| 0x20003118 | Bootloader heap/stack | 0xCDE8 | 52712 | 51.477
+| 0x20000000 | SD | 0x3178 | 12664 | 12.4
+| 0x20003178 | Bootloader | 0xCD88 | 52616 | 51.4
 | 0x0000FF00 | IPC | 0x100 | 256 | 0.250
 | | **Total** | 0x10000 | 65536 | 64
 
@@ -81,24 +79,23 @@ The global layout of the flash memory is shown below for the nRF52840:
 | 0x00000000 | MBR | 1 | fixed
 | 0x00001000 | SD | 37 | location: fixed <br> size: implicit
 | 0x00026000 | App / Bluenet | 54 | APPLICATION_START_ADDRESS<br> implicit
-| 0x0005C000 | Free | 129 | implicit
-| 0x000DD000 | Microapp | 16 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
-| 0x000ED000 | P2P DFU | 1 | location: implicit<br> size: fixed
-| 0x000EE000 | Reserved for FDS expansion | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
-| 0x000F2000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
-| 0x000F6000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
-| 0x000FD000 | Reserved for bootloader expansion | 1 | location: implicit<br> size: fixed
+| 0x0005C000 | Free | 118 | implicit
+| 0x000D2000 | P2P DFU | 1 | location: implicit<br> size: fixed
+| 0x000D3000 | Microapp | 4 | FLASH_MICROAPP_BASE <br> FLASH_MICROAPP_PAGES
+| 0x000D7000 | Reserved for more microapps | 12 | implicit <br>
+| 0x000E3000 | Reserved for FDS expansion | 8 | location: implicit <br> CS_FDS_VIRTUAL_PAGES_RESERVED_BEFORE
+| 0x000EB000 | FDS | 4 | location: implicit <br> CS_FDS_VIRTUAL_PAGES
+| 0x000EF000 | Bootloader | 7 | BOOTLOADER_START_ADDRESS <br> BOOTLOADER_LENGTH
+| 0x000F6000 | Reserved for bootloader expansion | 8 | location: implicit<br> size: fixed
 | 0x000FE000 | MBR settings | 1 | CS_MBR_PARAMS_PAGE_ADDRESS <br> size: fixed
 | 0x000FF000 | Bootloader settings | 1 | CS_BOOTLOADER_SETTINGS_ADDRESS <br> size: fixed
 | | **Total** | 256
 
 The microapp section is larger than on the nRF52832.
 
-The maximum size of the app is available as `APPLICATION_MAX_LENGTH`.
-For 54 + 129 pages this amounts to `(54 + 129) * 0x1000 = 0xB7000`.
-This is about 732 kB. For a dual bank bootloader the firmware should than be 366 kB max so the old firmware can exist
-temporarily alongside the new firmware. This is possible on the nRF52840, but that doesn't mean that it's in use.
-The build will fail if the app binary will go beyond the address `FLASH_MICROAPP_BASE` (`0xDD000`).
+The maximum size of the app is available as `APPLICATION_MAX_LENGTH`, and is the sum of app + free.
+For a dual bank bootloader, the application size should be smaller than the free space.
+The build will fail if the app binary will go beyond the P2P DFU start address.
 
 ### RAM
 
@@ -106,9 +103,9 @@ The layout for RAM memory is shown below for the nRF52840:
 
 | Start address | What | Size | Size | Size (kB)
 | ------------- |:----:| ----:| ----:| --------:|
-| 0x20000000 | SD | 0x2A00 | 10752 | 10.5
-| 0x20002A00 | App heap and stack | 0x3CD00 | 249088 | 243.25
-| 0x2003F700 | Microapp | 0x800 | 2048 | 2
+| 0x20000000 | SD | 0x2AA8 | 10920 | 10.7
+| 0x20002AA8 | Application | 0x3C458 | 246872 | 241.1
+| 0x2003EF00 | Microapp | 0x1000 | 4096 | 4
 | 0x2003FF00 | IPC | 0x100 | 256 | 0.25
 | | **Total** | 0x40000 | 262144 | 256
 

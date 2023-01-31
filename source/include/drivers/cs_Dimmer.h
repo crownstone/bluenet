@@ -48,17 +48,15 @@ public:
 	void setSoftOnSpeed(uint8_t speed);
 
 private:
-	uint32_t hardwareBoard;
-	uint8_t pinEnableDimmer;
+	uint32_t _hardwareBoard;
+	uint8_t _pinEnableDimmer;
 	bool _hasDimmer = false;
 
-	TYPIFY(STATE_SOFT_ON_SPEED) softOnfSpeed;
+	TYPIFY(STATE_SOFT_ON_SPEED) _softOnSpeed;
 
-	bool initialized = false;
-	bool started = false;
-	bool enabled = false;
+	bool _initialized = false;
+	bool _started     = false;
+	bool _enabled     = false;
 
 	void enable();
 };
-
-
