@@ -16,14 +16,6 @@
 #define LOGMeshTopologyDebug LOGvv
 #define LOGMeshTopologyVerbose LOGvv
 
-/**
- * Set this to true to make every crownstone in the sphere to send a noop message
- * on every tick, and make every crownstone respond with a neighbor message with that rssi.
- *
- * (This gives the highest possible frequency trip wire)
- */
-constexpr bool TripwireResearch = true;
-
 cs_ret_code_t MeshTopology::init() {
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
@@ -111,7 +103,6 @@ void MeshTopology::add(stone_id_t id, int8_t rssi, uint8_t channel) {
 }
 
 void MeshTopology::updateNeighbour(neighbour_node_t& node, stone_id_t id, int8_t rssi, uint8_t channel) {
-	// TODO: averaging.
 	LOGMeshTopologyDebug("updateNeighbour id=%u rssi=%i channel=%u", id, rssi, channel);
 	node.id = id;
 	switch (channel) {
@@ -215,7 +206,7 @@ void MeshTopology::sendNext() {
 	meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
 	meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 	meshMsg.urgency = CS_MESH_URGENCY_LOW;
-	meshMsg.flags.flags.noHops = false;
+	meshMsg.flags.flags.doNotRelay = false;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
 	meshMsg.size = sizeof(meshPayload);
 
@@ -245,7 +236,7 @@ cs_mesh_model_msg_neighbour_rssi_t MeshTopology::sendNeighbourMessageOverMesh(ne
 		meshMsg.type = CS_MESH_MODEL_TYPE_NEIGHBOUR_RSSI;
 		meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
 		meshMsg.urgency = CS_MESH_URGENCY_LOW;
-		meshMsg.flags.flags.noHops = false;
+		meshMsg.flags.flags.doNotRelay = false;
 		meshMsg.payload = reinterpret_cast<uint8_t*>(&meshPayload);
 		meshMsg.size = sizeof(meshPayload);
 
@@ -346,13 +337,13 @@ void MeshTopology::onMeshMsg(MeshMsgEvent& packet, cs_result_t& result) {
 		if(packet.type == CS_MESH_MODEL_TYPE_CMD_NOOP) {
 			neighbour_node_t node = {};
 			clearNeighbourRssi(node);
-			updateNeighbour(node, packet.srcAddress, packet.rssi, packet.channel);
+			updateNeighbour(node, packet.srcStoneId, packet.rssi, packet.channel);
 			sendNeighbourMessageOverMesh(node);
 		}
 	}
 
 
-	add(packet.srcAddress, packet.rssi, packet.channel);
+	add(packet.srcStoneId, packet.rssi, packet.channel);
 }
 
 void MeshTopology::onTickSecond() {

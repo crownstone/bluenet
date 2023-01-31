@@ -23,6 +23,14 @@
  * Several related commands are available over UART.
  */
 class MeshTopology: EventListener {
+	/**
+	 * Set this to true to make every crownstone in the sphere to send a noop message
+	 * on every tick, and make every crownstone respond with a neighbor message with that rssi.
+	 *
+	 * (This gives the highest possible frequency trip wire)
+	 */
+	static constexpr bool TripwireResearch = false;
+
 public:
 	/**
 	 * Initializes the class:
