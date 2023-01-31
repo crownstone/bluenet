@@ -1,6 +1,5 @@
 var cs__Characteristic_8h =
 [
-    [ "CharacteristicInit", "structCharacteristicInit.html", "structCharacteristicInit" ],
     [ "Status", "structStatus.html", "structStatus" ],
     [ "CharacteristicBase", "classCharacteristicBase.html", "classCharacteristicBase" ],
     [ "CharacteristicGeneric< T >", "classCharacteristicGeneric.html", "classCharacteristicGeneric" ],

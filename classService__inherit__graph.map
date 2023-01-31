@@ -1,7 +1,8 @@
 <map id="Service" name="Service">
-<area shape="rect" id="node1" title="Service as defined in the GATT Specification." alt="" coords="139,79,210,104"/>
+<area shape="rect" id="node1" title="Base class for a BLE service." alt="" coords="237,79,307,104"/>
 <area shape="rect" id="node3" href="$classCrownstoneService.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="5,152,152,177"/>
 <area shape="rect" id="node5" href="$classDeviceInformationService.html" title="The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions." alt="" coords="177,152,367,177"/>
-<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="111,5,238,31"/>
+<area shape="rect" id="node6" href="$classMicroappService.html" title=" " alt="" coords="392,152,523,177"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="209,5,335,31"/>
 <area shape="rect" id="node4" href="$classSetupService.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="25,225,132,251"/>
 </map>

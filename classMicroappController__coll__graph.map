@@ -1,4 +1,6 @@
 <map id="MicroappController" name="MicroappController">
-<area shape="rect" id="node1" title="The class MicroappController has functionality to store a second app (and perhaps in the future even ..." alt="" coords="5,79,152,104"/>
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="23,5,134,31"/>
+<area shape="rect" id="node1" title="The class MicroappController has functionality to store a second app (and perhaps in the future even ..." alt="" coords="5,256,152,281"/>
+<area shape="rect" id="node2" href="$structmicroapp__data__t.html" title="Keeps up data for a microapp." alt="" coords="13,168,144,193"/>
+<area shape="rect" id="node3" href="$classService.html" title="Base class for a BLE service." alt="" coords="43,80,114,105"/>
+<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="15,5,142,31"/>
 </map>

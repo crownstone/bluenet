@@ -5,5 +5,6 @@ var classBehaviourHandler =
     [ "init", "classBehaviourHandler.html#aced1112dc2134fbfb675f3b1507ccb3a", null ],
     [ "requiresAbsence", "classBehaviourHandler.html#a463664a1cde0ef30ce07e84feb51128d", null ],
     [ "requiresPresence", "classBehaviourHandler.html#a71550d790066ec2c37e7c35a95bc99da", null ],
-    [ "update", "classBehaviourHandler.html#aa254e9f699799ccc0bd08c2395bdcb30", null ]
+    [ "update", "classBehaviourHandler.html#aa254e9f699799ccc0bd08c2395bdcb30", null ],
+    [ "validateBehaviour", "classBehaviourHandler.html#a0c4dbabec8164c0c0e505c91b3400cd2", null ]
 ];

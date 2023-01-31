@@ -7,10 +7,10 @@ var classCharacteristicGeneric =
     [ "getValue", "classCharacteristicGeneric.html#ae8aeda9cb17f6bfe29c352d4bbdaf692", null ],
     [ "initEncryptionBuffer", "classCharacteristicGeneric.html#ad60800bf87475f95297a99ee7686a591", null ],
     [ "onWrite", "classCharacteristicGeneric.html#afa4a09d7fcddfcdb90e74fea71456afe", null ],
+    [ "onWrite", "classCharacteristicGeneric.html#afbe1cb4302e4571c0544cd55ca7f56ba", null ],
     [ "operator T&", "classCharacteristicGeneric.html#a097f0d0eb3471403597987f15dba8f8e", null ],
     [ "operator=", "classCharacteristicGeneric.html#a799481d5f5f17c114991ddeacac90153", null ],
     [ "setDefaultValue", "classCharacteristicGeneric.html#adf6c8395e58b73830d73f26b87f731dd", null ],
-    [ "written", "classCharacteristicGeneric.html#a34efc7a85618895826b6748b69cde090", null ],
     [ "_callbackOnWrite", "classCharacteristicGeneric.html#aba3f27023d47c108b6a165ff5730f42c", null ],
     [ "_value", "classCharacteristicGeneric.html#a43d732a57f1b1934215d7251986c7c49", null ]
 ];

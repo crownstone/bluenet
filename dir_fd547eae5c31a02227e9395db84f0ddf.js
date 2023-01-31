@@ -7,6 +7,6 @@ var dir_fd547eae5c31a02227e9395db84f0ddf =
     [ "cs_CircularBuffer.h", "cs__CircularBuffer_8h_source.html", null ],
     [ "cs_CircularDifferentialBuffer.h", "cs__CircularDifferentialBuffer_8h_source.html", null ],
     [ "cs_DifferentialBuffer.h", "cs__DifferentialBuffer_8h_source.html", null ],
-    [ "cs_EncryptionBuffer.h", "cs__EncryptionBuffer_8h_source.html", null ],
+    [ "cs_EncryptedBuffer.h", "cs__EncryptedBuffer_8h_source.html", null ],
     [ "cs_StackBuffer.h", "cs__StackBuffer_8h_source.html", null ]
 ];

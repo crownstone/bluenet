@@ -2,7 +2,7 @@ var classMeshCore =
 [
     [ "callback_model_configure_t", "classMeshCore.html#a0aa77605d9e80685926ff5e5467f6c9f", null ],
     [ "callback_model_init_t", "classMeshCore.html#aeadb9dbedc1548a4f9cf37ce3b03cba4", null ],
-    [ "callback_scan_t", "classMeshCore.html#a04339365641c81588c5a5dab959687bc", null ],
+    [ "callback_scan_t", "classMeshCore.html#a407afa8cadc716ced4698663e6985a48", null ],
     [ "eraseAllPages", "classMeshCore.html#a096e660c491420c8d488a4e3a27bedbe", null ],
     [ "factoryReset", "classMeshCore.html#a5d6451530398fcd939af8e1ed99af108", null ],
     [ "factoryResetDone", "classMeshCore.html#a820c19b0af554ad5c65bb5ed177470a0", null ],

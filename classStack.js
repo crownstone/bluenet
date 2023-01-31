@@ -1,6 +1,6 @@
 var classStack =
 [
-    [ "addService", "classStack.html#af020409d33ea1e5c88756986fe52ab87", null ],
+    [ "addService", "classStack.html#ab6645fdb07d13154c7016de26322eb44", null ],
     [ "init", "classStack.html#a891e74e94124bd2f19d94b8cd0c0ddc8", null ],
     [ "initRadio", "classStack.html#ada32d485742dd8f9c402bd59bc45319d", null ],
     [ "initServices", "classStack.html#afd358bba18866f5a76a4f045e5f3173e", null ],
@@ -10,8 +10,8 @@ var classStack =
     [ "onBleEventInterrupt", "classStack.html#aebfeabeb184956892555bb1c4114b8b6", null ],
     [ "onIncomingConnected", "classStack.html#a6e15da65593c0634c206853c2b5259d5", null ],
     [ "onTxComplete", "classStack.html#a5eb31d387de01d97d081568b69a7a9ba", null ],
+    [ "resetConnectionWatchdog", "classStack.html#a6660eb6c637ff3202751c4b6d467e473", null ],
     [ "setClockSource", "classStack.html#a8689fb3bdc4db5bc9bd7aaf0e9328b13", null ],
-    [ "shutdown", "classStack.html#a9872a0597f38a05a69122d6bf421c261", null ],
     [ "startScanning", "classStack.html#a13df03f3f3267f20245a4f62f8c87eb9", null ],
     [ "stopScanning", "classStack.html#a72e64e1ed8f68f6d2de0724db04482df", null ],
     [ "updateConnectionSupervisionTimeout", "classStack.html#a751a7731e79e95731814c5cdf88bddb6", null ],

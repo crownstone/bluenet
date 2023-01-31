@@ -1,7 +1,7 @@
 <map id="CrownstoneService" name="CrownstoneService">
 <area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="53,152,199,177"/>
 <area shape="rect" id="node5" href="$classSetupService.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="73,225,179,251"/>
-<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification." alt="" coords="33,79,104,104"/>
+<area shape="rect" id="node2" href="$classService.html" title="Base class for a BLE service." alt="" coords="33,79,104,104"/>
 <area shape="rect" id="node3" href="$classBaseClass.html" title=" " alt="" coords="5,5,132,31"/>
 <area shape="rect" id="node4" href="$classEventListener.html" title="Event listener." alt="" coords="128,79,239,104"/>
 </map>

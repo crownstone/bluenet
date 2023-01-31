@@ -1,5 +1,5 @@
 <map id="MeshUtil::cs_mesh_queue_item_t" name="MeshUtil::cs_mesh_queue_item_t">
 <area shape="rect" id="node1" title="Struct to queue an item." alt="" coords="87,108,279,148"/>
-<area shape="rect" id="node2" href="$structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title=" " alt="" coords="5,5,197,45"/>
+<area shape="rect" id="node2" href="$structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html" title="Data needed in each model queue." alt="" coords="5,5,197,45"/>
 <area shape="rect" id="node3" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="222,13,306,38"/>
 </map>

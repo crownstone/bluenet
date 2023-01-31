@@ -1,4 +1,5 @@
 <map id="ble_connected_t" name="ble_connected_t">
-<area shape="rect" id="node1" title=" " alt="" coords="5,108,133,133"/>
-<area shape="rect" id="node2" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="27,5,111,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="69,108,197,133"/>
+<area shape="rect" id="node2" href="$structcs__data__t.html" title="Packets (structs) that are used internally in the firmware, and can be changed freely." alt="" coords="5,5,89,31"/>
+<area shape="rect" id="node3" href="$structdevice__address__t.html" title=" " alt="" coords="151,5,285,31"/>
 </map>

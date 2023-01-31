@@ -7,6 +7,5 @@ var searchData=
   ['writemsgpart_4',['writeMsgPart',['../classUartHandler.html#a80f953b1fa453ad25a7e9934958c2709',1,'UartHandler']]],
   ['writemsgstart_5',['writeMsgStart',['../classUartHandler.html#a00868d13919627f73ba5d40618001366',1,'UartHandler']]],
   ['writenotificationconfig_6',['writeNotificationConfig',['../classBleCentral.html#a042a0988f8c7bd8187144cb123456894',1,'BleCentral']]],
-  ['writeresult_7',['writeResult',['../classCrownstoneService.html#a7d1dff235a4ca2a4b6d4649261bd0590',1,'CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t &amp;result)'],['../classCrownstoneService.html#a49d9478d028b81b5e1a103a133ad6b8e',1,'CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_ret_code_t retCode, cs_data_t data)']]],
-  ['written_8',['written',['../classCharacteristicBase.html#af2ecdba998f4740e622bd9b9773eb0eb',1,'CharacteristicBase::written()'],['../classCharacteristicGeneric.html#a34efc7a85618895826b6748b69cde090',1,'CharacteristicGeneric::written()']]]
+  ['writeresult_7',['writeResult',['../classCrownstoneService.html#a7d1dff235a4ca2a4b6d4649261bd0590',1,'CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t &amp;result)'],['../classCrownstoneService.html#a49d9478d028b81b5e1a103a133ad6b8e',1,'CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_ret_code_t retCode, cs_data_t data)']]]
 ];

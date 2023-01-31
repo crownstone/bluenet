@@ -1,5 +1,7 @@
 var classCharacteristic =
 [
-    [ "Characteristic", "classCharacteristic.html#a2e47ec8d29f5c5a8e9f594e270b2b175", null ],
-    [ "operator=", "classCharacteristic.html#a780a50615c45f108cd2cf40d709d3841", null ]
+    [ "getValue", "classCharacteristic.html#a5859ba416b35468911b0ccf8c22b3289", null ],
+    [ "setInitialValue", "classCharacteristic.html#a53440f55b0f174b591c922e2d5125ebf", null ],
+    [ "setValue", "classCharacteristic.html#a3f9fe6c30f4d055c15fd15ff65706e66", null ],
+    [ "_value", "classCharacteristic.html#ab0ca33a8f142ab5f573762e8c8b499a8", null ]
 ];

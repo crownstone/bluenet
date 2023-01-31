@@ -10,7 +10,8 @@ var searchData=
   ['deviceinformationservice_7',['DeviceInformationService',['../classDeviceInformationService.html#af13ec7c422220683c21553e14d904ec9',1,'DeviceInformationService']]],
   ['difference_8',['difference',['../classRTC.html#a47569127f5c4a0a4ee24015c803361e3',1,'RTC']]],
   ['differencems_9',['differenceMs',['../classRTC.html#a741a8eedf162d7d66852cf8ddd267d3f',1,'RTC']]],
-  ['disconnect_10',['disconnect',['../classBleCentral.html#af203a6dabf13fdcc08e7465a0d178d93',1,'BleCentral::disconnect()'],['../classCrownstoneCentral.html#ace21901133c31e06277f688402067769',1,'CrownstoneCentral::disconnect()'],['../classConnectionEncryption.html#a038a0eec8e94e2e5434bbe9a4c121e05',1,'ConnectionEncryption::disconnect()']]],
-  ['discoverservices_11',['discoverServices',['../classBleCentral.html#a174723364bbb9a5f75192cde10afb344',1,'BleCentral']]],
-  ['dispatch_12',['dispatch',['../classevent__t.html#a2896dafb27d6e46ad808a5d07805231e',1,'event_t::dispatch()'],['../classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014',1,'EventDispatcher::dispatch()']]]
+  ['digitalpintointerrupt_10',['digitalPinToInterrupt',['../classMicroappSdkUtil.html#a2b094d457e82d51fd05f981b7b34343e',1,'MicroappSdkUtil']]],
+  ['disconnect_11',['disconnect',['../classBleCentral.html#af203a6dabf13fdcc08e7465a0d178d93',1,'BleCentral::disconnect()'],['../classCrownstoneCentral.html#ace21901133c31e06277f688402067769',1,'CrownstoneCentral::disconnect()'],['../classConnectionEncryption.html#a038a0eec8e94e2e5434bbe9a4c121e05',1,'ConnectionEncryption::disconnect()']]],
+  ['discoverservices_12',['discoverServices',['../classBleCentral.html#a174723364bbb9a5f75192cde10afb344',1,'BleCentral']]],
+  ['dispatch_13',['dispatch',['../classevent__t.html#a2896dafb27d6e46ad808a5d07805231e',1,'event_t::dispatch()'],['../classEventDispatcher.html#a74b53d85f9a845e717c45c721be48014',1,'EventDispatcher::dispatch()']]]
 ];

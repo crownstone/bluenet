@@ -1,5 +1,5 @@
 <map id="DeviceInformationService" name="DeviceInformationService">
 <area shape="rect" id="node1" title="The DeviceInformationService is a BLE service that gives info on hardware and firmware revisions." alt="" coords="5,152,196,177"/>
-<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification." alt="" coords="65,79,136,104"/>
+<area shape="rect" id="node2" href="$classService.html" title="Base class for a BLE service." alt="" coords="65,79,136,104"/>
 <area shape="rect" id="node3" href="$classBaseClass.html" title=" " alt="" coords="37,5,164,31"/>
 </map>

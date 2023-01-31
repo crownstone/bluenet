@@ -1,6 +1,6 @@
 var classMeshModelMulticast =
 [
-    [ "callback_msg_t", "classMeshModelMulticast.html#a1af0ab63258ec2e71a1938d9b8f685aa", null ],
+    [ "callback_msg_t", "classMeshModelMulticast.html#a3fdfa2839e2b49aae927f41fb94f92ac", null ],
     [ "addToQueue", "classMeshModelMulticast.html#a602f80554631ab588b4b0dc5fb20360d", null ],
     [ "configureSelf", "classMeshModelMulticast.html#a77ec20a7fd2974f9bd993f005b70038f", null ],
     [ "handleMsg", "classMeshModelMulticast.html#a539a222b88f030a68cde3d0a013f5e39", null ],

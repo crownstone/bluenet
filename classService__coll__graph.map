@@ -1,12 +1,4 @@
 <map id="Service" name="Service">
-<area shape="rect" id="node1" title="Service as defined in the GATT Specification." alt="" coords="1016,80,1087,105"/>
-<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="689,5,815,31"/>
-<area shape="rect" id="node3" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,55,781,80"/>
-<area shape="rect" id="node4" href="$classBaseClass.html" title=" " alt="" coords="365,15,491,40"/>
-<area shape="rect" id="node5" href="$classfixed__tuple.html" title=" " alt="" coords="327,65,529,105"/>
-<area shape="rect" id="node6" href="$classtuple.html" title="A tuple is a vector with a templated type and a public constructor." alt="" coords="184,72,277,97"/>
-<area shape="rect" id="node7" title=" " alt="" coords="5,72,135,97"/>
-<area shape="rect" id="node8" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,104,780,129"/>
-<area shape="rect" id="node9" href="$classtuple.html" title=" " alt="" coords="643,153,861,179"/>
-<area shape="rect" id="node10" title=" " alt="" coords="330,146,526,186"/>
+<area shape="rect" id="node1" title="Base class for a BLE service." alt="" coords="33,79,104,104"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="5,5,132,31"/>
 </map>

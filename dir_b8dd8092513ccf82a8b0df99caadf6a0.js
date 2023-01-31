@@ -4,6 +4,7 @@ var dir_b8dd8092513ccf82a8b0df99caadf6a0 =
     [ "cs_AssetFilterStructs.h", "cs__AssetFilterStructs_8h_source.html", null ],
     [ "cs_BleCentralPackets.h", "cs__BleCentralPackets_8h_source.html", null ],
     [ "cs_BufferAccessor.h", "cs__BufferAccessor_8h_source.html", null ],
+    [ "cs_CharacteristicStructs.h", "cs__CharacteristicStructs_8h_source.html", null ],
     [ "cs_ControlPacketAccessor.h", "cs__ControlPacketAccessor_8h_source.html", null ],
     [ "cs_CrownstoneCentralPackets.h", "cs__CrownstoneCentralPackets_8h_source.html", null ],
     [ "cs_PacketsInternal.h", "cs__PacketsInternal_8h_source.html", null ],

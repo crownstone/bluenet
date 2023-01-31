@@ -1,14 +1,8 @@
 var searchData=
 [
-  ['samplecount_0',['sampleCount',['../structrssi__data__t.html#a3ae1947624127b23c090decbbcb1d681',1,'rssi_data_t']]],
-  ['samples_1',['samples',['../structadc__buffer__t.html#aed83786f07546b28b7962a53344d49a4',1,'adc_buffer_t']]],
-  ['samplingintervalus_2',['samplingIntervalUs',['../structadc__channel__config__result__t.html#af5b3fe2f11cf13c03cebc890001d3b47',1,'adc_channel_config_result_t']]],
-  ['scanintervalus_3',['scanIntervalUs',['../structboards__config__t.html#a44f8ea01d745ec24aca763adf8ad2e32',1,'boards_config_t']]],
-  ['scanwindowus_4',['scanWindowUs',['../structboards__config__t.html#a8e986dafff2ae3c150b17ebab4f522ea',1,'boards_config_t']]],
-  ['sccd_5fmd_5',['sccd_md',['../structCharacteristicInit.html#a51caf5de98956aeda915e3fb1da735e5',1,'CharacteristicInit']]],
-  ['send_5finterval_5fseconds_5fper_5fneighbour_6',['SEND_INTERVAL_SECONDS_PER_NEIGHBOUR',['../classMeshTopology.html#a4de5e4786ba1c18e078a03150f985707',1,'MeshTopology']]],
-  ['send_5fnoop_5finterval_5fseconds_7',['SEND_NOOP_INTERVAL_SECONDS',['../classMeshTopology.html#acc1e5cb22cf64c0c84e4bfda135f4b07',1,'MeshTopology']]],
-  ['seqnr_8',['seqNr',['../structadc__buffer__t.html#a9b996bad665b09199e3a6924bbf9ecb8',1,'adc_buffer_t']]],
-  ['sharedencryptionbuffer_9',['sharedEncryptionBuffer',['../structStatus.html#aadaebf9b1f33df58f8cdc9f572b98ab8',1,'Status']]],
-  ['source_10',['source',['../classevent__t.html#ad573199aeee318e34725f203dfcdc4a0',1,'event_t']]]
+  ['pin_0',['pin',['../structadc__channel__config__result__t.html#a8ac783b5ae83199bb9c2d7882fc7a7a4',1,'adc_channel_config_result_t']]],
+  ['poweroffsetmilliwatt_1',['powerOffsetMilliWatt',['../structboards__config__t.html#a08e172da8ab6ba3ff0104c19c17f4317',1,'boards_config_t']]],
+  ['priority_2',['priority',['../structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#a9c7e75abf41809269e276b7a62e1f59a',1,'MeshUtil::cs_mesh_queue_item_meta_data_t']]],
+  ['pwmtempvoltagethreshold_3',['pwmTempVoltageThreshold',['../structboards__config__t.html#aca7741ed42538545936863444e57ca03',1,'boards_config_t']]],
+  ['pwmtempvoltagethresholddown_4',['pwmTempVoltageThresholdDown',['../structboards__config__t.html#a70bd38475536196ca64bb85f0535bb8b',1,'boards_config_t']]]
 ];

@@ -1,5 +1,4 @@
-<map id="Characteristic&lt; T, E &gt;" name="Characteristic&lt; T, E &gt;">
-<area shape="rect" id="node1" title="A default characteristic." alt="" coords="22,152,189,177"/>
-<area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title="Characteristic of generic type T." alt="" coords="5,79,205,104"/>
-<area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="33,5,177,31"/>
+<map id="Characteristic&lt; T &gt;" name="Characteristic&lt; T &gt;">
+<area shape="rect" id="node1" title="Characteristic of generic type T." alt="" coords="5,79,156,104"/>
+<area shape="rect" id="node2" href="$classCharacteristicBase.html" title="Base class for a BLE characteristic." alt="" coords="9,5,153,31"/>
 </map>

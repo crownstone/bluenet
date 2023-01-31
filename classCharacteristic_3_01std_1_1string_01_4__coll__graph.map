@@ -3,7 +3,7 @@
 <area shape="rect" id="node2" href="$classCharacteristicGeneric.html" title=" " alt="" coords="1553,117,1716,157"/>
 <area shape="rect" id="node3" href="$classCharacteristicBase.html" title="Non&#45;template base class for Characteristics." alt="" coords="1218,69,1362,95"/>
 <area shape="rect" id="node4" href="$classUUID.html" title="Class that enables the use of 128 bit service UUIDs." alt="" coords="724,5,780,31"/>
-<area shape="rect" id="node5" href="$classService.html" title="Service as defined in the GATT Specification." alt="" coords="1016,69,1087,95"/>
+<area shape="rect" id="node5" href="$classService.html" title="Base class for a BLE service." alt="" coords="1016,69,1087,95"/>
 <area shape="rect" id="node6" href="$classBaseClass.html" title=" " alt="" coords="689,65,815,91"/>
 <area shape="rect" id="node7" href="$classStack.html" title="nRF51822 specific implementation of the BLEStack" alt="" coords="723,115,781,140"/>
 <area shape="rect" id="node8" href="$classBaseClass.html" title=" " alt="" coords="365,57,491,83"/>

@@ -85,7 +85,8 @@ var NAVTREE =
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
-        [ "Functions", "globals_func.html", null ]
+        [ "Functions", "globals_func.html", null ],
+        [ "Typedefs", "globals_type.html", null ]
       ] ]
     ] ]
   ] ]
@@ -94,12 +95,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "Element_8h_source.html",
-"classCircularBuffer.html#a4f5f5dc17fb57ef6580b58cbf76d5a31",
-"classMeshTopology.html",
-"classStorage.html#acf5b7bf4d475ed3578c2017f9a79dbbe",
-"cs__MultiSwitchHandler_8h_source.html",
-"structMeshPacketTraits_3_01CS__MESH__MODEL__TYPE__NEIGHBOUR__RSSI_01_4.html",
-"structservice__data__encrypted__alternative__state__t.html"
+"classCommandHandler.html#aae67dfa61ee1fc3e0df6d51f946e9f61",
+"classMicroappController.html#a1bdacf3e1eed0728c8b2e4496e8b99d6",
+"classStreamBufferAccessor.html#a23b2d71454fcdc464b55a185a6c68115",
+"cs__RC5_8h_source.html",
+"structMeshUtil_1_1cs__mesh__queue__item__meta__data__t.html#afdd215822f3b840c7854f2cde25a425b",
+"structmicroapp__message__internal__t.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

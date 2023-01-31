@@ -1,0 +1,5 @@
+<map id="microapp_data_t" name="microapp_data_t">
+<area shape="rect" id="node1" title="Keeps up data for a microapp." alt="" coords="5,168,136,193"/>
+<area shape="rect" id="node2" href="$classService.html" title="Base class for a BLE service." alt="" coords="35,80,106,105"/>
+<area shape="rect" id="node3" href="$classBaseClass.html" title=" " alt="" coords="7,5,134,31"/>
+</map>

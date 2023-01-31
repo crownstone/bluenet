@@ -1,6 +1,6 @@
 var classMeshModelMulticastNeighbours =
 [
-    [ "callback_msg_t", "classMeshModelMulticastNeighbours.html#ad643495611edddf23900f21e26ed1d80", null ],
+    [ "callback_msg_t", "classMeshModelMulticastNeighbours.html#acedefa2dbabc7864740e12d01ed8ce2b", null ],
     [ "addToQueue", "classMeshModelMulticastNeighbours.html#a309d50a5b05b560c2a42101823f78968", null ],
     [ "configureSelf", "classMeshModelMulticastNeighbours.html#adcf87b90eaecd50172eeff3abfea1a16", null ],
     [ "handleMsg", "classMeshModelMulticastNeighbours.html#a9caf3af158a971fa8eb30d3e9d59e30c", null ],

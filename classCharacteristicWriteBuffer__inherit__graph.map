@@ -1,4 +1,4 @@
 <map id="CharacteristicWriteBuffer" name="CharacteristicWriteBuffer">
-<area shape="rect" id="node1" title=" " alt="" coords="5,79,192,104"/>
+<area shape="rect" id="node1" title="Buffer used to hold plain text characteristic data written by the user." alt="" coords="5,79,192,104"/>
 <area shape="rect" id="node2" href="$classCharacteristicBuffer.html" title="CharacteristicBuffer is a byte array with header." alt="" coords="23,5,175,31"/>
 </map>

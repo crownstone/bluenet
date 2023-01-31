@@ -11,6 +11,7 @@ var dir_b336e50c30dde46b9972cb7df7cdb246 =
     [ "cs_MicroappPackets.h", "cs__MicroappPackets_8h_source.html", null ],
     [ "cs_Packets.h", "cs__Packets_8h_source.html", null ],
     [ "cs_RssiAndChannel.h", "cs__RssiAndChannel_8h_source.html", null ],
+    [ "cs_SerialTypes.h", "cs__SerialTypes_8h_source.html", null ],
     [ "cs_ServiceDataPackets.h", "cs__ServiceDataPackets_8h_source.html", null ],
     [ "cs_Typedefs.h", "cs__Typedefs_8h_source.html", null ],
     [ "cs_UartMsgTypes.h", "cs__UartMsgTypes_8h_source.html", null ],

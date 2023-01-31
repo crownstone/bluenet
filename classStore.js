@@ -1,14 +1,14 @@
 var classStore =
 [
-    [ "IdType", "classStore.html#aa2dc883cd0e8357e17740c49f1a20229", null ],
-    [ "add", "classStore.html#af3cc373f9fd8f939818240f9ebb2edfe", null ],
-    [ "addAtEnd", "classStore.html#a2e56f336599839e309d0a7ab52357c86", null ],
-    [ "clear", "classStore.html#ad61167a1f3d90cde276cf7a450b5f408", null ],
-    [ "count", "classStore.html#a8f98a349f7384e951cb2f41c972ecdd4", null ],
-    [ "countIf", "classStore.html#ae4717b377b5e9ec65579892688502a55", null ],
-    [ "full", "classStore.html#a91bc4beda4d12adb0dac7b29346e14c4", null ],
-    [ "get", "classStore.html#a6ee64d6637ce3bed81afb051f811a2b1", null ],
-    [ "get", "classStore.html#ac1dc595a9f0b3830dbd5eddfdfa7172b", null ],
-    [ "getMin", "classStore.html#a8eda2fd6820d3726be4e3e9df7ec5551", null ],
-    [ "getOrAdd", "classStore.html#a920b621adb4438ccb8ad1c66efea33b0", null ]
+    [ "IdType", "classStore.html#a4905d4c95a04755a7e292a472758c24e", null ],
+    [ "add", "classStore.html#ab1038cadc6ce9cbb74c057d4360013c0", null ],
+    [ "addAtEnd", "classStore.html#a90eb46eac5d69f52bb13d5611d48759f", null ],
+    [ "clear", "classStore.html#ad62f180244f7b084ca455bc84fe5a434", null ],
+    [ "count", "classStore.html#a852fff870e53d3da2609221ece9d7058", null ],
+    [ "countIf", "classStore.html#a5f9ff815b73b38419f79035fd144584d", null ],
+    [ "full", "classStore.html#a8e676695fd78e9ffacbc80e8e8e3f388", null ],
+    [ "get", "classStore.html#afbf6b600c250e7a1b01962e6847f4607", null ],
+    [ "get", "classStore.html#a4616da143de2bb793abe5e3e9f69600b", null ],
+    [ "getMin", "classStore.html#a320300d274b554d2c24cc127387592e9", null ],
+    [ "getOrAdd", "classStore.html#a925c50269caf67617613ec272925837c", null ]
 ];

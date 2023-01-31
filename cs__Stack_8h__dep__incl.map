@@ -1,12 +1,15 @@
 <map id="source/include/ble/cs_Stack.h" name="source/include/ble/cs_Stack.h">
-<area shape="rect" id="node1" title="Manufacturing data." alt="" coords="357,5,497,45"/>
-<area shape="rect" id="node2" href="$cs__Advertiser_8h_source.html" title=" " alt="" coords="54,181,194,221"/>
-<area shape="rect" id="node3" href="$cs__Crownstone_8h_source.html" title=" " alt="" coords="199,445,430,471"/>
-<area shape="rect" id="node4" href="$cs__Service_8h.html" title="BLE service." alt="" coords="357,93,497,133"/>
-<area shape="rect" id="node9" href="$cs__CommandHandler_8h_source.html" title=" " alt="" coords="546,357,737,397"/>
-<area shape="rect" id="node10" href="$cs__Scanner_8h_source.html" title=" " alt="" coords="707,93,898,133"/>
-<area shape="rect" id="node5" href="$cs__Characteristic_8h.html" title="Bluetooth Low Energy characteristics." alt="" coords="352,181,501,221"/>
-<area shape="rect" id="node6" href="$cs__CrownstoneService_8h_source.html" title=" " alt="" coords="93,269,277,309"/>
-<area shape="rect" id="node7" href="$cs__SetupService_8h_source.html" title=" " alt="" coords="227,357,402,397"/>
-<area shape="rect" id="node8" href="$cs__DeviceInformationService_8h_source.html" title=" " alt="" coords="403,269,631,309"/>
+<area shape="rect" id="node1" title="Manufacturing data." alt="" coords="620,5,760,45"/>
+<area shape="rect" id="node2" href="$cs__Advertiser_8h_source.html" title=" " alt="" coords="956,181,1096,221"/>
+<area shape="rect" id="node3" href="$cs__Crownstone_8h_source.html" title=" " alt="" coords="697,533,928,559"/>
+<area shape="rect" id="node4" href="$cs__Service_8h.html" title="BLE service." alt="" coords="525,93,665,133"/>
+<area shape="rect" id="node12" href="$cs__CommandHandler_8h_source.html" title=" " alt="" coords="5,269,196,309"/>
+<area shape="rect" id="node13" href="$cs__Scanner_8h_source.html" title=" " alt="" coords="689,93,880,133"/>
+<area shape="rect" id="node5" href="$cs__Characteristic_8h_source.html" title=" " alt="" coords="469,269,618,309"/>
+<area shape="rect" id="node6" href="$cs__CrownstoneService_8h_source.html" title=" " alt="" coords="595,357,779,397"/>
+<area shape="rect" id="node7" href="$cs__SetupService_8h_source.html" title=" " alt="" coords="600,445,775,485"/>
+<area shape="rect" id="node8" href="$cs__DeviceInformationService_8h_source.html" title=" " alt="" coords="93,357,321,397"/>
+<area shape="rect" id="node9" href="$cs__MicroappService_8h_source.html" title=" " alt="" coords="345,357,520,397"/>
+<area shape="rect" id="node11" href="$cs__CharacteristicBase_8h.html" title="Bluetooth Low Energy characteristics." alt="" coords="505,181,686,221"/>
+<area shape="rect" id="node10" href="$cs__MicroappController_8h_source.html" title=" " alt="" coords="341,445,524,485"/>
 </map>
