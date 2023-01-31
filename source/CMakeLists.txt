@@ -566,7 +566,7 @@ add_custom_target(check
 
 add_custom_target(generate_documentation
 	COMMAND ${CMAKE_COMMAND} -E echo "Run doxygen from ${CMAKE_SOURCE_DIR}"
-	COMMAND cd ${WORKSPACE_DIR} && doxygen source/doxygen.config
+	COMMAND cd ${WORKSPACE_DIR} && doxygen doxygen.config
 	COMMENT "Run documentation generator"
 	)
 
