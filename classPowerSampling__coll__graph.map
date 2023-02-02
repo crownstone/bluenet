@@ -1,5 +1,5 @@
 <map id="PowerSampling" name="PowerSampling">
-<area shape="rect" id="node1" title=" " alt="" coords="1067,459,1189,485"/>
+<area shape="rect" id="node1" title="Sample power." alt="" coords="1067,459,1189,485"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="299,98,409,123"/>
 <area shape="rect" id="node3" href="$classADC.html" title="Analog&#45;Digital conversion." alt="" coords="710,210,761,235"/>
 <area shape="rect" id="node4" href="$structadc__config__t.html" title="Struct to configure the ADC." alt="" coords="302,150,406,175"/>

@@ -1,4 +1,4 @@
 <map id="PowerSampling" name="PowerSampling">
-<area shape="rect" id="node1" title=" " alt="" coords="5,79,128,104"/>
+<area shape="rect" id="node1" title="Sample power." alt="" coords="5,79,128,104"/>
 <area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="11,5,122,31"/>
 </map>
